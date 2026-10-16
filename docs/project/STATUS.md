@@ -1,5 +1,18 @@
 # Proje durumu
 
+## 0.14.40 · Birleşik teslim · 16 Ekim 2026
+
+Kullanıcının isteğiyle bütün değişiklikler birleştirildi ve TV'ye kuruldu:
+- Kişisel ana sayfa, vitrin slider'ı ve eş merkezli odak halkası (D063).
+- NEXTV logo, ikon, banner, splash ve açılış sesi (D062, logo dalı).
+- main'deki 0.14.38 belgeleri ve SearchNavigation odak kontrolü.
+
+Sürüm 0.14.40 (kod 54). 0.14.39 (kod 53) numarası başka bir oturumun emülatöre kurduğu, commit edilmemiş bir derlemede kullanılmıştı; çakışmasın diye atlandı.
+
+Teslim: releases/IPTV_Player_TV_Design_Preview_0.14.40.apk (+ .sha256), SHA-256 9272cbe502ef1857cdfd71bb2f3307eaeded899ce80c885822a77a8fa805909e. TV'ye `adb install -r` ile kuruldu (0.14.38'den). Kurulu dosyanın SHA-256'sı eşleşti; firstInstallTime 13 Ekim olarak kaldı, yani veri korundu. Uygulama açılmadı.
+
+Kontroller (birleşik ağaç): 157 JVM testi geçti (1 atlanan), lint 0 hata / 32 uyarı, release/debug/test APK'ları derlendi, imza doğrulandı. Enstrümantasyon testleri koşulmadı (5556'daki gerçek Evim kaynağını silerler). Slider ve logolar TV'de henüz görülmedi.
+
 ## Kişisel ana sayfa ve vitrin slider'ı · 16 Ekim 2026
 
 Kullanıcının istekleri ve seçimleriyle (D063) ana sayfa değişti:

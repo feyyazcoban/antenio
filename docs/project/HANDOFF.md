@@ -1,5 +1,13 @@
 # Son devir notu
 
+## 0.14.40 · Birleşik teslim · 16 Ekim 2026
+
+Birleştirme sırası: `35ad2b2` (bu oturum, D063), main'in `fa8ae8f` commit'i (`fe4f188` birleştirmesi), logo dalı `claude/trusting-margulis-73aa19` (`0982a50` birleştirmesi), ardından sürüm 0.14.40 / 54. Çakışmalar yalnız STATUS, HANDOFF ve DECISIONS'taydı; hepsinde iki tarafın kayıtları da korundu. DECISIONS'ta main'in güncel D061'i kaldı, D062 ve D063 eklendi. Kodda çakışma çıkmadı; `PilotApp.kt` kendiliğinden birleşti.
+
+TV (192.168.1.126:5555): 0.14.40 kurulu (SHA eşleşti, veri korundu, uygulama açılmadı). Emülatör 5556 bu oturumun sonunda kapanmıştı. Üzerinde başka bir oturumun 0.14.39 derlemesi ile ayrı paketli "Slider önizleme" (`dev.iptvplayer.tv.pilot.slider`, yalnız sentetik Demo kaynağı, `127.0.0.1:8766`'daki oturum sunucusuna bağlı) kurulu.
+
+Sonraki adım: kullanıcının TV'de splash, logo, banner ve slider'ı değerlendirmesi. Evim'in M3U olduğu TV'de slider tek başlık kalabilir; TV'deki kaynak Xtream ise tarihler gelir. İstenirse önizleme uygulaması kaldırılmalı.
+
 ## Kişisel ana sayfa ve vitrin slider'ı · 16 Ekim 2026
 
 Değişen dosyalar:
