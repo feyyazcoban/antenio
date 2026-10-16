@@ -42,5 +42,5 @@
   "not checked by hand: the dialog, the order after a choice, the poster badge (it has no semantics); the cached catalogue was written in v3, so ratings and added times appear only after the next refresh (automatic after 6 h, or Ayarlar -> Kataloğu yenile)"
  ],
  "instrumentation": "not run (user's source on 5556; full run before the release)",
- "physicalTv": "not installed (TV stays on 0.14.36)"
+ "physicalTv": "installed later on the user's request (adb install -r from 0.14.36/code50; on-TV SHA-256 matches; data kept; speed compile; not launched). Known issues fixed in 0.14.38: dividers first under Ad (A-Z), no badge on Home, Esc with the keyboard open."
 }

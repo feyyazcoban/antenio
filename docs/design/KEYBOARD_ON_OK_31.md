@@ -21,6 +21,7 @@ Kullanıcı isteği: metin alanları klavyeyi kendiliğinden açmasın; klavye, 
 - Compose'un klavye denetleyicisi yeni alanın girişine ulaşmadığı için OK klavyeyi platformun giriş yöneticisinden açar, Ara/İleri eylemi de oradan kapatır (`FieldKeyboard`). Klavye açıkken Geri bu yeni alanda ekranın Geri işleyicisine kadar ulaşıp odağı alandan götürüyordu; alanın tuş işleyicisi artık o durumda yalnız klavyeyi kapatır.
 - Yeni API metni bir kare sonra bildirir; kullanıcının her düzenlemesi, eski alanlardaki gibi anında bildirilsin diye bir giriş dönüşümüyle (`InputTransformation`) raporlanır.
 - Esc, uygulamanın kökünde tuş önizlemesiyle yakalanır ve geri dağıtıcısına (bütün `BackHandler`'lar) iletilir; diyaloglar Esc'yi kendileri kapatır. Activity'nin tuş dağıtımını ezmek lint'te kısıtlı API hatası verdiği için kullanılmadı.
+- 0.14.38: kökte yakalanan Esc bırakılınca pencereye `KEYCODE_BACK` olarak enjekte edilir (`Window.injectInputEvent`); klavye açıkken önce klavyeyi platform kapatır. Önceki sürüm klavyeyi pencere girintilerinden tahmin ediyordu; TV klavyesi geç bildirince tek Esc hem klavyeyi kapatıp hem Geri yapıyordu (SearchNavigationTest.fieldsOpenTheKeyboardOnlyOnOk).
 - Ortak kod `ui/Theme.kt` (`fieldKeyboardOptions`, `fieldKey`, `FieldKeyboard`, `rememberFieldInput`) ve `ui/PilotApp.kt` (`escapeAsBack`).
 
 ## Açık

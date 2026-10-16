@@ -45,6 +45,8 @@ BKL-003 bağımlılığı: kişisel hesabın Figma bağlantısı tekrar yazmaya 
 
 0.7 ek kanıt: 58 JVM / 36 emülatör akışı; 1.5 fontta 5 ek akış. VOD02 otomatik geçiş yerel denemeleri geçti; gerçek cihaz ve kullanıcı incelemesi bekler.
 
+0.14.38: 0.14.37 incelemesinin doğrulanan bulguları (ayraçlar sonda, sıralama önbellekte ve arka planda, ana sayfa rozeti, Geçmiş sırası, büyük yazı), Esc pencereye gerçek Geri olarak verilir, Ayarlar'da hızlı tuş, 0.14.36'dan beri düşen altı cihaz testi düzeltildi. [QA](native-sort-rating-38-qa.json). TV denemesi açık; BKL-020 in progress.
+
 0.14.37: Filmler/Diziler'de Sırala (Varsayılan, Son eklenen, Ad, Yıl, Puan; bölüm başına saklanır) ve afişte sağlayıcı puanı rozeti; katalog kaydı v4. [QA](native-sort-rating-37-qa.json), D061. Emülatörde etiketle doğrulandı; TV denemesi açık; BKL-020 in progress.
 
 0.14.31: Metin alanları klavyeyi odakta açmaz; OK açar, Geri kapatır. [Sözleşme](../design/KEYBOARD_ON_OK_31.md), [QA](native-keyboard-on-ok-31-qa.json). TV'de deneme açık; BKL-020 in progress.
