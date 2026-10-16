@@ -244,15 +244,16 @@ internal class EvenColumns(private val count: Int) : GridCells {
     guide: GuideSlice? = null, now: Long = 0, onMeasured: (Int) -> Unit = {}, compact: Boolean = false,
     compactMin: androidx.compose.ui.unit.Dp = 132.dp, click: () -> Unit) {
     val live = entry.kind == MediaKind.LIVE
+    val radius = if (live && !compact) 14.dp else TvLayout.CardRadius
     val visibility = rememberCardVisibility()
     Column(visibility.container.onSizeChanged { onMeasured(it.height) }.testTag("tile:library:${entry.id}")) {
         Card(onClick = click, modifier = modifier.then(visibility.focus).fillMaxWidth()
             .then(if (compact) Modifier.heightIn(min = compactMin) else if (live) Modifier.heightIn(min = 126.dp) else Modifier.aspectRatio(2f / 3))
             .semantics { contentDescription = entry.title },
-            shape = CardDefaults.shape(shape = RoundedCornerShape(if (live && !compact) 14.dp else TvLayout.CardRadius)),
+            shape = CardDefaults.shape(shape = RoundedCornerShape(radius)),
             colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
             scale = CardDefaults.scale(focusedScale = 1f),
-            border = CardDefaults.border(focusedBorder = Border(BorderStroke(TvLayout.Focus, Ink.Text), inset = 3.dp))) {
+            border = CardDefaults.border(focusedBorder = focusRing(radius))) {
             if (compact) Row(Modifier.fillMaxWidth().heightIn(min = compactMin).padding(10.dp), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 // Same row as the Ara results: small artwork, title, type line and source.

@@ -23,13 +23,13 @@ Temel kontrol alanı 960 × 540 dp; 1920 × 1080, density 320 emülatörde doğr
 
 Roboto paket içinde kalır. Hero 42/46 sp; film 42/47, dizi 34/39; bölüm/satır başlığı 15–18; gövde 12–13/18–19; ikincil bilgi 10–12 sp. Dar alanda metin sınırlandırılır; uzun açıklama ayrı okunabilir panelde açılır. Kaynağın vermediği süre, tür, yayın programı veya puan uydurulmaz.
 
-Odak, seçim ve normal durum farklıdır: odak mint çerçeve; seçili gezinme/kategori koyu yeşil yüzey; normal eylem şeffaf koyu yüzey ve ince kenar. Logo oranı `Fit`, afiş `Crop`; başarıyla yüklenen şeffaf logonun altında harf fallback'i kalmaz. Yanlış Dune görsel eşleşmesi önizleme veri setine alınmaz.
+Odak, seçim ve normal durum farklıdır: odak mint çerçeve; seçili gezinme/kategori koyu yeşil yüzey; normal eylem şeffaf koyu yüzey ve ince kenar. Odak halkası 2 dp kalınlıkta ve yüzeyin 3 dp dışında durur. Köşesi yüzeyin köşesiyle eş merkezlidir: sabit yarıçaplı yüzeyde halka yarıçapı + 3 dp olur (`focusRing`), hap biçimli eylemler zaten büyüyen sınırla birlikte büyür. Logo oranı `Fit`, afiş `Crop`; başarıyla yüklenen şeffaf logonun altında harf fallback'i kalmaz. Yanlış Dune görsel eşleşmesi önizleme veri setine alınmaz.
 
 ## Kumanda ve kaydırma
 
 Görünür kart odağa geldi diye bütün ekran yukarı zıplamaz. Compose `BringIntoViewSpec` ile yalnız görünür alan dışındaki hedef için gerekli kaydırma kullanılır; [resmî TV liste rehberi](https://developer.android.com/training/tv/playback/compose/lists) bu davranışın özelleştirilmesini açıklar. Bu düzen prototip hero'sunun ilk devam kartında kaybolmasını önler.
 
-Home açıldığında önce devam kartı, sonra son kanal, sonra hero seçilir. Ayrıntıdan geri dönüş son karta; oynatıcıdan geri dönüş doğru bölüme gider. İlk odak hazır metadata'yı bekler. Ayrıntı listesi sabit geri alanının altında kırpılır; metin geri düğmesinin arkasına taşmaz. Back oynatıcıda önce dil panelini, sonra kontrolleri, sonra oynatıcıyı kapatır.
+Vitrin, sağlayıcının tarih verdiği en yeni 6 film ve diziden bir slider'dır (D063). 8 saniyede bir 400 ms solarak geçer, Ayrıntılar'dayken Sağ/Sol ile değişir, altında nokta göstergesi vardır. Slaytlar değişirken eylem aynı kalır, odak kaybolmaz. Hareketi azalt açıksa geçiş yalnız kumandayla ve solmadan olur. Tarih yoksa tek başlık gösterilir. Geçmiş oluşunca "Son izlediğin kanallar" ile "İzlemeye devam et", başlangıç rafları "Canlı yayınlar" ile "Film kütüphanen"in yerini alır. Home açıldığında önce devam kartı, sonra son kanal, sonra hero seçilir. Ayrıntıdan geri dönüş son karta; oynatıcıdan geri dönüş doğru bölüme gider. İlk odak hazır metadata'yı bekler. Ayrıntı listesi sabit geri alanının altında kırpılır; metin geri düğmesinin arkasına taşmaz. Back oynatıcıda önce dil panelini, sonra kontrolleri, sonra oynatıcıyı kapatır.
 
 ## Açılış ve ses
 

@@ -1,6 +1,13 @@
 package dev.iptvplayer.tv.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.snap
@@ -10,6 +17,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +36,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,9 +44,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.*
+import coil3.SingletonImageLoader
 import coil3.compose.AsyncImage
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 import dev.iptvplayer.tv.*
 import dev.iptvplayer.tv.data.*
+import kotlinx.coroutines.delay
 
 /**
  * Side menu around a screen's [content]. At rest it is an icon rail; while it has focus it opens over the
@@ -185,8 +198,10 @@ private data class HomeRow(val key: String, val title: String, val entries: List
             if (library.continueWatching.isNotEmpty()) add(HomeRow("continue", "İzlemeye devam et", library.continueWatching.map { it.entry }, continuing = library.continueWatching))
             if (library.recentChannels.isNotEmpty()) add(HomeRow("recent", "Son izlediğin kanallar", library.recentChannels, MediaKind.LIVE))
             if (library.favorites.isNotEmpty()) add(HomeRow("favorites", "Favorilerin", library.favorites))
-            if (library.channels.isNotEmpty()) add(HomeRow("live", "Canlı yayınlar", library.channels, MediaKind.LIVE))
-            if (library.movies.isNotEmpty()) add(HomeRow("movies", "Film kütüphanen", library.movies, MediaKind.MOVIE))
+            // Starter shelves until there is history: watched channels replace "Canlı yayınlar", and
+            // "İzlemeye devam et" replaces "Film kütüphanen", so a new or channel-only list never opens empty.
+            if (library.recentChannels.isEmpty() && library.channels.isNotEmpty()) add(HomeRow("live", "Canlı yayınlar", library.channels, MediaKind.LIVE))
+            if (library.continueWatching.isEmpty() && library.movies.isNotEmpty()) add(HomeRow("movies", "Film kütüphanen", library.movies, MediaKind.MOVIE))
             if (library.series.isNotEmpty()) add(HomeRow("series", "Dizi kütüphanen", library.series, MediaKind.SERIES))
         }
     }
@@ -199,12 +214,12 @@ private data class HomeRow(val key: String, val title: String, val entries: List
     // moving focus must not recompose the screen.
     val heroFocus = remember { FocusRequester() }
     val lastFocus = remember { FocusMemory() }
-    val hero = library.featured
-    val validKeys = rows.flatMap { r -> r.entries.map { "${r.key}:${it.id}" } }.toSet() + if (hero != null) setOf("hero") else emptySet()
+    val slides = remember(library) { library.newest.ifEmpty { listOfNotNull(library.featured) } }
+    val validKeys = rows.flatMap { r -> r.entries.map { "${r.key}:${it.id}" } }.toSet() + if (slides.isNotEmpty()) setOf("hero") else emptySet()
     val target = remember { model.homeFocusKey?.takeIf { it in validKeys } ?: when {
         library.continueWatching.isNotEmpty() -> "continue:${library.continueWatching.first().entry.id}"
         library.recentChannels.isNotEmpty() -> "recent:${library.recentChannels.first().id}"
-        hero != null -> "hero"
+        slides.isNotEmpty() -> "hero"
         else -> rows.firstOrNull()?.let { "${it.key}:${it.entries.first().id}" }
     } }
     val startRow = rows.indexOfFirst { r -> r.entries.any { "${r.key}:${it.id}" == target } }
@@ -254,9 +269,10 @@ private data class HomeRow(val key: String, val title: String, val entries: List
             }, state = list,
             verticalArrangement = Arrangement.spacedBy(16.dp), contentPadding = PaddingValues(bottom = maxOf(28.dp, viewportHeight - (shelfHeights[rows.lastOrNull()?.key] ?: 0.dp) + 7.dp))) {
             item(key = "hero") {
-                if (hero != null) Hero(hero, Modifier.then(if (target == "hero") Modifier.focusRequester(focus) else Modifier)
+                if (slides.isNotEmpty()) Hero(slides, newest = library.newest.isNotEmpty(), reducedMotion = s.reducedMotion,
+                    Modifier.then(if (target == "hero") Modifier.focusRequester(focus) else Modifier)
                     .focusRequester(heroFocus)
-                    .onFocusChanged { if (it.hasFocus) { model.homeFocus("hero"); lastFocus.requester = heroFocus } }, openLive = { model.showKind(MediaKind.LIVE) }) { model.open(hero) }
+                    .onFocusChanged { if (it.hasFocus) { model.homeFocus("hero"); lastFocus.requester = heroFocus } }) { model.open(it) }
                 else Column(Modifier.padding(horizontal = TvLayout.Gutter, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("SENİN TELEVİZYONUN", color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, letterSpacing = 2.sp)
                     Heading("Şimdi ne izleyelim?")
@@ -299,6 +315,9 @@ private data class HomeRow(val key: String, val title: String, val entries: List
         }
     } }
     LaunchedEffect(Unit) {
+        // A remembered key whose starter shelf gave way to its personal row (the first watch) already fell back to
+        // the new target; record that before the stale-key effect below looks, so focus does not jump to the menu.
+        if (target != null) model.homeFocus(target)
         withFrameNanos { }; withFrameNanos { }
         val rowKey = if (startRow >= 0) rows[startRow].key else "hero"
         if (target != null && list.layoutInfo.visibleItemsInfo.none { it.key == rowKey }) {
@@ -323,17 +342,42 @@ private data class HomeRow(val key: String, val title: String, val entries: List
     }
 }
 
-@Composable private fun Hero(entry: MediaEntry, actionModifier: Modifier, openLive: () -> Unit, open: () -> Unit) {
+/**
+ * The hero carousel: the newest films and series ([newest]), or the single featured title of a list without dates.
+ * More slides advance every 8 s with a cross-fade; Right and Left on Ayrıntılar step through them, and Left on the
+ * first slide still reaches the menu. Reduced motion or system animations off stop the timer and the fade. The
+ * action is one composable across slides, so focus never leaves it.
+ */
+@Composable private fun Hero(slides: List<MediaEntry>, newest: Boolean, reducedMotion: Boolean, actionModifier: Modifier,
+    open: (MediaEntry) -> Unit) {
     val largeText = LocalDensity.current.fontScale >= 1.5f
-    val hasVisual = entry.hasBackdrop || entry.artwork != null
+    val motion = !reducedMotion && android.animation.ValueAnimator.areAnimatorsEnabled()
+    val many = slides.size > 1
+    var index by rememberSaveable(slides) { mutableIntStateOf(0) }
+    // A restored index can outlive a shorter slide list; every use goes through the clamped one.
+    val current = index.coerceIn(0, slides.lastIndex)
+    val entry = slides[current]
+    val context = LocalContext.current
+    if (many) LaunchedEffect(current, slides, motion) {
+        // Fetch the next slide's picture now, so the fade does not reveal an empty frame. Disk only, kept small.
+        val next = slides[(current + 1) % slides.size]
+        (if (next.hasBackdrop) next.backdrop else next.artwork)?.let { url ->
+            SingletonImageLoader.get(context).enqueue(ImageRequest.Builder(context).data(SourceArtwork(next.sourceId, url))
+                .memoryCachePolicy(CachePolicy.DISABLED).size(coil3.size.Size(480, 270)).build())
+        }
+        if (motion) { delay(8_000); index = (current + 1) % slides.size }
+    }
+    val fade = if (motion) tween<Float>(400) else snap()
     val visibility = rememberCardVisibility()
     Box(Modifier.padding(horizontal = TvLayout.Gutter).fillMaxWidth().heightIn(min = TvLayout.HeroHeight)
         .then(visibility.container).then(visibility.focus)
         .clip(RoundedCornerShape(TvLayout.HeroRadius)).background(Ink.Container).testTag("home-hero")) {
-        if (entry.hasBackdrop) Box(Modifier.matchParentSize()) {
-            AsyncImage(SourceArtwork(entry.sourceId, entry.backdrop!!), null,
-                Modifier.align(Alignment.CenterEnd).fillMaxHeight().fillMaxWidth(.78f),
-                contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
+        Crossfade(entry, Modifier.matchParentSize(), animationSpec = fade, label = "hero-backdrop") { slide ->
+            if (slide.hasBackdrop) Box(Modifier.fillMaxSize()) {
+                AsyncImage(SourceArtwork(slide.sourceId, slide.backdrop!!), null,
+                    Modifier.align(Alignment.CenterEnd).fillMaxHeight().fillMaxWidth(.78f),
+                    contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
+            }
         }
         Box(Modifier.matchParentSize().background(Brush.horizontalGradient(
             0f to Ink.Background, .28f to Ink.Background.copy(alpha = .96f),
@@ -342,30 +386,72 @@ private data class HomeRow(val key: String, val title: String, val entries: List
         Box(Modifier.matchParentSize().background(Brush.verticalGradient(
             0f to Color.Transparent, .6f to Color.Transparent, 1f to Ink.Background.copy(alpha = .65f))))
         // A poster-only entry is drawn above the scrims, in its own colours, as on the detail screen.
-        if (!entry.hasBackdrop && entry.artwork != null) Box(Modifier.matchParentSize()) {
-            Box(Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(220.dp).padding(top = if (largeText) 76.dp else 62.dp, bottom = 16.dp, end = 28.dp)) {
-                Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.align(Alignment.CenterEnd).fillMaxHeight()
-                    .aspectRatio(2f / 3).clip(RoundedCornerShape(TvLayout.CardRadius)).testTag("home-hero-poster"))
+        Crossfade(entry, Modifier.matchParentSize(), animationSpec = fade, label = "hero-poster") { slide ->
+            if (!slide.hasBackdrop && slide.artwork != null) Box(Modifier.fillMaxSize()) {
+                Box(Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(220.dp).padding(top = if (largeText) 76.dp else 62.dp, bottom = 16.dp, end = 28.dp)) {
+                    Artwork(slide.sourceId, slide.artwork, slide.title, Modifier.align(Alignment.CenterEnd).fillMaxHeight()
+                        .aspectRatio(2f / 3).clip(RoundedCornerShape(TvLayout.CardRadius)).testTag("home-hero-poster"))
+                }
             }
         }
         Column(Modifier.fillMaxWidth().heightIn(min = TvLayout.HeroHeight).padding(horizontal = 28.dp, vertical = 20.dp), verticalArrangement = Arrangement.SpaceBetween) {
             // The header line keeps the height of the source selector it used to hold, so the title and poster stay put.
             Row(Modifier.fillMaxWidth().heightIn(min = actionHeight(compact = true)), verticalAlignment = Alignment.CenterVertically) {
-                Text("KÜTÜPHANENDEN",
+                Text(if (newest) "YENİ EKLENEN" else "KÜTÜPHANENDEN",
                     Modifier.weight(1f).testTag("hero-label"), color = Ink.Mint, fontFamily = Roboto,
                     fontWeight = FontWeight.Medium, fontSize = 10.sp, letterSpacing = 1.2.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            Column(Modifier.padding(top = 16.dp).fillMaxWidth(if (!hasVisual) 1f else if (largeText) .62f else .48f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(entry.title, Modifier.testTag("hero-title"), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
-                    fontSize = if (largeText) 28.sp else 44.sp, lineHeight = if (largeText) 33.sp else 50.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text(listOf(entry.kind.label, entry.year).filter { it.isNotBlank() }.joinToString("  ·  "),
-                    color = Ink.Muted, fontFamily = Roboto, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                if (entry.description.isNotBlank()) Text(entry.description, Modifier.testTag("hero-description"), fontFamily = Roboto, fontSize = 12.sp, lineHeight = 17.sp, color = Ink.Muted, maxLines = if (largeText) 1 else 2, overflow = TextOverflow.Ellipsis)
-                Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Action("Ayrıntılar", actionModifier.testTag("hero-details"), primary = true, onClick = open)
-                    Action("Kanalları aç", Modifier.testTag("hero-live"), outlined = true, onClick = openLive)
+            Column(Modifier.padding(top = 16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Every slide's text is laid out, unseen, in the same slot: the hero keeps the tallest slide's height,
+                // so the shelves below never move as it turns.
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomStart) {
+                    if (many) slides.forEach { HeroText(it, largeText, Modifier.graphicsLayer { alpha = 0f }.clearAndSetSemantics { }) }
+                    // Text fades out, then in: two large titles cross-fading over each other read as a smear.
+                    AnimatedContent(entry, contentAlignment = Alignment.BottomStart, label = "hero-text", transitionSpec = {
+                        (if (motion) fadeIn(tween(220, delayMillis = 180)) togetherWith fadeOut(tween(180))
+                        else EnterTransition.None togetherWith ExitTransition.None) using null
+                    }) { slide -> HeroText(slide, largeText, tagged = true) }
+                }
+                Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                    // Right and Left turn the slides; with one slide, Right stays here rather than jumping to the first shelf.
+                    Action("Ayrıntılar", actionModifier.onPreviewKeyEvent { event ->
+                        if (!many || event.type != KeyEventType.KeyDown) false
+                        else when (event.key) {
+                            Key.DirectionRight -> { index = (current + 1) % slides.size; true }
+                            Key.DirectionLeft -> if (current > 0) { index = current - 1; true } else false
+                            else -> false
+                        }
+                    }.focusProperties { right = FocusRequester.Cancel }
+                        .semantics { if (many) stateDescription = "${entry.title}, ${current + 1} / ${slides.size}" }
+                        .testTag("hero-details"), primary = true) { open(entry) }
+                    if (many) SlideDots(slides.size, current)
                 }
             }
+        }
+    }
+}
+
+/** A slide's title, type/year line and plot, as wide as its picture leaves room for. Only the shown copy carries test tags. */
+@Composable private fun HeroText(slide: MediaEntry, largeText: Boolean, modifier: Modifier = Modifier, tagged: Boolean = false) {
+    val width = if (!slide.hasBackdrop && slide.artwork == null) 1f else if (largeText) .62f else .48f
+    fun Modifier.tag(tag: String) = if (tagged) testTag(tag) else this
+    Column(modifier.fillMaxWidth(width), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(slide.title, Modifier.tag("hero-title"), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
+            fontSize = if (largeText) 28.sp else 44.sp, lineHeight = if (largeText) 33.sp else 50.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(listOf(slide.kind.label, slide.year).filter { it.isNotBlank() }.joinToString("  ·  "),
+            color = Ink.Muted, fontFamily = Roboto, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (slide.description.isNotBlank()) Text(slide.description, Modifier.tag("hero-description"), fontFamily = Roboto, fontSize = 12.sp,
+            lineHeight = 17.sp, color = Ink.Muted, maxLines = if (largeText) 1 else 2, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+@Composable private fun SlideDots(count: Int, current: Int) {
+    // The tag is set inside clearAndSetSemantics; a separate testTag on this row would be cleared with the rest.
+    Row(Modifier.clearAndSetSemantics { testTag = "hero-dots" }, horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        repeat(count) { i ->
+            Box(Modifier.size(width = if (i == current) 18.dp else 6.dp, height = 6.dp)
+                .background(if (i == current) Ink.Mint else Ink.Muted.copy(alpha = .45f), RoundedCornerShape(50)))
         }
     }
 }
@@ -377,19 +463,21 @@ private data class HomeRow(val key: String, val title: String, val entries: List
     // which left a strip of the previous card with cut text at the other edge.
     val visibility = rememberCardVisibility(horizontalPadding = TvLayout.Gutter, contextAbove = headingContext, viewportHeight = viewportHeight)
     if (record != null) {
+        // A finished latest episode: the card offers the series' next episode instead of a position.
+        val next = record.kind == MediaKind.EPISODE && record.progress.completed
         Box(Modifier.width(TvLayout.ContinueWidth).then(visibility.container)) {
             Card(onClick = open, modifier = modifier.then(visibility.focus).fillMaxWidth()
                 .semantics {
                     contentDescription = "Devam et: ${entry.title}"
                     stateDescription = listOfNotNull(sourceName,
-                        if (record.kind == MediaKind.EPISODE) "Sezon ${record.season}, bölüm ${record.episode}" else null,
-                        "İzleme konumu ${clockTime(record.positionMs)}").joinToString(". ")
+                        if (record.kind == MediaKind.EPISODE) "Sezon ${record.season}, bölüm ${record.episode}${if (next) " izlendi" else ""}" else null,
+                        if (next) "Sıradaki bölüm" else "İzleme konumu ${clockTime(record.positionMs)}").joinToString(". ")
                     testTag = "$section:${entry.id}"
                 },
                 shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
                 colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
                 scale = CardDefaults.scale(focusedScale = 1f),
-                border = CardDefaults.border(focusedBorder = Border(BorderStroke(TvLayout.Focus, Ink.Text), inset = 3.dp))) {
+                border = CardDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
                 Box(Modifier.fillMaxWidth()) {
                     Box(Modifier.matchParentSize()) {
                         Box(Modifier.width(76.dp).fillMaxHeight().background(Ink.High), contentAlignment = Alignment.Center) {
@@ -401,14 +489,14 @@ private data class HomeRow(val key: String, val title: String, val entries: List
                         Text(entry.title, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                             fontSize = 13.sp, lineHeight = 18.sp, minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                        if (record.kind == MediaKind.EPISODE) Text("S${record.season} · B${record.episode}",
+                        if (record.kind == MediaKind.EPISODE) Text("S${record.season} · B${record.episode}${if (next) " izlendi" else ""}",
                             color = Ink.Muted, fontFamily = Roboto, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         else if (reserveEpisode) Text(" ", Modifier.clearAndSetSemantics { },
                             color = Ink.Muted, fontFamily = Roboto, fontSize = 11.sp, maxLines = 1)
-                        Text(clockTime(record.positionMs),
+                        Text(if (next) "Sıradaki bölüm" else clockTime(record.positionMs),
                             color = Ink.Mint, fontFamily = Roboto, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
-                    if (record.durationMs > 0) Box(Modifier.align(Alignment.BottomStart).fillMaxWidth().height(3.dp).background(Ink.High)) {
+                    if (record.durationMs > 0 && !next) Box(Modifier.align(Alignment.BottomStart).fillMaxWidth().height(3.dp).background(Ink.High)) {
                         Box(Modifier.fillMaxHeight().fillMaxWidth((record.positionMs.toFloat() / record.durationMs).coerceIn(0f, 1f)).background(Ink.Mint))
                     }
                 }
@@ -422,7 +510,7 @@ private data class HomeRow(val key: String, val title: String, val entries: List
             scale = CardDefaults.scale(focusedScale = 1f),
             shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
             colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
-            border = CardDefaults.border(focusedBorder = Border(BorderStroke(TvLayout.Focus, Ink.Text), inset = 3.dp))) {
+            border = CardDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
             if (live) Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(130.dp).height(40.dp), true, logoInset = 0.dp)
             } else Box(Modifier.fillMaxSize()) {

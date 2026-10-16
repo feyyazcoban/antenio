@@ -584,18 +584,29 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                     repairEpisodeFavorites()
                     if (resume != null) {
                         val episode = episodes.firstOrNull { it.id == resume.id }
-                        if (episode != null) { mutable.update { it.copy(season = episode.season) }; play(episode) }
-                        else mutable.update { it.copy(detailError = "İzlediğin bölüm artık bu kaynakta bulunamıyor. Başka bir bölüm seçebilirsin.") }
+                        // A finished episode goes on with the next one when its order is certain; otherwise the
+                        // detail opens on the next episode's season and the viewer starts it (as after autoplay).
+                        val next = if (episode != null && resume.progress.completed) EpisodeSequence.next(source, episode, episodes) else null
+                        when {
+                            episode == null -> mutable.update { it.copy(detailError = "İzlediğin bölüm artık bu kaynakta bulunamıyor. Başka bir bölüm seçebilirsin.") }
+                            !resume.progress.completed -> { mutable.update { it.copy(season = episode.season) }; if (stillOn(show)) play(episode) }
+                            next == null -> mutable.update { it.copy(season = episode.season) }
+                            next.automaticAllowed -> { mutable.update { it.copy(season = next.entry.season) }; if (stillOn(show)) play(next.entry) }
+                            else -> mutable.update { it.copy(season = next.entry.season) }
+                        }
                     }
                 } else {
                     val movie = repository.movie(source, entry.withoutSource()).inSource(source.id)
                     mutable.update { it.copy(selected = movie, detailLoading = false) }
-                    if (resume != null) play(movie)
+                    if (resume != null && stillOn(movie)) play(movie)
                 }
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) { mutable.update { it.copy(detailLoading = false, detailError = (e as? SourceFailure)?.message ?: "Ayrıntılar alınamadı.") } }
         }
     }
+
+    /** A resume opened from a card plays only while its detail is still the screen; leaving during the load cancels it. */
+    private fun stillOn(entry: MediaEntry) = state.value.route == Route.DETAIL && state.value.selected?.id == entry.id
 
     fun play(entry: MediaEntry, restart: Boolean = false) {
         if (entry.adult || state.value.sourceFor(entry) == null) return

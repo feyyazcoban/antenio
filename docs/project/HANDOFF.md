@@ -1,5 +1,43 @@
 # Son devir notu
 
+## Kişisel ana sayfa ve vitrin slider'ı · 16 Ekim 2026
+
+Değişen dosyalar:
+- data/HomeLibrary.kt: `newest` alanı eklendi. Devam rafı, bitmiş (%95) bölümün dizisini de tutuyor.
+- data/CatalogPresentation.kt: `newestEntries` tek geçişte en yeni 6 kaydı seçiyor; tarihsiz ya da görselsiz kayıtlar ve kanallar elenir, eşitlerde liste sırası korunur.
+- TvViewModel.kt `loadDetail`: tamamlanmış bölümle açılan dizide `EpisodeSequence.next` kullanılıyor. `automaticAllowed` ise sıradaki bölümü oynatır, değilse ya da sıradaki yoksa ayrıntıyı o sezonda açar.
+- ui/HomeScreen.kt: başlangıç rafı kuralı. `Hero` artık slaytlarla çalışıyor: `rememberSaveable` ile indeks, 8 sn `LaunchedEffect`, bir sonraki görselin diske önden yüklenmesi (`CachePolicy.DISABLED`, 480×270), arka plan/afiş/metin için üç `Crossfade`, Ayrıntılar'da `onPreviewKeyEvent` ile Sağ/Sol, `SlideDots`. "Kanalları aç" ve `openLive` kaldırıldı. Devam kartında "S… · B… izlendi" ve "Sıradaki bölüm" var; bitmiş bölümde ilerleme çubuğu gizli.
+- Testler: HomeLibraryTest (2 yeni vaka, 1 güncellenen), HeroLayoutTest (`home()` yardımcısı, `hero-live` beklentisi kaldırıldı, yeni slider vakası).
+- Belgeler: DECISIONS D063, NATIVE_UI.
+
+Kontroller: 157 JVM testi geçti, APK'lar derlendi. 5556'da elle doğrulananlar STATUS'ta.
+
+İnceleme sonrası düzeltmeler:
+- `LaunchedEffect(Unit)` hedefi önce `model.homeFocus` ile kaydediyor; böylece başlangıç rafı kişisel rafa dönüştükten sonra eski anahtar odağı menüye göndermiyor.
+- `Hero` her yerde sınırlanmış `current` indeksini kullanıyor.
+- Görünmeyen `HeroText` kopyaları en uzun slaytın yüksekliğini ayırıyor.
+- Metin geçişi `AnimatedContent` ile önce sönüp sonra beliriyor.
+- `SlideDots` etiketi `clearAndSetSemantics { testTag }` içinde.
+- `TvViewModel.stillOn`: devam oynatımı yalnız ayrıntı hâlâ ekrandaysa başlıyor.
+- PrivateCatalogPresentationAuditTest'e `dated`/`rated` sayıları ve cihaz yolu (kayıt yaz-oku, `SourceLibrary.combine`, `heroSlides`) eklendi; yalnız sayı yazdırıyor.
+
+Önemli: 5556'daki "Evim" kullanıcının gerçek sağlayıcısının **M3U** kaynağı; daha önceki bir notta geçen "sentetik Evim" değil. 8765'teki `fixture_server.py` yalnız 15 kayıtlık görsel fikstürü sunuyor. M3U'da tarih yok, bu yüzden Evim'le vitrin tek başlık kalıyor; aynı sağlayıcının Xtream API'si tarihleri veriyor (özel döküm). Gösterim için eklenen ikinci kaynak "Demo", oturum betiği `demo_server.py` ile `127.0.0.1:8766`'da sunuluyor; sunucu kapanınca Demo kaynağı yenilenemez. Kullanıcı isterse Ayarlar → Kaynakları yönet → Demo → Kaldır ile kaldırılmalı.
+
+Açık kalanlar:
+- HeroLayoutTest ve ContinueCard/PilotFlow sınıfları koşulmadı (gerçek Evim'i silerler).
+- "Sıradaki bölüm" akışı cihazda görülmedi.
+- TalkBack'te otomatik geçiş ve TV işlemcisinde solma akıcılığı ölçülmedi.
+
+Sonraki adım: Demo'yu kaldırmak (kullanıcı onayıyla). Evim yeniden kurulabiliyorsa enstrümantasyon sınıflarını koşmak, değilse gerçek Xtream hesabıyla TV'de denemek.
+
+## Odak halkası köşeleri ve kategori yazısı · 16 Ekim 2026
+
+Değişen: ui/DesignSystem.kt (`TvLayout.FocusInset`, `focusRing(radius, color)`: `Border(…, inset = 3 dp, shape = RoundedCornerShape(radius + 3 dp))`). Şu dosyalarda `focusRing` kullanılıyor: DetailScreen, HomeScreen (iki kart), LibraryScreen (kategori ve kanal satırı, 10 dp), PilotApp (kütüphane kartı; canlı kartta 14 dp, diğerlerinde CardRadius, ikisi aynı `radius` değerinden), PlayerScreen, SearchScreen, SettingsScreen. LibraryScreen kategori satırının Row'una `fillMaxWidth().heightIn(min = 40.dp)` eklendi. Ayrıca NATIVE_UI.md'ye halka kuralı yazıldı. Sürüm numarası değişmedi.
+
+Neden: tv-material 1.1.0 `SurfaceBorderNode`, çizim alanını `inset` kadar büyütüp yüzeyin kendi şeklini (Border.shape varsayılansa) o alana çizer. Sabit dp yarıçap büyümediği için köşe boşluğu açılıyordu. Yüzde şekiller (hap) büyüyen sınırla birlikte büyür. Theme.kt `Action` ve HomeScreen `NavItem` bu yüzden değişmedi. Yeni sabit yarıçaplı odaklanan yüzeyler de `focusRing` kullanmalı.
+
+Kontroller: `assembleRelease` geçti. 5556'da önce ve sonra ölçüldü: kategori yazısı 253–274'ten 257–277'ye indi, dolgu 228–307. Kategori, kart ve ayar satırı halkaları eş merkezli görünüyor. Lint ve enstrümantasyon koşulmadı.
+
 ## Ara/Rehber/Oynatıcı/Ana sayfa Geri aralığı · 16 Ekim 2026
 
 Değişen: ui/PilotApp.kt (`routeBack`: HOME → `exitAsk`, diğerleri → `model.back()`; genel işleyici bunu çağırır ve Ara/Rehber/Oynatıcı'ya geçirir), ui/SearchScreen.kt, ui/GuideScreen.kt, ui/PlayerScreen.kt (`back` parametresi; `BackHandler` önce `model.state.value.route`'a bakar, kendi rotası değilse `back()`; bu üç ek 0.14.37 oturumunca aynı tasarımla yapıldı), ui/HomeScreen.kt (`HomeBackToMenu` model HOME değilse `model.back()`), SearchNavigationTest (yeni `searchBackFollowsTheModelRouteBeforeTheScreenLeaves`; sınıf düzeyi `backRightAfter`), GuideFlowTest (yeni `guideBackFollows…`, `playerBackFollows…`). Sürüm numarası değişmedi; 0.14.37 release ana sayfa ekinden önce derlendi. [QA](native-screen-back-gap-qa.json).

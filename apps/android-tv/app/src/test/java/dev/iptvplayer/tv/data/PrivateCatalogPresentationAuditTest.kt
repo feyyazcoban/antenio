@@ -25,15 +25,22 @@ class PrivateCatalogPresentationAuditTest {
                 report.put(JSONObject().put("kind", kind.name).put("count", items.size)
                     .put("dividerCandidates", items.count { it.isProviderDivider() })
                     .put("usableArtwork", items.count { it.hasArtwork })
-                    .put("usableBackdrop", items.count { it.hasBackdrop }))
+                    .put("usableBackdrop", items.count { it.hasBackdrop })
+                    .put("dated", items.count { it.addedAt > 0 }).put("rated", items.count { it.rating > 0f }))
                 addAll(items)
             }
         }
         val home = homeLibrary(Catalog(entries), emptyList(), emptySet())
         assertTrue("Automatic rows exclude divider hints", (home.channels + home.movies + home.series).none { it.isProviderDivider() })
         assertTrue("Hero is real catalog content", home.featured != null && home.featured in entries && !home.featured!!.isProviderDivider())
+        // The device path: the stored snapshot, read back and scoped to its source, feeds the same home rules.
+        val source = SourceConfig("audit", "Audit", SourceType.XTREAM, "http://example.invalid", "u", "p")
+        val stored = CatalogSnapshotCodec.decode(CatalogSnapshotCodec.encode(CatalogSnapshot(Catalog(entries), 1L))).catalog
+        val device = homeLibrary(SourceLibrary.combine(listOf(source), mapOf(source.id to stored)), emptyList(), emptySet())
         println("CATALOG_PRESENTATION_AUDIT=" + JSONObject().put("types", report)
             .put("homeLive", home.channels.size).put("homeMovies", home.movies.size).put("homeSeries", home.series.size)
-            .put("heroHasBackdrop", home.featured?.hasBackdrop == true).put("rawEntriesRetained", true))
+            .put("heroHasBackdrop", home.featured?.hasBackdrop == true).put("heroSlides", home.newest.size)
+            .put("storedDated", stored.items.count { it.addedAt > 0 }).put("storedRated", stored.items.count { it.rating > 0f })
+            .put("deviceHeroSlides", device.newest.size).put("rawEntriesRetained", true))
     }
 }

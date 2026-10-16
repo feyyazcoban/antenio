@@ -44,10 +44,29 @@ class HomeLibraryTest {
         val home = homeLibrary(Catalog(listOf(entry("1", MediaKind.LIVE))), listOf(WatchRecord("2", MediaKind.LIVE), WatchRecord("1", MediaKind.LIVE)), emptySet())
         assertEquals(listOf("1"), home.recentChannels.map { it.id })
     }
-    @Test fun completingLatestEpisodeDoesNotResurrectAnOlderEpisode() {
+    @Test fun completedLatestEpisodeKeepsItsSeriesForTheNextEpisodeWithoutResurrectingAnOlderOne() {
         val home = homeLibrary(Catalog(listOf(entry("series", MediaKind.SERIES))), listOf(
             WatchRecord("new", MediaKind.EPISODE, "series", positionMs = 960, durationMs = 1000),
             WatchRecord("old", MediaKind.EPISODE, "series", positionMs = 500, durationMs = 1000)), emptySet())
-        assertTrue(home.continueWatching.isEmpty())
+        assertEquals(listOf("new"), home.continueWatching.map { it.record.id })
+        assertTrue(home.continueWatching.single().record.progress.completed)
+    }
+    @Test fun newestHeroSlidesAreTheLatestDatedFilmsAndSeriesWithArtwork() {
+        fun dated(id: String, kind: MediaKind, added: Long, art: String? = "http://img/$id.jpg") =
+            MediaEntry(id, id, kind, "Title $id", artwork = art, addedAt = added)
+        val catalog = Catalog(listOf(dated("m1", MediaKind.MOVIE, 100), dated("m2", MediaKind.MOVIE, 500),
+            dated("bare", MediaKind.MOVIE, 900, art = null), dated("s1", MediaKind.SERIES, 700),
+            dated("tie", MediaKind.MOVIE, 100), dated("live", MediaKind.LIVE, 999),
+            dated("old", MediaKind.MOVIE, 0), dated("hidden", MediaKind.SERIES, 800).copy(adult = true))
+            + (1..8).map { dated("x$it", MediaKind.MOVIE, 10L + it) })
+        val home = homeLibrary(catalog, emptyList(), emptySet())
+        // Newest first; no artwork, no date, channels and adult titles never qualify; equal dates keep list order.
+        assertEquals(listOf("s1", "m2", "m1", "tie", "x8", "x7"), home.newest.map { it.id })
+    }
+    @Test fun aListWithoutDatesHasNoNewestSlidesAndKeepsTheFeaturedTitle() {
+        val catalog = Catalog(listOf(MediaEntry("m", "m", MediaKind.MOVIE, "Movie", artwork = "http://img/m.jpg")))
+        val home = homeLibrary(catalog, emptyList(), emptySet())
+        assertTrue(home.newest.isEmpty())
+        assertEquals("m", home.featured?.id)
     }
 }

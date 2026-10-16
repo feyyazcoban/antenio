@@ -429,7 +429,7 @@ import java.util.Locale
         enabled = enabled, contentPadding = PaddingValues(0.dp), shape = ButtonDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
         colors = ButtonDefaults.colors(containerColor = if (selected) Ink.Selected else Ink.Container, focusedContainerColor = Ink.High),
         scale = ButtonDefaults.scale(focusedScale = 1f),
-        border = ButtonDefaults.border(focusedBorder = Border(BorderStroke(TvLayout.Focus, Ink.Text), inset = 3.dp))) {
+        border = ButtonDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             // The status line is never ellipsized, so an unavailable track always says why.

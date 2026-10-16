@@ -1,7 +1,9 @@
 package dev.iptvplayer.tv.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -21,6 +23,7 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.Border
 
 /** Common 960×540 dp TV geometry, shared across application screens. */
 object TvLayout {
@@ -29,6 +32,7 @@ object TvLayout {
     val Gap = 20.dp
     val RowGap = 20.dp
     val Focus = 2.dp
+    val FocusInset = 3.dp
     val CardRadius = 12.dp
     val HeaderTop = 18.dp
     val HeaderBottom = 14.dp
@@ -42,6 +46,14 @@ object TvLayout {
     val ContinueWidth = 284.dp
     val LiveWidth = 168.dp
 }
+
+/**
+ * The focus ring of a surface with [radius] corners, [TvLayout.FocusInset] outside it. tv-material strokes the
+ * surface's own shape on the grown bounds, so a fixed radius stays the same and the gap widens at the corners;
+ * radius + inset keeps the ring concentric with the fill. Pill (percent) shapes already grow with the bounds.
+ */
+fun focusRing(radius: Dp, color: Color = Ink.Text) =
+    Border(BorderStroke(TvLayout.Focus, color), inset = TvLayout.FocusInset, shape = RoundedCornerShape(radius + TvLayout.FocusInset))
 
 // Reuses the stroke icon paths from prototypes/tv-flow/app.js.
 private val iconPaths = mapOf(

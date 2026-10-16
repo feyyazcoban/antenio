@@ -221,7 +221,7 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
     }, shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
         colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
         scale = CardDefaults.scale(focusedScale = 1f),
-        border = CardDefaults.border(focusedBorder = Border(BorderStroke(TvLayout.Focus, Ink.Text), inset = 3.dp))) {
+        border = CardDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {

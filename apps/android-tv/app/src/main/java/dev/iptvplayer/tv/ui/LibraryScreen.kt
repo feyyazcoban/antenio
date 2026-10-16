@@ -369,9 +369,12 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                 shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
                 colors = ClickableSurfaceDefaults.colors(containerColor = if (isSelected) Ink.Selected else Color.Transparent,
                     contentColor = Ink.Text, focusedContainerColor = Ink.Text, focusedContentColor = Ink.Background),
-                border = ClickableSurfaceDefaults.border(focusedBorder = Border(BorderStroke(TvLayout.Focus, Ink.Text), inset = 3.dp)),
+                border = ClickableSurfaceDefaults.border(focusedBorder = focusRing(10.dp)),
                 scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)) {
-                Row(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                // The row takes the surface's 40 dp itself: the surface does not stretch its content, and a row of
+                // its own text height sat at the top, its label about 2 dp above the centre.
+                Row(Modifier.fillMaxWidth().heightIn(min = 40.dp).padding(horizontal = 14.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
                     Text(category.label, Modifier.weight(1f), color = LocalContentColor.current, fontFamily = Roboto,
                         fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal, fontSize = 14.sp, lineHeight = 19.sp,
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -415,7 +418,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
             shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
             colors = ClickableSurfaceDefaults.colors(containerColor = Ink.Container, contentColor = Ink.Text,
                 focusedContainerColor = Ink.High, focusedContentColor = Ink.Text),
-            border = ClickableSurfaceDefaults.border(focusedBorder = Border(BorderStroke(TvLayout.Focus, Ink.Text), inset = 3.dp)),
+            border = ClickableSurfaceDefaults.border(focusedBorder = focusRing(10.dp)),
             scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)) {
             Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = 12.dp, vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {

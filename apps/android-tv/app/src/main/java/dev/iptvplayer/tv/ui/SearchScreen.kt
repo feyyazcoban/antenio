@@ -262,7 +262,7 @@ private data class SearchRow(val key: String, val title: String, val entries: Li
             shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
             colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
             scale = CardDefaults.scale(focusedScale = 1f),
-            border = CardDefaults.border(focusedBorder = Border(BorderStroke(TvLayout.Focus, Ink.Text), inset = 3.dp))) {
+            border = CardDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
             // The floor sits on the Row (outside its padding) so CenterVertically centres the content in the card.
             Row(Modifier.fillMaxWidth().heightIn(min = minHeight).padding(10.dp), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)) {

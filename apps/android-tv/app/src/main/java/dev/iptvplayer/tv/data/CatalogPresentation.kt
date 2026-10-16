@@ -47,6 +47,22 @@ internal fun featuredEntry(movies: List<MediaEntry>, series: List<MediaEntry>, f
         ?: candidates.firstOrNull()
 }
 
+/**
+ * The [limit] most recently added entries with artwork, newest first; equal dates keep the provider's order. Entries
+ * without a provider date (every M3U entry) never qualify. One pass, so a large catalog is not sorted.
+ */
+internal fun newestEntries(entries: List<MediaEntry>, limit: Int = 6): List<MediaEntry> {
+    val top = ArrayList<MediaEntry>(limit + 1)
+    for (entry in entries) {
+        if (entry.addedAt <= 0 || !entry.hasArtwork) continue
+        if (top.size == limit && entry.addedAt <= top.last().addedAt) continue
+        val at = top.indexOfFirst { entry.addedAt > it.addedAt }.let { if (it < 0) top.size else it }
+        top.add(at, entry)
+        if (top.size > limit) top.removeAt(limit)
+    }
+    return top
+}
+
 /** Categories of [entries] in the provider's order; names it did not list follow in first-appearance order. */
 fun providerCategories(entries: List<MediaEntry>, order: List<String>): List<String> {
     val present = LinkedHashSet<String>()

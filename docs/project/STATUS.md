@@ -1,5 +1,26 @@
 # Proje durumu
 
+## Kişisel ana sayfa ve vitrin slider'ı · 16 Ekim 2026
+
+Kullanıcının istekleri ve seçimleriyle (D063) ana sayfa değişti:
+- Vitrindeki "Kanalları aç" kalktı.
+- Vitrin, ekleme tarihi olan en yeni 6 film ve diziden bir slider oldu: 8 sn'de bir geçiyor, Sağ/Sol ile elle değişiyor, nokta göstergesi var, Hareketi azalt açıksa durur.
+- Geçmiş oluşunca "Canlı yayınlar"ın yerini "Son izlediğin kanallar", "Film kütüphanen"in yerini "İzlemeye devam et" alıyor. Geçmiş yokken bu iki raf başlangıç rafı olarak kalıyor.
+- Devam rafı, son bölümü bitirilen diziyi de tutuyor; kart sıradaki bölümü açıyor.
+
+Kontroller:
+- 157 JVM testi geçti (1 atlanan; en yeni seçimi ve bitmiş bölüm için 3 yeni/güncel test). Release, debug ve test APK'ları derlendi.
+- 5556'da (veri korunarak release kuruldu) "Kanalları aç"ın kalktığı, kategori yazısının ortalandığı (dolgu 228–307, yazı 257–277) ve halkaların eş merkezli olduğu görüldü.
+- 5556'daki "Evim" gerçek sağlayıcının **M3U** listesi (Kaynaklar: "Kaynak 1 · M3U", 21.308 içerik). M3U'da tarih ve puan yok, bu yüzden orada vitrin tek başlık kalıyor. Aynı sağlayıcının özel Xtream dökümünde 14.609 filmin hepsinde `added`, 2.173 dizinin hepsinde `last_modified` var. Genişletilmiş PrivateCatalogPresentationAuditTest bu dökümü ayrıştırma, kayıt ve kaynak birleştirme yolundan geçirdiğinde 6 slayt çıkıyor. Ayarlar → Kataloğu yenile bir kez çalıştırıldı (18:28, gerçek sağlayıcı, yalnız liste).
+- Slider'ı göstermek için ikinci kaynak olarak sentetik "Demo" eklendi (Xtream, `http://10.0.2.2:8766`, yalnız oturum boyunca çalışan yerel sunucu, fikstür görselleri, sentetik tarih). Doğrulananlar: "YENİ EKLENEN", 6 nokta, 8 sn'de kendiliğinden geçiş, Sağ ileri gidiyor ve sonda başa sarıyor, Sol geri gidiyor, ilk slaytta Sol menüyü açıyor, odak Ayrıntılar'da kalıyor, raflar yerinden oynamıyor, metin sıralı soluyor.
+- Çok ajanlı inceleme 5 hata doğruladı, hepsi düzeltildi: `hero-dots` etiketinin semantikle silinmesi, ilk izlemeden sonra odağın menüye kaçması, slayta göre vitrin yüksekliği, geri yüklenen slayt indeksinin sınırlanmaması, ayrıntıdan çıkıldıktan sonra devam oynatımının başlaması. 1 bulgu çürütüldü.
+- HeroLayoutTest koşulmadı: test sınıfları 5556'daki gerçek Evim kaynağını siliyor.
+- Devam kartının "sıradaki bölüm" akışı cihazda denenmedi; bu emülatörde izleme geçmişi yok.
+
+## Odak halkası köşeleri ve kategori yazısı · 16 Ekim 2026
+
+Kullanıcı iki görsel kusur gösterdi. İlki: odak halkası ile dolgunun köşeleri eş merkezli değildi. tv-material halkayı yüzeyin 3 dp dışına çiziyor ama sabit köşe yarıçapını büyütmüyordu, bu yüzden köşelerdeki boşluk kenarlardakinden genişti. Yeni `focusRing(radius)`, halka yarıçapını dolgu yarıçapı + 3 dp yapıyor. Sabit yarıçaplı bütün kart ve satırlar bunu kullanıyor: ana sayfa, kütüphane, ayrıntı, arama, ayarlar, oynatıcı parça paneli, kategori ve kanal satırları. Hap biçimli eylemler zaten eş merkezliydi, değişmedi. İkincisi: kütüphane kategori satırında yazı yaklaşık 2 dp yukarıdaydı (5556'da ölçüm: dolgu y=228–307, yazı 253–274). Surface içeriğini uzatmadığı için satır kendi yazı yüksekliğinde kalıp üste yapışıyordu. Satır artık 40 dp'yi kendisi taşıyor. Yeni karar yok.
+
 ## Ara/Rehber/Oynatıcı/Ana sayfa Geri aralığı · 16 Ekim 2026
 
 Çıkış sorusu düzeltmesindeki ilke ekranların kendi Geri işleyicilerine de uygulandı: model başka rotaya geçtiği halde ekran bir sonraki kareye kadar duruyorsa, o arada gelen Geri artık eski ekranın kararını vermez, PilotApp'in rota kuralına gider (ana sayfa → çıkış sorusu, diğerleri → `model.back()`). Örnek: Ara'nın menüsünde Geri ana sayfaya döner, hemen ardından basılan ikinci Geri eskiden kayboluyordu, artık çıkış sorusunu açar. Rehber ve Oynatıcı için aynısı; 0.14.36'da eklenen ana sayfa "Geri menüyü açar" işleyicisinde de aynı aralık vardı (Ana sayfa → Kütüphane anındaki Geri kayboluyordu) ve düzeltildi. Ekranlar kendi rotalarındayken davranış aynı; yeni karar yok. [QA](native-screen-back-gap-qa.json).
