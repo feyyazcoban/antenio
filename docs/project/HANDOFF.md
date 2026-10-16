@@ -8,7 +8,7 @@ Dal `claude/trusting-margulis-73aa19`. Değişen: AndroidManifest.xml (icon `@mi
 
 Kontroller: assembleDebug/assembleRelease/assembleDebugAndroidTest geçti, lint 0 hata/31 uyarı. 5556'da release ile splash zaman çizelgesi, ana sayfaya geçiş, ilk odak, tuşla kalkma ve sesin kapanması görüldü. Bir kez yeni kurulumdan hemen sonraki açılışta ve bir kez nedeni belirsiz olarak ses başlamadı (1,8 sn sınırı ya da emülatör ses hatası olabilir; tasarım gereği sessiz atlanır); sonraki 4 açılışta çaldı. Ekran görüntüleri kullanıcının gerçek kaynağını gösterdiği için depoya konmadı. Enstrümantasyon/JVM testleri çalıştırılmadı. 5556'da bu dalın release derlemesi kurulu (sürüm adı yine 0.14.38-design-preview); ana oturum kendi derlemesini üstüne kuracağını bildirdi.
 
-Sonraki adım: kullanıcının splash ve sesi değerlendirmesi, sesin kökenini/lisansını doğrulaması; istenirse ses düzeyi veya süresi; dalın ana dala alınması ve bir sonraki teslimde sürüm artışı; fiziksel TV'de launcher ikonu, banner ve açılış kontrolü.
+Sonraki adım: kullanıcının splash ve sesi değerlendirmesi (sesin kullanımı onaylandı: kullanıcının seçtiği telifsiz ses); istenirse ses düzeyi veya süresi; dalın ana dala alınması ve bir sonraki teslimde sürüm artışı; fiziksel TV'de launcher ikonu, banner ve açılış kontrolü.
 
 ## Ara/Rehber/Oynatıcı/Ana sayfa Geri aralığı · 16 Ekim 2026
 
