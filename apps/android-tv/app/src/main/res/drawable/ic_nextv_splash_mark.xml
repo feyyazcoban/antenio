@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NEXTV amblem (design/brand/nextv-amblem.svg) for the launch window; the same mark LaunchCover draws. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="51.84dp"
+    android:height="64.47dp"
+    android:viewportWidth="119"
+    android:viewportHeight="148">
+    <path
+        android:fillColor="#FF1CECAB"
+        android:pathData="M31.7724 105.612L0 125.739V134.66L24.4766 148L110.631 92.7103L89.825 82.6398C81.8158 78.754 72.3532 79.3355 64.8821 84.1731L31.7724 105.612Z" />
+    <path
+        android:fillColor="#FF1CECAB"
+        android:pathData="M31.7724 88.8575L31.7724 4.68213L24.4766 0L0 13.3402V125.739L21.8459 108.974C28.1044 104.171 31.7724 96.738 31.7724 88.8575Z" />
+    <path
+        android:fillColor="#FF1CECAB"
+        android:pathData="M119 60.6602L31.7724 4.68213L34.4924 32.2673C35.2522 39.972 39.4941 46.9088 46.0115 51.105L110.631 92.7103L119 87.3402L119 60.6602Z" />
+</vector>

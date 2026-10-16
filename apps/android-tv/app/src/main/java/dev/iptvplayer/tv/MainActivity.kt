@@ -5,6 +5,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -32,16 +35,23 @@ class TvApplication : Application(), SingletonImageLoader.Factory {
 class MainActivity : ComponentActivity() {
     private val model: TvViewModel by viewModels()
     private val startupSound by lazy { StartupSound(this) }
+    private var opening by mutableStateOf(false)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) startupSound.prepare()
-        val opening = savedInstanceState == null && (application as TvApplication).claimOpening()
+        opening = savedInstanceState == null && (application as TvApplication).claimOpening()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, window.decorView).apply {
             hide(WindowInsetsCompat.Type.systemBars())
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
-        setContent { PilotTheme { PilotApp(model, opening) } }
+        setContent { PilotTheme { PilotApp(model, opening) { opening = false } } }
+    }
+    // Any remote key ends the launch splash and its chime at once, and still reaches the screen. Caught here because
+    // while sources are restored nothing in Compose holds focus, so a key would never reach a Compose key handler.
+    override fun onUserInteraction() {
+        super.onUserInteraction()
+        if (opening) { opening = false; startupSound.stop() }
     }
     override fun onStart() { super.onStart(); startupSound.start() }
     override fun onStop() { startupSound.stop(); super.onStop() }

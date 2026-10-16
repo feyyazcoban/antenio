@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!--
+      NEXTV amblem (design/brand/nextv-amblem.svg, 119x148), inverted app-icon scheme: BLACK mark on the
+      green background layer. Scaled to 48dp tall (~67% of the 72dp visible circle) so a padding ring
+      stays inside the launcher mask. Optically centred: the mark's area centroid (local x=46.77 of 119,
+      ~4.1dp left of the box centre) sits on the canvas centre, so the box is nudged right of the
+      geometric centre (translateX 34.70 -> 38.83). Vertical is already balanced (centroid y=74.04).
+    -->
+    <group
+        android:translateX="38.83"
+        android:translateY="30.0"
+        android:scaleX="0.324324"
+        android:scaleY="0.324324">
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="M31.7724 105.612L0 125.739V134.66L24.4766 148L110.631 92.7103L89.825 82.6398C81.8158 78.754 72.3532 79.3355 64.8821 84.1731L31.7724 105.612Z" />
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="M31.7724 88.8575L31.7724 4.68213L24.4766 0L0 13.3402V125.739L21.8459 108.974C28.1044 104.171 31.7724 96.738 31.7724 88.8575Z" />
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="M119 60.6602L31.7724 4.68213L34.4924 32.2673C35.2522 39.972 39.4941 46.9088 46.0115 51.105L110.631 92.7103L119 87.3402L119 60.6602Z" />
+    </group>
+</vector>
