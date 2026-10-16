@@ -1,0 +1,64 @@
+{
+ "date": "2026-10-16",
+ "version": "0.14.38-design-preview",
+ "versionCode": 52,
+ "buildType": "release (R8, not debuggable, debug key)",
+ "sha256": "7e173b44d9ef748b3e9ae9340dd1feafaa490c876029669d675308b5597f60a0",
+ "apkSignature": "apksigner verify: v2 scheme true",
+ "requests": [
+  "user: install 0.14.37 on the TV (done, see physicalTv)",
+  "follow-up of 0.14.37: a read-only review workflow (6 reviewers, 2 skeptics per finding, a completeness critic) and a diagnosis workflow for the six device tests that failed since 0.14.36"
+ ],
+ "reviewFindingsFixed": [
+  "Ad (A-Z) and Son eklenen moved provider dividers (*****BİLGİ*****, ===4K===) to the top: librarySorted now sorts content only and keeps dividers last in their own order",
+  "sorting ran in Library's composition on the main thread every time Library was entered (Library leaves composition for Detail/Player): LibraryOrderCache in the model keeps one sorted list per section, catalogue and choice; a choice is sorted on Dispatchers.Default before it is shown, a newly published catalogue is sorted ahead for the saved choices; keys are computed once per title (no boxing per comparison)",
+  "Home poster shelves (HomeCard) had no rating badge: same RatingBadge as MediaCard",
+  "Geçmiş followed the saved sort and lost watch order: Geçmiş keeps watch order and hides Sırala",
+  "at large text the Sırala chip squeezed the category title: the chip says only 'Sırala' there (its selected look marks a non-default order)",
+  "SourceRegistryStorageTest still expected snapshot version 3: CatalogSnapshotCodec.VERSION constant used by encode, decode and the test",
+  "a Sırala choice tried by hand on the emulator would survive resetFixtureSources: the reset sets both sections back to Varsayılan"
+ ],
+ "reviewRefuted": [
+  "v1-v3 snapshots stay without ratings until the next refresh (documented trade-off)",
+  "global search result rows show no rating (not posters; D061 scope)"
+ ],
+ "deviceTestFixes": {
+  "product": [
+   "Esc as Back (ui/PilotApp.kt): no longer guesses an open keyboard from window insets (a TV keyboard reports late or not at all, so one Esc both closed the keyboard and acted as Back); on release it injects a real KEYCODE_BACK into the window, which the platform routes like the remote's Back (keyboard first, then the BackHandlers); only an Esc whose press reached the app counts; Esc with a modifier is ignored",
+   "Settings (ui/SettingsScreen.kt): a key pressed before the dialog's window reported its focus is no longer undone by the late entry-row focus request (a quick Down jumped back to the first row; found by a diagnostic that named the focused rows)"
+  ],
+  "tests (outdated after D059/D060 or racing an unsettled screen)": [
+   "SearchNavigationTest.sideMenuLabelsFitAndRemoteCanReachSettingsAndReturn: checks the hero header label instead of the removed 'Tüm kaynaklar'; waits for the app window's input focus after Settings closes before the Up keys (keys sent earlier are dropped by the system; reproduced 3/3 with and without the Settings change)",
+   "SearchNavigationTest.refreshRecoversRemovedFocusedItemAndMissingCategoryWithoutStealingInput: accepts both keyboards (one that reports its closing, and the emulator's floating one that keeps typing mode until focus leaves the field), then requires the category column on Tümü",
+   "SearchNavigationTest.homeBackAsksBeforeLeavingTheApp: waits until Home has focused its content before the first Back",
+   "GuideFlowTest.liveCardsAndPlayerKeepProgrammeAndRemoteControlsVisible and PilotFlowTest.liveMovieSeriesTracksFavoritesAndBack: entering Canlı TV focuses 'Tüm kanallar' (D060); Right enters the first channel",
+   "SearchNavigationTest: assertFocusedOrSay names the focused nodes when a focus assertion fails"
+  ]
+ },
+ "unit": {
+  "tests": 155,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 1
+ },
+ "lint": {
+  "errors": 0,
+  "warnings": 32
+ },
+ "instrumentation": {
+  "device": "emulator-5556 / nextv_design_api36 / API 36, debug builds, synthetic fixtures only",
+  "SearchNavigationTest": "21/21 in two consecutive class runs (before the fixes: 17/21 in the 0.14.37 round of the other session)",
+  "SourceRegistryStorageTest": "12/12",
+  "HeroLayoutTest": "1/1",
+  "VisualPreviewTest": "11/11",
+  "PilotFlowTest, GuideFlowTest, EpisodeAutoplayFlowTest": "after an emulator restart PilotFlow 8/8, GuideFlow 13/13, EpisodeAutoplayFlow 11/11; before the restart the emulator (2 h under load, -no-audio) logged AudioTrack 'device stall' and 4 player cases failed (position did not advance), the same cases passed in the first round of this version"
+ },
+ "notVerified": [
+  "font 1.5/2.0 runs",
+  "the Sırala dialog, sort result and badge by eye (no screenshots of these)",
+  "Esc in the player's video view",
+  "the TCL keyboard with the injected Back",
+  "0.14.38 on the TV by eye (installed, not launched)"
+ ],
+ "physicalTv": "0.14.38 installed on the user's request after 0.14.37 (adb install -r from 0.14.37/code51 to 0.14.38/code52; on-TV SHA-256 7e173b44... matches; firstInstallTime 2026-10-13 23:50:03 unchanged, data kept; speed compile Success; app not launched)"
+}

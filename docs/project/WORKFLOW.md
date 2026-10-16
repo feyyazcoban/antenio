@@ -35,7 +35,7 @@ TV'ye giden teslimler 0.14.29'dan beri `.\gradlew.bat assembleRelease` çıktıs
 
 - Kullanıcı cihazı `emulator-5554`: gerçek kaynak ve 0.13 korunur; test/reset/izinsiz kurulum yapılmaz.
 - Tasarım cihazı `emulator-5556`: önce bağlı cihaz ve AVD kimliği doğrulanır. Sadece ayrılmış cihazda hedefli test çalıştırılır.
-- Fiziksel 65U95A: kullanıcının önceki güncelleme isteği kapsamında 16 Ekim'de kullanıcının isteğiyle 0.14.36 (release) kuruldu; güncel sürüm STATUS üzerinden doğrulanır. Bağlı veya açık olduğu varsayılmaz; test/reset yapılmaz, güncelleme kullanıcı isteğiyle gerçekleştirilir.
+- Fiziksel 65U95A: kullanıcının önceki güncelleme isteği kapsamında 16 Ekim'de kullanıcının isteğiyle 0.14.38 (release) kuruldu; güncel sürüm STATUS üzerinden doğrulanır. Bağlı veya açık olduğu varsayılmaz; test/reset yapılmaz, güncelleme kullanıcı isteğiyle gerçekleştirilir.
 - Toplu `connectedAndroidTest` çalıştırma. Her kurulum/test komutunda doğrulanmış seri kimliğini açıkça belirt.
 
 ## Dosya yerleşimi

@@ -215,8 +215,11 @@ class SearchNavigationTest {
         ui.onNode(hasText("Hareketi azalt") and hasClickAction()).assertIsFocused()
         key(KeyEvent.KEYCODE_BACK)
         ui.onNodeWithTag("nav:Ayarlar").assertIsFocused()
+        // The closed dialog's window keeps the system's input focus for a moment after Compose drops it; keys sent
+        // before the app's window has it again never reach the app (InputDispatcher: "no input channel").
+        ui.waitUntil(5_000) { ui.onAllNodesWithTag("settings-panel").fetchSemanticsNodes().isEmpty() && ui.activity.hasWindowFocus() }
         repeat(order.size) { key(KeyEvent.KEYCODE_DPAD_UP) }
-        ui.onNodeWithTag("nav:Ara").assertIsFocused()
+        ui.onNodeWithTag("nav:Ara").assertFocusedOrSay()
         key(KeyEvent.KEYCODE_DPAD_UP)
         ui.onNodeWithTag("nav:Ara").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_LEFT)
