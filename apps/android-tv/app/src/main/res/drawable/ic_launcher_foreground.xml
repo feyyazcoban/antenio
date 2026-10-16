@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!--
+      NEXTV play mark from Figma "App_Icon" (file HYiVJkfk5xuxvG8nXlBzEu, node 271:711).
+      Inverted scheme: BLACK mark on the green background layer.
+      Mark source box is 477x595 px. Scaled by 0.080672 so it stands ~48dp tall in the
+      108dp canvas (~67% of the 72dp visible circle), leaving a comfortable padding ring
+      inside the launcher mask. Optically centered: the mark's area-centroid (local x=187,
+      ~4.1dp left of the geometric box center) is placed at the canvas center, so the box
+      is nudged +4.12dp right of geometric center (translateX 34.76 -> 38.88). Vertical is
+      already balanced (centroid y == box center).
+    -->
+    <group
+        android:translateX="38.88"
+        android:translateY="30.0"
+        android:scaleX="0.080672"
+        android:scaleY="0.080672">
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="M127.357 424.588 L0 505.506 L0 541.369 L98.1123 595 L443.454 372.721 L360.055 332.235 C327.951 316.612 290.021 318.95 260.074 338.399 L127.357 424.588 Z" />
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="M127.357 357.231 L127.357 18.8234 L98.1123 0 L0 53.6311 L0 505.506 L87.5671 438.105 C112.654 418.796 127.357 388.913 127.357 357.231 Z" />
+        <path
+            android:fillColor="#FF000000"
+            android:pathData="M477 243.87 L127.357 18.8234 L138.259 129.723 C141.305 160.698 158.308 188.586 184.432 205.456 L443.454 372.721 L476.998 351.131 L477 243.87 Z" />
+    </group>
+</vector>

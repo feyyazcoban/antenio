@@ -63,11 +63,11 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
 
+/** [opening] shows the launch splash; the host clears it through [endOpening] or on any remote key (MainActivity). */
 @OptIn(ExperimentalFoundationApi::class)
-@Composable fun PilotApp(model: TvViewModel, showOpening: Boolean = false) {
+@Composable fun PilotApp(model: TvViewModel, opening: Boolean = false, endOpening: () -> Unit = {}) {
     val state by model.state.collectAsStateWithLifecycle()
     var settings by remember { mutableStateOf(false) }
-    var opening by remember { mutableStateOf(showOpening) }
     var exitAsk by remember { mutableStateOf(false) }
     val savedScreens = rememberSaveableStateHolder()
     // Keep already-visible cards in place instead of moving every TV focus to a fixed pivot.
@@ -108,7 +108,7 @@ import androidx.compose.ui.input.key.type
         handler
     }
     CompositionLocalProvider(LocalReducedMotion provides state.reducedMotion, LocalBringIntoViewSpec provides bringIntoView) {
-        Box(Modifier.fillMaxSize().background(Ink.Background).onPreviewKeyEvent { event -> if (opening) opening = false; escapeAsBack(event) }) {
+        Box(Modifier.fillMaxSize().background(Ink.Background).onPreviewKeyEvent { event -> escapeAsBack(event) }) {
             when (state.route) {
                 Route.RECOVERY -> SourceRecoveryScreen(state, model)
                 Route.SOURCES -> SourcesScreen(state, model)
@@ -129,7 +129,8 @@ import androidx.compose.ui.input.key.type
             }
             if (settings) Settings(state, model) { settings = false }
             if (exitAsk && state.route == Route.HOME) ExitDialog { exitAsk = false }
-            if (opening) LaunchCover(state.reducedMotion) { opening = false }
+            if (opening) LaunchCover(state.reducedMotion,
+                loading = state.route == Route.LOADING && state.sourceTask == SourceTask.RESTORING, finish = endOpening)
         }
     }
 }

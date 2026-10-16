@@ -1,5 +1,11 @@
 # Proje durumu
 
+## NEXTV logo ve splash · 16 Ekim 2026
+
+Kullanıcının isteğiyle ("buradan logoyu ve splash'i al") NEXTV logo/splash paketi uygulandı (D062): uyarlanabilir launcher ikonu, TV banner'ı, siyah başlangıç penceresi ve işaret, 2,8 sn'lik animasyonlu splash ve paketin açılış sesi. Splash en az 3 sn görünür; kayıtlı kaynaklar hâlâ açılıyorsa gösterge ve "Hazırlanıyor..." ile bekler. Hareketi azalt, ses ayarı ve "her tuş splash'i kaldırır" korunur. Tuş artık sesi de durdurur ve kaynaklar yüklenirken (Compose'da odak yokken) de çalışır; eskiden bu durumda tuş geçişe ulaşmıyordu. Google Sans eklenmedi (lisans), etiket Roboto. Uygulama adı değişmedi (D007). Sürüm numarası değişmedi, teslim APK'sı üretilmedi.
+
+Kontroller: assembleDebug, assembleRelease ve assembleDebugAndroidTest geçti; lint 0 hata/31 uyarı, değişen dosyalarda uyarı yok. 5556'da (nextv_design_api36) release derlemesiyle görüldü: splash'in zaman çizelgesi, ~3,9 sn'de ana sayfaya geçiş ve ilk odak "Ayrıntılar"da, tuşla anında kalkma ve ses oynatıcısının kapanması, normal açılışta sesin başlaması (dumpsys audio). Enstrümantasyon ve JVM testleri çalıştırılmadı. Açık: sesin kökeni/lisansı (D019); ses eskisinden yüksek (tepe ≈ −0,4 dBFS); "Hazırlanıyor..." beklemesi görülmedi (yükleme 3 sn'den kısa sürdü); Hareketi azalt yolu denenmedi; fiziksel TV görsel/ses kabulü ve Figma.
+
 ## Ara/Rehber/Oynatıcı/Ana sayfa Geri aralığı · 16 Ekim 2026
 
 Çıkış sorusu düzeltmesindeki ilke ekranların kendi Geri işleyicilerine de uygulandı: model başka rotaya geçtiği halde ekran bir sonraki kareye kadar duruyorsa, o arada gelen Geri artık eski ekranın kararını vermez, PilotApp'in rota kuralına gider (ana sayfa → çıkış sorusu, diğerleri → `model.back()`). Örnek: Ara'nın menüsünde Geri ana sayfaya döner, hemen ardından basılan ikinci Geri eskiden kayboluyordu, artık çıkış sorusunu açar. Rehber ve Oynatıcı için aynısı; 0.14.36'da eklenen ana sayfa "Geri menüyü açar" işleyicisinde de aynı aralık vardı (Ana sayfa → Kütüphane anındaki Geri kayboluyordu) ve düzeltildi. Ekranlar kendi rotalarındayken davranış aynı; yeni karar yok. [QA](native-screen-back-gap-qa.json).
