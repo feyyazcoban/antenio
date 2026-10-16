@@ -1,0 +1,364 @@
+{
+  "version": "0.14.14-design-preview",
+  "versionCode": 28,
+  "sha256": "73a6b4314467793a18bda25577d681cc989e88fc1dc5b916fc857b225aaf8bdb",
+  "unitTests": 118,
+  "unitFailures": 0,
+  "instrumentation": {
+    "sourceRegistryStorage": 11,
+    "stageProfile": 1,
+    "largeCatalog": 1,
+    "pilotFlow": 1,
+    "coldSeedVerifyCleanup": 3
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "signature": "v2 verified",
+  "stageProfile": {
+    "build": "0.14.14-design-preview",
+    "entries": 60000,
+    "scope": "Sequential isolated debug components; caches, JIT and allocations carry across samples. No UI synchronization. Timings are not additive startup phases.",
+    "samples": [
+      {
+        "pass": 0,
+        "stage": "gzipJsonEncode",
+        "ms": 1224.3716
+      },
+      {
+        "pass": 0,
+        "stage": "gzipJsonDecode",
+        "ms": 1129.6116
+      },
+      {
+        "pass": 0,
+        "stage": "encryptedWrite",
+        "ms": 1083.562
+      },
+      {
+        "pass": 0,
+        "stage": "authenticatedHeaderRead",
+        "ms": 38.7246
+      },
+      {
+        "pass": 0,
+        "stage": "encryptedReadAndDecode",
+        "ms": 1036.5592
+      },
+      {
+        "pass": 0,
+        "stage": "sourceIdentityCombine",
+        "ms": 156.0574
+      },
+      {
+        "pass": 0,
+        "stage": "homePresentation",
+        "ms": 198.4749
+      },
+      {
+        "pass": 0,
+        "stage": "titleIndexBuild",
+        "ms": 511.8057
+      },
+      {
+        "pass": 0,
+        "stage": "narrowQuery",
+        "ms": 99.8996
+      },
+      {
+        "pass": 0,
+        "stage": "broadQuery",
+        "ms": 35.5703
+      },
+      {
+        "pass": 1,
+        "stage": "gzipJsonEncode",
+        "ms": 969.1054
+      },
+      {
+        "pass": 1,
+        "stage": "gzipJsonDecode",
+        "ms": 962.2615
+      },
+      {
+        "pass": 1,
+        "stage": "encryptedWrite",
+        "ms": 1035.8591
+      },
+      {
+        "pass": 1,
+        "stage": "authenticatedHeaderRead",
+        "ms": 32.9988
+      },
+      {
+        "pass": 1,
+        "stage": "encryptedReadAndDecode",
+        "ms": 1019.5274
+      },
+      {
+        "pass": 1,
+        "stage": "sourceIdentityCombine",
+        "ms": 60.337
+      },
+      {
+        "pass": 1,
+        "stage": "homePresentation",
+        "ms": 80.0367
+      },
+      {
+        "pass": 1,
+        "stage": "titleIndexBuild",
+        "ms": 387.4121
+      },
+      {
+        "pass": 1,
+        "stage": "narrowQuery",
+        "ms": 25.7967
+      },
+      {
+        "pass": 1,
+        "stage": "broadQuery",
+        "ms": 19.9324
+      },
+      {
+        "pass": 2,
+        "stage": "gzipJsonEncode",
+        "ms": 985.4467
+      },
+      {
+        "pass": 2,
+        "stage": "gzipJsonDecode",
+        "ms": 1003.5406
+      },
+      {
+        "pass": 2,
+        "stage": "encryptedWrite",
+        "ms": 990.6658
+      },
+      {
+        "pass": 2,
+        "stage": "authenticatedHeaderRead",
+        "ms": 28.9701
+      },
+      {
+        "pass": 2,
+        "stage": "encryptedReadAndDecode",
+        "ms": 1039.7889
+      },
+      {
+        "pass": 2,
+        "stage": "sourceIdentityCombine",
+        "ms": 62.1382
+      },
+      {
+        "pass": 2,
+        "stage": "homePresentation",
+        "ms": 66.2244
+      },
+      {
+        "pass": 2,
+        "stage": "titleIndexBuild",
+        "ms": 406.459
+      },
+      {
+        "pass": 2,
+        "stage": "narrowQuery",
+        "ms": 26.4924
+      },
+      {
+        "pass": 2,
+        "stage": "broadQuery",
+        "ms": 26.0682
+      }
+    ]
+  },
+  "baselineStageProfile": "native-catalog-stage-qa.json",
+  "largeCatalog": {
+    "build": "0.14.14-design-preview",
+    "entries": 60000,
+    "live": 10000,
+    "movies": 35000,
+    "series": 15000,
+    "scope": "Debug emulator: model request through Compose idle and visible semantics. Includes test synchronization; not physical input-to-pixel or process startup.",
+    "encryptedWriteMs": 1038.2785,
+    "restoreToHomeMs": [
+      2242.1008,
+      1950.4,
+      1949.6814,
+      1799.951,
+      1833.7859
+    ],
+    "queryToVisibleMs": [
+      {
+        "pass": 0,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 893.4593
+      },
+      {
+        "pass": 0,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 199.4576
+      },
+      {
+        "pass": 0,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 249.1187
+      },
+      {
+        "pass": 0,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 368.3768
+      },
+      {
+        "pass": 0,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 214.9768
+      },
+      {
+        "pass": 0,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 199.9283
+      },
+      {
+        "pass": 1,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 199.082
+      },
+      {
+        "pass": 1,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 201.3701
+      },
+      {
+        "pass": 1,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 215.3866
+      },
+      {
+        "pass": 1,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 301.2701
+      },
+      {
+        "pass": 1,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 216.6901
+      },
+      {
+        "pass": 1,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 182.4795
+      },
+      {
+        "pass": 2,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 184.3323
+      },
+      {
+        "pass": 2,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 183.6919
+      },
+      {
+        "pass": 2,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 215.8654
+      },
+      {
+        "pass": 2,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 233.0938
+      },
+      {
+        "pass": 2,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 200.5344
+      },
+      {
+        "pass": 2,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 182.6429
+      },
+      {
+        "pass": 3,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 166.5276
+      },
+      {
+        "pass": 3,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 166.3091
+      },
+      {
+        "pass": 3,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 217.853
+      },
+      {
+        "pass": 3,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 337.1588
+      },
+      {
+        "pass": 3,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 228.5613
+      },
+      {
+        "pass": 3,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 183.8014
+      }
+    ],
+    "usedJavaHeapBytesAtEnd": 89584912
+  },
+  "coldRestore": {
+    "build": "0.14.14-design-preview",
+    "entries": 63175,
+    "sourceCount": 1,
+    "favoriteRestored": true,
+    "continueWatchingRestored": true,
+    "progressRestoredMs": 45000,
+    "seedPid": 5031,
+    "verifyPid": 5146,
+    "launchToRestoredStateMs": 3536,
+    "scope": "Instrumentation starts a new process, then ActivityScenario launches MainActivity. State readiness only, not first rendered content or physical startup timing."
+  },
+  "comparison": {
+    "decodeBeforeMedianMs": 1904.5007,
+    "decodeAfterMedianMs": 1003.5406,
+    "reductionPercent": 47.30689256244431
+  },
+  "scope": "Debug emulator; independent ordered samples, not physical p95. Profile/storage/large/pilot ran before final whitespace-only formatting. Final build ran full JVM suite and external cold restore.",
+  "limits": [
+    "Physical device startup/codec/long playback not verified",
+    "First query still approximately 0.9s in this synchronized test",
+    "Older APK downgrade reading v2 not supported",
+    "User visual acceptance and Figma open"
+  ]
+}

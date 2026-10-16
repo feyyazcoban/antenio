@@ -1,0 +1,66 @@
+package dev.iptvplayer.tv
+
+import android.graphics.Bitmap
+import android.view.KeyEvent
+import androidx.lifecycle.ViewModelProvider
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.test.platform.app.InstrumentationRegistry
+import dev.iptvplayer.tv.data.*
+import dev.iptvplayer.tv.ui.*
+import org.junit.*
+import org.junit.Assert.*
+import kotlinx.coroutines.runBlocking
+
+/** Emulator-only encrypted fixtures, restored through the actual app and removed after the test. */
+class ContinueCardLayoutTest {
+    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @After fun cleanup() { resetFixtureSources(ui) }
+    @Test fun longEpisodeAndSourceKeepResumeTimeReadableAcrossShelf() {
+        var model = resetFixtureSources(ui)
+        val sources = (1..2).map { SourceConfig("layout-$it", "Aile arşivi ve belgesel koleksiyonu $it", SourceType.M3U, "http://127.0.0.1:1/list.m3u") }
+        val entries = (1..8).map { MediaEntry("series:$it", "$it", MediaKind.SERIES,
+            "Uzun Bir Yolculuğun Ardından: Dünyanın Bilinmeyen Köşeleri $it", "Belgeseller", sourceId = sources[(it-1)%2].id) }
+        val records = entries.map { WatchRecord("episode:${it.providerId}", MediaKind.EPISODE, parentId = it.id,
+            season = 120, episode = 350, positionMs = 4_956_000, durationMs = 9_000_000, sourceId = it.sourceId) }
+        ui.runOnUiThread { ui.activity.viewModelStore.clear() }
+        runBlocking { SourceTransactions.shared.write {
+            val store = DeviceStore(ui.activity)
+            sources.forEach { source ->
+                CatalogStore(ui.activity).write(source, CatalogSnapshot(Catalog(entries.filter { it.sourceId == source.id }.map { it.copy(sourceId = "") }), System.currentTimeMillis()))
+                store.history(source.id, records.filter { it.sourceId == source.id }.map { it.copy(sourceId = "") })
+            }
+            store.saveSources(SourceRegistry(sources))
+        } }
+        ui.activityRule.scenario.recreate()
+        ui.runOnUiThread { model = ViewModelProvider(ui.activity)[TvViewModel::class.java] }
+        ui.waitUntil(10_000) { model.state.value.route == Route.HOME && model.state.value.sourceTask == SourceTask.IDLE }
+        ui.waitForIdle()
+        val restored = homeLibrary(model.state.value.catalog, model.state.value.history, emptySet()).continueWatching.map { it.entry }
+        assertEquals(8, restored.size)
+        repeat(restored.size) { index ->
+            val card = ui.onNodeWithTag("continue:${restored[index].id}").assertIsFocused()
+            val bounds = card.getUnclippedBoundsInRoot()
+            val viewport = ui.onNodeWithTag("home-content").getUnclippedBoundsInRoot()
+            assertTrue("Whole focused card must fit", bounds.top >= viewport.top && bounds.bottom <= viewport.bottom && bounds.left.value >= 7 && bounds.right.value <= viewport.right.value - 7)
+            val time = ui.onNode(hasText("1:22:36", substring = true) and hasAnyAncestor(hasTestTag("continue:${restored[index].id}")), useUnmergedTree = true)
+            val layouts = mutableListOf<TextLayoutResult>()
+            time.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+            assertTrue(layouts.isNotEmpty())
+            assertFalse("Resume time must not be ellipsized", layouts.single().isLineEllipsized(0))
+            if (index == 0 || index == entries.lastIndex) {
+                Thread.sleep(1200); ui.waitForIdle()
+                val dir=ui.activity.filesDir.resolve("continue-layout").apply { mkdirs() }
+                InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot().let { bitmap ->
+                    dir.resolve("card-$index.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG,100,it) }; bitmap.recycle()
+                }
+            }
+            if(index < entries.lastIndex) {
+                InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT)
+                ui.waitForIdle()
+            }
+        }
+    }
+}

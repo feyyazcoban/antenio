@@ -1,0 +1,26 @@
+{
+  "version": "0.14.18-design-preview",
+  "sha256": "d20e80a933e5a4a1ab5b493088dd397803b3d948f40eee13206e1c144d7b3dd8",
+  "tests": [
+    "VisualPreviewTest#captureGoogleTvRevision",
+    "VisualPreviewTest#playerPanelKeepsTitleAndRemoteActionsInsideScreen"
+  ],
+  "fontScales": [
+    1.0,
+    2.0
+  ],
+  "passed": 4,
+  "screenshots": 20,
+  "scope": "Separate visual navigation and local player scenarios, not a single uninterrupted end-to-end playback session. Real reviewed artwork over localhost; synthetic local video.",
+  "observations": [
+    "Shared gutters, dark surfaces and mint action/focus language remain consistent in inspected normal/large overview images.",
+    "Large text reduces visible rows; focused media cards and tested player actions fit via scrolling.",
+    "No new layout failure observed; no production change made."
+  ],
+  "limits": [
+    "No physical TV performance or codec validation",
+    "Not all dialogs/settings/long playback paths are covered",
+    "SAFE01 PIN absent in native SettingsScreen disclosure and no native implementation located",
+    "Figma and user visual approval remain open"
+  ]
+}

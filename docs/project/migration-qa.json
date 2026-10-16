@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-14",
+  "scope": "project relocation and tool-independent structure",
+  "migration": {
+    "projectFilesVerified": 4027,
+    "deliveryFilesVerified": 248,
+    "existingPdfPreserved": true,
+    "verification": "SHA-256 before documentation edits"
+  },
+  "checks": {
+    "projectDocuments": "pass; 17 screens, 401 variables",
+    "assembleDebug": "pass; 50 seconds, 38 tasks"
+  },
+  "deviceChanges": false,
+  "openIssue": "0.14.2 font scale 2.0 header-to-card return partially visible header; not fixed by relocation",
+  "privateDependencies": "SDK and old private work retained; local paths excluded from Git"
+}

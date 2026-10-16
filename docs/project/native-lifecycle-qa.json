@@ -1,0 +1,128 @@
+{
+  "date": "2026-10-14",
+  "version": "0.8.0-pilot",
+  "versionCode": 8,
+  "physicalTvInstalled": "0.2.0-pilot",
+  "jvmTests": {
+    "tests": 68,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "favoritePolicyUnitTests": 6,
+  "sourceTransactionUnitTests": 4,
+  "emulatorFlows": {
+    "passed": true,
+    "count": 46,
+    "seconds": 334.76,
+    "failed": 0,
+    "classes": [
+      "SourceOperationFlowTest (7)",
+      "PilotFlowTest (8)",
+      "SearchNavigationTest (9)",
+      "PlaybackRecoveryFlowTest (11)",
+      "EpisodeAutoplayFlowTest (10)",
+      "VisualPreviewTest (1)"
+    ]
+  },
+  "finalSettingsRegression": {
+    "passed": true,
+    "count": 19,
+    "seconds": 124.843,
+    "runs": [
+      {
+        "passed": true,
+        "count": 9,
+        "seconds": 42.751
+      },
+      {
+        "passed": true,
+        "count": 10,
+        "seconds": 82.092
+      }
+    ],
+    "failed": 0,
+    "classes": [
+      "PilotFlowTest (8)",
+      "SearchNavigationTest (9)",
+      "EpisodeAutoplayFlowTest#autoplaySettingTogglesWithRemoteAndSurvivesRecreation (1)",
+      "VisualPreviewTest (1)"
+    ],
+    "scope": "46-case suite passed before the final Settings window-focus fix; these 19 affected flows were rerun on the delivered APK, followed by 1.5/2.0 navigation checks. Counts are repeat executions, not new unique cases."
+  },
+  "largeFont": {
+    "originalFontScale": "1.0",
+    "runs": [
+      {
+        "requestedFontScale": 1.5,
+        "observedFontScale": "1.5",
+        "passed": true,
+        "count": 1,
+        "seconds": 7.68
+      },
+      {
+        "requestedFontScale": 2.0,
+        "observedFontScale": "2.0",
+        "passed": true,
+        "count": 1,
+        "seconds": 8.512
+      }
+    ],
+    "restoredFontScale": "1.0"
+  },
+  "largeFontScope": "Navigation text overflow, actual viewport bounds, Down/Up, Settings OK/Back and Right into content at 1.5 and 2.0; not a full-screen accessibility audit",
+  "lint": {
+    "Error": 0,
+    "Warning": 29
+  },
+  "nativeScreens": [
+    "About",
+    "AutoplaySetting",
+    "EpisodeCountdown",
+    "EpisodeFinal",
+    "Home",
+    "Movie",
+    "Movies",
+    "Navigation15",
+    "Navigation20",
+    "Player",
+    "RecoveryFailed",
+    "RecoveryWaiting",
+    "Search",
+    "Series",
+    "Settings",
+    "SettingsBottom",
+    "Tracks"
+  ],
+  "verifiedBehaviors": [
+    "Navigation rail measures the widest label using the actual Roboto style; rows grow and middle section scrolls while Settings stays accessible",
+    "Episode favorite resolves to visible parent series, persists in a newly created ViewModel and can be removed from series detail",
+    "Legacy episode favorite migrates after parent metadata is loaded; unknown IDs are retained until resolvable",
+    "Import cancellation keeps the previous source; delayed cancelled response cannot replace a new source",
+    "Source/cache writes, removal and startup reads are serialized across ViewModels; readers wait for accepted writes",
+    "Saving/removal consume Back and prevent new connections until disk work ends; failed file removal reports an error and retries",
+    "Player disposal after source removal cannot resurrect progress/history",
+    "All previous playback recovery, autoplay, search, settings and cache flows passed in the combined emulator suite",
+    "Seventeen native images captured; normal Home/detail/player/settings and enlarged navigation inspected; physical TV not operated"
+  ],
+  "intermediateFindings": [
+    "Initial targeted run: seven source flows and navigation passed; two new favorite assertions failed because ActivityScenario.recreate retains the ViewModel",
+    "Disk-restoration tests now explicitly clear the ViewModelStore before Activity recreation. The final combined suite uses the corrected tests",
+    "Navigation viewport test tag moved outside verticalScroll to measure the clipped viewport, not the scrolling content",
+    "First combined run exposed refresh-complete published before dependent search was marked pending. Completion now follows search invalidation; the unchanged search regression passed",
+    "At 2.0 font Settings initial focus was overwritten by the platform default Close target. Bounded waiting confirmed a real persistent focus error. Waiting for WindowInfo plus an extra frame alone still allowed a late focus reset during normal rapid Down navigation. The final panel declares a focusGroup onEnter target and requests page focus when its own window is focused without a further frame delay; affected normal flows and both font scales rerun",
+    "The first failure diagnostic attempted to print one root despite two dialog/activity roots; it now prints the tagged Settings panel. This was test diagnostics, not app behavior"
+  ],
+  "limitations": [
+    "Mutex serialization is in-process concurrency protection, not a cross-file power-loss transaction. Source/cache remain separate encrypted stores",
+    "New ViewModel disk restoration is tested; full process-death and large catalog cold launch have historical 0.3 evidence, not newly measured 0.8 timing",
+    "Physical TV remains 0.2; no real-device codec/HDR/5.1, long playback, UI p95 or user visual acceptance",
+    "Multiple sources, EPG, PIN, full accessibility and QR remain open; no Figma write due to known quota block"
+  ],
+  "apk": {
+    "name": "IPTV_Player_TV_Pilot_0.8.0.apk",
+    "bytes": 17475916,
+    "sha256": "5e0181906f20744165e6b9408a7a5ea728be5a4919d4a1d2153c616229b3c547",
+    "signatureV2Verified": true
+  }
+}

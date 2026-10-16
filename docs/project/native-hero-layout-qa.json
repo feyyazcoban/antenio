@@ -1,0 +1,42 @@
+{
+  "version": "0.14.13-design-preview",
+  "versionCode": 27,
+  "sha256": "ca9d2042a72f9ba145b0fe669b9cf38d19f480d22b98cb96338e61c6df28c262",
+  "device": "emulator-5556 / nextv_design_api36",
+  "candidate": {
+    "fonts": [
+      1.0,
+      1.5,
+      2.0
+    ],
+    "testsPerFont": 3,
+    "scope": "HeroLayout, full VisualPreview navigation, poster-only/dividers"
+  },
+  "final": {
+    "fonts": [
+      1.0,
+      1.5,
+      2.0
+    ],
+    "testsPerFont": 2,
+    "scope": "HeroLayout, poster-only/dividers with >=8dp source-selector separation"
+  },
+  "regressions": {
+    "font2": "ContinueCardLayoutTest passed",
+    "font1": "PilotFlow live/movie/series/tracks/favorites/Back passed"
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "signature": "v2 verified",
+  "screenshots": "design/reviews/hero-layout",
+  "screenshotScope": "soft-home images from pre-final poster-spacing candidate; no-art and presentation-home-poster refreshed from final APK",
+  "limits": [
+    "No TV install",
+    "Figma unchanged",
+    "User visual acceptance pending",
+    "JVM not rerun for UI-only change"
+  ],
+  "followup": "At font2 some screenshots show Filmler/Diziler visually close despite earlier bounds checks; inspect text paint, actual spacing and focus states."
+}

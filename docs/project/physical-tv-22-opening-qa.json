@@ -1,0 +1,25 @@
+{
+  "appProcessPresent": true,
+  "sameProcessAsLaunch": true,
+  "catalogDirectoryReadable": true,
+  "encryptedCatalogFileCount": 1,
+  "deviceStateFileNonempty": true,
+  "fatalCrashMarkerForCurrentPid": false,
+  "screenState": "Asleep",
+  "uiDump": "null root; visible UI cannot be confirmed",
+  "version": "0.14.22-design-preview",
+  "scope": "Post-upgrade physical TV launch while display remains asleep",
+  "launchStatus": "ok",
+  "waitTimeMs": 3021,
+  "interpretation": [
+    "Launch wait time is not first-frame or visible-home latency.",
+    "One encrypted catalog file and nonempty device preferences exist; their semantic contents were not read.",
+    "No FATAL EXCEPTION marker in current PID crash buffer; not a guarantee of all runtime correctness.",
+    "No playback, reset, test fixture or display wake was initiated."
+  ],
+  "remaining": [
+    "Visible home/catalog restoration",
+    "Physical media/codec and sustained playback",
+    "User visual approval"
+  ]
+}

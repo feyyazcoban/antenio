@@ -1,0 +1,29 @@
+{
+  "version": "0.14.10-design-preview",
+  "sha256": "7b50a46f26819e6779b6c7010d80144830fcaa49e94a278ba210b28cb01610ca",
+  "device": "emulator-5556 / nextv_design_api36",
+  "fontScales": [
+    1,
+    1.5,
+    2
+  ],
+  "tests": [
+    "VisualPreviewTest#captureGoogleTvRevision (all six guide rows including square and wide artwork)",
+    "GuideFlowTest#captureCurrentFontAndReachLongNamesAndAllGuideControls"
+  ],
+  "finalNormalRegression": [
+    "PilotFlowTest#liveMovieSeriesTracksFavoritesAndBack",
+    "GuideFlowTest#remotePreservesTimeAcrossUnequalProgrammesAndReturnsFromDetailsAndPlayer"
+  ],
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "signature": "v2 verified",
+  "screenshots": 15,
+  "limitations": [
+    "Debug emulator is not physical performance or codec proof",
+    "Figma Starter MCP quota remains",
+    "User visual acceptance remains open"
+  ]
+}

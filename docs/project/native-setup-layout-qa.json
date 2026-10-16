@@ -1,0 +1,27 @@
+{
+  "version": "0.14.8-design-preview",
+  "sha256": "72eeed4b5e86e0973e75e4801e9686daae8d9a427b7502e0d2151d28c1591cbe",
+  "device": "emulator-5556 / nextv_design_api36",
+  "tests": {
+    "SetupLayoutTest": [
+      1.0,
+      1.5,
+      2.0
+    ],
+    "SourceOperationFlowTest": [
+      "cancellingDownloadPreservesThePreviousSourceAfterRecreation",
+      "savingFinishesBeforeTheNewCatalogIsShown"
+    ]
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "screenshots": "design/reviews/setup",
+  "limitations": [
+    "IME keyboard interaction not fully tested; test hides keyboard between form navigation steps",
+    "Physical TV remains 0.14.4",
+    "Figma unchanged",
+    "Loading, empty and recovery visual review remains open"
+  ]
+}

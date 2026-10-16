@@ -1,0 +1,48 @@
+{
+  "version": "0.14.21-design-preview",
+  "versionCode": 35,
+  "sha256": "195561e5eaeb4c29c92a6a6f3773525664337a54b27e7ebce361fdb72def12da",
+  "baseline": {
+    "version": "0.14.20",
+    "test": "VisualPreviewTest#tracksPanelKeepsHeaderAndSelectionReadable",
+    "font": 2.0,
+    "result": "expected failure: focused row bottom equals viewport bottom 443.5dp; no focus ring inset"
+  },
+  "final": {
+    "font2": [
+      "VisualPreviewTest#tracksPanelKeepsHeaderAndSelectionReadable",
+      "TracksLayoutTest#emptyMetadataKeepsExplanationAndCloseReachable",
+      "TracksLayoutTest#manyTracksWithLongLabelsKeepRemoteSelectionReadable",
+      "TracksLayoutTest#oversizedDescriptionCanBeReadWithoutSelectingTrack"
+    ],
+    "font1.5": [
+      "VisualPreviewTest#tracksPanelKeepsHeaderAndSelectionReadable"
+    ],
+    "font1": [
+      "VisualPreviewTest#tracksPanelKeepsHeaderAndSelectionReadable"
+    ],
+    "passed": 6
+  },
+  "precedingRegression": {
+    "version": "0.14.20",
+    "playerAndTracksTests": 4,
+    "fonts": [
+      1.0,
+      2.0
+    ],
+    "note": "Old bounds-only checks passed; screenshot revealed clipped outer border. This prompted the stronger inset assertion."
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "signature": "verified",
+  "screenshots": "design/reviews/track-focus-0.14.21/font-2.0",
+  "device": "emulator-5556 / nextv_design_api36",
+  "limits": [
+    "No physical TV / codec validation",
+    "No Figma change",
+    "Local synthetic playback and metadata, no provider session",
+    "User visual acceptance remains pending"
+  ]
+}

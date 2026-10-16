@@ -1,0 +1,30 @@
+{
+  "version": "0.14.20-design-preview",
+  "versionCode": 34,
+  "sha256": "ae4d541bbfdb57d1cb361705e9a4aedbb268b94e5404956ad098a6fdf82bb9df",
+  "candidateTests": {
+    "font1": 2,
+    "font1.5": 1,
+    "font2": 3
+  },
+  "finalTests": {
+    "font2": [
+      "VisualPreviewTest#refreshKeepsContentInPlaceAndSettingsShowsItsResult",
+      "VisualPreviewTest#captureGoogleTvRevision"
+    ],
+    "passed": 2
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "device": "emulator-5556 / nextv_design_api36",
+  "fontRestored": 1.0,
+  "screenshots": "design/reviews/visual-0.14.20",
+  "limits": [
+    "Normal screenshots precede final library-only scroll correction; large home/movie/detail/search screenshots are refreshed from final APK.",
+    "Physical TV and emulator-5554 unchanged; no physical acceptance.",
+    "Figma not updated; user visual approval pending.",
+    "No new JVM tests: layout-only change."
+  ]
+}

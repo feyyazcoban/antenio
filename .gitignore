@@ -1,0 +1,33 @@
+# Secrets and source captures
+.private/
+.env
+.env.*
+!.env.example
+*credentials*
+*secrets*
+*.m3u
+*.m3u8
+# MPEG-TS captures belong in .private/; do not ignore TypeScript source files.
+*.mp4
+!apps/android-tv/app/src/androidTest/assets/playback-fixture.mp4
+*.mkv
+*.log
+local.properties
+keystore.properties
+*.jks
+*.keystore
+
+# Generated and local
+.gradle/
+.kotlin/
+**/build/
+.idea/
+.vscode/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+work/
+
+# Historical delivery archive; source of truth is the working project
+releases/

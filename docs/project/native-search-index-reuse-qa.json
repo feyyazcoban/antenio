@@ -1,0 +1,285 @@
+{
+  "version": "0.14.15-design-preview",
+  "sha256": "ed273513824b8fdbf6d0220b49a1e35a43fd1cba5bfb045ac6eca552d1118c24",
+  "change": "Prepare the Catalog instance retained by StateFlow, avoiding discarded warm index after structurally unchanged restores.",
+  "regression": "Same identity assertion fails on old prepare(all), passes on prepare(state.value.allCatalog). Five unchanged restores followed by 24 searches reuse identical deferred index.",
+  "diagnosticBefore": {
+    "awaitMs": 592.7399,
+    "findMs": 127.9188,
+    "dispatchMs": 0.6468,
+    "returnMs": 0.4127,
+    "note": "Temporary timings only, removed before final build; no titles or credentials logged."
+  },
+  "largeCatalog": {
+    "build": "0.14.15-design-preview",
+    "entries": 60000,
+    "live": 10000,
+    "movies": 35000,
+    "series": 15000,
+    "scope": "Debug emulator: model request through Compose idle and visible semantics. Includes test synchronization; not physical input-to-pixel or process startup.",
+    "encryptedWriteMs": 1032.2202,
+    "restoreToHomeMs": [
+      2244.8018,
+      1849.88,
+      1849.1065,
+      1833.6457,
+      1934.3341
+    ],
+    "queryToVisibleMs": [
+      {
+        "pass": 0,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 449.9093,
+        "requestDispatchMs": 11.9639,
+        "modelReadyMs": 308.8169,
+        "testPollReadyMs": 385.7807,
+        "modelToIdleAndVisibleMs": 141.1142
+      },
+      {
+        "pass": 0,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 199.1117,
+        "requestDispatchMs": 2.2925,
+        "modelReadyMs": 52.9584,
+        "testPollReadyMs": 56.033,
+        "modelToIdleAndVisibleMs": 146.2028
+      },
+      {
+        "pass": 0,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 278.7507,
+        "requestDispatchMs": 1.5895,
+        "modelReadyMs": 44.6392,
+        "testPollReadyMs": 51.1505,
+        "modelToIdleAndVisibleMs": 234.1756
+      },
+      {
+        "pass": 0,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 319.2737,
+        "requestDispatchMs": 3.0316,
+        "modelReadyMs": 100.2394,
+        "testPollReadyMs": 101.9085,
+        "modelToIdleAndVisibleMs": 219.0574
+      },
+      {
+        "pass": 0,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 200.6252,
+        "requestDispatchMs": 3.2472,
+        "modelReadyMs": 64.3614,
+        "testPollReadyMs": 71.4827,
+        "modelToIdleAndVisibleMs": 136.285
+      },
+      {
+        "pass": 0,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 201.1248,
+        "requestDispatchMs": 7.5795,
+        "modelReadyMs": 52.0585,
+        "testPollReadyMs": 58.3006,
+        "modelToIdleAndVisibleMs": 149.1064
+      },
+      {
+        "pass": 1,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 181.9453,
+        "requestDispatchMs": 1.4776,
+        "modelReadyMs": 43.1192,
+        "testPollReadyMs": 52.1631,
+        "modelToIdleAndVisibleMs": 138.8924
+      },
+      {
+        "pass": 1,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 182.9838,
+        "requestDispatchMs": 1.9364,
+        "modelReadyMs": 49.1785,
+        "testPollReadyMs": 50.6167,
+        "modelToIdleAndVisibleMs": 133.818
+      },
+      {
+        "pass": 1,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 266.3755,
+        "requestDispatchMs": 1.5204,
+        "modelReadyMs": 42.6589,
+        "testPollReadyMs": 51.576,
+        "modelToIdleAndVisibleMs": 223.7291
+      },
+      {
+        "pass": 1,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 247.6616,
+        "requestDispatchMs": 4.1794,
+        "modelReadyMs": 67.0838,
+        "testPollReadyMs": 73.5522,
+        "modelToIdleAndVisibleMs": 180.5914
+      },
+      {
+        "pass": 1,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 199.9848,
+        "requestDispatchMs": 1.351,
+        "modelReadyMs": 62.0658,
+        "testPollReadyMs": 71.1991,
+        "modelToIdleAndVisibleMs": 137.9393
+      },
+      {
+        "pass": 1,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 182.6851,
+        "requestDispatchMs": 1.793,
+        "modelReadyMs": 41.6492,
+        "testPollReadyMs": 47.8746,
+        "modelToIdleAndVisibleMs": 141.0488
+      },
+      {
+        "pass": 2,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 200.5332,
+        "requestDispatchMs": 2.2068,
+        "modelReadyMs": 46.4183,
+        "testPollReadyMs": 47.9205,
+        "modelToIdleAndVisibleMs": 154.1302
+      },
+      {
+        "pass": 2,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 184.8348,
+        "requestDispatchMs": 1.4447,
+        "modelReadyMs": 46.5882,
+        "testPollReadyMs": 50.1748,
+        "modelToIdleAndVisibleMs": 138.2662
+      },
+      {
+        "pass": 2,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 231.0518,
+        "requestDispatchMs": 1.827,
+        "modelReadyMs": 39.2182,
+        "testPollReadyMs": 48.9825,
+        "modelToIdleAndVisibleMs": 191.8462
+      },
+      {
+        "pass": 2,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 283.3593,
+        "requestDispatchMs": 1.3652,
+        "modelReadyMs": 54.725,
+        "testPollReadyMs": 60.5506,
+        "modelToIdleAndVisibleMs": 228.65
+      },
+      {
+        "pass": 2,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 217.7752,
+        "requestDispatchMs": 2.9462,
+        "modelReadyMs": 65.8901,
+        "testPollReadyMs": 68.9479,
+        "modelToIdleAndVisibleMs": 151.9422
+      },
+      {
+        "pass": 2,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 183.1078,
+        "requestDispatchMs": 2.8872,
+        "modelReadyMs": 44.9343,
+        "testPollReadyMs": 50.8244,
+        "modelToIdleAndVisibleMs": 138.3081
+      },
+      {
+        "pass": 3,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 166.1443,
+        "requestDispatchMs": 2.1605,
+        "modelReadyMs": 53.4051,
+        "testPollReadyMs": 102.1122,
+        "modelToIdleAndVisibleMs": 112.7512
+      },
+      {
+        "pass": 3,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 182.276,
+        "requestDispatchMs": 5.0042,
+        "modelReadyMs": 48.6156,
+        "testPollReadyMs": 52.2858,
+        "modelToIdleAndVisibleMs": 133.6758
+      },
+      {
+        "pass": 3,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 282.2119,
+        "requestDispatchMs": 4.1783,
+        "modelReadyMs": 63.7662,
+        "testPollReadyMs": 67.7737,
+        "modelToIdleAndVisibleMs": 218.4651
+      },
+      {
+        "pass": 3,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 235.3298,
+        "requestDispatchMs": 2.1347,
+        "modelReadyMs": 57.126,
+        "testPollReadyMs": 63.0604,
+        "modelToIdleAndVisibleMs": 178.2172
+      },
+      {
+        "pass": 3,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 165.0798,
+        "requestDispatchMs": 2.0819,
+        "modelReadyMs": 67.7925,
+        "testPollReadyMs": 73.7647,
+        "modelToIdleAndVisibleMs": 97.3128
+      },
+      {
+        "pass": 3,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 165.6533,
+        "requestDispatchMs": 2.3997,
+        "modelReadyMs": 41.8122,
+        "testPollReadyMs": 47.7487,
+        "modelToIdleAndVisibleMs": 123.8568
+      }
+    ],
+    "usedJavaHeapBytesAtEnd": 92910864
+  },
+  "verification": {
+    "jvm": 118,
+    "jvmFailures": 0,
+    "lintErrors": 0,
+    "lintWarnings": 32,
+    "deviceTests": 3,
+    "apkV2Signature": true
+  },
+  "limits": [
+    "Debug isolated API36 emulator; not a physical TV p95 gate.",
+    "Earlier subsequent-query modelReadyMs were invalid: intermediate state contained new query with previous results. Final observer waits for searching=true before completion. First-query old timings had empty initial results and remain usable.",
+    "Physical TV, full playback/codec, Figma and user visual acceptance remain open."
+  ]
+}

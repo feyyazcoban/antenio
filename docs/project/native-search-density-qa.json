@@ -1,0 +1,26 @@
+{
+  "version": "0.14.16-design-preview",
+  "sha256": "e6a3467c2faaf7dd4caf175d224c76092f7fe97e05d9944fd9b6ef41956a2e3c",
+  "changes": [
+    "Adaptive search grid: minimum 260dp normal / 360dp fontScale >=1.5",
+    "72x108dp posters, 132dp minimum card height, original 96x54dp live logos",
+    "Shared CardVisibility and safe grid padding; no duplicated fallback title"
+  ],
+  "checks": {
+    "candidateVisualTests": 3,
+    "finalVisualTests": 3,
+    "finalSearchFocusBackTests": 2,
+    "lintErrors": 0,
+    "lintWarnings": 32,
+    "apkV2Signature": true,
+    "jvm": "Not rerun for this layout-only change; previous 0.14.15 run 118 passed"
+  },
+  "screenshots": "design/reviews/search-density/font-{1.0,1.5,2.0}/search-dense-{first,last}-row.png",
+  "scope": "1920x1080/density320 isolated API36 emulator, real previously reviewed poster assets served locally, synthetic account; no provider playback",
+  "limits": [
+    "Physical TV and user visual approval pending",
+    "Four-result film/series fixture does not cover all source-name lengths/live catalog distributions",
+    "Unfocused neighboring row may be partially visible",
+    "Figma unchanged"
+  ]
+}

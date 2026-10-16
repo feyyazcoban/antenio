@@ -1,0 +1,43 @@
+{
+ "date": "2026-10-16",
+ "version": "0.14.36-design-preview",
+ "versionCode": 50,
+ "buildType": "release (R8, not debuggable, debug key)",
+ "sha256": "edb832493d729fa507494b000051ddba35683e844946477c4687800b843e4ebf",
+ "apkSignature": "apksigner verify: v2 scheme true",
+ "requests": [
+  "Back on Home content opens the side menu instead of asking to leave",
+  "remove the Tüm kaynaklar selector from every sub-page; sources stay manageable from Settings",
+  "browsing the category column must not change the category; OK changes it",
+  "OK on Canlı TV / Filmler / Diziler opens the section on its category column (Tüm ...), never skipping that level"
+ ],
+ "changes": [
+  "ui/HomeScreen.kt: HomeBackToMenu, a BackHandler enabled while focus is outside the menu, moves focus to Ana Sayfa; menu focus is read in that small composable only",
+  "ui/LibraryScreen.kt, SearchScreen.kt, GuideScreen.kt: no SourceFilterAction; ui/SourcesScreen.kt: SourceFilterAction and its picker removed",
+  "TvViewModel.kt: a saved source choice is reset to all sources at start (no screen can change it any more)",
+  "ui/LibraryScreen.kt CategoryColumn: no rest-to-select timer; OK selects",
+  "ui/LibraryScreen.kt: entering a section with no title to return to focuses the selected category in the column; Back from a title still returns to its card",
+  "Settings keeps Kaynakları yönet, Kataloğu yenile, Kaynağı düzenle, Kaynağı kaldır"
+ ],
+ "unit": {
+  "tests": 152,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 1
+ },
+ "lint": {
+  "errors": 0,
+  "warnings": 31
+ },
+ "manualEmulatorRelease": [
+  "Home: Back from content -> focus Ana Sayfa, no exit question; Back again -> exit question; Back -> closed",
+  "OK on Canlı TV -> focus Tüm kanallar; Left -> Canlı TV in the menu; OK on Filmler -> focus Tüm filmler",
+  "no Tüm kaynaklar button on the screens visited",
+  "checked through the accessibility tree reading app labels only; no screenshots (the user's own source is on the emulator)",
+  "not measured by hand: that moving through categories leaves the list unchanged (code and test changed)"
+ ],
+ "instrumentation": "not run (user's source on 5556; full run before the release). Updated: SearchNavigationTest (category OK, 8 section entries go through the category column, exit flow via the menu), VisualPreviewTest (4 section entries, no picker shot), MultiSourceFlowTest (sources via manageSources, filters via the model), SourceLayoutFlowTest (picker test removed)",
+ "emulatorWindow": "the emulator has no fullscreen mode and ignores programmatic maximize/resize; the user can drag the window corner",
+ "physicalTv": "installed on the user's request with adb install -r from 0.14.34/code48 to 0.14.36/code50; on-TV SHA-256 matches; firstInstallTime 2026-10-13 23:50:03 unchanged, data kept; speed compile Success; app not launched",
+ "notes": "0.14.35 (Back to menu only) was built and published to releases but never installed; 0.14.36 contains it"
+}

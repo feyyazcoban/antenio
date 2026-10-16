@@ -1,0 +1,26 @@
+{
+ "date": "2026-10-16",
+ "version": "0.14.33-design-preview",
+ "versionCode": 47,
+ "buildType": "release (R8, not debuggable, debug key)",
+ "sha256": "daedf7ece05f6c38491a7e88ce02538440087f455c4db34f181c0d0ead68d583",
+ "apkSignature": "apksigner verify: v2 scheme true",
+ "request": "the keyboard stays on screen and does not close",
+ "cause": "with the TextFieldState fields Compose's own keyboard close on focus loss no longer reaches the field's input (the same reason OK needed FieldKeyboard), so leaving a field kept the keyboard; ImeTracker showed show requests and no hide",
+ "change": "ui/Theme.kt FieldKeyboard.focusChanged: fields count focus; once no field has it (posted check, so field-to-field moves keep the keyboard) the keyboard closes; a field removed while focused counts as left. EntryField and SearchField report focus changes.",
+ "unit": {
+  "tests": 152,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 1
+ },
+ "lint": {
+  "errors": 0,
+  "warnings": 32
+ },
+ "instrumentation": "not run: the user's own source is now on emulator-5556 and the test classes delete sources; the user asked to keep the full run for before the release",
+ "manual": "Esc with the keyboard open closed it (adb). The close-on-leave path was not exercised by hand: navigating the user's real library blind was not reliable and screenshots of it are not taken.",
+ "privacy": "one emulator screenshot accidentally showed the user's real catalogue; it was deleted at once and never stored in the project",
+ "deviceState": "emulator-5556: 0.14.33 release over the user's data",
+ "physicalTv": "installed on the user's request with adb install -r from 0.14.29/code43 to 0.14.33/code47 (the TV first showed the debugging prompt; the user allowed it); on-TV APK SHA-256 matches; firstInstallTime 2026-10-13 23:50:03 unchanged, data kept; not debuggable; cmd package compile -m speed -f Success; app not launched, no tests"
+}

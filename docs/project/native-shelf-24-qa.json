@@ -1,0 +1,49 @@
+{
+  "version": "0.14.24-design-preview",
+  "versionCode": 38,
+  "sha256": "eb093112d5757ac9abd43f576851b6c565abe422fc8c2e8f5e9dba736615540a",
+  "device": "emulator-5556 / nextv_design_api36",
+  "tests": {
+    "VisualPreviewTest#captureGoogleTvRevision": [
+      1.0,
+      1.5,
+      2.0
+    ],
+    "VisualPreviewTest#homePostersAndContinueRemainVisibleWithRemote": [
+      1.0,
+      1.5,
+      2.0
+    ],
+    "VisualPreviewTest#remoteVerticalShelvesKeepTheirHeadingAndFullCardTogether": [
+      1.0,
+      1.5,
+      2.0
+    ],
+    "VisualPreviewTest#refreshKeepsContentInPlaceAndSettingsShowsItsResult": [
+      2.0
+    ],
+    "ContinueCardLayoutTest#longEpisodeAndSourceKeepResumeTimeReadableAcrossShelf": [
+      2.0
+    ]
+  },
+  "passed": 11,
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "signature": "verified",
+  "fontRestored": 1.0,
+  "screenshots": "design/reviews/shelves-0.14.24",
+  "observations": [
+    "New remote test crosses live/movie/series shelves and back three times; heading within 9dp of viewport top and full focused tile with 26dp bottom clearance.",
+    "Eight rapid right/left pairs leave focus on movie shelf; this is not a key-latency or zero-dropped-input measurement.",
+    "Inspected normal and 2.0 film shelves and 2.0 last series shelf. No previous-row text sliver in those captures.",
+    "Existing long-title/source/resume test verifies eight continue cards and unclipped resume time."
+  ],
+  "limits": [
+    "Physical TV not contacted/updated; last known 0.14.22.",
+    "Figma and user visual acceptance pending.",
+    "Oversized context falls back to focused tile; every possible provider string not covered.",
+    "No physical codec/performance validation or native PIN integration."
+  ]
+}

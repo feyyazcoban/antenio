@@ -1,0 +1,37 @@
+{
+  "version": "0.14.11-design-preview",
+  "versionCode": 25,
+  "sha256": "8e1213f0a77d1ca8973268bdec7e91309fdedb731949b2f35ddfa4a6e0440cd9",
+  "device": "emulator-5556 / nextv_design_api36",
+  "fontScales": [
+    1.0,
+    1.5,
+    2.0
+  ],
+  "homeTests": {
+    "passed": 3,
+    "method": "VisualPreviewTest#homePostersAndContinueRemainVisibleWithRemote"
+  },
+  "normalFontRegression": {
+    "passed": 3,
+    "methods": [
+      "VisualPreviewTest#captureGoogleTvRevision",
+      "VisualPreviewTest#providerDividersRemainReachableAndPosterOnlyContentKeepsItsShape",
+      "PilotFlowTest#liveMovieSeriesTracksFavoritesAndBack"
+    ]
+  },
+  "build": "assembleDebug assembleDebugAndroidTest lintDebug passed",
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "signature": "v2 verified",
+  "screenshots": "design/reviews/home-refinement",
+  "limitations": [
+    "No physical TV install or visual approval",
+    "Figma unchanged",
+    "JVM suite not rerun for this UI-only change",
+    "No new physical performance evidence"
+  ],
+  "initialFailure": "Test scroll competed with focused shelf relocation; test now moves focus to navigation before scrolling to continue row."
+}

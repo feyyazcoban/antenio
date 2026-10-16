@@ -1,0 +1,330 @@
+{
+  "date": "2026-10-14",
+  "version": "0.13.0-pilot",
+  "versionCode": 13,
+  "physicalTvInstalled": "0.2.0-pilot",
+  "jvmTests": {
+    "tests": 109,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "Error": 0,
+    "Warning": 32
+  },
+  "instrumentation": {
+    "uniqueCases": 77,
+    "passed": 77,
+    "runs": [
+      {
+        "log": "v13-final-regression.log",
+        "fontScale": 1.0,
+        "cases": 77,
+        "passed": 76,
+        "failedCases": [
+          "dev.iptvplayer.tv.SearchNavigationTest#everyNavigationLabelFitsAndRemoteCanReachSettingsAndReturn"
+        ],
+        "seconds": 288.455
+      },
+      {
+        "log": "v13-search-final.log",
+        "fontScale": 1.0,
+        "cases": 9,
+        "passed": 9,
+        "failedCases": [],
+        "seconds": 46.38
+      },
+      {
+        "log": "v13-font1_5.log",
+        "fontScale": 1.5,
+        "cases": 16,
+        "passed": 16,
+        "failedCases": [],
+        "seconds": 78.534
+      },
+      {
+        "log": "v13-font2_0.log",
+        "fontScale": 2.0,
+        "cases": 16,
+        "passed": 16,
+        "failedCases": [],
+        "seconds": 80.069
+      }
+    ],
+    "cases": [
+      "dev.iptvplayer.tv.EpgStorageTest#androidParserAndIndexedSnapshotPreserveDstUnicodeAndUnknownEndAfterReopen",
+      "dev.iptvplayer.tv.EpgStorageTest#androidRejectsInternalEntitiesAndSupportsUtf16",
+      "dev.iptvplayer.tv.EpgStorageTest#cancellationDuringNetworkBodyCleansStageAndPreservesPreviousGuide",
+      "dev.iptvplayer.tv.EpgStorageTest#channelsWithoutDeclarationsAreAvailableByIdOnAndroid",
+      "dev.iptvplayer.tv.EpgStorageTest#credentialsAndFeedAddressesAreNotCopiedIntoGuideDatabase",
+      "dev.iptvplayer.tv.EpgStorageTest#failedStageAndSupersededStageNeverReplaceLastGoodSnapshot",
+      "dev.iptvplayer.tv.EpgStorageTest#matchingIsExactConservativeAndSourceScoped",
+      "dev.iptvplayer.tv.EpgStorageTest#multipleFeedsDoNotSilentlyMergeConflictingChannelIds",
+      "dev.iptvplayer.tv.EpgStorageTest#queriesBoundRowsKeepGapsAndExcludeEndedProgrammesAtWindowBoundary",
+      "dev.iptvplayer.tv.EpgStorageTest#removalInvalidatesInFlightStageAndPreservesOtherOwnerAcrossStoreInstances",
+      "dev.iptvplayer.tv.EpgStorageTest#repositoryKeepsSnapshotOnHttpFailureAndRejectsUnacceptedSuccess",
+      "dev.iptvplayer.tv.EpgStorageTest#repositoryPublishesGenuineEmptyGuideButRejectsAllInvalidProgrammes",
+      "dev.iptvplayer.tv.EpgStorageTest#sequentialFeedsKeepTheirSqliteTransactionAcrossSuspensions",
+      "dev.iptvplayer.tv.GuideFlowTest#cachedGuideSurvivesRestorationWithoutAnotherDownload",
+      "dev.iptvplayer.tv.GuideFlowTest#cancellingFirstGuideDoesNotRestartFromRecompositionAndManualRetryWorks",
+      "dev.iptvplayer.tv.GuideFlowTest#captureCurrentFontAndReachLongNamesAndAllGuideControls",
+      "dev.iptvplayer.tv.GuideFlowTest#emptyGuideHasReachableNavigationAndNoUnattachedFocusTarget",
+      "dev.iptvplayer.tv.GuideFlowTest#guideOverrideIsEncryptedAndPersistsWithoutReloadingTheCatalog",
+      "dev.iptvplayer.tv.GuideFlowTest#liveCardsAndPlayerKeepProgrammeAndRemoteControlsVisible",
+      "dev.iptvplayer.tv.GuideFlowTest#missingGuideAndEmptyFutureDayNeverBlockLivePlayback",
+      "dev.iptvplayer.tv.GuideFlowTest#refreshFailureKeepsOldProgrammesAndIsVisibleInSourceDetails",
+      "dev.iptvplayer.tv.GuideFlowTest#remotePreservesTimeAcrossUnequalProgrammesAndReturnsFromDetailsAndPlayer",
+      "dev.iptvplayer.tv.GuideFlowTest#removalCancelsGuideBodyAndCannotRecreateCacheLater",
+      "dev.iptvplayer.tv.GuideFlowTest#timezoneSelectionKeepsInstantAndPersistsAcrossRestoration",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#collidingIdsHaveIndependentFavoritesHistoryAndPersistentFilters",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#duplicateConnectionIsRejectedWithoutChangingEitherSource",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#failedEditPreservesAccountAndRemovalKeepsOtherOwner",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#m3uSeriesDetailsUseEachOwnersRawEpisodeMapAfterReopening",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#partialRefreshKeepsFullOldCatalogAndDoesNotDisturbOtherSourceFilter",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#secondSourcesEpisodesResolveAndFavoriteTheirOwnParent",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#unavailableSourceOnStartupKeepsBothCachesAndOtherSourcePlayable",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#backDuringRecoveryDisposesItsPendingRequest",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#backgroundCancelsRecoveryUntilExplicitRetry",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#cancelStopsFurtherRequestsAndBackReturnsToLibrary",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#changingMediaCancelsOldRecovery",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#deniedAccessStopsAndManualRetryCanRecover",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#hlsSegmentFailureRecoversThroughTheSameBudget",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#malformedMediaDoesNotLoop",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#rateLimitDoesNotAddAutomaticTraffic",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#repeatedServerFailureStopsAfterTwoRetriesAndKeepsRetryFocused",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#silentServerStopsWithinTheRecoveryDeadline",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#temporaryServerFailureRecoversAtSavedVodPosition",
+      "dev.iptvplayer.tv.SearchNavigationTest#dpadKeepsWholeCaptionsVisibleAndReturnsToSameCatalogCard",
+      "dev.iptvplayer.tv.SearchNavigationTest#everyNavigationLabelFitsAndRemoteCanReachSettingsAndReturn",
+      "dev.iptvplayer.tv.SearchNavigationTest#globalTurkishSearchFiltersRestoresFocusAndCancelsOldQueries",
+      "dev.iptvplayer.tv.SearchNavigationTest#longCategoryRowRemainsReachableFromSearchField",
+      "dev.iptvplayer.tv.SearchNavigationTest#refreshKeepsAlreadyFocusedCaptionInsideShrinkingViewport",
+      "dev.iptvplayer.tv.SearchNavigationTest#refreshRecoversRemovedFocusedItemAndMissingCategoryWithoutStealingInput",
+      "dev.iptvplayer.tv.SearchNavigationTest#searchBackVisitsResultsAndNavigationBeforeHome",
+      "dev.iptvplayer.tv.SearchNavigationTest#settingsKeepsHeaderRestoresSubpageFocusAndCancelsRemoval",
+      "dev.iptvplayer.tv.SearchNavigationTest#settingsRefreshKeepsFocusAndIgnoresRepeatedConfirmation",
+      "dev.iptvplayer.tv.SourceLayoutFlowTest#deepManagerRestoresEditAndRemovalCancelFocus",
+      "dev.iptvplayer.tv.SourceLayoutFlowTest#deepPickerKeepsSelectionAndReturnsToItsOpener",
+      "dev.iptvplayer.tv.SourceLayoutFlowTest#failedLongSourceKeepsIdentityAndRemoteActionsInsideTheList",
+      "dev.iptvplayer.tv.SourceLayoutFlowTest#veryLongNameCanBeReadBothWaysWithoutLosingCloseOrCancel",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#anotherViewModelWaitsForTheWholeSourceAndCacheWrite",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#cancellingDownloadPreservesThePreviousSourceAfterRecreation",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#failedRemovalShowsAnErrorAndCanBeRetried",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#lateCancelledResponseCannotReplaceANewerConnection",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#playerDisposalCannotResurrectProgressAfterRemoval",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#removalWaitsForOldCommitAndBackCannotStartANewSource",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#savingFinishesBeforeTheNewCatalogIsShown",
+      "dev.iptvplayer.tv.SourceRecoveryFlowTest#confirmedResetClearsAllSourcesRotatesKeyAndPreservesDevicePreferences",
+      "dev.iptvplayer.tv.SourceRecoveryFlowTest#malformedLegacyAndWrongPreferenceTypeHaveRecoveryWithoutSilentOverwrite",
+      "dev.iptvplayer.tv.SourceRecoveryFlowTest#retryAndCancelKeepRecordsAndFocusAndSuccessfulRetryRestoresLibrary",
+      "dev.iptvplayer.tv.SourceRecoveryFlowTest#staleConfirmationCannotClearNewlyRepairedAccounts",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#catalogReadsTheOldFilenameAndReplacesItOnlyAfterWritingTheNewOne",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#clearingHistoryDoesNotClearAnotherSourcesProgressOrAnyFavorites",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#deletingOneSourceKeepsCollidingIdsAndTheOtherCacheAndPreferences",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#editingOneSourcePreservesItsIdentityAndOtherAccounts",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#firstRegistryMigrationPreservesCurrentCacheAndCleansOnlyUnownedOldFiles",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#invalidReplacementIsRejectedBeforeAnySavedAccountIsChanged",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#legacySourceMigratesWithFavoritesHistoryAndUnlistedOldProgress",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#newerNamespacedProgressWinsOverAnOldLegacyCopy",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#registryIsEncryptedAndCorruptionDoesNotFallBackToObsoleteLegacyCredentials",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#sourceRemovalClearsAllOfItsCredentialVersionsWithoutTouchingAnotherOwner",
+      "dev.iptvplayer.tv.VisualPreviewTest#captureNativeScreensWithRealArtwork"
+    ],
+    "scope": "All77 unique cases have passing latest results. Regression77 passed76; one test still used six Up presses after the seventh navigation item was added. Its count now follows the label list; all9 SearchNavigation cases reran successfully with unchanged application bytes. Guide11, EpgStorage13, SourceOperation7, SourceRecovery4, SourceRegistry10, MultiSource7, Search9, SourceLayout4, VisualPreview1, PlaybackRecovery11. Guide11+SourceLayout4+navigation-label1 repeated at fonts1.5/2.0. No physical TV or real-provider instrumentation."
+  },
+  "iterationHistory": [
+    "Initial guide suite passed6/7; fast Now/OK could open the previous programme. KeyUp activation now reads the latest logical cursor. Early intermittent readiness timeouts were investigated rather than treated as acceptance.",
+    "Large-font detail reader initially chose Close geometrically. Explicit down/up focus now connects the reader and the live action; source guide summary uses explicit refresh/edit focus.",
+    "A later10-case round exposed override-refresh timeout and staging left after cancellation. Android SQLite transactions are thread-bound; repository now owns one physical writer thread through parse/seal/rollback/close. Network cancellation runs on a separate IO observer. A13th storage case repeats two-feed refresh eight times with suspensions. Stage enforces thread ownership. The subsequent23-case round passed.",
+    "Cancellation-in-progress is treated as an existing job until completion, so Compose re-entry cannot restart first-guide download. New case verifies cancellation, no restart and explicit retry.",
+    "First77-case regression had3 failures: empty-guide right focus was geometrically chosen at normal font; old navigation-label test omitted the new Guide item; old source-reader test omitted the new Guide settings action. Explicit right routing and updated navigation expectations were verified by the next77-case run, except the navigation test still used six Up presses when returning. The test now uses labels.size; all9 SearchNavigation cases then passed, without further application-code changes."
+  ],
+  "visualReview": "41 fresh native images:14 general real-art screens and9 guide surfaces at each of fonts1.0/1.5/2.0. Real logos/posters, synthetic programme schedules and local test video. Unclipped bounds verify selected rows/cards and fixed dialog actions; full readers are reached by remote. Final images reviewed separately before delivery.",
+  "nativeScreens": [
+    {
+      "file": "IPTV_Player_Native_013_home.png",
+      "sha256": "7977b7cdb7fcb9a4af6f7d5a1e5a6537f28bf17722667d8bf0df6c5f0a43be16"
+    },
+    {
+      "file": "IPTV_Player_Native_013_movies.png",
+      "sha256": "6d114e530527ef207790f5fc09b768c2e24fddb01218b74aeaff9a11b21cc72e"
+    },
+    {
+      "file": "IPTV_Player_Native_013_movie.png",
+      "sha256": "e801eee478f4e234fd77c799fc4638bc987cca5537eabcd6fa474c452d93998f"
+    },
+    {
+      "file": "IPTV_Player_Native_013_series.png",
+      "sha256": "d53679a945c02a85d4f3ca37b735d5f435ac490ce12ac062a72913494110b51d"
+    },
+    {
+      "file": "IPTV_Player_Native_013_player.png",
+      "sha256": "c2f6d515f300a7234aab731fafd7030285c6ffd97fff4530968cd4a268c2e640"
+    },
+    {
+      "file": "IPTV_Player_Native_013_tracks.png",
+      "sha256": "5f8eda71f40ef60c01757cf0de1de80200ddde6ffdb559dba37cc15482f9508c"
+    },
+    {
+      "file": "IPTV_Player_Native_013_settings.png",
+      "sha256": "c722274e426cb4dd0de30e3c92f74e27db32c67791e5db3cedce02fe25779f87"
+    },
+    {
+      "file": "IPTV_Player_Native_013_about.png",
+      "sha256": "6f2b0129ff4d29993086145b565aab151f14f0bfb6627c72740610935ff9a6ad"
+    },
+    {
+      "file": "IPTV_Player_Native_013_settings-bottom.png",
+      "sha256": "345e8b52b6ec4f3a915fed7ebc07f3075fafcf6c78c265e923a0cddaeb4d85f4"
+    },
+    {
+      "file": "IPTV_Player_Native_013_search.png",
+      "sha256": "f97f2e517d181a4af0d30ba1c033beb5af60140dbf870cb3ca86bf14147c17e3"
+    },
+    {
+      "file": "IPTV_Player_Native_013_sources.png",
+      "sha256": "92a8dfacd919ed7575c753fb75e7d1400e10ef8a09690857a3c247d956a0f2f5"
+    },
+    {
+      "file": "IPTV_Player_Native_013_multi-search.png",
+      "sha256": "cfffcda22684eaca6ba413711354043daed10afe012e73053360e1fda0290a5d"
+    },
+    {
+      "file": "IPTV_Player_Native_013_source-picker.png",
+      "sha256": "692bc0377717593642561abefe69a0ab868bd809d8e1d80f38e13821c99d8521"
+    },
+    {
+      "file": "IPTV_Player_Native_013_multi-movies.png",
+      "sha256": "a191a677c720d5152bad03f4240100f831f2f6c058d7eeea38fdf3a3050bb81a"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-1_0.png",
+      "sha256": "ca68458489b06f9410c732f5578b64cd16d0c7a1289758d6aec1897f135ae6a6"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-long-1_0.png",
+      "sha256": "1e95a0aec7f09281f3047782cdae1b413b283fe54815495aad6593ce67fb1985"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-detail-1_0.png",
+      "sha256": "c2671abff6f43fa6061ad64de0dc5b60ed8414b7353001b25560f711370d9d8a"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-zone-1_0.png",
+      "sha256": "47d58cb0a69914848c29af09ec1fc52df089edb6aa8f9cbec6d54fa9a4193ceb"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-settings-1_0.png",
+      "sha256": "fb5f83f2a5909205ca819fc9dc2e16a8eb1a2d5d703c905b72509d4cc7d4e4a8"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-editor-1_0.png",
+      "sha256": "2f17f7b2d2efd1ab0aa58ef1e40687ccbc69dab5be923702d9532066efd47263"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-live-cards-1_0.png",
+      "sha256": "9f18c77088d41ad5156355261f1d67b8384a70de7a1a01aae7e2d03ed27b75fc"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-player-1_0.png",
+      "sha256": "ae2d1f69a5d919e8f1ba174d50d36d4889b8635cc8f05cad49ca50fe7badd382"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-player-controls-1_0.png",
+      "sha256": "7af20049f946fee07b93ef44f7b105ba6f4f3457c6a36026fed3f6137258c5c8"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-1_5.png",
+      "sha256": "5f25a2ffb042e9b9b9d6f5a7d17bcbdd22338356793084973e850f623698b206"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-long-1_5.png",
+      "sha256": "2221df3a15d8485edb193a13f199b333bdbe1af5a309e7d881b993ad184b84fb"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-detail-1_5.png",
+      "sha256": "b48117fda87c41c20e7a8baa463f12a03c1279095d31618ea3fbbfd5d867edf3"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-zone-1_5.png",
+      "sha256": "6878cf58e82c0406cbf99cd45dd492c2535b49464ffc01aacea9940b3c9ec899"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-settings-1_5.png",
+      "sha256": "f2627ce3be482ed19475177e40015dba8dd991a15995be01c692080de33312f4"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-editor-1_5.png",
+      "sha256": "691c0903fc56c76a0a3c3fe448fa584b853ab32867069ee39ad9d785ec0fb07b"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-live-cards-1_5.png",
+      "sha256": "3c79c7bdbfab3fb7e27aa1a6fae41db2ca697499ea111f9c3bdcf5a3f563c16b"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-player-1_5.png",
+      "sha256": "4d94006686d8e29ba2d3f3211532a593dab464ef9880a356d7c1683ee965a817"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-player-controls-1_5.png",
+      "sha256": "44f0ec983146acbd69b5990891d68b10dfa58ae61a6850ce9a8273592e181de8"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-2_0.png",
+      "sha256": "3b7a7b555fd3960e05df855dfe39ee288f8394ff2dc25f4d59c2c7eac46ab0c7"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-long-2_0.png",
+      "sha256": "4c36dbf357079a4cbd473e2f0cf0032907538f2c7dd3e3deaa28091678b4c6ce"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-detail-2_0.png",
+      "sha256": "d2f0f8a2640013b3df98de644fe0c81eac48525113ce1a927536d701ec1af50a"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-zone-2_0.png",
+      "sha256": "8d33afc206e19b71947330dae1705ae278b0218d3cba72e9bc225e54a406aeee"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-settings-2_0.png",
+      "sha256": "2e88347262ada48f3232df6f94b7246dfe9cf5491897057ba61ae7f19bb9bef4"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-editor-2_0.png",
+      "sha256": "64c993ee8168336e573e6a42383f4d8f8c74879efa12342ab76d118887103e6f"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-live-cards-2_0.png",
+      "sha256": "ed2347523e5bebe14236045dec111fed79b5e83f0420f715d15ea8761f9d6037"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-player-2_0.png",
+      "sha256": "800cf095a1d6733831eae81a47030319f478e6e1b679bd180aca050c91a6af8f"
+    },
+    {
+      "file": "IPTV_Player_Native_013_guide-player-controls-2_0.png",
+      "sha256": "9f2d5a827c5191a7e8e5312f4f93d60ffbd2324d9d61dab25984841647739568"
+    }
+  ],
+  "apk": {
+    "file": "IPTV_Player_TV_Pilot_0.13.0.apk",
+    "bytes": 17880182,
+    "sha256": "9063f6d8785fb8e1ef02cc37ddfd9a5d0bd2c680d08864e2ef20261dd644d87a",
+    "v2SignatureVerified": true
+  },
+  "limitations": [
+    "No real-provider XMLTV/short-EPG compatibility or matching-rate claim",
+    "Physical TV untouched; no new real-provider stream; no Figma change or quota recheck",
+    "Common PIN, remaining SYS01, full-screen font/focus matrix, hardware p95/codec/HDR/5.1/two-hour playback and five-person review remain open",
+    "Debug emulator evidence is not release/device performance acceptance",
+    "No catch-up; past/future details offer current live playback only",
+    "Guide metadata stays in app-private plaintext SQLite; credentials and feed overrides are encrypted.96MiB is a single primary DB page cap, not a whole-device/all-source quota"
+  ],
+  "providerFollowup": {
+    "date": "2026-10-14",
+    "report": "provider-guide-qa.json",
+    "apkUnchanged": true,
+    "note": "One opt-in metadata audit passed separately; the 77 release cases above were not rerun in this follow-up."
+  }
+}

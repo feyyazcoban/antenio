@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-14",
+  "version": "0.3.0-pilot",
+  "versionCode": 3,
+  "physicalTvInstalled": "0.2.0-pilot",
+  "jvmTests": {
+    "passed": 24,
+    "failed": 0
+  },
+  "emulatorFlows": {
+    "passed": 7,
+    "failed": 0,
+    "seconds": 71.945
+  },
+  "lint": {
+    "Error": 0,
+    "Warning": 27
+  },
+  "catalogColdLaunch": {
+    "syntheticRecords": 63175,
+    "server": "unreachable localhost fixture",
+    "processForceStoppedBeforeLaunch": true,
+    "homeObserved": true,
+    "uiObservedUpperBoundSeconds": 8.401,
+    "note": "Includes ADB start and UI dump overhead. Not first-frame, p95 or physical TV timing."
+  },
+  "activityColdStartMs": 3076,
+  "nativeScreens": [
+    "Home",
+    "Movies",
+    "Movie",
+    "Series",
+    "Player",
+    "Tracks",
+    "Settings"
+  ],
+  "visualFixes": [
+    "Consistent rail, typography, spacing and poster ratios",
+    "Film poster on right",
+    "Visible focus no longer forces hero offscreen",
+    "Transparent logos no longer show fallback initials",
+    "Detail scroll excludes fixed back header",
+    "Floating player controls and right track panel",
+    "Turkish uppercase I correction"
+  ],
+  "startup": {
+    "originalSoundSeconds": 1.12,
+    "peakDbFS": -12,
+    "meanDbFS": -24.2,
+    "settingsPersist": true,
+    "implementation": "TV launch window and 220ms Compose reveal; platform custom SplashScreen unsupported on TV",
+    "physicalTvSoundVerified": false,
+    "nativeLaunchFrameReviewed": true,
+    "preview": "IPTV_Player_Startup_Preview.png"
+  },
+  "intermediateFindings": [
+    "One test run was interrupted by test APK replacement; excluded from passing evidence",
+    "Visual assertion exposed locale-insensitive uppercase; fixed and retested",
+    "Platform splash assumption rejected after official TV documentation and emulator inspection"
+  ],
+  "limitations": [
+    "0.3 not installed on physical TV while user sleeps",
+    "No second real provider stream opened",
+    "Large-catalog observation is not p95 or first-frame timing",
+    "EPG/PIN/multiple sources/QR/automatic next episode remain open",
+    "Figma quota remains blocked; no design write",
+    "Long-run hardware playback and full focus/performance matrix pending",
+    "Scrollable series metadata/settings footer extend below first viewport; further focus/large-font checks are next."
+  ],
+  "apk": {
+    "name": "IPTV_Player_TV_Pilot_0.3.0.apk",
+    "signatureV2Verified": true,
+    "sha256": "19fe68932dd029fc0e4c8cda4f2f977cf181fb1bd478630869ae6126f402844d"
+  },
+  "validationNote": "Seven full flows ran before a launch-background XML cleanup; final assemble/lint and normal cold-launch screen recording followed. No playback logic changed afterward."
+}

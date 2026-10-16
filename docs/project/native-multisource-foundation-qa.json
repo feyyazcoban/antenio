@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-14",
+  "stage": "0.9 multi-source foundation, integration pending",
+  "lastDeliveredApk": "0.8.0-pilot",
+  "workingBuildVersionLabel": "0.8.0-pilot (unreleased development code)",
+  "physicalTvInstalled": "0.2.0-pilot",
+  "jvmTests": {
+    "tests": 79,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "Error": 0,
+    "Warning": 29
+  },
+  "newUnitTests": {
+    "SourceLibraryTest": 6,
+    "SourceRegistryTest": 5
+  },
+  "emulatorFlows": {
+    "passed": true,
+    "count": 24,
+    "seconds": 73.639,
+    "classes": [
+      "SourceRegistryStorageTest (9)",
+      "SourceOperationFlowTest (7)",
+      "PilotFlowTest (8)"
+    ]
+  },
+  "verifiedBehaviors": [
+    "Length-prefixed source/local identities distinguish duplicate names and provider IDs, including M3U episode parents",
+    "Per-source favorites and continue-watching remain separate in aggregate library data",
+    "AES-GCM registry round trip and tamper rejection; corrupt registry does not silently restore obsolete legacy credentials",
+    "Legacy single-source favorites/history/progress migrate; old progress outside the bounded history list is retained; newer namespaced progress wins",
+    "Source-specific removal and history clearing preserve other owners and device preferences, including source IDs sharing a string prefix",
+    "Catalog filenames carry hashed owner identity; current/new credential versions can be removed together without deleting another source",
+    "Old catalog filenames still read and are replaced after successful new snapshot write",
+    "Invalid source replacement leaves the registry unchanged; new account password/name preserves stable identity",
+    "Existing source operation and playback/favorite/cache pilot flows still pass with namespaced progress keys"
+  ],
+  "notYetImplemented": [
+    "TvViewModel startup/connect/refresh/remove migration to the registry; aggregate runtime catalog and per-source state",
+    "Source manager screen; Home/catalog/favorites/search source filters and source badges",
+    "Routing detail/playback/episode/recovery/watch records using entry.sourceId instead of a single state.source",
+    "Ownership or safe cleanup of orphan pre-registry catalog files at the first legacy migration",
+    "End-to-end two-server UI flows, updated scoped-ID assertions in existing instrumentation, native screenshots and a 0.9 deliverable"
+  ],
+  "limitations": [
+    "This verifies storage/domain scaffolding, not complete SRC03/FIND01 or a user-accessible multiple-source feature",
+    "Legacy single-source APIs remain during integration; the new multiple-source UI must not call parameterless forgetSource()",
+    "No physical TV action, provider request, Figma write or new public APK/ZIP in this stage"
+  ],
+  "workingApkSha256": "0793f69526b85fc0a92137a78d82c95426e4dd4289e4abc890d8a7c636383b7e"
+}

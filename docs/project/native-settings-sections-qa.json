@@ -1,0 +1,35 @@
+{
+  "version": "0.14.4-design-preview",
+  "versionCode": 18,
+  "status": "design preview delivered; user/physical approval pending",
+  "apkSha256": "51af10e8d87876b563cc6d3171fe0b399efb3b33beed3dadb936618b6c7f5e2f",
+  "device": "isolated emulator-5556; restored font1.0",
+  "runs": [
+    {
+      "fontScale": 1.0,
+      "passed": 4,
+      "failed": 0,
+      "log": "settings-section-1.0.log"
+    },
+    {
+      "fontScale": 1.5,
+      "passed": 4,
+      "failed": 0,
+      "log": "settings-section-1.5.log"
+    },
+    {
+      "fontScale": 2.0,
+      "passed": 4,
+      "failed": 0,
+      "log": "settings-section-2.0.log"
+    }
+  ],
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "signature": "v2 verified",
+  "jvm": "not rerun for this UI-only change",
+  "protected": "physical TV0.14.1 and user5554 unchanged",
+  "figmaUpdated": false
+}

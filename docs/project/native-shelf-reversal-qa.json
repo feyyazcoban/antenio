@@ -1,0 +1,25 @@
+{
+  "version": "0.14.24-design-preview",
+  "installedApkSha256": "eb093112d5757ac9abd43f576851b6c565abe422fc8c2e8f5e9dba736615540a",
+  "installedHashMatchesPublished": true,
+  "test": "VisualPreviewTest#remoteVerticalShelvesKeepTheirHeadingAndFullCardTogether",
+  "passedFontScales": [
+    1.5,
+    2.0
+  ],
+  "pendingFontScales": [
+    1.0
+  ],
+  "assertions": [
+    "Each of eight Right/Left pairs returns to the same identified movie; no Compose idle wait between opposite events.",
+    "OK opens that exact movie after reversal; Back restores its exact home card.",
+    "Previous three-tour vertical shelf and heading/full-card checks remain."
+  ],
+  "pendingReason": "Normal-font instrumentation remains live without completion. Emulator process exists; all 3709 observed host threads reported Wait/Suspended. adb lists device, but guest date/pidof and console avd name timed out. No restart, kill or resumption attempted.",
+  "limits": [
+    "Pending normal-font test is neither passed nor failed.",
+    "This does not measure input-to-pixel latency or prove no dropped individual inputs.",
+    "Physical TV and Figma unchanged.",
+    "Fixture cleanup and final font readback after pending test are not verified."
+  ]
+}

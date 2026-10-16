@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tv SYSTEM "https://example.invalid/xmltv.dtd">
+<tv generator-info-name="Synthetic European fixture">
+  <channel id="news.fixture"><display-name lang="tr">Örnek Haber</display-name><display-name lang="en">Sample News</display-name></channel>
+  <channel id="shared.one"><display-name>Ortak Kanal</display-name></channel>
+  <channel id="shared.two"><display-name>Ortak Kanal</display-name></channel>
+  <programme channel="news.fixture" start="20261025023000 +0200" stop="20261025023000 +0100">
+    <title lang="en">First news</title><title lang="tr">İlk haber &amp; gündem</title>
+    <desc lang="tr"><![CDATA[İstanbul'dan güncel haberler.]]></desc><category lang="tr">Haber</category>
+  </programme>
+  <programme channel="news.fixture" start="20261025023000 +0100" stop="20261025033000 +0100"><title>İkinci haber</title></programme>
+  <programme channel="news.fixture" start="20261025043000 +0100"><title>Bitişi belirtilmemiş</title></programme>
+</tv>

@@ -1,0 +1,142 @@
+{
+  "date": "2026-10-14",
+  "version": "0.11.0-pilot",
+  "versionCode": 11,
+  "physicalTvInstalled": "0.2.0-pilot",
+  "jvmTests": {
+    "tests": 79,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "Error": 0,
+    "Warning": 30
+  },
+  "instrumentation": {
+    "uniqueCases": 25,
+    "passed": 25,
+    "log": "v11-regression.log",
+    "seconds": 148.549,
+    "classes": {
+      "SourceLayoutFlowTest": 4,
+      "MultiSourceFlowTest": 7,
+      "SourceRecoveryFlowTest": 4,
+      "SearchNavigationTest": 9,
+      "VisualPreviewTest": 1
+    },
+    "scope": "One clean 25-case final application regression at font 1.0. Later test-only screenshot settlement delay does not change application behavior; SourceLayoutFlowTest was repeated at all three scales after that edit."
+  },
+  "font": {
+    "original": "1.0",
+    "restored": "1.0",
+    "runs": [
+      {
+        "scale": "1.0",
+        "log": "v11-final-font-1.0.log",
+        "cases": 4,
+        "passed": true,
+        "seconds": 25.779
+      },
+      {
+        "scale": "1.5",
+        "log": "v11-final-font-1.5.log",
+        "cases": 4,
+        "passed": true,
+        "seconds": 25.325
+      },
+      {
+        "scale": "2.0",
+        "log": "v11-final-font-2.0.log",
+        "cases": 4,
+        "passed": true,
+        "seconds": 26.273
+      }
+    ]
+  },
+  "fontScope": "Four source layout cases at 1.0, 1.5 and 2.0; repeated cases are not unique additions. Sixteen synthetic sources, common-prefix names, duplicate names, ~1000-character full name, filter dialog Back, deep edit/remove focus return, full text scrolling both directions, fixed close/cancel/confirm, failed refresh card inside viewport. Not all-screen accessibility approval.",
+  "iterationHistory": [
+    {
+      "log": "v11-baseline.log",
+      "appVersion": "0.10.0-pilot",
+      "cases": 2,
+      "passed": 1,
+      "failedCases": 1,
+      "finding": "Screens showed indistinguishable long names and removal confirmation outside the dialog. Search test sent input before IME/focus settled."
+    },
+    {
+      "log": "v11-large.log",
+      "cases": 2,
+      "passed": 1,
+      "failedCases": 1,
+      "finding": "New manager layout passed. Test incorrectly expected blank IME Done to leave the input; corrected to wait for actual IME and dismiss it with Back."
+    },
+    {
+      "log": "v11-large-final.log",
+      "cases": 3,
+      "passed": 3,
+      "seconds": 19.61
+    },
+    {
+      "log": "v11-font-2.0.log",
+      "cases": 4,
+      "passed": 4,
+      "seconds": 23.751,
+      "finding": "Includes failed-refresh whole-card visibility and bounded status line. Search screenshot caught Android dialog exit animation; capture-only 400 ms settlement added, final captures replaced."
+    }
+  ],
+  "visualReview": "Reviewed real-art Home, source manager and source picker; source layout at normal/large fonts, failed refresh, complete-name reader and fixed removal actions. Final search capture rechecked after window exit settlement. 14 real-art general screenshots plus 8 source-layout screenshots at each scale.",
+  "apk": {
+    "file": "IPTV_Player_TV_Pilot_0.11.0.apk",
+    "bytes": 17648194,
+    "sha256": "9592ec84fe8428993388473eaed01b0e4a2c42c0dd52db47753c06c771601a22",
+    "v2SignatureVerified": true
+  },
+  "nativeScreens": [
+    "IPTV_Player_Native_011_about.png",
+    "IPTV_Player_Native_011_font-1.0_failed-source.png",
+    "IPTV_Player_Native_011_font-1.0_full-name-reader.png",
+    "IPTV_Player_Native_011_font-1.0_home-long-name.png",
+    "IPTV_Player_Native_011_font-1.0_manager-deep.png",
+    "IPTV_Player_Native_011_font-1.0_picker-deep.png",
+    "IPTV_Player_Native_011_font-1.0_removal-long-name.png",
+    "IPTV_Player_Native_011_font-1.0_search-long-name.png",
+    "IPTV_Player_Native_011_font-1.0_source-info.png",
+    "IPTV_Player_Native_011_font-1.5_failed-source.png",
+    "IPTV_Player_Native_011_font-1.5_full-name-reader.png",
+    "IPTV_Player_Native_011_font-1.5_home-long-name.png",
+    "IPTV_Player_Native_011_font-1.5_manager-deep.png",
+    "IPTV_Player_Native_011_font-1.5_picker-deep.png",
+    "IPTV_Player_Native_011_font-1.5_removal-long-name.png",
+    "IPTV_Player_Native_011_font-1.5_search-long-name.png",
+    "IPTV_Player_Native_011_font-1.5_source-info.png",
+    "IPTV_Player_Native_011_font-2.0_failed-source.png",
+    "IPTV_Player_Native_011_font-2.0_full-name-reader.png",
+    "IPTV_Player_Native_011_font-2.0_home-long-name.png",
+    "IPTV_Player_Native_011_font-2.0_manager-deep.png",
+    "IPTV_Player_Native_011_font-2.0_picker-deep.png",
+    "IPTV_Player_Native_011_font-2.0_removal-long-name.png",
+    "IPTV_Player_Native_011_font-2.0_search-long-name.png",
+    "IPTV_Player_Native_011_font-2.0_source-info.png",
+    "IPTV_Player_Native_011_home.png",
+    "IPTV_Player_Native_011_movie.png",
+    "IPTV_Player_Native_011_movies.png",
+    "IPTV_Player_Native_011_multi-movies.png",
+    "IPTV_Player_Native_011_multi-search.png",
+    "IPTV_Player_Native_011_player.png",
+    "IPTV_Player_Native_011_search.png",
+    "IPTV_Player_Native_011_series.png",
+    "IPTV_Player_Native_011_settings-bottom.png",
+    "IPTV_Player_Native_011_settings.png",
+    "IPTV_Player_Native_011_source-picker.png",
+    "IPTV_Player_Native_011_sources.png",
+    "IPTV_Player_Native_011_tracks.png"
+  ],
+  "limitations": [
+    "Physical TV unchanged; no new real-provider stream",
+    "EPG/XMLTV, PIN, SYS01, QR and performance/device/user validation remain open",
+    "Figma quota/write not rechecked; screenshots not uploaded",
+    "Artwork ownership table growth/pruning remains open; no new p95 performance claim",
+    "Large-font behavior outside the source surfaces remains a separate matrix"
+  ]
+}

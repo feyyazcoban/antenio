@@ -1,0 +1,35 @@
+{
+  "version": "0.14.12-design-preview",
+  "versionCode": 26,
+  "sha256": "fd4cf7ad2fa0df7d6de1c4cfa447c382a7bf7a9c8c2d3634b5ceeaa21fd95411",
+  "device": "emulator-5556 / nextv_design_api36",
+  "fontScales": [
+    1.0,
+    1.5,
+    2.0
+  ],
+  "candidateTests": "ContinueCardLayoutTest + VisualPreviewTest home raf testi: her fontta2/2",
+  "finalTests": {
+    "font2": 1,
+    "font1": 3,
+    "normalMethods": [
+      "VisualPreviewTest#homePostersAndContinueRemainVisibleWithRemote",
+      "VisualPreviewTest#providerDividersRemainReachableAndPosterOnlyContentKeepsItsShape",
+      "PilotFlowTest#liveMovieSeriesTracksFavoritesAndBack"
+    ]
+  },
+  "beforeAfter": "Released0.14.11, same native restore test,font2: fails Resume time must not be ellipsized. Final0.14.12passes.",
+  "isolatedFixtureFailure": "Initial setContent fixture timed out, including after changes; replaced by actual encrypted source restore. Not evidence of a production freeze. Temporary geometry logging removed.",
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "signature": "v2 verified",
+  "screenshots": "design/reviews/continue-layout",
+  "limits": [
+    "TV not installed",
+    "No Figma update",
+    "No physical performance or codec proof",
+    "JVM suite not rerun for this UI-only change"
+  ]
+}

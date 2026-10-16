@@ -1,0 +1,42 @@
+[
+  {
+    "label": "Ana Sayfa",
+    "buttonLeft": 103,
+    "buttonRight": 188.5,
+    "paintLeft": 117,
+    "paintRight": 174.48633,
+    "overflow": false
+  },
+  {
+    "label": "Canlı TV",
+    "buttonLeft": 192.5,
+    "buttonRight": 269,
+    "paintLeft": 206.5,
+    "paintRight": 254.60156,
+    "overflow": false
+  },
+  {
+    "label": "Filmler",
+    "buttonLeft": 273,
+    "buttonRight": 340,
+    "paintLeft": 287,
+    "paintRight": 326,
+    "overflow": false
+  },
+  {
+    "label": "Diziler",
+    "buttonLeft": 344,
+    "buttonRight": 407.5,
+    "paintLeft": 358,
+    "paintRight": 393.5,
+    "overflow": false
+  },
+  {
+    "label": "Favoriler",
+    "buttonLeft": 411.5,
+    "buttonRight": 489.5,
+    "paintLeft": 425.5,
+    "paintRight": 475.09375,
+    "overflow": false
+  }
+]

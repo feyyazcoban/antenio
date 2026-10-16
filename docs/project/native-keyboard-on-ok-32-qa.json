@@ -1,0 +1,48 @@
+{
+ "date": "2026-10-16",
+ "version": "0.14.32-design-preview",
+ "versionCode": 46,
+ "buildType": "release (R8, not debuggable, debug key)",
+ "sha256": "1ee0605a94052886f84d2b84b9228536d7f95994d2d11d6cde311b14e128bea0",
+ "apkSignature": "apksigner verify: v2 scheme true",
+ "request": "keyboard still opened by itself in 0.14.31; Esc used as Back on the emulator did nothing",
+ "design": "docs/design/KEYBOARD_ON_OK_31.md, decision D058",
+ "causes": [
+  "0.14.31 hid the keyboard in the frame focus arrived; in the source form the legacy field's keyboard request came about 0.3 s after the hide (ImeTracker)",
+  "Compose maps Esc to leaving the focused group, so Back never came"
+ ],
+ "changes": [
+  "ui/Theme.kt: EntryField on the TextFieldState API with showKeyboardOnFocus = false (BasicSecureTextField for secrets); FieldKeyboard opens/closes through InputMethodManager; fieldKey: OK (or a remote's Enter) opens, Back with the keyboard open closes only the keyboard; rememberFieldInput reports each edit at once via InputTransformation and applies outside changes",
+  "ui/SearchScreen.kt: SearchField on the same API",
+  "ui/PilotApp.kt: escapeAsBack at the root (keyboard open: close it; otherwise the back dispatcher)"
+ ],
+ "manualEmulator": "debug build on 5556: Ara and source form keep the keyboard closed on focus and on field moves; OK opens it (only one show request, from OK); keyboard Next moves on and keeps it open; Esc closes an open keyboard, then works as Back (Ara -> menu -> Home -> exit question -> closes it). 0.14.32 release installed and opens.",
+ "unit": {
+  "tests": 152,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 1
+ },
+ "lint": {
+  "errors": 0,
+  "warnings": 32
+ },
+ "instrumentation_font1_0": {
+  "MultiSourceFlowTest": "7/7",
+  "SetupLayoutTest": "1/1",
+  "GuideFlowTest": "11/11",
+  "VisualPreviewTest": "11/11",
+  "SearchNavigationTest": "16/20 in the class run; globalTurkish..., fieldsOpenTheKeyboardOnlyOnOk passed alone; refreshRecovers..., settingsRefresh... not rerun",
+  "SourceLayoutFlowTest": "2/5 in the class run (picker, removal dialog and manager focus checks; deepPicker passed alone)",
+  "PilotFlowTest": "6/8 (homeResumesExactEpisode..., liveMovieSeriesTracksFavoritesAndBack)"
+ },
+ "status": "Failures not diagnosed. Several are focus checks on screens without text fields and one is a lifecycle timeout; emulator load was high (load average about 3.3). They may be environmental or real. The user asked to stop the long runs and keep the full regression for before the release.",
+ "deviceState": "5556 windowed with 0.14.32 release, no source (tests removed the synthetic one); opens on Kaynak ekle for the user's own list",
+ "physicalTv": "not touched",
+ "notVerified": [
+  "the failing instrumentation cases above",
+  "TCL keyboard on the TV",
+  "Esc while the player's video view has focus",
+  "font 1.5 / 2.0"
+ ]
+}

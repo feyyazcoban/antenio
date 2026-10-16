@@ -1,0 +1,22 @@
+{
+  "build": "0.14.18-design-preview",
+  "productionChanged": false,
+  "newTest": "EpisodeAutoplayFlowTest#playingAndPausedEpisodesPreservePositionAcrossBackgroundAndExit",
+  "checks": [
+    "Playing episode reaches >1.5s; CREATED lifecycle pauses actual Media3 player and saves >1s progress",
+    "After 1.2s in background, position difference <150ms and no additional request for buffered local episode",
+    "RESUMED resumes prior playing state and uses same Player instance",
+    "Explicit pause stays paused after next CREATED/RESUMED cycle",
+    "Model back to detail retains episode progress and focuses the correct episode card",
+    "Existing automatic next-season and countdown-background cancellation flows pass"
+  ],
+  "deviceTestsPassed": 3,
+  "testDurationSeconds": 52.366,
+  "environment": "Isolated emulator-5556, nextv_design_api36, font1.0; local synthetic video/account only",
+  "limits": [
+    "Not long-running TV playback, codec matrix or process-death durability proof",
+    "Same Player identity and fixture request count do not prove all HLS/live sockets close immediately on pause",
+    "New test exits through model.back; existing countdown test uses physical Back key events",
+    "No production APK change; no JVM/lint rerun"
+  ]
+}

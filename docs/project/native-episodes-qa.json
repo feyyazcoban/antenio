@@ -1,0 +1,102 @@
+{
+  "date": "2026-10-14",
+  "version": "0.7.0-pilot",
+  "versionCode": 7,
+  "physicalTvInstalled": "0.2.0-pilot",
+  "jvmTests": {
+    "tests": 58,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "episodePolicyUnitTests": 9,
+  "episodeControllerUnitTests": 8,
+  "emulatorFlows": {
+    "passed": true,
+    "count": 36,
+    "seconds": 302.699,
+    "failed": 0,
+    "classes": [
+      "EpisodeAutoplayFlowTest (10)",
+      "PlaybackRecoveryFlowTest (11)",
+      "PilotFlowTest (6)",
+      "SearchNavigationTest (8)",
+      "VisualPreviewTest (1)"
+    ]
+  },
+  "largeFont": {
+    "requestedFontScale": 1.5,
+    "originalFontScale": "1.0",
+    "observedSystemFontScale": "1.5",
+    "passed": true,
+    "count": 5,
+    "seconds": 63.528,
+    "restoredFontScale": "1.0"
+  },
+  "largeFontCases": [
+    "automatic cross-season and focus return",
+    "final available episode",
+    "setting toggle and recreation",
+    "M3U ordering inference",
+    "visual screen tour"
+  ],
+  "lint": {
+    "Error": 0,
+    "Warning": 31
+  },
+  "nativeScreens": [
+    "Home",
+    "Movies",
+    "Movie",
+    "Series",
+    "Player",
+    "Tracks",
+    "Settings",
+    "SettingsBottom",
+    "About",
+    "Search",
+    "RecoveryWaiting",
+    "RecoveryFailed",
+    "EpisodeCountdown",
+    "EpisodeFinal",
+    "AutoplaySetting"
+  ],
+  "policy": {
+    "countdownSeconds": 10,
+    "trigger": "actual STATE_ENDED after playback",
+    "defaultEnabled": true,
+    "initialFocus": "Bu bölümde kal",
+    "ambiguousOrder": "manual only",
+    "backgroundReturn": "manual only; countdown does not restart",
+    "oldCache": "loads without migration; automatic ordering waits for refreshed evidence"
+  },
+  "verifiedBehaviors": [
+    "Ten-second virtual-clock boundary; exactly one transition with source/current/target revalidation",
+    "Adjacent season starts from zero and returns to its own season and episode focus",
+    "Back, initial OK, media pause, setting off, background, changed target and media disposal cancel pending transition",
+    "Unknown, duplicate or gapped numbering stays manual; inaccessible immediate target is not skipped",
+    "Final available episode has no invented next; M3U inference is labelled",
+    "Preference persists through recreation and source removal; cache additive field remains backward compatible",
+    "Recovery, catalog cache, watch history, tracks, favorites, search and settings regression passed",
+    "Normal and 1.5 font native screenshots inspected; physical TV not operated"
+  ],
+  "intermediateFindings": [
+    "Initial wall-clock-only countdown assertion conflicted with Compose auto-advanced test coroutine clock; assertion now uses Compose clock, with exact boundary separately tested using virtual clock",
+    "End card initially revealed underlying player buttons; player controls now hide while end dialog is open",
+    "Screenshot helper waits for platform dialog fade before capture; end event updates displayed position immediately",
+    "At 1.5 font toggling the setting increased description height and clipped its last line; focused settings rows now relocate on size change, verified against the actual viewport bounds",
+    "An intermediate clipping-driven relocation fought programmatic test scrolling; that one diagnostic run was intentionally stopped. Final setting relocation responds only to focus or measured size changes",
+    "The new viewport test tag initially shadowed the About reading-area tag; one regression assertion failed. The tag now follows the active settings page and the final suite is rerun"
+  ],
+  "limitations": [
+    "Physical TV still 0.2; emulator evidence does not establish codec/HDR/5.1/long-play or provider compatibility",
+    "At 1.5 font the existing sidebar Home label is partially clipped; general navigation text layout remains follow-up work",
+    "No UI p95 or complete accessibility audit; multiple sources, EPG, PIN and QR remain open",
+    "Figma quota remains blocked; no Figma write; user visual acceptance remains open"
+  ],
+  "apk": {
+    "name": "IPTV_Player_TV_Pilot_0.7.0.apk",
+    "sha256": "8b70153f2ec4765823508c0dee7ce517933a022a4ebc92ce6aae4b79f1316faf",
+    "signatureV2Verified": true
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "component": "PinAttempts",
+  "integrated": false,
+  "newTests": 8,
+  "jvm": {
+    "total": 146,
+    "passed": 145,
+    "skipped": 1,
+    "failures": 0,
+    "errors": 0
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "coverage": [
+    "threshold and exact deadline",
+    "same-boot reconstructed state",
+    "reboot with larger uptime",
+    "monotonic rollback",
+    "reservation consumed on interruption",
+    "bounded exponential delay",
+    "initial/reset state",
+    "invalid values and overflow"
+  ],
+  "limits": [
+    "Pure state transitions only; persistence/atomic write failure not tested",
+    "No Android boot clock adapter",
+    "No actual process death or concurrent requests tested",
+    "No UI or APK change; TV remains 0.14.22"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "reviewedAt": "2026-10-13",
+  "downloadedAssets": 47,
+  "eligibleAssets": 45,
+  "visibleCatalog": {
+    "channels": 6,
+    "movies": 5,
+    "series": 4,
+    "sampleEpisodes": 21
+  },
+  "excludedItems": [
+    {
+      "id": "m1",
+      "reason": "Provider title identifies Dune Part Two (2024); visual review shows Dune (2021) poster and backdrop. Excluded from UI without relabeling the source record.",
+      "paths": [
+        "assets/catalog/m1-poster.jpg",
+        "assets/catalog/m1-backdrop.jpg"
+      ]
+    }
+  ],
+  "limits": [
+    "Artwork checks do not validate media playback identity.",
+    "Season/episode data is sampled, not complete.",
+    "PIN assignments are interaction examples, not provider classifications."
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-14",
+  "version": "0.2.0-pilot",
+  "applicationId": "dev.iptvplayer.tv.pilot",
+  "build": {
+    "assembleDebug": "PASS",
+    "lintErrors": 0,
+    "lintWarnings": 25,
+    "apkBytes": 16971759,
+    "sha256": "a5bdf9567b3ca35fba17f20e507cbe13696500e246db394bedb7f8c257cb8a2e",
+    "signatureV2": "PASS"
+  },
+  "unitTests": {
+    "passed": 21,
+    "failed": 0
+  },
+  "emulator": {
+    "platform": "Android TV API 36 x86_64",
+    "syntheticFlowTestsPassed": 3,
+    "seconds": 35.429,
+    "newChecks": [
+      "exact episode resume",
+      "continue card initial focus",
+      "focus restoration after playback",
+      "history survives new store instance",
+      "history removal preserves favorites",
+      "completed latest episode hides older incomplete episodes"
+    ]
+  },
+  "physicalTv": {
+    "userReportedModel": "iFFALCON 65U95A",
+    "manufacturer": "TCL",
+    "reportedModel": "Smart TV Pro",
+    "android": "12",
+    "api": 31,
+    "firmware": "STT2.221228.001 release-keys",
+    "physicalResolution": "3840x2160",
+    "reportedOverrideResolution": "1920x1080",
+    "density": 320,
+    "wirelessInstall": "PASS",
+    "installedVersionCode": 2,
+    "setup": {
+      "status": "configured",
+      "catalogCount": 21307,
+      "credentialsVerified": true,
+      "playbackStarted": false,
+      "LIVE": 4284,
+      "MOVIE": 12723,
+      "SERIES": 2173
+    },
+    "sourceSurvivedNormalRelaunch": true,
+    "livePlaybackObserved": true,
+    "firstInstallActivityStartMs": 6342,
+    "normalColdActivityStartMs": 3795,
+    "launchTimingCaveat": "Single Activity start measurements, not first content ready or p95.",
+    "reportedClosure": "OS exit reason USER REQUESTED; descriptions start instr / finished inst. Provisioning instrumentation ended the app; no crash reason observed.",
+    "temporaryTestPackageRemoved": true,
+    "privateProvisioningInputRemoved": true
+  },
+  "privateProvider": {
+    "v02SequentialPlaybackRetest": "NOT_RUN",
+    "baseline": "native-qa.json",
+    "simultaneousProviderPlayersMax": 1
+  },
+  "knownGaps": [
+    "catalog memory only and full reload at startup",
+    "prototype/native visual mismatch reported by user",
+    "EPG/PIN/multiple sources absent",
+    "no automatic next episode",
+    "legacy 0.1 progress not migrated to home history"
+  ],
+  "nextVersionRequested": [
+    "prototype visual alignment and layout standards",
+    "persistent catalog and nonblocking refresh",
+    "original splash screen and startup sound",
+    "easier phone-based source setup proposal"
+  ],
+  "goalStatus": "ACTIVE"
+}

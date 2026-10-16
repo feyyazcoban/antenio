@@ -1,0 +1,6 @@
+{"version":1,"updatedAt":12,"warnings":[]}
+{"group":null,"entry":{"id":"c","provider":"c","kind":"LIVE","title":"Kanal","category":"Diğer","artwork":null,"backdrop":null,"description":"","year":"","duration":0,"extension":"","uri":null,"headers":{},"season":1,"episode":1,"adult":false}}
+{"group":"empty"}
+{"group":"show"}
+{"group":"show","entry":{"id":"1","provider":"1","kind":"EPISODE","title":"Bölüm 1","category":"Diğer","artwork":null,"backdrop":null,"description":"","year":"","duration":0,"extension":"mp4","uri":null,"headers":{},"season":1,"episode":1,"adult":false}}
+{"group":"show","entry":{"id":"2","provider":"2","kind":"EPISODE","title":"Bölüm 2","category":"Diğer","artwork":null,"backdrop":null,"description":"","year":"","duration":0,"extension":"mp4","uri":null,"headers":{},"season":1,"episode":2,"adult":false}}

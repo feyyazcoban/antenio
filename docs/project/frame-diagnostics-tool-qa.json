@@ -1,0 +1,24 @@
+{
+  "artifact": "tools/analyze_framestats.py",
+  "testCommand": "python -m unittest discover -s tools -p test_analyze_framestats.py -v",
+  "syntheticTestsPassed": 9,
+  "deviceFramesAnalyzed": 0,
+  "productionAppChanged": false,
+  "coverage": [
+    "header names/order and legacy naming",
+    "nanosecond integer precision",
+    "known percentile values and exact budget boundary",
+    "invalid/flagged/duplicate counts",
+    "empty data remains unknown",
+    "separate profile blocks and identifier omission",
+    "truncated/unsupported headers rejected",
+    "slow positive frames retained",
+    "budget validation and CLI no-overwrite"
+  ],
+  "limits": [
+    "No device performance measured",
+    "Recent buffers cannot prove full-scenario coverage",
+    "No input-to-pixel, displayed FPS, FrameTimeline jank or product acceptance inferred"
+  ],
+  "pendingDeviceRun": "Original normal-font reversal test remains live in session 38142; host emulator PID35776 all observed threads Suspended. No restart/resume attempted."
+}

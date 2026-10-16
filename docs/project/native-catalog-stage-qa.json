@@ -1,0 +1,240 @@
+{
+  "build": "0.14.13-design-preview",
+  "sha256": "ca9d2042a72f9ba145b0fe669b9cf38d19f480d22b98cb96338e61c6df28c262",
+  "device": "emulator-5556 / nextv_design_api36",
+  "productionChanged": false,
+  "stageProbe": {
+    "build": "0.14.13-design-preview",
+    "entries": 60000,
+    "scope": "Sequential isolated debug components; caches, JIT and allocations carry across samples. No UI synchronization. Timings are not additive startup phases.",
+    "samples": [
+      {
+        "pass": 0,
+        "stage": "gzipJsonEncode",
+        "ms": 2168.4501
+      },
+      {
+        "pass": 0,
+        "stage": "gzipJsonDecode",
+        "ms": 1998.0942
+      },
+      {
+        "pass": 0,
+        "stage": "encryptedWrite",
+        "ms": 2205.1672
+      },
+      {
+        "pass": 0,
+        "stage": "authenticatedHeaderRead",
+        "ms": 53.9404
+      },
+      {
+        "pass": 0,
+        "stage": "encryptedReadAndDecode",
+        "ms": 1988.0456
+      },
+      {
+        "pass": 0,
+        "stage": "sourceIdentityCombine",
+        "ms": 193.4531
+      },
+      {
+        "pass": 0,
+        "stage": "homePresentation",
+        "ms": 244.8509
+      },
+      {
+        "pass": 0,
+        "stage": "titleIndexBuild",
+        "ms": 527.4168
+      },
+      {
+        "pass": 0,
+        "stage": "narrowQuery",
+        "ms": 94.5603
+      },
+      {
+        "pass": 0,
+        "stage": "broadQuery",
+        "ms": 37.8908
+      },
+      {
+        "pass": 1,
+        "stage": "gzipJsonEncode",
+        "ms": 2080.1071
+      },
+      {
+        "pass": 1,
+        "stage": "gzipJsonDecode",
+        "ms": 1900.8257
+      },
+      {
+        "pass": 1,
+        "stage": "encryptedWrite",
+        "ms": 2074.9805
+      },
+      {
+        "pass": 1,
+        "stage": "authenticatedHeaderRead",
+        "ms": 40.5743
+      },
+      {
+        "pass": 1,
+        "stage": "encryptedReadAndDecode",
+        "ms": 1975.2408
+      },
+      {
+        "pass": 1,
+        "stage": "sourceIdentityCombine",
+        "ms": 63.4836
+      },
+      {
+        "pass": 1,
+        "stage": "homePresentation",
+        "ms": 63.7084
+      },
+      {
+        "pass": 1,
+        "stage": "titleIndexBuild",
+        "ms": 392.7355
+      },
+      {
+        "pass": 1,
+        "stage": "narrowQuery",
+        "ms": 25.0853
+      },
+      {
+        "pass": 1,
+        "stage": "broadQuery",
+        "ms": 35.6624
+      },
+      {
+        "pass": 2,
+        "stage": "gzipJsonEncode",
+        "ms": 2168.3729
+      },
+      {
+        "pass": 2,
+        "stage": "gzipJsonDecode",
+        "ms": 1904.5007
+      },
+      {
+        "pass": 2,
+        "stage": "encryptedWrite",
+        "ms": 2191.1474
+      },
+      {
+        "pass": 2,
+        "stage": "authenticatedHeaderRead",
+        "ms": 43.7908
+      },
+      {
+        "pass": 2,
+        "stage": "encryptedReadAndDecode",
+        "ms": 2000.5033
+      },
+      {
+        "pass": 2,
+        "stage": "sourceIdentityCombine",
+        "ms": 75.9713
+      },
+      {
+        "pass": 2,
+        "stage": "homePresentation",
+        "ms": 54.9153
+      },
+      {
+        "pass": 2,
+        "stage": "titleIndexBuild",
+        "ms": 403.1477
+      },
+      {
+        "pass": 2,
+        "stage": "narrowQuery",
+        "ms": 35.4916
+      },
+      {
+        "pass": 2,
+        "stage": "broadQuery",
+        "ms": 32.8965
+      }
+    ]
+  },
+  "compactExperiment": {
+    "build": "0.14.13-design-preview",
+    "entries": 60000,
+    "scope": "In-memory experimental rows only; excludes group/header compatibility, limits, encryption, UI and device performance gates. Alternating order; no claim of cold samples.",
+    "objectBytes": 1493571,
+    "arrayBytes": 1241057,
+    "samples": [
+      {
+        "pass": 0,
+        "stage": "object-encode",
+        "ms": 2393.6964
+      },
+      {
+        "pass": 0,
+        "stage": "object-decode",
+        "ms": 2408.4681
+      },
+      {
+        "pass": 0,
+        "stage": "array-encode",
+        "ms": 1303.2554
+      },
+      {
+        "pass": 0,
+        "stage": "array-decode",
+        "ms": 1176.3881
+      },
+      {
+        "pass": 1,
+        "stage": "array-encode",
+        "ms": 1168.5785
+      },
+      {
+        "pass": 1,
+        "stage": "array-decode",
+        "ms": 1100.9224
+      },
+      {
+        "pass": 1,
+        "stage": "object-encode",
+        "ms": 2187.3058
+      },
+      {
+        "pass": 1,
+        "stage": "object-decode",
+        "ms": 2117.7721
+      },
+      {
+        "pass": 2,
+        "stage": "object-encode",
+        "ms": 2239.5731
+      },
+      {
+        "pass": 2,
+        "stage": "object-decode",
+        "ms": 2221.6455
+      },
+      {
+        "pass": 2,
+        "stage": "array-encode",
+        "ms": 1187.7006
+      },
+      {
+        "pass": 2,
+        "stage": "array-decode",
+        "ms": 1152.1384
+      }
+    ]
+  },
+  "compactDecodeMedianReductionPercent": 48.14031311476111,
+  "limits": [
+    "Debug emulator, not physical p95",
+    "Sequential stages overlap conceptually and must not be summed",
+    "First sample is not cold app startup",
+    "Array experiment excludes groups, header compatibility, size limits, encryption and UI",
+    "No migration or production cache format change"
+  ]
+}

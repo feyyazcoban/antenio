@@ -1,0 +1,664 @@
+{
+  "baselineWithConcurrentBuild": {
+    "build": "0.11.0-pilot",
+    "entries": 60000,
+    "live": 10000,
+    "movies": 35000,
+    "series": 15000,
+    "scope": "Debug emulator: model request through Compose idle and visible semantics. Includes test synchronization; not physical input-to-pixel or process startup.",
+    "encryptedWriteMs": 5178.7566,
+    "restoreToHomeMs": [
+      6971.2703,
+      6081.9227,
+      5767.6344,
+      5958.9741,
+      5814.9721
+    ],
+    "queryToVisibleMs": [
+      {
+        "pass": 0,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 1721.2072
+      },
+      {
+        "pass": 0,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 276.2457
+      },
+      {
+        "pass": 0,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 591.0347
+      },
+      {
+        "pass": 0,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 798.6419
+      },
+      {
+        "pass": 0,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 256.9944
+      },
+      {
+        "pass": 0,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 342.198
+      },
+      {
+        "pass": 1,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 299.1727
+      },
+      {
+        "pass": 1,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 249.7512
+      },
+      {
+        "pass": 1,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 317.1458
+      },
+      {
+        "pass": 1,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 419.2216
+      },
+      {
+        "pass": 1,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 249.6404
+      },
+      {
+        "pass": 1,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 232.5387
+      },
+      {
+        "pass": 2,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 282.6186
+      },
+      {
+        "pass": 2,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 198.1147
+      },
+      {
+        "pass": 2,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 363.038
+      },
+      {
+        "pass": 2,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 363.1321
+      },
+      {
+        "pass": 2,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 240.4351
+      },
+      {
+        "pass": 2,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 299.9305
+      },
+      {
+        "pass": 3,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 251.2592
+      },
+      {
+        "pass": 3,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 249.1898
+      },
+      {
+        "pass": 3,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 300.5929
+      },
+      {
+        "pass": 3,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 350.5626
+      },
+      {
+        "pass": 3,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 251.7798
+      },
+      {
+        "pass": 3,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 246.834
+      }
+    ],
+    "usedJavaHeapBytesAtEnd": 77174208
+  },
+  "baselineQuiet": {
+    "build": "0.11.0-pilot",
+    "entries": 60000,
+    "live": 10000,
+    "movies": 35000,
+    "series": 15000,
+    "scope": "Debug emulator: model request through Compose idle and visible semantics. Includes test synchronization; not physical input-to-pixel or process startup.",
+    "encryptedWriteMs": 1891.1002,
+    "restoreToHomeMs": [
+      2765.7051,
+      2599.3389,
+      2550.2267,
+      2299.7919,
+      2300.9811
+    ],
+    "queryToVisibleMs": [
+      {
+        "pass": 0,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 854.5749
+      },
+      {
+        "pass": 0,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 166.206
+      },
+      {
+        "pass": 0,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 216.926
+      },
+      {
+        "pass": 0,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 254.1954
+      },
+      {
+        "pass": 0,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 162.0285
+      },
+      {
+        "pass": 0,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 166.7796
+      },
+      {
+        "pass": 1,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 150.2693
+      },
+      {
+        "pass": 1,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 149.6712
+      },
+      {
+        "pass": 1,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 233.7838
+      },
+      {
+        "pass": 1,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 216.2994
+      },
+      {
+        "pass": 1,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 166.6458
+      },
+      {
+        "pass": 1,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 149.4011
+      },
+      {
+        "pass": 2,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 167.7168
+      },
+      {
+        "pass": 2,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 149.7802
+      },
+      {
+        "pass": 2,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 182.679
+      },
+      {
+        "pass": 2,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 201.5024
+      },
+      {
+        "pass": 2,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 165.4564
+      },
+      {
+        "pass": 2,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 150.7419
+      },
+      {
+        "pass": 3,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 149.4159
+      },
+      {
+        "pass": 3,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 182.7643
+      },
+      {
+        "pass": 3,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 200.4893
+      },
+      {
+        "pass": 3,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 183.907
+      },
+      {
+        "pass": 3,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 150.9909
+      },
+      {
+        "pass": 3,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 154.7721
+      }
+    ],
+    "usedJavaHeapBytesAtEnd": 91542816
+  },
+  "maintenanceBeforeSharedIndex": {
+    "build": "0.12.0-pilot",
+    "entries": 60000,
+    "live": 10000,
+    "movies": 35000,
+    "series": 15000,
+    "scope": "Debug emulator: model request through Compose idle and visible semantics. Includes test synchronization; not physical input-to-pixel or process startup.",
+    "encryptedWriteMs": 1735.1768,
+    "restoreToHomeMs": [
+      2524.608,
+      2417.1149,
+      2401.0785,
+      2333.1178,
+      2232.6663
+    ],
+    "queryToVisibleMs": [
+      {
+        "pass": 0,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 907.7096
+      },
+      {
+        "pass": 0,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 166.2852
+      },
+      {
+        "pass": 0,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 199.5987
+      },
+      {
+        "pass": 0,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 300.492
+      },
+      {
+        "pass": 0,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 149.1325
+      },
+      {
+        "pass": 0,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 150.4771
+      },
+      {
+        "pass": 1,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 150.2108
+      },
+      {
+        "pass": 1,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 149.8099
+      },
+      {
+        "pass": 1,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 183.3783
+      },
+      {
+        "pass": 1,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 259.2319
+      },
+      {
+        "pass": 1,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 173.5845
+      },
+      {
+        "pass": 1,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 150.1931
+      },
+      {
+        "pass": 2,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 134.9479
+      },
+      {
+        "pass": 2,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 138.6321
+      },
+      {
+        "pass": 2,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 209.3512
+      },
+      {
+        "pass": 2,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 216.6697
+      },
+      {
+        "pass": 2,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 167.9631
+      },
+      {
+        "pass": 2,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 116.2042
+      },
+      {
+        "pass": 3,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 133.0989
+      },
+      {
+        "pass": 3,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 148.937
+      },
+      {
+        "pass": 3,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 184.1287
+      },
+      {
+        "pass": 3,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 233.4476
+      },
+      {
+        "pass": 3,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 167.2403
+      },
+      {
+        "pass": 3,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 149.2132
+      }
+    ],
+    "usedJavaHeapBytesAtEnd": 101205808
+  },
+  "final": {
+    "build": "0.12.0-pilot",
+    "entries": 60000,
+    "live": 10000,
+    "movies": 35000,
+    "series": 15000,
+    "scope": "Debug emulator: model request through Compose idle and visible semantics. Includes test synchronization; not physical input-to-pixel or process startup.",
+    "encryptedWriteMs": 1682.8958,
+    "restoreToHomeMs": [
+      2628.5944,
+      2482.6964,
+      2550.2707,
+      2382.8829,
+      2383.4871
+    ],
+    "queryToVisibleMs": [
+      {
+        "pass": 0,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 822.605
+      },
+      {
+        "pass": 0,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 149.4128
+      },
+      {
+        "pass": 0,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 201.301
+      },
+      {
+        "pass": 0,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 283.0161
+      },
+      {
+        "pass": 0,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 133.0447
+      },
+      {
+        "pass": 0,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 149.8441
+      },
+      {
+        "pass": 1,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 150.3576
+      },
+      {
+        "pass": 1,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 149.5361
+      },
+      {
+        "pass": 1,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 200.6262
+      },
+      {
+        "pass": 1,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 199.3783
+      },
+      {
+        "pass": 1,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 183.7508
+      },
+      {
+        "pass": 1,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 150.3123
+      },
+      {
+        "pass": 2,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 148.8109
+      },
+      {
+        "pass": 2,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 150.6447
+      },
+      {
+        "pass": 2,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 183.6761
+      },
+      {
+        "pass": 2,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 217.3204
+      },
+      {
+        "pass": 2,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 165.6311
+      },
+      {
+        "pass": 2,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 150.1812
+      },
+      {
+        "pass": 3,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 149.4512
+      },
+      {
+        "pass": 3,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 133.4456
+      },
+      {
+        "pass": 3,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 182.7329
+      },
+      {
+        "pass": 3,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 217.5419
+      },
+      {
+        "pass": 3,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 133.2258
+      },
+      {
+        "pass": 3,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 150.533
+      }
+    ],
+    "usedJavaHeapBytesAtEnd": 83814256
+  },
+  "artwork": {
+    "abandonedRows": 10000,
+    "remainingRows": 1,
+    "sweepMs": 6732.2755,
+    "firstBatchMs": 45.9005,
+    "batchLimit": 64,
+    "databaseBytesBefore": 3870720,
+    "databaseBytesAfter": 32768,
+    "scope": "Debug emulator; incremental batches. Database size includes journal/WAL side files; no explicit VACUUM."
+  }
+}

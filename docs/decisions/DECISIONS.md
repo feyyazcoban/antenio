@@ -1,0 +1,149 @@
+# Karar kaydı
+
+| ID | Tarih | Karar | Durum ve dayanak |
+| --- | --- | --- | --- |
+| D001 | 2026-10-13 | İlk platform Android TV / Google TV | Kullanıcı kararı |
+| D002 | 2026-10-13 | M3U URL ve Xtream Codes | Kullanıcı kararı |
+| D003 | 2026-10-13 | İlk sürüm canlı TV + film + dizi | Kullanıcı kararı |
+| D004 | 2026-10-13 | Google TV UI kiti ve mevcut Figma temeli | Kullanıcı kararı |
+| D005 | 2026-10-13 | Codex ve Claude Code ortak belgelerden devam eder | Kullanıcı isteği; AGENTS ortak giriş |
+| D006 | 2026-10-13 | Figma düzeni üç mevcut sayfa içinde bölümlerle kurulur | Starter üç sayfa sınırına uygun uygulama tercihi |
+| D007 | 2026-10-13 | NEXTV geçici çalışma adı | Nihai marka açık; PRD'de mevcut NexTv ürününe referans |
+| D008 | 2026-10-13 | Kotlin + Compose for TV + Media3 | Kullanıcının “Tamam başlayalım” onayıyla native pilotta uygulandı; D017 ayrıntıları |
+| D009 | 2026-10-13 | Koyu tema ve mint vurgu mevcut temelden sürer | Tasarım başlangıç önerisi; renk kontrastı COLOR'da |
+| D010 | 2026-10-13 | Kısa, kesilebilir ve düşük sıçramalı hareket | Prototip önerisi; MOTION testleri bekliyor |
+| D011 | 2026-10-13 | Gerçek kaynak sırları ortak belgelere alınmaz | Çalışma kuralı; paylaşılan hesap yalnız özel testte |
+| D012 | 2026-10-13 | LG/Samsung ve Android/iOS sonraki faz | Kullanıcı kararı; platform sırası ayrıntısı açık |
+| D013 | 2026-10-13 | Figma kotası sürerken yerel, sentetik TV etkileşim prototipi | Kullanıcı ilk akışı burada denemeyi onayladı; üretim teknoloji seçimini değiştirmez |
+| D014 | 2026-10-13 | Prototip uygulama yüzeyinde paket içi Roboto | Mevcut type/font/family tokenıyla tutarlılık; geçici Segoe UI uygulama yüzeyinde kaldırıldı |
+| D015 | 2026-10-13 | D013 görsel veri sınırını genişlet: gerçek katalog afiş/logo/bölüm karesi; yerel F01–F06 prototipi | Kullanıcının “akışları uçtan uca tamamla” ve “gerçek assetlerle yap” isteği. Hesap/medya URL'leri hariç; oynatma, EPG ve parça listeleri örnek. Bilinen yanlış m1 eşleşmesi UI dışında. Üretim uygulaması kararı değildir. |
+
+## İlk test cihazı
+
+**D016 · 2026-10-13 · Kullanıcı bilgisi:** İlk fiziksel pilot cihaz **iFFALCON 65U95A**. Kullanıcının marka ve model yanıtlarıyla kaydedildi; minimum Android/API veya cihaz desteği kararı yerine geçmez. Modelin resmî özellikleri ve ölçülecek noktalar [PLATFORMS](../architecture/PLATFORMS.md) içinde. Native pilot ve emülatör testi hazır; fiziksel TV testi yapılmadı.
+
+## İlk native pilot
+
+**D017 · 2026-10-13 · Uygulama tercihi:** D008 önerisi uygulandı. Geçici paket `dev.iptvplayer.tv.pilot`, ad IPTV Player · Pilot, min API 26 / target API 36; bunlar yayın markası veya nihai cihaz desteği kararı değildir. Sürümler [uygulama README](../../apps/android-tv/README.md) içinde sabitlendi. Debug APK üretilir; üretim imzası kurulmadı.
+
+Tek kayıtlı kaynak ve tek oynatma oturumu; katalog bellekte, hesap Keystore/AES-GCM ile şifreli, favori/ilerleme cihazda. Kullanıcının HTTP kaynağı nedeniyle pilot cleartext erişimi açık, TLS doğrulaması korunur. Yedekleme/cihaz aktarımı kapalı. Altyazı/ses seçenekleri Media3'ün gerçek track listesinden gelir.
+
+EPG, PIN, QR, çoklu kaynak/profil ve otomatik sonraki bölüm bu APK'nin dışında; PRD'den çıkarılmadı. Sağlayıcı yetişkin bayrağı filtrelenir, tam ebeveyn denetimi yerine geçmez. Figma kota engeli nedeniyle bu turda Figma yazımı yapılmadı. Roboto ve mevcut renk rolleri native temaya taşındı. Eski tarayıcı prototipi ayrı tasarım referansı olarak kalır.
+
+## Değişiklik biçimi
+
+Yeni karar için ID, tarih, bağlam, karar, gerekçe, etkilenen belge/ekran ve durumu yazın. Bir eski karar değişirse “D00x yerine geçer” bağlantısı ekleyin. Araştırma sonucu kullanıcı kararı gibi işaretlenmez.
+
+## Açık kararlar
+
+Ürün adı, hedef pazar/diller, gelir modeli, uygulama paket adı, minimum cihaz desteği, pilot kullanıcılar ve yayın tarihi. Renk/hareket taslaklarının gerçek TV doğrulaması da bekliyor.
+
+## Ana sayfa ve kullanıcı pilotu
+
+**D018 · 2026-10-14 · Uygulama tercihi:** 0.2 ana sayfa, en çok 50 izleme kaydı, %95 tamamlanma eşiği, tam bölüm kimliğiyle devam ve favorileri koruyan geçmiş temizleme. İlk TV kurulumu kablosuz tamamlandı; ilk fiziksel gözlem codec/kalite kapılarını tamamlamaz.
+
+**D019 · 2026-10-14 · Kullanıcı talebi:** Gösterilen prototip ile native ekranlar hizalanacak; ortak tasarım standartları ve titiz UX incelemesi zorunlu teslim ölçütü. Kalıcı katalog, splash ve özgün açılış sesi istendi. Ses diğer markalardan alınmaz. Telefonla kolay kurulum ihtiyacı açıkça istendi; QR/web yaklaşımı ONBOARDING içinde öneri, hizmet kurulmuş sayılmaz.
+
+## Kalıcı katalog ve TV görünümü
+
+**D020 · 2026-10-14 · D017 katalog bellekte tercihi yerine:** Kullanıcı talebiyle tek kaynak kataloğu Keystore/AES-GCM, gzip NDJSON ve atomik dosya olarak saklanır. Altı saat tazelik bir pilot başlangıç tercihidir. Bozuk dosyada yeniden yükle; yenileme hatasında son listeyi koru. Hesap hash bağlamı kaynaklar arası yanlış cache kullanımını önler.
+
+**D021 · 2026-10-14 · D019 uygulaması:** Yerel prototipten ortak native geometri ve görsel kontrol. Android TV platform özel SplashScreen animasyonunu desteklemediğinden TV başlangıç penceresi + 220 ms kesilebilir Compose geçişi kullanılır. Ses özgün sentez, 1,12 s, sistem seviyesi ve kapatma ayarı. Fiziksel TV ses/görsel onayı bekliyor.
+
+**D022 · 2026-10-14 · Kullanıcı yetkisi:** Sabaha kadar bağımsız iyileştirme yapılabilir. Kullanıcının uyku mesajı dikkate alınarak gerçek TV açılmaz/ses çalınmaz; gece doğrulaması ayrılmış emülatörde yapılır. Genel hedefin PRD kapsamı korunur.
+
+## Ortak arama ve kumanda dayanıklılığı
+
+**D023 · 2026-10-14 · Uygulama tercihi:** FIND01 için 0.4'te bellekte başlık indeksi, Türkçe/aksan eşleme, kelime kesişimi ve kararlı tam/prefix/içerir sıralaması. Katalog başına indeks paylaşılır; sorgu ve indeksleme arka planda, eski iş iptal edilir. Ham URL ve hesap alanları aramaya girmez; sorgu kaydı tutulmaz. Yetişkin politikası mevcut gizleme kuralıyla aynıdır. Tek kaynak sınırı korunur; bu seçim çoklu kaynak gereksinimini iptal etmez.
+
+**D024 · 2026-10-14 · D019 devamı:** Odak resmi ve başlığı birlikte kaydırır. Kaynak yenilemesinde silinen kart en yakın geçerli konuma; silinen kategori Tümü'ne döner. Kontrol alanındaki odak korunur. Kalıcı bir kategori grubuna yönlenme, ekran dışına çıkabilen tek bir çipe bağlanmaktan kaçınır. İlk sürümün araştırma ölçüleri ve gerçek cihaz performans kapıları açık kalır.
+
+## Ayar paneli ve Back katmanları
+
+**D025 · 2026-10-14 · D019 devamı:** 0.5 Ayarlar, yerel prototipin sağ panel yapısını izler. Başlık/kapatma sabit, açıklamalı satırlar kaydırılır; uygulama/cihaz bilgisi ayrı alt sayfaya taşınır. Onaydan geri dönüş son ayar satırını korur. Yenileme sürerken satır odakta kalır, modelin tek iş koruması ikinci isteği önler.
+
+**D026 · 2026-10-14 · D024 tamamlayıcısı:** Arama Back basamakları klavye → sonuç → Ara gezinme satırı → ana sayfa. Boş/yüklenen sonuçta olmayan basamak atlanır. Kart görünürlüğü viewport daralmasıyla yeniden değerlendirilir; kırpılma boolean'ı değişince yer değiştirme başlar, sürekli koordinat değişimi animasyonu tekrar başlatmaz. Geniş kapsamlı cihaz/motion ölçümleri ayrıca gereklidir.
+
+**D027 · 2026-10-14 · PLAY02 uygulaması:** 0.6 tek Media3 oynatıcı üzerinde sınırlı kurtarma: 1/3 saniye arayla en çok iki deneme; ilk hatadan 20 saniye, normal açma/buffer 30 saniye. İç yükleme tekrarları kapalı; iki katmanlı çoğalma yok. Auth/limit/biçim/sertifika hatasında otomatik tekrar yok. İptal/Back/kaynak değişimi/arka plan bekleyen işi durdurur. VOD konumu tutulur; canlı pencere yenilenir. On saniye kesintisiz oynatma veya açık kullanıcı tekrarı bütçeyi sıfırlar. Bu değerler pilot başlangıç tercihidir; gerçek cihaz ve sağlayıcı matrisi bekler.
+
+**D028 · 2026-10-14 · VOD02 uygulaması:** 0.7'de otomatik sonraki bölüm varsayılan açık, Ayarlar'dan kapatılabilir ve cihaz tercihi olarak saklanır. Gerçek medya sonundan sonra 10 saniye geri sayım; jenerik zamanı tahmin edilmez. İlk odak Bu bölümde kal: tek OK veya Geri iptal eder. Liste/numara belirsizliği otomatik geçişi durdurur; var olan geçerli hedef elle başlatılabilir. M3U numaralarının başlıktan eşleştirildiği gösterilir; eski cache yeni sıra kanıtı yoksa manuel kalır, yenilemede kanıt eklenir. Kaynak/medya/ayar değişimi, arka plan ve hedefin kalkması zamanlayıcıyı iptal eder. Sonraki bölüm baştan açılır; sezon ve dönüş odağı yeni bölümü izler. On saniye önceki prototiple uyumlu ürün tercihi; kullanıcı/cihaz incelemesi bekler.
+
+## Gezinme ölçeği ve dizi favorisi
+
+**D029 · 2026-10-14 · 0.8 uygulama tercihi:** Navigation yazı ölçeğini küçültmez; mevcut Roboto stiliyle etiketleri ölçer, rayı gerektiğinde genişletir ve satır yüksekliğini esnek bırakır. Orta menü kaydırılır; Ayarlar alttan erişilir. Bölüm yıldızı kütüphanede görünen diziyi temsil eder. Eski bölüm favorileri yalnız doğrulanmış dizi ilişkisiyle dönüştürülür; bilinmeyen bağlantı tahmin edilmez. 1.0/1.5/2.0 gezinme ve kalıcılık testleri QA kaydındadır.
+
+## Kaynak işlemlerinin sırası
+
+**D030 · 2026-10-14 · 0.8 uygulama tercihi:** Kaynak/cache okuma, kayıt ve silme süreç genelinde sıraya alınır. İndirme iptal edilebilir; başlamış kısa disk kaydı/silme bitirilir, eski çağıran UI yayımlamaz. Kaynak kaldırmada player ayrılmadan kaynak bağlamı temizlenir. Hata sabit Türkçe mesajla tekrar denemeye izin verir. Bu, ayrı şifreli kaynak/cache dosyaları arasında elektrik kesintisine dayanıklı tek işlem iddiası değildir. [AtomicFile](https://developer.android.com/reference/android/util/AtomicFile) eşzamanlı işlemlerin kilidini sağlamaz; [Mutex.withLock](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.sync/with-lock.html) ve [withContext iptal davranışı](https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/with-context.html) kullanılır.
+
+## Çoklu kaynak kimliği ve kayıt geçişi
+
+**D031 · 2026-10-14 · devam eden 0.9 uygulama tercihi:** SRC03/FIND01 tam kapsamı için runtime içerik anahtarı kaynak + yerel ID'dir; aynı başlık/sağlayıcı ID'si kaynaklar arasında birleştirilmez. Disk katalog/favori/geçmiş yerel ID'yi ve kaynak bağlamını korur. Kaynak listesi mevcut Keystore anahtarıyla AES-GCM registry'de, kaynak filtresiyle saklanır. Eski tek kaynak ve p: ilerleme kayıtları ilk registry yazımında taşınır. Yeni p2 öneki yalnız hedef kaynağı temizlemeyi sağlar. Katalog dosyasına kaynak sahibinin özeti eklenir; eski format okumada desteklenir. Bu veri katmanı kararı henüz ekranlara bağlı değildir; [entegrasyon ve açık geçiş maddeleri](../architecture/MULTI_SOURCE.md) tamamlanmadan çoklu kaynak teslim edildi sayılmaz.
+
+## Native çoklu kaynak davranışı
+
+**D032 · 2026-10-14 · 0.9:** D031 veri temeli native yönetim ve filtrelere bağlandı. Home/katalog/Favoriler kaynak seçimi kalıcı, arama seçimi oturum içi bağımsızdır. Cache varsa UI hemen kullanılabilir; eksik/eski kaynaklar sırayla yenilenir. Giriş sahibini runtime ContentRef belirler, tek varsayılan hesap playback için kullanılmaz. İlk registry yazımı eski sahipsiz dosyaları eski tek kaynak bağlamında temizler. Düzenleme ID korur; aynı bağlantı tekrar eklenmez; aynı görünür ada sıra eki verilir. Kaynak silmede filtreler ve odak kurtarılır. Global artwork cache’in scoped temizliği ve bozuk registry recovery açık kalite maddesidir; veri katmanı temizliğini bunlar da tamamlanmış gibi sunmayın.
+
+## Kaynak sahibiyle görsel temizliği
+
+**D033 · 2026-10-14 · 0.10:** D032'nin açık cache maddesi uygulandı. Ortak 80 MB Coil disk cache'te URL özeti anahtar, SQLite'ta hash owner/key referansı; bellekte owner ayrı. Kaldırma o sahibin ağ çağrılarını ve işlerini bitirir; son referanssa byte/metadata, her durumda kendi bellek varyantları temizlenir. İlk geçiş adsız eski görsel cache'i bir kez temizler; katalog/favoriler korunur. Sahiplik tablosu disk bütçesine dahil değildir; büyük veri budama/performance kapısı açık. Ayrıntı MULTI_SOURCE sözleşmesinde.
+
+**D034 · 2026-10-14 · 0.10:** Okunamayan kayıt sessizce yeni forma veya eski hesaba düşmez. Yeniden dene önde; yalnız bozuk kayıt için ayrı sıfırlama ve Vazgeç odaklı onay. Sıfırlama öncesi kaydın değişmediği ve hâlâ okunamadığı kilit altında doğrulanır. Tüm yerel kaynak/kişisel kayıtlar, katalog/görsel cache ve eski şifreleme anahtarı açık onayla temizlenir; cihaz tercihleri kalır. Sonradan düzelmiş kaydı eski pencere silemez. Çok dosyada elektrik kesintisine dayanıklı tek işlem iddiası yoktur.
+
+**D035 · 2026-10-14 · 0.11:** Uzun kaynak adlarının başı ve sonu tek satırlık kısaltmayla korunur; sıra ve tür ayrı destekleyici bilgidir. Tam ad ve tam durum açıklaması Bilgiler'de kumandayla okunur. Kaynak adı veride kesilmez, sıra kimlik yerine kullanılmaz. Onay/iptal düğmeleri uzun açıklamadan bağımsız sabit kalır, kaldırma onayı Vazgeç ile açılır. Kaynak kartı odakta bütünüyle görünür tutulur. 16 kaynak ve 1.0/1.5/2.0 font kontrolü bu yüzeyleri kapsar; PRD'nin erişilebilirlik ve fiziksel cihaz kapılarını kapatmaz.
+
+**D036 · 2026-10-14 · 0.12:** Geçersiz görsel sahiplik kayıtları başlangıçta ve her16 istek bitişinde64 satırlık arka plan turlarıyla temizlenir. Disk/bellek/aktif isteği kalan anahtarın tüm sahipleri korunur. Dosya yolları Coil snapshot'larından göreli alınır; özel dosya biçimi tahmin edilmez, bilinen dosya kontrolü LRU sırasını yenilemez. Bakım hatası uygulamayı kapatmaz. Index fiziksel byte kotası iddiası yoktur; [PERFORMANCE](../architecture/PERFORMANCE.md) sınırları geçerlidir.
+
+**D037 · 2026-10-14 · 0.12:** Arama indeksi katalog yayımlanınca ViewModel'e ait paylaşılan Deferred olarak hazırlanır. Sorgu iptali indeks hazırlığını baştan başlatmaz; katalog değişimi/Model bitişi hazırlığı iptal eder. Eski/yetişkin içerik politikası değişmez. 60bin kayıtlı debug/emülatör tanı ölçümü release/fiziksel p95 hedefinin yerine geçmez; ilk sorgu ve sıcak sorgu ayrı raporlanır.
+
+**D038 · 2026-10-14 · EPG veri temeli, entegrasyon sürüyor:** Kaynak başına XMLTV akıştan normalize edilir; ofsetler korunur, eksik bitiş/boş aralık/çelişen kanal eşleşmesi tahminle doldurulmaz. Büyük program listesi bellekte tutulmaz. Sorgulanabilir SQLite rehber metaverisi Android'in özel alanında, yedekleme kapalı olarak saklanır; ayrıca uygulama düzeyinde şifrelenmez. Hesap/rehber/yayın URL'leri DB'ye yazılmaz; kaynak yapılandırması mevcut şifreli depoda kalır. İzole, kapanmış staging DB yalnız güncel kaynak/kuşak kontrolünden sonra atomik yayımlanır. Kaynak kaldırma/sıfırlama rehberini de temizler. Bu karar native rehberin tamamlandığı anlamına gelmez; [EPG sözleşmesi](../architecture/EPG.md) ve PRD kabul ölçütleri geçerlidir.
+
+
+**D039 · 2026-10-14 · 0.13 native rehber:** Izgara tek kararlı D-pad odağı ve kanal/zaman imleciyle çalışır; dikeyde zaman korunur, OK bırakılması güncel hedefi açar. Şimdiki program canlı yayına gider; diğerleri açıklama ve açık canlı izleme eylemi sunar, catch-up iddiası yoktur. Saat dilimi cihazda, özel XMLTV adresi şifreli kaynakta kalır. Rehber durumu katalogdan bağımsız yenilenir; eski bilgi/iptal/hata oynatmayı engellemez. SQLite stage transaction bütün yaşamı boyunca tek fiziksel GuideWriter iş parçacığında tutulur; ağ iptali ayrı IO gözlemcisidir. Büyük fontta iki saatlik pencere, sabit eylemler ve kaydırılabilir açıklama kullanılır. Gerçek sağlayıcı/cihaz onayı açık. [Sözleşme](../architecture/EPG.md).
+
+
+**D040 · 2026-10-14 · Görsel öncelik:** Kullanıcı yeni özelliklerden önce iyi tasarım istedi; Google TV'ye yakın yumuşak yüzeyler, yuvarlak kartlar, ferah düzeni seçti. PIN/diğer yeni kapsam bu işin önüne geçmez. Üst gezinme, nötr zemin/sakin mint ve ortak kart geometrisi yerel inceleme adayında somutlaştırıldı; kesin token onayı, Figma veya native uygulama sayılmaz. [Görsel revizyon](../design/VISUAL_REVISION.md), Android karşılığı ve gerçek ekran karşılaştırmasıyla devam eder. Kullanıcı emülatörü otomatik testlerden ayrılır.
+
+
+**D041 · 2026-10-14 · Android görsel önizlemesi:** D040 yönü mevcut Compose for TV bileşenlerine uygulanır; ayrı bir tasarım bileşeni kopyası oluşturulmaz. Üst menüde odak hareketi ekran değiştirmez, OK açar. Kaynak filtresi ilgili sayfa başlığında, rehber canlı katalog başlığındadır. Büyük yazıda başlık/kategori/arama kartlarla kayabilir; odaktaki afiş ve açıklama birlikte görünür alana alınır. Aktif arama sorgusu kapalı girişte de düğmede belirtilir. Aday tokenlar native uygulanmış, Figma eşitlenmemiş olarak işaretlenir. 0.14 tasarım APK'si ayrı test emülatöründe doğrulanır; kullanıcı emülatörünün kaydı ve 0.13 kurulumu korunur. [Native sözleşme](../design/NATIVE_VISUAL_REVISION.md) ve [QA](../project/native-visual-revision-qa.json) fiziksel/kullanıcı onayı yerine geçmez.
+
+
+**D042 · 2026-10-14 · Katalog sunum ipuçları:** Tam çevrelenmiş dekoratif başlık ve boş EPG kimliği, otomatik raf seçimi/sıralama için kullanılır; oynatılamazlık veya kalıcı silme kararı değildir. INFO kelimesine göre filtre uygulanmaz. Tüm kayıtlar kütüphane ve aramada kalır; açık favori/geçmiş tercihi korunur. Büyük kapak tüm uygun havuzdan seçilir; geniş görsel yoksa afiş 2:3 oranında sunulur. Posterle aynı backdrop adresi geniş görsel kabul edilmez; görselin doğru eser olması ayrıca doğrulanmalıdır. [Katalog sunumu](../design/CATALOG_PRESENTATION.md), mevcut kaynak rehberindeki gizleme önerisinin bu aşamadaki somut alternatifidir; yeni gizleme ayarı eklenmez.
+
+**D043 · 2026-10-15 · İçeriği ekrana yayma:** Kullanıcı sağ/sol boşluğu fazla buldu ve bütün içeriğin daha fazla yayılmasını istedi. Ortak dış kenar58dp'den32dp'ye indirildi; native gezinme, ana sayfa, kütüphane, arama, rehber, detay, kurulum, kaynaklar ve oynatıcı bunu paylaşır. Odaktaki yatay kartlar için7dp güvenli pay korunur. Okuma pencerelerinin metin genişliği, ana ekranın dış kenarıyla aynı kavram değildir. Ana sayfa geniş görseli sağdaki%68alanda üstten hizalanır; özet%58alanda kalır. Canlı raf kartları168dp, diğer geniş kartlar196dp. Ayrıntılar eylemi oynatma başlatmadığından play simgesi kaldırıldı. Figma henüz eşitlenmedi; kullanıcı görsel kabulü açık.
+
+**D044 · 2026-10-15 · Kompakt katalog:** Ölçümle saptanan çözüm maliyetini azaltmak için yeni cache yazımları sürüm2sıralı JSON dizisi kullanır. Sürüm1okuma korunur; alanlar/boş bölüm grupları/rehber başlığı kaybolmaz. AES-GCM hesap bağlamı, atomik yazım ve boyut sınırları korunur. Eski APK sürümüne düşürmede v2okuma taahhüdü yoktur. [Biçim sözleşmesi](../architecture/CATALOG_CACHE.md).
+
+**D045 · 2026-10-15 · Kaynak içi kimlik metaverisi:** Sağlayıcı categoryId ve kaynak içi parentLocalId, görünen addan ayrı taşınır. Katalog v3 ilk 20 v2 alanını koruyup bu iki alanı ekler; v1/v2 okunur, bilinmeyen kimlik uydurulmaz. İçerik kimlikleri ve hesap bağlı şifreleme değişmez. PIN politikası tamamlandı anlamına gelmez. [Sözleşme](../architecture/CATALOG_CACHE.md).
+
+**D046 · 2026-10-15 · Görsel genişlik:** Kullanıcının görsel kalite ve daha az yan boşluk isteği için ortak kenar 24 dp, daha kısa menü payı ve 264 dp ana sayfa vitrini uygulandı. D043 yatay görsel alanı %78 olarak güncellendi; Roboto/Google TV bileşenleri korunur. [Ölçüler](../design/VISUAL_POLISH_20.md). Fiziksel overscan ve kullanıcı kabulü bekler.
+
+**D047 · 2026-10-15 · PIN doğrulayıcı adayı:** API26 platform JCA ile PBKDF2-HMAC-SHA256/600.000 iterasyon, rastgele 16 bayt tuz, 32 bayt çıktı ve sabit sürümlü kayıt seçildi. Bu Android kullanılabilirliği ödünleşimidir, OWASP genel Argon2id tercihi veya FIPS sertifikası diye sunulmaz. [Gerekçe/sınırlar](../architecture/PIN_CREDENTIAL.md). Şifreli depo/kalıcı deneme sınırı ve erişim entegrasyonu olmadan etkinleştirilmez.
+
+**D048 · 2026-10-15 · PIN deneme bütçesi:** Doğrulamadan önce rezervasyon; beşinci denemeden sonra 30 saniyeden 300 saniyeye sınırlı bekleme. Aynı boot monoton deadline, boot değişiminde tam gecikme. Duvar saati kullanılmaz; iptal de deneme tüketir. Bunlar uygulama tercihleridir. [Sözleşme](../architecture/PIN_ATTEMPTS.md). Depo/kontrolcü entegrasyonu bekler.
+
+**D049 · 2026-10-15 · Koruma deposu:** Kaynak hesabından ayrı Keystore anahtarı, tek atomik PIN/kurallar/deneme kaydı, nesil karşılaştırması. Anahtar ve dosyadan yalnız biri varsa hata; sessiz yeniden kurulum yok. [Sözleşme ve sınırlar](../architecture/PROTECTION_STORE.md). Denetleyici/UI entegrasyonu ve açık kurtarma tasarımı bekler.
+
+**D050 · 2026-10-15 · Görsel hiyerarşi:** D040 önceliği doğrultusunda yeni özellikler yerine vitrin metni/yardımcı eylem ağırlığı ve raf başlık hizası iyileştirildi. Görsel üstünde kaynak seçimi opak kalır; düz zeminde yardımcı kontroller çevre çizgilidir. [Sözleşme](../design/VISUAL_POLISH_23.md). Kullanıcı görsel kabulü bekler.
+
+**D051 · 2026-10-15 · Ana sayfa raf bağlamı:** Ekrana sığan raf başlığı ve kart tek görünürlük isteğinde üst hizaya alınır; sığmayan bağlamda kart görünürlüğü korunur. Son raf alt payı ölçülen yüksekliğe bağlıdır. [Sözleşme](../design/HOME_SHELF_FRAMING.md). Fiziksel akıcılık ve kullanıcı kabulü bekler.
+
+**D052 · 2026-10-15 · Ortak seçim işareti ve alan ayrımı:** Renkle belirtilen seçim, mevcut gezinme dilindeki alt çizgiyle ortak düğmelere taşındı; seçim erişilebilirlik bilgisine de yansıtılır. Kaynak formunda alan içi mevcut koyu zemin, odaksız alan çevresinde daha belirgin mevcut outline rolü kullanılır. Arama türleri katalogdaki kompakt yardımcı düğme stilini paylaşır. [Ölçüler ve nominal kontrast](../design/CONTROL_POLISH_25.md). Figma ve fiziksel kullanıcı kabulü açık.
+
+**D053 · 2026-10-15 · Kaydırma kenarı, tam satır ve liste seçimi:** UI denetiminde doğrulanan bozukluklar için kaydırılan listeler kenarda yarım metin satırı bırakmaz: düz zeminde kenar aynı renge solar, görsel arka planda alfa maskesi kullanılır, sabit satırlı listeler ve metin okuyucu tam satıra yuvarlanır. Odak görünürlük payı solma bandını aşar ama liste iç boşluğundan büyük olmaz. Tam genişlik liste satırlarında seçim sağdaki ✓ ile, kompakt düğmelerde 4 dp aşağıdaki mint çizgiyle gösterilir. Devre dışı eylem odak almaz. D052 çizgi kararını genişletir, değiştirmez. [Ayrıntılar](../design/UI_REPAIR_26.md). Kullanıcı görsel kabulü ve Figma açık.
+
+**D054 · 2026-10-15 · Yazarken arama düzeni:** Kullanıcının fiziksel TV'de arama sonuçlarını klavye açıkken görememesi üzerine Ara ve bölüm araması yazarken yazma kipine geçer: başlık, filtre ve kategori/tür satırları çekilir, alan menünün altına çıkar, sonuç sayısı alan etiketine eklenir ve bölüm sonuçları Ara'daki satır kartıyla gösterilir. Klavye boşluk bildirmezse alanda yazı değişmesi de yazma kipi sayılır. [Ayrıntılar](../design/SEARCH_TYPING_27.md). Fiziksel TV görünümü, kullanıcı görsel kabulü ve Figma açık.
+
+**D055 · 2026-10-15 · Sol menü ve TCL düzeninde Ara:** Kullanıcının TV'deki örnekleri bizim stilde istemesiyle üst gezinme çubuğu sol menüye taşındı: kapalıyken 72 dp simge şeridi, odakta içeriğin üstüne açılan 208 dp yazılı menü; içerik yeniden dizilmez (MOT04), menüye her giriş bulunduğun bölüme düşer, sağ ok içerikteki son öğeye döner. D040'taki üst gezinme adayının ve D041'in "üst menü" ifadesinin yerine geçer; D041'in "odak ekran değiştirmez, OK açar" kuralı ve D029'un "etiket sığmazsa menü genişler" kuralı korunur. Ara, üstte geniş alan ve türe göre yatay raflarla yeniden düzenlendi; D054'ün yazma kipi korunur, alan artık içeriğin en üstündedir. Ana sayfada Geri çıkış sorusu açar (odak Vazgeç). [Ayrıntılar](../design/SIDE_NAV_SEARCH_28.md). Fiziksel TV görünümü, kullanıcı görsel kabulü ve Figma açık.
+
+**D056 · 2026-10-16 · Akıcılık ve TiviMate yapısı:** Kullanıcının takılma bildirimi ve TiviMate örnekleri üzerine: TV teslimleri `release` türüdür (R8, hata ayıklama kapalı, aynı imza; testler `debug`); odakta büyüme animasyonu kaldırıldı, odak renk ve çerçeveyle anında gösterilir (D040/D052'nin 1,025 büyüme önerisinin yerine geçer); odak hareketleri uygulama durumunu güncellemez; sol menü 160/120 ms, içerik menü kadar çizim katmanında kayar; menü simgeleri Material Symbols Rounded, seçili olan dolu. Canlı TV, Filmler ve Diziler'de solda kategori sütunu (sanal kategoriler, ardından sağlayıcı sırası), Canlı TV'de numaralı satır ve şimdi/sonra, Filmler/Diziler'de odaktaki başlığın bilgisi ve afiş ızgarası. Kullanıcı gece boyunca kararı bana bıraktı; [ayrıntılar](../design/FLUID_TIVIMATE_29.md). Sabah görsel kabul, fiziksel ölçüm ve Figma açık.
+
+**D057 · 2026-10-16 · Sezon rafları ve konum sayacı:** Kullanıcının TiviMate ayrıntı ve ızgara örneklerinin açık kalan parçaları: dizi ayrıntısında sezon düğmeleri ve üçlü bölüm ızgarası yerine her sezon için "Sezon N" başlığı, sağında hatırlanan bölümün "2 / 10" sayacı ve tek satır 16:9 bölüm rafı; ilk odak bölümdedir (oynatılan ya da Oynat'ın başlatacağı), Yukarı/Aşağı sezonlar arasında rafın hatırladığı bölüme gider. Kütüphanede normal yazıda başlık satırı ızgaranın üstünde sabittir (büyük yazıda eskisi gibi kayar) ve odak afiş ızgarasındayken sayı yerine "sıra / toplam" gösterir. Sayaçlar konumu yalnız kendi metninde okur; odak hareketi ekranı yeniden oluşturmaz (D056). TiviMate'in adı, logosu ve renkleri kullanılmaz; [ayrıntılar](../design/TIVIMATE_SEASONS_30.md). Görsel kabul, fiziksel ölçüm ve Figma açık.
+
+**D058 · 2026-10-16 · Klavye yalnız OK ile açılır:** Kullanıcının isteğiyle metin alanları odak alınca klavye açmaz; klavye odaktaki alanda OK ile açılır, Geri yalnız klavyeyi kapatır. Ekranın kendisinin odak verdiği alanlar (Ara, bölüm araması, kaynak formu, rehber ayarları) da buna dahildir; klavyedeki İleri sonraki alana geçer, orada klavye yine OK ile açılır (beklenen, elle doğrulanmadı). D054'teki yazma kipi klavye açılınca başlar. 0.14.32: Esc (bilgisayar klavyesi) Geri gibi çalışır; klavye açıkken önce klavyeyi kapatır. [Ayrıntılar](../design/KEYBOARD_ON_OK_31.md).
+
+**D059 · 2026-10-16 · Ana sayfa sadeleşti:** Kullanıcının isteğiyle ana sayfada raf başlıklarındaki "Tümünü gör" ve "Tüm kaynaklar" kaynak seçicisi kaldırıldı. Bölümlere sol menüden gidilir; kaynak seçici Kütüphane, Ara ve Rehber'de kalır. Ana sayfa seçili kaynağa göre süzülmeye devam eder, ancak bunu gösteren bir öğe yoktur.
+
+**D060 · 2026-10-16 · Gezinme ve kaynak seçimi:** Kullanıcının isteğiyle: ana sayfada içerikten Geri sol menüye gider, menüden Geri çıkış sorusunu açar (D055 korunur). Kaynak seçici ("Tüm kaynaklar") hiçbir ekranda yoktur; kaynaklar Ayarlar'dan yönetilir ve uygulama her zaman tüm kaynakları gösterir (eski kayıtlı seçim sıfırlanır). Kategori sütununda odak gezinmesi listeyi değiştirmez, OK değiştirir (D056'daki "kısa süre durunca göster" kaldırıldı). Menüden bir bölüme girişte odak kategori sütununda seçili "Tüm …" satırındadır.
+
+**D061 · 2026-10-16 · Sıralama ve puan:** Kullanıcının seçimiyle: Filmler ve Diziler bir "Sırala" düğmesiyle Varsayılan (sağlayıcı sırası), Son eklenen, Ad (A–Z, Türkçe alfabe), Yıl ve Puan'a göre sıralanır; seçim bölüm başına cihazda saklanır, Canlı TV ve Favoriler kendi sırasını korur. Bilinmeyen tarih/yıl/puan sona gider, eşitler sağlayıcı sırasını korur. Sağlayıcı puanı 0–10 ölçeğinde gösterilir ("★ 7,5"), yoksa hiç gösterilmez; afişte sol üstte küçük koyu bir rozet, bilgi panelinde ve ayrıntıda metin. Puan yalnız sağlayıcının verdiği değerdir; dış puan servisi kullanılmaz.

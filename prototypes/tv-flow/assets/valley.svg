@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#243d47"/><stop offset=".53" stop-color="#cb9b75"/><stop offset="1" stop-color="#efc58e"/></linearGradient>
+ <linearGradient id="land" x2=".8" y2="1"><stop stop-color="#ce9a71"/><stop offset="1" stop-color="#553e3a"/></linearGradient>
+ <linearGradient id="rock" x1="0" y1="0" x2="1" y2=".6"><stop stop-color="#ebc292"/><stop offset=".5" stop-color="#c38c63"/><stop offset="1" stop-color="#745440"/></linearGradient>
+ <linearGradient id="shade" x2="1" y2="1"><stop stop-color="#674f48"/><stop offset="1" stop-color="#283534"/></linearGradient>
+ <radialGradient id="sun"><stop stop-color="#fff0bc" stop-opacity=".58"/><stop offset="1" stop-color="#ffdfa6" stop-opacity="0"/></radialGradient>
+ <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".45" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".08"/></feComponentTransfer><feBlend in="SourceGraphic" mode="soft-light"/></filter>
+ <symbol id="spire" viewBox="0 0 130 380"><path d="M4 380 35 190 46 157 56 54 69 20 83 75 89 165 107 212 130 380Z" fill="url(#rock)"/><path d="m69 20 1 150 21 92 13 118h26l-23-168-18-47-6-90Z" fill="#71513e" opacity=".7"/><path d="m45 158 12-99 11-36-4 138-17 142-15 51Z" fill="#f0c99d" opacity=".48"/><path d="m42 159 24-9 25 17-7 17-29-2Z" fill="#6f4d3a" opacity=".5"/><path d="M57 244h13v20H57z" fill="#392c26"/><path d="m0 375 32-23 33 8 30-9 35 29Z" fill="#b27b58"/></symbol>
+</defs>
+<path fill="url(#sky)" d="M0 0h1600v900H0z"/>
+<circle cx="1200" cy="292" r="290" fill="url(#sun)"/><circle cx="1200" cy="292" r="38" fill="#ffe5ae"/>
+<path d="m0 414 150-63 175 29 140-90 173 105 202-61 137 59 189-12 146 40 288-112v310H0Z" fill="#91857c" opacity=".47"/>
+<path d="m0 495 160-29 179 58 190-78 186 56 190-36 183 61 152-38 181 57 179-18v372H0Z" fill="#ab8c73"/>
+<path d="M0 580q186-123 427 4t449 6 724-37v347H0Z" fill="url(#land)"/>
+<path d="M170 900q357-310 663-259 286 32 449-134-145 183-471 196Q535 721 470 900" fill="#ecc397" opacity=".5"/>
+<g opacity=".73"><use href="#spire" x="1110" y="388" width="73" height="214"/><use href="#spire" x="1192" y="398" width="66" height="192"/><use href="#spire" x="1280" y="364" width="81" height="236"/><use href="#spire" x="1380" y="377" width="96" height="280"/></g>
+<g><use href="#spire" x="790" y="356" width="146" height="427"/><use href="#spire" x="954" y="421" width="104" height="304"/><use href="#spire" x="1090" y="500" width="138" height="403"/><use href="#spire" x="1280" y="444" width="179" height="523"/><use href="#spire" x="670" y="558" width="113" height="330"/></g>
+<path d="M0 720q165-182 325 7t371 65l96 108H0Z" fill="url(#shade)"/>
+<path d="M1200 900q179-94 400-149v149Z" fill="#413b34"/>
+<g transform="translate(980 195)"><path d="M0 12c-36-49-20-78 3-78s42 29 10 78l-3 12H3Z" fill="#c8774f"/><path d="M4-66C-8-35-7-17 5 12h6C24-25 19-45 4-66" fill="#edcc98"/><path d="M3 26h10v8H3Z" fill="#493c32"/></g>
+<g transform="translate(1410 160) scale(.48)"><path d="M0 12c-36-49-20-78 3-78s42 29 10 78l-3 12H3Z" fill="#bd8460"/><path d="M4-66C-8-35-7-17 5 12h6C24-25 19-45 4-66" fill="#e1ceaa"/><path d="M3 26h10v8H3Z" fill="#493c32"/></g>
+<path fill="transparent" filter="url(#grain)" d="M0 0h1600v900H0z"/>
+</svg>

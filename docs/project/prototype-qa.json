@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "checks": [
+    "F01 Xtream: validation, draft, cancelled import, successful import",
+    "F02 live: D-pad, audio/subtitle, layered Back restores exact channel",
+    "Channel drawer respects PIN and cancelled PIN restores the selected channel",
+    "F02 guide: time anchor, future program, current playback, return",
+    "F03 movie: play/pause/seek, resume, subtitle off, controls, exact return",
+    "F04 series: seasons, episode return, cancel autoplay, next season, final episode",
+    "F05 search: movie/channel round trip, retained query, screen keyboard, no results",
+    "Favorites: add, open, remove and safe focus on empty list",
+    "F06 PIN: wrong, cancel, correct, settings, relock",
+    "VOD retry stays in the same player",
+    "M3U, partial retry, empty edit and failed connection",
+    "Local Roboto, real artwork, missing artwork, reduced motion, desktop/narrow layout",
+    "No external requests or console/runtime errors"
+  ],
+  "externalRequests": 0,
+  "browserErrors": 0,
+  "checkedAt": "2026-10-13",
+  "prototypeVersion": "0.2",
+  "browser": "Chrome via Playwright",
+  "assetFilesVerified": 47,
+  "assetChecks": "SHA-256, decoded dimensions and image integrity",
+  "visibleMovies": 5,
+  "excludedMovieIds": [
+    "m1"
+  ],
+  "nativeDeviceTested": false,
+  "realPlaybackTested": false
+}

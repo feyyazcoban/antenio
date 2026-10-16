@@ -1,0 +1,42 @@
+{
+  "components": [
+    "ProtectionSnapshot",
+    "ProtectionCodec",
+    "ProtectionStore"
+  ],
+  "integrated": false,
+  "jvm": {
+    "newTests": 4,
+    "total": 150,
+    "passed": 149,
+    "skipped": 1,
+    "failures": 0
+  },
+  "android": {
+    "test": "ProtectionStoreTest",
+    "passed": 4,
+    "device": "emulator-5556 / nextv_design_api36",
+    "isolatedNamespaces": true
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "checks": [
+    "all scopes and attempt/credential codec roundtrip",
+    "malformed/oversized/duplicate records",
+    "Keystore encrypted read through new store instance",
+    "correct PIN verification on Android",
+    "missing file/key fail closed",
+    "ciphertext tampering and cross-store swap",
+    "stale generation rejected",
+    "failed write preserves old state",
+    "policy changes require revision increase"
+  ],
+  "limits": [
+    "No UI/controller/access gate integration",
+    "No true process death/power loss",
+    "Not multiprocess or malicious rollback resistant",
+    "No new release APK or TV change"
+  ]
+}

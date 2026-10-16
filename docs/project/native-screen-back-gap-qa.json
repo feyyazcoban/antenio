@@ -1,0 +1,39 @@
+{
+ "date": "2026-10-16",
+ "version": "0.14.37-design-preview source. The published 0.14.37 release was built after the Search/Guide/Player change (0.14.37 HANDOFF) but before the HomeBackToMenu change; that one ships with the next delivery.",
+ "device": "emulator-5556 / nextv_design_api36 / API 36, windowed, font 1.0; debug builds for tests. The user agreed in chat that the tests delete their own source on 5556.",
+ "request": "Ara, Rehber and Oynatıcı have their own BackHandlers whose enabled flag follows a route change only on the next applied frame; a Back in that gap reached the old screen (e.g. a quick second Back after Ara's menu -> Home ran model.home() again and was lost instead of asking). Apply the PilotApp principle (decide by the model's route when Back arrives) to these handlers without changing behaviour on their own route.",
+ "decision": "When the model's route is no longer the screen's own, the screen hands Back to PilotApp's route-level rule (routeBack): HOME -> exit question, any other route -> model.back(). The new screen's focus-dependent first step (Home content -> side menu, Guide grid -> menu, Player controls -> hide) does not exist yet in that gap, so the gap follows the rule PilotApp already used for LOADING/LIBRARY/DETAIL -> HOME. No new product decision.",
+ "changes": [
+  "ui/PilotApp.kt: routeBack = { HOME -> exitAsk = true, else model.back() }; the general BackHandler calls it and passes it to SearchScreen, GuideScreen and PlayerScreen.",
+  "ui/SearchScreen.kt, ui/GuideScreen.kt, ui/PlayerScreen.kt: new `back` parameter; each BackHandler first checks model.state.value.route and calls back() when it is not SEARCH / GUIDE / PLAYER. (The parameter and the three checks were added by the parallel 0.14.37 session so its build compiled; same design, kept as is.)",
+  "ui/HomeScreen.kt: HomeBackToMenu (added in 0.14.36, the same gap: after Home -> Library the Back focused Home's menu and was lost) calls model.back() when the model has left Home; on Home it still opens the side menu. The existing backFollowsTheModelRouteBeforeTheScreenCatchesUp failed on this before."
+ ],
+ "testChanges": [
+  "SearchNavigationTest: new searchBackFollowsTheModelRouteBeforeTheScreenLeaves (Ara's side menu, two Backs in one main-thread turn -> Home asks; a result opened in the same turn as Back -> back on Ara). Class-level backRightAfter helper, also used by backFollowsTheModelRouteBeforeTheScreenCatchesUp.",
+  "GuideFlowTest: new guideBackFollowsTheModelRouteBeforeTheScreenLeaves (guide menu, double Back -> Home asks) and playerBackFollowsTheModelRouteBeforeTheScreenLeaves (live channel from Home, paused, Back hides controls, double Back -> Home asks)."
+ ],
+ "results": {
+  "new cases with the old screen handlers (debug 0.14.36 build + new tests)": "0/3: each timed out waiting for the exit question right after the double Back (Search line 291, Guide 173, Player 184)",
+  "new cases with the fix": "9/9 (3 runs each)",
+  "backFollowsTheModelRouteBeforeTheScreenCatchesUp": "failed before the HomeBackToMenu change (expected HOME, was LIBRARY) in both the old build and the first fixed build; 3/3 after it",
+  "first class round (before HomeBackToMenu)": "SearchNavigation 16/21, GuideFlow 12/13, PilotFlow 7/8, EpisodeAutoplayFlow 11/11",
+  "final class round": "SearchNavigation 17/21, GuideFlow 12/13, PilotFlow 7/8, EpisodeAutoplayFlow 11/11; every failure is in the list below",
+  "failing before this change (same line with the debug 0.14.36 build, not caused by it; tests adapted in 0.14.36 but never run)": [
+   "SearchNavigationTest.sideMenuLabelsFitAndRemoteCanReachSettingsAndReturn:193 looks for the removed 'Tüm kaynaklar' label",
+   "SearchNavigationTest.refreshRecoversRemovedFocusedItemAndMissingCategoryWithoutStealingInput:550 expects 'library-categories' after leaving the field",
+   "SearchNavigationTest.fieldsOpenTheKeyboardOnlyOnOk:340 the field loses focus after Esc closes the keyboard",
+   "SearchNavigationTest.homeBackAsksBeforeLeavingTheApp:239 after the first Back on Home the side menu is not focused (3/3 with the final build too)",
+   "GuideFlowTest.liveCardsAndPlayerKeepProgrammeAndRemoteControlsVisible:315 twelve Downs now move in the category column",
+   "PilotFlowTest.liveMovieSeriesTracksFavoritesAndBack:87 expects the first channel card focused after Canlı TV; focus now starts on the category column"
+  ],
+  "unit": {"tests": 155, "failures": 0, "errors": 0, "skipped": 1},
+  "lint": {"errors": 0, "warnings": 32}
+ },
+ "deviceState": "the tests removed the user's source (agreed); DeviceProvisioningTest re-added the synthetic 'Evim' (6 channels, 5 films, 4 series; base http://10.0.2.2:8765/ from the androidTest visual fixture, served on the host only while the working session keeps it running) and the published 0.14.37 release was installed over it (base.apk SHA-256 2c18cbbe... matches releases, first install time kept); app opened on Home with the synthetic shelves",
+ "knownLimits": [
+  "In the gap Back follows the route-level rule, not the new screen's first focus step: e.g. Player -> Guide followed within a frame by Back goes Home (as before this change), where a settled guide would first open its side menu.",
+  "A Back within about 100 ms after the exit question closes is still dropped by the system (Dialog window; D055 design, unchanged)."
+ ],
+ "notVerified": ["physical TV", "font 1.5/2.0", "SwiftShader headless emulator", "release build with the HomeBackToMenu change"]
+}

@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-15",
+  "version": "0.14.28-design-preview",
+  "versionCode": 42,
+  "sha256": "9140b6cceb50a15daa90c4541b1cc57588212550d876f882fdcfd604061cbc2d",
+  "apkSignature": "apksigner verify: v2 scheme true",
+  "device": "emulator-5556 / nextv_design_api36 / API 36 / SwiftShader",
+  "request": "Ara ekranı TCL düzenine göre; menü TV'deki örnek gibi solda, bizim stilde; ana sayfada Geri ile çıkış sorusu",
+  "references": "TCL search and NEXTV side menu screenshots taken from the user's TV on request; kept in the private scratchpad, not in the repository",
+  "review": {
+    "method": "4-reader mapping workflow, then 4 review lenses (focus, layout, compose, tests) with one skeptical verifier per finding",
+    "verifiedAndFixed": [
+      "menu entry restored the last menu item instead of the current section (now onEnter for remote entry only)",
+      "quick double Back could leave the app before the question had window focus (Home BackHandler stays enabled; flag reset off Home)",
+      "rail icons jumped while closing; open menu clipped 'Ana Sayfa' at 2.0 on linear font scaling (layout follows the animated width; menu widens per D029)",
+      "menu recomposed every animation frame (width read in layout/draw only)",
+      "new search reused the old focus index (reset per query/kind/source)",
+      "no-match message under the keyboard while typing; 340 dp large-text cards cut a title at the edge (380 dp)",
+      "Detail backdrop not full-bleed; finished load pulled focus out of an open menu",
+      "open menu did not dim the content"
+    ],
+    "foundDuringTests": [
+      "Right from the menu returned to the first item of a lazy list (Compose restoration stops at the first lazy layout): each screen now passes its remembered item as content entry",
+      "explicit focus requests into the menu were redirected to the current section (now only remote entry is redirected)",
+      "exit dialog asked for focus before its window had focus (now waits like SourceDialog)"
+    ],
+    "refuted": 6,
+    "leftOpen": ["Guide grid reaches the menu with Left only at the start of the retention window (Back is the quick route, hint 'Geri: menü')"]
+  },
+  "unit": { "tests": 150, "failures": 0, "errors": 0, "skipped": 1 },
+  "lint": { "errors": 0, "warnings": 32, "note": "first run found ContextCastToActivity in the exit dialog; fixed with LocalActivity" },
+  "font1_0": {
+    "fullRun": {
+      "classes": 16,
+      "tests": 100,
+      "passed": 95,
+      "failures": [
+        "SearchNavigationTest#settingsKeepsHeaderRestoresSubpageFocusAndCancelsRemoval and #sideMenuAlwaysEntersOnTheCurrentSection: real defects (see foundDuringTests), fixed",
+        "VisualPreviewTest#mixedEpisodeArtworkTitlesAndResumeKeepAlignedCaptions: environment, reduced motion off on 5556 (same on 0.14.25-0.14.27)",
+        "PlaybackRecoveryFlowTest#silentServerStopsWithinTheRecoveryDeadline: environment, SwiftShader deadline (same on 0.14.25-0.14.27)",
+        "PilotFlowTest#legacyEpisodeFavoriteMigratesWhenItsSeriesIsOpened: timing flake noted in 0.14.26, passed alone"
+      ]
+    },
+    "rerunAfterFixes": {
+      "classes": ["SearchNavigationTest", "VisualPreviewTest", "GuideFlowTest", "PilotFlowTest", "MultiSourceFlowTest", "HeroLayoutTest", "EmptyHomeLayoutTest", "ContinueCardLayoutTest", "EpisodeAutoplayFlowTest"],
+      "result": "GuideFlow 11/11, MultiSource 7/7, Hero 1/1, EmptyHome 1/1, Continue 1/1; SearchNavigation 15/16 (exit dialog focus, fixed); VisualPreview 10/11 (environment case); PilotFlow 7/8 and EpisodeAutoplay 10/11 (timing cases, both passed alone)"
+    },
+    "finalApk": {
+      "SearchNavigationTest": "16/16",
+      "individualReruns": "7/7 (exit dialog, menu entry, settings focus, menu labels, search Back order, legacy favourite, episode background position)"
+    }
+  },
+  "font2_0": {
+    "SearchNavigationTest": "16/16 (the two header cases that failed on 0.14.25-0.14.27 now pass: the header is no longer below a top bar)",
+    "VisualPreviewTest": "10/11 (same environment case)"
+  },
+  "manualEmulator": [
+    "Home: collapsed rail, Left opens on Ana Sayfa, Down moves, Right returns to Ayrıntılar, re-entry lands on the current section",
+    "Ara: field at the top, rows by kind; while typing the best row ends at about 240 dp; Back restores chips and source filter",
+    "Home Back: question opens with focus on Vazgeç; Back closes it; Çık returns to the TV launcher",
+    "No FATAL EXCEPTION in logcat during these flows"
+  ],
+  "testChanges": [
+    "SearchNavigationTest: side menu test rewritten (collapsed rail, open width, vertical order, Settings return, Right back to the same item); new homeBackAsksBeforeLeavingTheApp, sideMenuAlwaysEntersOnTheCurrentSection, typingKeepsTheBestRowRightUnderTheField; Back to Home asserts no exit dialog",
+    "VisualPreviewTest: Down from Ana Sayfa to Canlı TV; search test written for kind rows; menu/hero separation instead of top-bar label gap; episode width >= 260 dp beside the menu; hero focus before the home capture",
+    "GuideFlowTest: empty guide uses Right from the menu",
+    "PilotFlowTest: empty home focus asserted by tag"
+  ],
+  "deviceState": "5556 has 0.14.28 installed, font 1.0; test classes removed the synthetic sources, so the app opens on Kaynak ekle",
+  "physicalTv": "installed 0.14.28 with adb install -r on user request; on-device APK SHA-256 matches; firstInstallTime 2026-10-13 unchanged, data kept; app not launched, no tests",
+  "notVerified": ["physical 65U95A view", "user visual acceptance", "Figma", "API < 34 linear font scaling (menu widening computed, not observed on a device)"],
+  "reviewImages": "design/reviews/side-nav-0.14.28"
+}

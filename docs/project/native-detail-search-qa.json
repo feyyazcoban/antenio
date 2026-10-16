@@ -1,0 +1,48 @@
+{
+  "version": "0.14.7-design-preview",
+  "versionCode": 21,
+  "apkSha256": "df38bdebe1a26323118f187fc04051846832ad6aae9c8044ebb45cd785e0e693",
+  "status": "preview delivered separately; physical TV0.14.4",
+  "phases": [
+    {
+      "name": "Search/detail composition before episode focus guard",
+      "testsPerScale": 5,
+      "scales": [
+        1.0,
+        1.5,
+        2.0
+      ],
+      "logs": "detail-search-{scale}.log"
+    },
+    {
+      "name": "Final episode focus guard + navigation",
+      "testsPerScale": 2,
+      "scales": [
+        1.0,
+        1.5,
+        2.0
+      ],
+      "logs": "detail-edge-{scale}.log"
+    },
+    {
+      "name": "Final live/movie/series/tracks/favorites/back regression",
+      "passed": 1,
+      "failed": 0,
+      "fontScale": 1.0,
+      "log": "detail-search-playback.log"
+    }
+  ],
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "signature": "v2 verified",
+  "jvm": "not rerun for UI-only change",
+  "visualFinding": "Episode geometry assertion originally passed but scaled focus border touched bottom; visibility relocation and 7dp safe bounds added and screenshots refreshed.",
+  "remaining": [
+    "Setup/loading/empty/error visual consistency",
+    "Real artwork/Figma alignment",
+    "Physical performance/codec validation",
+    "User visual acceptance and PRD gates"
+  ]
+}

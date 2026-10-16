@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-15",
+  "version": "0.14.27-design-preview",
+  "versionCode": 41,
+  "sha256": "6933dfe8f51cdd6b9f612547171f14ce884a592bbb77fddc7945664e591665da",
+  "apkSignature": "apksigner verify: v2 scheme true",
+  "device": "emulator-5556 / nextv_design_api36 / API 36",
+  "request": "Search ederken sonuçlar TV klavyesinin altında kalıyor; bölüm içi arama da aynı",
+  "change": "Ara and section search switch to a typing layout while the keyboard is open (title, filters and category rows step aside, field under navigation, result count in the field label, compact rows in the section search)",
+  "crashFixed": "Section search crashed on typing: ClassCastException at PilotApp.kt Library (WindowInsets.isImeVisible composed only behind &&, shifting remembered slots). Read unconditionally in both screens.",
+  "unit": { "tests": 150, "failures": 0, "errors": 0, "skipped": 1 },
+  "lint": { "errors": 0, "warnings": 32 },
+  "font1_0": {
+    "classes": {
+      "SearchNavigationTest": "13/13",
+      "MultiSourceFlowTest": "7/7",
+      "PilotFlowTest": "8/8",
+      "GuideFlowTest": "11/11",
+      "VisualPreviewTest": "10/11"
+    },
+    "failures": [
+      { "case": "VisualPreviewTest#mixedEpisodeArtworkTitlesAndResumeKeepAlignedCaptions", "cause": "environment: reduced motion off on 5556, focused card 1.025 scale moves metadata 1.47 dp; same failure on 0.14.25 and 0.14.26" }
+    ]
+  },
+  "font2_0": {
+    "classes": { "SearchNavigationTest": "11/13" },
+    "failures": [
+      "longCategoryRowRemainsReachableFromSearchField and refreshRecoversRemovedFocusedItemAndMissingCategoryWithoutStealingInput: 'Bu bölümde ara' header action not on screen at 2.0 when the test clicks it; same failure on 0.14.25 and 0.14.26, before the new code is reached"
+    ],
+    "manual": "Filmler section search at 2.0: 2 compact columns, titles above the keyboard, Back restores the full layout"
+  },
+  "testChanges": [
+    "SearchNavigationTest: Ara type chips absent while typing and back after leaving the field; section heading and categories absent while typing and back after leaving the field",
+    "MultiSourceFlowTest: Done before opening the search source filter, which steps aside while typing"
+  ],
+  "manualEmulator": [
+    "Canlı TV section search: keyboard open, field under navigation, '1 sonuç' in label, result row above keyboard; Back restores heading and categories; Down moves to the result",
+    "Filmler section search: compact poster rows above keyboard, '8 sonuç'; Back restores the poster grid",
+    "Ara: title, chips and filter step aside; '8 sonuç' / '14 sonuç' in label; Back restores the full layout",
+    "No FATAL EXCEPTION in logcat during these flows"
+  ],
+  "physicalTv": "installed 0.14.27 with adb install -r on user request (TCL Smart TV Pro); on-device APK SHA-256 matches; firstInstallTime 2026-10-13 unchanged, data kept; app not launched, no tests",
+  "notVerified": ["physical 65U95A view with the TCL keyboard", "user visual acceptance", "Figma"],
+  "review": "design/reviews/search-0.14.27"
+}

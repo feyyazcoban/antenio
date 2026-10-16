@@ -1,0 +1,35 @@
+{
+ "date": "2026-10-16",
+ "version": "0.14.31-design-preview source (no new APK; the fix ships with the next delivery)",
+ "device": "emulator-5556 / nextv_design_api36 / API 36, windowed host GPU, font 1.0; debug build for tests",
+ "request": "SearchNavigationTest#homeBackAsksBeforeLeavingTheApp passed alone 1/3: the first Back on Home did not open the exit question; find the root cause and fix it",
+ "rootCause": [
+  "Product: PilotApp had two BackHandlers (Home: exitAsk; others: model.back()). BackHandler updates its enabled flag in a SideEffect, so after the model reaches HOME the previous route's handler stays enabled until the next composition is applied. The first Home frame after an import took 0.1-0.4 s; a Back in that gap reached the LOADING handler, whose model.back() does nothing on HOME, and was lost. The same gap could swallow a quick Back after returning Home from the library or a detail page, and on Home a Back right after leaving it raised a question that was then dropped.",
+  "Platform (test only): after the question closes, the system keeps input focus on the removed dialog window for about 100 ms; keys sent then are dropped before reaching the app. The test sent the next Back as soon as the dialog left the Compose tree."
+ ],
+ "evidence": [
+  "Run without probes (failing): CoreBackPreview shows the androidx callback re-registered at 08.638 (general handler disabled, Home handler enabled = HOME composed), 0.38 s after the test's dumpsys input_method at 08.263 that directly precedes its Back.",
+  "Temporary probe logs (removed afterwards), failing run: test sends Back 11.215 with model=HOME; the general handler receives it 11.227; HOME is composed 11.339. Passing runs: the Back reaches the Home handler.",
+  "Class run after the product fix: the third Back failed instead; InputDispatcher logged 'Not creating InputTarget for <dialog window>, no input channel' twice (DOWN/UP) 83-85 ms after the dialog's back callback was removed."
+ ],
+ "changes": [
+  "ui/PilotApp.kt: the Home and general handlers are one BackHandler with the same enabled routes (now including HOME); it decides by model.state.value.route when Back arrives: HOME -> exit question, otherwise model.back(). No platform callback re-registration on LOADING -> HOME any more."
+ ],
+ "testChanges": [
+  "SearchNavigationTest: new backFollowsTheModelRouteBeforeTheScreenCatchesUp changes the route and dispatches Back in the same main-thread turn (Library -> Home asks; Home -> Library returns Home without asking). Old product code 0/2 (exit question never opens), fixed code 3/3 alone and passing in both class runs.",
+  "SearchNavigationTest.homeBackAsksBeforeLeavingTheApp: closed() also waits until Home's window has window focus again before the next key."
+ ],
+ "results": {
+  "homeBackAsksBeforeLeavingTheApp alone": "6/6 with the product fix and the old test; 6/6 with the final code",
+  "SearchNavigationTest class": "20/20 with the final code (before the closed() change: 19/20, the platform focus gap above)",
+  "PilotFlowTest": "8/8",
+  "unit": {"tests": 152, "failures": 0, "errors": 0, "skipped": 1},
+  "lint": {"errors": 0, "warnings": 32}
+ },
+ "deviceState": "test classes removed the synthetic source; DeviceProvisioningTest re-added 'Evim' (6 channels, 5 films, 4 series, local fixture server on host port 8765) and the 0.14.31 release was installed over it (base.apk SHA-256 94970a72... matches the published APK, data kept); app opened on Home",
+ "knownLimits": [
+  "Ara, Rehber and Oynatıcı keep their own Back handlers, which have the same gap (e.g. a quick second Back right after Ara -> Home is lost). Not changed in this round.",
+  "A Back pressed within about 100 ms after the exit question closes is dropped by the system; only an in-window overlay instead of a Dialog window would avoid it (D055 design, not changed)."
+ ],
+ "notVerified": ["physical TV", "SwiftShader headless emulator", "release build with the fix", "font 1.5/2.0"]
+}

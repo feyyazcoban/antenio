@@ -1,0 +1,25 @@
+{
+  "version": "0.14.18-design-preview",
+  "sha256": "d20e80a933e5a4a1ab5b493088dd397803b3d948f40eee13206e1c144d7b3dd8",
+  "changes": [
+    "Library poster fallback no longer duplicates the title already below the card",
+    "Year reserves one line even when missing; source labels retain a consistent vertical position"
+  ],
+  "checks": {
+    "candidateVisualTests": 3,
+    "finalVisualTests": 1,
+    "finalNavigationTests": 1,
+    "lint": {
+      "Error": 0,
+      "Warning": 32
+    },
+    "apkV2Signature": true,
+    "jvm": "Not rerun: layout-only change"
+  },
+  "screenshots": "design/reviews/library-captions; 1.0/1.5 from candidate, 2.0 final; only version changed between candidate and final",
+  "limits": [
+    "Physical TV and user visual approval pending",
+    "Null artwork tested, not every corrupt image encoding",
+    "Figma unchanged"
+  ]
+}

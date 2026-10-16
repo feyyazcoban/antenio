@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-14",
+  "version": "0.5.0-pilot",
+  "versionCode": 5,
+  "physicalTvInstalled": "0.2.0-pilot",
+  "jvmTests": {
+    "tests": 32,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "emulatorFlows": {
+    "passed": true,
+    "count": 15,
+    "seconds": 97.761,
+    "failed": 0,
+    "classes": [
+      "SearchNavigationTest (8)",
+      "PilotFlowTest (6)",
+      "VisualPreviewTest (1)"
+    ]
+  },
+  "largeFont": {
+    "requestedFontScale": 1.5,
+    "originalFontScale": "1.0",
+    "observedSystemFontScale": "1.5",
+    "passed": true,
+    "count": 9,
+    "seconds": 60.58,
+    "restoredFontScale": "1.0"
+  },
+  "lint": {
+    "Error": 0,
+    "Warning": 29
+  },
+  "nativeScreens": [
+    "Home",
+    "Movies",
+    "Movie",
+    "Series",
+    "Player",
+    "Tracks",
+    "Settings",
+    "SettingsBottom",
+    "About",
+    "Search"
+  ],
+  "verifiedBehaviors": [
+    "Fixed settings heading/close with scrollable descriptive rows; reading page scrolls with D-pad",
+    "Back from confirmation/about returns to the same setting; cancel leaves source intact",
+    "Refresh remains focused; repeated OK does not duplicate catalog request",
+    "Search Back sequence: native IME, results, Search navigation, home; empty results skip the missing stage",
+    "Already focused poster and caption stay within the actual grid viewport when a refresh notice shrinks it",
+    "Existing search, cache, history, playback, track and favorite regression flows passed"
+  ],
+  "intermediateFindings": [
+    "Previous visibility effect ran only on focus changes; a refresh notice could clip the already focused caption. Re-evaluate on clipped-state changes.",
+    "Refresh success text is present in both dimmed page and settings; test selector now scopes the dialog.",
+    "Reading text needed an explicit focusable scroll surface; padding-only scroll remainder no longer announces more content."
+  ],
+  "limitations": [
+    "Physical TV unchanged overnight; no additional real provider stream",
+    "Normal and 1.5 font screenshots reviewed; not a full accessibility, p95, or hardware performance audit",
+    "Single source; multiple sources, EPG, PIN, QR, automatic next episode and bounded recovery remain open",
+    "Visual preview uses local real artwork plus synthetic media/API fixtures, not real film playback",
+    "Figma quota blocked; no Figma screen write; user visual acceptance and long-run playback remain open"
+  ],
+  "apk": {
+    "name": "IPTV_Player_TV_Pilot_0.5.0.apk",
+    "sha256": "72087e97bf679090366ed7d513d205f2c408b2ed70903827e3f1a88758176eb7",
+    "signatureV2Verified": true
+  }
+}

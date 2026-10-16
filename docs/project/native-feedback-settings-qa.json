@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-14",
+  "version": "0.14.2-design-preview",
+  "versionCode": 16,
+  "status": "design preview delivered; not production acceptance",
+  "jvm": {
+    "tests": 116,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "note": "Opt-in private snapshot audit not repeated"
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "buildLog": "heading-fix-build.log; header-warning-build.log; heading-lint-recheck.log",
+  "device": "emulator-5556 / API36 / 1920x1080 / density320",
+  "deviceRuns": [
+    {
+      "fontScale": 1.0,
+      "passed": 12,
+      "failed": 0,
+      "log": "heading-regression-1.0.log"
+    },
+    {
+      "fontScale": 1.5,
+      "passed": 12,
+      "failed": 0,
+      "log": "heading-regression-1.5.log"
+    },
+    {
+      "fontScale": 2.0,
+      "passed": 12,
+      "failed": 0,
+      "log": "heading-regression-2.0.log"
+    }
+  ],
+  "findings": [
+    "Refresh success preserves home and library geometry; failure remains readable in settings and header.",
+    "Interrupted scroll no longer terminates heading observer; real screen/focus cancellation still propagates.",
+    "Three repeated header/card round trips pass at each font scale.",
+    "Warning is reached via two remote Up presses, checked fully inside viewport, followed by Down return.",
+    "Local SDK property escape corrected; lint rerun without stale cache."
+  ],
+  "candidateApkSha256": "28661638ec0d93d4c5c2475bb34dfd888ed1d7cc79bca3fe984c89717d628551",
+  "protectedDevices": [
+    "User emulator-5554 unchanged",
+    "Physical TV updated to previous 0.14.1 at explicit user request; no tests/reset; 0.14.2 not installed there"
+  ],
+  "figmaUpdated": false,
+  "screenshots": "design/reviews/feedback-settings; 10 screenshots per scale, final candidate",
+  "remaining": [
+    "Settings section label at scroll boundary; source/player visual refinement.",
+    "Artwork associations, Figma/user/physical acceptance and all remaining PRD gates."
+  ],
+  "previousAttempt": {
+    "deviceRuns": [
+      {
+        "fontScale": 1.0,
+        "passed": 28,
+        "failed": 0,
+        "log": "feedback-final-1.0.log"
+      },
+      {
+        "fontScale": 1.5,
+        "passed": 12,
+        "failed": 0,
+        "log": "feedback-final-1.5.log"
+      },
+      {
+        "fontScale": 2.0,
+        "passed": 11,
+        "failed": 1,
+        "log": "feedback-final-2.0.log"
+      },
+      {
+        "fontScale": 2.0,
+        "passed": 0,
+        "failed": 1,
+        "log": "feedback-final-2.0-recheck.log"
+      }
+    ],
+    "findings": [
+      "Refresh success no longer shifts the home hero, shelf or focused library card.",
+      "Settings success/warnings remain in the refresh row; cached content survives failure.",
+      "First large-font library entry and upward header access pass.",
+      "After going up to heading controls and down twice at font2.0, focus follows a nearby column, not always Inception. The test now checks a valid movie and its full caption.",
+      "That corrected check exposes a real remaining partial-heading bug on the return path: heading top39.5/bottom113.5, viewport top98.0 dp.",
+      "No 0.14.2 distribution APK or release approval was produced."
+    ],
+    "latestContinuation": {
+      "headerFix": "interrupted scroll no longer terminates observer; preserves parent cancellation",
+      "directFont2Test": "passed 1 test",
+      "regression": {
+        "1.0": "12 passed",
+        "1.5": "11 passed, 1 failed: header warning visibility after forced scroll while card focused",
+        "2.0": "not run after expanded repeat-3 regression"
+      },
+      "jvm": "115 passed, 1 skipped",
+      "lint": "0 errors, 32 warnings",
+      "distribution": "not published; physical TV received previous 0.14.1 at user request"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "version": "0.14.9-design-preview",
+  "delivery": "working candidate, not published",
+  "sha256": "46b1e48b300ef2efdb6466928204153f6301c7f5aa9644ae36f60e002607d7ac",
+  "device": "emulator-5556 / nextv_design_api36",
+  "fontScales": [
+    1,
+    1.5,
+    2
+  ],
+  "tests": [
+    "LoadingLayoutTest#everySourceOperationFitsAndImportCanBeCancelled",
+    "SourceRecoveryFlowTest#retryAndCancelKeepRecordsAndFocusAndSuccessfulRetryRestoresLibrary",
+    "SourceOperationFlowTest#cancellingDownloadPreservesThePreviousSourceAfterRecreation"
+  ],
+  "screenshots": 18,
+  "remaining": [
+    "Empty home/library/search visual pass",
+    "Physical TV performance and codec",
+    "Figma alignment",
+    "User visual acceptance"
+  ]
+}

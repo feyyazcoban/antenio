@@ -1,0 +1,31 @@
+{
+  "version": "0.14.22-design-preview",
+  "productionChanged": false,
+  "test": "VisualPreviewTest#mixedEpisodeArtworkTitlesAndResumeKeepAlignedCaptions",
+  "fonts": [
+    1.0,
+    1.5,
+    2.0
+  ],
+  "passed": 3,
+  "fixture": [
+    "Long episode title and deliberately undecodable local artwork response",
+    "Short title on adjacent card",
+    "Third episode with saved 45000ms of 120000ms progress"
+  ],
+  "checks": [
+    "Real DPAD_RIGHT visits each card",
+    "Focused card vertical bounds retain 7dp screen margin",
+    "Metadata top alignment within 1dp across all three cards",
+    "Resume text displayed and resumeMs remains 45000",
+    "Failed-art placeholder does not duplicate title"
+  ],
+  "image": "design/reviews/episodes-0.14.22/font-2.0/series-mixed-episodes.png",
+  "limits": [
+    "Very long title still ellipsizes after two lines",
+    "Does not test arbitrary season-number width or every provider",
+    "No physical TV/Figma/user acceptance"
+  ],
+  "device": "emulator-5556 / nextv_design_api36",
+  "fontRestored": 1.0
+}

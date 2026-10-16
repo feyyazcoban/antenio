@@ -1,0 +1,26 @@
+{
+  "version": "0.14.10-design-preview",
+  "status": "working candidate, not released",
+  "sha256": "113c9b24a963890e4781cc4eb5c1cdb0db305f1f6d9910c72710ca69802b537f",
+  "tests": {
+    "genuinelyEmptyMovieLibraryOpensSourcesAndReturns": [
+      1,
+      1.5,
+      2
+    ],
+    "EmptyHomeLayoutTest": [
+      1,
+      1.5,
+      2
+    ],
+    "VisualPreviewTest#captureGoogleTvRevision": [
+      1
+    ]
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "figma": "Personal account verified; get_screenshot blocked by Starter MCP rate limit",
+  "next": "Guide logo proportions and channel column layout"
+}

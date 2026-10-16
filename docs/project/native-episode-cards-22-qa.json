@@ -1,0 +1,35 @@
+{
+  "version": "0.14.22-design-preview",
+  "versionCode": 36,
+  "sha256": "f0a37653bc7a50bb792c2b1c2a78a563574e47b0723d00399c4a0f32e3732660",
+  "tests": {
+    "VisualPreviewTest#detailDescriptionAndWideEpisodesStayReadableWithRemote": [
+      1.0,
+      1.5,
+      2.0
+    ],
+    "EpisodeAutoplayFlowTest#countdownOpensOneNextSeasonEpisodeAndReturnsToItsCard": [
+      1.0
+    ]
+  },
+  "passed": 4,
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "signature": "verified",
+  "screenshots": "design/reviews/episodes-0.14.22",
+  "observations": [
+    "Inspected normal and 2.0 series episode screenshots. Two-line titles reveal all three fixture episode names at 2.0.",
+    "Focused whole card stays within viewport; metadata is on an opaque shared surface.",
+    "Detail description reader and its Back focus passed at all three scales."
+  ],
+  "limits": [
+    "No physical TV or Figma validation",
+    "Not every provider title fits in two lines",
+    "Resume-status wrapping and missing-art appearance changed by layout but not separately exercised in these four cases",
+    "User visual approval pending"
+  ],
+  "device": "emulator-5556 / nextv_design_api36",
+  "fontRestored": 1.0
+}

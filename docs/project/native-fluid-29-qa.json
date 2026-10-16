@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-16",
+  "version": "0.14.29-design-preview",
+  "versionCode": 43,
+  "buildType": "release (R8 minify + shrinkResources, not debuggable, signed with the debug key so install -r keeps data)",
+  "sha256": "befe19eed7035e55da55e5e8dbe4bbaa33b28df2a1a83188b8e2e05fbfc9890c",
+  "apkSignature": "apksigner verify: v2 scheme true",
+  "device": "emulator-5556 / nextv_design_api36 / API 36 / SwiftShader",
+  "request": "every move stutters, find and fix the cause; TiviMate-fast transitions; Google rounded menu icons with the current section filled; content shifts right as the menu opens; TiviMate category system and listing for Canlı TV, Filmler, Diziler",
+  "references": "TiviMate screens shown on the user's TV; screenshots show real provider content and stay in the private scratchpad. Structure only: docs/design/TIVIMATE_REFERENCE.md",
+  "design": "docs/design/FLUID_TIVIMATE_29.md, decision D056",
+  "measurements": {
+    "physicalTv_0_14_28_debug": "dumpsys gfxinfo after opening: 369 frames, 81.6% janky, 185 slow UI thread, 303 high input latency",
+    "emulator_sameKeySequence": {
+      "debug": { "jankyPercent": 69.2, "medianMs": 61, "p99Ms": 450, "framesRendered": 91 },
+      "release": { "jankyPercent": 27.8, "medianMs": 34, "p99Ms": 69, "framesRendered": 252 }
+    },
+    "apkSize": "about 18 MB debug, about 3 MB release",
+    "note": "SwiftShader emulator numbers compare builds only; they are not a TV frame-time result. 0.14.29 frames were not measured on the TV."
+  },
+  "causesFixed": [
+    "debuggable builds were delivered to the TV (release build type now)",
+    "tv-material focus scale animated in composition for every card and button (focusedScale = 1f everywhere)",
+    "Home wrote homeFocusKey into app state on every focus move (plain ViewModel field now)",
+    "menu width and content shift read in layout/draw phase only; menu motion 160/120 ms"
+  ],
+  "unit": { "tests": 152, "failures": 0, "errors": 0, "skipped": 1, "new": ["CatalogSnapshotTest category order round trip and legacy snapshot", "CatalogPresentationTest providerCategories"] },
+  "lint": { "errors": 0, "warnings": 32 },
+  "font1_0": {
+    "SearchNavigationTest": "17/17",
+    "VisualPreviewTest": "11/11",
+    "PilotFlowTest": "8/8",
+    "MultiSourceFlowTest": "7/7",
+    "GuideFlowTest": "11/11",
+    "SourceLayoutFlowTest": "5/5",
+    "EpisodeAutoplayFlowTest": "11/11",
+    "HeroLayoutTest": "1/1",
+    "EmptyHomeLayoutTest": "1/1",
+    "ContinueCardLayoutTest": "1/1",
+    "SetupLayoutTest": "1/1",
+    "LoadingLayoutTest": "1/1",
+    "TracksLayoutTest": "3/3",
+    "SourceRecoveryFlowTest": "4/4",
+    "SourceOperationFlowTest": "7/7",
+    "PlaybackRecoveryFlowTest": "11/12; silentServerStopsWithinTheRecoveryDeadline is the known SwiftShader deadline case (same on 0.14.25-0.14.28)"
+  },
+  "font2_0": "not rerun for 0.14.29",
+  "manualEmulatorRelease": [
+    "release APK on 5556: Canlı TV rows, category column, Filmler grid mode (7 columns) and Left back to the category, detail, player, Ara, exit dialog",
+    "no FATAL EXCEPTION in logcat during these flows"
+  ],
+  "testChanges": [
+    "SearchNavigationTest: categoriesFollowTheProviderWithVirtualOnesFirst; menu entry now passes through the selected category; empty-library and refresh tests use the category column",
+    "PilotFlowTest: nav(label) helper by tag (rail Favoriler and category Favoriler share a label)",
+    "GuideFlowTest and VisualPreviewTest updated for the new library layout",
+    "FixtureSources passes categoryOrder"
+  ],
+  "deviceState": "5556 has the 0.14.29 debug build with the synthetic local source re-added for review screenshots",
+  "physicalTv": "installed 0.14.29 release with adb install -r under the user's overnight request; on-device SHA-256 matches; firstInstallTime 2026-10-13 unchanged, data kept; not debuggable; cmd package compile -m speed -f Success; app not launched, no tests",
+  "knownLimits": [
+    "existing catalog snapshots have no provider category order until the catalog is refreshed (Ayarlar > Kataloğu yenile or the 6 h auto refresh); until then categories fall back to first appearance",
+    "no live video preview in Canlı TV by design (second player on the TV SoC)"
+  ],
+  "notVerified": ["0.14.29 frame times on the physical 65U95A", "user visual acceptance", "Figma", "font 2.0 runs", "TiviMate position counter, sort button and season-row detail (not implemented)"],
+  "reviewImages": "design/reviews/fluid-0.14.29"
+}

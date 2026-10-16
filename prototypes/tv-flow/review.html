@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IPTV · Google TV görsel taslağı</title>
+  <link rel="stylesheet" href="review.css">
+  <script src="catalog-data.js" defer></script>
+  <script src="review.js" defer></script>
+</head>
+<body>
+  <header class="review-tools">
+    <div><strong>Google TV · Görsel taslak</strong><span>Gerçek kapaklar · Android sürümü henüz değişmedi</span></div>
+    <label>Görünüm <select id="review-state"><option value="normal">Normal</option><option value="loading">Yükleniyor</option><option value="empty">Boş</option><option value="error">Hata</option><option value="missing">Kapak eksik</option></select></label>
+    <button id="fullscreen">Tam ekran</button>
+  </header>
+  <main id="stage"><div id="tv" aria-label="TV tasarım önizlemesi"><div id="app"></div><div id="overlay"></div></div></main>
+  <footer class="review-footer">
+    <div id="review-note" role="status">Ok tuşlarıyla gez · Enter ile seç · Escape ile geri dön · Gerçek yayın açılmaz</div>
+    <nav aria-label="Önizleme kumandası"><button data-remote="ArrowLeft" aria-label="Sola">←</button><button data-remote="ArrowUp" aria-label="Yukarı">↑</button><button data-remote="ArrowDown" aria-label="Aşağı">↓</button><button data-remote="ArrowRight" aria-label="Sağa">→</button><button data-remote="Enter">OK</button><button data-remote="Escape">Geri</button></nav>
+  </footer>
+</body>
+</html>

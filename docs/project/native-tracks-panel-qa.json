@@ -1,0 +1,68 @@
+{
+  "version": "0.14.5-design-preview",
+  "versionCode": 19,
+  "status": "design preview delivered; physical TV remains 0.14.4",
+  "apkSha256": "df205c80d78821ed73f605256682fe879049a0d9018c6ebe8a6f07b98006e225",
+  "runs": [
+    {
+      "fontScale": 1.0,
+      "passed": 2,
+      "failed": 0,
+      "log": "tracks-panel-1.0.log"
+    },
+    {
+      "fontScale": 1.5,
+      "passed": 2,
+      "failed": 0,
+      "log": "tracks-panel-1.5.log"
+    },
+    {
+      "fontScale": 2.0,
+      "passed": 2,
+      "failed": 0,
+      "log": "tracks-panel-2.0.log"
+    }
+  ],
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "priorFailure": "1.5 initial tracks-close focus false; wait for dialog window and focusGroup entry added; test awaits real focus bounded5s",
+  "jvm": "not rerun",
+  "device": "emulator-5556 only; final font1.0",
+  "remaining": [
+    "Sources UI review",
+    "Real artwork and Figma alignment",
+    "Physical device performance and codec validation",
+    "User visual acceptance and full PRD gates"
+  ],
+  "metadataRuns": [
+    {
+      "fontScale": 1.0,
+      "passed": 3,
+      "failed": 0,
+      "log": "tracks-metadata-1.0.log"
+    },
+    {
+      "fontScale": 1.5,
+      "passed": 3,
+      "failed": 0,
+      "log": "tracks-metadata-1.5.log"
+    },
+    {
+      "fontScale": 2.0,
+      "passed": 3,
+      "failed": 0,
+      "log": "tracks-metadata-2.0.log"
+    }
+  ],
+  "metadataPriorFailure": "Infinite recompositions during second D-pad move with custom CardVisibility; reproduced with disabled rows excluded from focus. Resolved by using native scroll focus relocation in TrackChoice. Initial failure retained in .private/tracks-metadata-initial-failure.log.",
+  "finalPlayback": {
+    "passed": 1,
+    "failed": 0,
+    "test": "PilotFlowTest.liveMovieSeriesTracksFavoritesAndBack",
+    "log": "tracks-final-playback.log"
+  },
+  "signature": "v2 verified; tracks-final-signature.log",
+  "readerTestCorrection": "Initial test read ExoPlayer from instrumentation thread; changed assertion to main thread. Failure retained in tracks-reader-test-thread-failure.log."
+}

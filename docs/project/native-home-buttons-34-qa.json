@@ -1,0 +1,28 @@
+{
+ "date": "2026-10-16",
+ "version": "0.14.34-design-preview",
+ "versionCode": 48,
+ "buildType": "release (R8, not debuggable, debug key)",
+ "sha256": "d33cfd6fe943b11d9538206e82649543184d335e430d89cc13df5b8f6ce0b467",
+ "apkSignature": "apksigner verify: v2 scheme true",
+ "request": "remove the Tümünü gör and Tüm kaynaklar buttons from Home",
+ "change": "ui/HomeScreen.kt: no source selector in the hero, in the no-hero header or in the empty Home; no Tümünü gör on shelf headings. The hero header line and shelf headings keep the compact action height, so titles, posters and shelves do not move. The source selector stays in the libraries, Ara and Rehber.",
+ "testChanges": [
+  "HeroLayoutTest and EmptyHomeLayoutTest assert Home has no source selector",
+  "MultiSourceFlowTest and SourceLayoutFlowTest reach the selector from Canlı TV / Filmler",
+  "VisualPreviewTest: hero poster separation measured from the hero label"
+ ],
+ "unit": {
+  "tests": 152,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 1
+ },
+ "lint": {
+  "errors": 0,
+  "warnings": 32
+ },
+ "instrumentation": "not run (user's own source on 5556; full run kept for before the release)",
+ "manual": "not checked on screen: emulator-5556 had been closed when the build was ready",
+ "physicalTv": "installed on the user's request with adb install -r from 0.14.33/code47 to 0.14.34/code48; on-TV APK SHA-256 matches; firstInstallTime 2026-10-13 23:50:03 unchanged, data kept; not debuggable; cmd package compile -m speed -f Success; app not launched, no tests"
+}

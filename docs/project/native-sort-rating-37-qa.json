@@ -1,0 +1,46 @@
+{
+ "date": "2026-10-16",
+ "version": "0.14.37-design-preview",
+ "versionCode": 51,
+ "buildType": "release (R8, not debuggable, debug key)",
+ "sha256": "2c18cbbe41b35be1546bc34d562661fdfae415883d48baebaa5899cfe8fad69d",
+ "apkSignature": "apksigner verify: v2 scheme true",
+ "requests": [
+  "a Sırala button for Filmler and Diziler",
+  "the provider's rating on posters"
+ ],
+ "changes": [
+  "data/Models.kt: MediaEntry.rating (0-10, 0 = unknown) and addedAt (Unix seconds, 0 = unknown)",
+  "data/CatalogParser.kt: Xtream 'rating' (dot or comma), else 'rating_5based' x2, out-of-range or text = 0; 'added' (films) / 'last_modified' (series); film info and series info ratings fill a missing one; live channels carry no rating",
+  "data/CatalogSnapshot.kt: format v4 appends rating and addedAt (24-field rows); v1-v3 still read, their titles get 0/0 until the next catalogue refresh",
+  "data/CatalogPresentation.kt: LibrarySort (Varsayılan, Son eklenen, Ad (A-Z), Yıl, Puan), librarySorted (stable, unknown values last, Turkish collation for titles), MediaEntry.ratingText ('7,5')",
+  "data/DeviceStore.kt + TvViewModel.kt: the choice is kept per section (sort:MOVIE, sort:SERIES); TvState.librarySorts; model.librarySort(kind, sort)",
+  "ui/LibraryScreen.kt: 'Sırala: <choice>' in the heading of Filmler and Diziler (not Canlı TV, not Favoriler); the choices open in a dialog with a check on the current one; focus returns to the button; the information panel shows '★ 7,5'",
+  "ui/PilotApp.kt MediaCard + ui/Theme.kt RatingBadge: a small dark pill with a mint star at the poster's top-left; kept out of semantics so the card's description is unchanged",
+  "ui/DetailScreen.kt: '★ 7,5' in the metadata line",
+  "ui/SearchScreen.kt, GuideScreen.kt, PlayerScreen.kt: take the 'back' the side session 'Ara/Rehber/Oynatıcı Geri aralığını kapat' had already passed from PilotApp.kt (the build was broken); their Back handler calls it when the model's route is no longer theirs. That session was told and owns the final design"
+ ],
+ "unit": {
+  "tests": 155,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 1,
+  "new": [
+   "SourceTest.xtreamRatingsAndAddedTimesAreReadAndUnknownOnesStayZero",
+   "CatalogSnapshotTest.ratingAndAddedTimeSurviveTheSnapshot",
+   "CatalogPresentationTest.librarySortsAreStableAndPutUnknownValuesLast"
+  ]
+ },
+ "lint": {
+  "errors": 0,
+  "warnings": 32
+ },
+ "manualEmulatorRelease": [
+  "install -r on emulator-5556 (AVD nextv_design_api36), data kept (firstInstallTime unchanged)",
+  "menu -> Filmler: focus 'Tüm filmler', heading shows 'Sırala: Varsayılan'",
+  "read through the accessibility tree, app labels only; no screenshots (the user's own source is on the emulator)",
+  "not checked by hand: the dialog, the order after a choice, the poster badge (it has no semantics); the cached catalogue was written in v3, so ratings and added times appear only after the next refresh (automatic after 6 h, or Ayarlar -> Kataloğu yenile)"
+ ],
+ "instrumentation": "not run (user's source on 5556; full run before the release)",
+ "physicalTv": "not installed (TV stays on 0.14.36)"
+}

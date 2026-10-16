@@ -1,0 +1,35 @@
+{
+  "version": "0.14.9-design-preview",
+  "sha256": "b14c027a64899f4e378451dae8cf7d8f42b1d60eeb09773e5a29f2647a65b3a6",
+  "device": "emulator-5556 / nextv_design_api36",
+  "fontScales": [
+    1,
+    1.5,
+    2
+  ],
+  "finalTests": [
+    "emptyLibraryExplainsFiltersAndFavoritesAndOffersRecovery",
+    "everyNavigationLabelFitsAndRemoteCanReachSettingsAndReturn",
+    "EmptyHomeLayoutTest"
+  ],
+  "earlierUnchangedChecks": [
+    "globalTurkishSearchFiltersRestoresFocusAndCancelsOldQueries at 3 font scales",
+    "LoadingLayoutTest at 3 font scales"
+  ],
+  "finalNormalRegression": [
+    "PilotFlowTest#liveMovieSeriesTracksFavoritesAndBack",
+    "SourceRecoveryFlowTest#retryAndCancelKeepRecordsAndFocusAndSuccessfulRetryRestoresLibrary",
+    "SourceOperationFlowTest#cancellingDownloadPreservesThePreviousSourceAfterRecreation"
+  ],
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "limitations": [
+    "Empty kind library branch is not covered by new interaction test",
+    "Home failure heading remains generic",
+    "Figma unchanged",
+    "TV still 0.14.4",
+    "Physical performance and user visual acceptance open"
+  ]
+}

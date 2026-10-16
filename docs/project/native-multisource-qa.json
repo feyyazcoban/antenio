@@ -1,0 +1,167 @@
+{
+  "date": "2026-10-14",
+  "version": "0.9.0-pilot",
+  "versionCode": 9,
+  "physicalTvInstalled": "0.2.0-pilot",
+  "jvmTests": {
+    "tests": 79,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "instrumentation": {
+    "uniqueCases": 63,
+    "latestResultOfEveryCase": "passed",
+    "runs": [
+      {
+        "log": "v09-full-flows.log",
+        "count": 60,
+        "passed": 56,
+        "failed": 4,
+        "seconds": 396.153
+      },
+      {
+        "log": "v09-final-flows.log",
+        "count": 32,
+        "passed": 30,
+        "failed": 2,
+        "seconds": 191.142
+      },
+      {
+        "log": "v09-release-flows.log",
+        "count": 10,
+        "passed": 10,
+        "failed": 0,
+        "seconds": 92.17
+      }
+    ],
+    "scope": "60-case first run had four outdated fixture assertions. The 32-case regression fixed those; two new fixture errors (IME Back ordering and MockWebServer DNS on UI thread) were repaired. Final 10-case run passed on the released application, including all seven multi-source flows, empty M3U, real artwork capture and autoplay setting. Repeated executions are not extra unique cases. The final application differs from that release candidate only by the measured navigation width for the source filter; navigation and two-source edit/removal were rerun at both enlarged font scales after that change.",
+    "cases": [
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#autoplaySettingTogglesWithRemoteAndSurvivesRecreation",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#backCancelsCountdownAndManualNextStartsFromBeginning",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#backgroundStopsCountdownAndReturnRequiresManualStart",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#changingEpisodeListCancelsAnAlreadyVisibleCountdown",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#countdownOpensOneNextSeasonEpisodeAndReturnsToItsCard",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#disabledAutoplayLeavesAManualEndCard",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#finalEpisodeHasNoInventedNextAndCanReturnToTheEpisodeList",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#m3uSequenceUsesParsedNumbersAndLabelsTheInference",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#okOnInitialCancelPreventsTransitionAndReplayCanFinishAgain",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#tracksPanelYieldsToEndPromptWithoutLosingCancelFocus",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#collidingIdsHaveIndependentFavoritesHistoryAndPersistentFilters",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#duplicateConnectionIsRejectedWithoutChangingEitherSource",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#failedEditPreservesAccountAndRemovalKeepsOtherOwner",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#m3uSeriesDetailsUseEachOwnersRawEpisodeMapAfterReopening",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#partialRefreshKeepsFullOldCatalogAndDoesNotDisturbOtherSourceFilter",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#secondSourcesEpisodesResolveAndFavoriteTheirOwnParent",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#unavailableSourceOnStartupKeepsBothCachesAndOtherSourcePlayable",
+      "dev.iptvplayer.tv.PilotFlowTest#cachedCatalogOpensWithoutRequestsAndFailedRefreshKeepsLibrary",
+      "dev.iptvplayer.tv.PilotFlowTest#corruptOrDifferentAccountCacheIsNotReused",
+      "dev.iptvplayer.tv.PilotFlowTest#devicePreferencesSurviveSourceRemovalAndActivityRecreation",
+      "dev.iptvplayer.tv.PilotFlowTest#episodeFavoriteAddsItsSeriesAndPersistsAcrossReopening",
+      "dev.iptvplayer.tv.PilotFlowTest#homeResumesExactEpisodeRestoresFocusAndClearsOnlyHistory",
+      "dev.iptvplayer.tv.PilotFlowTest#legacyEpisodeFavoriteMigratesWhenItsSeriesIsOpened",
+      "dev.iptvplayer.tv.PilotFlowTest#liveMovieSeriesTracksFavoritesAndBack",
+      "dev.iptvplayer.tv.PilotFlowTest#m3uImportAndSafeEmptyState",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#backDuringRecoveryDisposesItsPendingRequest",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#backgroundCancelsRecoveryUntilExplicitRetry",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#cancelStopsFurtherRequestsAndBackReturnsToLibrary",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#changingMediaCancelsOldRecovery",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#deniedAccessStopsAndManualRetryCanRecover",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#hlsSegmentFailureRecoversThroughTheSameBudget",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#malformedMediaDoesNotLoop",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#rateLimitDoesNotAddAutomaticTraffic",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#repeatedServerFailureStopsAfterTwoRetriesAndKeepsRetryFocused",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#silentServerStopsWithinTheRecoveryDeadline",
+      "dev.iptvplayer.tv.PlaybackRecoveryFlowTest#temporaryServerFailureRecoversAtSavedVodPosition",
+      "dev.iptvplayer.tv.SearchNavigationTest#dpadKeepsWholeCaptionsVisibleAndReturnsToSameCatalogCard",
+      "dev.iptvplayer.tv.SearchNavigationTest#everyNavigationLabelFitsAndRemoteCanReachSettingsAndReturn",
+      "dev.iptvplayer.tv.SearchNavigationTest#globalTurkishSearchFiltersRestoresFocusAndCancelsOldQueries",
+      "dev.iptvplayer.tv.SearchNavigationTest#longCategoryRowRemainsReachableFromSearchField",
+      "dev.iptvplayer.tv.SearchNavigationTest#refreshKeepsAlreadyFocusedCaptionInsideShrinkingViewport",
+      "dev.iptvplayer.tv.SearchNavigationTest#refreshRecoversRemovedFocusedItemAndMissingCategoryWithoutStealingInput",
+      "dev.iptvplayer.tv.SearchNavigationTest#searchBackVisitsResultsAndNavigationBeforeHome",
+      "dev.iptvplayer.tv.SearchNavigationTest#settingsKeepsHeaderRestoresSubpageFocusAndCancelsRemoval",
+      "dev.iptvplayer.tv.SearchNavigationTest#settingsRefreshKeepsFocusAndIgnoresRepeatedConfirmation",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#anotherViewModelWaitsForTheWholeSourceAndCacheWrite",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#cancellingDownloadPreservesThePreviousSourceAfterRecreation",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#failedRemovalShowsAnErrorAndCanBeRetried",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#lateCancelledResponseCannotReplaceANewerConnection",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#playerDisposalCannotResurrectProgressAfterRemoval",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#removalWaitsForOldCommitAndBackCannotStartANewSource",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#savingFinishesBeforeTheNewCatalogIsShown",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#catalogReadsTheOldFilenameAndReplacesItOnlyAfterWritingTheNewOne",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#clearingHistoryDoesNotClearAnotherSourcesProgressOrAnyFavorites",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#deletingOneSourceKeepsCollidingIdsAndTheOtherCacheAndPreferences",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#editingOneSourcePreservesItsIdentityAndOtherAccounts",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#firstRegistryMigrationPreservesCurrentCacheAndCleansOnlyUnownedOldFiles",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#invalidReplacementIsRejectedBeforeAnySavedAccountIsChanged",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#legacySourceMigratesWithFavoritesHistoryAndUnlistedOldProgress",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#newerNamespacedProgressWinsOverAnOldLegacyCopy",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#registryIsEncryptedAndCorruptionDoesNotFallBackToObsoleteLegacyCredentials",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#sourceRemovalClearsAllOfItsCredentialVersionsWithoutTouchingAnotherOwner",
+      "dev.iptvplayer.tv.VisualPreviewTest#captureNativeScreensWithRealArtwork"
+    ]
+  },
+  "font": {
+    "original": "1.0",
+    "runs": [
+      {
+        "scale": "1.5",
+        "passed": true,
+        "tests": 2,
+        "seconds": 21.086
+      },
+      {
+        "scale": "2.0",
+        "passed": true,
+        "tests": 2,
+        "seconds": 20.635
+      }
+    ],
+    "restored": "1.0"
+  },
+  "fontScope": "Navigation labels, remote access to Settings and return; two-account edit/removal/confirmation focus at 1.5 and 2.0. Not a complete accessibility audit.",
+  "lint": {
+    "Error": 0,
+    "Warning": 30
+  },
+  "apk": {
+    "file": "IPTV_Player_TV_Pilot_0.9.0.apk",
+    "bytes": 17380797,
+    "sha256": "ec63b008cb89d993d8ecc465e96d4b54e84451a340f0777a8884f7ac206a90a4",
+    "v2SignatureVerified": true
+  },
+  "nativeScreens": [
+    "IPTV_Player_Native_09_About.png",
+    "IPTV_Player_Native_09_AutoplaySetting.png",
+    "IPTV_Player_Native_09_EpisodeCountdown.png",
+    "IPTV_Player_Native_09_EpisodeFinal.png",
+    "IPTV_Player_Native_09_Home.png",
+    "IPTV_Player_Native_09_Movie.png",
+    "IPTV_Player_Native_09_Movies.png",
+    "IPTV_Player_Native_09_MultiMovies.png",
+    "IPTV_Player_Native_09_MultiSearch.png",
+    "IPTV_Player_Native_09_Navigation15.png",
+    "IPTV_Player_Native_09_Navigation20.png",
+    "IPTV_Player_Native_09_Player.png",
+    "IPTV_Player_Native_09_RecoveryFailed.png",
+    "IPTV_Player_Native_09_RecoveryWaiting.png",
+    "IPTV_Player_Native_09_Search.png",
+    "IPTV_Player_Native_09_Series.png",
+    "IPTV_Player_Native_09_Settings.png",
+    "IPTV_Player_Native_09_SettingsBottom.png",
+    "IPTV_Player_Native_09_SourcePicker.png",
+    "IPTV_Player_Native_09_Sources.png",
+    "IPTV_Player_Native_09_Sources15.png",
+    "IPTV_Player_Native_09_Sources20.png",
+    "IPTV_Player_Native_09_Tracks.png"
+  ],
+  "visualReview": "Native sources/picker/duplicate-title search/movie grid at 1.0, sources at 1.5/2.0 and navigation at 2.0 inspected. The final 2.0 navigation capture shows the complete source-filter label after the measured-width repair.",
+  "limitations": [
+    "Physical TV unchanged; no new real provider stream",
+    "EPG/XMLTV, PIN, QR and full accessibility/performance/long-play gates remain open",
+    "Figma write/quota not rechecked",
+    "Shared artwork cache is not partitioned by source; scoped reference cleanup remains open",
+    "Corrupt registry fails closed with retry; explicit local reset/recovery UX remains open"
+  ]
+}

@@ -1,0 +1,66 @@
+{
+ "date": "2026-10-16",
+ "version": "0.14.30-design-preview",
+ "versionCode": 44,
+ "buildType": "release (R8 minify + shrinkResources, not debuggable, signed with the debug key so install -r keeps data)",
+ "sha256": "2bd50f94506fba31ecae397a8ef8c48284a1606aa4c6356d6e25b7580de87034",
+ "apkSignature": "apksigner verify: v2 scheme true",
+ "device": "emulator-5556 / nextv_design_api36 / API 36 / SwiftShader, font 1.0; reopened headless (-no-window -no-snapshot, data kept) after the earlier instance disappeared mid-run",
+ "request": "0.14.29 open TiviMate parts: series detail with one 16:9 episode shelf per season, 'Sezon N' and a '1 / 10' counter, focus straight on episodes, Up/Down between seasons; library grid mode counter 'focused / total' that redraws only its own text",
+ "design": "docs/design/TIVIMATE_SEASONS_30.md, decision D057",
+ "changes": [
+  "ui/DetailScreen.kt: SeasonShelf memory outside Compose state, SeasonRow ('Sezon N' + PositionNote + LazyRow), EpisodeCard 16:9 196 dp with 'E1.' prefix, duration and Devam et/İzlendi, progress line; first focus on the played or next episode; target season scrolled into view",
+  "ui/LibraryScreen.kt: heading fixed above the grid at normal text (large text unchanged), PositionNote in grid mode, itemsIndexed, counter kept true after refresh",
+  "ui/Theme.kt: PositionNote (reads its IntState only, tabular digits)",
+  "ui/CardVisibility.kt: frameShelf flag (default unchanged); episodes keep their heading in view without pinning the shelf to the top"
+ ],
+ "unit": {
+  "tests": 152,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 1
+ },
+ "lint": {
+  "errors": 0,
+  "warnings": 32
+ },
+ "font1_0_finalBuild": {
+  "VisualPreviewTest": "11/11",
+  "PilotFlowTest": "8/8",
+  "EpisodeAutoplayFlowTest": "11/11",
+  "SearchNavigationTest": "17/18; homeBackAsksBeforeLeavingTheApp failed (first Back did not open the exit question); alone 1/3 on the headless emulator"
+ },
+ "earlierRunsSameFeatureCode": {
+  "SearchNavigationTest": "18/18 twice on the earlier windowed emulator instance (library code identical to the final build)",
+  "PilotFlowTest": "8/8 in every completed run (4)",
+  "VisualPreviewTest": "11/11 in every completed run (3); one run stopped when the earlier emulator instance disappeared (not counted)",
+  "EpisodeAutoplayFlowTest": "10/11 twice on the earlier instance: playingAndPausedEpisodesPreservePositionAcrossBackgroundAndExit ('Background position must not advance'); alone 1/3. With the 0.14.29 DetailScreen.kt in a scratch copy the same case failed 3/4, so it is not caused by this change. 11/11 twice on the reopened emulator"
+ },
+ "newChecks": [
+  "SearchNavigationTest.posterGridHeadingCountsTheFocusedPlace: 1 / 80 → Right 2 / 80 → Down 9 / 80 → 30 / 80, heading above the scrolled grid, counter displayed, Left to the category column shows '80 içerik' again",
+  "VisualPreviewTest series detail: first focus on the first episode with Oynat visible, 196 dp shelf width, counter 10 dp right of 'Sezon N' on the same bottom line, Right → '2 / 3', Down → next season with '1 / 3' and its heading in view, Up → the remembered episode",
+  "PilotFlowTest: back from the player on the played episode ('2 / 2'), Down to season 2 ('1 / 1'), Up back to it"
+ ],
+ "testChanges": [
+  "PilotFlowTest: season button click replaced by remote Down/Up between season shelves",
+  "VisualPreviewTest: episode width 196 dp (was the 3-column ≥260 dp grid); heading-within-grid check allows the fixed heading",
+  "SearchNavigationTest: catalog warning checked above the grid (fixed heading)"
+ ],
+ "manualEmulatorRelease": [
+  "0.14.30 release on 5556 over the provisioned synthetic source (install -r, data kept): Home, Canlı TV rows, Diziler → Breaking Bad detail with first focus on E1 and 'Sezon 1  1 / 3'; no FATAL EXCEPTION, not debuggable",
+  "source added with DeviceProvisioningTest (debug build, synthetic base http://10.0.2.2:8765/ served from the androidTest visual fixture), then the release installed over it"
+ ],
+ "deviceState": "5556 reopened with a window (host GPU, -feature -Vulkan, -no-snapshot, data kept) for the user to try: 0.14.30 release with the synthetic 'Evim' source (6 channels, 5 films, 4 series). Artwork and catalog come from a local fixture server on the host (port 8765) that only runs while this session keeps it alive; catalog stays cached",
+ "physicalTv": "not touched; no install (only on the user's request)",
+ "knownLimits": [
+  "homeBackAsksBeforeLeavingTheApp and playingAndPausedEpisodesPreservePositionAcrossBackgroundAndExit are unstable on this emulator; neither touches the changed screens",
+  "moving down a season leaves the shelf above half under the Geri row with the existing edge fade (same as the old episode grid)",
+  "provider episode titles are shown as given ('E1. Breaking Bad - S01E01 - …'); no series name or SxxEyy clean-up"
+ ],
+ "notVerified": [
+  "physical TV look, frame timing and user acceptance",
+  "font 1.5 / 2.0 runs for this change",
+  "Figma"
+ ],
+ "reviewImages": "design/reviews/tivimate-0.14.30/"
+}

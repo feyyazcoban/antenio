@@ -1,0 +1,28 @@
+{
+  "version": "0.14.19-design-preview",
+  "sha256": "806ac448dcf0a4479fbfade5a0887f028452ec7ace93d97dffedc6035dd99807",
+  "changes": [
+    "MediaEntry.categoryId stores provider category ID separately from label",
+    "parentLocalId stores source-local series identity for Xtream/M3U episodes",
+    "Catalog v3 appends two fields; v1/v2 remain readable; unknown old metadata stays empty/null"
+  ],
+  "checks": {
+    "jvm": 122,
+    "failures": 0,
+    "deviceStorage": 12,
+    "pilotFlow": 1,
+    "lintErrors": 0,
+    "lintWarnings": 32,
+    "apkV2Signature": true
+  },
+  "fixtures": [
+    "Independent catalog-v1.jsonl",
+    "Independent catalog-v2.jsonl"
+  ],
+  "limits": [
+    "PIN enforcement not implemented",
+    "M3U category name scoping and old episode parent resolution still required",
+    "Older APK cannot read v3; downgrade unsupported",
+    "No physical TV or performance remeasurement in this change"
+  ]
+}

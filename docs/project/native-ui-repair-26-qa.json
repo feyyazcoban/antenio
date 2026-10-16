@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-15",
+  "version": "0.14.26-design-preview",
+  "versionCode": 40,
+  "sha256": "69ff70d499384f6c3ef1914907624f910b3a99c1124f4644bce1b86c5a7c17a8",
+  "device": "emulator-5556 / nextv_design_api36 / API 36 / SwiftShader",
+  "audit": {
+    "method": "11 screen-group finders over 137 current-build captures (1.0/1.5/2.0) and code, semantic dedupe, two independent verifiers per issue (evidence+code, design-contract+fix)",
+    "confirmed": 56,
+    "disputed": ["U01 selected vs high fill", "U24 next shelf caption at bottom edge (fixed anyway with the shared fade)", "U29 description dialog over top nav", "U52 icons fixed at 16 dp under font scale"],
+    "rejected": ["U31"],
+    "notApplied": ["U45 Temizle exact centring at large text", "U56 live favourites in poster grid (design decision)", "U01", "U29", "U52"]
+  },
+  "unit": { "tests": 150, "failures": 0, "errors": 0, "skipped": 1 },
+  "lint": { "errors": 0, "warnings": 32 },
+  "normalFont": {
+    "classes": 16,
+    "tests": 98,
+    "passed": 95,
+    "failures": [
+      { "case": "VisualPreviewTest#mixedEpisodeArtworkTitlesAndResumeKeepAlignedCaptions", "cause": "environment: app reduced-motion preference is off on 5556, focused card 1.025 scale moves its metadata 1.47 dp; 0.14.25 release fails identically" },
+      { "case": "PlaybackRecoveryFlowTest#silentServerStopsWithinTheRecoveryDeadline", "cause": "environment: 23 s deadline under SwiftShader; 0.14.25 release fails identically" },
+      { "case": "PilotFlowTest#legacyEpisodeFavoriteMigratesWhenItsSeriesIsOpened", "cause": "flaky: passed in the previous full run and twice on rerun" }
+    ],
+    "fixedDuringRun": "first run exposed 'uncancelled requests present' in Settings/Sources/Visual tests: relocation margins larger than list padding; margins reduced to padding (Settings 18 dp, Sources padding 20 dp) and Detail scroll-back moved to the bring-into-view queue; all affected cases then passed"
+  },
+  "font2_0": {
+    "classes": ["VisualPreviewTest", "TracksLayoutTest", "SetupLayoutTest", "SourceLayoutFlowTest", "SearchNavigationTest", "LoadingLayoutTest"],
+    "tests": 34,
+    "passed": 31,
+    "failures": [
+      "VisualPreviewTest#mixedEpisodeArtworkTitlesAndResumeKeepAlignedCaptions (same environment cause)",
+      "SearchNavigationTest#longCategoryRowRemainsReachableFromSearchField and #refreshRecoversRemovedFocusedItemAndMissingCategoryWithoutStealingInput: header action off-screen at 2.0; 0.14.25 release fails identically, tests are not written for 2.0"
+    ],
+    "setupAfterFinalChange": "SetupLayoutTest passed at 2.0 and 1.0 after the invalid-field margin change"
+  },
+  "prototype": { "command": "node tools/test_tv_flow.cjs (Playwright with installed Chrome)", "passed": 13, "total": 13, "externalRequests": 0, "browserErrors": 0 },
+  "physicalTv": "installed 0.14.26 with adb install -r on user request; data kept; not launched or tested",
+  "notVerified": ["physical 65U95A visual check", "Figma", "user visual acceptance", "live channel zap mid-buffer capture of the opening pill", "favourites grid with a live channel"],
+  "review": "design/reviews/repair-0.14.26"
+}

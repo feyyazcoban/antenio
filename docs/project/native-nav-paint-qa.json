@@ -1,0 +1,45 @@
+{
+  "version": "0.14.13-design-preview",
+  "productionChanged": false,
+  "sha256": "ca9d2042a72f9ba145b0fe669b9cf38d19f480d22b98cb96338e61c6df28c262",
+  "fonts": [
+    1.0,
+    1.5,
+    2.0
+  ],
+  "testsPerFont": 2,
+  "methods": [
+    "SearchNavigationTest#everyNavigationLabelFitsAndRemoteCanReachSettingsAndReturn",
+    "VisualPreviewTest#providerDividersRemainReachableAndPosterOnlyContentKeepsItsShape"
+  ],
+  "device": "emulator-5556 / nextv_design_api36",
+  "gapAtFont2Dp": 32,
+  "visibleGapAtFont2Pixels": 69,
+  "pixelComparison": {
+    "old": "design/reviews/hero-layout/font-2.0/presentation-home-poster.png",
+    "new": "design/reviews/nav-paint/font-2.0/navigation-content-focused.png",
+    "xRange": [
+      800,
+      1220
+    ],
+    "yRange": [
+      80,
+      132
+    ],
+    "threshold": "min(R,G,B)>180",
+    "emptyColumnsInclusive": [
+      990,
+      1058
+    ]
+  },
+  "conclusion": "Previously suspected tight label spacing not reproduced; both screenshots have same measured gap. Production layout unchanged.",
+  "changedFiles": [
+    "SearchNavigationTest.kt",
+    "VisualPreviewTest.kt"
+  ],
+  "limits": [
+    "Physical TV not tested",
+    "User visual acceptance pending",
+    "Figma unchanged"
+  ]
+}

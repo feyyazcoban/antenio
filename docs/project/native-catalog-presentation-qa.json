@@ -1,0 +1,117 @@
+{
+  "date": "2026-10-14",
+  "version": "0.14.1-design-preview",
+  "versionCode": 15,
+  "buildLog": "catalog-presentation-final-build.log",
+  "scope": "Catalog presentation, full-library hero selection and role-preserving poster/fallback rendering",
+  "jvm": {
+    "tests": 116,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "device": "emulator-5556 / API 36 / 1920x1080 / density 320",
+  "protectedDevices": [
+    "emulator-5554 / user account and 0.13 unchanged",
+    "65U95A / 0.2 unchanged"
+  ],
+  "deviceRuns": [
+    {
+      "fontScale": 1.0,
+      "passed": 19,
+      "failed": 0,
+      "seconds": 130.426,
+      "log": "catalog-presentation-final-1.0.log"
+    },
+    {
+      "fontScale": 1.5,
+      "passed": 1,
+      "failed": 0,
+      "seconds": 17.948,
+      "log": "catalog-presentation-final-1.5.log"
+    },
+    {
+      "fontScale": 2.0,
+      "passed": 10,
+      "failed": 0,
+      "seconds": 60.49,
+      "log": "catalog-presentation-final-2.0.log"
+    }
+  ],
+  "privateSnapshotAudit": {
+    "types": [
+      {
+        "dividerCandidates": 51,
+        "usableBackdrop": 0,
+        "kind": "LIVE",
+        "count": 4525,
+        "usableArtwork": 1280
+      },
+      {
+        "dividerCandidates": 40,
+        "usableBackdrop": 0,
+        "kind": "MOVIE",
+        "count": 14609,
+        "usableArtwork": 11705
+      },
+      {
+        "dividerCandidates": 0,
+        "usableBackdrop": 2023,
+        "kind": "SERIES",
+        "count": 2173,
+        "usableArtwork": 2153
+      }
+    ],
+    "homeMovies": 12,
+    "heroHasBackdrop": true,
+    "homeSeries": 12,
+    "homeLive": 12,
+    "rawEntriesRetained": true
+  },
+  "auditLimits": "Previously saved provider snapshot, read locally by production Kotlin parsers/presentation rules; no new provider or media network requests.",
+  "testData": "Synthetic accounts and catalogs, approved real art served locally. Pilot playback tests use local generated media.",
+  "checks": [
+    "Probable divider entries removed only from automatic home promotion; retained at the end of library, in search, explicit favorites and history.",
+    "Every raw identity retained in actual provider snapshot; plain INFO and internal punctuation not blanket-filtered.",
+    "Poster-only hero and movie detail keep 2:3 proportions at tested fonts.",
+    "Missing art uses a neutral icon/title; all-divider source still exposes library navigation and source controls.",
+    "Pilot playback/history/cache/source preferences and nine search/navigation cases passed at normal font."
+  ],
+  "screenshots": [
+    "design/reviews/catalog-presentation/font-1.0/home-poster.png",
+    "design/reviews/catalog-presentation/font-1.0/movies.png",
+    "design/reviews/catalog-presentation/font-1.0/detail-poster.png",
+    "design/reviews/catalog-presentation/font-1.0/live.png",
+    "design/reviews/catalog-presentation/font-1.0/divider-only.png",
+    "design/reviews/catalog-presentation/font-1.5/home-poster.png",
+    "design/reviews/catalog-presentation/font-1.5/movies.png",
+    "design/reviews/catalog-presentation/font-1.5/detail-poster.png",
+    "design/reviews/catalog-presentation/font-1.5/live.png",
+    "design/reviews/catalog-presentation/font-1.5/divider-only.png",
+    "design/reviews/catalog-presentation/font-2.0/home-poster.png",
+    "design/reviews/catalog-presentation/font-2.0/movies.png",
+    "design/reviews/catalog-presentation/font-2.0/detail-poster.png",
+    "design/reviews/catalog-presentation/font-2.0/live.png",
+    "design/reviews/catalog-presentation/font-2.0/divider-only.png"
+  ],
+  "apk": {
+    "file": "IPTV_Player_TV_Design_Preview_0.14.1.apk",
+    "sha256": "29c67c3b76aca1f1afa8df9a07a3c9e70707bcc5df6363a86eda713ffb54724e",
+    "signature": "v2 verified"
+  },
+  "initialBuildIssue": "New screenshot geometry assertion used unavailable DpRect width/height properties; corrected to right-left and bottom-top, subsequent build passed.",
+  "figmaUpdated": false,
+  "remaining": [
+    "Wrong work/cover associations and real image dimension validation",
+    "More varied home curation",
+    "Success notice can push unfocused home shelf captions close to the bottom edge after refresh",
+    "Large-font header clipping during catalog scroll",
+    "Remaining settings/source/player visual refinement",
+    "User visual approval, Figma, physical performance/codec/audio matrix, PIN and phone setup"
+  ],
+  "claims": "The repeated font runs are not distinct tests. No full historical device suite or physical performance approval is claimed."
+}

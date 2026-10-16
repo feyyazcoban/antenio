@@ -1,0 +1,205 @@
+{
+  "version": "0.14.10-design-preview",
+  "apkSha256": "7b50a46f26819e6779b6c7010d80144830fcaa49e94a278ba210b28cb01610ca",
+  "device": "emulator-5556 / nextv_design_api36",
+  "largeCatalogProbe": {
+    "build": "0.14.10-design-preview",
+    "entries": 60000,
+    "live": 10000,
+    "movies": 35000,
+    "series": 15000,
+    "scope": "Debug emulator: model request through Compose idle and visible semantics. Includes test synchronization; not physical input-to-pixel or process startup.",
+    "encryptedWriteMs": 2044.0199,
+    "restoreToHomeMs": [
+      3081.0564,
+      2933.1492,
+      2782.6795,
+      2883.2492,
+      2766.4485
+    ],
+    "queryToVisibleMs": [
+      {
+        "pass": 0,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 911.348
+      },
+      {
+        "pass": 0,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 183.7345
+      },
+      {
+        "pass": 0,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 235.1046
+      },
+      {
+        "pass": 0,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 315.1231
+      },
+      {
+        "pass": 0,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 216.8032
+      },
+      {
+        "pass": 0,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 182.7959
+      },
+      {
+        "pass": 1,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 199.5616
+      },
+      {
+        "pass": 1,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 184.3451
+      },
+      {
+        "pass": 1,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 215.7065
+      },
+      {
+        "pass": 1,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 233.3308
+      },
+      {
+        "pass": 1,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 250.9599
+      },
+      {
+        "pass": 1,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 198.8222
+      },
+      {
+        "pass": 2,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 166.7202
+      },
+      {
+        "pass": 2,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 166.4217
+      },
+      {
+        "pass": 2,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 217.6114
+      },
+      {
+        "pass": 2,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 234.2278
+      },
+      {
+        "pass": 2,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 198.8488
+      },
+      {
+        "pass": 2,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 182.8739
+      },
+      {
+        "pass": 3,
+        "queryClass": 0,
+        "results": 1,
+        "ms": 167.8407
+      },
+      {
+        "pass": 3,
+        "queryClass": 1,
+        "results": 1,
+        "ms": 165.4286
+      },
+      {
+        "pass": 3,
+        "queryClass": 2,
+        "results": 16,
+        "ms": 217.7497
+      },
+      {
+        "pass": 3,
+        "queryClass": 3,
+        "results": 60000,
+        "ms": 300.0493
+      },
+      {
+        "pass": 3,
+        "queryClass": 4,
+        "results": 1,
+        "ms": 199.8115
+      },
+      {
+        "pass": 3,
+        "queryClass": 5,
+        "results": 1,
+        "ms": 166.1716
+      }
+    ],
+    "usedJavaHeapBytesAtEnd": 89347344
+  },
+  "coldRestore": {
+    "build": "0.14.10-design-preview",
+    "entries": 63175,
+    "sourceCount": 1,
+    "favoriteRestored": true,
+    "continueWatchingRestored": true,
+    "progressRestoredMs": 45000,
+    "seedPid": 29459,
+    "verifyPid": 29592,
+    "launchToRestoredStateMs": 4472,
+    "scope": "Instrumentation starts a new process, then ActivityScenario launches MainActivity. State readiness only, not first rendered content or physical startup timing."
+  },
+  "summary": {
+    "queryMs": {
+      "min": 165.4286,
+      "median": 199.68655,
+      "max": 911.348,
+      "samples": 24
+    },
+    "restoreMs": {
+      "min": 2766.4485,
+      "median": 2883.2492,
+      "max": 3081.0564,
+      "samples": 5
+    },
+    "javaHeapEndMiB": 85.20826721191406
+  },
+  "externalActivityStartMs": 2627,
+  "externalActivityStartCaveat": "am start -W Activity launch, not content readiness; UI checked after 8 second wait",
+  "productionCodeChanged": false,
+  "sharedRunner": "tools/check_cold_catalog.py",
+  "remaining": [
+    "Physical p95 input-to-focus and startup",
+    "Frame timing/jank",
+    "Codec/HDR/audio matrix and long playback",
+    "Figma alignment and visual user acceptance"
+  ]
+}

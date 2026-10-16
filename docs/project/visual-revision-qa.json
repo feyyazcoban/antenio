@@ -1,0 +1,174 @@
+{
+  "date": "2026-10-14",
+  "scope": "local HTML visual proposal; no native build or device test",
+  "nativeVersionUnchanged": "0.13.0-pilot",
+  "figmaUpdated": false,
+  "sourceCredentialsUsed": false,
+  "mediaStreamsOpened": 0,
+  "viewports": [
+    [
+      1920,
+      1080
+    ],
+    [
+      430,
+      700
+    ]
+  ],
+  "referenceScreens": [
+    "home.png",
+    "movies.png",
+    "live.png",
+    "series.png",
+    "detail.png"
+  ],
+  "observations": [
+    {
+      "case": "real-artwork",
+      "result": "pass",
+      "evidence": "5 film images loaded; home image failure count 0; m1 excluded due established title/artwork mismatch"
+    },
+    {
+      "case": "TV-safe-margins",
+      "result": "pass",
+      "evidence": "1920x1080: left gutter116px; home first row bottom1020.5px; film cards bottom1026px"
+    },
+    {
+      "case": "live-dpad",
+      "result": "pass",
+      "evidence": "TRT Belgesel Right -> TRT1; Down -> TRTHaber; Right -> CNN Türk; Right stays CNN Türk"
+    },
+    {
+      "case": "category-filter",
+      "result": "pass",
+      "evidence": "Bilim kurgu displays Interstellar, Inception, Dune (2021)"
+    },
+    {
+      "case": "detail-back",
+      "result": "pass",
+      "evidence": "Inception detail -> favorite -> Escape restores card:m3 and Bilim kurgu filter"
+    },
+    {
+      "case": "reduced-motion",
+      "result": "pass",
+      "evidence": "Settings switch checked; #tv has reduced class; AX shows only modal controls while open"
+    },
+    {
+      "case": "error-retry",
+      "result": "pass",
+      "evidence": "Error focuses retry; retry restores5 film cards, focus card:m2"
+    },
+    {
+      "case": "empty",
+      "result": "pass",
+      "evidence": "Empty heading and source CTA visible; source action deliberately limited to review notice"
+    },
+    {
+      "case": "missing-art",
+      "result": "pass",
+      "evidence": "Five fixed-aspect fallback cards visible; labels retained"
+    },
+    {
+      "case": "loading",
+      "result": "pass",
+      "evidence": "Static skeleton and loading text; nav:movies remains focusable"
+    },
+    {
+      "case": "narrow-frame",
+      "result": "pass-after-fix",
+      "evidence": "430x700 initially clipped at x265; final frame x0.2..430.2 inside stage0..430.4"
+    },
+    {
+      "case": "home-fold",
+      "result": "pass-after-fix",
+      "evidence": "Full1080 screenshot revealed partial second heading; subsequent shelf gap32dp puts heading top1084.5px below frame1080."
+    }
+  ],
+  "limitations": [
+    "Normal font only; 1.5/2.0 native font matrix not verified",
+    "Source selection, complete guide/player/PIN/setup states remain in existing prototype/native; not fully redesigned here",
+    "Editorial Turkish short synopses are presentation copy; production provider metadata is unchanged",
+    "Selected sample does not prove arbitrary-provider artwork matching or INFO-row cleanup",
+    "Visual user approval, native parity and physical TV validation pending"
+  ],
+  "contrasts": [
+    {
+      "foreground": "text",
+      "background": "surface",
+      "ratio": 15.8
+    },
+    {
+      "foreground": "text",
+      "background": "container",
+      "ratio": 12.64
+    },
+    {
+      "foreground": "text",
+      "background": "high",
+      "ratio": 9.76
+    },
+    {
+      "foreground": "muted",
+      "background": "surface",
+      "ratio": 9.64
+    },
+    {
+      "foreground": "muted",
+      "background": "container",
+      "ratio": 7.71
+    },
+    {
+      "foreground": "muted",
+      "background": "high",
+      "ratio": 5.95
+    },
+    {
+      "foreground": "onPrimary",
+      "background": "primary",
+      "ratio": 10.06
+    },
+    {
+      "foreground": "text",
+      "background": "selected",
+      "ratio": 9.39
+    },
+    {
+      "foreground": "text",
+      "background": "high",
+      "ratio": 9.76
+    },
+    {
+      "foreground": "outline",
+      "background": "surface",
+      "ratio": 7.77
+    }
+  ],
+  "screenshotSizes": {
+    "detail.png": [
+      1920,
+      1080
+    ],
+    "home.png": [
+      1920,
+      1080
+    ],
+    "live.png": [
+      1920,
+      1080
+    ],
+    "movies.png": [
+      1920,
+      1080
+    ],
+    "series.png": [
+      1920,
+      1080
+    ]
+  },
+  "artifactChecks": {
+    "javascriptSyntax": "node --check PASS",
+    "projectLinks": "check_project.py PASS;17screens/401historicalFigmaVariables",
+    "nativeApkSha256Unchanged": "9063f6d8785fb8e1ef02cc37ddfd9a5d0bd2c680d08864e2ef20261dd644d87a"
+  },
+  "captureNote": "Initial viewport captures were1920x1061. Replaced all five using fullPage screenshots; final files verified1920x1080 without resizing or padding."
+}

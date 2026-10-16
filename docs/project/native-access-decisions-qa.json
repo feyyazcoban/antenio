@@ -1,0 +1,30 @@
+{
+  "component": "AccessPolicy",
+  "integratedIntoApp": false,
+  "latestReleasedApk": "0.14.19",
+  "unitTests": {
+    "tests": 134,
+    "failures": 0,
+    "errors": 0
+  },
+  "newPolicyTests": 12,
+  "lint": {
+    "Error": 0,
+    "Warning": 32
+  },
+  "coverage": [
+    "Owned canonical identity shape",
+    "Source/content/category scope",
+    "Typed provider vs M3U category keys",
+    "Hidden vs locked distinction",
+    "Inherited series rules and validated membership",
+    "Unresolved old metadata does not open protected content",
+    "Rule order and defensive rule-list copy"
+  ],
+  "limitations": [
+    "No PIN verifier or persistence",
+    "No UI/ViewModel call sites yet",
+    "Caller must supply authoritative current entries and series membership",
+    "No device tests warranted for unintegrated pure component"
+  ]
+}

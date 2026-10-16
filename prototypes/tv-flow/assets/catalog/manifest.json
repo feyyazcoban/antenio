@@ -1,0 +1,382 @@
+{
+  "capturedAt": "2026-10-13",
+  "assets": [
+    {
+      "path": "assets/catalog/m1-poster.jpg",
+      "role": "poster",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/m0KlkqSLoYeGACAgLzOkv2tmpry.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "170de6edb343b3c9f877065578fca7eec5a6fc638f11910a9dcf0a8fcfd6c35f"
+    },
+    {
+      "path": "assets/catalog/m1-backdrop.jpg",
+      "role": "backdrop",
+      "url": "https://image.tmdb.org/t/p/w1280/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg",
+      "width": 1280,
+      "height": 720,
+      "sha256": "3e965e7087fc477acf80401bc7bb3693c936723e8d0341678ad0c03cd564705f"
+    },
+    {
+      "path": "assets/catalog/m2-poster.jpg",
+      "role": "poster",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/hHdhfkkzt0Mwec33Ux177Z7CO8w.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "7003803b41e024560693c0ecb609df341541e6474663b84ef26940854c4f069a"
+    },
+    {
+      "path": "assets/catalog/m2-backdrop.jpg",
+      "role": "backdrop",
+      "url": "https://image.tmdb.org/t/p/w1280/5XNQBqnBwPA9yT0jZ0p3s8bbLh0.jpg",
+      "width": 1280,
+      "height": 720,
+      "sha256": "aa743f8c40ca6cfa39e5715a2b279adbae8bf7696998a4cf29a1ee82d421b845"
+    },
+    {
+      "path": "assets/catalog/m3-poster.jpg",
+      "role": "poster",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/xn0Kcg4e6p0mLxVS3nAWhNmW2Ni.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "ddd65ff015dc217b2e488b7f2fd9d08b17e9a955ed2cf5b0ae33a27f2f5fb152"
+    },
+    {
+      "path": "assets/catalog/m3-backdrop.jpg",
+      "role": "backdrop",
+      "url": "https://image.tmdb.org/t/p/w1280/ii8QGacT3MXESqBckQlyrATY0lT.jpg",
+      "width": 1280,
+      "height": 720,
+      "sha256": "3ed995fc99289eb6803990f928e79cf90e3727f10a5101c23c8f0abece140c23"
+    },
+    {
+      "path": "assets/catalog/m4-poster.jpg",
+      "role": "poster",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/hYdclrAOjWtxTgE7PZy102hTYAf.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "72b9f0fac26c55311b06e31e692e8ead44d430567138496a6e1cec39b3d7c1b5"
+    },
+    {
+      "path": "assets/catalog/m4-backdrop.jpg",
+      "role": "backdrop",
+      "url": "https://image.tmdb.org/t/p/w1280/jK65srQczOKTpW62wPxwwKztGgE.jpg",
+      "width": 1280,
+      "height": 720,
+      "sha256": "92c28f214d443fdcfbdf14279d1912b9adb38a0cb267e3bcf9997eae82834c96"
+    },
+    {
+      "path": "assets/catalog/m5-poster.jpg",
+      "role": "poster",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/2WAIykbIIVeE3WHsxlLBLYTKBRA.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "cce28b8b23c783499bc218c5c43408d73aab06f3e27de487dfdb5a53547141f1"
+    },
+    {
+      "path": "assets/catalog/m5-backdrop.jpg",
+      "role": "backdrop",
+      "url": "https://image.tmdb.org/t/p/w1280/eeijXm3553xvuFbkPFkDG6CLCbQ.jpg",
+      "width": 1280,
+      "height": 720,
+      "sha256": "b1d2bb3e04db31b0e72f5dd7e666daa3a60eac7e8f802227b2ec71b6151b043a"
+    },
+    {
+      "path": "assets/catalog/m6-poster.jpg",
+      "role": "poster",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/75HC6rSUX8UBWgW87s8iMOaW7qr.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "d004dbc8dd8d7151f727877ed1e77d6490eb3c2e2626a69b679a5dce3ba0f87d"
+    },
+    {
+      "path": "assets/catalog/m6-backdrop.jpg",
+      "role": "backdrop",
+      "url": "https://image.tmdb.org/t/p/w1280/XNVdWNgiAHu8y4BsJv5ndUHXxN.jpg",
+      "width": 1280,
+      "height": 720,
+      "sha256": "e26fd892bad922ed01d26d455afc539221af5a1faeb28583a36f67a5b9b3b928"
+    },
+    {
+      "path": "assets/catalog/s1-1-1.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/grrNGqWohlE4TwQlAhy0tyNVkIR.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "cddac9078833812eba8d1f690c5cafc7695d994e2d45c191d1eee9018731101a"
+    },
+    {
+      "path": "assets/catalog/s1-1-2.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/36zPfBqUtNDo9b3sybT4TrvlGXo.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "819cbfd44dc9d7e41e87136532c8b9d4b6f8e60fce470a9a55bd644d7638f8a7"
+    },
+    {
+      "path": "assets/catalog/s1-1-3.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/xyZkggxKAkaHNpY6hhSPHulla3h.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "d0e2fec1cca0cc83c7ae5d5bad3f159e8616648f1772001c16c4496a1d9066fa"
+    },
+    {
+      "path": "assets/catalog/s1-poster.jpg",
+      "role": "poster",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/gf5ZPRCz5X8isVraQnJdjMEAlPe.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "8aeb6ad691b8a4e721330187f1afc9be49dfdac6bcc72293bf2a3462146fa9ae"
+    },
+    {
+      "path": "assets/catalog/s1-backdrop.jpg",
+      "role": "backdrop",
+      "url": "https://image.tmdb.org/t/p/w1280/8UBsLEagJt1Yxmxy61v2YTeCpyv.jpg",
+      "width": 1280,
+      "height": 720,
+      "sha256": "dc58855a5c4394db0ee16e3637b0ecdeedc1fab70b0debc22955137e4b912be9"
+    },
+    {
+      "path": "assets/catalog/s2-1-1.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/ydlY3iPfeOAvu8gVqrxPoMvzNCn.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "9d0e003970a51c7abc1724b6168964c9f67161e59c7648bf174be41e049e1ac7"
+    },
+    {
+      "path": "assets/catalog/s2-1-2.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w300/tjDNvbokPLtEnpFyFPyXMOd6Zr1.jpg",
+      "width": 300,
+      "height": 169,
+      "sha256": "f4f6d8e07a216224379d1402571d4767238429e7397b4585ce6f9579d937db96"
+    },
+    {
+      "path": "assets/catalog/s2-1-3.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/2kBeBlxGqBOdWlKwzAxiwkfU5on.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "c2293bc18740baf2e6b31ccc2b0ca85f7524a5f6d123a43483da66d281eb768e"
+    },
+    {
+      "path": "assets/catalog/s2-2-1.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/7vVujNqjP23MtPqUTBNITIW3DDA.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "7dc77cc46dce346935930710818ea0dc90fb61bad6d0e21c7c376be36a972b02"
+    },
+    {
+      "path": "assets/catalog/s2-2-2.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/vWcFcwMUfeBN8FZEdSSPHGQYrna.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "88664d20a60126ead61264f452142bb74b093b5723553ace90af1bb2f09d5d47"
+    },
+    {
+      "path": "assets/catalog/s2-2-3.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w300/p69fPkpnnxUmevhupJiDeYfQxxl.jpg",
+      "width": 300,
+      "height": 169,
+      "sha256": "07687e77cf63cf80d4faaaecc4408eeb83f347bca022f2b53b5608292a08c83e"
+    },
+    {
+      "path": "assets/catalog/s2-poster.jpg",
+      "role": "poster",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "cd877aaa0082da88092507baffa8505bacfa1e6c79a4dc9aa26ea984b97eae87"
+    },
+    {
+      "path": "assets/catalog/s2-backdrop.jpg",
+      "role": "backdrop",
+      "url": "https://image.tmdb.org/t/p/w1280/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+      "width": 1280,
+      "height": 720,
+      "sha256": "bc08403e9a5f3bd1c14384555513f13a856aaea4347947155760e21bb421fc9c"
+    },
+    {
+      "path": "assets/catalog/s3-1-1.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/u8xvgVzTQjAeRu68sI9JJHeQSuA.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "693e30e7c99bf6562ce84773829c65a0e3e2f92b88e2dea2b5964a65b88d7532"
+    },
+    {
+      "path": "assets/catalog/s3-1-2.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/cp1mf1pwb8F7NcuCJkzcfxIkZw2.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "1cfff03e89d34760dbde9c034cbe2ccf53ffa526bdad4d621cdd4fe991be12de"
+    },
+    {
+      "path": "assets/catalog/s3-1-3.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/inRnf07LWmlT5Z3KkS4iWlBX48x.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "37277c3eef2be9352e18a31875b7aacc14986542c0ada8d6724fe69a2ec29be2"
+    },
+    {
+      "path": "assets/catalog/s3-2-1.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/9fmNcR20uEnMeAKmUucJnCPeUJg.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "6b26aef5dc036e0c0f444727cffb7ba37a2d20f000286c5d70b6323b7b653658"
+    },
+    {
+      "path": "assets/catalog/s3-2-2.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/vjUsJUsF5RcTRKn2prGHCW9Nxro.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "c1e93396eff81a5cf01ab6c1009c6fc9566deff24151079288be3f15377d7cf1"
+    },
+    {
+      "path": "assets/catalog/s3-2-3.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/PVxRD2JqT2QM4t1Cih0v2AoRSR.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "5b47f1a2021f59278329f11966210ff58a39652fd7d146175aab39e1c9c07d9b"
+    },
+    {
+      "path": "assets/catalog/s3-poster.jpg",
+      "role": "poster",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/cIfGAkpvWD2zxHrXzhv3uptYbyV.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "8c09e18bb15ef8081aadfc7dba8900ca2f222f5d90458b12d0b6cabff47bb951"
+    },
+    {
+      "path": "assets/catalog/s3-backdrop.jpg",
+      "role": "backdrop",
+      "url": "https://image.tmdb.org/t/p/w1280/hmLTIRtVyTHShJl2Wb8LHmvUgJm.jpg",
+      "width": 1280,
+      "height": 720,
+      "sha256": "6ae716f351fc034f0d2cf5011a1e13227960f18fbb8aab59e0c9d8cbd5aec9eb"
+    },
+    {
+      "path": "assets/catalog/s4-1-1.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/ljQC5U5Ag86vRylCR5gmf78fVaS.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "fdc32cb22ce5a39cb9cee32a220261b4618979ee2534dc164099778219e026dd"
+    },
+    {
+      "path": "assets/catalog/s4-1-2.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/oFTNaNwF1g0GCQPTXgHviixMCDM.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "fe9e598825ee12e480cb3b49bbaee0d6103ddef03f4a3322a2d202294143c02b"
+    },
+    {
+      "path": "assets/catalog/s4-1-3.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/63pMJ4CLC7MDzjgWWlGZ2NKOG6o.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "b7f97686a540d21d0ce4694b14b39480f8e88ce3090ebf0762a320418e123476"
+    },
+    {
+      "path": "assets/catalog/s4-2-1.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/vMNgEJ1jAZHKRa5BFMOMEf2chCD.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "ba1fdee138f4f781ff35e97635235ff3e59d51aebdcc25e902e77497ff6e4557"
+    },
+    {
+      "path": "assets/catalog/s4-2-2.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/cCEfceBlCuqIshrvRJMED9Wr77c.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "f5636f099c25dba8e2a02971b7d75602454792527e19fddefe9777e0730c69ec"
+    },
+    {
+      "path": "assets/catalog/s4-2-3.jpg",
+      "role": "episode",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/t4NoLNFHJgeJiPzNDHD3cYbfht.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "c3a1f9dc59f9d9b2a0705ce3afc0d767e1a3718f23952e12e67a68d57b9aceb6"
+    },
+    {
+      "path": "assets/catalog/s4-poster.jpg",
+      "role": "poster",
+      "url": "https://image.tmdb.org/t/p/w600_and_h900_bestv2/5LoHuHWA4H8jElFlZDvsmU2n63b.jpg",
+      "width": 600,
+      "height": 900,
+      "sha256": "be1b4a4d6d6f5a8ed9c0daff69a0388c89d5dd74f388e319675a084a260c9800"
+    },
+    {
+      "path": "assets/catalog/s4-backdrop.jpg",
+      "role": "backdrop",
+      "url": "https://image.tmdb.org/t/p/w1280/3lBDg3i6nn5R2NKFCJ6oKyUo2j5.jpg",
+      "width": 1280,
+      "height": 720,
+      "sha256": "fac9c902ca23c3553b95cf3a39dc345ed8b1ae24e274420f4cc54947cf6c4434"
+    },
+    {
+      "path": "assets/catalog/channel-0.png",
+      "role": "logo",
+      "url": "https://raw.githubusercontent.com/tv-logo/tv-logos/refs/heads/main/countries/turkey/trt-belgesel-tr.png",
+      "width": 512,
+      "height": 55,
+      "sha256": "fc2ebffadee24549f89a8cb170e238617da236d49321d36a76dfd36ee0ad3663"
+    },
+    {
+      "path": "assets/catalog/channel-1.png",
+      "role": "logo",
+      "url": "https://raw.githubusercontent.com/tv-logo/tv-logos/refs/heads/main/countries/turkey/trt-1-tr.png",
+      "width": 512,
+      "height": 168,
+      "sha256": "f57c6c431fdc2bcbc1c54751685ae8285e1b5636a406fccc020587adfbf57e8d"
+    },
+    {
+      "path": "assets/catalog/channel-2.png",
+      "role": "logo",
+      "url": "https://raw.githubusercontent.com/tv-logo/tv-logos/refs/heads/main/countries/turkey/trt-muzik-tr.png",
+      "width": 512,
+      "height": 93,
+      "sha256": "7bf790e179cf278cd7b73caa0face7eb604023a8181fe200317675620b07c9be"
+    },
+    {
+      "path": "assets/catalog/channel-3.png",
+      "role": "logo",
+      "url": "https://raw.githubusercontent.com/tv-logo/tv-logos/refs/heads/main/countries/turkey/trt-spor-tr.png",
+      "width": 512,
+      "height": 81,
+      "sha256": "139c16e1f81445ba1e6e905915ea2806f385905c87089e5a8404bfc91dbc0284"
+    },
+    {
+      "path": "assets/catalog/channel-4.png",
+      "role": "logo",
+      "url": "https://raw.githubusercontent.com/tv-logo/tv-logos/refs/heads/main/countries/turkey/trt-haber-tr.png",
+      "width": 512,
+      "height": 90,
+      "sha256": "82d446868b40285cf85b37ba5649c022b4478d0748b176812d3f0f01e3c800e2"
+    },
+    {
+      "path": "assets/catalog/channel-5.png",
+      "role": "logo",
+      "url": "https://raw.githubusercontent.com/tv-logo/tv-logos/refs/heads/main/countries/turkey/cnn-turk-tr.png",
+      "width": 512,
+      "height": 404,
+      "sha256": "c943d3fbd2c51160cd417fe20deb2967af7c918d7a9601d8f67ebeb99474669e"
+    }
+  ],
+  "note": "Original provider-referenced public images retained for this user-requested local prototype. No rights or ownership claim. Episode sample capped at 3 per season / 2 seasons."
+}

@@ -1,0 +1,73 @@
+{
+  "version": "0.14.3-design-preview",
+  "versionCode": 17,
+  "status": "design preview delivered; not full product acceptance",
+  "tests": [
+    {
+      "fontScale": "1.0",
+      "passed": 1,
+      "failed": 0,
+      "scope": "player panel geometry and D-pad actions",
+      "log": "player-layout-1.0.log"
+    },
+    {
+      "fontScale": "1.5",
+      "passed": 1,
+      "failed": 0,
+      "scope": "player panel geometry and D-pad actions",
+      "log": "player-layout-1.5.log"
+    },
+    {
+      "fontScale": "2.0",
+      "passed": 1,
+      "failed": 0,
+      "scope": "player panel geometry and D-pad actions",
+      "log": "player-layout-2.0.log"
+    }
+  ],
+  "priorToSafeEdgeChange": {
+    "passed": 2,
+    "log": "player-existing-flows.log"
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "jvm": "not rerun in this layout-only turn",
+  "device": "isolated emulator-5556; final font scale1.0",
+  "apkSha256": "8263bbb7363a03743945a449ee2ca7563d301417ffe6d5404e3abeae7af25032",
+  "remaining": [
+    "Settings scroll boundary section labels",
+    "Source/track surfaces and artwork mapping",
+    "Figma/user/physical/codec matrix and remaining PRD gates"
+  ],
+  "stateTests": [
+    {
+      "fontScale": 1.0,
+      "passed": 2,
+      "failed": 0,
+      "scope": "long title/recovery/failure/retry and live programme/controls",
+      "log": "player-states-1.0.log"
+    },
+    {
+      "fontScale": 1.5,
+      "passed": 2,
+      "failed": 0,
+      "scope": "long title/recovery/failure/retry and live programme/controls",
+      "log": "player-states-1.5.log"
+    },
+    {
+      "fontScale": 2.0,
+      "passed": 2,
+      "failed": 0,
+      "scope": "long title/recovery/failure/retry and live programme/controls",
+      "log": "player-states-2.0.log"
+    }
+  ],
+  "finalRegression": {
+    "passed": 1,
+    "log": "player-final-regression.log",
+    "scope": "live/movie/series/tracks/favorites/back"
+  },
+  "signature": "v2 verified; player-signature.log"
+}

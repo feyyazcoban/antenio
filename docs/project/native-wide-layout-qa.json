@@ -1,0 +1,52 @@
+{
+  "version": "0.14.6-design-preview",
+  "versionCode": 20,
+  "apkSha256": "5d0e9503b3f0f2f0f1f760c724c45c4e45f770f9e07d01eb012adafa5035a598",
+  "status": "separate preview; TV remains 0.14.4",
+  "phases": [
+    {
+      "name": "Wide layout and source controls before home composition",
+      "testsPerScale": 7,
+      "scales": [
+        1.0,
+        1.5,
+        2.0
+      ],
+      "logs": "wide-layout-{scale}.log"
+    },
+    {
+      "name": "Home composition and horizontal focus guard",
+      "testsPerScale": 2,
+      "scales": [
+        1.0,
+        1.5,
+        2.0
+      ],
+      "logs": "home-composition-{scale}.log"
+    },
+    {
+      "name": "Final APK after derived source entry",
+      "passed": 8,
+      "failed": 0,
+      "fontScale": 1.0,
+      "log": "wide-final-1.0.log"
+    }
+  ],
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "signature": "v2 verified",
+  "jvm": "not rerun for this layout change",
+  "priorFailures": [
+    "Header Down used spatial selection; explicit visible-source info target added",
+    "Source test tag measured inner padding; moved tag to outer card bounds",
+    "Home live card reached screen edge; 7dp relocation padding added"
+  ],
+  "remaining": [
+    "Detail/search composition review",
+    "Figma and actual artwork alignment",
+    "Physical performance and codec gates",
+    "User visual acceptance and other PRD gates"
+  ]
+}

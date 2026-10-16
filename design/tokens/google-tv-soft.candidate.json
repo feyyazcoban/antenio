@@ -1,0 +1,110 @@
+{
+  "status": "proposal-implemented-in-android-design-preview",
+  "date": "2026-10-14",
+  "figmaSynced": false,
+  "nativeApplied": true,
+  "baseDp": {
+    "width": 960,
+    "height": 540
+  },
+  "color": {
+    "surface": "#15191e",
+    "container": "#252c33",
+    "high": "#343e47",
+    "text": "#f0f3f1",
+    "muted": "#b7c1c7",
+    "primary": "#a8dfcb",
+    "onPrimary": "#152b22",
+    "selected": "#35423f",
+    "outline": "#9eafb4",
+    "error": "#ffb4ab"
+  },
+  "layoutDp": {
+    "horizontalGutter": 58,
+    "topSafeArea": 27,
+    "bottomSafeArea": 27,
+    "headerHeight": 88,
+    "contentWidth": 844,
+    "heroHeight": 228,
+    "heroRadius": 20,
+    "cardRadius": 12,
+    "channelRadius": 14,
+    "gap": 20,
+    "focusWidth": 2,
+    "focusOffset": 3,
+    "posterWidth": 152.8,
+    "posterHeight": 229.2,
+    "landscapeWidth": 196,
+    "landscapeHeight": 110.25,
+    "channelWidth": 268,
+    "channelHeight": 126,
+    "subsequentShelfGap": 32
+  },
+  "typographySp": {
+    "hero": 39,
+    "pageTitle": 31,
+    "sectionTitle": 17,
+    "navigation": 13,
+    "cardTitle": 12,
+    "description": 13,
+    "metadata": 11
+  },
+  "motion": {
+    "focusMs": 160,
+    "cardScale": 1.025,
+    "reducedScale": 1
+  },
+  "contrastOpaquePairs": [
+    {
+      "foreground": "text",
+      "background": "surface",
+      "ratio": 15.8
+    },
+    {
+      "foreground": "text",
+      "background": "container",
+      "ratio": 12.64
+    },
+    {
+      "foreground": "text",
+      "background": "high",
+      "ratio": 9.76
+    },
+    {
+      "foreground": "muted",
+      "background": "surface",
+      "ratio": 9.64
+    },
+    {
+      "foreground": "muted",
+      "background": "container",
+      "ratio": 7.71
+    },
+    {
+      "foreground": "muted",
+      "background": "high",
+      "ratio": 5.95
+    },
+    {
+      "foreground": "onPrimary",
+      "background": "primary",
+      "ratio": 10.06
+    },
+    {
+      "foreground": "text",
+      "background": "selected",
+      "ratio": 9.39
+    },
+    {
+      "foreground": "text",
+      "background": "high",
+      "ratio": 9.76
+    },
+    {
+      "foreground": "outline",
+      "background": "surface",
+      "ratio": 7.77
+    }
+  ],
+  "nativeVersion": "0.14.1-design-preview"
+}

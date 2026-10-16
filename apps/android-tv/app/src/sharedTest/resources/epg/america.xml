@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tv PUBLIC "-//XMLTV//DTD XMLTV//EN" "xmltv.dtd">
+<tv generator-info-name="Synthetic American fixture">
+  <programme channel="without-definition.fixture" start="20261101013000 -0400" stop="20261101013000 -0500"><title lang="en">First 1:30</title></programme>
+  <programme channel="without-definition.fixture" start="20261101013000 -0500" stop="20261101023000 -0500"><title lang="en">Second 1:30</title></programme>
+  <programme channel="utc.fixture" start="202611011200" stop="202611011300"><title>UTC without an offset</title></programme>
+</tv>

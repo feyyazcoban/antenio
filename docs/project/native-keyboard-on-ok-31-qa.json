@@ -1,0 +1,55 @@
+{
+ "date": "2026-10-16",
+ "version": "0.14.31-design-preview",
+ "versionCode": 45,
+ "buildType": "release (R8, not debuggable, debug key so install -r keeps data)",
+ "sha256": "94970a72ddee2d9711ba146aaa3723e967b2c52514cca49bbdd3a563653daf35",
+ "apkSignature": "apksigner verify: v2 scheme true",
+ "device": "emulator-5556 / nextv_design_api36 / API 36, windowed host GPU (-feature -Vulkan, -no-snapshot), font 1.0",
+ "request": "text fields must not open the keyboard by themselves; the keyboard opens when the user clicks the field",
+ "design": "docs/design/KEYBOARD_ON_OK_31.md, decision D058",
+ "changes": [
+  "ui/Theme.kt: fieldKey (Up/Down leave, OK shows the keyboard for every remote) and keepKeyboardClosedOnFocus (hide in the frame focus starts input); EntryField uses both",
+  "ui/SearchScreen.kt: SearchField uses both"
+ ],
+ "mechanism": "legacy BasicTextField(String) always asks for the keyboard when focus starts input (KeyboardOptions.showKeyboardOnFocus only works with the TextFieldState API); a hide request in the same frame keeps it closed. logcat on focus: only a cancelled hide request (PHASE_CLIENT_ALREADY_HIDDEN), no show request",
+ "unit": {
+  "tests": 152,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 1
+ },
+ "lint": {
+  "errors": 0,
+  "warnings": 32
+ },
+ "font1_0": {
+  "SearchNavigationTest": "18/19 after the test fixes; homeBackAsksBeforeLeavingTheApp failed (alone 1/3, same rate as on 0.14.30 before this change); new fieldsOpenTheKeyboardOnlyOnOk passes",
+  "SourceLayoutFlowTest": "5/5",
+  "MultiSourceFlowTest": "7/7",
+  "SetupLayoutTest": "1/1",
+  "GuideFlowTest": "11/11 after the test fix",
+  "PilotFlowTest": "8/8",
+  "VisualPreviewTest": "11/11"
+ },
+ "testChanges": [
+  "SearchNavigationTest: new fieldsOpenTheKeyboardOnlyOnOk (Ara, section search, source form: closed on focus and on remote moves; OK opens, Back closes and keeps focus); hideKeyboard only presses Back when the keyboard is open; refreshRecovers... opens the keyboard with OK before typing, as a viewer would",
+  "SourceLayoutFlowTest: search field asserts the keyboard stays closed, OK opens, Back closes",
+  "GuideFlowTest: address editor asserts the keyboard stays closed, OK opens, Back closes only the keyboard"
+ ],
+ "manualEmulatorRelease": [
+  "0.14.31 release over the provisioned synthetic source: Ara opens with mInputShown=false, OK -> true, Back -> false; no FATAL EXCEPTION"
+ ],
+ "deviceState": "5556 windowed, 0.14.31 release with the synthetic 'Evim' source (local fixture server on host port 8765 while this session keeps it running)",
+ "physicalTv": "not touched",
+ "knownLimits": [
+  "keyboard Next moves to the next field and the keyboard closes there; OK opens it again (expected from the code, not checked by hand)",
+  "touch/mouse tap on a field not tested (no touch on TV)",
+  "homeBackAsksBeforeLeavingTheApp remains unstable on 5556 (pre-existing, unrelated to fields)"
+ ],
+ "notVerified": [
+  "TCL TV keyboard on the physical TV",
+  "font 1.5 / 2.0"
+ ],
+ "reviewImages": "design/reviews/keyboard-0.14.31/"
+}

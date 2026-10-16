@@ -1,0 +1,1061 @@
+{
+  "m3u_plus": {
+    "entries": 63175,
+    "uniqueUrls": 63175,
+    "duplicateUrls": 0,
+    "nonemptyAttributes": {
+      "tvg-name": 63171,
+      "tvg-logo": 56604,
+      "group-title": 63135,
+      "tvg-id": 490
+    },
+    "tagCounts": {
+      "#EXTM3U": 1
+    },
+    "typeByUrlPath": {
+      "unclassified": 4525,
+      "movie": 14603,
+      "series": 44047
+    },
+    "groupCount": 202,
+    "topGroups": [
+      [
+        "TR/DIZI ~ NETFLIX (DUAL)",
+        11179
+      ],
+      [
+        "TR/DIZI ~ TV FINAL",
+        4754
+      ],
+      [
+        "TR/DIZI ~ AMAZON PRIME",
+        3591
+      ],
+      [
+        "DE/SERIE ~ AMAZON PRIME",
+        2729
+      ],
+      [
+        "DE/SERIE ~ NETFLIX",
+        2544
+      ],
+      [
+        "DE/SERIE ~ ALL",
+        2539
+      ],
+      [
+        "TR/DIZI ~ TV",
+        2336
+      ],
+      [
+        "XXX/ADULT ~ VOD +18",
+        1886
+      ],
+      [
+        "TR/DIZI ~ DISNEY +",
+        1871
+      ],
+      [
+        "TR/DIZI ~ HBO MAX/BLUTV",
+        1750
+      ],
+      [
+        "TR/FILM ~ YABANCI 2017-2000 (DUAL)",
+        1579
+      ],
+      [
+        "TR/DIZI ~ COCUK",
+        1261
+      ]
+    ],
+    "sampleLabels": [
+      "*****INFO*****",
+      "*****INFO TURKIYE*****",
+      "*****TURK SPOR*****",
+      "TR: MAC OZETLERI",
+      "TR: beIN SPORTS HABER HD"
+    ],
+    "logoCount": 56604,
+    "uniqueLogos": 41204
+  },
+  "m3u": {
+    "entries": 63175,
+    "uniqueUrls": 63175,
+    "duplicateUrls": 0,
+    "nonemptyAttributes": {},
+    "tagCounts": {
+      "#EXTM3U": 1
+    },
+    "typeByUrlPath": {
+      "unclassified": 4525,
+      "movie": 14603,
+      "series": 44047
+    },
+    "groupCount": 1,
+    "topGroups": [
+      [
+        "(missing)",
+        63175
+      ]
+    ],
+    "sampleLabels": [
+      "*****INFO*****",
+      "*****INFO TURKIYE*****",
+      "*****TURK SPOR*****",
+      "TR: MAC OZETLERI",
+      "TR: beIN SPORTS HABER HD"
+    ],
+    "logoCount": 0,
+    "uniqueLogos": 0
+  },
+  "comparison": {
+    "sameOrderedUrls": true,
+    "onlyPlus": 0,
+    "onlyPlain": 0
+  },
+  "api": {
+    "live": {
+      "count": 4525,
+      "nonemptyFields": {
+        "added": 4525,
+        "category_id": 4485,
+        "category_ids": 4485,
+        "custom_sid": 0,
+        "direct_source": 0,
+        "epg_channel_id": 490,
+        "is_adult": 4525,
+        "name": 4525,
+        "num": 4525,
+        "stream_icon": 1282,
+        "stream_id": 4525,
+        "stream_type": 4525,
+        "tv_archive": 4525,
+        "tv_archive_duration": 4525
+      },
+      "categoryIdCount": 59
+    },
+    "vod": {
+      "count": 14609,
+      "nonemptyFields": {
+        "added": 14609,
+        "category_id": 14609,
+        "category_ids": 14609,
+        "container_extension": 14609,
+        "custom_sid": 0,
+        "direct_source": 0,
+        "is_adult": 14609,
+        "name": 14609,
+        "num": 14609,
+        "rating": 12751,
+        "rating_5based": 14609,
+        "stream_icon": 11708,
+        "stream_id": 14609,
+        "stream_type": 14609,
+        "tmdb": 10745,
+        "trailer": 4357
+      },
+      "categoryIdCount": 105
+    },
+    "series": {
+      "count": 2173,
+      "nonemptyFields": {
+        "backdrop_path": 2063,
+        "cast": 1899,
+        "category_id": 2173,
+        "category_ids": 2173,
+        "cover": 2153,
+        "director": 1155,
+        "episode_run_time": 2173,
+        "genre": 2004,
+        "last_modified": 2173,
+        "name": 2173,
+        "num": 2173,
+        "plot": 1812,
+        "rating": 2173,
+        "rating_5based": 2173,
+        "releaseDate": 2037,
+        "release_date": 2037,
+        "series_id": 2173,
+        "tmdb": 2173,
+        "youtube_trailer": 1141
+      },
+      "categoryIdCount": 38
+    }
+  },
+  "categories": {
+    "live": 58,
+    "vod": 105,
+    "series": 38
+  },
+  "assets": {
+    "references": 77220,
+    "uniqueUrls": 47388,
+    "byField": {
+      "stream_icon": 12984,
+      "cover": 2152,
+      "backdrop_path": 5486,
+      "tvg-logo": 56598
+    },
+    "hosts": [
+      [
+        "image.tmdb.org",
+        71799
+      ],
+      [
+        "raw.githubusercontent.com",
+        1292
+      ],
+      [
+        "img.freepik.com",
+        658
+      ],
+      [
+        "logo.hdiptv.app",
+        450
+      ],
+      [
+        "i.ytimg.com",
+        349
+      ],
+      [
+        "image.exxen.com",
+        176
+      ],
+      [
+        "upload.wikimedia.org",
+        133
+      ],
+      [
+        "www.bkmonline.net",
+        121
+      ],
+      [
+        "img-s2.onedio.com",
+        114
+      ],
+      [
+        "assets-jpcust.jwpsrv.com",
+        98
+      ],
+      [
+        "logos-world.net",
+        94
+      ],
+      [
+        "pbs.twimg.com",
+        93
+      ],
+      [
+        "m.media-amazon.com",
+        90
+      ],
+      [
+        "i4.hurimg.com",
+        76
+      ],
+      [
+        "assets.tazztv.io",
+        74
+      ],
+      [
+        "www.diziizle.day",
+        63
+      ],
+      [
+        "blutv-images.mncdn.com",
+        61
+      ],
+      [
+        "scdnmain.net",
+        60
+      ],
+      [
+        "go.wrldonx.fyi",
+        50
+      ]
+    ],
+    "http": 1894,
+    "https": 75326
+  },
+  "detailSamples": [
+    {
+      "kind": "vod",
+      "sample": 0,
+      "fields": [
+        "info",
+        "movie_data"
+      ],
+      "infoFields": [
+        "kinopoisk_url",
+        "tmdb_id",
+        "name",
+        "o_name",
+        "cover_big",
+        "movie_image",
+        "releasedate",
+        "episode_run_time",
+        "youtube_trailer",
+        "director",
+        "actors",
+        "cast",
+        "description",
+        "plot",
+        "age",
+        "country",
+        "genre",
+        "backdrop_path",
+        "duration_secs",
+        "duration",
+        "bitrate",
+        "rating",
+        "runtime",
+        "status"
+      ],
+      "info": {
+        "duration": "01:20:36",
+        "duration_secs": "4836"
+      }
+    },
+    {
+      "kind": "vod",
+      "sample": 1,
+      "fields": [
+        "info",
+        "movie_data"
+      ],
+      "infoFields": [
+        "tmdb_url",
+        "tmdb_id",
+        "name",
+        "o_name",
+        "cover_big",
+        "movie_image",
+        "releasedate",
+        "episode_run_time",
+        "youtube_trailer",
+        "director",
+        "actors",
+        "cast",
+        "description",
+        "plot",
+        "age",
+        "country",
+        "genre",
+        "backdrop_path",
+        "duration_secs",
+        "duration",
+        "bitrate",
+        "rating"
+      ],
+      "info": {
+        "duration": "01:25:14",
+        "duration_secs": "5114"
+      }
+    },
+    {
+      "kind": "vod",
+      "sample": 2,
+      "fields": [
+        "info",
+        "movie_data"
+      ],
+      "infoFields": [
+        "kinopoisk_url",
+        "tmdb_id",
+        "name",
+        "o_name",
+        "cover_big",
+        "movie_image",
+        "releasedate",
+        "episode_run_time",
+        "youtube_trailer",
+        "director",
+        "actors",
+        "cast",
+        "description",
+        "plot",
+        "age",
+        "country",
+        "genre",
+        "backdrop_path",
+        "duration_secs",
+        "duration",
+        "bitrate",
+        "rating"
+      ],
+      "info": {
+        "duration": "01:43:34",
+        "duration_secs": "6214"
+      }
+    },
+    {
+      "kind": "series",
+      "sample": 0,
+      "fields": [
+        "seasons",
+        "info",
+        "episodes"
+      ],
+      "infoFields": [
+        "name",
+        "cover",
+        "plot",
+        "cast",
+        "director",
+        "genre",
+        "releaseDate",
+        "release_date",
+        "last_modified",
+        "rating",
+        "rating_5based",
+        "backdrop_path",
+        "tmdb",
+        "youtube_trailer",
+        "episode_run_time",
+        "category_id",
+        "category_ids"
+      ],
+      "seasons": 1,
+      "episodes": 15,
+      "episodeFields": [
+        "id",
+        "episode_num",
+        "title",
+        "container_extension",
+        "info",
+        "custom_sid",
+        "added",
+        "season",
+        "direct_source"
+      ],
+      "episodeInfoFields": [
+        "air_date",
+        "rating",
+        "id",
+        "duration_secs",
+        "duration",
+        "video",
+        "audio",
+        "bitrate"
+      ]
+    },
+    {
+      "kind": "series",
+      "sample": 1,
+      "fields": [
+        "seasons",
+        "info",
+        "episodes"
+      ],
+      "infoFields": [
+        "name",
+        "cover",
+        "plot",
+        "cast",
+        "director",
+        "genre",
+        "releaseDate",
+        "release_date",
+        "last_modified",
+        "rating",
+        "rating_5based",
+        "backdrop_path",
+        "tmdb",
+        "youtube_trailer",
+        "episode_run_time",
+        "category_id",
+        "category_ids"
+      ],
+      "seasons": 1,
+      "episodes": 6,
+      "episodeFields": [
+        "id",
+        "episode_num",
+        "title",
+        "container_extension",
+        "info",
+        "custom_sid",
+        "added",
+        "season",
+        "direct_source"
+      ],
+      "episodeInfoFields": [
+        "tmdb_id",
+        "releasedate",
+        "plot",
+        "duration_secs",
+        "duration",
+        "movie_image",
+        "video",
+        "audio",
+        "bitrate",
+        "rating",
+        "season"
+      ]
+    }
+  ],
+  "probeResults": {
+    "catalogQuality": {
+      "live": {
+        "declaredAdult": 241,
+        "separatorLikeNames": 51,
+        "streamTypes": {
+          "live": 4484,
+          "radio_streams": 41
+        },
+        "positiveRatings": 0,
+        "positiveTmdbIds": 0,
+        "dualNameCount": 0,
+        "archiveEnabled": 0
+      },
+      "vod": {
+        "declaredAdult": 1886,
+        "separatorLikeNames": 40,
+        "streamTypes": {
+          "movie": 14609
+        },
+        "positiveRatings": 10169,
+        "positiveTmdbIds": 10744,
+        "dualNameCount": 8,
+        "containers": {
+          "mp4": 10896,
+          "mkv": 3381,
+          "avi": 326,
+          "mpg": 6
+        }
+      },
+      "series": {
+        "declaredAdult": 0,
+        "separatorLikeNames": 0,
+        "streamTypes": {
+          "not supplied": 2173
+        },
+        "positiveRatings": 1797,
+        "positiveTmdbIds": 2033,
+        "dualNameCount": 0
+      }
+    },
+    "assetsSample": [
+      {
+        "sample": 1,
+        "kind": "logo",
+        "scheme": "https",
+        "host": "logo.hdiptv.app",
+        "ok": false,
+        "error": "URLError"
+      },
+      {
+        "sample": 2,
+        "kind": "logo",
+        "scheme": "https",
+        "host": "www.dmy.info",
+        "httpStatus": 200,
+        "contentType": "image/png",
+        "ok": true,
+        "width": 680,
+        "height": 350,
+        "format": "PNG",
+        "alpha": true,
+        "bytes": 101461
+      },
+      {
+        "sample": 3,
+        "kind": "logo",
+        "scheme": "https",
+        "host": "raw.githubusercontent.com",
+        "httpStatus": 200,
+        "contentType": "image/png",
+        "ok": true,
+        "width": 512,
+        "height": 443,
+        "format": "PNG",
+        "alpha": true,
+        "bytes": 37982
+      },
+      {
+        "sample": 4,
+        "kind": "logo",
+        "scheme": "https",
+        "host": "raw.githubusercontent.com",
+        "httpStatus": 200,
+        "contentType": "image/png",
+        "ok": true,
+        "width": 512,
+        "height": 289,
+        "format": "PNG",
+        "alpha": true,
+        "bytes": 24232
+      },
+      {
+        "sample": 5,
+        "kind": "logo",
+        "scheme": "https",
+        "host": "raw.githubusercontent.com",
+        "httpStatus": 200,
+        "contentType": "image/png",
+        "ok": true,
+        "width": 512,
+        "height": 301,
+        "format": "PNG",
+        "alpha": true,
+        "bytes": 23095
+      },
+      {
+        "sample": 6,
+        "kind": "logo",
+        "scheme": "https",
+        "host": "raw.githubusercontent.com",
+        "httpStatus": 200,
+        "contentType": "image/png",
+        "ok": true,
+        "width": 512,
+        "height": 301,
+        "format": "PNG",
+        "alpha": true,
+        "bytes": 25049
+      },
+      {
+        "sample": 7,
+        "kind": "poster",
+        "scheme": "https",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 600,
+        "height": 900,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 110798
+      },
+      {
+        "sample": 8,
+        "kind": "poster",
+        "scheme": "http",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 600,
+        "height": 900,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 70335
+      },
+      {
+        "sample": 9,
+        "kind": "poster",
+        "scheme": "https",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 600,
+        "height": 900,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 141303
+      },
+      {
+        "sample": 10,
+        "kind": "poster",
+        "scheme": "https",
+        "host": "encrypted-tbn2.gstatic.com",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 1175,
+        "height": 1763,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 536006
+      },
+      {
+        "sample": 11,
+        "kind": "poster",
+        "scheme": "https",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 600,
+        "height": 900,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 174087
+      },
+      {
+        "sample": 12,
+        "kind": "poster",
+        "scheme": "https",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 600,
+        "height": 900,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 87326
+      },
+      {
+        "sample": 13,
+        "kind": "seriesCover",
+        "scheme": "https",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 600,
+        "height": 900,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 135715
+      },
+      {
+        "sample": 14,
+        "kind": "seriesCover",
+        "scheme": "https",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 600,
+        "height": 900,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 116350
+      },
+      {
+        "sample": 15,
+        "kind": "seriesCover",
+        "scheme": "https",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 600,
+        "height": 900,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 98593
+      },
+      {
+        "sample": 16,
+        "kind": "seriesCover",
+        "scheme": "https",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 600,
+        "height": 900,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 142152
+      },
+      {
+        "sample": 17,
+        "kind": "backdrop",
+        "scheme": "https",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 1280,
+        "height": 720,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 298494
+      },
+      {
+        "sample": 18,
+        "kind": "backdrop",
+        "scheme": "https",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 1280,
+        "height": 720,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 164204
+      },
+      {
+        "sample": 19,
+        "kind": "backdrop",
+        "scheme": "https",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 1279,
+        "height": 720,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 313685
+      },
+      {
+        "sample": 20,
+        "kind": "backdrop",
+        "scheme": "https",
+        "host": "image.tmdb.org",
+        "httpStatus": 200,
+        "contentType": "image/jpeg",
+        "ok": true,
+        "width": 1280,
+        "height": 720,
+        "format": "JPEG",
+        "alpha": false,
+        "bytes": 138627
+      }
+    ],
+    "mediaSamples": [
+      {
+        "kind": "live",
+        "ok": true,
+        "exitCode": 0,
+        "streams": [
+          {
+            "index": 0,
+            "codec_type": "video",
+            "codec_name": "h264",
+            "width": 1280,
+            "height": 720,
+            "language": null,
+            "title": "",
+            "default": 0,
+            "forced": 0,
+            "hearingImpaired": 0
+          },
+          {
+            "index": 1,
+            "codec_type": "audio",
+            "codec_name": "aac",
+            "sample_rate": "48000",
+            "channels": 2,
+            "channel_layout": "stereo",
+            "language": "tur",
+            "title": "",
+            "default": 0,
+            "forced": 0,
+            "hearingImpaired": 0
+          }
+        ],
+        "duration": null,
+        "format": "mpegts"
+      },
+      {
+        "kind": "vod",
+        "ok": false,
+        "exitCode": 1,
+        "streams": [],
+        "duration": null,
+        "format": null,
+        "error": "probe returned no streams; raw diagnostics kept private"
+      },
+      {
+        "kind": "episode",
+        "ok": true,
+        "exitCode": 0,
+        "streams": [
+          {
+            "index": 0,
+            "codec_type": "video",
+            "codec_name": "h264",
+            "width": 1920,
+            "height": 1080,
+            "language": "und",
+            "title": "",
+            "default": 1,
+            "forced": 0,
+            "hearingImpaired": 0
+          },
+          {
+            "index": 1,
+            "codec_type": "audio",
+            "codec_name": "aac",
+            "sample_rate": "44100",
+            "channels": 2,
+            "channel_layout": "stereo",
+            "language": "tur",
+            "title": "",
+            "default": 1,
+            "forced": 0,
+            "hearingImpaired": 0
+          }
+        ],
+        "duration": "2502.181497",
+        "format": "mov,mp4,m4a,3gp,3g2,mj2"
+      }
+    ],
+    "epgSamples": [
+      {
+        "entries": 0,
+        "fields": [],
+        "error": "HTTPError"
+      },
+      {
+        "entries": 0,
+        "fields": [],
+        "error": "HTTPError"
+      }
+    ]
+  },
+  "languageVariants": [
+    {
+      "sample": "vod_mkv",
+      "selection": "DUAL category; declared container mkv",
+      "ok": true,
+      "streams": [
+        {
+          "index": 0,
+          "codec_type": "video",
+          "codec_name": "hevc",
+          "width": 3840,
+          "height": 1608,
+          "language": null,
+          "title": "",
+          "default": 1,
+          "forced": 0,
+          "hearingImpaired": 0
+        },
+        {
+          "index": 1,
+          "codec_type": "audio",
+          "codec_name": "ac3",
+          "channels": 6,
+          "channel_layout": "5.1(side)",
+          "language": "tur",
+          "title": "",
+          "default": 0,
+          "forced": 0,
+          "hearingImpaired": 0
+        },
+        {
+          "index": 2,
+          "codec_type": "audio",
+          "codec_name": "aac",
+          "channels": 6,
+          "channel_layout": "5.1",
+          "language": "eng",
+          "title": "",
+          "default": 1,
+          "forced": 0,
+          "hearingImpaired": 0
+        },
+        {
+          "index": 3,
+          "codec_type": "subtitle",
+          "codec_name": "subrip",
+          "language": "eng",
+          "title": "",
+          "default": 1,
+          "forced": 0,
+          "hearingImpaired": 0
+        },
+        {
+          "index": 4,
+          "codec_type": "subtitle",
+          "codec_name": "subrip",
+          "language": "eng",
+          "title": "",
+          "default": 0,
+          "forced": 0,
+          "hearingImpaired": 0
+        }
+      ],
+      "duration": "8074.419000",
+      "format": "matroska,webm",
+      "httpCodes": []
+    },
+    {
+      "sample": "vod_mp4",
+      "selection": "DUAL category; declared container mp4",
+      "ok": true,
+      "streams": [
+        {
+          "index": 0,
+          "codec_type": "video",
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "language": "und",
+          "title": "",
+          "default": 1,
+          "forced": 0,
+          "hearingImpaired": 0
+        },
+        {
+          "index": 1,
+          "codec_type": "audio",
+          "codec_name": "aac",
+          "channels": 2,
+          "channel_layout": "stereo",
+          "language": "tur",
+          "title": "",
+          "default": 1,
+          "forced": 0,
+          "hearingImpaired": 0
+        }
+      ],
+      "duration": "5252.384000",
+      "format": "mov,mp4,m4a,3gp,3g2,mj2",
+      "httpCodes": []
+    },
+    {
+      "sample": "episode_dual",
+      "selection": "DUAL category; declared container mp4",
+      "ok": true,
+      "streams": [
+        {
+          "index": 0,
+          "codec_type": "video",
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080,
+          "language": "und",
+          "title": "",
+          "default": 1,
+          "forced": 0,
+          "hearingImpaired": 0
+        },
+        {
+          "index": 1,
+          "codec_type": "audio",
+          "codec_name": "aac",
+          "channels": 2,
+          "channel_layout": "stereo",
+          "language": "ger",
+          "title": "",
+          "default": 1,
+          "forced": 0,
+          "hearingImpaired": 0
+        }
+      ],
+      "duration": "2287.808000",
+      "format": "mov,mp4,m4a,3gp,3g2,mj2",
+      "httpCodes": []
+    }
+  ],
+  "capturedAt": "2026-10-13",
+  "scope": "Full playlist/catalog field inventory; 20 asset HTTP/decode samples; 6 stream probes; not full media playback validation.",
+  "artworkFieldQuality": {
+    "live": {
+      "nonempty": 1282,
+      "validHttpUrl": 1280,
+      "missing": 3243
+    },
+    "vod": {
+      "nonempty": 11708,
+      "validHttpUrl": 11704,
+      "missing": 2901
+    },
+    "series": {
+      "nonempty": 2153,
+      "validHttpUrl": 2152,
+      "missing": 20
+    }
+  }
+}

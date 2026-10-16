@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>NEXTV · TV akış denemesi</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="flows.css">
+  <script src="catalog-data.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="flows.js" defer></script>
+</head>
+<body>
+  <header class="lab-header">
+    <div><strong>NEXTV <span class="lab-separator">/</span> <span>TV deneyimi</span></strong><p>01 · Kaynak ekle, keşfet, izlemeye geç.</p></div>
+    <div class="demo-label"><span></span> Gerçek görseller · Örnek oynatma</div>
+  </header>
+  <main>
+    <div class="tv-shell"><div id="app" class="tv" aria-label="Televizyon uygulaması prototipi"></div></div>
+    <div class="lab-controls" aria-label="Prototip deneme araçları">
+      <div class="remote-hint"><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd><span>Gezin</span><kbd>Enter</kbd><span>Seç</span><kbd>Esc</kbd><span>Geri</span></div>
+      <div class="lab-actions">
+        <button id="demo-home" type="button">Ana sayfayı dene</button>
+        <button id="restart" type="button">Kuruluma dön</button>
+        <button id="fullscreen" type="button">Tam ekran</button>
+      </div>
+    </div>
+    <details class="test-drawer"><summary>Deneme seçenekleri</summary><div class="test-options">
+      <label>Kurulum sonucu <select id="scenario"><option value="success">Başarılı</option><option value="partial">Kısmi yükleme</option><option value="empty">Boş katalog</option><option value="error">Bağlantı hatası</option></select></label>
+      <label class="check-label"><input id="reduce-motion" type="checkbox"> Hareketi azalt</label>
+      <button id="stream-error" type="button">Yayın hatasını dene</button>
+      <button id="finish-episode" type="button">Bölümü / filmi bitir</button>
+      <label class="check-label"><input id="missing-art" type="checkbox"> Eksik görselleri dene</label>
+      <p>Gerçek yayın açılmaz. Form verileri gönderilmez veya kalıcı saklanmaz. Görseller sağladığın katalogdan; yayın rehberi ve parça seçenekleri örnektir. Deneme PIN kodu: 1234.</p>
+    </div></details>
+  </main>
+  <footer class="lab-footer"><span>Google TV için ilk tasarım denemesi</span><span id="screen-label">TV-001 · Karşılama</span></footer>
+  <div id="announcer" class="sr-only" role="status" aria-live="polite"></div>
+</body>
+</html>

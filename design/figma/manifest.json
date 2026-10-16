@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "fileKey": "KYAb9p9Aqu49vnXKZXXpcx",
+  "accountHint": "personal fyzcbn",
+  "updatedAt": "2026-10-13",
+  "syncMode": "manual",
+  "pages": [
+    {
+      "id": "160:3739",
+      "name": "Foundations"
+    },
+    {
+      "id": "0:1",
+      "name": "Components"
+    },
+    {
+      "id": "87:3626",
+      "name": "03 · Product & Screens"
+    }
+  ],
+  "sections": [
+    {
+      "id": "204:2",
+      "name": "00 · Project",
+      "boardId": "204:3",
+      "width": 1240,
+      "height": 1100
+    },
+    {
+      "id": "204:16",
+      "name": "01 · Flows",
+      "boardId": "204:17",
+      "width": 1240,
+      "height": 1128
+    },
+    {
+      "id": "204:32",
+      "name": "02 · Google TV Screens",
+      "boardId": "204:33",
+      "width": 1240,
+      "height": 1128
+    },
+    {
+      "id": "204:48",
+      "name": "03 · Motion Lab",
+      "boardId": "204:49",
+      "width": 1240,
+      "height": 1100
+    },
+    {
+      "id": "204:62",
+      "name": "04 · Handoff",
+      "boardId": "204:63",
+      "width": 1240,
+      "height": 1100
+    },
+    {
+      "id": "204:76",
+      "name": "99 · Archive",
+      "boardId": "204:77",
+      "width": 1240,
+      "height": 1100
+    }
+  ],
+  "screens": [
+    {
+      "id": "TV-001",
+      "name": "Karşılama",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-002",
+      "name": "M3U formu",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-003",
+      "name": "Xtream formu",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-004",
+      "name": "İçe aktarma",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-010",
+      "name": "Ana Sayfa",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-020",
+      "name": "Canlı TV",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-021",
+      "name": "Rehber",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-030",
+      "name": "Filmler",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-031",
+      "name": "Film ayrıntısı",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-040",
+      "name": "Diziler",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-041",
+      "name": "Dizi sezon ve bölümleri",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-050",
+      "name": "Canlı oynatıcı",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-051",
+      "name": "Film ve dizi oynatıcı",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-060",
+      "name": "Arama",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-061",
+      "name": "Favoriler",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-070",
+      "name": "Kaynaklar ve ayarlar",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    },
+    {
+      "id": "TV-071",
+      "name": "PIN",
+      "status": "planned",
+      "nodeId": null,
+      "plannedSectionId": "204:32"
+    }
+  ],
+  "preservedNodes": [
+    "160:3740",
+    "160:3892",
+    "160:4044",
+    "160:4109",
+    "161:2",
+    "161:96",
+    "161:244",
+    "161:370",
+    "55:6424",
+    "155:2627"
+  ],
+  "pending": [
+    {
+      "id": "FIGMA-CLEANUP",
+      "reason": "MCP Starter tool quota",
+      "script": "tools/figma_cleanup.js",
+      "status": "not_applied"
+    }
+  ]
+}

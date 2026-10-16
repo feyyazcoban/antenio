@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-13",
+  "applicationId": "dev.iptvplayer.tv.pilot",
+  "version": "0.1.0-pilot",
+  "build": {
+    "assembleDebug": "PASS",
+    "lintDebug": {
+      "errors": 0,
+      "warnings": 23
+    },
+    "apkBytes": 17725398,
+    "apkSha256": "3a25cb307e48435909d4841c207cb69b00d2b5f03dd60548358aab0f74b8c6bb",
+    "jdk": "Android Studio JBR 25.0.2",
+    "gradle": "9.2.1",
+    "sdk": 36,
+    "minSdkPilotOnly": 26
+  },
+  "unitTests": {
+    "passed": 14,
+    "failed": 0,
+    "syntheticCatalogEntries": 63175,
+    "largeCatalogTestSeconds": 3.224
+  },
+  "emulator": {
+    "platform": "Android TV API 36 x86_64",
+    "display": "1920x1080, density 320",
+    "acceleration": "WHPX",
+    "syntheticFlowTestsPassed": 2,
+    "syntheticFlowSeconds": 43.909,
+    "checks": [
+      "Xtream setup form",
+      "physical D-pad center event",
+      "live channel switching",
+      "two audio tracks and embedded subtitle selection",
+      "movie seek and resume",
+      "series season and episode selection",
+      "next episode",
+      "favorites",
+      "Back and catalog focus restoration",
+      "encrypted source round trip",
+      "empty M3U",
+      "remove source"
+    ]
+  },
+  "privateProvider": {
+    "test": "PASS",
+    "catalogCount": 21307,
+    "samplesPlayedSequentially": [
+      "LIVE",
+      "MOVIE",
+      "SERIES episode"
+    ],
+    "testSeconds": 64.47,
+    "simultaneousPlaybackSessions": 1,
+    "credentialsInApk": false,
+    "privateDeviceInputDeleted": true
+  },
+  "visualReview": [
+    "source setup",
+    "real artwork movie catalog"
+  ],
+  "physicalTv": {
+    "model": "iFFALCON 65U95A",
+    "status": "NOT_CONNECTED_NOT_TESTED"
+  },
+  "notVerified": [
+    "HDR and HEVC on physical TV",
+    "AC-3/5.1 output and passthrough on physical TV",
+    "physical remote repetition performance",
+    "full catalog performance budget",
+    "EPG/XMLTV",
+    "production PIN"
+  ],
+  "lintReview": "No errors. Warnings: newer dependency versions, SharedPreferences style/apply suggestion, vector banner size, optional Modifier argument order. Persistence commit executes on IO.",
+  "distributionVerification": {
+    "apkSignatureV2": "PASS",
+    "projectAndApkCredentialScan": "PASS",
+    "zipIntegrity": "PASS",
+    "projectLinkCheck": "PASS",
+    "emulatorAppDataCleared": true
+  }
+}

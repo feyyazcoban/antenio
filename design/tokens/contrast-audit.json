@@ -1,0 +1,190 @@
+{
+  "capturedAt": "2026-10-13",
+  "method": "WCAG sRGB relative luminance; opaque token pairs; displayed 8-bit hex; rounded to 2 decimals",
+  "rows": [
+    {
+      "mode": "Dark",
+      "foreground": "on-surface",
+      "background": "surface",
+      "fgHex": "#D8E6DF",
+      "bgHex": "#091610",
+      "ratio": 14.38
+    },
+    {
+      "mode": "Dark",
+      "foreground": "on-surface",
+      "background": "surface-container",
+      "fgHex": "#D8E6DF",
+      "bgHex": "#1A211F",
+      "ratio": 12.73
+    },
+    {
+      "mode": "Dark",
+      "foreground": "on-surface-variant",
+      "background": "surface",
+      "fgHex": "#B9CBC2",
+      "bgHex": "#091610",
+      "ratio": 10.92
+    },
+    {
+      "mode": "Dark",
+      "foreground": "on-surface-variant",
+      "background": "surface-variant",
+      "fgHex": "#B9CBC2",
+      "bgHex": "#3B4A43",
+      "ratio": 5.51
+    },
+    {
+      "mode": "Dark",
+      "foreground": "on-primary",
+      "background": "primary",
+      "fgHex": "#023826",
+      "bgHex": "#1CECAB",
+      "ratio": 8.54
+    },
+    {
+      "mode": "Dark",
+      "foreground": "on-primary-container",
+      "background": "primary-container",
+      "fgHex": "#D1F7F0",
+      "bgHex": "#0D553E",
+      "ratio": 7.66
+    },
+    {
+      "mode": "Dark",
+      "foreground": "on-error",
+      "background": "error",
+      "fgHex": "#690005",
+      "bgHex": "#FFB4AB",
+      "ratio": 7.72
+    },
+    {
+      "mode": "Dark",
+      "foreground": "on-error-container",
+      "background": "error-container",
+      "fgHex": "#FFDAD6",
+      "bgHex": "#93000A",
+      "ratio": 7.24
+    },
+    {
+      "mode": "Dark",
+      "foreground": "outline",
+      "background": "surface",
+      "fgHex": "#84948C",
+      "bgHex": "#091610",
+      "ratio": 5.82
+    },
+    {
+      "mode": "Dark",
+      "foreground": "outline",
+      "background": "surface-container-high",
+      "fgHex": "#84948C",
+      "bgHex": "#252B2A",
+      "ratio": 4.52
+    },
+    {
+      "mode": "Dark",
+      "foreground": "outline-variant",
+      "background": "surface",
+      "fgHex": "#3B4A43",
+      "bgHex": "#091610",
+      "ratio": 1.98
+    },
+    {
+      "mode": "Light",
+      "foreground": "on-surface",
+      "background": "surface",
+      "fgHex": "#141E19",
+      "bgHex": "#EFFDF6",
+      "ratio": 16.31
+    },
+    {
+      "mode": "Light",
+      "foreground": "on-surface",
+      "background": "surface-container",
+      "fgHex": "#141E19",
+      "bgHex": "#E9EFED",
+      "ratio": 14.67
+    },
+    {
+      "mode": "Light",
+      "foreground": "on-surface-variant",
+      "background": "surface",
+      "fgHex": "#3B4A43",
+      "bgHex": "#EFFDF6",
+      "ratio": 8.93
+    },
+    {
+      "mode": "Light",
+      "foreground": "on-surface-variant",
+      "background": "surface-variant",
+      "fgHex": "#3B4A43",
+      "bgHex": "#D5E7DE",
+      "ratio": 7.26
+    },
+    {
+      "mode": "Light",
+      "foreground": "on-primary",
+      "background": "primary",
+      "fgHex": "#FFFFFF",
+      "bgHex": "#076C4C",
+      "ratio": 6.44
+    },
+    {
+      "mode": "Light",
+      "foreground": "on-primary-container",
+      "background": "primary-container",
+      "fgHex": "#015138",
+      "bgHex": "#41FFBD",
+      "ratio": 7.28
+    },
+    {
+      "mode": "Light",
+      "foreground": "on-error",
+      "background": "error",
+      "fgHex": "#FFFFFF",
+      "bgHex": "#BA1A1A",
+      "ratio": 6.46
+    },
+    {
+      "mode": "Light",
+      "foreground": "on-error-container",
+      "background": "error-container",
+      "fgHex": "#93000A",
+      "bgHex": "#FFDAD6",
+      "ratio": 7.24
+    },
+    {
+      "mode": "Light",
+      "foreground": "outline",
+      "background": "surface",
+      "fgHex": "#6B7B73",
+      "bgHex": "#EFFDF6",
+      "ratio": 4.26
+    },
+    {
+      "mode": "Light",
+      "foreground": "outline",
+      "background": "surface-container-high",
+      "fgHex": "#6B7B73",
+      "bgHex": "#E3EAE7",
+      "ratio": 3.65
+    },
+    {
+      "mode": "Light",
+      "foreground": "outline-variant",
+      "background": "surface",
+      "fgHex": "#B9CBC2",
+      "bgHex": "#EFFDF6",
+      "ratio": 1.62
+    },
+    {
+      "mode": "Dark",
+      "foreground": "white (avoid on primary)",
+      "background": "primary",
+      "fgHex": "#FFFFFF",
+      "bgHex": "#1CECAB",
+      "ratio": 1.54
+    }
+  ]
+}

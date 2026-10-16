@@ -1,0 +1,31 @@
+{
+  "version": "0.14.17-design-preview",
+  "sha256": "d4f2f5650713315fe10760aaaaf5919645749e7f2af25799d54cecd4323c750f",
+  "changes": [
+    "Source number/type and count separated in an eyebrow row",
+    "Name 18/24sp Medium; update information on separate line",
+    "1dp mint container outline when a child action is focused"
+  ],
+  "checks": {
+    "candidateDeviceTests": 6,
+    "finalDeviceTests": 7,
+    "fonts": [
+      1.0,
+      1.5,
+      2.0
+    ],
+    "fixtureSources": 16,
+    "lint": {
+      "Error": 0,
+      "Warning": 32
+    },
+    "apkV2Signature": true,
+    "jvm": "Not rerun: layout-only change"
+  },
+  "screenshots": "design/reviews/source-hierarchy",
+  "limits": [
+    "Physical TV and user visual approval pending",
+    "Figma unchanged",
+    "Source metadata, encryption and operations unchanged; no provider playback tested"
+  ]
+}

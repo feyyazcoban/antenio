@@ -1,0 +1,327 @@
+{
+  "date": "2026-10-14",
+  "version": "0.14.0-design-preview",
+  "versionCode": 14,
+  "scope": "Native visual revision of shared theme/navigation, home, catalog, detail, search and guide entry; user visual approval remains open",
+  "device": {
+    "serial": "emulator-5556",
+    "avd": "nextv_design_api36",
+    "api": 36,
+    "pixels": [
+      1920,
+      1080
+    ],
+    "densityDpi": 320,
+    "fontRestored": 1.0
+  },
+  "protectedDevices": {
+    "emulator-5554": "0.13 and user catalog unchanged; mouse remote Right/OK/Back verified",
+    "65U95A": "0.2 unchanged"
+  },
+  "buildLog": "design-native-final-verification-build.log",
+  "jvm": {
+    "tests": 109,
+    "failures": 0,
+    "errors": 0
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 32
+  },
+  "initialRegressionRun": {
+    "log": "design-native-flow1.log",
+    "tests": 37,
+    "passed": 35,
+    "failed": 2,
+    "resolution": [
+      "Library refresh/filter stole input focus: clear gridActive when search row has focus; related nine cases rerun successfully.",
+      "Guide test assumed four live columns: navigate four rows to the same channel in the new three-column layout; player/guide assertions retained and rerun."
+    ]
+  },
+  "successfulRuns": [
+    {
+      "log": "design-native-flow-fix.log",
+      "fontScale": 1.0,
+      "passed": 11,
+      "failed": 0,
+      "seconds": 69.949,
+      "revision": "search focus regression fix"
+    },
+    {
+      "log": "design-native-font-1.5.log",
+      "fontScale": 1.5,
+      "passed": 17,
+      "failed": 0,
+      "seconds": 97.318,
+      "revision": "candidate before final query indicator/clear row"
+    },
+    {
+      "log": "design-native-font-2.0.log",
+      "fontScale": 2.0,
+      "passed": 17,
+      "failed": 0,
+      "seconds": 97.379,
+      "revision": "candidate before final query indicator/clear row"
+    },
+    {
+      "log": "design-native-final-1.0.log",
+      "fontScale": 1.0,
+      "passed": 10,
+      "failed": 0,
+      "seconds": 62.482,
+      "revision": "final APK"
+    },
+    {
+      "log": "design-native-final-2.0.log",
+      "fontScale": 2.0,
+      "passed": 10,
+      "failed": 0,
+      "seconds": 63.783,
+      "revision": "final APK"
+    },
+    {
+      "log": "design-native-settled-1.0.log",
+      "fontScale": 1.0,
+      "passed": 1,
+      "failed": 0,
+      "seconds": 21.035,
+      "revision": "final production APK, test capture waits for Compose after image decoding"
+    },
+    {
+      "log": "design-native-settled-1.5.log",
+      "fontScale": 1.5,
+      "passed": 1,
+      "failed": 0,
+      "seconds": 20.794,
+      "revision": "final production APK, test capture waits for Compose after image decoding"
+    },
+    {
+      "log": "design-native-settled-2.0.log",
+      "fontScale": 2.0,
+      "passed": 1,
+      "failed": 0,
+      "seconds": 20.75,
+      "revision": "final production APK, test capture waits for Compose after image decoding"
+    }
+  ],
+  "apk": {
+    "file": "IPTV_Player_TV_Design_Preview_0.14.0.apk",
+    "sha256": "9f193aa445584575bfeeed90bad63894b8bdd0a7c9289d765f124dc922d7453b",
+    "signatureVerified": "v2"
+  },
+  "previous013Sha256Unchanged": "9063f6d8785fb8e1ef02cc37ddfd9a5d0bd2c680d08864e2ef20261dd644d87a",
+  "screenshots": [
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.0/home.png",
+      "fontScale": 1.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.0/live.png",
+      "fontScale": 1.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.0/movies.png",
+      "fontScale": 1.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.0/series.png",
+      "fontScale": 1.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.0/detail.png",
+      "fontScale": 1.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.0/guide.png",
+      "fontScale": 1.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.0/search.png",
+      "fontScale": 1.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.5/home.png",
+      "fontScale": 1.5,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.5/live.png",
+      "fontScale": 1.5,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.5/movies.png",
+      "fontScale": 1.5,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.5/series.png",
+      "fontScale": 1.5,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.5/detail.png",
+      "fontScale": 1.5,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.5/guide.png",
+      "fontScale": 1.5,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-1.5/search.png",
+      "fontScale": 1.5,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-2.0/home.png",
+      "fontScale": 2.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-2.0/live.png",
+      "fontScale": 2.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-2.0/movies.png",
+      "fontScale": 2.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-2.0/series.png",
+      "fontScale": 2.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-2.0/detail.png",
+      "fontScale": 2.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-2.0/guide.png",
+      "fontScale": 2.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    },
+    {
+      "path": "design/reviews/google-tv-soft-native/font-2.0/search.png",
+      "fontScale": 2.0,
+      "size": [
+        1920,
+        1080
+      ],
+      "revision": "final APK with settled capture"
+    }
+  ],
+  "observations": [
+    "Normal home first shelf captions fit; five poster columns share metadata baseline.",
+    "Focused poster and captions stay within viewport with bottom safe area at large font.",
+    "Large-font catalog header scrolls out while cards are focused; a partial count can remain at the viewport edge. Header can be reached with Up; edge polish remains.",
+    "Large-font detail play/favorite/description actions remain visible; explanatory content below can require scrolling.",
+    "Search field retains focus while results refresh; selected navigation and keyboard focus are visually distinct.",
+    "Initial screenshots retained fallback initials behind transparent logos because the capture slept after Compose idle but did not wait for pending recomposition. The test helper now waits for idle again after decoding; the final home image shows clean logos. Production APK unchanged by this test-only fix."
+  ],
+  "privacy": {
+    "realCredentialsUsedInTests": false,
+    "realProviderStreamsOpened": 0,
+    "artwork": "Previously approved real art served locally; synthetic accounts/catalog"
+  },
+  "figmaUpdated": false,
+  "notCompleted": [
+    "User visual approval",
+    "Real provider separator/INFO and unreliable art curation",
+    "All settings/source/player surfaces redesigned",
+    "Figma synchronization",
+    "Physical TV performance/HDR/codec/audio and full accessibility matrix",
+    "PIN and phone setup"
+  ],
+  "claims": "Historical 0.13 77-case suite was not rerun in full. Repeated runs are not distinct test cases. Emulator timing is not physical performance approval."
+}

@@ -1,0 +1,74 @@
+{
+  "stage": "EPG data foundation; native UI integration pending",
+  "checkedAt": "2026-10-14T09:15:55.649728+03:00",
+  "releasePublished": false,
+  "sourceVersion": "12 / 0.12.0-pilot (development work after published 0.12)",
+  "publishedApkUnchanged": {
+    "file": "IPTV_Player_TV_Pilot_0.12.0.apk",
+    "bytes": 17474116,
+    "sha256": "2944e921d71c04cfa819ee7c4a5742bd7e6b4ec53a9618c84be8d580448da958"
+  },
+  "emulatorDevelopmentApk": {
+    "file": "app-debug.apk",
+    "bytes": 17514166,
+    "sha256": "100d0777ebb489ff2382fb68747e3476e0f3c4f73df8616ae711042c4cd5e11a"
+  },
+  "unitTests": {
+    "tests": 105,
+    "failures": 0,
+    "errors": 0
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 31
+  },
+  "emulator": {
+    "serial": "emulator-5554",
+    "api": 36,
+    "tests": 33,
+    "passed": 33,
+    "seconds": 36.376,
+    "classes": {
+      "EpgStorageTest": 12,
+      "SourceOperationFlowTest": 7,
+      "SourceRecoveryFlowTest": 4,
+      "SourceRegistryStorageTest": 10
+    }
+  },
+  "evidence": [
+    "work/epg-foundation-final-build.log",
+    "work/epg-foundation-final-device.log"
+  ],
+  "fixtures": [
+    "app/src/sharedTest/resources/epg/europe.xml",
+    "app/src/sharedTest/resources/epg/america.xml"
+  ],
+  "verified": [
+    "DST offsets and calendar-day retention",
+    "Turkish text and preferred language",
+    "no guessed end times or ambiguous current programme",
+    "M3U and Xtream guide metadata; backwards-compatible catalog decoding",
+    "separate source/feed matching and conservative name fallback",
+    "plain, file gzip and HTTP gzip",
+    "body-read network cancellation",
+    "XML external DTD ignored without fetching; internal entities rejected",
+    "staging/publication; old snapshot retained on failure or cancellation",
+    "removal and superseded requests reject late publication",
+    "query row limit and gaps",
+    "guide DB contains no fixture source URL or credentials",
+    "related source lifecycle regression"
+  ],
+  "firstRunCorrections": [
+    "MockWebServer throttle reduced from 30s to 3s to fit its 5s shutdown; actual responseBodyStart latch confirms cancellation phase",
+    "Coroutine recovery may add a sanitized SourceFailure cause; test checks the whole message chain for secrets instead of requiring null cause"
+  ],
+  "notVerified": [
+    "native guide UI, TV remote flow and font scaling",
+    "real provider guide compatibility",
+    "real-device EPG memory/storage/performance",
+    "physical TV, visual/sound approval and remaining PRD P0 gates"
+  ],
+  "physicalTvTouched": false,
+  "providerStreamsOpened": 0,
+  "figmaChanged": false
+}

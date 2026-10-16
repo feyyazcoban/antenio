@@ -1,0 +1,534 @@
+{
+  "scope": "Debug API36 isolated emulator; direct StateFlow publication plus Compose test synchronization, not physical input-to-pixel. Production APK unchanged 0.14.14.",
+  "runs": [
+    {
+      "build": "0.14.14-design-preview",
+      "entries": 60000,
+      "live": 10000,
+      "movies": 35000,
+      "series": 15000,
+      "scope": "Debug emulator: model request through Compose idle and visible semantics. Includes test synchronization; not physical input-to-pixel or process startup.",
+      "encryptedWriteMs": 1039.5682,
+      "restoreToHomeMs": [
+        2170.1223,
+        1898.9465,
+        2050.8115,
+        1815.998,
+        1832.1718
+      ],
+      "queryToVisibleMs": [
+        {
+          "pass": 0,
+          "queryClass": 0,
+          "results": 1,
+          "ms": 890.4972,
+          "requestDispatchMs": 2.8963,
+          "modelReadyMs": 785.7225,
+          "testPollReadyMs": 786.3725,
+          "modelToIdleAndVisibleMs": 104.7921
+        },
+        {
+          "pass": 0,
+          "queryClass": 1,
+          "results": 1,
+          "ms": 168.5313,
+          "requestDispatchMs": 2.1694,
+          "modelReadyMs": 1.7428,
+          "testPollReadyMs": 60.6056,
+          "modelToIdleAndVisibleMs": 166.8036
+        },
+        {
+          "pass": 0,
+          "queryClass": 2,
+          "results": 16,
+          "ms": 232.425,
+          "requestDispatchMs": 2.2562,
+          "modelReadyMs": 1.7947,
+          "testPollReadyMs": 55.593,
+          "modelToIdleAndVisibleMs": 230.6545
+        },
+        {
+          "pass": 0,
+          "queryClass": 3,
+          "results": 60000,
+          "ms": 406.7472,
+          "requestDispatchMs": 2.3609,
+          "modelReadyMs": 1.8615,
+          "testPollReadyMs": 107.8602,
+          "modelToIdleAndVisibleMs": 404.8992
+        },
+        {
+          "pass": 0,
+          "queryClass": 4,
+          "results": 1,
+          "ms": 208.3268,
+          "requestDispatchMs": 2.8116,
+          "modelReadyMs": 2.3305,
+          "testPollReadyMs": 64.9272,
+          "modelToIdleAndVisibleMs": 206.0053
+        },
+        {
+          "pass": 0,
+          "queryClass": 5,
+          "results": 1,
+          "ms": 183.3529,
+          "requestDispatchMs": 5.3571,
+          "modelReadyMs": 1.1699,
+          "testPollReadyMs": 56.5138,
+          "modelToIdleAndVisibleMs": 182.2007
+        },
+        {
+          "pass": 1,
+          "queryClass": 0,
+          "results": 1,
+          "ms": 232.6447,
+          "requestDispatchMs": 1.9216,
+          "modelReadyMs": 1.2366,
+          "testPollReadyMs": 66.9173,
+          "modelToIdleAndVisibleMs": 231.4221
+        },
+        {
+          "pass": 1,
+          "queryClass": 1,
+          "results": 1,
+          "ms": 184.802,
+          "requestDispatchMs": 2.6716,
+          "modelReadyMs": 1.4221,
+          "testPollReadyMs": 56.0505,
+          "modelToIdleAndVisibleMs": 183.4
+        },
+        {
+          "pass": 1,
+          "queryClass": 2,
+          "results": 16,
+          "ms": 231.7843,
+          "requestDispatchMs": 1.5364,
+          "modelReadyMs": 1.1628,
+          "testPollReadyMs": 48.0674,
+          "modelToIdleAndVisibleMs": 230.8067
+        },
+        {
+          "pass": 1,
+          "queryClass": 3,
+          "results": 60000,
+          "ms": 232.7286,
+          "requestDispatchMs": 1.45,
+          "modelReadyMs": 1.0662,
+          "testPollReadyMs": 54.2668,
+          "modelToIdleAndVisibleMs": 231.6768
+        },
+        {
+          "pass": 1,
+          "queryClass": 4,
+          "results": 1,
+          "ms": 198.9388,
+          "requestDispatchMs": 2.4241,
+          "modelReadyMs": 1.7839,
+          "testPollReadyMs": 69.5705,
+          "modelToIdleAndVisibleMs": 197.1744
+        },
+        {
+          "pass": 1,
+          "queryClass": 5,
+          "results": 1,
+          "ms": 183.267,
+          "requestDispatchMs": 2.1257,
+          "modelReadyMs": 1.5313,
+          "testPollReadyMs": 50.872,
+          "modelToIdleAndVisibleMs": 181.7505
+        },
+        {
+          "pass": 2,
+          "queryClass": 0,
+          "results": 1,
+          "ms": 165.9927,
+          "requestDispatchMs": 1.2787,
+          "modelReadyMs": 0.8513,
+          "testPollReadyMs": 98.9162,
+          "modelToIdleAndVisibleMs": 165.2168
+        },
+        {
+          "pass": 2,
+          "queryClass": 1,
+          "results": 1,
+          "ms": 183.2669,
+          "requestDispatchMs": 1.4766,
+          "modelReadyMs": 0.9639,
+          "testPollReadyMs": 49.6676,
+          "modelToIdleAndVisibleMs": 182.3221
+        },
+        {
+          "pass": 2,
+          "queryClass": 2,
+          "results": 16,
+          "ms": 218.0567,
+          "requestDispatchMs": 1.4376,
+          "modelReadyMs": 0.8871,
+          "testPollReadyMs": 45.9682,
+          "modelToIdleAndVisibleMs": 217.1883
+        },
+        {
+          "pass": 2,
+          "queryClass": 3,
+          "results": 60000,
+          "ms": 231.2638,
+          "requestDispatchMs": 2.4873,
+          "modelReadyMs": 1.8988,
+          "testPollReadyMs": 64.305,
+          "modelToIdleAndVisibleMs": 229.379
+        },
+        {
+          "pass": 2,
+          "queryClass": 4,
+          "results": 1,
+          "ms": 249.5294,
+          "requestDispatchMs": 7.3413,
+          "modelReadyMs": 6.9193,
+          "testPollReadyMs": 82.5757,
+          "modelToIdleAndVisibleMs": 242.6867
+        },
+        {
+          "pass": 2,
+          "queryClass": 5,
+          "results": 1,
+          "ms": 181.378,
+          "requestDispatchMs": 2.7809,
+          "modelReadyMs": 2.046,
+          "testPollReadyMs": 58.086,
+          "modelToIdleAndVisibleMs": 179.3429
+        },
+        {
+          "pass": 3,
+          "queryClass": 0,
+          "results": 1,
+          "ms": 183.8436,
+          "requestDispatchMs": 2.1169,
+          "modelReadyMs": 0.9802,
+          "testPollReadyMs": 44.5713,
+          "modelToIdleAndVisibleMs": 182.8774
+        },
+        {
+          "pass": 3,
+          "queryClass": 1,
+          "results": 1,
+          "ms": 165.9426,
+          "requestDispatchMs": 1.3987,
+          "modelReadyMs": 1.0163,
+          "testPollReadyMs": 72.7873,
+          "modelToIdleAndVisibleMs": 164.9401
+        },
+        {
+          "pass": 3,
+          "queryClass": 2,
+          "results": 16,
+          "ms": 203.1179,
+          "requestDispatchMs": 1.5293,
+          "modelReadyMs": 0.9638,
+          "testPollReadyMs": 44.2543,
+          "modelToIdleAndVisibleMs": 202.216
+        },
+        {
+          "pass": 3,
+          "queryClass": 3,
+          "results": 60000,
+          "ms": 229.889,
+          "requestDispatchMs": 2.4467,
+          "modelReadyMs": 1.7544,
+          "testPollReadyMs": 61.8181,
+          "modelToIdleAndVisibleMs": 228.1917
+        },
+        {
+          "pass": 3,
+          "queryClass": 4,
+          "results": 1,
+          "ms": 182.9674,
+          "requestDispatchMs": 2.5777,
+          "modelReadyMs": 1.9583,
+          "testPollReadyMs": 59.305,
+          "modelToIdleAndVisibleMs": 181.0422
+        },
+        {
+          "pass": 3,
+          "queryClass": 5,
+          "results": 1,
+          "ms": 182.7145,
+          "requestDispatchMs": 6.7327,
+          "modelReadyMs": 0.9635,
+          "testPollReadyMs": 49.4971,
+          "modelToIdleAndVisibleMs": 181.7819
+        }
+      ],
+      "usedJavaHeapBytesAtEnd": 102286656
+    },
+    {
+      "build": "0.14.14-design-preview",
+      "entries": 60000,
+      "live": 10000,
+      "movies": 35000,
+      "series": 15000,
+      "scope": "Debug emulator: model request through Compose idle and visible semantics. Includes test synchronization; not physical input-to-pixel or process startup.",
+      "encryptedWriteMs": 1049.679,
+      "restoreToHomeMs": [
+        2178.362,
+        1900.0209,
+        1916.241,
+        1816.6806,
+        2050.1906
+      ],
+      "queryToVisibleMs": [
+        {
+          "pass": 0,
+          "queryClass": 0,
+          "results": 1,
+          "ms": 859.6862,
+          "requestDispatchMs": 3.5396,
+          "modelReadyMs": 748.0118,
+          "testPollReadyMs": 757.3123,
+          "modelToIdleAndVisibleMs": 111.7012
+        },
+        {
+          "pass": 0,
+          "queryClass": 1,
+          "results": 1,
+          "ms": 176.1975,
+          "requestDispatchMs": 1.646,
+          "modelReadyMs": 1.1226,
+          "testPollReadyMs": 56.9945,
+          "modelToIdleAndVisibleMs": 175.0983
+        },
+        {
+          "pass": 0,
+          "queryClass": 2,
+          "results": 16,
+          "ms": 256.4111,
+          "requestDispatchMs": 2.1243,
+          "modelReadyMs": 1.6751,
+          "testPollReadyMs": 52.1871,
+          "modelToIdleAndVisibleMs": 254.7517
+        },
+        {
+          "pass": 0,
+          "queryClass": 3,
+          "results": 60000,
+          "ms": 299.9728,
+          "requestDispatchMs": 2.3581,
+          "modelReadyMs": 1.5977,
+          "testPollReadyMs": 90.165,
+          "modelToIdleAndVisibleMs": 298.4231
+        },
+        {
+          "pass": 0,
+          "queryClass": 4,
+          "results": 1,
+          "ms": 201.5751,
+          "requestDispatchMs": 2.698,
+          "modelReadyMs": 1.5856,
+          "testPollReadyMs": 64.1051,
+          "modelToIdleAndVisibleMs": 200.0065
+        },
+        {
+          "pass": 0,
+          "queryClass": 5,
+          "results": 1,
+          "ms": 198.0893,
+          "requestDispatchMs": 1.9588,
+          "modelReadyMs": 1.5398,
+          "testPollReadyMs": 55.3773,
+          "modelToIdleAndVisibleMs": 196.5636
+        },
+        {
+          "pass": 1,
+          "queryClass": 0,
+          "results": 1,
+          "ms": 182.4668,
+          "requestDispatchMs": 2.2775,
+          "modelReadyMs": 1.8176,
+          "testPollReadyMs": 57.6496,
+          "modelToIdleAndVisibleMs": 180.6641
+        },
+        {
+          "pass": 1,
+          "queryClass": 1,
+          "results": 1,
+          "ms": 183.4866,
+          "requestDispatchMs": 2.7008,
+          "modelReadyMs": 1.1988,
+          "testPollReadyMs": 49.5639,
+          "modelToIdleAndVisibleMs": 182.3106
+        },
+        {
+          "pass": 1,
+          "queryClass": 2,
+          "results": 16,
+          "ms": 249.7195,
+          "requestDispatchMs": 1.7832,
+          "modelReadyMs": 1.2623,
+          "testPollReadyMs": 46.8797,
+          "modelToIdleAndVisibleMs": 248.4717
+        },
+        {
+          "pass": 1,
+          "queryClass": 3,
+          "results": 60000,
+          "ms": 317.6694,
+          "requestDispatchMs": 2.048,
+          "modelReadyMs": 1.4686,
+          "testPollReadyMs": 64.0354,
+          "modelToIdleAndVisibleMs": 316.2572
+        },
+        {
+          "pass": 1,
+          "queryClass": 4,
+          "results": 1,
+          "ms": 214.6092,
+          "requestDispatchMs": 3.5751,
+          "modelReadyMs": 2.7376,
+          "testPollReadyMs": 84.0714,
+          "modelToIdleAndVisibleMs": 211.8939
+        },
+        {
+          "pass": 1,
+          "queryClass": 5,
+          "results": 1,
+          "ms": 166.1704,
+          "requestDispatchMs": 1.4803,
+          "modelReadyMs": 1.0289,
+          "testPollReadyMs": 46.0445,
+          "modelToIdleAndVisibleMs": 165.1559
+        },
+        {
+          "pass": 2,
+          "queryClass": 0,
+          "results": 1,
+          "ms": 183.6973,
+          "requestDispatchMs": 1.9284,
+          "modelReadyMs": 1.3768,
+          "testPollReadyMs": 72.8474,
+          "modelToIdleAndVisibleMs": 182.333
+        },
+        {
+          "pass": 2,
+          "queryClass": 1,
+          "results": 1,
+          "ms": 182.459,
+          "requestDispatchMs": 2.3913,
+          "modelReadyMs": 1.8402,
+          "testPollReadyMs": 53.0534,
+          "modelToIdleAndVisibleMs": 180.6308
+        },
+        {
+          "pass": 2,
+          "queryClass": 2,
+          "results": 16,
+          "ms": 201.0917,
+          "requestDispatchMs": 1.234,
+          "modelReadyMs": 0.7795,
+          "testPollReadyMs": 41.8144,
+          "modelToIdleAndVisibleMs": 200.3253
+        },
+        {
+          "pass": 2,
+          "queryClass": 3,
+          "results": 60000,
+          "ms": 234.1223,
+          "requestDispatchMs": 2.0012,
+          "modelReadyMs": 1.6294,
+          "testPollReadyMs": 57.9083,
+          "modelToIdleAndVisibleMs": 232.577
+        },
+        {
+          "pass": 2,
+          "queryClass": 4,
+          "results": 1,
+          "ms": 197.8459,
+          "requestDispatchMs": 1.992,
+          "modelReadyMs": 1.393,
+          "testPollReadyMs": 74.5678,
+          "modelToIdleAndVisibleMs": 196.4749
+        },
+        {
+          "pass": 2,
+          "queryClass": 5,
+          "results": 1,
+          "ms": 148.7419,
+          "requestDispatchMs": 2.4824,
+          "modelReadyMs": 2.1252,
+          "testPollReadyMs": 47.4186,
+          "modelToIdleAndVisibleMs": 146.6325
+        },
+        {
+          "pass": 3,
+          "queryClass": 0,
+          "results": 1,
+          "ms": 168.4376,
+          "requestDispatchMs": 1.4046,
+          "modelReadyMs": 0.8774,
+          "testPollReadyMs": 44.8847,
+          "modelToIdleAndVisibleMs": 167.5732
+        },
+        {
+          "pass": 3,
+          "queryClass": 1,
+          "results": 1,
+          "ms": 164.8669,
+          "requestDispatchMs": 1.4823,
+          "modelReadyMs": 1.0124,
+          "testPollReadyMs": 52.1947,
+          "modelToIdleAndVisibleMs": 163.9078
+        },
+        {
+          "pass": 3,
+          "queryClass": 2,
+          "results": 16,
+          "ms": 218.5575,
+          "requestDispatchMs": 1.736,
+          "modelReadyMs": 1.2904,
+          "testPollReadyMs": 46.3021,
+          "modelToIdleAndVisibleMs": 217.3232
+        },
+        {
+          "pass": 3,
+          "queryClass": 3,
+          "results": 60000,
+          "ms": 282.9808,
+          "requestDispatchMs": 1.8351,
+          "modelReadyMs": 1.1184,
+          "testPollReadyMs": 67.775,
+          "modelToIdleAndVisibleMs": 281.8939
+        },
+        {
+          "pass": 3,
+          "queryClass": 4,
+          "results": 1,
+          "ms": 198.4313,
+          "requestDispatchMs": 2.044,
+          "modelReadyMs": 1.5025,
+          "testPollReadyMs": 56.718,
+          "modelToIdleAndVisibleMs": 196.9421
+        },
+        {
+          "pass": 3,
+          "queryClass": 5,
+          "results": 1,
+          "ms": 133.1051,
+          "requestDispatchMs": 1.1504,
+          "modelReadyMs": 0.8525,
+          "testPollReadyMs": 44.3151,
+          "modelToIdleAndVisibleMs": 132.2675
+        }
+      ],
+      "usedJavaHeapBytesAtEnd": 89437504
+    }
+  ],
+  "checks": [
+    "Initial diagnostic 1/1",
+    "Final diagnostic with observer cleanup 1/1",
+    "Final test APK build successful"
+  ],
+  "limitations": [
+    "Model-ready includes index await, matching and main-thread publication; these are not yet separated.",
+    "Post-publication duration includes test polling and idle synchronization; not pure rendering.",
+    "No physical TV test, no production change."
+  ],
+  "correction": "Subsequent-query modelReadyMs/modelToIdleAndVisibleMs are invalid: observer could accept new query text with previous results before searching=true. First query and total ms unaffected. Corrected observer and results in native-search-index-reuse-qa.json."
+}

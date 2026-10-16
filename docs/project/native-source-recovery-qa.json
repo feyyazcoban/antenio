@@ -1,0 +1,151 @@
+{
+  "date": "2026-10-14",
+  "version": "0.10.0-pilot",
+  "versionCode": 10,
+  "physicalTvInstalled": "0.2.0-pilot",
+  "jvmTests": {
+    "tests": 79,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "instrumentation": {
+    "uniqueCases": 44,
+    "latestResults": "all passed",
+    "runs": [
+      {
+        "log": "v10-new-flows.log",
+        "cases": 8,
+        "passed": 6,
+        "failedCases": 2,
+        "seconds": 31.551
+      },
+      {
+        "log": "v10-new-final.log",
+        "cases": 8,
+        "passed": 8,
+        "failedCases": 0,
+        "seconds": 18.155
+      },
+      {
+        "log": "v10-regression.log",
+        "cases": 35,
+        "passed": 34,
+        "failedCases": 1,
+        "seconds": 249.095
+      },
+      {
+        "log": "v10-release-flows.log",
+        "cases": 16,
+        "passed": 16,
+        "failedCases": 0,
+        "seconds": 36.012
+      }
+    ],
+    "cases": [
+      "dev.iptvplayer.tv.ArtworkCacheTest#clearCancelsAllOwnersAndRemovesEveryReference",
+      "dev.iptvplayer.tv.ArtworkCacheTest#ownershipPersistsAcrossLoaderRestartAndAbsentOwnerIsReconciled",
+      "dev.iptvplayer.tv.ArtworkCacheTest#removalCancelsInFlightBodyAndRejectsLateRequests",
+      "dev.iptvplayer.tv.ArtworkCacheTest#sharedDiskSurvivesOneOwnerRemovalAndLastOwnerCleansBytesAndMemory",
+      "dev.iptvplayer.tv.ArtworkCacheTest#unownedLegacyCacheIsDiscardedOnceBeforeNewOwnershipIsAccepted",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#autoplaySettingTogglesWithRemoteAndSurvivesRecreation",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#backCancelsCountdownAndManualNextStartsFromBeginning",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#backgroundStopsCountdownAndReturnRequiresManualStart",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#changingEpisodeListCancelsAnAlreadyVisibleCountdown",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#countdownOpensOneNextSeasonEpisodeAndReturnsToItsCard",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#disabledAutoplayLeavesAManualEndCard",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#finalEpisodeHasNoInventedNextAndCanReturnToTheEpisodeList",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#m3uSequenceUsesParsedNumbersAndLabelsTheInference",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#okOnInitialCancelPreventsTransitionAndReplayCanFinishAgain",
+      "dev.iptvplayer.tv.EpisodeAutoplayFlowTest#tracksPanelYieldsToEndPromptWithoutLosingCancelFocus",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#collidingIdsHaveIndependentFavoritesHistoryAndPersistentFilters",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#duplicateConnectionIsRejectedWithoutChangingEitherSource",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#failedEditPreservesAccountAndRemovalKeepsOtherOwner",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#m3uSeriesDetailsUseEachOwnersRawEpisodeMapAfterReopening",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#partialRefreshKeepsFullOldCatalogAndDoesNotDisturbOtherSourceFilter",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#secondSourcesEpisodesResolveAndFavoriteTheirOwnParent",
+      "dev.iptvplayer.tv.MultiSourceFlowTest#unavailableSourceOnStartupKeepsBothCachesAndOtherSourcePlayable",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#anotherViewModelWaitsForTheWholeSourceAndCacheWrite",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#cancellingDownloadPreservesThePreviousSourceAfterRecreation",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#failedRemovalShowsAnErrorAndCanBeRetried",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#lateCancelledResponseCannotReplaceANewerConnection",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#playerDisposalCannotResurrectProgressAfterRemoval",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#removalWaitsForOldCommitAndBackCannotStartANewSource",
+      "dev.iptvplayer.tv.SourceOperationFlowTest#savingFinishesBeforeTheNewCatalogIsShown",
+      "dev.iptvplayer.tv.SourceRecoveryFlowTest#confirmedResetClearsAllSourcesRotatesKeyAndPreservesDevicePreferences",
+      "dev.iptvplayer.tv.SourceRecoveryFlowTest#malformedLegacyAndWrongPreferenceTypeHaveRecoveryWithoutSilentOverwrite",
+      "dev.iptvplayer.tv.SourceRecoveryFlowTest#retryAndCancelKeepRecordsAndFocusAndSuccessfulRetryRestoresLibrary",
+      "dev.iptvplayer.tv.SourceRecoveryFlowTest#staleConfirmationCannotClearNewlyRepairedAccounts",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#catalogReadsTheOldFilenameAndReplacesItOnlyAfterWritingTheNewOne",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#clearingHistoryDoesNotClearAnotherSourcesProgressOrAnyFavorites",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#deletingOneSourceKeepsCollidingIdsAndTheOtherCacheAndPreferences",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#editingOneSourcePreservesItsIdentityAndOtherAccounts",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#firstRegistryMigrationPreservesCurrentCacheAndCleansOnlyUnownedOldFiles",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#invalidReplacementIsRejectedBeforeAnySavedAccountIsChanged",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#legacySourceMigratesWithFavoritesHistoryAndUnlistedOldProgress",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#newerNamespacedProgressWinsOverAnOldLegacyCopy",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#registryIsEncryptedAndCorruptionDoesNotFallBackToObsoleteLegacyCredentials",
+      "dev.iptvplayer.tv.SourceRegistryStorageTest#sourceRemovalClearsAllOfItsCredentialVersionsWithoutTouchingAnotherOwner",
+      "dev.iptvplayer.tv.VisualPreviewTest#captureNativeScreensWithRealArtwork"
+    ],
+    "scope": "Not a single clean 44-case first run. First 8-case run had 2 failed cases plus their cleanup failures: delayed Coil body was not interrupted by coroutine cancellation alone; recovery Back was sent before dialog focus. Real Call.cancel ownership and window-focus synchronization fixed these. Next 8 passed. Regression 35 had 1 failed case plus cleanup: synthetic Back preceded loading-screen focus. Fixture now waits for focused Cancel; the final 16 passed. The final UI-only recovery change does not affect the other 28 regression cases."
+  },
+  "font": {
+    "original": "1.0",
+    "restored": "1.0",
+    "runs": [
+      {
+        "scale": "1.5",
+        "passed": true
+      },
+      {
+        "scale": "2.0",
+        "passed": true
+      }
+    ]
+  },
+  "fontScope": "Two recovery/cancel/reset cases repeated at 1.5 and 2.0 after visual repair. Each explanation paragraph receives remote focus and fits wholly inside its actual scroll viewport. Cancel/confirm remain fixed and accessible; Back returns to opener. Not full-app accessibility certification.",
+  "visualReview": "Inspected native Home and multi-source Search with real artwork; normal recovery/reset; final reset at 1.5/2.0. Initial 2.0 screenshot exposed clipped Cancel focus and inaccessible beginning of text despite passing action tests. Fixed footer and remotely focusable paragraphs corrected both; paragraph viewport assertions added.",
+  "lint": {
+    "Error": 0,
+    "Warning": 30
+  },
+  "apk": {
+    "file": "IPTV_Player_TV_Pilot_0.10.0.apk",
+    "bytes": 17435506,
+    "sha256": "61739fe209b1176f51bfae15b5eaceae170c6842678044d5655f9bdd80973159",
+    "v2SignatureVerified": true
+  },
+  "nativeScreens": [
+    "IPTV_Player_Native_010_About.png",
+    "IPTV_Player_Native_010_AutoplaySetting.png",
+    "IPTV_Player_Native_010_EpisodeCountdown.png",
+    "IPTV_Player_Native_010_EpisodeFinal.png",
+    "IPTV_Player_Native_010_Home.png",
+    "IPTV_Player_Native_010_Movie.png",
+    "IPTV_Player_Native_010_Movies.png",
+    "IPTV_Player_Native_010_MultiMovies.png",
+    "IPTV_Player_Native_010_MultiSearch.png",
+    "IPTV_Player_Native_010_Player.png",
+    "IPTV_Player_Native_010_Search.png",
+    "IPTV_Player_Native_010_Series.png",
+    "IPTV_Player_Native_010_Settings.png",
+    "IPTV_Player_Native_010_SettingsBottom.png",
+    "IPTV_Player_Native_010_SourcePicker.png",
+    "IPTV_Player_Native_010_SourceRecovery.png",
+    "IPTV_Player_Native_010_SourceRecovery15.png",
+    "IPTV_Player_Native_010_SourceRecovery20.png",
+    "IPTV_Player_Native_010_SourceReset.png",
+    "IPTV_Player_Native_010_SourceReset15.png",
+    "IPTV_Player_Native_010_SourceReset20.png",
+    "IPTV_Player_Native_010_Sources.png",
+    "IPTV_Player_Native_010_Tracks.png"
+  ],
+  "limitations": [
+    "Physical TV unchanged; no new real-provider stream",
+    "EPG/XMLTV, PIN, SYS01, QR and full performance/device/user validation remain open",
+    "Figma quota/write not rechecked; screenshots not uploaded",
+    "Artwork reference table is outside 80MB byte-cache budget; large-table pruning and performance remain open",
+    "Catalog/preferences/artwork reset is ordered but not a cross-file power-loss atomic transaction"
+  ]
+}
