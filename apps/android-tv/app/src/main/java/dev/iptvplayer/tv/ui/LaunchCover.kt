@@ -80,7 +80,7 @@ import kotlin.math.abs
             drawRect(Brush.radialGradient(listOf(NextvMint.copy(alpha = .30f * glow), NextvMint.copy(alpha = .10f * glow),
                 Color.Transparent), Offset(size.width * (1774f / RefW), size.height * (-414f / RefH)), span))
 
-            // Play mark + wordmark, authored in a GroupW × GroupH box centred on the 1920×1080 stage.
+            // Play mark + wordmark (design/brand/nextv-dikey.svg), a GroupW × GroupH box centred on the 1920×1080 stage.
             val unit = minOf(size.width / RefW, size.height / RefH)
             withTransform({
                 translate((size.width - GroupW * unit) / 2f, (size.height - GroupH * unit) / 2f)
@@ -147,7 +147,7 @@ private val NextvMint = Color(0xFF1CECAB)
 private const val RefW = 1920f
 private const val RefH = 1080f
 private const val GroupW = 298f
-private const val GroupH = 260.341f
+private const val GroupH = 260f
 
 // The entrance is tuned to res/raw/splash_chime: StartupSound skips its 0.4 s lead, so the impact lands ~1.34 s in,
 // i.e. master t≈Impact. Move Impact and StartupSound's lead skip together.
@@ -158,11 +158,11 @@ private const val LettersStart = Impact + .02f
 private const val LetterStagger = .045f
 private const val LetterSpan = .20f
 
-/** Folded play mark ("Union"), in group-local coordinates. */
+/** Folded play mark ("Union"), in group-local coordinates of design/brand/nextv-dikey.svg. */
 private val UnionPaths = listOf(
-    "M124.893 92.1276L97.2701 109.685V117.467L118.55 129.104L193.454 80.8733L175.365 72.0886C168.402 68.6989 160.175 69.2062 153.679 73.4261L124.893 92.1276Z",
-    "M124.893 77.5124L124.893 4.08433L118.55 0L97.2701 11.6369V109.685L116.263 95.0606C121.704 90.8709 124.893 84.3868 124.893 77.5124Z",
-    "M200.73 52.9153L124.893 4.08433L127.258 28.1475C127.919 34.8685 131.607 40.9196 137.273 44.5801L193.454 80.8733L200.73 76.1888L200.73 52.9153Z",
+    "M124.893 92.0069L97.2701 109.541V117.313L118.55 128.935L193.454 80.7673L175.365 71.9941C168.402 68.6088 160.175 69.1155 153.679 73.3298L124.893 92.0069Z",
+    "M124.893 77.4108L124.893 4.07898L118.55 0L97.2701 11.6217V109.541L116.263 94.936C121.704 90.7518 124.893 84.2762 124.893 77.4108Z",
+    "M200.73 52.8459L124.893 4.07898L127.258 28.1106C127.919 34.8228 131.607 40.866 137.273 44.5217L193.454 80.7673L200.73 76.089L200.73 52.8459Z",
 )
 
 private class GlyphSpec(val data: String, val mint: Boolean)
@@ -170,11 +170,11 @@ private class ParsedGlyph(val path: Path, val center: Offset, val mint: Boolean)
 
 /** "NEXTV", left to right. N/E/X are white; T/V take the mint. */
 private val NextvGlyphs = listOf(
-    GlyphSpec("M26.3205 240.601H19.7404V227.441H13.1603V260.341H0V194.54H19.7404V207.7H26.3205V220.86H32.9007V234.021H39.4808V194.54H52.6411V260.341H32.9007V253.761H26.3205V240.601Z", mint = false),
-    GlyphSpec("M84.6987 247.181H111.019V260.341H71.5384V194.54H111.019V207.7H84.6987V220.861H104.439V234.021H84.6987V247.181Z", mint = false),
-    GlyphSpec("M129.882 234.021H136.462V227.441H143.042V220.861H136.462V214.28H129.882V194.54H143.042V207.7H149.623V214.28H156.203V207.7H162.783V194.54H175.943V214.28H169.363V220.861H162.783V227.441H169.363V234.021H175.943V260.341H162.783V240.601H156.203V234.021H149.623V240.601H143.042V260.341H129.882V234.021Z", mint = false),
-    GlyphSpec("M206.755 207.7H193.595V194.54H233.076V207.7H219.916V260.341H206.755V207.7Z", mint = true),
-    GlyphSpec("M278.259 234.021H284.84V194.54H298V240.601H291.42V247.181H284.84V253.761H278.259V260.341H271.679V253.761H265.099V247.181H258.519V240.601H251.939V194.54H265.099V234.021H271.679V240.601H278.259V234.021Z", mint = true),
+    GlyphSpec("M26.3205 240.285H19.7404V227.142H13.1603V260H0V194.285H19.7404V207.428H26.3205V220.571H32.9007V233.714H39.4808V194.285H52.6411V260H32.9007V253.428H26.3205V240.285Z", mint = false),
+    GlyphSpec("M84.6987 246.857H111.019V260H71.5384V194.285H111.019V207.428H84.6987V220.571H104.439V233.714H84.6987V246.857Z", mint = false),
+    GlyphSpec("M129.882 233.714H136.462V227.143H143.042V220.571H136.462V214H129.882V194.285H143.042V207.428H149.623V214H156.203V207.428H162.783V194.285H175.943V214H169.363V220.571H162.783V227.143H169.363V233.714H175.943V260H162.783V240.286H156.203V233.714H149.623V240.286H143.042V260H129.882V233.714Z", mint = false),
+    GlyphSpec("M206.755 207.428H193.595V194.285H233.076V207.428H219.916V260H206.755V207.428Z", mint = true),
+    GlyphSpec("M278.259 233.714H284.84V194.285H298V240.286H291.42V246.857H284.84V253.429H278.259V260H271.679V253.429H265.099V246.857H258.519V240.286H251.939V194.285H265.099V233.714H271.679V240.286H278.259V233.714Z", mint = true),
 )
 
 /** Carve a normalised [start, end] window out of master progress [t]. */

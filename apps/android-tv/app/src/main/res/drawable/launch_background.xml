@@ -2,5 +2,8 @@
     <item>
         <shape android:shape="rectangle"><solid android:color="#000000" /></shape>
     </item>
-    <item android:drawable="@drawable/ic_nextv_splash_mark" android:width="120dp" android:height="132dp" android:gravity="center" />
+    <!-- Where LaunchCover's mark lands on a 960x540dp TV (0.5dp per 1920-px handoff unit, 32.77dp above centre). On a
+         larger dp screen the in-app mark is bigger and higher, e.g. 1280x720dp: 69x86dp, top edge 22dp higher. -->
+    <item android:drawable="@drawable/ic_nextv_splash_mark" android:width="51.84dp" android:height="64.47dp"
+        android:bottom="65.53dp" android:gravity="center" />
 </layer-list>
