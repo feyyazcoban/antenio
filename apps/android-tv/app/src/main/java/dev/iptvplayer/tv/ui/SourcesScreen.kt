@@ -171,6 +171,6 @@ import kotlinx.coroutines.flow.first
 private fun sourceNumber(s: TvState, source: SourceConfig): String =
     stringResource(R.string.sources_number, (s.sources.indexOf(source) + 1).toString(), source.type.label())
 
-// Protocol names, the same in every language.
-private fun SourceType.label() = if (this == SourceType.XTREAM) "Xtream Codes" else "M3U"
+@Composable @ReadOnlyComposable
+private fun SourceType.label() = stringResource(if (this == SourceType.XTREAM) R.string.source_type_xtream else R.string.source_type_m3u)
 

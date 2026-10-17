@@ -177,6 +177,9 @@
     <string name="setup_tagline">Canlı yayınların, filmlerin ve dizilerin tek yerde.</string>
     <string name="setup_privacy">Kendi kaynağınla başla. Hesap bilgilerin bu cihazda şifreli saklanır.</string>
     <string name="setup_heading">Kaynak ekle</string>
+    <!-- Protocol names, the same in every language; each is written once, so a renamed label changes everywhere. -->
+    <string name="source_type_xtream" translatable="false">Xtream Codes</string>
+    <string name="source_type_m3u" translatable="false">M3U</string>
     <string name="setup_m3u">M3U bağlantısı</string>
     <string name="setup_hint_xtream">Sunucu adresini ve hesap bilgilerini gir.</string>
     <string name="setup_hint_m3u">Sağlayıcının verdiği liste bağlantısını gir.</string>
@@ -502,7 +505,8 @@
     </plurals>
     <string name="settings_version">Sürüm %1$s</string>
     <string name="settings_about_library">Kütüphane</string>
-    <string name="settings_about_library_note">Uygulama içerik sağlamaz. Kendi M3U veya Xtream Codes kaynağını ekleyerek izleyebilirsin.</string>
+    <!-- %1$s and %2$s are the protocol names (M3U, Xtream Codes). -->
+    <string name="settings_about_library_note">Uygulama içerik sağlamaz. Kendi %1$s veya %2$s kaynağını ekleyerek izleyebilirsin.</string>
     <string name="settings_about_storage_note">Kaynağın ve katalog önbelleğin bu cihazda şifreli saklanır.</string>
     <string name="settings_about_release">Bu sürümde</string>
     <string name="settings_about_release_note">Canlı TV, film, dizi, arama, favori, izlemeye devam et ve yayın rehberi kullanılabilir. Rehber bilgisi kaynağın desteğine bağlıdır. PIN yönetimi henüz yok. Sağlayıcının yetişkin işaretli içerikleri hiç gösterilmez; adı yetişkin içerik bildiren kategoriler Ayarlar\'dan kapatılır.</string>

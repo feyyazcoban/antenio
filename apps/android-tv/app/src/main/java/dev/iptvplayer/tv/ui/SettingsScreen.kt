@@ -230,7 +230,8 @@ private enum class SectionId(@StringRes val label: Int) {
                                 Note("Android ${android.os.Build.VERSION.RELEASE} · API ${android.os.Build.VERSION.SDK_INT}")
                                 Spacer(Modifier.height(6.dp))
                                 SettingsLabel(stringResource(R.string.settings_about_library))
-                                Note(stringResource(R.string.settings_about_library_note))
+                                Note(stringResource(R.string.settings_about_library_note,
+                                    stringResource(R.string.source_type_m3u), stringResource(R.string.source_type_xtream)))
                                 Note(stringResource(R.string.settings_about_storage_note))
                                 Spacer(Modifier.height(6.dp))
                                 SettingsLabel(stringResource(R.string.settings_about_release))

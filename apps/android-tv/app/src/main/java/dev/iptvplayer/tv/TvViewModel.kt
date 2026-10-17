@@ -18,8 +18,8 @@ import kotlinx.coroutines.ensureActive
 
 enum class Route { SETUP, LOADING, HOME, LIBRARY, GUIDE, SEARCH, DETAIL, PLAYER, SOURCES, RECOVERY }
 enum class SourceTask { RESTORING, IMPORTING, SAVING, REMOVING, RESETTING, IDLE }
-/** The source form; a new one gets its first name from the model, in the app's language. */
-data class SourceDraft(val name: String = "", val type: SourceType = SourceType.XTREAM,
+/** The source form; a null [name] is the untouched default name, which the setup screen shows in the app's language. */
+data class SourceDraft(val name: String? = null, val type: SourceType = SourceType.XTREAM,
     val address: String = "", val username: String = "", val password: String = "", val epgUrl: String = "") {
     override fun toString() = "SourceDraft(type=$type, credentials=REDACTED)"
 }
@@ -114,7 +114,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     private val artwork = (application as TvApplication).artworkCache
     private var recoveryStamp: String? = null
     private val transactions = SourceTransactions.shared
-    private val mutable = MutableStateFlow(TvState(draft = newDraft(), reducedMotion = store.reducedMotion, startupSound = store.startupSound, autoNextEpisode = store.autoNextEpisode, guideZoneId = store.guideZoneId, librarySorts = storedSorts()))
+    private val mutable = MutableStateFlow(TvState(reducedMotion = store.reducedMotion, startupSound = store.startupSound, autoNextEpisode = store.autoNextEpisode, guideZoneId = store.guideZoneId, librarySorts = storedSorts()))
     val state = mutable.asStateFlow()
     private var registry = SourceRegistry()
     private val snapshots = LinkedHashMap<String, CatalogSnapshot>()
@@ -134,9 +134,6 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { guides.state.collect { value -> mutable.update { it.copy(guideStatus = value.statuses, guideRevision = value.revision) } } }
         restore(atLaunch = true)
     }
-
-    /** The form for a new source, with the app's default source name. */
-    private fun newDraft() = SourceDraft(getApplication<Application>().getString(R.string.source_default_name))
 
     /** Migration is serialized with accepted writes from a previous ViewModel. */
     private fun readRegistry(): SourceRegistry {
@@ -272,12 +269,13 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun draft(value: SourceDraft) { mutable.update { it.copy(draft = value, error = null) } }
-    fun connectDraft() {
+    /** [defaultName] is what an untouched name field saves; the setup screen passes the app's default source name. */
+    fun connectDraft(defaultName: String = "") {
         if (state.value.route != Route.SETUP) return
         if (state.value.sourceTask != SourceTask.IDLE && state.value.sourceTask != SourceTask.IMPORTING) return
         val draft = state.value.draft
         try {
-            val source = SourceConfig(name = draft.name, type = draft.type, address = draft.address,
+            val source = SourceConfig(name = draft.name ?: defaultName, type = draft.type, address = draft.address,
                 username = draft.username, password = draft.password, epgUrl = draft.epgUrl).validated().let { value ->
                 state.value.editingSourceId?.let { value.copy(id = it) } ?: value
             }
@@ -322,7 +320,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 publishLibrary()
                 homeFocusKey = null
                 mutable.update { it.copy(route = if (it.setupReturn == Route.SOURCES) Route.SOURCES else Route.HOME,
-                    sourceTask = SourceTask.IDLE, editingSourceId = null, draft = newDraft(), playing = null,
+                    sourceTask = SourceTask.IDLE, editingSourceId = null, draft = SourceDraft(), playing = null,
                     selected = null, episodes = emptyList(), focusedId = null,
                     sourceStatus = it.sourceStatus + (source.id to SourceStatus(
                         catalog.items.count { entry -> !entry.adult }, snapshot.updatedAt,
@@ -791,7 +789,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             Route.LOADING -> cancelImport()
             Route.DETAIL -> { detailJob?.cancel(); mutable.update { it.copy(route = it.detailReturn, detailLoading = false) } }
             Route.PLAYER -> mutable.update { it.copy(route = it.playerReturn, revision = it.revision + 1) }
-            Route.SETUP -> if (state.value.sources.isNotEmpty()) mutable.update { it.copy(route = it.setupReturn, error = null, draft = newDraft(), editingSourceId = null) }
+            Route.SETUP -> if (state.value.sources.isNotEmpty()) mutable.update { it.copy(route = it.setupReturn, error = null, draft = SourceDraft(), editingSourceId = null) }
             Route.SOURCES -> mutable.update { it.copy(route = it.sourcesReturn) }
             Route.LIBRARY, Route.SEARCH, Route.GUIDE -> home()
             else -> Unit
@@ -806,7 +804,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun addSource() {
         if (state.value.sourceTask != SourceTask.IDLE) return
-        mutable.update { it.copy(route = Route.SETUP, editingSourceId = null, draft = newDraft(), error = null, sourceManagerFocus = "add-source",
+        mutable.update { it.copy(route = Route.SETUP, editingSourceId = null, draft = SourceDraft(), error = null, sourceManagerFocus = "add-source",
             setupReturn = if (it.route == Route.SOURCES) Route.SOURCES else Route.HOME) }
     }
     fun editSource(sourceId: String? = state.value.source?.id) {
@@ -853,7 +851,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 homeFocusKey = null
                 mutable.update { it.copy(route = if (saved.sources.isEmpty()) Route.SETUP else
                     if (previous.route == Route.SOURCES) Route.SOURCES else Route.HOME,
-                    sourceTask = SourceTask.IDLE, editingSourceId = null, draft = newDraft(),
+                    sourceTask = SourceTask.IDLE, editingSourceId = null, draft = SourceDraft(),
                     selected = null, episodes = emptyList(), error = null,
                     sourceManagerFocus = saved.sources.getOrNull(previous.sources.indexOf(owner).coerceAtMost(saved.sources.lastIndex).coerceAtLeast(0))
                         ?.let { source -> "remove-source:${source.id}" } ?: "add-source",

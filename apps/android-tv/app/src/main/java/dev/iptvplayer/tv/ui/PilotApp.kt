@@ -155,12 +155,14 @@ import androidx.compose.ui.input.key.type
     // Hidden fields (the M3U link, the password, the guide address) can be shown while typing them with the remote (U13).
     var reveal by rememberSaveable { mutableStateOf(false) }
     val density = LocalDensity.current
+    // An untouched name field shows, and saves, the default name in the app's language.
+    val defaultName = stringResource(R.string.source_default_name)
     fun fieldView(view: BringIntoViewRequester) = Modifier.bringIntoViewRequester(view).onSizeChanged { fieldHeights[view] = it.height }
     LaunchedEffect(s.error) {
         val error = s.error ?: return@LaunchedEffect
         val d = s.draft
         // Only form-validation messages point at a field; import, duplicate and storage errors keep the scroll.
-        val config = SourceConfig(name = d.name, type = d.type, address = d.address,
+        val config = SourceConfig(name = d.name ?: defaultName, type = d.type, address = d.address,
             username = d.username, password = d.password, epgUrl = d.epgUrl)
         if ((runCatching { config.validated() }.exceptionOrNull() as? SourceFailure)?.text != error) return@LaunchedEffect
         val url = d.address.trim().toHttpUrlOrNull()
@@ -203,7 +205,7 @@ import androidx.compose.ui.input.key.type
                         layout(placeable.width - 2 * room, placeable.height) { placeable.place(-room, 0) }
                     }.then(methods.container).then(methods.focus).onFocusChanged { chipsFocused = it.hasFocus },
                     horizontalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(4.dp)) {
-                    item { Action("Xtream Codes", Modifier.focusRequester(first).testTag("setup-xtream"), selected = s.draft.type == SourceType.XTREAM) {
+                    item { Action(stringResource(R.string.source_type_xtream), Modifier.focusRequester(first).testTag("setup-xtream"), selected = s.draft.type == SourceType.XTREAM) {
                         model.draft(s.draft.copy(type = SourceType.XTREAM))
                     } }
                     item { Action(stringResource(R.string.setup_m3u), Modifier.testTag("setup-m3u"), selected = s.draft.type == SourceType.M3U) {
@@ -211,7 +213,7 @@ import androidx.compose.ui.input.key.type
                     } }
                 }
                 Note(stringResource(if (s.draft.type == SourceType.XTREAM) R.string.setup_hint_xtream else R.string.setup_hint_m3u))
-                SetupEntry(stringResource(R.string.setup_name), s.draft.name, { model.draft(s.draft.copy(name = it)) })
+                SetupEntry(stringResource(R.string.setup_name), s.draft.name ?: defaultName, { model.draft(s.draft.copy(name = it)) })
                 SetupEntry(stringResource(if (s.draft.type == SourceType.M3U) R.string.setup_m3u else R.string.setup_server), s.draft.address,
                     { model.draft(s.draft.copy(address = it)) }, secret = s.draft.type == SourceType.M3U,
                     modifier = fieldView(addressView), revealed = reveal)
@@ -226,7 +228,7 @@ import androidx.compose.ui.input.key.type
             }
             s.error?.let { Note(it.resolve(), error = true, modifier = Modifier.testTag("setup-error")) }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Action(stringResource(R.string.setup_connect), Modifier.testTag("setup-connect"), primary = true) { model.connectDraft() }
+                Action(stringResource(R.string.setup_connect), Modifier.testTag("setup-connect"), primary = true) { model.connectDraft(defaultName) }
                 if (s.source != null) Action(stringResource(R.string.action_cancel)) { model.back() }
                 Action(stringResource(if (reveal) R.string.setup_hide else R.string.setup_show), Modifier.testTag("setup-reveal"), outlined = true,
                     selected = reveal) { reveal = !reveal }
