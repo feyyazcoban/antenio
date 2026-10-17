@@ -1,5 +1,9 @@
 # Proje durumu
 
+## UI/UX denetimi · 17 Ekim 2026
+
+Kullanıcının isteğiyle 0.14.40 için ayrıntılı UI/UX denetimi yapıldı: [UX_AUDIT_0.14.40](../design/UX_AUDIT_0.14.40.md). Kod okundu, ardından kullanıcının isteğiyle ("gerçek data ile kontrol et") bulgular 5556'da gerçek "Evim" M3U kaynağıyla (4.531 kanal, 14.626 film, 2.172 dizi) ekranda denendi. 26 bulgu; 6'sı yüksek öncelik. Gerçek veride ayrıca dört yeni sorun çıktı: bölüme yeniden girişte odağın Rehber/Sırala düğmesine kaçması, 19 sn'lik oynatmanın "İzlemeye devam et"e girip film rafını silmesi, sağlayıcı adlarının temizlenmeden gösterilmesi, "8x8" adlı dizinin Sezon 8 · B8 sanılması. Kod değişmedi; öneriler kullanıcı önceliklendirmesini bekliyor. Fiziksel TV'ye dokunulmadı.
+
 ## 0.14.40 · Birleşik teslim · 16 Ekim 2026
 
 Kullanıcının isteğiyle bütün değişiklikler birleştirildi ve TV'ye kuruldu:

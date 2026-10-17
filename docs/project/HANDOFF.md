@@ -1,5 +1,17 @@
 # Son devir notu
 
+## UI/UX denetimi · 17 Ekim 2026
+
+Yeni dosya: docs/design/UX_AUDIT_0.14.40.md (U1–U26, öncelik ve önerilen sıra). Kod, Figma ve manifest değişmedi; BACKLOG'a madde eklenmedi (öneriler onaylanmadı).
+
+Yapılanlar: `ui/` ekranlarının tamamı ve Back/odak yolları okundu; Ink paleti kontrastı hesaplandı. 5556 (`nextv_design_api36`) açıldı, 0.14.39 üstüne imzası doğrulanmış 0.14.40 release APK'sı `install -r` ile kuruldu (veri korundu). Gerçek "Evim" M3U ile Ana Sayfa, Canlı TV, Filmler, Diziler, ayrıntı, Ara, Rehber, Ayarlar ve oynatıcı denendi; sırayla tek canlı yayın ve tek film açıldı. TV yalnız `dumpsys` ile okundu (uykudaydı, yayın yoktu). Crash kaydı yok. Ekran görüntüleri gerçek veri içerdiği için depoya konmadı. Emülatör iş bitince kapatıldı.
+
+5556'da kalan iz: geçmişe "TR: beIN SPORTS HABER HD" (son kanal) ve "U Are the Universe (2024) DE" (0:19, devam kaydı) eklendi; bu yüzden Ana Sayfa'da başlangıç rafları yerine kişisel raflar görünür. İstenirse Ayarlar → İzleme geçmişini temizle ile eski hâline döner (öncesinde geçmiş boştu; favoriler etkilenmez).
+
+Denenmeyenler: TalkBack, büyük yazı, fiziksel TV, kurulum formu (U13), favori ekleme akışı (U8), yükleme göstergesi (U22).
+
+Sonraki adım: kullanıcının bulguları önceliklendirmesi. Önerilen ilk iş: U23 (yeniden giriş odağı) ve U4 (kütüphane Geri katmanları) birlikte, binlerce kayıtlı sentetik fikstürle enstrümantasyon testiyle.
+
 ## 0.14.40 · Birleşik teslim · 16 Ekim 2026
 
 Birleştirme sırası: `35ad2b2` (bu oturum, D063), main'in `fa8ae8f` commit'i (`fe4f188` birleştirmesi), logo dalı `claude/trusting-margulis-73aa19` (`0982a50` birleştirmesi), ardından sürüm 0.14.40 / 54. Çakışmalar yalnız STATUS, HANDOFF ve DECISIONS'taydı; hepsinde iki tarafın kayıtları da korundu. DECISIONS'ta main'in güncel D061'i kaldı, D062 ve D063 eklendi. Kodda çakışma çıkmadı; `PilotApp.kt` kendiliğinden birleşti.
