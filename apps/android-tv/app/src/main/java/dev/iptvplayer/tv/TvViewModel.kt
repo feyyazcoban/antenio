@@ -73,6 +73,8 @@ data class TvState(
     val playerReturn: Route = Route.LIBRARY,
     val progressLabel: String = "Hazırlanıyor…",
     val sourceTask: SourceTask = SourceTask.RESTORING,
+    /** The restore opening the app (D069): shown as the NEXTV cover. Retries and resets keep the operation card. */
+    val restoringAtLaunch: Boolean = true,
     val refreshing: Boolean = false,
     val catalogUpdatedAt: Long = 0,
     val catalogNotice: CatalogNotice? = null,
@@ -127,7 +129,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch { guides.state.collect { value -> mutable.update { it.copy(guideStatus = value.statuses, guideRevision = value.revision) } } }
-        restore()
+        restore(atLaunch = true)
     }
 
     /** Migration is serialized with accepted writes from a previous ViewModel. */
@@ -140,12 +142,12 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         return current
     }
 
-    fun restore() {
+    fun restore(atLaunch: Boolean = false) {
         if (state.value.sourceTask in setOf(SourceTask.SAVING, SourceTask.REMOVING, SourceTask.RESETTING)) return
         val token = ++generation
         loadJob?.cancel()
         guides.forget()
-        mutable.update { it.copy(route = Route.LOADING, sourceTask = SourceTask.RESTORING,
+        mutable.update { it.copy(route = Route.LOADING, sourceTask = SourceTask.RESTORING, restoringAtLaunch = atLaunch,
             progressLabel = "Kayıtlı kütüphanen kontrol ediliyor…", error = null) }
         loadJob = viewModelScope.launch {
             var observedStamp: String? = null
@@ -521,7 +523,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun favorites() { clearLibraryQuery(); mutable.update { it.copy(onlyFavorites = true, category = "Tümü", focusedId = null, route = Route.LIBRARY) } }
     fun category(value: String) { mutable.update { it.copy(category = value, focusedId = null) } }
-    fun query(value: String) { mutable.update { it.copy(query = value, focusedId = null) }; updateLibrarySearch() }
+    // Each letter keeps the last results until the new ones arrive, so the list does not blink empty while typing.
+    fun query(value: String) { mutable.update { it.copy(query = value, focusedId = null) }; updateLibrarySearch(clearResults = false) }
     fun onlyFavorites() { mutable.update { it.copy(onlyFavorites = !it.onlyFavorites, focusedId = null) } }
     fun season(value: Int) { mutable.update { it.copy(season = value) } }
     fun reducedMotion() { store.reducedMotion = !state.value.reducedMotion; mutable.update { it.copy(reducedMotion = store.reducedMotion) } }

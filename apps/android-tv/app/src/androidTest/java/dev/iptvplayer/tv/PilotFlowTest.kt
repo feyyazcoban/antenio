@@ -206,6 +206,11 @@ class PilotFlowTest {
         ui.waitUntil(10_000) { model.state.value.history.any { it.id == model.fixtureKey("episode:6") && it.positionMs >= 10_000 } }
         back(); back(); back()
         click("Ana Sayfa")
+        // Home opens on the hero when there is one (D070); Down reaches the continue shelf.
+        if (ui.onAllNodesWithTag("hero-details").fetchSemanticsNodes().isNotEmpty()) {
+            ui.onNodeWithTag("hero-details").assertIsFocused()
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle()
+        }
         val tile = ui.onNodeWithTag("continue:${model.fixtureKey("series:4")}")
         tile.assertIsFocused()
         val sourceId = model.state.value.source!!.id

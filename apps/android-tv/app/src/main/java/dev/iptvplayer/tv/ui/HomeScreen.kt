@@ -229,10 +229,11 @@ private data class HomeRow(val key: String, val title: String, val entries: List
     val lastFocus = remember { FocusMemory() }
     val slides = remember(library) { library.newest.ifEmpty { listOfNotNull(library.featured) } }
     val validKeys = rows.flatMap { r -> r.entries.map { "${r.key}:${it.id}" } }.toSet() + if (slides.isNotEmpty()) setOf("hero") else emptySet()
+    // Home opens on the hero's Ayrıntılar (D070); coming back from a title or the player keeps the remembered card.
     val target = remember { model.homeFocusKey?.takeIf { it in validKeys } ?: when {
+        slides.isNotEmpty() -> "hero"
         library.continueWatching.isNotEmpty() -> "continue:${library.continueWatching.first().entry.id}"
         library.recentChannels.isNotEmpty() -> "recent:${library.recentChannels.first().id}"
-        slides.isNotEmpty() -> "hero"
         else -> rows.firstOrNull()?.let { "${it.key}:${it.entries.first().id}" }
     } }
     val startRow = rows.indexOfFirst { r -> r.entries.any { "${r.key}:${it.id}" == target } }

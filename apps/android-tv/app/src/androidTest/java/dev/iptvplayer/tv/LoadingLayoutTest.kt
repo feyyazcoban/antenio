@@ -9,13 +9,31 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.unit.dp
 import dev.iptvplayer.tv.ui.LoadingScreen
+import dev.iptvplayer.tv.ui.LocalReducedMotion
 import dev.iptvplayer.tv.ui.PilotTheme
+import dev.iptvplayer.tv.ui.RestoringCover
 import org.junit.*
 import org.junit.Assert.*
 
 class LoadingLayoutTest {
     @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    /** D069: the cover that opens saved sources says it is working, in a readable size, with or without motion. */
+    @Test fun restoringCoverShowsProgressAndALabel() {
+        val reduced = mutableStateOf(false)
+        ui.runOnUiThread { ui.activity.setContent { PilotTheme { CompositionLocalProvider(LocalReducedMotion provides reduced.value) { RestoringCover() } } } }
+        for (still in listOf(false, true)) {
+            ui.runOnUiThread { reduced.value = still }
+            ui.waitUntil(5_000) { ui.onAllNodesWithTag("launch-loading").fetchSemanticsNodes().isNotEmpty() }
+            ui.onNodeWithTag("launch-loading").assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo, ProgressBarRangeInfo.Indeterminate))
+            val label = ui.onNodeWithText("Hazırlanıyor...").assertExists().getUnclippedBoundsInRoot()
+            assertTrue("The label keeps a TV-readable height", label.bottom - label.top >= 18.dp)
+        }
+    }
+
+    // RESTORING here is the recovery screen's Yeniden dene and the reset fallback; opening the app uses the cover above.
     @Test fun everySourceOperationFitsAndImportCanBeCancelled() {
         val state = mutableStateOf(TvState())
         var cancelled = false

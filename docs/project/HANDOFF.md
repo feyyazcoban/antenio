@@ -1,5 +1,13 @@
 # Son devir notu
 
+## Açılış kapağı, ana sayfa odağı, bölüm araması, raporlar · 18 Ekim 2026
+
+Değişen kod: ui/LaunchCover.kt (`RestoringCover`; hareketsiz kapak kaynaklar açılana kadar; `SplashSpinner(still)` hareket azaltma/kapalı animasyonda sabit yay; etiket en az 14 sp), ui/PilotApp.kt (LOADING + RESTORING + `restoringAtLaunch` → kapak, diğerleri `LoadingScreen`), TvViewModel.kt (`TvState.restoringAtLaunch`, `restore(atLaunch)`; init `restore(atLaunch = true)`; `query()` sonuçları korur), ui/HomeScreen.kt (ilk odak "hero"), ui/LibraryScreen.kt (alan açılınca `scrollToItem(0)` sonra odak; alanın `down` yönlendirmesi kaldırıldı; `searchLabel`/`widenLabel`, boş durumda `widen`, `widened` sonrası ilk sonuca odak; Favoriler/Geçmiş kategorisinde aramada doğru boş metin). Testler: SearchNavigationTest, LoadingLayoutTest, PilotFlowTest, VisualPreviewTest, ContinueCardLayoutTest. Belgeler: DECISIONS D069/D070 (D062'ye not), NATIVE_UI "Açılış ve ses", yeni PLAY_STORE_READINESS.md ve product/TIVIMATE_GAP.md.
+
+Cihaz: 5556'da bu derleme kurulu (sürüm adı 0.14.42), gerçek Evim duruyor. TV'de 0.14.42 (bu düzeltmeler yok).
+
+Sonraki adım: kullanıcı isterse 0.14.43 olarak TV'ye kurulum; Play/hukuk raporundaki kararlar (ad, paket adı, upload anahtarı, PIN, ses lisansı) ve TiviMate listesinden öncelik seçimi kullanıcıda.
+
 ## 0.14.42 · TV teslimi · 17 Ekim 2026
 
 Değişen: app/build.gradle.kts (versionCode 56, 0.14.42-design-preview). Teslim releases/NEXTV_TV_Design_Preview_0.14.42.apk, SHA-256 73f2bf9531163b659a5ef38874a17c71eaab4c51e72e72c36306284790187c3a. TV'de 0.14.42 kurulu, SHA eşleşti, veri korundu. Sonraki adım: kullanıcının TV'de vitrin (Xtream geniş görseli), rehber kısayolları ve kategori ayarlarını denemesi; Play Store hazırlık ve hukuk raporu hazırlanıyor.

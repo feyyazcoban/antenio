@@ -155,6 +155,24 @@ class SearchNavigationTest {
         ui.waitUntil(5000) { model.state.value.route == Route.HOME }
     }
 
+    @Test fun searchInACategoryOffersTheWholeSection() {
+        ui.runOnUiThread { model.showKind(MediaKind.MOVIE) }; ui.waitForIdle()
+        ui.runOnUiThread { model.category("Koleksiyon") }; ui.waitForIdle()
+        click("Bu kategoride ara")
+        ui.runOnUiThread { model.query("ISIGI") }
+        ui.waitUntil(10_000) { !model.state.value.librarySearching }
+        ui.onNodeWithText("Bu kategoride bulunamadı").assertExists()
+        ui.onNodeWithTag("category:Koleksiyon").performSemanticsAction(SemanticsActions.RequestFocus)
+        key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag("library-empty-action").assertIsFocused().assertTextContains("Tüm filmlerde ara")
+        // OK keeps the search and widens it to every film; focus lands on the result.
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10_000) { model.state.value.category == "Tümü" && !model.state.value.librarySearching }
+        assertEquals("ISIGI", model.state.value.query)
+        ui.waitUntil(5_000) { ui.onAllNodes(hasContentDescription("İstanbul Işığı") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithText("Bu bölümde ara").assertExists()
+    }
+
     @Test fun sideMenuLabelsFitAndRemoteCanReachSettingsAndReturn() {
         val order = listOf("Ara", "Ana Sayfa", "Canlı TV", "Filmler", "Diziler", "Favoriler", "Ayarlar")
         val density = ui.activity.resources.displayMetrics.density
@@ -538,7 +556,8 @@ class SearchNavigationTest {
         click("Koleksiyon")
         assertEquals("Koleksiyon", model.state.value.category)
         removeCategory = true
-        click("Bu bölümde ara")
+        // With a category selected the search says it searches that category.
+        click("Bu kategoride ara")
         val input = ui.onNode(hasSetTextAction())
         input.performSemanticsAction(SemanticsActions.RequestFocus) { it() }
         // As a viewer would: OK opens the keyboard on the field before typing.
@@ -560,15 +579,12 @@ class SearchNavigationTest {
         key(KeyEvent.KEYCODE_DPAD_DOWN)
         input.assertIsNotFocused()
         ui.onNodeWithTag("library-heading").assertExists()
-        // A keyboard that does not report itself (the emulator's floating TV keyboard) keeps typing mode until focus
-        // leaves the field, so Down goes to the result under it and the focused poster grid takes the category
-        // column's place (D056); Left from its first column brings the column back. A keyboard that reports its
-        // closing ends typing mode at Back, and Down goes straight to the column.
-        if (ui.onAllNodes(isFocused() and hasAnyAncestor(hasTestTag("library-grid"))).fetchSemanticsNodes().isNotEmpty()) {
-            ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
-            ui.onNodeWithTag("library-categories").assertDoesNotExist()
-            key(KeyEvent.KEYCODE_DPAD_LEFT)
-        }
+        // Down goes to the result under the field, whether or not the keyboard reported its closing (a TV keyboard
+        // does, and once went to the category column instead); the focused poster grid takes the category column's
+        // place (D056) and Left from its first column brings the column back.
+        ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
+        ui.onNodeWithTag("library-categories").assertDoesNotExist()
+        key(KeyEvent.KEYCODE_DPAD_LEFT)
         // Either way the column is back, on the category the refresh fell back to.
         ui.onNodeWithTag("library-categories").assertExists()
         ui.onNode(isFocused() and hasAnyAncestor(hasTestTag("library-categories"))).assertExists()

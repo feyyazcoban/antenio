@@ -36,7 +36,7 @@ import kotlin.math.abs
  * startup chime's hit and the pixel "NEXTV" wordmark cascading in. Laid out on the 1920×1080 handoff, scaled to the
  * screen. It stays at least [MinShowMs]; while saved sources are still restored it holds with a spinner and
  * "Hazırlanıyor...", then fades into the content. Any remote key removes it at once (PilotApp). Reduced motion or
- * disabled system animations skip the entrance and remove it after the first frame, as before.
+ * disabled system animations skip the entrance: the finished logo stays, still, only while sources are restored (D069).
  */
 @Composable internal fun LaunchCover(reducedMotion: Boolean, loading: Boolean, finish: () -> Unit) {
     val still = remember { reducedMotion || !android.animation.ValueAnimator.areAnimatorsEnabled() }
@@ -45,10 +45,14 @@ import kotlin.math.abs
     val alpha = remember { Animatable(1f) }
     val done by rememberUpdatedState(finish)
     val busy by rememberUpdatedState(loading)
-    var holding by remember { mutableStateOf(false) }
+    // Still: the spinner shows at once, beside the finished logo.
+    var holding by remember { mutableStateOf(still) }
+    // The spinner turns unless motion is reduced in Ayarlar or the system's animations are off; then it is a fixed arc
+    // (as LoadingArc, U22), never a frozen frame of the turn. RestoringCover is still for its logo only.
+    val spinnerStill = LocalReducedMotion.current || !android.animation.ValueAnimator.areAnimatorsEnabled()
     LaunchedEffect(Unit) {
         withFrameNanos { }
-        if (still) { done(); return@LaunchedEffect }
+        if (still) { snapshotFlow { busy }.first { !it }; done(); return@LaunchedEffect }
         intro.animateTo(1f, tween(EntranceMs, easing = LinearEasing))
         delay((MinShowMs - EntranceMs).toLong())
         holding = true
@@ -73,7 +77,9 @@ import kotlin.math.abs
             // Corner glows stay dark through the build, arrive with the mark on the impact and bloom briefly on it.
             val glowIn = Ease.Out.transform(segment(t, Impact - .14f, Impact + .05f))
             val bloom = smoothPulse(t, Impact, .13f)
-            val glow = glowIn * lerp(.82f, 1f, breath.value) * (1f + .24f * bloom)
+            // Still covers do not breathe: nothing moves but the spinner.
+            val idle = if (still) .5f else breath.value
+            val glow = glowIn * lerp(.82f, 1f, idle) * (1f + .24f * bloom)
             val span = maxOf(size.width, size.height) * .62f
             drawRect(Brush.radialGradient(listOf(NextvMint.copy(alpha = .34f * glow), NextvMint.copy(alpha = .11f * glow),
                 Color.Transparent), Offset(size.width * (-319f / RefW), size.height * (1306f / RefH)), span))
@@ -90,7 +96,7 @@ import kotlin.math.abs
                 val rise = Ease.Out.transform(segment(t, Impact - .17f, Impact + .05f))
                 val markAlpha = Ease.Out.transform(segment(t, Impact - .17f, Impact - .01f))
                 val pop = lerp(.6f, 1f, Ease.Back.transform(segment(t, Impact - .15f, Impact + .07f)))
-                val pulse = lerp(1f, lerp(.985f, 1.02f, breath.value), Ease.InOut.transform(segment(t, .86f, 1f)))
+                val pulse = if (still) 1f else lerp(1f, lerp(.985f, 1.02f, breath.value), Ease.InOut.transform(segment(t, .86f, 1f)))
                 withTransform({
                     translate(0f, lerp(-8f, 0f, rise))
                     scale(pop * pulse, pop * pulse, pivot = markCenter)
@@ -117,16 +123,35 @@ import kotlin.math.abs
                     liveRegion = LiveRegionMode.Polite
                     progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate
                 }, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(ref * 34f)) {
-                SplashSpinner(ref * 56f, ref * 8f)
-                Text("Hazırlanıyor...", color = Color.White, fontFamily = Roboto, fontSize = (21f * ref.value).sp,
-                    lineHeight = (25f * ref.value).sp, textAlign = TextAlign.Center)
+                SplashSpinner(ref * 56f, ref * 8f, spinnerStill)
+                // The handoff's 21 px label is 10.5 sp on a 960 dp TV; it is the screen's only text, so it keeps 14 sp.
+                Text("Hazırlanıyor...", color = Color.White, fontFamily = Roboto, fontSize = (21f * ref.value).coerceAtLeast(14f).sp,
+                    lineHeight = (25f * ref.value).coerceAtLeast(18f).sp, textAlign = TextAlign.Center)
             }
         }
     }
 }
 
-/** Round-capped mint arc that grows and shrinks while it turns; drawn here so no progress library is needed. */
-@Composable private fun SplashSpinner(diameter: Dp, stroke: Dp) {
+/**
+ * The NEXTV cover while saved sources are restored without the launch splash (D069): a later launch in the same
+ * process (the splash plays once per process, D062), a remote key during the splash, or reduced motion. The same logo,
+ * still and silent, with the spinner; it leaves with the restore. The source-operation card stays for imports and saves.
+ */
+@Composable internal fun RestoringCover() = LaunchCover(reducedMotion = true, loading = true, finish = {})
+
+/**
+ * Round-capped mint arc that grows and shrinks while it turns; drawn here so no progress library is needed. [still]
+ * draws a fixed three-quarter arc instead (reduced motion, system animations off).
+ */
+@Composable private fun SplashSpinner(diameter: Dp, stroke: Dp, still: Boolean) {
+    if (still) {
+        Canvas(Modifier.size(diameter)) {
+            val w = stroke.toPx()
+            drawArc(NextvMint, startAngle = -90f, sweepAngle = 270f, useCenter = false,
+                topLeft = Offset(w / 2f, w / 2f), size = Size(size.width - w, size.height - w), style = Stroke(w, cap = StrokeCap.Round))
+        }
+        return
+    }
     val phase = rememberInfiniteTransition(label = "splash-spinner").animateFloat(0f, 1f,
         infiniteRepeatable(tween(1333, easing = LinearEasing)), label = "phase")
     Canvas(Modifier.size(diameter)) {

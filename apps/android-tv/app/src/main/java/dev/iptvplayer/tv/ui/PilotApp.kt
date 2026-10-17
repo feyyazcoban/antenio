@@ -113,7 +113,10 @@ import androidx.compose.ui.input.key.type
                 Route.RECOVERY -> SourceRecoveryScreen(state, model)
                 Route.SOURCES -> SourcesScreen(state, model)
                 Route.SETUP -> Setup(state, model)
-                Route.LOADING -> LoadingScreen(state) { model.cancelImport() }
+                // Opening the app on saved sources shows the NEXTV cover, never the operation card (D069). Imports, saves,
+                // removals and a Yeniden dene or reset from the recovery screen keep the card, so no brand flash cuts in.
+                Route.LOADING -> if (state.sourceTask == SourceTask.RESTORING && state.restoringAtLaunch) RestoringCover()
+                    else LoadingScreen(state) { model.cancelImport() }
                 Route.HOME -> savedScreens.SaveableStateProvider("home:${state.sourceFilterId}:${state.sources.map { it.id }}") {
                     key(state.sourceFilterId) { HomeScreen(state, model) { settings = true } }
                 }

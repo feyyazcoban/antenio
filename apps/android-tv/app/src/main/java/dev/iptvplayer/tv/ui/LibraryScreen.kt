@@ -91,6 +91,16 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
         }
     }
     val categoryLabel = displayCategory(categories.firstOrNull { it.key == s.category }?.label ?: s.category).first
+    // The section search filters the selected category; its label says so, and an empty result offers the whole section.
+    val searchScoped = s.category != "Tümü"
+    val searchLabel = if (searchScoped) "Bu kategoride ara" else "Bu bölümde ara"
+    val widenLabel = when {
+        s.onlyFavorites -> "Tüm favorilerde ara"
+        s.kind == MediaKind.LIVE -> "Tüm kanallarda ara"
+        s.kind == MediaKind.MOVIE -> "Tüm filmlerde ara"
+        else -> "Tüm dizilerde ara"
+    }
+    var widened by remember { mutableStateOf(false) }
     // Sources with a guide: without one, rows and the panel do not repeat "Program bilgisi yok" (U14).
     val guided = s.guideStatus.filterValues { it.configured }.keys
     val noGuide = live && itemsOfKind.none { it.sourceId in guided }
@@ -207,7 +217,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                 }
                 if (live) Action("Rehber", Modifier.testTag("open-guide"), compact = true, outlined = true, icon = "guide") { model.guide() }
                 if (sortable) SortAction(sort, short = largeText) { model.librarySort(s.kind, it) }
-                Action(if (s.query.isBlank()) "Bu bölümde ara" else "Arama: ${s.query}",
+                Action(if (s.query.isBlank()) searchLabel else "Arama: ${s.query}",
                     Modifier.widthIn(max = 200.dp), compact = true, outlined = true, icon = "search", selected = searchOpen || s.query.isNotBlank()) { searchOpen = !searchOpen }
             }
             if (s.catalog.warnings.isNotEmpty()) Note(s.catalog.warnings.joinToString(" "), error = true)
@@ -249,9 +259,9 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                     if (searchOpen) item(key = "input", span = { GridItemSpan(maxLineSpan) }) {
                         Row(Modifier.onFocusChanged { if (it.hasFocus) gridActive = false }.focusGroup(),
                             verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            EntryField("Bu bölümde ara" + if (typing && s.query.isNotBlank()) " · ${if (s.librarySearching) "Aranıyor…" else "${filtered.size} sonuç"}" else "", s.query, { edited = true; model.query(it) },
-                                Modifier.weight(1f).focusRequester(searchFocus).onFocusChanged { inputFocused = it.hasFocus; if (!it.hasFocus) { edited = false; imeSeen = false } }
-                                    .focusProperties { down = if (typing) FocusRequester.Default else categoryFocus },
+                            // Down goes to the results under the field, keyboard open or closed; Left reaches the categories.
+                            EntryField(searchLabel + if (typing && s.query.isNotBlank()) " · ${if (s.librarySearching) "Aranıyor…" else "${filtered.size} sonuç"}" else "", s.query, { edited = true; model.query(it) },
+                                Modifier.weight(1f).focusRequester(searchFocus).onFocusChanged { inputFocused = it.hasFocus; if (!it.hasFocus) { edited = false; imeSeen = false } },
                                 onDone = { if (!focusContent()) categoryFocus.requestFocus() })
                             if (s.query.isNotBlank()) Action("Temizle", Modifier.padding(bottom = 4.dp), outlined = true) { model.query(""); searchFocus.requestFocus() }
                         }
@@ -260,31 +270,37 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                     item(key = "categories", span = { GridItemSpan(maxLineSpan) }) { Spacer(Modifier.height(0.dp)) }
                     if (filtered.isEmpty()) item(key = "empty", span = { GridItemSpan(maxLineSpan) }) {
                         val hasFilter = s.query.isNotBlank() || s.category != "Tümü"
+                        // A search that found nothing in one category: the same search over the whole section is one OK away.
+                        val widen = s.query.isNotBlank() && searchScoped && !s.librarySearching
                         val emptyVisibility = rememberCardVisibility()
                         Column(Modifier.fillMaxWidth().then(emptyVisibility.container).testTag("library-empty")
                             .background(Ink.Container, RoundedCornerShape(20.dp)).padding(24.dp),
                             verticalArrangement = Arrangement.spacedBy(14.dp)) {
                             Text(when {
                                 s.librarySearching -> "Aranıyor…"
-                                s.category == FavoritesCategory -> "Favorilerin burada görünecek"
-                                s.category == HistoryCategory -> "İzlediklerin burada görünecek"
+                                s.category == FavoritesCategory && s.query.isBlank() -> "Favorilerin burada görünecek"
+                                s.category == HistoryCategory && s.query.isBlank() -> "İzlediklerin burada görünecek"
+                                widen -> "Bu kategoride bulunamadı"
                                 hasFilter -> "Bu filtrelerle içerik bulunamadı"
                                 s.onlyFavorites -> "Favorilerin burada görünecek"
                                 else -> "Bu bölümde içerik yok"
                             }, color = Ink.Text, fontFamily = Roboto, fontSize = 24.sp, lineHeight = 30.sp)
                             Note(when {
                                 s.librarySearching -> "Kütüphanendeki başlıklar kontrol ediliyor."
-                                s.category == FavoritesCategory || s.onlyFavorites && !hasFilter -> "Bir içeriği ayrıntı ekranından veya oynatıcıdan favorilerine ekle."
-                                s.category == HistoryCategory -> "İzlemeye başladığın içerikler burada sıralanır."
+                                s.category == FavoritesCategory && s.query.isBlank() || s.onlyFavorites && !hasFilter -> "Bir içeriği ayrıntı ekranından veya oynatıcıdan favorilerine ekle."
+                                s.category == HistoryCategory && s.query.isBlank() -> "İzlemeye başladığın içerikler burada sıralanır."
+                                widen -> "“${s.query}” $categoryLabel içinde yok. Bölümün tamamında arayabilirsin."
                                 hasFilter -> "Aramayı ve kategori seçimini temizleyerek bu bölümdeki tüm içerikleri görebilirsin."
                                 else -> "Seçili kaynakta bu türde gösterilebilen içerik bulunamadı. Kaynaklarını kontrol edebilirsin."
                             })
                             if (!s.librarySearching) Action(when {
+                                widen -> widenLabel
                                 hasFilter -> "Filtreleri temizle"
                                 s.onlyFavorites -> "İçerikleri keşfet"
                                 else -> "Kaynakları kontrol et"
                             }, Modifier.focusRequester(emptyFocus).then(emptyVisibility.focus).testTag("library-empty-action"), primary = true) {
                                 when {
+                                    widen -> { widened = true; model.category("Tümü") }
                                     hasFilter -> { model.query(""); model.category("Tümü"); selectedCategoryFocus.requestFocus() }
                                     s.onlyFavorites -> model.home()
                                     else -> model.manageSources()
@@ -326,7 +342,17 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
         QuickActions(entry, entry.id in s.favoriteIds, toggleFavorite = { model.toggleFavorite(entry) }, open = { model.open(entry) },
             dismiss = { quick = null; refocus = entry.id })
     }
-    LaunchedEffect(searchOpen) { if (searchOpen) { withFrameNanos { }; searchFocus.requestFocus() } }
+    // The field is the list's first row: show the list from its top, so the whole field and its label are in view.
+    LaunchedEffect(searchOpen) {
+        if (searchOpen) {
+            withFrameNanos { }; grid.scrollToItem(0); withFrameNanos { }
+            try { searchFocus.requestFocus() } catch (_: IllegalStateException) { }
+        }
+    }
+    // After "Tüm filmlerde ara": focus the first result, or the empty state's action when the section has none either.
+    LaunchedEffect(widened, filtered, s.librarySearching) {
+        if (widened && !s.librarySearching) { withFrameNanos { }; withFrameNanos { }; focusContent(); widened = false }
+    }
     // The field rests at the top of the content while typing, so the first result row stays above the keyboard.
     LaunchedEffect(typing) { if (typing) { withFrameNanos { }; grid.scrollToItem(inputIndex) } }
     LaunchedEffect(Unit) {
