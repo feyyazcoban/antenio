@@ -3,12 +3,15 @@
 package dev.iptvplayer.tv.ui
 
 import android.os.SystemClock
+import androidx.annotation.StringRes
 import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
+import dev.iptvplayer.tv.R
+import dev.iptvplayer.tv.data.UiText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -26,41 +29,41 @@ internal class SingleAttemptLoadPolicy : DefaultLoadErrorHandlingPolicy(0) {
     ): LoadErrorHandlingPolicy.FallbackSelection? = null
 }
 
-internal data class PlaybackProblem(val message: String, val retryable: Boolean = false)
+internal data class PlaybackProblem(@StringRes val message: Int, val retryable: Boolean = false)
 
 internal fun playbackProblem(error: PlaybackException): PlaybackProblem {
     val causes = generateSequence(error as Throwable) { it.cause }.take(12).toList()
     // Certificate failures need intervention, even when wrapped as a network connection failure.
-    if (causes.any { it is SSLException }) return PlaybackProblem("Sunucuyla güvenli bağlantı kurulamadı. Kaynak adresini kontrol et.")
+    if (causes.any { it is SSLException }) return PlaybackProblem(R.string.playback_secure_failed)
     val http = causes.filterIsInstance<HttpDataSource.InvalidResponseCodeException>().firstOrNull()?.responseCode
     if (http != null) return when (http) {
-        401, 403 -> PlaybackProblem("Bu yayına erişim verilmedi. Hesap bilgilerini ve aboneliğini kontrol et.")
-        404, 410 -> PlaybackProblem("Bu yayın artık bulunamıyor. Kataloğu yenileyebilir veya başka bir içerik seçebilirsin.")
-        429 -> PlaybackProblem("Sağlayıcının bağlantı sınırına ulaşıldı. Biraz bekleyip tekrar dene.")
-        408, 500, 502, 503, 504 -> PlaybackProblem("Sağlayıcı şu anda yanıt vermiyor. Biraz sonra tekrar dene.", true)
-        else -> PlaybackProblem("Sağlayıcı yayını açmadı. Kaynak erişimini kontrol et.")
+        401, 403 -> PlaybackProblem(R.string.playback_access_denied)
+        404, 410 -> PlaybackProblem(R.string.playback_gone)
+        429 -> PlaybackProblem(R.string.playback_limit_reached)
+        408, 500, 502, 503, 504 -> PlaybackProblem(R.string.playback_provider_unavailable, true)
+        else -> PlaybackProblem(R.string.playback_refused)
     }
     return when (error.errorCode) {
         PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
-        PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT -> PlaybackProblem("Yayına bağlanılamadı. İnternet bağlantısını kontrol et.", true)
-        PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW -> PlaybackProblem("Canlı yayınla bağlantı koptu. Yeniden bağlanmayı dene.", true)
+        PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT -> PlaybackProblem(R.string.playback_unreachable, true)
+        PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW -> PlaybackProblem(R.string.playback_behind_live, true)
         PlaybackException.ERROR_CODE_DECODER_INIT_FAILED,
         PlaybackException.ERROR_CODE_DECODING_FAILED,
         PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES,
-        PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED -> PlaybackProblem("Bu cihaz yayının görüntü veya ses biçimini çözemiyor.")
+        PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED -> PlaybackProblem(R.string.playback_unsupported)
         PlaybackException.ERROR_CODE_PARSING_CONTAINER_MALFORMED,
         PlaybackException.ERROR_CODE_PARSING_MANIFEST_MALFORMED,
         PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED,
         PlaybackException.ERROR_CODE_PARSING_MANIFEST_UNSUPPORTED,
-        PlaybackException.ERROR_CODE_IO_INVALID_HTTP_CONTENT_TYPE -> PlaybackProblem("Yayının biçimi okunamadı. Başka bir içerik deneyebilirsin.")
-        else -> PlaybackProblem("Yayın oynatılamadı. Tekrar dene veya başka bir içerik seç.")
+        PlaybackException.ERROR_CODE_IO_INVALID_HTTP_CONTENT_TYPE -> PlaybackProblem(R.string.playback_unreadable)
+        else -> PlaybackProblem(R.string.playback_failed)
     }
 }
 
-internal data class RecoveryState(val failure: String? = null, val attempt: Int = 0, val seconds: Int? = null) {
+internal data class RecoveryState(val failure: UiText? = null, val attempt: Int = 0, val seconds: Int? = null) {
     val recovering get() = attempt > 0
-    val message get() = if (seconds != null) "Bağlantı kesildi · $seconds sn sonra yeniden denenecek ($attempt/2)"
-        else "Yeniden bağlanılıyor… ($attempt/2)"
+    val message: UiText get() = if (seconds != null) UiText.Res(R.string.playback_retry_wait, listOf(seconds.toString(), attempt.toString()))
+        else UiText.Res(R.string.playback_retrying, listOf(attempt.toString()))
 }
 
 /** All calls and callbacks run on the player's main looper. URLs/errors are never displayed or logged. */
@@ -105,14 +108,14 @@ internal class PlaybackRecovery(
         retryJob?.cancel(); stableJob?.cancel(); deadlineJob?.cancel()
         val problem = playbackProblem(error)
         if (!foreground || !player.playWhenReady || !problem.retryable || attempts >= 2) {
-            mutableState.value = RecoveryState(failure = problem.message)
+            mutableState.value = RecoveryState(failure = UiText.Res(problem.message))
             return
         }
         val now = elapsedMs()
         val first = incidentAt ?: now.also { incidentAt = it }
         val wait = if (attempts == 0) 1_000L else 3_000L
         if (now - first + wait >= RECOVERY_LIMIT_MS) {
-            stopWithMessage("Yayın bağlantısı zamanında kurulamadı. Tekrar deneyebilirsin.")
+            stopWithMessage(R.string.playback_timeout)
             return
         }
         val attempt = ++attempts
@@ -158,25 +161,25 @@ internal class PlaybackRecovery(
         deadlineJob?.cancel()
         deadlineJob = scope.launch {
             delay(remaining)
-            stopWithMessage("Yayın bağlantısı zamanında kurulamadı. Tekrar deneyebilirsin.")
+            stopWithMessage(R.string.playback_timeout)
         }
     }
 
-    fun cancel() = stopWithMessage("Yeniden bağlanma durduruldu. Hazır olduğunda tekrar deneyebilirsin.")
+    fun cancel() = stopWithMessage(R.string.playback_cancelled)
 
     fun background() {
         foreground = false
         val connecting = state.value.recovering || player.playbackState == Player.STATE_BUFFERING
         cancelJobs()
         player.pause()
-        if (connecting) stopWithMessage("Yayına bağlanma duraklatıldı. Devam etmek için tekrar dene.")
+        if (connecting) stopWithMessage(R.string.playback_paused)
     }
 
     fun foreground() { foreground = true }
 
-    private fun stopWithMessage(message: String) {
+    private fun stopWithMessage(@StringRes message: Int) {
         cancelJobs()
-        mutableState.value = RecoveryState(failure = message)
+        mutableState.value = RecoveryState(failure = UiText.Res(message))
         player.pause(); player.stop()
     }
 

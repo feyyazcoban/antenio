@@ -52,6 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.*
 import coil3.compose.AsyncImage
 import dev.iptvplayer.tv.*
+import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
@@ -177,15 +178,15 @@ import androidx.compose.ui.input.key.type
         horizontalArrangement = Arrangement.spacedBy(32.dp)) {
         Column(Modifier.weight(.8f).align(Alignment.CenterVertically), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             NextvLogo(height = 28.dp)
-            Text("Televizyonun.\nSenin kütüphanen.", color = Ink.Text, fontFamily = Roboto,
+            Text(stringResource(R.string.setup_title), color = Ink.Text, fontFamily = Roboto,
                 fontSize = if (largeText) 24.sp else 34.sp, lineHeight = if (largeText) 30.sp else 40.sp)
-            if (!largeText) Note("Canlı yayınların, filmlerin ve dizilerin tek yerde.")
-            Note("Kendi kaynağınla başla. Hesap bilgilerin bu cihazda şifreli saklanır.")
+            if (!largeText) Note(stringResource(R.string.setup_tagline))
+            Note(stringResource(R.string.setup_privacy))
         }
         Column(Modifier.weight(1.4f).fillMaxHeight()
             .background(Ink.Container, RoundedCornerShape(24.dp)).padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text("Kaynak ekle", color = Ink.Text, fontFamily = Roboto, fontSize = 22.sp, lineHeight = 28.sp)
+            Text(stringResource(R.string.setup_heading), color = Ink.Text, fontFamily = Roboto, fontSize = 22.sp, lineHeight = 28.sp)
             // Field remnants at the viewport edges fade out instead of resting cut through their glyphs;
             // the top fade never paints over the focused method chips.
             Column(Modifier.weight(1f).testTag("setup-fields")
@@ -205,29 +206,29 @@ import androidx.compose.ui.input.key.type
                     item { Action("Xtream Codes", Modifier.focusRequester(first).testTag("setup-xtream"), selected = s.draft.type == SourceType.XTREAM) {
                         model.draft(s.draft.copy(type = SourceType.XTREAM))
                     } }
-                    item { Action("M3U bağlantısı", Modifier.testTag("setup-m3u"), selected = s.draft.type == SourceType.M3U) {
+                    item { Action(stringResource(R.string.setup_m3u), Modifier.testTag("setup-m3u"), selected = s.draft.type == SourceType.M3U) {
                         model.draft(s.draft.copy(type = SourceType.M3U))
                     } }
                 }
-                Note(if (s.draft.type == SourceType.XTREAM) "Sunucu adresini ve hesap bilgilerini gir." else "Sağlayıcının verdiği liste bağlantısını gir.")
-                SetupEntry("Kaynak adı", s.draft.name, { model.draft(s.draft.copy(name = it)) })
-                SetupEntry(if (s.draft.type == SourceType.M3U) "M3U bağlantısı" else "Sunucu adresi · http(s)://…", s.draft.address,
+                Note(stringResource(if (s.draft.type == SourceType.XTREAM) R.string.setup_hint_xtream else R.string.setup_hint_m3u))
+                SetupEntry(stringResource(R.string.setup_name), s.draft.name, { model.draft(s.draft.copy(name = it)) })
+                SetupEntry(stringResource(if (s.draft.type == SourceType.M3U) R.string.setup_m3u else R.string.setup_server), s.draft.address,
                     { model.draft(s.draft.copy(address = it)) }, secret = s.draft.type == SourceType.M3U,
                     modifier = fieldView(addressView), revealed = reveal)
                 if (s.draft.type == SourceType.XTREAM) {
-                    SetupEntry("Kullanıcı adı", s.draft.username, { model.draft(s.draft.copy(username = it)) },
+                    SetupEntry(stringResource(R.string.setup_username), s.draft.username, { model.draft(s.draft.copy(username = it)) },
                         modifier = fieldView(userView))
-                    SetupEntry("Şifre", s.draft.password, { model.draft(s.draft.copy(password = it)) }, secret = true,
+                    SetupEntry(stringResource(R.string.setup_password), s.draft.password, { model.draft(s.draft.copy(password = it)) }, secret = true,
                         modifier = fieldView(passwordView), revealed = reveal)
                 }
-                SetupEntry("XMLTV rehber adresi · isteğe bağlı", s.draft.epgUrl, { model.draft(s.draft.copy(epgUrl = it)) }, secret = true,
+                SetupEntry(stringResource(R.string.setup_guide), s.draft.epgUrl, { model.draft(s.draft.copy(epgUrl = it)) }, secret = true,
                     modifier = fieldView(guideView), revealed = reveal)
             }
             s.error?.let { Note(it.resolve(), error = true, modifier = Modifier.testTag("setup-error")) }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Action("Kütüphaneyi aç", Modifier.testTag("setup-connect"), primary = true) { model.connectDraft() }
-                if (s.source != null) Action("Vazgeç") { model.back() }
-                Action(if (reveal) "Bilgileri gizle" else "Bilgileri göster", Modifier.testTag("setup-reveal"), outlined = true,
+                Action(stringResource(R.string.setup_connect), Modifier.testTag("setup-connect"), primary = true) { model.connectDraft() }
+                if (s.source != null) Action(stringResource(R.string.action_cancel)) { model.back() }
+                Action(stringResource(if (reveal) R.string.setup_hide else R.string.setup_show), Modifier.testTag("setup-reveal"), outlined = true,
                     selected = reveal) { reveal = !reveal }
             }
         }
@@ -277,7 +278,7 @@ internal class EvenColumns(private val count: Int) : GridCells {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     Text(name, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                         fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(if (live) guide?.now(now)?.let { "Şimdi: ${it.title}" } ?: shownCategory(entry.category).first
+                    Text(if (live) guide?.now(now)?.let { stringResource(R.string.programme_now, it.title) } ?: shownCategory(entry.category).first
                         else listOf(stringResource(entry.kind.label), shown.year, shown.tag).filter { it.isNotBlank() }.joinToString(" · "),
                         color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
@@ -306,9 +307,10 @@ internal class EvenColumns(private val count: Int) : GridCells {
             overflow = TextOverflow.Ellipsis)
         if (live) sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
         if (live) {
-            Text(guide?.now(now)?.let { "Şimdi: ${it.title}" } ?: if (guideAvailable) "Program bilgisi yok" else "", color = Ink.Muted, fontFamily = Roboto,
+            Text(guide?.now(now)?.let { stringResource(R.string.programme_now, it.title) }
+                ?: if (guideAvailable) stringResource(R.string.programme_none) else "", color = Ink.Muted, fontFamily = Roboto,
                 fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(guide?.next(now)?.let { "Sonra: ${it.title}" }.orEmpty(), color = Ink.Muted, fontFamily = Roboto,
+            Text(guide?.next(now)?.let { stringResource(R.string.programme_next, it.title) }.orEmpty(), color = Ink.Muted, fontFamily = Roboto,
                 fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
@@ -321,11 +323,11 @@ internal class EvenColumns(private val count: Int) : GridCells {
 @Composable internal fun QuickActions(entry: MediaEntry, favorite: Boolean, toggleFavorite: () -> Unit, open: () -> Unit, dismiss: () -> Unit) {
     val first = remember { FocusRequester() }
     SourceDialog(displayTitle(entry.title, entry.year).name, first, dismiss, width = 440.dp) {
-        Action(if (favorite) "Favorilerden çıkar" else "Favorilere ekle", Modifier.fillMaxWidth().focusRequester(first).testTag("quick-favorite"),
+        Action(stringResource(if (favorite) R.string.favorite_remove else R.string.favorite_add), Modifier.fillMaxWidth().focusRequester(first).testTag("quick-favorite"),
             icon = "star", iconFilled = favorite) { toggleFavorite(); dismiss() }
-        Action(if (entry.kind == MediaKind.LIVE) "İzle" else "Ayrıntılar", Modifier.fillMaxWidth().testTag("quick-open"),
+        Action(stringResource(if (entry.kind == MediaKind.LIVE) R.string.action_watch else R.string.action_details), Modifier.fillMaxWidth().testTag("quick-open"),
             icon = if (entry.kind == MediaKind.LIVE) "play" else null) { dismiss(); open() }
-        Action("Vazgeç", Modifier.fillMaxWidth().testTag("quick-cancel"), outlined = true, onClick = dismiss)
+        Action(stringResource(R.string.action_cancel), Modifier.fillMaxWidth().testTag("quick-cancel"), outlined = true, onClick = dismiss)
     }
 }
 
@@ -361,11 +363,11 @@ internal suspend fun refocusAfterDialog(window: androidx.compose.ui.platform.Win
     Dialog(onDismissRequest = dismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Column(Modifier.width(480.dp).background(Ink.Container, RoundedCornerShape(18.dp)).padding(28.dp).testTag("exit-dialog"),
             verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            Text("Uygulamadan çıkmak istiyor musunuz?", color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
+            Text(stringResource(R.string.exit_question), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                 fontSize = 22.sp, lineHeight = 28.sp)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Action("Vazgeç", Modifier.focusRequester(stay).testTag("exit-cancel")) { dismiss() }
-                Action("Çık", Modifier.testTag("exit-confirm"), outlined = true) { activity?.finish() }
+                Action(stringResource(R.string.action_cancel), Modifier.focusRequester(stay).testTag("exit-cancel")) { dismiss() }
+                Action(stringResource(R.string.exit_confirm), Modifier.testTag("exit-confirm"), outlined = true) { activity?.finish() }
             }
         }
         // The platform gives the dialog window focus on its own schedule; ask for Vazgeç once it has it, or
@@ -390,14 +392,15 @@ internal suspend fun refocusAfterDialog(window: androidx.compose.ui.platform.Win
 }
 
 /** What is left of a title, for Devam et: "35 dk kaldı", "1 sa 17 dk kaldı"; the position when the length is unknown. */
+@Composable @ReadOnlyComposable
 internal fun remainingText(positionMs: Long, durationMs: Long): String {
     if (durationMs <= 0) return clockTime(positionMs)
     val minutes = ((durationMs - positionMs).coerceAtLeast(0) + 59_999) / 60_000
     return when {
-        minutes < 1 -> "Bitmek üzere"
-        minutes < 60 -> "$minutes dk kaldı"
-        minutes % 60 == 0L -> "${minutes / 60} sa kaldı"
-        else -> "${minutes / 60} sa ${minutes % 60} dk kaldı"
+        minutes < 1 -> stringResource(R.string.remaining_soon)
+        minutes < 60 -> stringResource(R.string.remaining_minutes, minutes.toString())
+        minutes % 60 == 0L -> stringResource(R.string.remaining_hours, (minutes / 60).toString())
+        else -> stringResource(R.string.remaining_hours_minutes, (minutes / 60).toString(), (minutes % 60).toString())
     }
 }
 

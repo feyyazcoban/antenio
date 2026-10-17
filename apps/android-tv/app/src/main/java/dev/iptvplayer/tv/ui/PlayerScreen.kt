@@ -28,7 +28,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -62,6 +65,7 @@ import androidx.compose.foundation.BorderStroke
 import dev.iptvplayer.tv.PlayingMedia
 import dev.iptvplayer.tv.Route
 import dev.iptvplayer.tv.BuildConfig
+import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.TvViewModel
 import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.EpisodeSequence
@@ -73,6 +77,8 @@ import java.util.Locale
 @OptIn(ExperimentalFoundationApi::class)
 @Composable internal fun PlayerScreen(media: PlayingMedia, model: TvViewModel, back: () -> Unit) {
     val context = LocalContext.current
+    // The corner notes are written when a key arrives, outside composition.
+    val resources = LocalResources.current
     val controlEdge = with(LocalDensity.current) { 12.dp.toPx() }
     val controlVisibility = remember(controlEdge) { object : BringIntoViewSpec {
         override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float = when {
@@ -143,7 +149,8 @@ import java.util.Locale
         val end = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
         val target = (player.currentPosition + deltaMs).coerceIn(0, end)
         player.seekTo(target); position = target
-        flash("${if (deltaMs < 0) "−" else "+"}${kotlin.math.abs(deltaMs) / 1000} sn", "${clockTime(target)} / ${if (duration > 0) clockTime(duration) else "—"}")
+        flash(resources.getString(if (deltaMs < 0) R.string.player_seek_back else R.string.player_seek_forward, (kotlin.math.abs(deltaMs) / 1000).toString()),
+            "${clockTime(target)} / ${if (duration > 0) clockTime(duration) else "—"}")
     }
     LaunchedEffect(noteAt) { if (note != null) { delay(2_500); note = null } }
     LaunchedEffect(digits) {
@@ -151,7 +158,7 @@ import java.util.Locale
         delay(1_500)
         val number = digits.toInt(); digits = ""
         quiet = !visible
-        if (!model.playChannelNumber(number)) { quiet = false; flash("$number numaralı kanal yok") }
+        if (!model.playChannelNumber(number)) { quiet = false; flash(resources.getString(R.string.player_no_channel, number.toString())) }
     }
 
     DisposableEffect(player, lifecycle) {
@@ -310,7 +317,7 @@ import java.util.Locale
                 .background(Ink.Background.copy(alpha = .9f), RoundedCornerShape(12.dp)).padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 LoadingArc()
-                Text("Yayın açılıyor…", color = Ink.Text, fontFamily = Roboto, fontSize = 16.sp)
+                Text(stringResource(R.string.player_opening), color = Ink.Text, fontFamily = Roboto, fontSize = 16.sp)
             }
         }
         if (controlsShown) {
@@ -323,7 +330,8 @@ import java.util.Locale
                 .background(Ink.Background.copy(alpha = .9f), RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 LineIcon(if (live) "tv" else "film", Ink.Mint, Modifier.size(20.dp))
-                Text(if (live) "CANLI TV" else if (media.entry.kind == MediaKind.EPISODE) "DİZİ" else "FİLM",
+                Text(stringResource(if (live) R.string.player_kicker_live else if (media.entry.kind == MediaKind.EPISODE) R.string.player_kicker_series
+                    else R.string.player_kicker_movie),
                     color = Ink.Text, fontFamily = Roboto, fontSize = 12.sp, letterSpacing = 1.4.sp)
                 if (screenState.sources.size > 1) Text(screenState.sourceName(media.entry.sourceId),
                     Modifier.widthIn(max = 360.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp,
@@ -338,27 +346,29 @@ import java.util.Locale
                 // Status on the left, the remote's shortcuts on the right.
                 Row(Modifier.fillMaxWidth().padding(horizontal = 5.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    val clock = "${clockTime(position)} / ${if (duration > 0) clockTime(duration) else "—"}"
                     Text(when {
-                        recoveryState.recovering -> recoveryState.message
-                        failure != null -> failure
-                        opening && live -> "Yayın açılıyor…"
-                        live -> "● CANLI"
-                        else -> "${clockTime(position)} / ${if (duration > 0) clockTime(duration) else "—"}" +
-                            when { opening -> " · Yayın açılıyor…"; status == Player.STATE_ENDED -> " · Bitti"; else -> "" }
+                        recoveryState.recovering -> recoveryState.message.resolve()
+                        failure != null -> failure.resolve()
+                        opening && live -> stringResource(R.string.player_opening)
+                        live -> stringResource(R.string.player_live)
+                        opening -> stringResource(R.string.text_pair, clock, stringResource(R.string.player_opening))
+                        status == Player.STATE_ENDED -> stringResource(R.string.text_pair, clock, stringResource(R.string.player_ended))
+                        else -> clock
                     }, Modifier.weight(1f), color = if (failure != null && !recoveryState.recovering) Ink.Error else Ink.Text,
                         fontFamily = Roboto, fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     Text(when {
-                        recoveryState.recovering -> "Geri: yeniden bağlanmayı durdur"
+                        recoveryState.recovering -> stringResource(R.string.player_keys_recovering)
                         failure != null -> ""
-                        live -> "Kontroller kapalıyken Yukarı/Aşağı: kanal · Rakam: kanal no"
-                        else -> "Kontroller kapalıyken Sol/Sağ: sar"
+                        live -> stringResource(R.string.player_keys_live)
+                        else -> stringResource(R.string.player_keys_vod)
                     }, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 if (live && failure == null && !recoveryState.recovering) {
-                    Text(currentProgramme?.let { "${it.title} · ${programmeTime(it, model.guideZone())}" } ?: "Program bilgisi bulunmuyor",
+                    Text(currentProgramme?.let { "${it.title} · ${programmeTime(it, model.guideZone())}" } ?: stringResource(R.string.player_no_programme),
                         Modifier.padding(horizontal = 5.dp).testTag("player-current-programme"), color = Ink.Text, fontFamily = Roboto,
                         fontSize = 14.sp, lineHeight = 19.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    schedule?.next(guideNow)?.let { next -> Text("Sonra · ${guideTime(next.start, model.guideZone())}  ${next.title}",
+                    schedule?.next(guideNow)?.let { next -> Text(stringResource(R.string.player_next_programme, guideTime(next.start, model.guideZone()), next.title),
                         Modifier.padding(horizontal = 5.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp,
                         maxLines = 1, overflow = TextOverflow.Ellipsis) }
                     currentProgramme?.end?.let { end -> Box(Modifier.padding(horizontal = 5.dp).fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)).background(Color.White.copy(alpha = .25f))) {
@@ -373,7 +383,8 @@ import java.util.Locale
                 }
                 CompositionLocalProvider(LocalBringIntoViewSpec provides controlVisibility) {
                 Row(Modifier.fillMaxWidth().testTag("player-controls").horizontalScroll(rememberScrollState()).padding(horizontal = 5.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Action(if (recoveryState.recovering) "İptal et" else if (failure != null) "Tekrar dene" else if (playing) "Duraklat" else if (status == Player.STATE_ENDED) "Baştan izle" else "Oynat",
+                    Action(stringResource(if (recoveryState.recovering) R.string.action_stop else if (failure != null) R.string.action_retry else if (playing) R.string.player_pause
+                        else if (status == Player.STATE_ENDED) R.string.action_replay else R.string.action_play),
                         Modifier.focusRequester(first), primary = true) {
                         interact()
                         if (recoveryState.recovering) recovery.cancel()
@@ -382,27 +393,29 @@ import java.util.Locale
                         else { if (status == Player.STATE_ENDED) { episodeEnd.newMedia(); player.seekTo(0) }; player.play() }
                     }
                     if (live) {
-                        Action("‹ Kanal") { model.changeChannel(-1) }
-                        Action("Kanal ›") { model.changeChannel(1) }
+                        Action(stringResource(R.string.player_channel_previous)) { model.changeChannel(-1) }
+                        Action(stringResource(R.string.player_channel_next)) { model.changeChannel(1) }
                     } else {
-                        Action("−10 sn", enabled = player.isCurrentMediaItemSeekable) { interact(); player.seekTo((player.currentPosition - 10_000).coerceAtLeast(0)) }
-                        Action("+10 sn", enabled = player.isCurrentMediaItemSeekable) { interact(); player.seekTo((player.currentPosition + 10_000).coerceAtMost(duration.takeIf { it > 0 } ?: Long.MAX_VALUE)) }
+                        Action(stringResource(R.string.player_seek_back, "10"), enabled = player.isCurrentMediaItemSeekable) { interact(); player.seekTo((player.currentPosition - 10_000).coerceAtLeast(0)) }
+                        Action(stringResource(R.string.player_seek_forward, "10"), enabled = player.isCurrentMediaItemSeekable) { interact(); player.seekTo((player.currentPosition + 10_000).coerceAtMost(duration.takeIf { it > 0 } ?: Long.MAX_VALUE)) }
                     }
-                    Action("Ses / Altyazı", icon = "sound", enabled = failure == null && !recoveryState.recovering) { interact(); trackPanel = true }
+                    Action(stringResource(R.string.player_tracks), icon = "sound", enabled = failure == null && !recoveryState.recovering) { interact(); trackPanel = true }
                     // The shared star icon at icon size, filled while it is a favourite; the meaning stays in semantics.
+                    val favoriteLabel = stringResource(when {
+                        favoriteTarget == null -> R.string.player_favorite_unavailable
+                        media.entry.kind == MediaKind.EPISODE -> if (isFavorite) R.string.player_series_favorite_remove else R.string.player_series_favorite_add
+                        else -> if (isFavorite) R.string.favorite_remove else R.string.favorite_add
+                    })
+                    val favoriteState = stringResource(if (isFavorite) R.string.player_in_favorites else R.string.player_not_in_favorites)
                     Action("", Modifier.testTag("player-favorite").semantics {
-                        contentDescription = when {
-                            favoriteTarget == null -> "Favori için içerik bilgisi bulunamadı"
-                            media.entry.kind == MediaKind.EPISODE -> if (isFavorite) "Diziyi favorilerden çıkar" else "Diziyi favorilere ekle"
-                            else -> if (isFavorite) "Favorilerden çıkar" else "Favorilere ekle"
-                        }
-                        stateDescription = if (isFavorite) "Favorilerde" else "Favorilerde değil"
+                        contentDescription = favoriteLabel
+                        stateDescription = favoriteState
                     }, icon = "star", iconFilled = isFavorite, selected = isFavorite, enabled = favoriteTarget != null) { model.toggleFavorite(media.entry); interact() }
-                    if (nextChoice != null) Action("Sonraki bölüm") {
+                    if (nextChoice != null) Action(stringResource(R.string.player_next_episode)) {
                         save()
                         screenState.sourceFor(media.entry)?.let { model.playNextEpisode(it.id, media.entry.id, nextChoice.entry.id) }
                     }
-                    Action("Kapat") { save(); model.back() }
+                    Action(stringResource(R.string.action_close)) { save(); model.back() }
                 }
                 }
             }
@@ -439,9 +452,9 @@ import java.util.Locale
             .background(Ink.Background, RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp)).testTag("tracks-panel")) {
         Row(Modifier.fillMaxWidth().padding(start = 28.dp, end = 28.dp, top = 24.dp, bottom = 18.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text("Ses ve altyazı", Modifier.weight(1f).testTag("tracks-title"), color = Ink.Text,
+            Text(stringResource(R.string.tracks_title), Modifier.weight(1f).testTag("tracks-title"), color = Ink.Text,
                 fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 24.sp, lineHeight = 30.sp)
-            Action("Kapat", Modifier.focusRequester(first).testTag("tracks-close"), onClick = dismiss)
+            Action(stringResource(R.string.action_close), Modifier.focusRequester(first).testTag("tracks-close"), onClick = dismiss)
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(Ink.Divider))
         CompositionLocalProvider(LocalBringIntoViewSpec provides trackVisibility) {
@@ -449,14 +462,14 @@ import java.util.Locale
             .verticalScroll(rememberScrollState()).padding(horizontal = 28.dp, vertical = 18.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)) {
         listOf(C.TRACK_TYPE_AUDIO, C.TRACK_TYPE_TEXT).forEach { type ->
-            Text(if (type == C.TRACK_TYPE_AUDIO) "Ses dili" else "Altyazı", color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp)
-            if (type == C.TRACK_TYPE_TEXT) TrackChoice("Kapalı", selected = parameters.disabledTrackTypes.contains(type)) {
+            Text(stringResource(if (type == C.TRACK_TYPE_AUDIO) R.string.tracks_audio else R.string.tracks_subtitles), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp)
+            if (type == C.TRACK_TYPE_TEXT) TrackChoice(stringResource(R.string.tracks_off), selected = parameters.disabledTrackTypes.contains(type)) {
                 player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
                     .clearOverridesOfType(type).setTrackTypeDisabled(type, true).build()
                 model.store.subtitlesOff = true
             }
             val groups = tracks.groups.filter { it.type == type }
-            if (groups.isEmpty()) Note(if (type == C.TRACK_TYPE_TEXT) "Bu yayında gömülü altyazı bulunamadı." else "Ses parçası bulunamadı; yayın henüz açılmamış olabilir.")
+            if (groups.isEmpty()) Note(stringResource(if (type == C.TRACK_TYPE_TEXT) R.string.tracks_no_subtitles else R.string.tracks_no_audio))
             var number = 0
             groups.forEach { group ->
                 for (index in 0 until group.length) {
@@ -464,7 +477,7 @@ import java.util.Locale
                     val supported = group.isTrackSupported(index)
                     val label = trackLabel(format, ++number, type)
                     TrackChoice(label, selected = group.isTrackSelected(index) && !parameters.disabledTrackTypes.contains(type), enabled = supported,
-                        status = if (supported) null else "Bu cihaz desteklemiyor") {
+                        status = if (supported) null else stringResource(R.string.tracks_unsupported)) {
                         player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
                             .setTrackTypeDisabled(type, false).clearOverridesOfType(type)
                             .setOverrideForType(TrackSelectionOverride(group.mediaTrackGroup, index)).build()
@@ -476,7 +489,7 @@ import java.util.Locale
         }
         }
         }
-        Note("Yalnızca bu yayında bulunan dil ve altyazılar listelenir.",
+        Note(stringResource(R.string.tracks_note),
             modifier = Modifier.padding(horizontal = 28.dp, vertical = 16.dp).testTag("tracks-note"))
         }
         }
@@ -489,6 +502,7 @@ import java.util.Locale
     var restore by remember { mutableStateOf(false) }
     val explanation = remember { FocusRequester() }
     val window = LocalWindowInfo.current
+    val choice = stringResource(if (selected) R.string.tracks_selected else R.string.tracks_not_selected)
     LaunchedEffect(reading, restore) {
         if (!reading && restore) {
             snapshotFlow { window.isWindowFocused }.first { it }
@@ -498,7 +512,7 @@ import java.util.Locale
     }
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
     Button(onClick = onClick, modifier = Modifier.focusProperties { canFocus = enabled }.fillMaxWidth()
-        .semantics { role = Role.RadioButton; this.selected = selected; stateDescription = if (selected) "Seçili" else "Seçili değil" },
+        .semantics { role = Role.RadioButton; this.selected = selected; stateDescription = choice },
         enabled = enabled, contentPadding = PaddingValues(0.dp), shape = ButtonDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
         colors = ButtonDefaults.colors(containerColor = if (selected) Ink.Selected else Ink.Container, focusedContainerColor = Ink.High),
         scale = ButtonDefaults.scale(focusedScale = 1f),
@@ -518,25 +532,29 @@ import java.util.Locale
                 fontFamily = Roboto, fontSize = 16.sp)
         }
     }
-    if (overflow) Action("Tam açıklama", Modifier.focusRequester(explanation)) { reading = true }
+    if (overflow) Action(stringResource(R.string.tracks_full_description), Modifier.focusRequester(explanation)) { reading = true }
     }
     if (reading) {
         val reader = remember { FocusRequester() }
         val close = remember { FocusRequester() }
         fun dismissReading() { reading = false; restore = true }
-        SourceDialog("Parça açıklaması", reader, ::dismissReading, width = 560.dp) {
+        SourceDialog(stringResource(R.string.tracks_description_title), reader, ::dismissReading, width = 560.dp) {
             RemoteTextReader(label, Modifier.weight(1f, fill = false).focusRequester(reader)
                 .focusProperties { down = close }, "track-description-reader")
-            Action("Geri", Modifier.focusRequester(close).focusProperties { up = reader }
+            Action(stringResource(R.string.action_back), Modifier.focusRequester(close).focusProperties { up = reader }
                 .testTag("track-description-back"), onClick = ::dismissReading)
         }
     }
 }
 
+@Composable @ReadOnlyComposable
 private fun trackLabel(format: Format, number: Int, type: Int): String {
     val language = format.language?.takeUnless { it == "und" || it.isBlank() }
         ?.let { Locale.forLanguageTag(it).getDisplayLanguage(Locale.forLanguageTag("tr")).ifBlank { it } }
-        ?: if (type == C.TRACK_TYPE_AUDIO) "Ses" else "Altyazı"
-    val channels = if (format.channelCount > 0) when (format.channelCount) { 1 -> "mono"; 2 -> "stereo"; 6 -> "5.1"; 8 -> "7.1"; else -> "${format.channelCount} kanal" } else ""
+        ?: stringResource(if (type == C.TRACK_TYPE_AUDIO) R.string.tracks_audio_fallback else R.string.tracks_subtitles)
+    val channels = if (format.channelCount > 0) when (format.channelCount) {
+        1 -> stringResource(R.string.tracks_mono); 2 -> stringResource(R.string.tracks_stereo); 6 -> "5.1"; 8 -> "7.1"
+        else -> pluralStringResource(R.plurals.tracks_channels, format.channelCount, format.channelCount.toString())
+    } else ""
     return listOf("$language · $number", format.label.orEmpty(), channels).filter { it.isNotBlank() }.distinct().joinToString(" · ")
 }

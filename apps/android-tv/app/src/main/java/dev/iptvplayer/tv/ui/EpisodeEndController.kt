@@ -1,8 +1,10 @@
 package dev.iptvplayer.tv.ui
 
+import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.MediaEntry
 import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.NextEpisodeChoice
+import dev.iptvplayer.tv.data.UiText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -15,7 +17,7 @@ internal data class EpisodeEndState(
     val current: MediaEntry,
     val next: NextEpisodeChoice?,
     val seconds: Int? = null,
-    val notice: String? = null
+    val notice: UiText? = null
 )
 
 /** The end of media, not an estimated credits offset, starts the cancellable countdown. */
@@ -37,7 +39,7 @@ internal class EpisodeEndController(
         handled = true
         val automatic = next?.automaticAllowed == true && autoEnabled && foreground
         mutableState.value = EpisodeEndState(sourceId, current, next, if (automatic) COUNTDOWN_SECONDS else null,
-            when { !foreground -> "Otomatik geçiş duraklatıldı."; !autoEnabled && next != null -> "Otomatik geçiş kapalı."; else -> null })
+            when { !foreground -> UiText.Res(R.string.episode_auto_paused); !autoEnabled && next != null -> UiText.Res(R.string.episode_auto_off); else -> null })
         if (automatic) timer = scope.launch {
             for (seconds in COUNTDOWN_SECONDS - 1 downTo 0) {
                 delay(1000)
@@ -58,7 +60,7 @@ internal class EpisodeEndController(
         // The model validates the current source, episode and latest target again before opening media.
         if (playNext(s.sourceId, s.current.id, next.entry.id, automatic)) mutableState.value = null
         else mutableState.value = s.copy(next = null, seconds = null,
-            notice = "Sonraki bölüm artık açılamıyor. Bölüm listesinden yeniden seçebilirsin.")
+            notice = UiText.Res(R.string.episode_next_unavailable))
     }
 
     fun dismiss() { timer?.cancel(); mutableState.value = null }
@@ -66,7 +68,7 @@ internal class EpisodeEndController(
     fun preferenceChanged(enabled: Boolean) {
         if (!enabled && mutableState.value?.seconds != null) {
             timer?.cancel()
-            mutableState.value = mutableState.value?.copy(seconds = null, notice = "Otomatik geçiş kapalı.")
+            mutableState.value = mutableState.value?.copy(seconds = null, notice = UiText.Res(R.string.episode_auto_off))
         }
     }
 
@@ -76,13 +78,13 @@ internal class EpisodeEndController(
         if (next?.entry?.id != previous.entry.id || (s.seconds != null && !next.automaticAllowed)) {
             timer?.cancel()
             mutableState.value = s.copy(next = null, seconds = null,
-                notice = "Bölüm listesi değişti. Devam etmek için listeden bir bölüm seç.")
+                notice = UiText.Res(R.string.episode_list_changed))
         }
     }
 
     fun background() {
         foreground = false; timer?.cancel()
-        mutableState.value = mutableState.value?.copy(seconds = null, notice = "Otomatik geçiş duraklatıldı.")
+        mutableState.value = mutableState.value?.copy(seconds = null, notice = UiText.Res(R.string.episode_auto_paused))
     }
     fun foreground() { foreground = true }
     fun close() { closed = true; timer?.cancel(); mutableState.value = null }

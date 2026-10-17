@@ -31,6 +31,6 @@ class GuideTimelineTest {
     }
     @Test fun repeatedDstClockTimesShowBothOffsetsInsteadOfAnApparentZeroLength() {
         val p = EpgProgramme("c", "DST", XmltvTime.parse("20261025023000 +0200")!!, XmltvTime.parse("20261025023000 +0100"))
-        assertEquals("02:30 (UTC+02:00) — 02:30 (UTC+01:00)", dev.iptvplayer.tv.ui.programmeTime(p, java.time.ZoneId.of("Europe/Berlin")))
+        assertEquals("02:30 (UTC+02:00) — 02:30 (UTC+01:00)", dev.iptvplayer.tv.ui.programmeTime(p, java.time.ZoneId.of("Europe/Berlin"), unknownEnd = "?"))
     }
 }

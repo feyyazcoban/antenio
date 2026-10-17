@@ -21,11 +21,13 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
+import dev.iptvplayer.tv.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlin.math.abs
@@ -125,7 +127,7 @@ import kotlin.math.abs
                 }, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(ref * 34f)) {
                 SplashSpinner(ref * 56f, ref * 8f, spinnerStill)
                 // The handoff's 21 px label is 10.5 sp on a 960 dp TV; it is the screen's only text, so it keeps 14 sp.
-                Text("Hazırlanıyor...", color = Color.White, fontFamily = Roboto, fontSize = (21f * ref.value).coerceAtLeast(14f).sp,
+                Text(stringResource(R.string.launch_preparing), color = Color.White, fontFamily = Roboto, fontSize = (21f * ref.value).coerceAtLeast(14f).sp,
                     lineHeight = (25f * ref.value).coerceAtLeast(18f).sp, textAlign = TextAlign.Center)
             }
         }

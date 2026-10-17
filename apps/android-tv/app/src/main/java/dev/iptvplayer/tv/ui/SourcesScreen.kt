@@ -18,6 +18,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.semantics.semantics
@@ -31,6 +33,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.tv.material3.*
 import dev.iptvplayer.tv.*
+import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.*
 import kotlinx.coroutines.flow.first
 
@@ -52,11 +55,11 @@ import kotlinx.coroutines.flow.first
         Row(Modifier.fillMaxWidth().testTag("sources-header")
             .focusProperties { if (s.sources.isNotEmpty()) down = listEntry }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Heading("Kaynakların", Modifier.testTag("sources-title"))
-                Note("${s.sources.size} kaynak · Hesapların bu cihazda şifreli saklanır.")
+                Heading(stringResource(R.string.sources_title), Modifier.testTag("sources-title"))
+                Note(pluralStringResource(R.plurals.sources_summary, s.sources.size, s.sources.size.toString()))
             }
-            Action("Kaynak ekle", focus("add-source").testTag("add-source"), primary = true) { model.addSource() }
-            Action("Geri") { model.back() }
+            Action(stringResource(R.string.sources_add), focus("add-source").testTag("add-source"), primary = true) { model.addSource() }
+            Action(stringResource(R.string.action_back)) { model.back() }
         }
         s.catalogNotice?.let { Note(it.message.resolve(), error = it.needsAttention) }
         LazyColumn(Modifier.weight(1f).testTag("sources-list")
@@ -80,28 +83,28 @@ import kotlinx.coroutines.flow.first
                     .padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text("Kaynak ${s.sources.indexOf(source) + 1} · ${source.type.label()}", Modifier.weight(1f),
+                        Text(sourceNumber(s, source), Modifier.weight(1f),
                             color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 17.sp,
                             maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Text("${status.count} içerik", color = Ink.Muted, fontFamily = Roboto,
+                        Text(pluralStringResource(R.plurals.count_items, status.count, status.count.toString()), color = Ink.Muted, fontFamily = Roboto,
                             fontSize = 12.sp, lineHeight = 17.sp, maxLines = 1)
                     }
                     Text(s.sourceName(source.id), Modifier.fillMaxWidth().testTag("source-name:${source.id}"),
                         color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                         fontSize = 18.sp, lineHeight = 24.sp, maxLines = 1, overflow = TextOverflow.MiddleEllipsis)
-                    Note(if (status.updatedAt > 0) "Son güncelleme: " +
+                    Note(if (status.updatedAt > 0) stringResource(R.string.last_updated,
                         java.text.SimpleDateFormat("d MMM, HH:mm", java.util.Locale.forLanguageTag("tr"))
-                            .format(java.util.Date(status.updatedAt)) else "Henüz indirilmedi")
-                    if (status.refreshing) Note("Yenileniyor… Kayıtlı içerikler kullanılabilir.")
+                            .format(java.util.Date(status.updatedAt))) else stringResource(R.string.sources_not_downloaded))
+                    if (status.refreshing) Note(stringResource(R.string.sources_refreshing))
                     else if (status.notices.isNotEmpty()) Text(status.notices.resolve(), color = if (status.failed) Ink.Error else Ink.Muted,
                         fontFamily = Roboto, fontSize = 12.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Action("Bilgiler", Modifier.testTag("info-source:${source.id}")
+                        Action(stringResource(R.string.sources_info), Modifier.testTag("info-source:${source.id}")
                             .then(if (firstVisibleSource == source.id) Modifier.focusRequester(listEntry) else Modifier)
                             .then(if (info?.id == source.id) Modifier.focusRequester(dialogOpener) else Modifier)) { info = source }
-                        Action("Yenile", Modifier.testTag("refresh-source:${source.id}")) { model.refresh(source.id) }
-                        Action("Düzenle", focus("edit-source:${source.id}").testTag("edit-source:${source.id}")) { model.editSource(source.id) }
-                        Action("Kaldır", focus("remove-source:${source.id}").testTag("remove-source:${source.id}")
+                        Action(stringResource(R.string.sources_refresh), Modifier.testTag("refresh-source:${source.id}")) { model.refresh(source.id) }
+                        Action(stringResource(R.string.sources_edit), focus("edit-source:${source.id}").testTag("edit-source:${source.id}")) { model.editSource(source.id) }
+                        Action(stringResource(R.string.sources_remove), focus("remove-source:${source.id}").testTag("remove-source:${source.id}")
                             .then(if (removal?.id == source.id) Modifier.focusRequester(dialogOpener) else Modifier)) { removal = source }
                     }
                 }
@@ -114,13 +117,14 @@ import kotlinx.coroutines.flow.first
         val reader = remember { FocusRequester() }
         LaunchedEffect(source.id) { model.ensureGuide(listOf(source.id), download = false) }
         fun dismiss() { dialogOpener.requestFocus(); info = null }
-        SourceDialog("Kaynak bilgileri", reader, ::dismiss, hidden = guideOptions) {
+        SourceDialog(stringResource(R.string.sources_info_title), reader, ::dismiss, hidden = guideOptions) {
             val status = s.sourceStatus[source.id] ?: SourceStatus()
-            RemoteTextReader("${s.sourceName(source.id)}\n\nKaynak ${s.sources.indexOf(source) + 1} · ${source.type.label()}\n${status.count} içerik" +
+            RemoteTextReader("${s.sourceName(source.id)}\n\n${sourceNumber(s, source)}\n" +
+                pluralStringResource(R.plurals.count_items, status.count, status.count.toString()) +
                 (if (status.notices.isNotEmpty()) "\n\n${status.notices.resolve()}" else "") + "\n\n" + guideStatusText(s.guideStatus[source.id], model.guideZone()),
                 Modifier.weight(1f, fill = false).focusRequester(reader).focusProperties { down = guideOpener }, "source-info-reader")
-            Action("Rehber ayarları", Modifier.focusRequester(guideOpener).focusProperties { up = reader }.testTag("source-guide-settings")) { guideOptions = true }
-            Action("Kapat", Modifier.testTag("close-source-info")) { dismiss() }
+            Action(stringResource(R.string.sources_guide_settings), Modifier.focusRequester(guideOpener).focusProperties { up = reader }.testTag("source-guide-settings")) { guideOptions = true }
+            Action(stringResource(R.string.action_close), Modifier.testTag("close-source-info")) { dismiss() }
         }
         if (guideOptions) GuideSourceDialog(source, s, model) { guideOptions = false; guideOpener.requestFocus() }
     }
@@ -128,13 +132,13 @@ import kotlinx.coroutines.flow.first
         val cancel = remember { FocusRequester() }
         val reader = remember { FocusRequester() }
         fun dismiss() { dialogOpener.requestFocus(); removal = null }
-        SourceDialog("Kaynağı kaldır?", cancel, ::dismiss) {
-            RemoteTextReader("Kaynak ${s.sources.indexOf(source) + 1} · ${source.type.label()}\n" +
-                "Bu kaynağın listesi, favorileri ve geçmişi silinecek. Diğer kaynaklar korunacak.\n\nTam ad:\n${s.sourceName(source.id)}",
+        SourceDialog(stringResource(R.string.remove_source_question), cancel, ::dismiss) {
+            RemoteTextReader(sourceNumber(s, source) + "\n" + stringResource(R.string.sources_remove_note) + "\n\n" +
+                stringResource(R.string.sources_full_name, s.sourceName(source.id)),
                 Modifier.weight(1f, fill = false).focusRequester(reader), "source-removal-reader")
             Column(Modifier.padding(vertical = 5.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Action("Vazgeç", Modifier.focusRequester(cancel).focusProperties { up = reader }.testTag("cancel-source-removal")) { dismiss() }
-                Action("Kaynağı kaldır", Modifier.testTag("confirm-source-removal")) { removal = null; model.removeSource(source.id) }
+                Action(stringResource(R.string.action_cancel), Modifier.focusRequester(cancel).focusProperties { up = reader }.testTag("cancel-source-removal")) { dismiss() }
+                Action(stringResource(R.string.remove_source), Modifier.testTag("confirm-source-removal")) { removal = null; model.removeSource(source.id) }
             }
         }
     }
@@ -162,5 +166,11 @@ import kotlinx.coroutines.flow.first
     }
 }
 
+/** "Kaynak 2 · M3U": the source's place in the list and its kind. */
+@Composable @ReadOnlyComposable
+private fun sourceNumber(s: TvState, source: SourceConfig): String =
+    stringResource(R.string.sources_number, (s.sources.indexOf(source) + 1).toString(), source.type.label())
+
+// Protocol names, the same in every language.
 private fun SourceType.label() = if (this == SourceType.XTREAM) "Xtream Codes" else "M3U"
 

@@ -5,6 +5,8 @@ package dev.iptvplayer.tv.ui
 
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import dev.iptvplayer.tv.R
+import dev.iptvplayer.tv.data.UiText
 import kotlinx.coroutines.test.*
 import org.junit.Assert.*
 import org.junit.Test
@@ -25,7 +27,8 @@ class PlaybackRecoveryTest {
         advanceTimeBy(1); runCurrent(); assertEquals(2, f.prepares)
         r.onPlayerError(network()); advanceTimeBy(30_000); runCurrent()
         assertEquals(2, f.prepares); assertNotNull(r.state.value.failure)
-        assertFalse(r.state.value.failure!!.contains("private")); r.close()
+        // A fixed sentence without arguments: nothing from the error reaches the screen.
+        assertEquals(UiText.Res(R.string.playback_unreachable), r.state.value.failure); r.close()
     }
 
     @Test fun permanentAndCertificateFailuresNeverRetry() = runTest {
@@ -34,7 +37,7 @@ class PlaybackRecoveryTest {
         advanceTimeBy(30_000); runCurrent(); assertEquals(0, f.prepares)
         r.onPlayerError(PlaybackException("secret", SSLHandshakeException("secret"), PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED))
         advanceTimeBy(30_000); runCurrent(); assertEquals(0, f.prepares)
-        assertTrue(r.state.value.failure!!.contains("güvenli")); r.close()
+        assertEquals(UiText.Res(R.string.playback_secure_failed), r.state.value.failure); r.close()
     }
 
     @Test fun manualRetryResetsBudgetPreservesVodAndLiveRejoinsWindow() = runTest {

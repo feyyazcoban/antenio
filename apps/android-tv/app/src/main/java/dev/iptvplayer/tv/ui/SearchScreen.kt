@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.*
 import dev.iptvplayer.tv.*
+import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.*
 
 private data class SearchRow(val key: String, @StringRes val title: Int, val entries: List<MediaEntry>)
@@ -130,11 +131,11 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
                 SearchField(s.searchQuery, { edited = true; model.searchQuery(it) },
                     Modifier.weight(1f).focusRequester(input).onFocusChanged { inputFocused = it.hasFocus; if (!it.hasFocus) { edited = false; imeSeen = false } },
                     onDone = ::finishInput)
-                if (s.searchQuery.isNotEmpty()) Action("Temizle", outlined = true) { model.searchQuery(""); input.requestFocus() }
+                if (s.searchQuery.isNotEmpty()) Action(stringResource(R.string.action_clear), outlined = true) { model.searchQuery(""); input.requestFocus() }
             }
             if (!typing) LazyRow(controls.padding(top = 12.dp).fillMaxWidth().testTag("search-kinds"), horizontalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(horizontal = TvLayout.Gutter, vertical = 5.dp)) {
-                item { Action("Tümü", selected = s.searchKind == null, compact = true, outlined = true) { model.searchKind(null) } }
+                item { Action(stringResource(R.string.search_all), selected = s.searchKind == null, compact = true, outlined = true) { model.searchKind(null) } }
                 listOf(MediaKind.LIVE, MediaKind.MOVIE, MediaKind.SERIES).forEach { kind ->
                     item { Action(stringResource(kind.label), selected = s.searchKind == kind, compact = true, outlined = true) { model.searchKind(kind) } }
                 }
@@ -146,15 +147,15 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     LineIcon("search", Ink.Muted, Modifier.size(32.dp))
                     Spacer(Modifier.height(16.dp))
-                    Text(when { s.searching -> "Aranıyor…"; s.searchQuery.isBlank() -> "Bir başlıkla başla"; else -> "Eşleşen içerik bulunamadı" },
+                    Text(stringResource(when { s.searching -> R.string.searching; s.searchQuery.isBlank() -> R.string.search_start; else -> R.string.search_no_match }),
                         color = Ink.Text, fontFamily = Roboto, fontSize = 20.sp)
                     Spacer(Modifier.height(8.dp))
-                    Note(when {
-                        s.searching -> "Kütüphanendeki başlıklar kontrol ediliyor."
-                        s.searchQuery.isBlank() -> "Kumandayla yazabilir, ardından sonuçlara geçebilirsin."
-                        s.searchKind != null -> "Daha kısa bir ad dene veya içerik türünden Tümü’nü seç."
-                        else -> "Daha kısa bir ad dene veya seçili kaynağı kontrol et."
-                    })
+                    Note(stringResource(when {
+                        s.searching -> R.string.searching_note
+                        s.searchQuery.isBlank() -> R.string.search_start_note
+                        s.searchKind != null -> R.string.search_no_match_kind_note
+                        else -> R.string.search_no_match_note
+                    }))
                 }
             } else LazyColumn(Modifier.weight(1f).fillMaxWidth().padding(top = 14.dp).testTag("search-results")
                 .onSizeChanged { viewportHeight = with(density) { it.height.toDp() } }
@@ -170,7 +171,7 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
                         onDispose { if (rowStates[row.key] === rowState) rowStates.remove(row.key) }
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("${stringResource(row.title)} · ${row.entries.size}", Modifier.padding(horizontal = TvLayout.Gutter).testTag("search-row:${row.key}")
+                        Text(stringResource(R.string.text_pair, stringResource(row.title), row.entries.size.toString()), Modifier.padding(horizontal = TvLayout.Gutter).testTag("search-row:${row.key}")
                             .onSizeChanged { headingHeight = with(density) { it.height.toDp() } },
                             color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 17.sp, lineHeight = 22.sp)
                         LazyRow(state = rowState, horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -247,7 +248,7 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
                 LineIcon("search", if (focused) Ink.Text else Ink.Muted, Modifier.size(20.dp))
                 Spacer(Modifier.width(14.dp))
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                    if (state.text.isEmpty()) Text("Kanal, film veya dizi ara", color = Ink.Muted, fontFamily = Roboto, fontSize = 16.sp,
+                    if (state.text.isEmpty()) Text(stringResource(R.string.search_hint), color = Ink.Muted, fontFamily = Roboto, fontSize = 16.sp,
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
                     field()
                 }
@@ -273,7 +274,7 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     Text(shown.name, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                         fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(listOf(when (entry.kind) { MediaKind.LIVE -> "Canlı TV"; MediaKind.MOVIE -> "Film"; else -> "Dizi" }, shown.year, shown.tag)
+                    Text(listOf(stringResource(when (entry.kind) { MediaKind.LIVE -> R.string.kind_live; MediaKind.MOVIE -> R.string.kind_movie_single; else -> R.string.kind_series_single }), shown.year, shown.tag)
                         .filter { it.isNotBlank() }.joinToString(" · "), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp,
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
                     sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }

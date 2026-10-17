@@ -11,6 +11,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -19,6 +20,7 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
+import dev.iptvplayer.tv.R
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
@@ -36,6 +38,10 @@ import kotlinx.coroutines.launch
     val line = remember(density.density, density.fontScale) {
         measurer.measure("A\nA", style).let { (it.getLineTop(1) - it.getLineTop(0)).roundToInt() }.coerceAtLeast(1)
     }
+    val whole = stringResource(R.string.reader_whole)
+    val start = stringResource(R.string.reader_start)
+    val end = stringResource(R.string.reader_end)
+    val scrolling = stringResource(R.string.reader_scrolling)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Box(Modifier.weight(1f, fill = false).fillMaxWidth()
             // Snap the text viewport to whole lines so no line is sliced at either edge.
@@ -68,14 +74,14 @@ import kotlinx.coroutines.launch
                     }
                 }
             }.semantics { stateDescription = when {
-                !scroll.canScrollForward && !scroll.canScrollBackward -> "Metnin tamamı görünüyor"
-                !scroll.canScrollBackward -> "Metnin başı"
-                !scroll.canScrollForward -> "Metnin sonu"
-                else -> "Metin kaydırılıyor"
+                !scroll.canScrollForward && !scroll.canScrollBackward -> whole
+                !scroll.canScrollBackward -> start
+                !scroll.canScrollForward -> end
+                else -> scrolling
             } }.focusable().border(TvLayout.Focus, if (focused) Ink.Mint else Color.Transparent, RoundedCornerShape(8.dp))
             .padding(8.dp)) {
             Text(text, Modifier.fillMaxWidth().verticalScroll(scroll), color = Ink.Muted, style = style)
         }
-        if (scroll.maxValue > 0) Note("↑↓ Metni kaydır")
+        if (scroll.maxValue > 0) Note(stringResource(R.string.reader_keys))
     }
 }

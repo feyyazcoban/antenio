@@ -29,8 +29,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.*
 import coil3.compose.AsyncImage
+import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.TvState
 import dev.iptvplayer.tv.TvViewModel
 import dev.iptvplayer.tv.data.*
@@ -123,13 +126,15 @@ private class SeasonShelf(start: Int) {
                     .padding(horizontal = TvLayout.Gutter)) {
                     Column(Modifier.width(if (series) 700.dp else 560.dp).padding(top = if (series) 8.dp else 34.dp),
                         verticalArrangement = Arrangement.spacedBy(if (series) 12.dp else 14.dp)) {
-                        Text(if (series) "DİZİ KÜTÜPHANENDEN" else "FİLM KÜTÜPHANENDEN", color = Ink.Mint,
+                        Text(stringResource(if (series) R.string.detail_series_kicker else R.string.detail_movie_kicker), color = Ink.Mint,
                             fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 12.sp, letterSpacing = 1.2.sp)
                         Text(shown.name, fontFamily = Roboto, color = Ink.Text, fontWeight = FontWeight.Medium,
                             fontSize = if (series) 34.sp else 36.sp, lineHeight = if (series) 39.sp else 41.sp,
                             maxLines = 2, overflow = TextOverflow.Ellipsis)
-                        val metadata = listOf(if (s.sources.size > 1) s.sourceName(entry.sourceId) else "", entry.ratingText?.let { "★ $it" }.orEmpty(), shown.year, shown.tag, if (entry.durationSeconds > 0) "${entry.durationSeconds / 60} dk" else "",
-                            if (series && !s.detailLoading) "${s.episodes.map { it.season }.distinct().size} sezon" else "",
+                        val seasonCount = s.episodes.map { it.season }.distinct().size
+                        val metadata = listOf(if (s.sources.size > 1) s.sourceName(entry.sourceId) else "", entry.ratingText?.let { "★ $it" }.orEmpty(), shown.year, shown.tag,
+                            if (entry.durationSeconds > 0) stringResource(R.string.runtime_minutes, (entry.durationSeconds / 60).toString()) else "",
+                            if (series && !s.detailLoading) pluralStringResource(R.plurals.detail_seasons, seasonCount, seasonCount.toString()) else "",
                             // What is left of a started film (U18).
                             if (!series && resume) remainingText(mark!!.positionMs, mark.durationMs) else "").filter { it.isNotBlank() }
                         if (metadata.isNotEmpty()) Text(metadata.joinToString(" · "), color = Ink.Muted, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 20.sp)
@@ -137,21 +142,21 @@ private class SeasonShelf(start: Int) {
                         if (entry.description.isNotBlank()) Text(entry.description,
                             Modifier.widthIn(max = 560.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 22.sp,
                             maxLines = if (series) 2 else 3, overflow = TextOverflow.Ellipsis)
-                        if (s.detailLoading) Note("Ayrıntılar yükleniyor…")
+                        if (s.detailLoading) Note(stringResource(R.string.detail_loading))
                         s.detailError?.let { Note(it.resolve(), error = true) }
                         FlowRow(Modifier.then(actionVisibility.container).then(actionVisibility.focus).focusGroup().padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            if (canPlay) Action(if (resume) "Devam et" else "Oynat",
+                            if (canPlay) Action(stringResource(if (resume) R.string.action_resume else R.string.action_play),
                                 Modifier.then(if (target == null) Modifier.focusRequester(first) else Modifier), primary = true, icon = "play") {
                                 model.play(if (series) next!! else entry)
                             }
-                            if (s.detailError != null) Action("Tekrar dene",
+                            if (s.detailError != null) Action(stringResource(R.string.action_retry),
                                 Modifier.then(if (!canPlay && target == null) Modifier.focusRequester(first) else Modifier)) { model.retryDetail() }
                             // The label names what OK does; the filled star shows that it is a favourite now.
                             val favorite = entry.id in s.favoriteIds
-                            Action(if (favorite) "Favorilerden çıkar" else "Favoriye ekle", icon = "star", iconFilled = favorite) { model.toggleFavorite(entry) }
-                            if (entry.description.isNotBlank()) Action("Açıklama", Modifier.focusRequester(descriptionFocus).testTag("open-description")) { description = true }
+                            Action(stringResource(if (favorite) R.string.favorite_remove else R.string.detail_favorite_add), icon = "star", iconFilled = favorite) { model.toggleFavorite(entry) }
+                            if (entry.description.isNotBlank()) Action(stringResource(R.string.detail_description), Modifier.focusRequester(descriptionFocus).testTag("open-description")) { description = true }
                             // On the same 12 dp grid as the other actions, and only while playback is offered.
-                            if (canPlay && resume && !series) Action("Baştan başlat") { model.play(entry, restart = true) }
+                            if (canPlay && resume && !series) Action(stringResource(R.string.detail_restart)) { model.play(entry, restart = true) }
                         }
                     }
 
@@ -159,7 +164,7 @@ private class SeasonShelf(start: Int) {
             }
             if (series) {
                 if (!s.detailLoading && seasons.isEmpty()) item(key = "no-episodes") {
-                    Note("Bu dizi için bölüm bulunamadı.", modifier = Modifier.padding(horizontal = TvLayout.Gutter))
+                    Note(stringResource(R.string.detail_no_episodes), modifier = Modifier.padding(horizontal = TvLayout.Gutter))
                 }
                 items(seasons, key = { "season:${it.first}" }) { (season, episodes) ->
                     SeasonRow(season, episodes, entry.title, shelf(season, episodes), target, first, viewportHeight, model::progress, model::play)
@@ -168,7 +173,7 @@ private class SeasonShelf(start: Int) {
         }
         Row(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(Ink.Background.copy(alpha = .82f), Color.Transparent)))
             .padding(start = TvLayout.Gutter, end = TvLayout.Gutter, top = 5.dp + TvLayout.HeaderTop, bottom = 5.dp), verticalAlignment = Alignment.CenterVertically) {
-            Action("Geri", Modifier.focusRequester(back), icon = "back") { model.back() }
+            Action(stringResource(R.string.action_back), Modifier.focusRequester(back), icon = "back") { model.back() }
         }
     }
     }
@@ -190,10 +195,10 @@ private class SeasonShelf(start: Int) {
         val reader = remember { FocusRequester() }
         val close = remember { FocusRequester() }
         fun dismissDescription() { description = false; restoreDescription = true }
-        SourceDialog("Açıklama", reader, ::dismissDescription, width = 600.dp) {
+        SourceDialog(stringResource(R.string.detail_description), reader, ::dismissDescription, width = 600.dp) {
             RemoteTextReader(entry.title + "\n\n" + entry.description,
                 Modifier.weight(1f, fill = false).focusRequester(reader).focusProperties { down = close }, "detail-description-reader")
-            Action("Geri", Modifier.focusRequester(close).focusProperties { up = reader }.testTag("detail-description-back"), onClick = ::dismissDescription)
+            Action(stringResource(R.string.action_back), Modifier.focusRequester(close).focusProperties { up = reader }.testTag("detail-description-back"), onClick = ::dismissDescription)
         }
     }
 }
@@ -211,7 +216,7 @@ private class SeasonShelf(start: Int) {
         // of the backdrop, not on its bright right edge.
         Row(Modifier.fillMaxWidth().padding(horizontal = TvLayout.Gutter).onSizeChanged { headingHeight = with(density) { it.height.toDp() } },
             verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("Sezon $season", color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
+            Text(stringResource(R.string.detail_season, season.toString()), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                 fontSize = 18.sp, lineHeight = 24.sp, maxLines = 1)
             PositionNote(shelf.position, episodes.size, Modifier.testTag("season-position:$season"))
         }
@@ -238,8 +243,9 @@ private class SeasonShelf(start: Int) {
     val visibility = rememberCardVisibility(horizontalPadding = TvLayout.Gutter, contextAbove = headingContext,
         viewportHeight = viewportHeight, frameShelf = false)
     val resume = mark?.resumable == true
-    val status = listOf(if (entry.durationSeconds > 0) "${entry.durationSeconds / 60} dk" else "",
-        when { resume -> "Devam et"; mark?.completed == true -> "İzlendi"; else -> "" }).filter { it.isNotBlank() }
+    val status = listOf(if (entry.durationSeconds > 0) stringResource(R.string.runtime_minutes, (entry.durationSeconds / 60).toString()) else "",
+        when { resume -> stringResource(R.string.episode_in_progress); mark?.completed == true -> stringResource(R.string.episode_watched); else -> "" })
+        .filter { it.isNotBlank() }
     Card(onClick = play, modifier = modifier.width(TvLayout.LandscapeWidth).then(visibility.container).then(visibility.focus).testTag("episode:${entry.id}"),
             shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
             colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
@@ -257,9 +263,9 @@ private class SeasonShelf(start: Int) {
             val numbered = entry.episodeOrderKnown && entry.episode > 0
             val name = remember(entry.title, show) { episodeDisplayTitle(entry.title, show) }.ifBlank { null }
             Row(Modifier.padding(horizontal = 10.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                if (numbered && name != null) Text("E${entry.episode}.", color = Ink.Muted, fontFamily = Roboto, fontWeight = FontWeight.Medium,
+                if (numbered && name != null) Text(stringResource(R.string.episode_number_short, entry.episode.toString()), color = Ink.Muted, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                     fontSize = 12.sp, lineHeight = 17.sp, maxLines = 1)
-                Text(name ?: if (numbered) "Bölüm ${entry.episode}" else entry.title, Modifier.weight(1f).testTag("episode-title:${entry.id}"),
+                Text(name ?: if (numbered) stringResource(R.string.episode_number, entry.episode.toString()) else entry.title, Modifier.weight(1f).testTag("episode-title:${entry.id}"),
                     fontFamily = Roboto, color = Ink.Text, fontSize = 12.sp, lineHeight = 17.sp,
                     minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }

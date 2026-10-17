@@ -1,6 +1,7 @@
 package dev.iptvplayer.tv.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.EnterTransition
@@ -54,6 +55,7 @@ import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import dev.iptvplayer.tv.*
+import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.*
 import kotlinx.coroutines.delay
 
@@ -102,8 +104,10 @@ import kotlinx.coroutines.delay
     val inset = (TvLayout.RailWidth - itemHeight) / 2
     // D029: the open menu widens for a label that does not fit (large text on linear font scaling).
     val measurer = rememberTextMeasurer()
-    val widestLabel = remember(density, measurer) {
-        listOf("Ara", "Ana Sayfa", "Canlı TV", "Filmler", "Diziler", "Favoriler", "Ayarlar").maxOf {
+    val labels = listOf(R.string.nav_search, R.string.nav_home, MediaKind.LIVE.label, MediaKind.MOVIE.label, MediaKind.SERIES.label,
+        R.string.section_favorites, R.string.settings_title).map { stringResource(it) }
+    val widestLabel = remember(density, measurer, labels) {
+        labels.maxOf {
             with(density) { measurer.measure(it, TextStyle(fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 13.sp,
                 lineHeight = 18.sp, letterSpacing = 0.sp), softWrap = false).size.width.toDp() }
         }
@@ -162,18 +166,18 @@ import kotlinx.coroutines.delay
             Spacer(Modifier.weight(1f))
             Column(Modifier.fillMaxWidth().testTag("navigation-items").verticalScroll(rememberScrollState())
                 .padding(horizontal = inset, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                NavItem("Ara", "search", s.route == Route.SEARCH, open, expanded, itemHeight, itemModifiers.getValue(5)) { model.search() }
-                NavItem("Ana Sayfa", "home", s.route == Route.HOME, open, expanded, itemHeight, itemModifiers.getValue(0)) { model.home() }
+                NavItem(stringResource(R.string.nav_search), "search", s.route == Route.SEARCH, open, expanded, itemHeight, itemModifiers.getValue(5)) { model.search() }
+                NavItem(stringResource(R.string.nav_home), "home", s.route == Route.HOME, open, expanded, itemHeight, itemModifiers.getValue(0)) { model.home() }
                 listOf(MediaKind.LIVE to "live_tv", MediaKind.MOVIE to "movie", MediaKind.SERIES to "video_library").forEachIndexed { index, (kind, icon) ->
                     NavItem(stringResource(kind.label), icon, (s.route == Route.LIBRARY && s.kind == kind && !s.onlyFavorites) ||
                         (s.route == Route.GUIDE && kind == MediaKind.LIVE) || (s.route == Route.DETAIL && activeIndex == index + 1),
                         open, expanded, itemHeight, itemModifiers.getValue(index + 1)) { model.showKind(kind) }
                 }
-                NavItem("Favoriler", "star", s.route == Route.LIBRARY && s.onlyFavorites, open, expanded, itemHeight, itemModifiers.getValue(4)) { model.favorites() }
+                NavItem(stringResource(R.string.section_favorites), "star", s.route == Route.LIBRARY && s.onlyFavorites, open, expanded, itemHeight, itemModifiers.getValue(4)) { model.favorites() }
             }
             Spacer(Modifier.weight(1f))
             Box(Modifier.fillMaxWidth().padding(horizontal = inset)) {
-                NavItem("Ayarlar", "settings", false, open, expanded, itemHeight, itemModifiers.getValue(6), onClick = settings)
+                NavItem(stringResource(R.string.settings_title), "settings", false, open, expanded, itemHeight, itemModifiers.getValue(6), onClick = settings)
             }
         }
     }
@@ -202,21 +206,21 @@ import kotlinx.coroutines.delay
 
 private class FocusMemory { var requester: FocusRequester? = null }
 
-private data class HomeRow(val key: String, val title: String, val entries: List<MediaEntry>,
+private data class HomeRow(val key: String, @StringRes val title: Int, val entries: List<MediaEntry>,
     val kind: MediaKind? = null, val continuing: List<ContinueItem> = emptyList())
 
 @Composable internal fun HomeScreen(s: TvState, model: TvViewModel, settings: () -> Unit) {
     val library = remember(s.catalog, s.history, s.favoriteIds) { homeLibrary(s.catalog, s.history, s.favoriteIds) }
     val rows = remember(library) {
         buildList {
-            if (library.continueWatching.isNotEmpty()) add(HomeRow("continue", "İzlemeye devam et", library.continueWatching.map { it.entry }, continuing = library.continueWatching))
-            if (library.recentChannels.isNotEmpty()) add(HomeRow("recent", "Son izlediğin kanallar", library.recentChannels, MediaKind.LIVE))
-            if (library.favorites.isNotEmpty()) add(HomeRow("favorites", "Favorilerin", library.favorites))
+            if (library.continueWatching.isNotEmpty()) add(HomeRow("continue", R.string.home_continue, library.continueWatching.map { it.entry }, continuing = library.continueWatching))
+            if (library.recentChannels.isNotEmpty()) add(HomeRow("recent", R.string.home_recent_channels, library.recentChannels, MediaKind.LIVE))
+            if (library.favorites.isNotEmpty()) add(HomeRow("favorites", R.string.home_favorites, library.favorites))
             // Starter shelves until there is history: watched channels replace "Canlı yayınlar", and
             // "İzlemeye devam et" replaces "Film kütüphanen", so a new or channel-only list never opens empty.
-            if (library.recentChannels.isEmpty() && library.channels.isNotEmpty()) add(HomeRow("live", "Canlı yayınlar", library.channels, MediaKind.LIVE))
-            if (library.continueWatching.isEmpty() && library.movies.isNotEmpty()) add(HomeRow("movies", "Film kütüphanen", library.movies, MediaKind.MOVIE))
-            if (library.series.isNotEmpty()) add(HomeRow("series", "Dizi kütüphanen", library.series, MediaKind.SERIES))
+            if (library.recentChannels.isEmpty() && library.channels.isNotEmpty()) add(HomeRow("live", R.string.home_live, library.channels, MediaKind.LIVE))
+            if (library.continueWatching.isEmpty() && library.movies.isNotEmpty()) add(HomeRow("movies", R.string.home_movies, library.movies, MediaKind.MOVIE))
+            if (library.series.isNotEmpty()) add(HomeRow("series", R.string.home_series, library.series, MediaKind.SERIES))
         }
     }
     val focus = remember { FocusRequester() }
@@ -256,17 +260,16 @@ private data class HomeRow(val key: String, val title: String, val entries: List
             Column(Modifier.weight(1f).fillMaxWidth().padding(horizontal = TvLayout.Gutter - 5.dp, vertical = TvLayout.Gutter)
                 .verticalScroll(rememberScrollState()).padding(5.dp).testTag("home-empty"), verticalArrangement = Arrangement.Center) {
                 val warning = s.catalogNotice?.takeIf { it.needsAttention }?.message?.resolve()
-                Heading(when {
-                    s.refreshing -> "Kütüphanen hazırlanıyor"
-                    warning != null -> "İçerikler gösterilemiyor"
-                    else -> "Kütüphanen için yer hazır"
-                })
+                Heading(stringResource(when {
+                    s.refreshing -> R.string.library_preparing
+                    warning != null -> R.string.home_empty_unavailable
+                    else -> R.string.home_empty_ready
+                }))
                 Spacer(Modifier.height(14.dp))
-                Note(if (s.refreshing) s.progressLabel.resolve() else warning ?: if (s.catalog.items.any { !it.adult })
-                    "Ana sayfada öne çıkarılacak içerik bulunamadı. Tüm kayıtlarını soldaki menüden bölümlere girerek açabilirsin."
-                    else "Kaynağında gösterilebilen içerik bulunamadı. Kaynağını kontrol edebilir veya yenileyebilirsin.", error = warning != null && !s.refreshing)
+                Note(if (s.refreshing) s.progressLabel.resolve() else warning ?: stringResource(if (s.catalog.items.any { !it.adult })
+                    R.string.home_empty_hidden else R.string.home_empty_none), error = warning != null && !s.refreshing)
                 Spacer(Modifier.height(16.dp))
-                Action("Kaynakları kontrol et", Modifier.testTag("home-empty-action"), primary = true) { model.manageSources() }
+                Action(stringResource(R.string.action_check_sources), Modifier.testTag("home-empty-action"), primary = true) { model.manageSources() }
             }
         } else LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("home-content")
             .onSizeChanged { viewportHeight = with(density) { it.height.toDp() } }
@@ -297,9 +300,9 @@ private data class HomeRow(val key: String, val title: String, val entries: List
                     .onFocusChanged { if (it.hasFocus) { model.homeFocus("hero"); lastFocus.requester = heroFocus } },
                     detail = model::heroDetail, ensure = model::ensureHeroDetail, starting = s.heroStarting, watch = model::watch) { model.open(it) }
                 else Column(Modifier.padding(horizontal = TvLayout.Gutter, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text("SENİN TELEVİZYONUN", color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, letterSpacing = 2.sp)
-                    Heading("Şimdi ne izleyelim?")
-                    Note("Kanalların ve favorilerin, bıraktığın yerde.")
+                    Text(stringResource(R.string.home_kicker), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, letterSpacing = 2.sp)
+                    Heading(stringResource(R.string.home_prompt))
+                    Note(stringResource(R.string.home_prompt_note))
                 }
                 if (s.catalog.warnings.isNotEmpty()) Note(s.catalog.warnings.map { it.text }.resolve(), error = true, modifier = Modifier.padding(horizontal = TvLayout.Gutter, vertical = 8.dp))
                 s.catalogNotice?.takeIf { it.needsAttention }?.let { Note(it.message.resolve(), error = true,
@@ -313,7 +316,7 @@ private data class HomeRow(val key: String, val title: String, val entries: List
                     // Every heading row keeps the compact action's height (it held "Tümünü gör"), so the shelf rhythm is unchanged.
                     Row(Modifier.fillMaxWidth().heightIn(min = actionHeight(compact = true)).padding(horizontal = TvLayout.Gutter)
                         .testTag("shelf-heading:${row.key}").onSizeChanged { headingHeight = with(density) { it.height.toDp() } }, verticalAlignment = Alignment.CenterVertically) {
-                        Text(row.title, Modifier.weight(1f), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 17.sp, lineHeight = 22.sp)
+                        Text(stringResource(row.title), Modifier.weight(1f), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 17.sp, lineHeight = 22.sp)
                     }
                     val rowStart = row.entries.indexOfFirst { "${row.key}:${it.id}" == target }.coerceAtLeast(0)
                     val rowState = rememberLazyListState(initialFirstVisibleItemIndex = rowStart)
@@ -426,7 +429,7 @@ private data class HomeRow(val key: String, val title: String, val entries: List
             .86f to Ink.Background.copy(alpha = .8f), 1f to Ink.Background)))
         Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().heightIn(min = heroHeight)
             .padding(start = TvLayout.Gutter, end = TvLayout.Gutter, top = 28.dp, bottom = 22.dp), verticalArrangement = Arrangement.Bottom) {
-            Text(if (newest) "YENİ EKLENEN" else "KÜTÜPHANENDEN", Modifier.testTag("hero-label"), color = Ink.Mint, fontFamily = Roboto,
+            Text(stringResource(if (newest) R.string.hero_newest else R.string.hero_library), Modifier.testTag("hero-label"), color = Ink.Mint, fontFamily = Roboto,
                 fontWeight = FontWeight.Medium, fontSize = 13.sp, letterSpacing = 1.6.sp, maxLines = 1)
             Spacer(Modifier.height(10.dp))
             // Every slide's text is laid out, unseen, in the same slot: the hero keeps the tallest slide's height,
@@ -444,15 +447,16 @@ private data class HomeRow(val key: String, val title: String, val entries: List
             var watchFocused by remember { mutableStateOf(false) }
             var detailsFocused by remember { mutableStateOf(false) }
             LaunchedEffect(watchFocused, detailsFocused) { actionFocused = watchFocused || detailsFocused }
+            val place = stringResource(R.string.hero_slide, entry.title, (current + 1).toString(), slides.size.toString())
             Row(Modifier.padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 // Left on İzle shows the previous slide; on the first it goes on to the menu.
-                Action(if (starting == slides[current].id) "Açılıyor…" else "İzle", actionModifier.onPreviewKeyEvent { event ->
+                Action(stringResource(if (starting == slides[current].id) R.string.hero_opening else R.string.action_watch), actionModifier.onPreviewKeyEvent { event ->
                     if (many && event.type == KeyEventType.KeyDown && event.key == Key.DirectionLeft && current > 0) { index = current - 1; true } else false
                 }.onFocusChanged { watchFocused = it.isFocused }
-                    .semantics { if (many) stateDescription = "${entry.title}, ${current + 1} / ${slides.size}" }
+                    .semantics { if (many) stateDescription = place }
                     .testTag("hero-watch"), primary = true, icon = "play") { watch(shown()) }
                 // Right on Ayrıntılar shows the next slide; with one slide it stays here rather than jumping to a shelf.
-                Action("Ayrıntılar", Modifier.onPreviewKeyEvent { event ->
+                Action(stringResource(R.string.action_details), Modifier.onPreviewKeyEvent { event ->
                     if (many && event.type == KeyEventType.KeyDown && event.key == Key.DirectionRight) { index = (current + 1) % slides.size; true } else false
                 }.focusProperties { right = FocusRequester.Cancel }.onFocusChanged { detailsFocused = it.isFocused }
                     .testTag("hero-details"), outlined = true, icon = "info") { open(shown()) }
@@ -497,7 +501,7 @@ private data class HomeRow(val key: String, val title: String, val entries: List
             fontSize = if (largeText) 32.sp else 50.sp, lineHeight = if (largeText) 38.sp else 56.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             slide.ratingText?.let { Text("★ $it", color = Ink.Mint, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 15.sp, maxLines = 1) }
-            Text(listOf(shown.year, if (slide.kind == MediaKind.SERIES) "Dizi" else "Film",
+            Text(listOf(shown.year, stringResource(if (slide.kind == MediaKind.SERIES) R.string.kind_series_single else R.string.kind_movie_single),
                 if (slide.durationSeconds > 0) runtimeText(slide.durationSeconds) else "", shown.tag).filter { it.isNotBlank() }.joinToString("  ·  "),
                 color = Ink.Text.copy(alpha = .8f), fontFamily = Roboto, fontSize = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
@@ -507,9 +511,11 @@ private data class HomeRow(val key: String, val title: String, val entries: List
 }
 
 /** "1 sa 48 dk" or "52 dk". */
+@Composable @ReadOnlyComposable
 internal fun runtimeText(seconds: Long): String {
     val minutes = seconds / 60
-    return if (minutes >= 60) "${minutes / 60} sa ${minutes % 60} dk" else "$minutes dk"
+    return if (minutes >= 60) stringResource(R.string.runtime_hours_minutes, (minutes / 60).toString(), (minutes % 60).toString())
+        else stringResource(R.string.runtime_minutes, minutes.toString())
 }
 
 @Composable private fun SlideDots(count: Int, current: Int) {
@@ -533,13 +539,17 @@ internal fun runtimeText(seconds: Long): String {
     if (record != null) {
         // A finished latest episode: the card offers the series' next episode instead of a position.
         val next = record.kind == MediaKind.EPISODE && record.progress.completed
+        val description = stringResource(R.string.continue_description, entry.title)
+        val episode = if (record.kind == MediaKind.EPISODE) stringResource(if (next) R.string.continue_episode_watched else R.string.continue_episode,
+            record.season.toString(), record.episode.toString()) else null
+        val shortEpisode = stringResource(if (next) R.string.continue_episode_short_watched else R.string.continue_episode_short,
+            record.season.toString(), record.episode.toString())
+        val position = if (next) stringResource(R.string.continue_next_episode) else remainingText(record.positionMs, record.durationMs)
         Box(Modifier.width(TvLayout.ContinueWidth).then(visibility.container)) {
             Card(onClick = open, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth()
                 .semantics {
-                    contentDescription = "Devam et: ${entry.title}"
-                    stateDescription = listOfNotNull(sourceName,
-                        if (record.kind == MediaKind.EPISODE) "Sezon ${record.season}, bölüm ${record.episode}${if (next) " izlendi" else ""}" else null,
-                        if (next) "Sıradaki bölüm" else remainingText(record.positionMs, record.durationMs)).joinToString(". ")
+                    contentDescription = description
+                    stateDescription = listOfNotNull(sourceName, episode, position).joinToString(". ")
                     testTag = "$section:${entry.id}"
                 },
                 shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
@@ -557,12 +567,12 @@ internal fun runtimeText(seconds: Long): String {
                         Text(shown.name, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                             fontSize = 14.sp, lineHeight = 19.sp, minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                        if (record.kind == MediaKind.EPISODE) Text("S${record.season} · B${record.episode}${if (next) " izlendi" else ""}",
+                        if (record.kind == MediaKind.EPISODE) Text(shortEpisode,
                             color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         else if (reserveEpisode) Text(" ", Modifier.clearAndSetSemantics { },
                             color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1)
                         // What is left reads better than a position ("1 sa 17 dk kaldı", U18).
-                        Text(if (next) "Sıradaki bölüm" else remainingText(record.positionMs, record.durationMs),
+                        Text(position,
                             color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     if (record.durationMs > 0 && !next) Box(Modifier.align(Alignment.BottomStart).fillMaxWidth().height(3.dp).background(Ink.High)) {
@@ -573,9 +583,10 @@ internal fun runtimeText(seconds: Long): String {
         }
         return
     }
+    val description = if (section == "continue") stringResource(R.string.continue_description, entry.title) else entry.title
     Column(Modifier.width(if (live) TvLayout.LiveWidth else TvLayout.PosterWidth).then(visibility.container).testTag("tile:$section:${entry.id}"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Card(onClick = open, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth().aspectRatio(if (live) 16f / 9 else 2f / 3)
-            .semantics { contentDescription = "${if (section == "continue") "Devam et: " else ""}${entry.title}"; testTag = "$section:${entry.id}" },
+            .semantics { contentDescription = description; testTag = "$section:${entry.id}" },
             scale = CardDefaults.scale(focusedScale = 1f),
             shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
             colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),

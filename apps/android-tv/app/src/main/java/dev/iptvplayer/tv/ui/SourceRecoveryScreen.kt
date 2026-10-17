@@ -11,9 +11,11 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
+import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.TvState
 import dev.iptvplayer.tv.TvViewModel
 
@@ -24,15 +26,15 @@ import dev.iptvplayer.tv.TvViewModel
     Column(Modifier.fillMaxSize().padding(horizontal = TvLayout.Gutter, vertical = 28.dp)
         .testTag("source-recovery-screen"), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         NextvLogo(height = 28.dp)
-        Heading("Kütüphanen açılamadı")
+        Heading(stringResource(R.string.recovery_title))
         Column(Modifier.weight(1f, fill = false).fillMaxWidth().background(Ink.Container, RoundedCornerShape(24.dp))
             .padding(24.dp).verticalScroll(rememberScrollState()).padding(5.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)) {
-            Note(state.error?.resolve() ?: "Kayıtlı kaynaklar okunamadı. Yeniden deneyebilirsin.")
-            Action("Yeniden dene", Modifier.focusRequester(retry).testTag("retry-source-recovery"), primary = true) { model.restore() }
+            Note(state.error?.resolve() ?: stringResource(R.string.recovery_fallback))
+            Action(stringResource(R.string.recovery_retry), Modifier.focusRequester(retry).testTag("retry-source-recovery"), primary = true) { model.restore() }
             if (state.recoveryCanReset) {
-                Note("Sorun devam ederse bu cihazdaki kaynakları sıfırlayıp hesaplarını yeniden ekleyebilirsin. Bunun için bağlantı veya hesap bilgilerin gerekecek.")
-                Action("Kaynakları sıfırla…", Modifier.focusRequester(reset).testTag("open-source-reset")) { confirm = true }
+                Note(stringResource(R.string.recovery_reset_note))
+                Action(stringResource(R.string.recovery_reset), Modifier.focusRequester(reset).testTag("open-source-reset")) { confirm = true }
             }
         }
     }
@@ -41,14 +43,11 @@ import dev.iptvplayer.tv.TvViewModel
         val cancel = remember { FocusRequester() }
         val firstDetail = remember { FocusRequester() }
         fun dismiss() { confirm = false; reset.requestFocus() }
-        SourceDialog("Kaynakları sıfırla?", cancel, ::dismiss) {
+        SourceDialog(stringResource(R.string.recovery_reset_question), cancel, ::dismiss) {
             Column(Modifier.weight(1f, fill = false).testTag("reset-details-viewport")
                 .verticalScroll(rememberScrollState()).padding(vertical = 5.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                val paragraphs = listOf(
-                    "Bu cihazdaki tüm kaynak hesapları ve listeler silinecek.",
-                    "Afiş önbelleği, favoriler ve izleme geçmişi de silinecek. İşlem geri alınamaz.",
-                    "Kaynaklarını yeniden eklemek için bağlantı veya hesap bilgilerin gerekir.",
-                    "Sağlayıcı hesabın ve aboneliğin etkilenmez. Ses, hareket ve dil tercihlerin korunur.")
+                val paragraphs = listOf(R.string.recovery_reset_accounts, R.string.recovery_reset_personal,
+                    R.string.recovery_reset_credentials, R.string.recovery_reset_kept).map { stringResource(it) }
                 paragraphs.forEachIndexed { index, paragraph ->
                     var focused by remember { mutableStateOf(false) }
                     Note(paragraph, modifier = Modifier.fillMaxWidth().testTag("reset-detail:$index")
@@ -58,8 +57,8 @@ import dev.iptvplayer.tv.TvViewModel
                 }
             }
             Column(Modifier.padding(vertical = 5.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Action("Vazgeç", Modifier.focusRequester(cancel).focusProperties { up = firstDetail }.testTag("cancel-source-reset")) { dismiss() }
-                Action("Tüm kaynakları sıfırla", Modifier.testTag("confirm-source-reset")) { confirm = false; model.resetUnreadableSources() }
+                Action(stringResource(R.string.action_cancel), Modifier.focusRequester(cancel).focusProperties { up = firstDetail }.testTag("cancel-source-reset")) { dismiss() }
+                Action(stringResource(R.string.recovery_reset_confirm), Modifier.testTag("confirm-source-reset")) { confirm = false; model.resetUnreadableSources() }
             }
         }
     }

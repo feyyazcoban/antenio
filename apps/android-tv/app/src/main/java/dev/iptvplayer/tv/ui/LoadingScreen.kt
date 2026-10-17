@@ -9,10 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
+import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.SourceTask
 import dev.iptvplayer.tv.TvState
 
@@ -25,12 +27,12 @@ import dev.iptvplayer.tv.TvState
             .background(Ink.Container, RoundedCornerShape(24.dp)).padding(28.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)) {
             NextvLogo(height = 24.dp)
-            Text(when (state.sourceTask) {
-                SourceTask.RESETTING -> "Kaynakların sıfırlanıyor"
-                SourceTask.REMOVING -> "Kaynağın kaldırılıyor"
-                SourceTask.SAVING -> "Kütüphanen kaydediliyor"
-                else -> "Kütüphanen hazırlanıyor"
-            }, Modifier.testTag("loading-title"), color = Ink.Text, fontFamily = Roboto, fontSize = 28.sp, lineHeight = 34.sp)
+            Text(stringResource(when (state.sourceTask) {
+                SourceTask.RESETTING -> R.string.loading_resetting
+                SourceTask.REMOVING -> R.string.loading_removing
+                SourceTask.SAVING -> R.string.loading_saving
+                else -> R.string.library_preparing
+            }), Modifier.testTag("loading-title"), color = Ink.Text, fontFamily = Roboto, fontSize = 28.sp, lineHeight = 34.sp)
             Column(Modifier.fillMaxWidth().background(Ink.Background, RoundedCornerShape(12.dp)).padding(16.dp)
                 .testTag("loading-status").semantics {
                     liveRegion = LiveRegionMode.Polite
@@ -41,14 +43,14 @@ import dev.iptvplayer.tv.TvState
                     Text(state.progressLabel.resolve(), color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 21.sp)
                 }
             }
-            Note(when (state.sourceTask) {
-                SourceTask.IMPORTING -> "Büyük listelerin yüklenmesi biraz zaman alabilir."
-                SourceTask.RESETTING -> "İşlem tamamlanınca kaynaklarını yeniden ekleyebilirsin."
-                SourceTask.REMOVING -> "Bu kaynağın cihazdaki listesi, favorileri ve izleme kayıtları temizleniyor."
-                SourceTask.RESTORING -> "Bu cihazdaki kaynakların ve listelerin açılıyor."
-                else -> "Kayıt tamamlanınca kütüphanen açılacak."
-            }, modifier = Modifier.testTag("loading-explanation"))
-            if (importing) Action("İptal", Modifier.focusRequester(cancel).testTag("loading-cancel"), onClick = cancelImport)
+            Note(stringResource(when (state.sourceTask) {
+                SourceTask.IMPORTING -> R.string.loading_importing_note
+                SourceTask.RESETTING -> R.string.loading_resetting_note
+                SourceTask.REMOVING -> R.string.loading_removing_note
+                SourceTask.RESTORING -> R.string.loading_restoring_note
+                else -> R.string.loading_saving_note
+            }), modifier = Modifier.testTag("loading-explanation"))
+            if (importing) Action(stringResource(R.string.loading_cancel), Modifier.focusRequester(cancel).testTag("loading-cancel"), onClick = cancelImport)
         }
     }
     LaunchedEffect(importing) { if (importing) cancel.requestFocus() }

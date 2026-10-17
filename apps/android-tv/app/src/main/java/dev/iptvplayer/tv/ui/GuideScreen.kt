@@ -1,6 +1,7 @@
 package dev.iptvplayer.tv.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -16,6 +17,8 @@ import androidx.compose.ui.focus.*
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -23,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
 import dev.iptvplayer.tv.*
+import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.*
 import kotlinx.coroutines.delay
 import java.time.*
@@ -33,15 +37,20 @@ private val guideLocale = Locale.forLanguageTag("tr")
 internal fun guideTime(time: Long, zone: ZoneId): String = Instant.ofEpochMilli(time).atZone(zone).format(DateTimeFormatter.ofPattern("HH:mm", guideLocale))
 internal fun guideDate(time: Long, zone: ZoneId): String = Instant.ofEpochMilli(time).atZone(zone).format(DateTimeFormatter.ofPattern("d MMM EEEE", guideLocale))
 internal fun guideOffset(time: Long, zone: ZoneId): String = "UTC" + Instant.ofEpochMilli(time).atZone(zone).offset.id.let { if (it == "Z") "+00:00" else it }
-internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String {
+/** "20:00 — 21:30", with dates or offsets where they change; [unknownEnd] stands for an end the guide does not give. */
+internal fun programmeTime(programme: EpgProgramme, zone: ZoneId, unknownEnd: String): String {
     val start = Instant.ofEpochMilli(programme.start).atZone(zone)
     val end = programme.end?.let { Instant.ofEpochMilli(it).atZone(zone) }
     val dates = end != null && start.toLocalDate() != end.toLocalDate()
     val offsets = end != null && start.offset != end.offset
     val format = DateTimeFormatter.ofPattern(if (dates) "d MMM HH:mm" else "HH:mm", guideLocale)
     fun label(value: ZonedDateTime) = value.format(format) + if (offsets) " (${guideOffset(value.toInstant().toEpochMilli(), zone)})" else ""
-    return label(start) + " — " + (end?.let(::label) ?: "Bitiş bilinmiyor")
+    return label(start) + " — " + (end?.let(::label) ?: unknownEnd)
 }
+
+@Composable @ReadOnlyComposable
+internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
+    programmeTime(programme, zone, stringResource(R.string.guide_end_unknown))
 
 @Composable internal fun guideClock(): Long {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -58,15 +67,16 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String {
     return rows
 }
 
-internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = when {
-    status?.refreshing == true && status.info == null -> "Rehber yükleniyor…"
-    status?.error != null && status.info == null -> "Rehber alınamadı"
-    status?.configured != true -> "Rehber adresi eklenmemiş"
-    slice?.match?.kind == EpgMatchKind.AMBIGUOUS -> "Kanal eşleşmesi belirsiz"
-    slice?.match?.kind == EpgMatchKind.MISSING_ID -> "Rehberde kanal kimliği bulunamadı"
-    slice?.match?.kind == EpgMatchKind.NONE -> "Kanal rehberde eşleşmedi"
-    status.info == null -> "Rehber bilgisi yok"
-    else -> "Bu saatte program bilgisi yok"
+/** Why a channel shows no programme at a time. */
+@StringRes internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): Int = when {
+    status?.refreshing == true && status.info == null -> R.string.guide_loading
+    status?.error != null && status.info == null -> R.string.guide_unavailable
+    status?.configured != true -> R.string.guide_no_address
+    slice?.match?.kind == EpgMatchKind.AMBIGUOUS -> R.string.guide_match_ambiguous
+    slice?.match?.kind == EpgMatchKind.MISSING_ID -> R.string.guide_match_missing_id
+    slice?.match?.kind == EpgMatchKind.NONE -> R.string.guide_match_none
+    status.info == null -> R.string.guide_no_info
+    else -> R.string.guide_no_programme_now
 }
 
 @Composable internal fun GuideScreen(s: TvState, model: TvViewModel, back: () -> Unit, settings: () -> Unit) {
@@ -113,6 +123,7 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
     val channelWidth = (if (density.fontScale >= 1.5f) 232 else 210).dp
     // 50 dp rows show six channels at once at normal text (four at 65 dp before U9).
     val rowHeight = (if (density.fontScale >= 1.5f) 90 else 50).dp
+    val zoneName = if (s.guideZoneId.isEmpty()) stringResource(R.string.guide_tv_time) else zone.id
 
     fun select(id: String?, time: Long) { model.guideCursor(id, time.coerceIn(retention.from, retention.until - 1)) }
     fun open(entry: MediaEntry, slot: GuideSlot) {
@@ -159,45 +170,45 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 Column(Modifier.weight(1f)) {
-                    Heading("Yayın rehberi")
-                    Text("${guideDate(anchor, zone)} · ${if (s.guideZoneId.isEmpty()) "TV saati" else zone.id} · ${guideOffset(anchor, zone)}",
+                    Heading(stringResource(R.string.guide_title))
+                    Text("${guideDate(anchor, zone)} · $zoneName · ${guideOffset(anchor, zone)}",
                         color = Ink.Muted, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 Text(guideTime(now, zone), color = Ink.Mint, fontFamily = Roboto, fontSize = 18.sp)
             }
             if (guideless) Column(Modifier.weight(1f).fillMaxWidth().testTag("guide-unavailable"), verticalArrangement = Arrangement.Center) {
-                Text("Rehber bilgisi yok", color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 24.sp, lineHeight = 30.sp)
+                Text(stringResource(R.string.guide_no_info), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 24.sp, lineHeight = 30.sp)
                 Spacer(Modifier.height(10.dp))
-                Text("Kaynağında yayın rehberi (XMLTV) adresi yok. Adresi Kaynakları yönet → Bilgiler → Rehber ayarları'ndan ekleyebilirsin; " +
-                    "kanallar rehber olmadan da Canlı TV'den izlenir.", Modifier.widthIn(max = 640.dp), color = Ink.Muted, fontFamily = Roboto,
+                Text(stringResource(R.string.guide_unavailable_note), Modifier.widthIn(max = 640.dp), color = Ink.Muted, fontFamily = Roboto,
                     fontSize = 15.sp, lineHeight = 22.sp)
                 Spacer(Modifier.height(18.dp))
-                Action("Kaynakları yönet", Modifier.focusRequester(emptyFocus).testTag("guide-manage-sources"), primary = true) { model.manageSources() }
+                Action(stringResource(R.string.manage_sources), Modifier.focusRequester(emptyFocus).testTag("guide-manage-sources"), primary = true) { model.manageSources() }
             } else LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(4.dp)) {
-                item { Action("Şimdi", Modifier.focusRequester(nowFocus).focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-now"), compact = true) { select(channel?.id, now); if (channels.isNotEmpty()) gridFocus.requestFocus() } }
-                item { Action("‹ Önceki gün", Modifier.focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-day-previous"), compact = true,
+                item { Action(stringResource(R.string.guide_now), Modifier.focusRequester(nowFocus).focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-now"), compact = true) { select(channel?.id, now); if (channels.isNotEmpty()) gridFocus.requestFocus() } }
+                item { Action(stringResource(R.string.guide_previous_day), Modifier.focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-day-previous"), compact = true,
                     enabled = dayWindow.from > retention.from) { select(channel?.id, Instant.ofEpochMilli(anchor).atZone(zone).minusDays(1).toInstant().toEpochMilli()) } }
-                item { Action("Sonraki gün ›", Modifier.focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-day-next"), compact = true,
+                item { Action(stringResource(R.string.guide_next_day), Modifier.focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-day-next"), compact = true,
                     enabled = dayWindow.until < retention.until) { select(channel?.id, Instant.ofEpochMilli(anchor).atZone(zone).plusDays(1).toInstant().toEpochMilli()) } }
-                item { Action("Saat dilimi", Modifier.focusRequester(zoneFocus).focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-zone"), compact = true) { zones = true } }
-                item { Action("Kaynaklar", Modifier.focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }, compact = true) { model.manageSources() } }
+                item { Action(stringResource(R.string.guide_zone), Modifier.focusRequester(zoneFocus).focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-zone"), compact = true) { zones = true } }
+                item { Action(stringResource(R.string.guide_sources), Modifier.focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }, compact = true) { model.manageSources() } }
                 // The remote's shortcuts, where the bottom panel used to name them.
                 item { Box(Modifier.height(actionHeight(compact = true)).padding(start = 12.dp), contentAlignment = Alignment.CenterStart) {
-                    Text("Geri: bu düğmeler · CH+/CH−: sayfa · Rakam: kanal", color = Ink.Muted, fontFamily = Roboto,
+                    Text(stringResource(R.string.guide_keys), color = Ink.Muted, fontFamily = Roboto,
                         fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1)
                 } }
             }
             if (guideless) Unit else if (channels.isEmpty()) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
-                    Heading("Canlı kanal bulunamadı")
-                    Note("Kaynak seçimini değiştirebilir veya yeni bir kaynak ekleyebilirsin.")
-                    Action("Kaynakları aç") { model.manageSources() }
+                    Heading(stringResource(R.string.guide_no_channels))
+                    Note(stringResource(R.string.guide_no_channels_note))
+                    Action(stringResource(R.string.guide_open_sources)) { model.manageSources() }
                 }
             } else {
                 // The subtitle already names the offset; repeat it per hour only across a DST change.
                 val mixedOffsets = (0 until (duration / hour).toInt()).any { guideOffset(viewport.from + it * hour, zone) != guideOffset(anchor, zone) }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("${channels.size} kanal", Modifier.width(channelWidth), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
+                    Text(pluralStringResource(R.plurals.count_channels, channels.size, channels.size.toString()), Modifier.width(channelWidth),
+                        color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
                     repeat((duration / hour).toInt()) { n ->
                         val at = viewport.from + n * hour
                         Column(Modifier.weight(1f)) {
@@ -206,6 +217,11 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                         }
                     }
                 }
+                // What the removed bottom panel said (D067): the cell's programme, or why there is none.
+                val selectedText = selectedSlot?.programme?.title ?: stringResource(if ((selectedSlot?.programmes?.size ?: 0) > 1) R.string.guide_overlapping_now
+                    else guideEmptyText(channel?.let { s.guideStatus[it.sourceId] }, channel?.let { rows[it.id] }))
+                val openLabel = stringResource(R.string.guide_open_programme)
+                val detailLabel = stringResource(R.string.guide_programme_detail)
                 BoxWithConstraints(Modifier.weight(1f).fillMaxWidth().focusRequester(gridFocus).onFocusChanged { gridFocused = it.isFocused }
                     .onPreviewKeyEvent { event ->
                         val latest = model.state.value
@@ -251,11 +267,8 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                             }
                         }
                     }.focusable().testTag("guide-grid").semantics {
-                        // What the removed bottom panel said (D067): the cell's programme, or why there is none.
-                        contentDescription = channel?.title.orEmpty() + ", " + guideTime(anchor, zone) + ", " +
-                            (selectedSlot?.programme?.title ?: if ((selectedSlot?.programmes?.size ?: 0) > 1) "Bu saatte çakışan programlar var"
-                                else guideEmptyText(channel?.let { s.guideStatus[it.sourceId] }, channel?.let { rows[it.id] }))
-                        onClick("Programı aç") { if (channel != null && selectedSlot != null) open(channel, selectedSlot); true }
+                        contentDescription = channel?.title.orEmpty() + ", " + guideTime(anchor, zone) + ", " + selectedText
+                        onClick(openLabel) { if (channel != null && selectedSlot != null) open(channel, selectedSlot); true }
                     }) {
                     // Size the list to whole rows: every scroll position, including the end, lands on a row
                     // boundary, so no channel row rests cut through its text at the grid edge.
@@ -289,9 +302,9 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                                         val offset = width * ((start - viewport.from).toFloat() / duration)
                                         val cellWidth = (width * ((end - start).toFloat() / duration) - 3.dp).coerceAtLeast(3.dp)
                                         val chosen = index == selectedIndex && slot.contains(anchor)
-                                        val title = slot.programme?.title ?: if (slot.programmes.size > 1) "Çakışan programlar"
-                                            else if (rows[entry.id]?.match?.kind in listOf(EpgMatchKind.ID, EpgMatchKind.NAME)) "Bilgi yok"
-                                            else guideEmptyText(s.guideStatus[entry.sourceId], rows[entry.id])
+                                        val title = slot.programme?.title ?: stringResource(if (slot.programmes.size > 1) R.string.guide_overlapping
+                                            else if (rows[entry.id]?.match?.kind in listOf(EpgMatchKind.ID, EpgMatchKind.NAME)) R.string.guide_no_info_short
+                                            else guideEmptyText(s.guideStatus[entry.sourceId], rows[entry.id]))
                                         Box(Modifier.offset(x = offset).width(cellWidth).fillMaxHeight()
                                             .background(if (chosen) Ink.Selected else Ink.Container, RoundedCornerShape(6.dp))
                                             // The now marker sits on the fill, under the title and the focus border.
@@ -303,7 +316,7 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                                             .testTag("guide-cell:${entry.id}:${slot.from}").semantics {
                                                 selected = chosen
                                                 contentDescription = "${entry.title}, $title, ${guideTime(slot.from, zone)}"
-                                                onClick("Program ayrıntısı") { open(entry, slot); true }
+                                                onClick(detailLabel) { open(entry, slot); true }
                                             }) {
                                             if (cellWidth > 48.dp) Column(Modifier.padding(horizontal = 10.dp, vertical = 6.dp).align(Alignment.CenterStart)) {
                                                 val timed = cellWidth > 120.dp && density.fontScale < 1.5f && slot.programme != null
@@ -332,23 +345,25 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
         val focus = remember { FocusRequester() }
         val play = remember { FocusRequester() }
         fun dismiss() { detail = null; gridFocus.requestFocus() }
-        SourceDialog("Program ayrıntısı", focus, ::dismiss, width = 600.dp) {
+        SourceDialog(stringResource(R.string.guide_programme_detail), focus, ::dismiss, width = 600.dp) {
             // A programme that has not started is not catch-up; point to what the live action opens instead.
             val upcoming = slot.programmes.isNotEmpty() && slot.programmes.all { it.start > now }
             val ended = slot.programmes.isNotEmpty() && slot.programmes.all { (it.end ?: (it.start + 1)) <= now }
             val note = when {
                 slot.programmes.isEmpty() || slot.programme?.isOnAt(now) == true -> ""
-                upcoming -> "\n\nBu program henüz başlamadı. Canlı kanalı izle, şu an yayındaki programı açar."
-                ended -> "\n\nBu program için geçmişten izleme desteklenmiyor. Yalnız canlı yayın açılabilir."
-                else -> "\n\nYalnız canlı yayın açılabilir."
+                upcoming -> "\n\n" + stringResource(R.string.guide_detail_upcoming)
+                ended -> "\n\n" + stringResource(R.string.guide_detail_ended)
+                else -> "\n\n" + stringResource(R.string.guide_detail_live_only)
             }
-            val content = "${entry.title}\n${guideDate(slot.from, zone)} · ${if (s.guideZoneId.isEmpty()) "TV saati" else zone.id} · ${guideOffset(slot.from, zone)}\n\n" +
-                (if (slot.programmes.isEmpty()) "Program bilgisi bulunmuyor. Canlı kanal izlenebilir."
-                else slot.programmes.joinToString("\n\n") { "${it.title}\n${programmeTime(it, zone)}\n${it.description.ifBlank { "Açıklama bulunmuyor." }}" }) + note
+            val unknownEnd = stringResource(R.string.guide_end_unknown)
+            val noDescription = stringResource(R.string.guide_detail_no_description)
+            val content = "${entry.title}\n${guideDate(slot.from, zone)} · $zoneName · ${guideOffset(slot.from, zone)}\n\n" +
+                (if (slot.programmes.isEmpty()) stringResource(R.string.guide_detail_no_programme)
+                else slot.programmes.joinToString("\n\n") { "${it.title}\n${programmeTime(it, zone, unknownEnd)}\n${it.description.ifBlank { noDescription }}" }) + note
             RemoteTextReader(content, Modifier.weight(1f, fill = false).focusRequester(focus).focusProperties { down = play }, "guide-detail-reader")
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Action("Canlı kanalı izle", Modifier.focusRequester(play).focusProperties { up = focus }.testTag("guide-play-live"), primary = true) { detail = null; model.open(entry) }
-                Action("Kapat", Modifier.focusProperties { up = focus }.testTag("guide-close-detail")) { dismiss() }
+                Action(stringResource(R.string.guide_watch_live), Modifier.focusRequester(play).focusProperties { up = focus }.testTag("guide-play-live"), primary = true) { detail = null; model.open(entry) }
+                Action(stringResource(R.string.action_close), Modifier.focusProperties { up = focus }.testTag("guide-close-detail")) { dismiss() }
             }
         }
     }

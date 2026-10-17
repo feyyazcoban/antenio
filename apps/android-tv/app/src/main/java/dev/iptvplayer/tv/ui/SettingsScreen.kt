@@ -1,5 +1,6 @@
 package dev.iptvplayer.tv.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.gestures.scrollBy
@@ -20,6 +21,8 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
@@ -30,12 +33,19 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.tv.material3.*
 import dev.iptvplayer.tv.*
+import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.CategoryVisibility
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 
 private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATEGORY_LIST }
+
+/** The main page's sections; the one holding focus names itself above the list. */
+private enum class SectionId(@StringRes val label: Int) {
+    APPEARANCE(R.string.settings_section_appearance), SOURCES(R.string.settings_section_sources),
+    CONTENT(R.string.settings_section_content), WATCHING(R.string.settings_section_watching)
+}
 
 @Composable internal fun Settings(s: TvState, model: TvViewModel, dismiss: () -> Unit) {
     var page by remember { mutableStateOf(SettingsPage.MAIN) }
@@ -52,8 +62,8 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATE
     val cancel = remember { FocusRequester() }
     val headerAction = remember { FocusRequester() }
     var readingFocused by remember { mutableStateOf(false) }
-    var activeSection by remember { mutableStateOf("Görünüm ve ses") }
-    fun section(name: String) = Modifier.onFocusChanged { if (it.isFocused) activeSection = name }
+    var activeSection by remember { mutableStateOf(SectionId.APPEARANCE) }
+    fun section(id: SectionId) = Modifier.onFocusChanged { if (it.isFocused) activeSection = id }
     val scope = rememberCoroutineScope()
     val readingStep = with(LocalDensity.current) { 56.dp.toPx() }
     val scrollHintThreshold = with(LocalDensity.current) { 20.dp.toPx() }
@@ -99,19 +109,19 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATE
                 .testTag("settings-panel")) {
                 Row(Modifier.fillMaxWidth().padding(start = 28.dp, end = 28.dp, top = 24.dp, bottom = 18.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(when (page) {
-                        SettingsPage.MAIN -> "Ayarlar"
-                        SettingsPage.REMOVE -> "Kaynağı kaldır?"
-                        SettingsPage.HISTORY -> "Geçmişi temizle?"
-                        SettingsPage.ABOUT -> "Uygulama hakkında"
-                        SettingsPage.CATEGORIES -> "Kategoriler"
-                        SettingsPage.CATEGORY_LIST -> when (categoryKind) { MediaKind.LIVE -> "Canlı TV"; MediaKind.MOVIE -> "Filmler"; else -> "Diziler" }
-                    }, Modifier.weight(1f).testTag("settings-title"), color = Ink.Text, fontFamily = Roboto,
+                    Text(stringResource(when (page) {
+                        SettingsPage.MAIN -> R.string.settings_title
+                        SettingsPage.REMOVE -> R.string.remove_source_question
+                        SettingsPage.HISTORY -> R.string.settings_clear_history_question
+                        SettingsPage.ABOUT -> R.string.settings_about
+                        SettingsPage.CATEGORIES -> R.string.settings_categories
+                        SettingsPage.CATEGORY_LIST -> categoryKind.label
+                    }), Modifier.weight(1f).testTag("settings-title"), color = Ink.Text, fontFamily = Roboto,
                         fontWeight = FontWeight.Medium, fontSize = 24.sp, lineHeight = 30.sp)
-                    Action(if (page == SettingsPage.MAIN) "Kapat" else "Geri",
+                    Action(stringResource(if (page == SettingsPage.MAIN) R.string.action_close else R.string.action_back),
                         Modifier.focusRequester(headerAction).testTag("settings-close"), onClick = ::back)
                 }
-                if (page == SettingsPage.MAIN) Text(activeSection,
+                if (page == SettingsPage.MAIN) Text(stringResource(activeSection.label),
                     Modifier.padding(start = 28.dp, end = 28.dp, bottom = 12.dp)
                         .testTag("settings-section").semantics { heading() },
                     color = Ink.Mint, fontFamily = Roboto, fontWeight = FontWeight.Medium,
@@ -148,56 +158,66 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATE
                         .testTag("settings-content"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         when (page) {
                             SettingsPage.MAIN -> {
-                                SettingRow("Hareketi azalt", "Vitrin geçişlerini, açılış animasyonunu ve menü kaymasını kapatır.", Modifier.focusRequester(first).then(section("Görünüm ve ses")),
-                                    checked = s.reducedMotion) { model.reducedMotion() }
-                                SettingRow("Açılış sesi", "Uygulama açılırken kısa bir ses çalar.", section("Görünüm ve ses"), checked = s.startupSound) { model.startupSound() }
+                                SettingRow(stringResource(R.string.settings_reduced_motion), stringResource(R.string.settings_reduced_motion_note),
+                                    Modifier.focusRequester(first).then(section(SectionId.APPEARANCE)), checked = s.reducedMotion) { model.reducedMotion() }
+                                SettingRow(stringResource(R.string.settings_startup_sound), stringResource(R.string.settings_startup_sound_note),
+                                    section(SectionId.APPEARANCE), checked = s.startupSound) { model.startupSound() }
                                 Spacer(Modifier.height(6.dp))
-                                Note("${s.sources.size} kaynak · $visibleCount görünür içerik")
-                                SettingRow("Kaynakları yönet", "Ekle, düzenle, yenile veya kaldır.", section("Kaynaklar")) { dismiss(); model.manageSources() }
+                                Note(stringResource(R.string.text_pair, pluralStringResource(R.plurals.settings_sources, s.sources.size, s.sources.size.toString()),
+                                    pluralStringResource(R.plurals.settings_visible_items, visibleCount, visibleCount.toString())))
+                                SettingRow(stringResource(R.string.manage_sources), stringResource(R.string.settings_manage_sources_note), section(SectionId.SOURCES)) {
+                                    dismiss(); model.manageSources()
+                                }
                                 val refreshNotice = s.catalogNotice?.takeIf { it.operation == CatalogOperation.REFRESH }
                                 // The timestamp captions the refresh row: 4 dp more above, 8 dp below (clear of the focus ring).
                                 Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    if (s.catalogUpdatedAt > 0) Note("Son güncelleme: " + java.text.SimpleDateFormat("d MMM, HH:mm",
-                                        java.util.Locale.forLanguageTag("tr")).format(java.util.Date(s.catalogUpdatedAt)),
+                                    if (s.catalogUpdatedAt > 0) Note(stringResource(R.string.last_updated, java.text.SimpleDateFormat("d MMM, HH:mm",
+                                        java.util.Locale.forLanguageTag("tr")).format(java.util.Date(s.catalogUpdatedAt))),
                                         modifier = Modifier.padding(top = 4.dp))
-                                    SettingRow("Kataloğu yenile", if (s.refreshing) "Yenileniyor… Kütüphanen kullanılabilir."
-                                        else refreshNotice?.message?.resolve() ?: "Yeni kanalları, filmleri ve dizileri getirir.",
-                                        modifier = section("Kaynaklar"), busy = s.refreshing, attention = refreshNotice?.needsAttention == true) { model.refresh() }
+                                    SettingRow(stringResource(R.string.settings_refresh), if (s.refreshing) stringResource(R.string.settings_refreshing)
+                                        else refreshNotice?.message?.resolve() ?: stringResource(R.string.settings_refresh_note),
+                                        modifier = section(SectionId.SOURCES), busy = s.refreshing, attention = refreshNotice?.needsAttention == true) { model.refresh() }
                                 }
                                 s.catalogNotice?.takeIf { it.operation != CatalogOperation.REFRESH }?.let { Note(it.message.resolve(), error = it.needsAttention) }
-                                if (s.sources.size == 1) SettingRow("Kaynağı düzenle", "Bağlantı ve hesap bilgilerini değiştir.", section("Kaynaklar")) { dismiss(); model.editSource() }
-                                if (s.sources.size == 1) SettingRow("Kaynağı kaldır", "Bu kaynağı ve cihazdaki kayıtlarını kaldır.", Modifier.focusRequester(remove).then(section("Kaynaklar"))) { open(SettingsPage.REMOVE) }
+                                if (s.sources.size == 1) SettingRow(stringResource(R.string.settings_edit_source), stringResource(R.string.settings_edit_source_note),
+                                    section(SectionId.SOURCES)) { dismiss(); model.editSource() }
+                                if (s.sources.size == 1) SettingRow(stringResource(R.string.remove_source), stringResource(R.string.settings_remove_source_note),
+                                    Modifier.focusRequester(remove).then(section(SectionId.SOURCES))) { open(SettingsPage.REMOVE) }
                                 Spacer(Modifier.height(6.dp))
                                 // D068: what the screens show. A switch anyone can turn back, not a PIN lock.
-                                SettingRow("Yetişkin kategorilerini gizle", "Adında XXX, Adult, +18, Yetişkin gibi ifadeler geçen kategoriler hiçbir yerde görünmez.",
-                                    section("İçerik"), checked = s.hideAdultCategories) { model.hideAdultCategories() }
+                                SettingRow(stringResource(R.string.settings_hide_adult), stringResource(R.string.settings_hide_adult_note),
+                                    section(SectionId.CONTENT), checked = s.hideAdultCategories) { model.hideAdultCategories() }
                                 val hiddenCount = s.hiddenCategories.size
-                                SettingRow("Kategorileri yönet", (if (hiddenCount > 0) "$hiddenCount kategori gizli. " else "") +
-                                    "Canlı TV, film ve dizi kategorilerini aç veya kapat.",
-                                    Modifier.focusRequester(categories).then(section("İçerik"))) { open(SettingsPage.CATEGORIES) }
+                                SettingRow(stringResource(R.string.settings_manage_categories), if (hiddenCount > 0)
+                                    pluralStringResource(R.plurals.settings_manage_categories_hidden, hiddenCount, hiddenCount.toString())
+                                    else stringResource(R.string.settings_manage_categories_note),
+                                    Modifier.focusRequester(categories).then(section(SectionId.CONTENT))) { open(SettingsPage.CATEGORIES) }
                                 Spacer(Modifier.height(6.dp))
-                                SettingRow("Otomatik sonraki bölüm", "Bölüm bitince 10 saniye sonra devam eder. Geri sayımı iptal edebilirsin.",
-                                    modifier = section("İzleme ve uygulama"), checked = s.autoNextEpisode) { model.autoNextEpisode() }
-                                SettingRow("İzleme geçmişini temizle", "Tüm kaynaklardaki izleme konumlarını siler; favorilerini korur.", Modifier.focusRequester(history).then(section("İzleme ve uygulama"))) { open(SettingsPage.HISTORY) }
-                                SettingRow("Uygulama hakkında", "Sürüm ve cihaz bilgileri.", Modifier.focusRequester(about).then(section("İzleme ve uygulama"))) { open(SettingsPage.ABOUT) }
+                                SettingRow(stringResource(R.string.settings_auto_next), stringResource(R.string.settings_auto_next_note),
+                                    modifier = section(SectionId.WATCHING), checked = s.autoNextEpisode) { model.autoNextEpisode() }
+                                SettingRow(stringResource(R.string.settings_watch_history), stringResource(R.string.settings_watch_history_note),
+                                    Modifier.focusRequester(history).then(section(SectionId.WATCHING))) { open(SettingsPage.HISTORY) }
+                                SettingRow(stringResource(R.string.settings_about), stringResource(R.string.settings_about_note),
+                                    Modifier.focusRequester(about).then(section(SectionId.WATCHING))) { open(SettingsPage.ABOUT) }
                             }
                             SettingsPage.REMOVE, SettingsPage.HISTORY -> {
-                                Note(if (page == SettingsPage.REMOVE)
-                                    "${s.source?.name.orEmpty()} kaynağı, bu kaynağın favorileri ve izleme geçmişi bu cihazdan silinecek."
-                                    else "Tüm kaynaklardaki son kanallar ve izleme konumları bu cihazdan kaldırılacak. Favorilerin korunacak.")
+                                Note(if (page == SettingsPage.REMOVE) stringResource(R.string.settings_remove_confirm, s.source?.name.orEmpty())
+                                    else stringResource(R.string.settings_clear_history_confirm))
                                 Spacer(Modifier.height(12.dp))
-                                Action("Vazgeç", Modifier.focusRequester(cancel)) { page = SettingsPage.MAIN }
-                                Action(if (page == SettingsPage.REMOVE) "Kaynağı kaldır" else "Geçmişi temizle") {
+                                Action(stringResource(R.string.action_cancel), Modifier.focusRequester(cancel)) { page = SettingsPage.MAIN }
+                                Action(stringResource(if (page == SettingsPage.REMOVE) R.string.remove_source else R.string.settings_clear_history)) {
                                     if (page == SettingsPage.REMOVE) model.removeSource() else model.clearHistory()
                                     dismiss()
                                 }
                             }
                             SettingsPage.CATEGORIES -> {
-                                Note("Kapattığın kategoriler ana sayfada, kütüphanede, aramada ve rehberde görünmez. Kaynağın değişmez.")
-                                listOf(MediaKind.LIVE to "Canlı TV", MediaKind.MOVIE to "Filmler", MediaKind.SERIES to "Diziler").forEach { (kind, label) ->
+                                Note(stringResource(R.string.settings_categories_note))
+                                listOf(MediaKind.LIVE, MediaKind.MOVIE, MediaKind.SERIES).forEach { kind ->
                                     val list = s.categoryChoices[kind].orEmpty()
                                     val off = list.count { CategoryVisibility.key(kind, it.name) in s.hiddenCategories || s.hideAdultCategories && it.adult }
-                                    SettingRow(label, "${list.size} kategori" + if (off > 0) " · $off gizli" else "",
+                                    SettingRow(stringResource(kind.label), if (off > 0)
+                                        pluralStringResource(R.plurals.settings_kind_categories_hidden, list.size, list.size.toString(), off.toString())
+                                        else pluralStringResource(R.plurals.settings_kind_categories, list.size, list.size.toString()),
                                         Modifier.focusRequester(kindFocus.getValue(kind)).testTag("category-kind:${kind.name}")) {
                                         categoryKind = kind; returnTo = SettingsPage.CATEGORY_LIST; page = SettingsPage.CATEGORY_LIST
                                     }
@@ -206,15 +226,15 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATE
                             SettingsPage.CATEGORY_LIST -> Unit
                             SettingsPage.ABOUT -> {
                                 NextvLogo(height = 24.dp)
-                                Note("Sürüm ${BuildConfig.VERSION_NAME}")
+                                Note(stringResource(R.string.settings_version, BuildConfig.VERSION_NAME))
                                 Note("Android ${android.os.Build.VERSION.RELEASE} · API ${android.os.Build.VERSION.SDK_INT}")
                                 Spacer(Modifier.height(6.dp))
-                                SettingsLabel("Kütüphane")
-                                Note("Uygulama içerik sağlamaz. Kendi M3U veya Xtream Codes kaynağını ekleyerek izleyebilirsin.")
-                                Note("Kaynağın ve katalog önbelleğin bu cihazda şifreli saklanır.")
+                                SettingsLabel(stringResource(R.string.settings_about_library))
+                                Note(stringResource(R.string.settings_about_library_note))
+                                Note(stringResource(R.string.settings_about_storage_note))
                                 Spacer(Modifier.height(6.dp))
-                                SettingsLabel("Bu sürümde")
-                                Note("Canlı TV, film, dizi, arama, favori, izlemeye devam et ve yayın rehberi kullanılabilir. Rehber bilgisi kaynağın desteğine bağlıdır. PIN yönetimi henüz yok. Sağlayıcının yetişkin işaretli içerikleri hiç gösterilmez; adı yetişkin içerik bildiren kategoriler Ayarlar'dan kapatılır.")
+                                SettingsLabel(stringResource(R.string.settings_about_release))
+                                Note(stringResource(R.string.settings_about_release_note))
                             }
                         }
                     }
@@ -222,8 +242,8 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATE
                 }
                 Row(Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(if (scroll.value > scrollHintThreshold) "↑ Yukarı" else "", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
-                    Text(if (scroll.maxValue - scroll.value > scrollHintThreshold) "↓ Daha fazla" else "", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
+                    Text(if (scroll.value > scrollHintThreshold) stringResource(R.string.settings_scroll_up) else "", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
+                    Text(if (scroll.maxValue - scroll.value > scrollHintThreshold) stringResource(R.string.settings_scroll_more) else "", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
                 }
             }
         }
@@ -237,7 +257,7 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATE
 @Composable private fun CategoryList(choices: List<dev.iptvplayer.tv.data.CategoryChoice>, kind: MediaKind, s: TvState,
     first: FocusRequester, toggle: (String, Boolean) -> Unit) {
     if (choices.isEmpty()) {
-        Note("Bu bölümde kategori yok.", modifier = Modifier.padding(28.dp)); return
+        Note(stringResource(R.string.settings_no_categories), modifier = Modifier.padding(28.dp)); return
     }
     androidx.compose.foundation.lazy.LazyColumn(Modifier.fillMaxSize().testTag("settings-categories"),
         contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 18.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -247,7 +267,7 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATE
             val visible = !byAdult && CategoryVisibility.key(kind, choice.name) !in s.hiddenCategories
             val (label, tag) = shownCategory(choice.name)
             SettingRow(label + if (tag.isNotEmpty()) " · $tag" else "",
-                "${choice.count} içerik" + if (byAdult) " · Yetişkin filtresi gizliyor" else "",
+                pluralStringResource(if (byAdult) R.plurals.settings_category_items_adult else R.plurals.count_items, choice.count, choice.count.toString()),
                 (if (index == 0) Modifier.focusRequester(first) else Modifier).testTag("category-choice:$index"), checked = visible) {
                 if (!byAdult) toggle(choice.name, !visible)
             }
@@ -270,6 +290,7 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATE
     // 14 dp edge fade + 4 dp focus-ring outset; never more than the list's 18 dp padding, or the
     // request could not be satisfied at the first/last row.
     val safeEdge = with(LocalDensity.current) { 18.dp.toPx() }
+    val state = stringResource(if (checked == true) R.string.switch_on else R.string.switch_off)
     LaunchedEffect(focused, size) {
         if (focused) { withFrameNanos { }; relocation.bringIntoView(Rect(0f, -safeEdge, size.width.toFloat(), size.height + safeEdge)) }
     }
@@ -278,7 +299,7 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATE
         if (checked != null) {
             role = Role.Switch
             toggleableState = if (checked) ToggleableState.On else ToggleableState.Off
-            stateDescription = if (checked) "Açık" else "Kapalı"
+            stateDescription = state
         }
         if (busy) progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate
     }, shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
@@ -291,7 +312,7 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATE
                 Text(label, color = Ink.Text, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 19.sp)
                 Text(description, color = if (attention) Ink.Error else Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 17.sp)
             }
-            if (checked != null) Text(if (checked) "Açık" else "Kapalı",
+            if (checked != null) Text(state,
                 // Ink.Selected nearly equals the focused row colour, so the focused ON chip uses the dark chip too.
                 Modifier.background(if (checked && !focused) Ink.Selected else Ink.Background, RoundedCornerShape(50))
                     .padding(horizontal = 10.dp, vertical = 6.dp).clearAndSetSemantics { },
