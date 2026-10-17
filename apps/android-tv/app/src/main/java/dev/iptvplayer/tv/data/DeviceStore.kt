@@ -175,6 +175,13 @@ class DeviceStore(context: Context) {
     fun librarySort(kind: MediaKind): LibrarySort =
         prefs.getString("sort:${kind.name}", null)?.let { name -> LibrarySort.entries.firstOrNull { it.name == name } } ?: LibrarySort.DEFAULT
     fun librarySort(kind: MediaKind, sort: LibrarySort) { prefs.edit().putString("sort:${kind.name}", sort.name).apply() }
+    /** Hidden categories as [CategoryVisibility.key]s (D068); names only, never addresses or accounts. */
+    var hiddenCategories: Set<String>
+        get() = prefs.getStringSet("hiddenCategories", emptySet()).orEmpty().toSet()
+        set(value) { prefs.edit().putStringSet("hiddenCategories", value.toSet()).apply() }
+    var hideAdultCategories: Boolean
+        get() = prefs.getBoolean("hideAdultCategories", true)
+        set(value) { prefs.edit().putBoolean("hideAdultCategories", value).apply() }
     var autoNextEpisode: Boolean
         get() = prefs.getBoolean("autoNextEpisode", true)
         set(value) { prefs.edit().putBoolean("autoNextEpisode", value).apply() }

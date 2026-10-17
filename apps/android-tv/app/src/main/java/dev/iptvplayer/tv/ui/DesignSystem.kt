@@ -45,7 +45,8 @@ object TvLayout {
     /** Side menu: icon rail at rest, labels over the content while it has focus. */
     val RailWidth = 72.dp
     val RailOpenWidth = 208.dp
-    val HeroHeight = 264.dp
+    /** The home hero (D067): about two thirds of the 540 dp screen, so the first shelf still shows below it. */
+    val HeroHeight = 372.dp
     val HeroRadius = 20.dp
     val LandscapeWidth = 196.dp
     val PosterWidth = 136.dp

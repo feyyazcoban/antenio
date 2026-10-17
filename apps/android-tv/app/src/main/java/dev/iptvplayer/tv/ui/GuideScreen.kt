@@ -111,8 +111,8 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
     val viewportFrom = hourStart.coerceIn(dayWindow.from, dayWindow.until - duration)
     val viewport = GuideWindow(viewportFrom, viewportFrom + duration)
     val channelWidth = (if (density.fontScale >= 1.5f) 232 else 210).dp
-    // 56 dp rows show seven channels at once at normal text (four at 65 dp, U9).
-    val rowHeight = (if (density.fontScale >= 1.5f) 90 else 56).dp
+    // 50 dp rows show six channels at once at normal text (four at 65 dp before U9).
+    val rowHeight = (if (density.fontScale >= 1.5f) 90 else 50).dp
 
     fun select(id: String?, time: Long) { model.guideCursor(id, time.coerceIn(retention.from, retention.until - 1)) }
     fun open(entry: MediaEntry, slot: GuideSlot) {
@@ -121,10 +121,26 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
         if (programme?.isOnAt(System.currentTimeMillis()) == true) model.open(entry)
         else detail = entry to slot
     }
+    // Typed channel numbers ("12"), shown in the corner and opened 1.2 s after the last digit.
+    var digits by remember { mutableStateOf("") }
+    LaunchedEffect(digits) {
+        if (digits.isEmpty()) return@LaunchedEffect
+        delay(1_200)
+        val number = digits.toIntOrNull(); digits = ""
+        numbers.entries.firstOrNull { it.value == number }?.key?.let { id ->
+            select(id, (model.state.value.guideAnchor ?: anchor)); try { gridFocus.requestFocus() } catch (_: IllegalStateException) { }
+        }
+    }
     BackHandler {
         // A Back that arrives after the model left the guide, before this screen is gone, is the new route's.
-        // As in the library: the content's Back goes to the menu first, the menu's Back to Ana Sayfa.
-        if (model.state.value.route != Route.GUIDE) back() else if (!menuFocused) navigation.requestFocus() else model.home()
+        // From deep in the grid the day and time controls are one Back away (the grid's Up reaches them only from
+        // the first channel); then the menu, then Ana Sayfa.
+        when {
+            model.state.value.route != Route.GUIDE -> back()
+            gridFocused -> try { nowFocus.requestFocus() } catch (_: IllegalStateException) { navigation.requestFocus() }
+            !menuFocused -> navigation.requestFocus()
+            else -> model.home()
+        }
     }
     LaunchedEffect(Unit) { withFrameNanos { }; if (channels.isEmpty()) navigation.requestFocus() else if (!guideless) gridFocus.requestFocus() }
     // The statuses arrive after the first frame: once they say no source has a guide, focus moves from the grid to the action.
@@ -165,6 +181,11 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                     enabled = dayWindow.until < retention.until) { select(channel?.id, Instant.ofEpochMilli(anchor).atZone(zone).plusDays(1).toInstant().toEpochMilli()) } }
                 item { Action("Saat dilimi", Modifier.focusRequester(zoneFocus).focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-zone"), compact = true) { zones = true } }
                 item { Action("Kaynaklar", Modifier.focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }, compact = true) { model.manageSources() } }
+                // The remote's shortcuts, where the bottom panel used to name them.
+                item { Box(Modifier.height(actionHeight(compact = true)).padding(start = 12.dp), contentAlignment = Alignment.CenterStart) {
+                    Text("Geri: bu düğmeler · CH+/CH−: sayfa · Rakam: kanal", color = Ink.Muted, fontFamily = Roboto,
+                        fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1)
+                } }
             }
             if (guideless) Unit else if (channels.isEmpty()) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
@@ -201,6 +222,17 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                         when (event.key) {
                             Key.DirectionUp -> { if (index == 0) nowFocus.requestFocus() else select(channels[index - 1].id, at); true }
                             Key.DirectionDown -> { channels.getOrNull(index + 1)?.let { select(it.id, at) }; true }
+                            // CH+/CH− move a page of channels (CH+ towards higher numbers, as in the player).
+                            Key.ChannelUp, Key.ChannelDown, Key.PageUp, Key.PageDown -> {
+                                val page = (list.layoutInfo.visibleItemsInfo.size - 1).coerceAtLeast(1)
+                                val step = if (event.key == Key.ChannelUp || event.key == Key.PageDown) page else -page
+                                channels.getOrNull((index + step).coerceIn(0, channels.lastIndex))?.let { select(it.id, at) }; true
+                            }
+                            // Fast-forward and rewind change the day, as Sonraki gün / Önceki gün.
+                            Key.MediaFastForward, Key.MediaRewind -> {
+                                val day = Instant.ofEpochMilli(at).atZone(zone).plusDays(if (event.key == Key.MediaFastForward) 1 else -1).toInstant().toEpochMilli()
+                                if (day in retention.from until retention.until) select(entry?.id, day); true
+                            }
                             Key.DirectionLeft, Key.DirectionRight -> {
                                 val direction = if (event.key == Key.DirectionRight) 1 else -1
                                 val target = if (activeSlot?.programmes.isNullOrEmpty()) at + direction * 30 * 60_000L
@@ -208,21 +240,31 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                                 if (target < retention.from) navigation.requestFocus() else select(entry?.id, target)
                                 true
                             }
-                            else -> false
+                            else -> {
+                                val code = event.nativeKeyEvent.keyCode
+                                val digit = when (code) {
+                                    in android.view.KeyEvent.KEYCODE_0..android.view.KeyEvent.KEYCODE_9 -> code - android.view.KeyEvent.KEYCODE_0
+                                    in android.view.KeyEvent.KEYCODE_NUMPAD_0..android.view.KeyEvent.KEYCODE_NUMPAD_9 -> code - android.view.KeyEvent.KEYCODE_NUMPAD_0
+                                    else -> -1
+                                }
+                                if (digit >= 0) { if (digits.length < 4) digits += digit; true } else false
+                            }
                         }
                     }.focusable().testTag("guide-grid").semantics {
+                        // What the removed bottom panel said (D067): the cell's programme, or why there is none.
                         contentDescription = channel?.title.orEmpty() + ", " + guideTime(anchor, zone) + ", " +
-                            (selectedSlot?.programme?.title ?: "Program bilgisi yok")
+                            (selectedSlot?.programme?.title ?: if ((selectedSlot?.programmes?.size ?: 0) > 1) "Bu saatte çakışan programlar var"
+                                else guideEmptyText(channel?.let { s.guideStatus[it.sourceId] }, channel?.let { rows[it.id] }))
                         onClick("Programı aç") { if (channel != null && selectedSlot != null) open(channel, selectedSlot); true }
                     }) {
                     // Size the list to whole rows: every scroll position, including the end, lands on a row
                     // boundary, so no channel row rests cut through its text at the grid edge.
-                    val gapPx = with(density) { 5.dp.roundToPx() }
+                    val gapPx = with(density) { 4.dp.roundToPx() }
                     val padPx = with(density) { 4.dp.roundToPx() }
                     val pitchPx = with(density) { rowHeight.roundToPx() } + gapPx
                     val fit = ((constraints.maxHeight - 2 * padPx + gapPx) / pitchPx).coerceAtLeast(1)
                     val listHeight = with(density) { (fit * pitchPx - gapPx + 2 * padPx).toDp() }
-                    LazyColumn(Modifier.height(listHeight), state = list, verticalArrangement = Arrangement.spacedBy(5.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
+                    LazyColumn(Modifier.height(listHeight), state = list, verticalArrangement = Arrangement.spacedBy(4.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
                         itemsIndexed(channels, key = { _, entry -> entry.id }) { index, entry ->
                             val rowSlots = allSlots[entry.id] ?: emptySlots
                             Row(Modifier.fillMaxWidth().height(rowHeight).testTag("guide-row:${entry.id}"), verticalAlignment = Alignment.CenterVertically) {
@@ -278,20 +320,14 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                         }
                     }
                 }
-                Column(Modifier.fillMaxWidth().background(Ink.Container, RoundedCornerShape(8.dp)).padding(horizontal = 14.dp, vertical = 10.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(selectedSlot?.programme?.title ?: if ((selectedSlot?.programmes?.size ?: 0) > 1) "Bu saatte çakışan programlar var"
-                        else guideEmptyText(channel?.let { s.guideStatus[it.sourceId] }, channel?.let { rows[it.id] }),
-                        color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.testTag("guide-selection-title"))
-                    Text(selectedSlot?.programme?.let { programmeTime(it, zone) + if (it.isOnAt(now)) " · OK: canlı izle" else " · OK: ayrıntılar" }
-                        ?: "OK: kanal ve ayrıntılar · Geri: menü", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    if (rows[channel?.id]?.truncated == true) Text("Bu kanalın rehberi çok yoğun; bazı kayıtlar gösterilemiyor.",
-                        color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp)
-                }
             }
         }
     } }
+    // Below the clock, so the typed number never covers the time.
+    if (digits.isNotEmpty()) Box(Modifier.fillMaxSize().padding(top = 64.dp, end = TvLayout.Gutter), contentAlignment = Alignment.TopEnd) {
+        Text(digits, Modifier.background(Ink.Background.copy(alpha = .92f), RoundedCornerShape(12.dp)).padding(horizontal = 18.dp, vertical = 8.dp)
+            .testTag("guide-digits"), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 22.sp)
+    }
     detail?.let { (entry, slot) ->
         val focus = remember { FocusRequester() }
         val play = remember { FocusRequester() }

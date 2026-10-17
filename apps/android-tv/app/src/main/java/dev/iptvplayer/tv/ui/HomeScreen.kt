@@ -22,6 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -242,7 +245,9 @@ private data class HomeRow(val key: String, val title: String, val entries: List
     var refocus by remember { mutableStateOf<FocusRequester?>(null) }
     val window = LocalWindowInfo.current
     LaunchedEffect(refocus) { refocus?.let { target -> refocusAfterDialog(window) { target }; refocus = null } }
+    // The hero runs to the top edge (D067); without it the page keeps the usual top margin.
     Navigation(s, model, Modifier.onFocusChanged { menuFocused.value = it.hasFocus }, first = nav,
+        contentTop = if (slides.isNotEmpty() && rows.isNotEmpty()) 0.dp else TvLayout.HeaderTop,
         contentEntry = { lastFocus.requester }, settings = settings) { Column(Modifier.fillMaxSize()) {
         if (rows.isEmpty()) {
             // 19 + 5 dp: content on the 24 dp edge of the logo and shelves; 5 dp stays as focus-ring room.
@@ -287,7 +292,8 @@ private data class HomeRow(val key: String, val title: String, val entries: List
                 if (slides.isNotEmpty()) Hero(slides, newest = library.newest.isNotEmpty(), reducedMotion = s.reducedMotion,
                     Modifier.then(if (target == "hero") Modifier.focusRequester(focus) else Modifier)
                     .focusRequester(heroFocus)
-                    .onFocusChanged { if (it.hasFocus) { model.homeFocus("hero"); lastFocus.requester = heroFocus } }) { model.open(it) }
+                    .onFocusChanged { if (it.hasFocus) { model.homeFocus("hero"); lastFocus.requester = heroFocus } },
+                    detail = model::heroDetail, ensure = model::ensureHeroDetail) { model.open(it) }
                 else Column(Modifier.padding(horizontal = TvLayout.Gutter, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("SENİN TELEVİZYONUN", color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, letterSpacing = 2.sp)
                     Heading("Şimdi ne izleyelim?")
@@ -363,13 +369,15 @@ private data class HomeRow(val key: String, val title: String, val entries: List
 }
 
 /**
- * The hero carousel: the newest films and series ([newest]), or the single featured title of a list without dates.
- * More slides advance every 8 s with a cross-fade; Right and Left on Ayrıntılar step through them, and Left on the
- * first slide still reaches the menu. Reduced motion or system animations off stop the timer and the fade. The
- * action is one composable across slides, so focus never leaves it.
+ * The hero carousel (D067): a large, full-width picture from the top edge down to the shelves. A slide with a wide
+ * picture fills the hero with it; a poster-only slide fills it with its own poster, much enlarged and softened, and
+ * shows the poster beside the text. Films from an Xtream source get their wide picture from their details
+ * ([detail], fetched through [ensure] for the slide on screen and the next). Slides advance every 8 s (15 s while
+ * Ayrıntılar has focus, none with TalkBack or reduced motion); Right and Left on Ayrıntılar step through them.
+ * The action is one composable across slides, so focus never leaves it.
  */
 @Composable private fun Hero(slides: List<MediaEntry>, newest: Boolean, reducedMotion: Boolean, actionModifier: Modifier,
-    open: (MediaEntry) -> Unit) {
+    detail: (MediaEntry) -> MediaEntry, ensure: (MediaEntry) -> Unit, open: (MediaEntry) -> Unit) {
     val largeText = LocalDensity.current.fontScale >= 1.5f
     val motion = !reducedMotion && android.animation.ValueAnimator.areAnimatorsEnabled()
     val many = slides.size > 1
@@ -382,13 +390,15 @@ private data class HomeRow(val key: String, val title: String, val entries: List
     var index by rememberSaveable(slides) { mutableIntStateOf(0) }
     // A restored index can outlive a shorter slide list; every use goes through the clamped one.
     val current = index.coerceIn(0, slides.lastIndex)
-    val entry = slides[current]
+    val entry = detail(slides[current])
+    // Every slide's details at once (at most six small requests per session), so each slide opens on its wide picture.
+    LaunchedEffect(slides) { slides.forEach(ensure) }
     if (many) LaunchedEffect(current, slides, motion, actionFocused) {
         // Fetch the next slide's picture now, so the fade does not reveal an empty frame. Disk only, kept small.
-        val next = slides[(current + 1) % slides.size]
+        val next = detail(slides[(current + 1) % slides.size])
         (if (next.hasBackdrop) next.backdrop else next.artwork)?.let { url ->
             SingletonImageLoader.get(context).enqueue(ImageRequest.Builder(context).data(SourceArtwork(next.sourceId, url))
-                .memoryCachePolicy(CachePolicy.DISABLED).size(coil3.size.Size(480, 270)).build())
+                .memoryCachePolicy(CachePolicy.DISABLED).size(coil3.size.Size(960, 540)).build())
         }
         // 8 s (D063); 15 s while Ayrıntılar has focus, so the text being read does not change so soon.
         if (motion && !spoken) {
@@ -396,86 +406,102 @@ private data class HomeRow(val key: String, val title: String, val entries: List
             turnedFrom = entry; turnedAt = System.currentTimeMillis(); index = (current + 1) % slides.size
         }
     }
-    val fade = if (motion) tween<Float>(400) else snap()
+    val fade = if (motion) tween<Float>(450) else snap()
     val visibility = rememberCardVisibility()
-    Box(Modifier.padding(horizontal = TvLayout.Gutter).fillMaxWidth().heightIn(min = TvLayout.HeroHeight)
-        .then(visibility.container).then(visibility.focus)
-        .clip(RoundedCornerShape(TvLayout.HeroRadius)).background(Ink.Container).testTag("home-hero")) {
-        Crossfade(entry, Modifier.matchParentSize(), animationSpec = fade, label = "hero-backdrop") { slide ->
-            if (slide.hasBackdrop) Box(Modifier.fillMaxSize()) {
-                AsyncImage(SourceArtwork(slide.sourceId, slide.backdrop!!), null,
-                    Modifier.align(Alignment.CenterEnd).fillMaxHeight().fillMaxWidth(.78f),
-                    contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
-            }
-        }
+    val heroHeight = TvLayout.HeroHeight
+    Box(Modifier.fillMaxWidth().heightIn(min = heroHeight)
+        .then(visibility.container).then(visibility.focus).clipToBounds().background(Ink.Background).testTag("home-hero")) {
+        Crossfade(entry, Modifier.matchParentSize(), animationSpec = fade, label = "hero-backdrop") { slide -> HeroPicture(slide, largeText) }
+        // Dark on the text side, clear on the picture side, and into the page at the bottom where the shelves begin.
         Box(Modifier.matchParentSize().background(Brush.horizontalGradient(
-            0f to Ink.Background, .28f to Ink.Background.copy(alpha = .96f),
-            .48f to Ink.Background.copy(alpha = .82f), .72f to Ink.Background.copy(alpha = .22f),
-            1f to Color.Transparent)))
+            0f to Ink.Background, .26f to Ink.Background.copy(alpha = .9f), .5f to Ink.Background.copy(alpha = .5f),
+            .72f to Ink.Background.copy(alpha = .12f), 1f to Color.Transparent)))
         Box(Modifier.matchParentSize().background(Brush.verticalGradient(
-            0f to Color.Transparent, .6f to Color.Transparent, 1f to Ink.Background.copy(alpha = .65f))))
-        // A poster-only entry is drawn above the scrims, in its own colours, as on the detail screen.
-        Crossfade(entry, Modifier.matchParentSize(), animationSpec = fade, label = "hero-poster") { slide ->
-            if (!slide.hasBackdrop && slide.artwork != null) Box(Modifier.fillMaxSize()) {
-                Box(Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(220.dp).padding(top = if (largeText) 76.dp else 62.dp, bottom = 16.dp, end = 28.dp)) {
-                    Artwork(slide.sourceId, slide.artwork, slide.title, Modifier.align(Alignment.CenterEnd).fillMaxHeight()
-                        .aspectRatio(2f / 3).clip(RoundedCornerShape(TvLayout.CardRadius)).testTag("home-hero-poster"))
-                }
+            0f to Ink.Background.copy(alpha = .35f), .18f to Color.Transparent, .58f to Color.Transparent,
+            .86f to Ink.Background.copy(alpha = .8f), 1f to Ink.Background)))
+        Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().heightIn(min = heroHeight)
+            .padding(start = TvLayout.Gutter, end = TvLayout.Gutter, top = 28.dp, bottom = 22.dp), verticalArrangement = Arrangement.Bottom) {
+            Text(if (newest) "YENİ EKLENEN" else "KÜTÜPHANENDEN", Modifier.testTag("hero-label"), color = Ink.Mint, fontFamily = Roboto,
+                fontWeight = FontWeight.Medium, fontSize = 13.sp, letterSpacing = 1.6.sp, maxLines = 1)
+            Spacer(Modifier.height(10.dp))
+            // Every slide's text is laid out, unseen, in the same slot: the hero keeps the tallest slide's height,
+            // so the shelves below never move as it turns.
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomStart) {
+                if (many) slides.forEach { HeroText(detail(it), largeText, Modifier.graphicsLayer { alpha = 0f }.clearAndSetSemantics { }) }
+                // Text fades out, then in: two large titles cross-fading over each other read as a smear.
+                AnimatedContent(entry, contentAlignment = Alignment.BottomStart, label = "hero-text", transitionSpec = {
+                    (if (motion) fadeIn(tween(240, delayMillis = 200)) togetherWith fadeOut(tween(200))
+                    else EnterTransition.None togetherWith ExitTransition.None) using null
+                }) { slide -> HeroText(slide, largeText, tagged = true) }
             }
-        }
-        Column(Modifier.fillMaxWidth().heightIn(min = TvLayout.HeroHeight).padding(horizontal = 28.dp, vertical = 20.dp), verticalArrangement = Arrangement.SpaceBetween) {
-            // The header line keeps the height of the source selector it used to hold, so the title and poster stay put.
-            Row(Modifier.fillMaxWidth().heightIn(min = actionHeight(compact = true)), verticalAlignment = Alignment.CenterVertically) {
-                Text(if (newest) "YENİ EKLENEN" else "KÜTÜPHANENDEN",
-                    Modifier.weight(1f).testTag("hero-label"), color = Ink.Mint, fontFamily = Roboto,
-                    fontWeight = FontWeight.Medium, fontSize = 12.sp, letterSpacing = 1.2.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            Column(Modifier.padding(top = 16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Every slide's text is laid out, unseen, in the same slot: the hero keeps the tallest slide's height,
-                // so the shelves below never move as it turns.
-                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomStart) {
-                    if (many) slides.forEach { HeroText(it, largeText, Modifier.graphicsLayer { alpha = 0f }.clearAndSetSemantics { }) }
-                    // Text fades out, then in: two large titles cross-fading over each other read as a smear.
-                    AnimatedContent(entry, contentAlignment = Alignment.BottomStart, label = "hero-text", transitionSpec = {
-                        (if (motion) fadeIn(tween(220, delayMillis = 180)) togetherWith fadeOut(tween(180))
-                        else EnterTransition.None togetherWith ExitTransition.None) using null
-                    }) { slide -> HeroText(slide, largeText, tagged = true) }
-                }
-                Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                    // Right and Left turn the slides; with one slide, Right stays here rather than jumping to the first shelf.
-                    Action("Ayrıntılar", actionModifier.onPreviewKeyEvent { event ->
-                        if (!many || event.type != KeyEventType.KeyDown) false
-                        else when (event.key) {
-                            Key.DirectionRight -> { index = (current + 1) % slides.size; true }
-                            Key.DirectionLeft -> if (current > 0) { index = current - 1; true } else false
-                            else -> false
-                        }
-                    }.focusProperties { right = FocusRequester.Cancel }.onFocusChanged { actionFocused = it.isFocused }
-                        .semantics { if (many) stateDescription = "${entry.title}, ${current + 1} / ${slides.size}" }
-                        // An OK within half a second of an automatic turn meant the slide that was on screen.
-                        .testTag("hero-details"), primary = true) {
-                        open(turnedFrom?.takeIf { System.currentTimeMillis() - turnedAt < 600 } ?: entry)
+            Row(Modifier.padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                // Right and Left turn the slides; with one slide, Right stays here rather than jumping to the first shelf.
+                Action("Ayrıntılar", actionModifier.onPreviewKeyEvent { event ->
+                    if (!many || event.type != KeyEventType.KeyDown) false
+                    else when (event.key) {
+                        Key.DirectionRight -> { index = (current + 1) % slides.size; true }
+                        Key.DirectionLeft -> if (current > 0) { index = current - 1; true } else false
+                        else -> false
                     }
-                    if (many) SlideDots(slides.size, current)
+                }.focusProperties { right = FocusRequester.Cancel }.onFocusChanged { actionFocused = it.isFocused }
+                    .semantics { if (many) stateDescription = "${entry.title}, ${current + 1} / ${slides.size}" }
+                    // An OK within half a second of an automatic turn meant the slide that was on screen.
+                    .testTag("hero-details"), primary = true, icon = "play") {
+                    open(turnedFrom?.takeIf { System.currentTimeMillis() - turnedAt < 600 } ?: slides[current])
                 }
+                if (many) SlideDots(slides.size, current)
             }
         }
     }
 }
 
-/** A slide's title, type/year line and plot, as wide as its picture leaves room for. Only the shown copy carries test tags. */
-@Composable private fun HeroText(slide: MediaEntry, largeText: Boolean, modifier: Modifier = Modifier, tagged: Boolean = false) {
-    val width = if (!slide.hasBackdrop && slide.artwork == null) 1f else if (largeText) .62f else .48f
-    fun Modifier.tag(tag: String) = if (tagged) testTag(tag) else this
-    Column(modifier.fillMaxWidth(width), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        val shown = remember(slide.title, slide.year) { displayTitle(slide.title, slide.year) }
-        Text(shown.name, Modifier.tag("hero-title"), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
-            fontSize = if (largeText) 28.sp else 44.sp, lineHeight = if (largeText) 33.sp else 50.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        Text(listOf(slide.kind.label, shown.year, shown.tag).filter { it.isNotBlank() }.joinToString("  ·  "),
-            color = Ink.Muted, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        if (slide.description.isNotBlank()) Text(slide.description, Modifier.tag("hero-description"), fontFamily = Roboto, fontSize = 14.sp,
-            lineHeight = 20.sp, color = Ink.Muted, maxLines = if (largeText) 1 else 2, overflow = TextOverflow.Ellipsis)
+/**
+ * A slide's picture across the whole hero. A wide picture is shown as it is; a poster is enlarged and softened behind
+ * (decoded tiny, so the scaling itself blurs it; Android 12+ smooths it further) and shown sharp on the right.
+ */
+@Composable private fun HeroPicture(slide: MediaEntry, largeText: Boolean) {
+    val context = LocalContext.current
+    Box(Modifier.fillMaxSize()) {
+        if (slide.hasBackdrop) AsyncImage(SourceArtwork(slide.sourceId, slide.backdrop!!), null, Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop, alignment = BiasAlignment(0f, -.35f))
+        else if (slide.artwork != null) {
+            val soft = remember(slide.sourceId, slide.artwork) {
+                ImageRequest.Builder(context).data(SourceArtwork(slide.sourceId, slide.artwork)).size(coil3.size.Size(48, 72)).build()
+            }
+            AsyncImage(soft, null, Modifier.fillMaxSize().graphicsLayer { alpha = .75f }
+                .then(if (android.os.Build.VERSION.SDK_INT >= 31) Modifier.blur(24.dp) else Modifier), contentScale = ContentScale.Crop)
+            Box(Modifier.fillMaxSize().background(Ink.Background.copy(alpha = if (android.os.Build.VERSION.SDK_INT >= 31) .35f else .55f)))
+            Box(Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(top = if (largeText) 64.dp else 44.dp, bottom = 34.dp, end = 56.dp)) {
+                Artwork(slide.sourceId, slide.artwork, slide.title, Modifier.fillMaxHeight().aspectRatio(2f / 3)
+                    .shadow(24.dp, RoundedCornerShape(TvLayout.CardRadius)).clip(RoundedCornerShape(TvLayout.CardRadius)).testTag("home-hero-poster"))
+            }
+        }
     }
+}
+
+/** A slide's title, its rating, year, kind, runtime and language, and its plot, as wide as the picture leaves room for. */
+@Composable private fun HeroText(slide: MediaEntry, largeText: Boolean, modifier: Modifier = Modifier, tagged: Boolean = false) {
+    val width = if (largeText) .64f else if (slide.hasBackdrop) .5f else .52f
+    val shown = remember(slide.title, slide.year) { displayTitle(slide.title, slide.year) }
+    fun Modifier.tag(tag: String) = if (tagged) testTag(tag) else this
+    Column(modifier.fillMaxWidth(width), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(shown.name, Modifier.tag("hero-title"), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
+            fontSize = if (largeText) 32.sp else 50.sp, lineHeight = if (largeText) 38.sp else 56.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            slide.ratingText?.let { Text("★ $it", color = Ink.Mint, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 15.sp, maxLines = 1) }
+            Text(listOf(shown.year, if (slide.kind == MediaKind.SERIES) "Dizi" else "Film",
+                if (slide.durationSeconds > 0) runtimeText(slide.durationSeconds) else "", shown.tag).filter { it.isNotBlank() }.joinToString("  ·  "),
+                color = Ink.Text.copy(alpha = .8f), fontFamily = Roboto, fontSize = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        if (slide.description.isNotBlank()) Text(slide.description, Modifier.tag("hero-description"), fontFamily = Roboto, fontSize = 15.sp,
+            lineHeight = 22.sp, color = Ink.Text.copy(alpha = .78f), maxLines = if (largeText) 1 else 3, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/** "1 sa 48 dk" or "52 dk". */
+internal fun runtimeText(seconds: Long): String {
+    val minutes = seconds / 60
+    return if (minutes >= 60) "${minutes / 60} sa ${minutes % 60} dk" else "$minutes dk"
 }
 
 @Composable private fun SlideDots(count: Int, current: Int) {

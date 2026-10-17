@@ -1,5 +1,13 @@
 # Son devir notu
 
+## Büyük vitrin, rehber kısayolları, kategori gizleme · 17 Ekim 2026
+
+Değişen kod: ui/HomeScreen.kt (`Hero`, `HeroPicture`, `HeroText`, `runtimeText`; Home `contentTop` vitrin varken 0), ui/DesignSystem.kt (`HeroHeight` 372 dp), TvViewModel.kt (`heroDetail`, `ensureHeroDetail`: Xtream film/dizi ayrıntısı, bellek; `categoryVisible`, `hideAdultCategories`; `publishLibrary` içinde `CategoryVisibility.apply/choices`; TvState `hiddenCategories`, `hideAdultCategories`, `categoryChoices`), data/CategoryVisibility.kt (yeni), data/DeviceStore.kt (`hiddenCategories`, `hideAdultCategories`), ui/GuideScreen.kt (Geri sırası, CH±/sayfa/FF/RW/rakam, `guide-digits`, alt bant kaldırıldı, ipucu, 50 dp satır), ui/LibraryScreen.kt (`LiveInfo` ve `focusedEntry` kaldırıldı), ui/SettingsScreen.kt (İçerik bölümü, CATEGORIES/CATEGORY_LIST sayfaları, `CategoryList`). Testler: CategoryVisibilityTest (yeni); GuideFlowTest (Geri sırası, seçili program artık `guide-grid` açıklamasında), SearchNavigationTest (Ayarlar satır sırası: İçerik bölümü). Belgeler: DECISIONS D067/D068.
+
+Kontroller: `testDebugUnitTest` 163 (1 atlanan), `lintDebug` 0 hata, `assembleRelease`, `assembleDebugAndroidTest`. 5556'da gerçek Evim ile elle görüldü (STATUS). Test sırasında yanlışlıkla "Geçmişi temizle?" onayı açıldı, Vazgeç'le kapandı; geçmiş yerinde. GREECE kategorisi kapatılıp geri açıldı; 5556'da gizli kategori yok (yalnız yetişkin filtresi).
+
+Sonraki adım: kullanıcının isteğiyle TV'ye kurulum (sürüm 0.14.42), TV'de Xtream vitrin görsellerinin gelmesi; PIN ile kategori koruması kullanıcı kararı.
+
 ## 0.14.41 · NEXTV teslimi · 17 Ekim 2026
 
 Değişen: apps/android-tv/app/build.gradle.kts (versionCode 55, versionName 0.14.41-design-preview). Teslim releases/NEXTV_TV_Design_Preview_0.14.41.apk, SHA-256 5fa8f07da7b7572a14402fde2f819ad4bb35d3eeedd92a16e885646bd661cc61, imza 0.14.40 ile aynı.

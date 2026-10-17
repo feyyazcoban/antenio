@@ -123,8 +123,6 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     // Capture before removal makes Compose move focus to a fallback of its own.
     val recoverRemoved = remember(filtered) { gridActive && filtered.none { it.id == memory.lastId } }
     val recoveryIndex = remember(filtered) { memory.lastIndex.coerceAtMost((filtered.size - 1).coerceAtLeast(0)) }
-    // The focused title for the information panel; only the panel reads it.
-    val focusedEntry = remember { mutableStateOf<MediaEntry?>(null) }
     val navFocus = remember { FocusRequester() }
     val categoryFocus = remember { FocusRequester() }
     val selectedCategoryFocus = remember { FocusRequester() }
@@ -227,9 +225,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                     event.type == KeyEventType.KeyDown && event.key == Key.DirectionRight && focusContent()
                 }, selectedCategoryFocus) { key -> if (key != s.category) model.category(key) }
             Column(Modifier.weight(1f).fillMaxHeight()) {
-                // Films and series show no information panel above the posters (D064): the room goes to larger posters.
-                if (!typing && filtered.isNotEmpty() && live) LiveInfo({ focusedEntry.value ?: filtered.firstOrNull() }, numbers, { programmes }, now, zone,
-                    { it.sourceId in guided })
+                // No information panel above the list (D064 posters, D067 channels): the room goes to the list itself.
                 // Lined up with the cards below; the grid's own top padding and spacer keep the old 28 dp gap.
                 if (fixedHeading && !typing) LibraryHeading(Modifier.padding(start = if (gridMode) TvLayout.Gutter else 16.dp,
                     end = TvLayout.Gutter, top = 7.dp, bottom = 7.dp), Modifier)
@@ -304,7 +300,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                         }
                         val card = Modifier.focusRequester(own).onFocusChanged { if (it.isFocused) {
                             memory.lastId = entry.id; memory.lastIndex = index; gridActive = true
-                            focusedEntry.value = entry; position.intValue = index + 1
+                            position.intValue = index + 1
                         } }
                         if (entry.kind == MediaKind.LIVE && !typing && live)
                             ChannelRow(entry, numbers[entry.id] ?: 0, entry.id in s.favoriteIds, card, programmes[entry.id], now, zone,
@@ -368,7 +364,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     var firstFilter by remember { mutableStateOf(true) }
     LaunchedEffect(s.kind, s.category, s.query, s.onlyFavorites, sort) {
         if (firstFilter) firstFilter = false else {
-            focusedEntry.value = null; memory.lastId = null; memory.lastIndex = 0; position.intValue = 1
+            memory.lastId = null; memory.lastIndex = 0; position.intValue = 1
             grid.scrollToItem(if (typing) inputIndex else 0)
         }
     }
@@ -497,32 +493,6 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     val fraction = ((now - programme.start).toFloat() / (end - programme.start).coerceAtLeast(1)).coerceIn(0f, 1f)
     Box(modifier.fillMaxWidth().height(3.dp).clip(RoundedCornerShape(50)).background(Ink.Divider)) {
         Box(Modifier.fillMaxWidth(fraction).fillMaxHeight().background(Ink.Mint))
-    }
-}
-
-/** The focused channel above the list: logo, number and name, what is on now with its time, and what is next. */
-@Composable private fun LiveInfo(focused: () -> MediaEntry?, numbers: Map<String, Int>, programmes: () -> Map<String, GuideSlice>,
-    now: Long, zone: ZoneId, guideAvailable: (MediaEntry) -> Boolean = { true }) {
-    val entry = focused() ?: return
-    val shown = remember(entry.title) { displayTitle(entry.title) }
-    val (category, country) = remember(entry.category) { displayCategory(entry.category) }
-    val guide = programmes()[entry.id]
-    val current = guide?.now(now)
-    val next = guide?.next(now)
-    Row(Modifier.fillMaxWidth().height(116.dp).padding(start = 16.dp, end = TvLayout.Gutter, top = 4.dp, bottom = 8.dp)
-        .background(Ink.Container, RoundedCornerShape(TvLayout.CardRadius)).padding(16.dp).testTag("library-info"),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-        Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(128.dp).height(72.dp), true, logoInset = 0.dp)
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            Text(listOfNotNull(numbers[entry.id]?.toString(), shown.name).joinToString("  "), color = Ink.Text, fontFamily = Roboto,
-                fontWeight = FontWeight.Medium, fontSize = 18.sp, lineHeight = 23.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(current?.let { "${it.title} · ${programmeTime(it, zone)}" } ?: if (guideAvailable(entry)) "Program bilgisi yok"
-                else listOf(category, shown.tag.ifEmpty { country }).filter { it.isNotBlank() }.joinToString(" · "), color = if (current != null) Ink.Text else Ink.Muted,
-                fontFamily = Roboto, fontSize = 14.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            if (current != null) Progress(current, now, Modifier.widthIn(max = 360.dp))
-            Text(next?.let { "Sonra · ${guideTime(it.start, zone)} ${it.title}" } ?: if (guideAvailable(entry)) category else "Rehber bilgisi eklenmemiş", color = Ink.Muted, fontFamily = Roboto,
-                fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
     }
 }
 

@@ -3,6 +3,7 @@ package dev.iptvplayer.tv
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.compose.runtime.mutableStateMapOf
 import dev.iptvplayer.tv.data.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -80,6 +81,10 @@ data class TvState(
     val detailError: String? = null,
     val reducedMotion: Boolean = false,
     val startupSound: Boolean = true,
+    /** D068: categories hidden in Ayarlar and the adult-name filter; [categoryChoices] lists every category for that page. */
+    val hiddenCategories: Set<String> = emptySet(),
+    val hideAdultCategories: Boolean = true,
+    val categoryChoices: Map<MediaKind, List<CategoryChoice>> = emptyMap(),
     val autoNextEpisode: Boolean = true,
     /** The Sırala choice of the film and series lists, kept on the device. */
     val librarySorts: Map<MediaKind, LibrarySort> = emptyMap(),
@@ -223,7 +228,12 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun publishLibrary() {
         val saved = registry
         val raw = snapshots.mapValues { it.value.catalog }
-        val all = withContext(Dispatchers.Default) { SourceLibrary.combine(saved.sources, raw) }
+        val hidden = store.hiddenCategories
+        val hideAdult = store.hideAdultCategories
+        val (all, choices) = withContext(Dispatchers.Default) {
+            val combined = SourceLibrary.combine(saved.sources, raw)
+            CategoryVisibility.apply(combined, hidden, hideAdult) to CategoryVisibility.choices(combined)
+        }
         val favorites = SourceLibrary.favorites(saved.sources, store::favorites)
         val history = SourceLibrary.history(saved.sources, store::history)
         guides.synchronize(saved.sources, snapshots)
@@ -231,6 +241,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             val filter = registry.filterId?.takeIf { id -> saved.sources.any { it.id == id } }
             val catalog = filtered(all, filter)
             old.copy(sources = saved.sources, sourceFilterId = filter, allCatalog = all, catalog = catalog,
+                hiddenCategories = hidden, hideAdultCategories = hideAdult, categoryChoices = choices,
                 favoriteIds = favorites, history = history,
                 searchSourceId = old.searchSourceId?.takeIf { id -> saved.sources.any { it.id == id } },
                 sourceStatus = saved.sources.associate { source ->
@@ -515,6 +526,18 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     fun season(value: Int) { mutable.update { it.copy(season = value) } }
     fun reducedMotion() { store.reducedMotion = !state.value.reducedMotion; mutable.update { it.copy(reducedMotion = store.reducedMotion) } }
     fun startupSound() { store.startupSound = !state.value.startupSound; mutable.update { it.copy(startupSound = store.startupSound) } }
+    /** Shows or hides one category (D068); the library is published again without reloading any source. */
+    fun categoryVisible(kind: MediaKind, category: String, visible: Boolean) {
+        val key = CategoryVisibility.key(kind, category)
+        store.hiddenCategories = if (visible) store.hiddenCategories - key else store.hiddenCategories + key
+        mutable.update { it.copy(hiddenCategories = store.hiddenCategories) }
+        viewModelScope.launch { publishLibrary() }
+    }
+    fun hideAdultCategories() {
+        store.hideAdultCategories = !state.value.hideAdultCategories
+        mutable.update { it.copy(hideAdultCategories = store.hideAdultCategories) }
+        viewModelScope.launch { publishLibrary() }
+    }
     private fun storedSorts(): Map<MediaKind, LibrarySort> = listOf(MediaKind.MOVIE, MediaKind.SERIES).associateWith(store::librarySort)
     private val libraryOrders = LibraryOrderCache()
     /** Films or series in a Sırala order; sorted once per catalogue and choice. */
@@ -636,6 +659,30 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         if (next.entry.id != nextId || (automatic && (!s.autoNextEpisode || !next.automaticAllowed))) return false
         play(next.entry, restart = true)
         return state.value.playing?.entry?.id == nextId
+    }
+
+    /**
+     * The hero's films with their details (D067): an Xtream list sends no wide picture or plot for films, only their
+     * detail does. Fetched for the slide on screen and the next one, once per session, kept in memory only.
+     */
+    private val heroDetails = mutableStateMapOf<String, MediaEntry>()
+    private val heroRequests = HashSet<String>()
+    fun heroDetail(entry: MediaEntry): MediaEntry = heroDetails[entry.id] ?: entry
+    fun ensureHeroDetail(entry: MediaEntry) {
+        if (entry.kind != MediaKind.MOVIE && entry.kind != MediaKind.SERIES) return
+        if ((entry.hasBackdrop && entry.description.isNotBlank()) || !heroRequests.add(entry.id)) return
+        val source = state.value.sourceFor(entry)?.takeIf { it.type == SourceType.XTREAM } ?: return
+        viewModelScope.launch {
+            try {
+                val local = entry.withoutSource()
+                val detailed = if (entry.kind == MediaKind.MOVIE) repository.movie(source, local)
+                    else repository.episodes(source, local, snapshots[source.id]?.catalog ?: Catalog(emptyList())).first
+                // Keep the list's picture when the detail has none, and the kind and identity of the slide.
+                heroDetails[entry.id] = detailed.inSource(source.id).let { it.copy(backdrop = it.backdrop ?: entry.backdrop, artwork = it.artwork ?: entry.artwork) }
+            }
+            catch (e: CancellationException) { throw e }
+            catch (_: Exception) { } // The slide keeps its poster; the detail screen reports errors.
+        }
     }
 
     /** Channel numbers as Canlı TV shows them: the order of "Tüm kanallar". */

@@ -31,10 +31,12 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.tv.material3.*
 import dev.iptvplayer.tv.*
 import dev.iptvplayer.tv.data.MediaKind
+import dev.iptvplayer.tv.data.CategoryVisibility
+import dev.iptvplayer.tv.data.displayCategory
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 
-private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
+private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATEGORY_LIST }
 
 @Composable internal fun Settings(s: TvState, model: TvViewModel, dismiss: () -> Unit) {
     var page by remember { mutableStateOf(SettingsPage.MAIN) }
@@ -43,6 +45,11 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
     val remove = remember { FocusRequester() }
     val history = remember { FocusRequester() }
     val about = remember { FocusRequester() }
+    val categories = remember { FocusRequester() }
+    val kindFocus = remember { listOf(MediaKind.LIVE, MediaKind.MOVIE, MediaKind.SERIES).associateWith { FocusRequester() } }
+    val firstCategory = remember { FocusRequester() }
+    // The section whose categories CATEGORY_LIST shows; also where focus returns on the CATEGORIES page.
+    var categoryKind by remember { mutableStateOf(MediaKind.LIVE) }
     val cancel = remember { FocusRequester() }
     val headerAction = remember { FocusRequester() }
     var readingFocused by remember { mutableStateOf(false) }
@@ -51,7 +58,12 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
     val scope = rememberCoroutineScope()
     val readingStep = with(LocalDensity.current) { 56.dp.toPx() }
     val scrollHintThreshold = with(LocalDensity.current) { 20.dp.toPx() }
-    fun back() { if (page == SettingsPage.MAIN) dismiss() else page = SettingsPage.MAIN }
+    fun back() { when (page) {
+        SettingsPage.MAIN -> dismiss()
+        SettingsPage.CATEGORY_LIST -> { returnTo = SettingsPage.CATEGORY_LIST; page = SettingsPage.CATEGORIES }
+        SettingsPage.CATEGORIES -> { returnTo = SettingsPage.CATEGORIES; page = SettingsPage.MAIN }
+        else -> page = SettingsPage.MAIN
+    } }
     fun open(next: SettingsPage) { returnTo = next; page = next }
     val mainScroll = rememberScrollState()
     val secondaryScroll = key(page) { rememberScrollState() }
@@ -62,10 +74,13 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
             SettingsPage.REMOVE -> remove
             SettingsPage.HISTORY -> history
             SettingsPage.ABOUT -> about
+            SettingsPage.CATEGORIES, SettingsPage.CATEGORY_LIST -> categories
             else -> first
         }
         SettingsPage.REMOVE, SettingsPage.HISTORY -> cancel
         SettingsPage.ABOUT -> headerAction
+        SettingsPage.CATEGORIES -> kindFocus.getValue(categoryKind)
+        SettingsPage.CATEGORY_LIST -> if (s.categoryChoices[categoryKind].isNullOrEmpty()) headerAction else firstCategory
     }
 
     Dialog(onDismissRequest = ::back, properties = DialogProperties(usePlatformDefaultWidth = false)) {
@@ -90,6 +105,8 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
                         SettingsPage.REMOVE -> "Kaynağı kaldır?"
                         SettingsPage.HISTORY -> "Geçmişi temizle?"
                         SettingsPage.ABOUT -> "Uygulama hakkında"
+                        SettingsPage.CATEGORIES -> "Kategoriler"
+                        SettingsPage.CATEGORY_LIST -> when (categoryKind) { MediaKind.LIVE -> "Canlı TV"; MediaKind.MOVIE -> "Filmler"; else -> "Diziler" }
                     }, Modifier.weight(1f).testTag("settings-title"), color = Ink.Text, fontFamily = Roboto,
                         fontWeight = FontWeight.Medium, fontSize = 24.sp, lineHeight = 30.sp)
                     Action(if (page == SettingsPage.MAIN) "Kapat" else "Geri",
@@ -118,10 +135,12 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
                             else -> false
                         }
                     }.focusable() else Modifier)) {
+                    if (page == SettingsPage.CATEGORY_LIST) CategoryList(s.categoryChoices[categoryKind].orEmpty(), categoryKind, s, firstCategory,
+                        { name, visible -> model.categoryVisible(categoryKind, name, visible) })
                     // Rows cut by the divider or the hint row fade out instead of resting as half a line;
                     // the focused row keeps a 20 dp edge (SettingRow), so it never sits in the fade.
                     // About text starts on the 28 dp edge of the title inside its 12 dp reading frame.
-                    Column(Modifier.fillMaxSize()
+                    if (page != SettingsPage.CATEGORY_LIST) Column(Modifier.fillMaxSize()
                         .then(if (page == SettingsPage.MAIN || page == SettingsPage.ABOUT) Modifier.scrollEdgeFade(Ink.Background,
                             top = { scroll.canScrollBackward }, bottom = { scroll.canScrollForward }, topFade = 14.dp, bottomFade = 14.dp) else Modifier)
                         .verticalScroll(scroll)
@@ -150,6 +169,14 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
                                 if (s.sources.size == 1) SettingRow("Kaynağı düzenle", "Bağlantı ve hesap bilgilerini değiştir.", section("Kaynaklar")) { dismiss(); model.editSource() }
                                 if (s.sources.size == 1) SettingRow("Kaynağı kaldır", "Bu kaynağı ve cihazdaki kayıtlarını kaldır.", Modifier.focusRequester(remove).then(section("Kaynaklar"))) { open(SettingsPage.REMOVE) }
                                 Spacer(Modifier.height(6.dp))
+                                // D068: what the screens show. A switch anyone can turn back, not a PIN lock.
+                                SettingRow("Yetişkin kategorilerini gizle", "Adında XXX, Adult, +18, Yetişkin gibi ifadeler geçen kategoriler hiçbir yerde görünmez.",
+                                    section("İçerik"), checked = s.hideAdultCategories) { model.hideAdultCategories() }
+                                val hiddenCount = s.hiddenCategories.size
+                                SettingRow("Kategorileri yönet", (if (hiddenCount > 0) "$hiddenCount kategori gizli. " else "") +
+                                    "Canlı TV, film ve dizi kategorilerini aç veya kapat.",
+                                    Modifier.focusRequester(categories).then(section("İçerik"))) { open(SettingsPage.CATEGORIES) }
+                                Spacer(Modifier.height(6.dp))
                                 SettingRow("Otomatik sonraki bölüm", "Bölüm bitince 10 saniye sonra devam eder. Geri sayımı iptal edebilirsin.",
                                     modifier = section("İzleme ve uygulama"), checked = s.autoNextEpisode) { model.autoNextEpisode() }
                                 SettingRow("İzleme geçmişini temizle", "Tüm kaynaklardaki izleme konumlarını siler; favorilerini korur.", Modifier.focusRequester(history).then(section("İzleme ve uygulama"))) { open(SettingsPage.HISTORY) }
@@ -166,6 +193,18 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
                                     dismiss()
                                 }
                             }
+                            SettingsPage.CATEGORIES -> {
+                                Note("Kapattığın kategoriler ana sayfada, kütüphanede, aramada ve rehberde görünmez. Kaynağın değişmez.")
+                                listOf(MediaKind.LIVE to "Canlı TV", MediaKind.MOVIE to "Filmler", MediaKind.SERIES to "Diziler").forEach { (kind, label) ->
+                                    val list = s.categoryChoices[kind].orEmpty()
+                                    val off = list.count { CategoryVisibility.key(kind, it.name) in s.hiddenCategories || s.hideAdultCategories && it.adult }
+                                    SettingRow(label, "${list.size} kategori" + if (off > 0) " · $off gizli" else "",
+                                        Modifier.focusRequester(kindFocus.getValue(kind)).testTag("category-kind:${kind.name}")) {
+                                        categoryKind = kind; returnTo = SettingsPage.CATEGORY_LIST; page = SettingsPage.CATEGORY_LIST
+                                    }
+                                }
+                            }
+                            SettingsPage.CATEGORY_LIST -> Unit
                             SettingsPage.ABOUT -> {
                                 NextvLogo(height = 24.dp)
                                 Note("Sürüm ${BuildConfig.VERSION_NAME}")
@@ -176,7 +215,7 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
                                 Note("Kaynağın ve katalog önbelleğin bu cihazda şifreli saklanır.")
                                 Spacer(Modifier.height(6.dp))
                                 SettingsLabel("Bu sürümde")
-                                Note("Canlı TV, film, dizi, arama, favori, izlemeye devam et ve yayın rehberi kullanılabilir. Rehber bilgisi kaynağın desteğine bağlıdır. PIN yönetimi henüz yok. Sağlayıcının yetişkin işaretli içerikleri gösterilmez.")
+                                Note("Canlı TV, film, dizi, arama, favori, izlemeye devam et ve yayın rehberi kullanılabilir. Rehber bilgisi kaynağın desteğine bağlıdır. PIN yönetimi henüz yok. Sağlayıcının yetişkin işaretli içerikleri hiç gösterilmez; adı yetişkin içerik bildiren kategoriler Ayarlar'dan kapatılır.")
                             }
                         }
                     }
@@ -187,6 +226,31 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
                     Text(if (scroll.value > scrollHintThreshold) "↑ Yukarı" else "", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
                     Text(if (scroll.maxValue - scroll.value > scrollHintThreshold) "↓ Daha fazla" else "", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
                 }
+            }
+        }
+    }
+}
+
+/**
+ * One section's categories as switches (Açık = shown), in the provider's order. Adult-looking ones stay off while the
+ * adult filter is on, and say so. A lazy list: a provider can have hundreds of categories.
+ */
+@Composable private fun CategoryList(choices: List<dev.iptvplayer.tv.data.CategoryChoice>, kind: MediaKind, s: TvState,
+    first: FocusRequester, toggle: (String, Boolean) -> Unit) {
+    if (choices.isEmpty()) {
+        Note("Bu bölümde kategori yok.", modifier = Modifier.padding(28.dp)); return
+    }
+    androidx.compose.foundation.lazy.LazyColumn(Modifier.fillMaxSize().testTag("settings-categories"),
+        contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 18.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        items(choices.size, key = { choices[it].name }) { index ->
+            val choice = choices[index]
+            val byAdult = s.hideAdultCategories && choice.adult
+            val visible = !byAdult && CategoryVisibility.key(kind, choice.name) !in s.hiddenCategories
+            val (label, tag) = displayCategory(choice.name)
+            SettingRow(label + if (tag.isNotEmpty()) " · $tag" else "",
+                "${choice.count} içerik" + if (byAdult) " · Yetişkin filtresi gizliyor" else "",
+                (if (index == 0) Modifier.focusRequester(first) else Modifier).testTag("category-choice:$index"), checked = visible) {
+                if (!byAdult) toggle(choice.name, !visible)
             }
         }
     }

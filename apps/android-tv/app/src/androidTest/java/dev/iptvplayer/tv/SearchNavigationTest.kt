@@ -697,11 +697,12 @@ class SearchNavigationTest {
         click("Ayarlar")
         ui.waitUntil(5_000) { ui.onAllNodes(hasText("Hareketi azalt") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
         val rows = listOf("Hareketi azalt", "Açılış sesi", "Kaynakları yönet", "Kataloğu yenile",
-            "Kaynağı düzenle", "Kaynağı kaldır", "Otomatik sonraki bölüm", "İzleme geçmişini temizle", "Uygulama hakkında")
+            "Kaynağı düzenle", "Kaynağı kaldır", "Yetişkin kategorilerini gizle", "Kategorileri yönet",
+            "Otomatik sonraki bölüm", "İzleme geçmişini temizle", "Uygulama hakkında")
         val label = ui.onNodeWithTag("settings-section")
         val initial = label.getUnclippedBoundsInRoot()
         fun check(index: Int) {
-            val expected = when (index) { 0, 1 -> "Görünüm ve ses"; in 2..5 -> "Kaynaklar"; else -> "İzleme ve uygulama" }
+            val expected = when (index) { 0, 1 -> "Görünüm ve ses"; in 2..5 -> "Kaynaklar"; 6, 7 -> "İçerik"; else -> "İzleme ve uygulama" }
             label.assertTextEquals(expected).assertIsDisplayed()
             val current = label.getUnclippedBoundsInRoot()
             assertEquals(initial.top, current.top)

@@ -143,7 +143,7 @@ class GuideFlowTest {
         assertEquals(id(1), model.state.value.guideChannelId); assertEquals(anchor, model.state.value.guideAnchor)
         key(KeyEvent.KEYCODE_DPAD_RIGHT)
         assertEquals(base + 10 * 60_000, model.state.value.guideAnchor)
-        ui.onNodeWithTag("guide-selection-title").assertTextEquals("Sıradaki program 1")
+        ui.onNodeWithTag("guide-grid").assertContentDescriptionContains("Sıradaki program 1", substring = true)
         assertEquals(0, streams.get())
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.onNodeWithTag("guide-detail-reader").assertIsDisplayed(); assertEquals(0, streams.get())
@@ -159,6 +159,8 @@ class GuideFlowTest {
         key(KeyEvent.KEYCODE_BACK); assertEquals(Route.PLAYER, model.state.value.route)
         key(KeyEvent.KEYCODE_BACK); assertEquals(Route.GUIDE, model.state.value.route)
         ui.onNodeWithTag("guide-grid").assertIsFocused(); assertEquals(id(1), model.state.value.guideChannelId)
+        // Back from the grid: the day and time controls, then the menu, then Ana Sayfa.
+        key(KeyEvent.KEYCODE_BACK); ui.onNodeWithTag("guide-now").assertIsFocused()
         key(KeyEvent.KEYCODE_BACK); ui.onNodeWithTag("nav:Canlı TV").assertIsFocused()
         key(KeyEvent.KEYCODE_BACK); assertEquals(Route.HOME, model.state.value.route)
     }
@@ -169,6 +171,7 @@ class GuideFlowTest {
         // The guide's own Back handler stays enabled until the next frame removes the screen: from its side menu the
         // second Back belongs to Home and asks, instead of going Home a second time unseen.
         guide()
+        key(KeyEvent.KEYCODE_BACK); ui.onNodeWithTag("guide-now").assertIsFocused()
         key(KeyEvent.KEYCODE_BACK); ui.onNodeWithTag("nav:Canlı TV").assertIsFocused()
         doubleBack(); exitAsked()
         assertEquals(Route.HOME, model.state.value.route)
@@ -188,7 +191,7 @@ class GuideFlowTest {
     @Test fun missingGuideAndEmptyFutureDayNeverBlockLivePlayback() {
         guide()
         key(KeyEvent.KEYCODE_DPAD_DOWN); key(KeyEvent.KEYCODE_DPAD_DOWN)
-        ui.onNodeWithTag("guide-selection-title").assertTextEquals("Rehberde kanal kimliği bulunamadı")
+        ui.onNodeWithTag("guide-grid").assertContentDescriptionContains("Rehberde kanal kimliği bulunamadı", substring = true)
         click("guide-day-next")
         ui.onNodeWithTag("guide-grid").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
         key(KeyEvent.KEYCODE_DPAD_CENTER)
@@ -232,7 +235,7 @@ class GuideFlowTest {
         ui.runOnUiThread { model.refreshGuide(source.id) }
         ui.waitUntil(10_000) { model.state.value.guideStatus[source.id]?.error != null && model.state.value.guideStatus[source.id]?.refreshing == false }
         assertEquals(updated, model.state.value.guideStatus[source.id]!!.info!!.updatedAt)
-        ui.onNodeWithTag("guide-selection-title").assertTextEquals(currentTitle[0])
+        ui.onNodeWithTag("guide-grid").assertContentDescriptionContains(currentTitle[0], substring = true)
         ui.runOnUiThread { model.manageSources() }
         click("info-source:${source.id}")
         ui.onNodeWithText("Yayın rehberi şu anda alınamıyor.", substring = true).assertExists()

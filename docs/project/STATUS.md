@@ -1,5 +1,11 @@
 # Proje durumu
 
+## Büyük vitrin, rehber kısayolları, kategori gizleme · 17 Ekim 2026
+
+Kullanıcının istekleriyle (D067, D068): vitrin üst kenara kadar, tam genişlik, 372 dp ve geniş görselle (Xtream'de slayt ayrıntısından çekilir; yoksa bulanık afiş); rehberde Geri → gün/saat düğmeleri, CH+/CH− sayfa, İleri/Geri sarma gün, rakamla kanal, alt bant kaldırıldı, 50 dp satırla altı kanal; Canlı TV listesinin üst paneli kaldırıldı; Ayarlar → İçerik'te yetişkin kategorilerini gizle (varsayılan açık) ve kategorileri tek tek aç/kapat.
+
+Kontroller: 163 JVM testi geçti (1 atlanan; CategoryVisibilityTest yeni), lint 0 hata, release/debug/test APK'ları derlendi. 5556'da gerçek Evim ile görüldü: vitrin geniş görselle (slaytlar sentetik Demo'dan), Canlı TV listesi panelsiz (yetişkin filtresiyle 4.531 → 4.290 kanal), rehberde Geri/CH+/rakam, kategori sayfaları; GREECE kapatılınca 4.247 kanal, geri açılınca 4.290. Xtream'de slayt ayrıntısının çekilmesi emülatörde görülmedi (Evim M3U); TV'de görülecek. Enstrümantasyon testleri koşulmadı. Sürüm 0.14.41'de, TV'ye kurulmadı.
+
 ## 0.14.41 · NEXTV teslimi · 17 Ekim 2026
 
 Kullanıcının isteğiyle ("Televizyona yükle") bu dalın üç commit'i (UX denetimi, D064, D065/D066) TV'ye kuruldu. Sürüm 0.14.41 (kod 55). Teslim: releases/NEXTV_TV_Design_Preview_0.14.41.apk (+ .sha256), SHA-256 5fa8f07da7b7572a14402fde2f819ad4bb35d3eeedd92a16e885646bd661cc61. Dosya adı ürün adıyla (D066) NEXTV oldu; önceki teslimler eski adla kaldı. İmza sertifikası 0.14.40 ile aynı (4fe97f80…6065). TV'ye `adb install -r` ile kuruldu (0.14.40'tan); kurulu dosyanın SHA-256'sı eşleşti, firstInstallTime 13 Ekim olarak kaldı, yani veri korundu. TV kurulum sırasında uykudaydı; uygulama açılmadı. Launcher'daki ad NEXTV.
