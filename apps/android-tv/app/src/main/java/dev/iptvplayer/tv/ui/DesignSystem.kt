@@ -93,6 +93,7 @@ private val iconPaths = mapOf(
     "sound" to "m3 9 5 0 5-5v16l-5-5H3Zm14-2c3 3 3 7 0 10m3-13c5 5 5 11 0 16",
     "search" to "M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm5 12 6 6",
     "guide" to "M3 4h18v16H3ZM3 9h18M3 14h18M8 4v16M15 9v5",
+    "info" to "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18ZM12 11v5.5M12 7.6v.2",
 )
 
 @Composable fun LineIcon(name: String, color: Color, modifier: Modifier = Modifier, filled: Boolean = false) {

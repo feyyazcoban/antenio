@@ -647,10 +647,10 @@ class VisualPreviewTest {
         ui.runOnUiThread { model.recordViewed(movie); model.saveProgress(movie, 1_200_000, 8_880_000) }
         click("Filmler"); click("Ana Sayfa")
         // Home opens on the hero (D070), even with a title to continue.
-        ui.onNodeWithTag("hero-details").assertIsFocused()
+        ui.onNodeWithTag("hero-watch").assertIsFocused()
         // Resume focus now frames its shelf. Release it before capturing the hero;
         // the current hero renders the content type in a separate metadata line.
-        ui.onNodeWithTag("hero-details").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        ui.onNodeWithTag("hero-watch").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
         ui.onNodeWithTag("home-content").performScrollToIndex(0)
         ui.onNodeWithTag("hero-label").assertTextEquals("KÜTÜPHANENDEN").assertIsDisplayed()
         shot("home")

@@ -1,5 +1,11 @@
 # Son devir notu
 
+## 0.14.43 · TV teslimi · 18 Ekim 2026
+
+Değişen: app/build.gradle.kts (versionCode 57, 0.14.43-design-preview); ui/HomeScreen.kt (`Hero`: `hero-watch` İzle + `hero-details` Ayrıntılar, `starting`, `watch`; slayt dönüşü satır uçlarında), TvViewModel.kt (`watch(entry)`, `TvState.heroStarting`), ui/DesignSystem.kt ("info" ikonu); testler HeroLayoutTest, PilotFlowTest, VisualPreviewTest, ContinueCardLayoutTest; DECISIONS D071. Teslim releases/NEXTV_TV_Design_Preview_0.14.43.apk, SHA-256 954ed138e22140288d57e73a7c9bed85932c9a297b25aaca03d0daffc3742a92. TV'de 0.14.43 kurulu, SHA eşleşti, veri korundu.
+
+Sonraki adım: kullanıcının TV'de vitrin İzle/Ayrıntılar, açılış kapağı ve bölüm aramasını denemesi. Kullanıcı "tüm gap'i kapat" ve satış stratejisi istedi: strateji araştırması arka planda; gap çalışması dalgalar halinde başlayacak (TIVIMATE_GAP).
+
 ## Açılış kapağı, ana sayfa odağı, bölüm araması, raporlar · 18 Ekim 2026
 
 Değişen kod: ui/LaunchCover.kt (`RestoringCover`; hareketsiz kapak kaynaklar açılana kadar; `SplashSpinner(still)` hareket azaltma/kapalı animasyonda sabit yay; etiket en az 14 sp), ui/PilotApp.kt (LOADING + RESTORING + `restoringAtLaunch` → kapak, diğerleri `LoadingScreen`), TvViewModel.kt (`TvState.restoringAtLaunch`, `restore(atLaunch)`; init `restore(atLaunch = true)`; `query()` sonuçları korur), ui/HomeScreen.kt (ilk odak "hero"), ui/LibraryScreen.kt (alan açılınca `scrollToItem(0)` sonra odak; alanın `down` yönlendirmesi kaldırıldı; `searchLabel`/`widenLabel`, boş durumda `widen`, `widened` sonrası ilk sonuca odak; Favoriler/Geçmiş kategorisinde aramada doğru boş metin). Testler: SearchNavigationTest, LoadingLayoutTest, PilotFlowTest, VisualPreviewTest, ContinueCardLayoutTest. Belgeler: DECISIONS D069/D070 (D062'ye not), NATIVE_UI "Açılış ve ses", yeni PLAY_STORE_READINESS.md ve product/TIVIMATE_GAP.md.

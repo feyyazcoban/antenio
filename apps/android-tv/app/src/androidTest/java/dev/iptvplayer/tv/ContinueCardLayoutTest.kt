@@ -41,8 +41,8 @@ class ContinueCardLayoutTest {
         val restored = homeLibrary(model.state.value.catalog, model.state.value.history, emptySet()).continueWatching.map { it.entry }
         assertEquals(8, restored.size)
         // Home opens on the hero when there is one (D070); Down reaches the continue shelf.
-        if (ui.onAllNodesWithTag("hero-details").fetchSemanticsNodes().isNotEmpty()) {
-            ui.onNodeWithTag("hero-details").assertIsFocused()
+        if (ui.onAllNodesWithTag("hero-watch").fetchSemanticsNodes().isNotEmpty()) {
+            ui.onNodeWithTag("hero-watch").assertIsFocused()
             InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle()
         }
         repeat(restored.size) { index ->

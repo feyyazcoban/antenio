@@ -75,6 +75,8 @@ data class TvState(
     val sourceTask: SourceTask = SourceTask.RESTORING,
     /** The restore opening the app (D069): shown as the NEXTV cover. Retries and resets keep the operation card. */
     val restoringAtLaunch: Boolean = true,
+    /** The hero's İzle is fetching a series' episodes for this title (D071); its label says "Açılıyor…". */
+    val heroStarting: String? = null,
     val refreshing: Boolean = false,
     val catalogUpdatedAt: Long = 0,
     val catalogNotice: CatalogNotice? = null,
@@ -628,6 +630,45 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) { mutable.update { it.copy(detailLoading = false, detailError = (e as? SourceFailure)?.message ?: "Ayrıntılar alınamadı.") } }
+        }
+    }
+
+    /**
+     * The hero's İzle (D071): a film plays, from where it was left when it was started; a series plays its next
+     * episode, the way its detail's Oynat/Devam et would: the episode being watched, the one after a finished one, else
+     * the first. The episodes load first; leaving Ana Sayfa meanwhile cancels the start. With no episode, or when they
+     * cannot be loaded, the series' detail opens and explains.
+     */
+    fun watch(entry: MediaEntry) {
+        if (entry.adult || state.value.sourceFor(entry) == null) return
+        val source = state.value.sourceFor(entry) ?: return
+        mutable.update { it.copy(focusedId = entry.id) }
+        if (entry.kind != MediaKind.SERIES) { play(entry); return }
+        detailJob?.cancel()
+        mutable.update { it.copy(heroStarting = entry.id) }
+        detailJob = viewModelScope.launch {
+            try {
+                val (rawShow, rawEpisodes) = repository.episodes(source, entry.withoutSource(), snapshots[source.id]?.catalog ?: Catalog(emptyList()))
+                val show = rawShow.inSource(source.id)
+                val episodes = rawEpisodes.map { it.inSource(source.id) }
+                val history = state.value.history.firstOrNull { it.parentId == entry.id }
+                val watched = episodes.firstOrNull { it.id == history?.id && !it.adult }
+                val next = when {
+                    watched != null && history?.progress?.completed == true -> EpisodeSequence.next(source, watched, episodes)?.entry ?: watched
+                    watched != null -> watched
+                    else -> episodes.firstOrNull { !it.adult }
+                }
+                mutable.update { it.copy(heroStarting = null) }
+                if (state.value.route != Route.HOME) return@launch
+                if (next == null) { open(entry); return@launch }
+                // The player's next-episode countdown reads the series from the state, as after the detail's Oynat.
+                mutable.update { it.copy(selected = show, episodes = episodes, season = next.season) }
+                play(next)
+            } catch (e: CancellationException) { mutable.update { it.copy(heroStarting = null) }; throw e }
+            catch (_: Exception) {
+                mutable.update { it.copy(heroStarting = null) }
+                if (state.value.route == Route.HOME) open(entry)
+            }
         }
     }
 

@@ -229,7 +229,7 @@ private data class HomeRow(val key: String, val title: String, val entries: List
     val lastFocus = remember { FocusMemory() }
     val slides = remember(library) { library.newest.ifEmpty { listOfNotNull(library.featured) } }
     val validKeys = rows.flatMap { r -> r.entries.map { "${r.key}:${it.id}" } }.toSet() + if (slides.isNotEmpty()) setOf("hero") else emptySet()
-    // Home opens on the hero's Ayrıntılar (D070); coming back from a title or the player keeps the remembered card.
+    // Home opens on the hero's İzle (D070, D071); coming back from a title or the player keeps the remembered card.
     val target = remember { model.homeFocusKey?.takeIf { it in validKeys } ?: when {
         slides.isNotEmpty() -> "hero"
         library.continueWatching.isNotEmpty() -> "continue:${library.continueWatching.first().entry.id}"
@@ -294,7 +294,7 @@ private data class HomeRow(val key: String, val title: String, val entries: List
                     Modifier.then(if (target == "hero") Modifier.focusRequester(focus) else Modifier)
                     .focusRequester(heroFocus)
                     .onFocusChanged { if (it.hasFocus) { model.homeFocus("hero"); lastFocus.requester = heroFocus } },
-                    detail = model::heroDetail, ensure = model::ensureHeroDetail) { model.open(it) }
+                    detail = model::heroDetail, ensure = model::ensureHeroDetail, starting = s.heroStarting, watch = model::watch) { model.open(it) }
                 else Column(Modifier.padding(horizontal = TvLayout.Gutter, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("SENİN TELEVİZYONUN", color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, letterSpacing = 2.sp)
                     Heading("Şimdi ne izleyelim?")
@@ -373,12 +373,15 @@ private data class HomeRow(val key: String, val title: String, val entries: List
  * The hero carousel (D067): a large, full-width picture from the top edge down to the shelves. A slide with a wide
  * picture fills the hero with it; a poster-only slide fills it with its own poster, much enlarged and softened, and
  * shows the poster beside the text. Films from an Xtream source get their wide picture from their details
- * ([detail], fetched through [ensure] for the slide on screen and the next). Slides advance every 8 s (15 s while
- * Ayrıntılar has focus, none with TalkBack or reduced motion); Right and Left on Ayrıntılar step through them.
- * The action is one composable across slides, so focus never leaves it.
+ * ([detail], fetched through [ensure] for the slide on screen and the next). Two actions (D071): İzle ([watch]: the
+ * film from where it was left, a series' next episode) and Ayrıntılar ([open]). Slides advance every 8 s (15 s while
+ * an action has focus, none with TalkBack or reduced motion); the row's ends turn them: Right on Ayrıntılar shows the
+ * next slide, Left on İzle the previous one (Left on the first reaches the menu). The actions are one composable
+ * across slides, so focus never leaves them; [actionModifier] is İzle's, the hero's focus target.
  */
 @Composable private fun Hero(slides: List<MediaEntry>, newest: Boolean, reducedMotion: Boolean, actionModifier: Modifier,
-    detail: (MediaEntry) -> MediaEntry, ensure: (MediaEntry) -> Unit, open: (MediaEntry) -> Unit) {
+    detail: (MediaEntry) -> MediaEntry, ensure: (MediaEntry) -> Unit, starting: String?, watch: (MediaEntry) -> Unit,
+    open: (MediaEntry) -> Unit) {
     val largeText = LocalDensity.current.fontScale >= 1.5f
     val motion = !reducedMotion && android.animation.ValueAnimator.areAnimatorsEnabled()
     val many = slides.size > 1
@@ -401,7 +404,7 @@ private data class HomeRow(val key: String, val title: String, val entries: List
             SingletonImageLoader.get(context).enqueue(ImageRequest.Builder(context).data(SourceArtwork(next.sourceId, url))
                 .memoryCachePolicy(CachePolicy.DISABLED).size(coil3.size.Size(960, 540)).build())
         }
-        // 8 s (D063); 15 s while Ayrıntılar has focus, so the text being read does not change so soon.
+        // 8 s (D063); 15 s while an action has focus, so the text being read does not change so soon.
         if (motion && !spoken) {
             delay(if (actionFocused) 15_000 else 8_000)
             turnedFrom = entry; turnedAt = System.currentTimeMillis(); index = (current + 1) % slides.size
@@ -435,21 +438,24 @@ private data class HomeRow(val key: String, val title: String, val entries: List
                     else EnterTransition.None togetherWith ExitTransition.None) using null
                 }) { slide -> HeroText(slide, largeText, tagged = true) }
             }
-            Row(Modifier.padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                // Right and Left turn the slides; with one slide, Right stays here rather than jumping to the first shelf.
-                Action("Ayrıntılar", actionModifier.onPreviewKeyEvent { event ->
-                    if (!many || event.type != KeyEventType.KeyDown) false
-                    else when (event.key) {
-                        Key.DirectionRight -> { index = (current + 1) % slides.size; true }
-                        Key.DirectionLeft -> if (current > 0) { index = current - 1; true } else false
-                        else -> false
-                    }
-                }.focusProperties { right = FocusRequester.Cancel }.onFocusChanged { actionFocused = it.isFocused }
+            // An OK within half a second of an automatic turn meant the slide that was on screen.
+            fun shown() = turnedFrom?.takeIf { System.currentTimeMillis() - turnedAt < 600 } ?: slides[current]
+            var watchFocused by remember { mutableStateOf(false) }
+            var detailsFocused by remember { mutableStateOf(false) }
+            LaunchedEffect(watchFocused, detailsFocused) { actionFocused = watchFocused || detailsFocused }
+            Row(Modifier.padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                // Left on İzle shows the previous slide; on the first it goes on to the menu.
+                Action(if (starting == slides[current].id) "Açılıyor…" else "İzle", actionModifier.onPreviewKeyEvent { event ->
+                    if (many && event.type == KeyEventType.KeyDown && event.key == Key.DirectionLeft && current > 0) { index = current - 1; true } else false
+                }.onFocusChanged { watchFocused = it.isFocused }
                     .semantics { if (many) stateDescription = "${entry.title}, ${current + 1} / ${slides.size}" }
-                    // An OK within half a second of an automatic turn meant the slide that was on screen.
-                    .testTag("hero-details"), primary = true, icon = "play") {
-                    open(turnedFrom?.takeIf { System.currentTimeMillis() - turnedAt < 600 } ?: slides[current])
-                }
+                    .testTag("hero-watch"), primary = true, icon = "play") { watch(shown()) }
+                // Right on Ayrıntılar shows the next slide; with one slide it stays here rather than jumping to a shelf.
+                Action("Ayrıntılar", Modifier.onPreviewKeyEvent { event ->
+                    if (many && event.type == KeyEventType.KeyDown && event.key == Key.DirectionRight) { index = (current + 1) % slides.size; true } else false
+                }.focusProperties { right = FocusRequester.Cancel }.onFocusChanged { detailsFocused = it.isFocused }
+                    .testTag("hero-details"), outlined = true, icon = "info") { open(shown()) }
+                if (many) Spacer(Modifier.width(8.dp))
                 if (many) SlideDots(slides.size, current)
             }
         }

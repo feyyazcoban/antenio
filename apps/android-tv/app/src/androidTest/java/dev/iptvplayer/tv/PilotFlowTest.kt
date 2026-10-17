@@ -207,8 +207,8 @@ class PilotFlowTest {
         back(); back(); back()
         click("Ana Sayfa")
         // Home opens on the hero when there is one (D070); Down reaches the continue shelf.
-        if (ui.onAllNodesWithTag("hero-details").fetchSemanticsNodes().isNotEmpty()) {
-            ui.onNodeWithTag("hero-details").assertIsFocused()
+        if (ui.onAllNodesWithTag("hero-watch").fetchSemanticsNodes().isNotEmpty()) {
+            ui.onNodeWithTag("hero-watch").assertIsFocused()
             InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle()
         }
         val tile = ui.onNodeWithTag("continue:${model.fixtureKey("series:4")}")

@@ -1,5 +1,11 @@
 # Proje durumu
 
+## 0.14.43 · TV teslimi · 18 Ekim 2026
+
+Kullanıcının isteğiyle ("Televizyonda son halini görmek istiyorum") D069, D070, bölüm araması düzeltmeleri ve D071 (vitrinde İzle + Ayrıntılar, kullanıcının seçimi) TV'ye kuruldu. Sürüm 0.14.43 (kod 57). Teslim: releases/NEXTV_TV_Design_Preview_0.14.43.apk (+ .sha256), SHA-256 954ed138e22140288d57e73a7c9bed85932c9a297b25aaca03d0daffc3742a92, imza önceki sürümle aynı. `adb install -r` ile 0.14.42'nin üstüne kuruldu; kurulu dosyanın SHA-256'sı eşleşti, firstInstallTime değişmedi (veri korundu); uygulama TV'de açıldı.
+
+Kontroller: `testDebugUnitTest` geçti, `lintDebug` 0 hata, `assembleRelease` ve androidTest derlemesi geçti (HeroLayoutTest İzle/Ayrıntılar ve slayt dönüşü; PilotFlow/VisualPreview/ContinueCardLayout ilk odak `hero-watch`). 5556'da vitrin görüldü (İzle odakta, Ayrıntılar bilgi ikonuyla); emülatörde oynatma denenmedi. Enstrümantasyon testleri koşulmadı.
+
 ## Açılış kapağı, ana sayfa odağı, bölüm araması, raporlar · 18 Ekim 2026
 
 Kullanıcının bildirimleri ve istekleriyle: (1) süreç canlıyken ikinci açılışta eski yükleme kartı yerine NEXTV kapağı (D069; bağımsız incelemenin 6 bulgusu giderildi: hareket azaltmada sabit gösterge, kurtarma ekranında kart, 14 sp etiket, test); (2) Ana Sayfa açılışta vitrinin "Ayrıntılar" düğmesinde (D070); (3) "Bu bölümde ara" düzeltmeleri: alan açılınca liste başına kayar, alan etiketiyle tam görünür (önce yarısı başlığın altında kalıyordu); klavye kapalıyken alandan Aşağı ilk sonuca gider (önce soldaki kategori sütununa atlıyordu; TV klavyesi tam bu durumu yaşar); her harfte sonuçlar boşalıp "Aranıyor…" ile yanıp sönmez; kategori seçiliyken etiket "Bu kategoride ara", sonuç yoksa "Bu kategoride bulunamadı" ve tek tuşla "Tüm filmlerde ara" (dizilerde, kanallarda, favorilerde karşılığı). Raporlar: [Play Store hazırlığı ve hukuki riskler](PLAY_STORE_READINESS.md), [TiviMate rekabet farkı](../product/TIVIMATE_GAP.md); ikisindeki öneriler kullanıcı kararı değildir.

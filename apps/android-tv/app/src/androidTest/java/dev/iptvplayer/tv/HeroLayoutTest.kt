@@ -36,19 +36,29 @@ class HeroLayoutTest {
         DeviceStore(ui.activity).reducedMotion = true
         home((1..3).map { MediaEntry("movie:$it", "$it", MediaKind.MOVIE, "Yeni film $it", "Belgeseller",
             artwork = "http://127.0.0.1:1/poster-$it.jpg", addedAt = 1_000L + it, uri = "http://127.0.0.1:1/movie.mp4") })
-        ui.onNodeWithTag("hero-details").assertIsFocused()
+        // D071: İzle and Ayrıntılar; the row's ends turn the slides.
+        ui.onNodeWithTag("hero-watch").assertIsFocused()
         ui.onNodeWithTag("hero-label", useUnmergedTree = true).assertTextEquals("YENİ EKLENEN")
         ui.onNodeWithTag("hero-dots", useUnmergedTree = true).assertExists()
         fun title() = ui.onNodeWithTag("hero-title", useUnmergedTree = true)
         title().assertTextEquals("Yeni film 3")
         val keys = InstrumentationRegistry.getInstrumentation()
         keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
+        ui.onNodeWithTag("hero-details").assertIsFocused()
+        title().assertTextEquals("Yeni film 3")
+        keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
         title().assertTextEquals("Yeni film 2")
         ui.onNodeWithTag("hero-details").assertIsFocused()
         keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
         title().assertTextEquals("Yeni film 3")  // the last slide wraps to the first
-        keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_LEFT); ui.waitForIdle()
+        keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
+        title().assertTextEquals("Yeni film 2")
+        keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_LEFT); ui.waitForIdle()
+        ui.onNodeWithTag("hero-watch").assertIsFocused()
+        title().assertTextEquals("Yeni film 2")
+        keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_LEFT); ui.waitForIdle()
         title().assertTextEquals("Yeni film 3")
+        ui.onNodeWithTag("hero-watch").assertIsFocused()
         keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_LEFT); ui.waitForIdle()
         ui.onNodeWithTag("nav:Ana Sayfa").assertIsFocused()
     }
@@ -57,11 +67,11 @@ class HeroLayoutTest {
         home((1..6).map { MediaEntry("movie:$it", "$it", MediaKind.MOVIE,
             "Uzun Bir Yolculuğun Ardından: Dünyanın Bilinmeyen Köşeleri $it", "Belgeseller", year = "2026",
             description = "Uzak kıyılardan dağlara uzanan bir yolculuk. ".repeat(12), uri = "http://127.0.0.1:1/movie.mp4") })
-        ui.onNodeWithTag("hero-details").assertIsFocused()
+        ui.onNodeWithTag("hero-watch").assertIsFocused()
         val hero = ui.onNodeWithTag("home-hero").getUnclippedBoundsInRoot()
         val viewport = ui.onNodeWithTag("home-content").getUnclippedBoundsInRoot()
         assertTrue("Full hero fits when its action is focused: $hero / $viewport", hero.top >= viewport.top && hero.bottom <= viewport.bottom)
-        for(tag in listOf("hero-label","hero-title","hero-details")) {
+        for(tag in listOf("hero-label","hero-title","hero-watch","hero-details")) {
             val b=ui.onNodeWithTag(tag,useUnmergedTree=true).getUnclippedBoundsInRoot()
             assertTrue("$tag fits inside hero", b.left >= hero.left && b.right <= hero.right && b.top >= hero.top && b.bottom <= hero.bottom)
         }
@@ -70,7 +80,7 @@ class HeroLayoutTest {
         assertTrue("The label keeps its own header line",label.bottom <= title.top)
         // Home has no source selector (it stays in the libraries and Ara).
         ui.onNodeWithTag("library-source-filter").assertDoesNotExist()
-        // Ayrıntılar is the hero's only action; Right does not jump to a card in the first shelf.
+        // İzle and Ayrıntılar are the hero's actions; Right from İzle reaches Ayrıntılar, never a card in the first shelf.
         ui.onNodeWithTag("hero-live").assertDoesNotExist()
         InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.waitForIdle()
