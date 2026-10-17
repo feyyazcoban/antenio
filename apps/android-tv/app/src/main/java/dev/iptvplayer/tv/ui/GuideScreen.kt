@@ -232,8 +232,9 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                                             // The now marker sits on the fill, under the title and the focus border.
                                             .drawBehind { if (now in start until end) drawRect(Ink.Mint.copy(alpha = .5f),
                                                 topLeft = Offset((width * ((now - start).toFloat() / duration)).toPx(), 0f), size = Size(1.dp.toPx(), size.height)) }
+                                            // The same white ring as a focused card (D064).
                                             .border(if (chosen && gridFocused) TvLayout.Focus else 1.dp,
-                                                if (chosen && gridFocused) Ink.Mint else Ink.Divider.copy(alpha = .5f), RoundedCornerShape(6.dp))
+                                                if (chosen && gridFocused) Ink.Text else Ink.Divider.copy(alpha = .5f), RoundedCornerShape(6.dp))
                                             .testTag("guide-cell:${entry.id}:${slot.from}").semantics {
                                                 selected = chosen
                                                 contentDescription = "${entry.title}, $title, ${guideTime(slot.from, zone)}"

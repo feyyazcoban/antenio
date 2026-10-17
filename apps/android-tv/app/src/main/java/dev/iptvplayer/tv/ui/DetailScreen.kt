@@ -77,7 +77,7 @@ private class SeasonShelf(start: Int) {
         else -> s.episodes.firstOrNull { !it.adult }
     }
     val mark = if (!series) model.progress(entry) else next?.let(model::progress)
-    val resume = (mark?.resumeMs ?: 0) > 0
+    val resume = mark?.resumable == true
     val canPlay = !s.detailLoading && (!series || next != null)
     // As in TiviMate, focus lands on an episode: the one just played, else the one Oynat would start.
     val target = if (series) (restored ?: next?.id)?.takeIf { id -> visibleEpisodes.any { it.id == id } } else null
@@ -130,7 +130,8 @@ private class SeasonShelf(start: Int) {
                         val metadata = listOf(if (s.sources.size > 1) s.sourceName(entry.sourceId) else "", entry.ratingText?.let { "★ $it" }.orEmpty(), entry.year, if (entry.durationSeconds > 0) "${entry.durationSeconds / 60} dk" else "",
                             if (series && !s.detailLoading) "${s.episodes.map { it.season }.distinct().size} sezon" else "").filter { it.isNotBlank() }
                         if (metadata.isNotEmpty()) Note(metadata.joinToString(" · "))
-                        Text(entry.description.ifBlank { "Bu içerik için açıklama sağlanmamış." },
+                        // Most M3U titles carry no plot; a placeholder sentence on each of them is only noise.
+                        if (entry.description.isNotBlank()) Text(entry.description,
                             Modifier.widthIn(max = 510.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 19.sp,
                             maxLines = if (series) 2 else 3, overflow = TextOverflow.Ellipsis)
                         if (s.detailLoading) Note("Ayrıntılar yükleniyor…")
@@ -142,7 +143,9 @@ private class SeasonShelf(start: Int) {
                             }
                             if (s.detailError != null) Action("Tekrar dene",
                                 Modifier.then(if (!canPlay && target == null) Modifier.focusRequester(first) else Modifier)) { model.retryDetail() }
-                            Action(if (entry.id in s.favoriteIds) "Favorilerde" else "Favoriye ekle", icon = "star") { model.toggleFavorite(entry) }
+                            // The label names what OK does; the filled star shows that it is a favourite now.
+                            val favorite = entry.id in s.favoriteIds
+                            Action(if (favorite) "Favorilerden çıkar" else "Favoriye ekle", icon = "star", iconFilled = favorite) { model.toggleFavorite(entry) }
                             if (entry.description.isNotBlank()) Action("Açıklama", Modifier.focusRequester(descriptionFocus).testTag("open-description")) { description = true }
                             // On the same 12 dp grid as the other actions, and only while playback is offered.
                             if (canPlay && resume && !series) Action("Baştan başlat") { model.play(entry, restart = true) }
@@ -156,15 +159,13 @@ private class SeasonShelf(start: Int) {
                     Note("Bu dizi için bölüm bulunamadı.", modifier = Modifier.padding(horizontal = TvLayout.Gutter))
                 }
                 items(seasons, key = { "season:${it.first}" }) { (season, episodes) ->
-                    SeasonRow(season, episodes, shelf(season, episodes), target, first, viewportHeight, model::progress, model::play)
+                    SeasonRow(season, episodes, entry.title, shelf(season, episodes), target, first, viewportHeight, model::progress, model::play)
                 }
             }
         }
         Row(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(Ink.Background.copy(alpha = .82f), Color.Transparent)))
             .padding(start = TvLayout.Gutter, end = TvLayout.Gutter, top = 5.dp + TvLayout.HeaderTop, bottom = 5.dp), verticalAlignment = Alignment.CenterVertically) {
             Action("Geri", Modifier.focusRequester(back), icon = "back") { model.back() }
-            Spacer(Modifier.weight(1f))
-            Text(if (series) "DİZİ" else "FİLM", color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp, letterSpacing = 1.3.sp)
         }
     }
     }
@@ -198,7 +199,7 @@ private class SeasonShelf(start: Int) {
  * "Sezon N" with the remembered episode's place ("2 / 10") and one row of 16:9 episodes. Up and Down enter a
  * row on the episode it remembers; moving along a row redraws only its counter.
  */
-@Composable private fun SeasonRow(season: Int, episodes: List<MediaEntry>, shelf: SeasonShelf, target: String?, first: FocusRequester,
+@Composable private fun SeasonRow(season: Int, episodes: List<MediaEntry>, show: String, shelf: SeasonShelf, target: String?, first: FocusRequester,
     viewportHeight: Dp, progress: (MediaEntry) -> PlaybackMark?, play: (MediaEntry) -> Unit) {
     val density = LocalDensity.current
     var headingHeight by remember { mutableStateOf(0.dp) }
@@ -220,7 +221,7 @@ private class SeasonShelf(start: Int) {
             state = shelf.row, horizontalArrangement = Arrangement.spacedBy(TvLayout.Gap),
             contentPadding = PaddingValues(horizontal = TvLayout.Gutter, vertical = 4.dp)) {
             itemsIndexed(episodes, key = { _, episode -> episode.id }) { index, episode ->
-                EpisodeCard(episode, progress(episode), Modifier.focusRequester(shelf.card(index))
+                EpisodeCard(episode, show, progress(episode), Modifier.focusRequester(shelf.card(index))
                     .then(if (episode.id == target) Modifier.focusRequester(first) else Modifier)
                     .onFocusChanged { if (it.isFocused) shelf.position.intValue = index + 1 },
                     headingHeight + 8.dp, viewportHeight) { play(episode) }
@@ -229,11 +230,11 @@ private class SeasonShelf(start: Int) {
     }
 }
 
-@Composable private fun EpisodeCard(entry: MediaEntry, mark: PlaybackMark?, modifier: Modifier, headingContext: Dp, viewportHeight: Dp, play: () -> Unit) {
+@Composable private fun EpisodeCard(entry: MediaEntry, show: String, mark: PlaybackMark?, modifier: Modifier, headingContext: Dp, viewportHeight: Dp, play: () -> Unit) {
     // The season heading comes into view with the episode when both fit; the details above are not pushed away.
     val visibility = rememberCardVisibility(horizontalPadding = TvLayout.Gutter, contextAbove = headingContext,
         viewportHeight = viewportHeight, frameShelf = false)
-    val resume = (mark?.resumeMs ?: 0) > 0
+    val resume = mark?.resumable == true
     val status = listOf(if (entry.durationSeconds > 0) "${entry.durationSeconds / 60} dk" else "",
         when { resume -> "Devam et"; mark?.completed == true -> "İzlendi"; else -> "" }).filter { it.isNotBlank() }
     Card(onClick = play, modifier = modifier.width(TvLayout.LandscapeWidth).then(visibility.container).then(visibility.focus).testTag("episode:${entry.id}"),
@@ -248,11 +249,14 @@ private class SeasonShelf(start: Int) {
                     Box(Modifier.fillMaxHeight().fillMaxWidth((mark.positionMs.toFloat() / mark.durationMs).coerceIn(0f, 1f)).background(Ink.Mint))
                 }
             }
-            // "E1." stays its own text, so the provider's title is still one string for search and tests.
+            // The episode's own name, without the show's name and SxxEyy the provider repeats on every card. "E1."
+            // only for a number the source states; with no name left, "Bölüm 1" alone.
+            val numbered = entry.episodeOrderKnown && entry.episode > 0
+            val name = remember(entry.title, show) { episodeDisplayTitle(entry.title, show) }.ifBlank { null }
             Row(Modifier.padding(horizontal = 10.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                if (entry.episode > 0) Text("E${entry.episode}.", color = Ink.Muted, fontFamily = Roboto, fontWeight = FontWeight.Medium,
+                if (numbered && name != null) Text("E${entry.episode}.", color = Ink.Muted, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                     fontSize = 12.sp, lineHeight = 17.sp, maxLines = 1)
-                Text(entry.title, Modifier.weight(1f).testTag("episode-title:${entry.id}"),
+                Text(name ?: if (numbered) "Bölüm ${entry.episode}" else entry.title, Modifier.weight(1f).testTag("episode-title:${entry.id}"),
                     fontFamily = Roboto, color = Ink.Text, fontSize = 12.sp, lineHeight = 17.sp,
                     minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }

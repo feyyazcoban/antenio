@@ -613,7 +613,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         val source = state.value.sourceFor(entry) ?: return
         try {
             val uri = source.streamUrl(entry)
-            val position = if (restart || entry.kind == MediaKind.LIVE) 0 else store.progress(source.id, entry.withoutSource().id)?.resumeMs ?: 0
+            val position = if (restart || entry.kind == MediaKind.LIVE) 0 else store.progress(source.id, entry.withoutSource().id)?.takeIf { it.resumable }?.resumeMs ?: 0
             mutable.update { it.copy(route = Route.PLAYER, playing = PlayingMedia(entry, uri, position),
                 guideChannelId = if (entry.kind == MediaKind.LIVE && it.route == Route.PLAYER && it.playerReturn == Route.GUIDE) entry.id else it.guideChannelId,
                 playerReturn = if (it.route == Route.PLAYER) it.playerReturn else it.route,
@@ -636,6 +636,17 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         if (next.entry.id != nextId || (automatic && (!s.autoNextEpisode || !next.automaticAllowed))) return false
         play(next.entry, restart = true)
         return state.value.playing?.entry?.id == nextId
+    }
+
+    /** Channel numbers as Canlı TV shows them: the order of "Tüm kanallar". */
+    private fun numberedChannels(): List<MediaEntry> =
+        catalogDisplayOrder(state.value.catalog.items.filter { it.kind == MediaKind.LIVE && !it.adult })
+    fun channelNumber(entry: MediaEntry): Int? = numberedChannels().indexOfFirst { it.id == entry.id }.takeIf { it >= 0 }?.plus(1)
+    /** Plays channel [number] of "Tüm kanallar" (the one playing stays as it is); false when there is no such channel. */
+    fun playChannelNumber(number: Int): Boolean {
+        val channel = numberedChannels().getOrNull(number - 1) ?: return false
+        if (channel.id != state.value.playing?.entry?.id) play(channel)
+        return true
     }
 
     fun changeChannel(direction: Int) {

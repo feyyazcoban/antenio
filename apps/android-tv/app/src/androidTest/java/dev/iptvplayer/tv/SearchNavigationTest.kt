@@ -387,10 +387,10 @@ class SearchNavigationTest {
         // Provider order: the first film of 80; the adult entry is not counted.
         assertEquals("1 / 80", place())
         key(KeyEvent.KEYCODE_DPAD_RIGHT); assertEquals("2 / 80", place())
-        // Seven columns while the grid has focus; Down moves one row.
-        key(KeyEvent.KEYCODE_DPAD_DOWN); assertEquals("9 / 80", place())
+        // Five columns while the grid has focus (D064); Down moves one row.
+        key(KeyEvent.KEYCODE_DPAD_DOWN); assertEquals("7 / 80", place())
         repeat(3) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
-        assertEquals("30 / 80", place())
+        assertEquals("22 / 80", place())
         // The heading stays above the grid, so the counter is in view while the posters scroll.
         val heading = ui.onNodeWithTag("library-heading").getUnclippedBoundsInRoot()
         val grid = ui.onNodeWithTag("library-grid").getUnclippedBoundsInRoot()

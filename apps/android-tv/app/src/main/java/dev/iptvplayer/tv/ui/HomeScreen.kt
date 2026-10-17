@@ -124,7 +124,13 @@ import kotlinx.coroutines.delay
             .focusRequester(contentFocus).focusGroup()
             // The content slides right by as much as the menu opens. A layer translation only: nothing is
             // measured or laid out again (MOT04), and its right edge simply leaves the screen.
-            .graphicsLayer { translationX = (width.value - TvLayout.RailWidth).toPx() }) { content() }
+            .graphicsLayer { translationX = (width.value - TvLayout.RailWidth).toPx() }
+            // The open menu dims the content behind it, in draw only, so the labels read as the active layer.
+            .drawWithContent {
+                drawContent()
+                val open = ((width.value - TvLayout.RailWidth) / (openWidth - TvLayout.RailWidth)).coerceIn(0f, 1f)
+                if (open > 0f) drawRect(Ink.Background.copy(alpha = .6f * open))
+            }) { content() }
         Column(modifier.layout { measurable, constraints ->
                 val w = width.value.roundToPx()
                 val placeable = measurable.measure(constraints.copy(minWidth = w, maxWidth = w))
@@ -173,7 +179,7 @@ import kotlinx.coroutines.delay
         .testTag("nav:$label").semantics { selected = active; if (!open) contentDescription = label },
         shape = ButtonDefaults.shape(shape = RoundedCornerShape(50)),
         colors = ButtonDefaults.colors(containerColor = if (active) Ink.Selected else Color.Transparent,
-            contentColor = Ink.Text, focusedContainerColor = Ink.Text, focusedContentColor = Ink.Background),
+            contentColor = Ink.Text, focusedContainerColor = Ink.Mint, focusedContentColor = Ink.OnMint),
         border = ButtonDefaults.border(focusedBorder = Border(BorderStroke(TvLayout.Focus, Ink.Text), inset = 3.dp)),
         scale = ButtonDefaults.scale(focusedScale = 1f), contentPadding = PaddingValues(horizontal = (height - 20.dp) / 2)) {
         Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
@@ -353,19 +359,28 @@ private data class HomeRow(val key: String, val title: String, val entries: List
     val largeText = LocalDensity.current.fontScale >= 1.5f
     val motion = !reducedMotion && android.animation.ValueAnimator.areAnimatorsEnabled()
     val many = slides.size > 1
+    val context = LocalContext.current
+    // With TalkBack the slides turn only by remote: the spoken text must not change under the viewer.
+    val spoken = remember(context) { context.getSystemService(android.view.accessibility.AccessibilityManager::class.java)?.isTouchExplorationEnabled == true }
+    var actionFocused by remember { mutableStateOf(false) }
+    var turnedAt by remember { mutableLongStateOf(0L) }
+    var turnedFrom by remember { mutableStateOf<MediaEntry?>(null) }
     var index by rememberSaveable(slides) { mutableIntStateOf(0) }
     // A restored index can outlive a shorter slide list; every use goes through the clamped one.
     val current = index.coerceIn(0, slides.lastIndex)
     val entry = slides[current]
-    val context = LocalContext.current
-    if (many) LaunchedEffect(current, slides, motion) {
+    if (many) LaunchedEffect(current, slides, motion, actionFocused) {
         // Fetch the next slide's picture now, so the fade does not reveal an empty frame. Disk only, kept small.
         val next = slides[(current + 1) % slides.size]
         (if (next.hasBackdrop) next.backdrop else next.artwork)?.let { url ->
             SingletonImageLoader.get(context).enqueue(ImageRequest.Builder(context).data(SourceArtwork(next.sourceId, url))
                 .memoryCachePolicy(CachePolicy.DISABLED).size(coil3.size.Size(480, 270)).build())
         }
-        if (motion) { delay(8_000); index = (current + 1) % slides.size }
+        // 8 s (D063); 15 s while Ayrıntılar has focus, so the text being read does not change so soon.
+        if (motion && !spoken) {
+            delay(if (actionFocused) 15_000 else 8_000)
+            turnedFrom = entry; turnedAt = System.currentTimeMillis(); index = (current + 1) % slides.size
+        }
     }
     val fade = if (motion) tween<Float>(400) else snap()
     val visibility = rememberCardVisibility()
@@ -421,9 +436,12 @@ private data class HomeRow(val key: String, val title: String, val entries: List
                             Key.DirectionLeft -> if (current > 0) { index = current - 1; true } else false
                             else -> false
                         }
-                    }.focusProperties { right = FocusRequester.Cancel }
+                    }.focusProperties { right = FocusRequester.Cancel }.onFocusChanged { actionFocused = it.isFocused }
                         .semantics { if (many) stateDescription = "${entry.title}, ${current + 1} / ${slides.size}" }
-                        .testTag("hero-details"), primary = true) { open(entry) }
+                        // An OK within half a second of an automatic turn meant the slide that was on screen.
+                        .testTag("hero-details"), primary = true) {
+                        open(turnedFrom?.takeIf { System.currentTimeMillis() - turnedAt < 600 } ?: entry)
+                    }
                     if (many) SlideDots(slides.size, current)
                 }
             }

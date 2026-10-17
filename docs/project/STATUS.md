@@ -1,5 +1,11 @@
 # Proje durumu
 
+## Denetim düzeltmeleri, büyük afişler ve gradient oynatıcı · 17 Ekim 2026
+
+Kullanıcının isteğiyle (kütüphane bandını kaldır, afişleri ve yazıları büyüt; oynatıcıyı alttan gradient ile çöz) ve devam istemesiyle UX denetiminin 15 maddesi uygulandı (D064, [denetim](../design/UX_AUDIT_0.14.40.md)). Öne çıkanlar: Filmler/Diziler'de bilgi paneli yok, 4/5 sütun büyük afiş, 15/12 sp kart yazıları; oynatıcıda opak panel yerine alt scrim; canlıda CH+/CH−, Yukarı/Aşağı ve rakamla kanal; filmde Sol/Sağ ve FF/RW ile sarma; kütüphanede katmanlı Geri ve menüden girişte doğru odak; 2 dk/%2 altı izleme devam sayılmaz; "8x8" gibi başlıklar sezon sayılmaz; bölüm kartında yalnız bölüm adı; odakta tek mint dil.
+
+Kontroller: 160 JVM testi geçti (1 atlanan; 3 yeni test), lint 0 hata / 33 uyarı (yeni hata yok), release, debug ve test APK'ları derlendi. 5556'da gerçek "Evim" ile elle doğrulandı (STATUS altındaki denetim kaydı ve HANDOFF). Enstrümantasyon testleri koşulmadı (5556'daki gerçek Evim'i silerler); güncellenen beklentiler (5 sütun konum sayacı, "Favorilerden çıkar", bölüm adı) cihazda koşulmadı. Sürüm numarası değişmedi (0.14.40), teslim APK'sı üretilmedi, TV'ye kurulmadı.
+
 ## UI/UX denetimi · 17 Ekim 2026
 
 Kullanıcının isteğiyle 0.14.40 için ayrıntılı UI/UX denetimi yapıldı: [UX_AUDIT_0.14.40](../design/UX_AUDIT_0.14.40.md). Kod okundu, ardından kullanıcının isteğiyle ("gerçek data ile kontrol et") bulgular 5556'da gerçek "Evim" M3U kaynağıyla (4.531 kanal, 14.626 film, 2.172 dizi) ekranda denendi. 26 bulgu; 6'sı yüksek öncelik. Gerçek veride ayrıca dört yeni sorun çıktı: bölüme yeniden girişte odağın Rehber/Sırala düğmesine kaçması, 19 sn'lik oynatmanın "İzlemeye devam et"e girip film rafını silmesi, sağlayıcı adlarının temizlenmeden gösterilmesi, "8x8" adlı dizinin Sezon 8 · B8 sanılması. Kod değişmedi; öneriler kullanıcı önceliklendirmesini bekliyor. Fiziksel TV'ye dokunulmadı.

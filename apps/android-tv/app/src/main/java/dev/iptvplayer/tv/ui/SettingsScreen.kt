@@ -130,7 +130,7 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
                         .testTag("settings-content"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         when (page) {
                             SettingsPage.MAIN -> {
-                                SettingRow("Hareketi azalt", "Kartların odak büyümesini kapatır.", Modifier.focusRequester(first).then(section("Görünüm ve ses")),
+                                SettingRow("Hareketi azalt", "Vitrin geçişlerini, açılış animasyonunu ve menü kaymasını kapatır.", Modifier.focusRequester(first).then(section("Görünüm ve ses")),
                                     checked = s.reducedMotion) { model.reducedMotion() }
                                 SettingRow("Açılış sesi", "Uygulama açılırken kısa bir ses çalar.", section("Görünüm ve ses"), checked = s.startupSound) { model.startupSound() }
                                 Spacer(Modifier.height(6.dp))

@@ -1,5 +1,27 @@
 # Son devir notu
 
+## Denetim düzeltmeleri, büyük afişler ve gradient oynatıcı · 17 Ekim 2026
+
+Değişen kod (apps/android-tv/app/src/main/java/dev/iptvplayer/tv):
+- ui/LibraryScreen.kt: `LibraryBack` (kart/başlık/arama → kategori → menü; menüdeki Geri PilotApp'e kalır), menüden girişte `grid.scrollToItem(0)`, `LibraryMemory.focusVisible`, `TitleInfo` silindi, sütunlar 4/5 (büyük yazı 3/4), kategori odağı mint.
+- ui/PilotApp.kt `MediaCard`: başlık 15/20 sp, yıl ve kaynak tek satırda 12 sp, canlı kart yazıları 15/12 sp.
+- ui/PlayerScreen.kt: kısayollar (`zap`, `seekBy`, `digits`, `flash`, köşe notu `player-note`); opak panel yerine scrim, `player-panel` etiketi artık şeffaf sütunda (test etiketleri korunur), ipucu satırı sağda.
+- TvViewModel.kt: `channelNumber`, `playChannelNumber` ("Tüm kanallar" sırası); `play` devam konumunu `resumable` ile alır.
+- data/Models.kt `PlaybackMark.resumable` (%2, en çok 2 dk); HomeLibrary ve DetailScreen bunu kullanır.
+- data/CatalogParser.kt `M3uParser.findEpisodeTag`: kelime sınırı ve başlığın başında olmama şartı.
+- data/CatalogPresentation.kt `episodeDisplayTitle`; ui/DetailScreen.kt bölüm kartı, favori etiketi/dolu yıldız, yer tutucu açıklama ve sağ üst tür etiketi kaldırıldı.
+- ui/Theme.kt `Action`: dinlenen birincil düğme koyu yüzey + mint yazı, çerçeve Outline %60. ui/HomeScreen.kt: menü odağı mint, açık menüde içerik karartması, vitrin zamanlayıcısı (odakta 15 sn, TalkBack'te kapalı, geçiş sonrası 600 ms OK önceki slayt). ui/GuideScreen.kt: seçili hücre beyaz halka. ui/SettingsScreen.kt: Hareketi azalt açıklaması.
+- Testler: HomeLibraryTest, EpisodeSequenceTest, CatalogPresentationTest (yeni vakalar); PilotFlowTest, SearchNavigationTest, VisualPreviewTest beklentileri güncellendi.
+- Belgeler: DECISIONS D064, UX_AUDIT_0.14.40 "Uygulama durumu".
+
+Kontroller: `testDebugUnitTest` 160/160 (1 atlanan), `lintDebug` 0 hata, `assembleRelease` ve `assembleDebugAndroidTest` geçti. 5556'ya release `install -r` ile kuruldu (veri korundu) ve gerçek Evim ile görüldü: Diziler/Filmler'de bant yok, 4 sütun (ızgarada 5) büyük afiş; Geri ızgara → "Tüm diziler" → menüde Diziler → Ana Sayfa; menüden girişte liste başta ve Sağ ilk afişe; "8x8" tek "Bölüm 8" kartı (sezon başlığı hâlâ "Sezon 8", kaynak bilgisi bu); "Asırlık Gece" bölümleri "Bölüm 1…"; canlıda Yukarı 3. kanalı, "5" 5. kanalı, CH− 4. kanalı açtı ve köşede numara+ad notu çıktı; filmde Sağ +10 sn (0:13), İleri sarma +30 sn (0:44); 19 sn'lik eski kayıt devam rafına girmedi ve "Film kütüphanen" geri geldi. TV yalnız okunarak kontrol edildi (uykuda). Emülatör kapatıldı.
+
+Koşulmayanlar: enstrümantasyon sınıfları (gerçek Evim'i silerler), TalkBack, büyük yazı (3/4 sütun), basılı tutulan Sol/Sağ hızlanması, rakam girişinde olmayan numara uyarısı, fiziksel TV akıcılığı.
+
+5556'da kalan iz: geçmişte birkaç beIN kanalı ve "U Are the Universe (2024) DE" (~3:30, artık devam rafında). Test favorisi geri alındı. İstenirse Ayarlar → İzleme geçmişini temizle.
+
+Sonraki adım: kullanıcının 5556'da ya da TV'de görsel kabulü. TV'ye gidecekse sürüm 0.14.41'e yükseltilip release APK `releases` altına alınmalı ve kullanıcının isteğiyle kurulmalı. Ardından denetimin açık maddeleri (U25 ad sadeleştirme, U9 rehber, U6 tip ölçeği).
+
 ## UI/UX denetimi · 17 Ekim 2026
 
 Yeni dosya: docs/design/UX_AUDIT_0.14.40.md (U1–U26, öncelik ve önerilen sıra). Kod, Figma ve manifest değişmedi; BACKLOG'a madde eklenmedi (öneriler onaylanmadı).

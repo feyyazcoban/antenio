@@ -128,6 +128,14 @@ data class Catalog(
 data class PlaybackMark(val positionMs: Long, val durationMs: Long, val updatedAt: Long) {
     val completed: Boolean get() = durationMs > 0 && positionMs.toDouble() / durationMs >= .95
     val resumeMs: Long get() = if (completed) 0 else positionMs
+    /**
+     * Worth resuming: past 2 % of the title (at most 2 minutes; 2 minutes when the length is unknown). A title opened
+     * by mistake neither offers Devam et nor takes a place in İzlemeye devam et.
+     */
+    val resumable: Boolean get() = resumeMs > 0 &&
+        resumeMs >= if (durationMs > 0) minOf(RESUME_FLOOR_MS, durationMs / 50) else RESUME_FLOOR_MS
+
+    companion object { const val RESUME_FLOOR_MS = 120_000L }
 }
 
 /** Only fixed, user-facing messages leave the network layer. Never carry a raw URL/cause. */

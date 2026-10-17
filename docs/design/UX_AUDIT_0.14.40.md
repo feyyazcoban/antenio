@@ -2,6 +2,12 @@
 
 17 Ekim 2026 · Kod `ac94c85` (0.14.40, kod 54). Bu belge bir **öneri listesidir**; hiçbir madde kullanıcı onayı almış sayılmaz. Bazı öneriler kullanıcı kararlarına (D056, D059, D060, D063) dokunur; bunlar ayrıca işaretlenmiştir.
 
+## Uygulama durumu · 17 Ekim 2026
+
+Kullanıcının devam isteğiyle ve iki ek isteğiyle (kütüphane bandı ve afiş/yazı boyu; oynatıcıda alttan gradient) şu maddeler uygulandı, karar [D064](../decisions/DECISIONS.md): **U1, U2, U3, U4, U5, U7, U10, U12, U16, U17, U20, U21, U23, U24, U26** ve U8'in ayrıntı kısmı. U5, istek üzerine bilgi panelinin tamamen kaldırılması ve 4/5 sütun büyük afişle çözüldü. Gerçek "Evim" kaynağıyla 5556'da görülenler: Geri katmanları, menüden yeniden girişte odak, büyük afişler, gradient oynatıcı, CH−/Yukarı/rakamla kanal ve köşe notu, Sağ +10 sn ve İleri sarma +30 sn, kısa izlemenin devam rafına girmemesi, "8x8" düzeltmesi ve "Bölüm N" kartları.
+
+Açık kalanlar: U6 (genel tip ölçeği; yalnız kütüphane kartları büyütüldü), U9, U11, U13, U14, U15, U18, U19, U22, U25 ve U8'in bağlam menüsü. TalkBack, büyük yazı ve fiziksel TV denenmedi.
+
 ## Yöntem ve sınırlar
 
 - `ui/` altındaki bütün ekranlar (Home, Library, Detail, Search, Player, Guide, Settings, Sources, Setup, Loading, Recovery, EpisodeEnd) satır satır okundu; Back/odak yolları `TvViewModel` ile birlikte izlendi.

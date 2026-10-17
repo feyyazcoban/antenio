@@ -100,9 +100,11 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
         .heightIn(min = height, max = height)
         .then(if (selected != null) Modifier.semantics { this.selected = selected } else Modifier), enabled = enabled,
         shape = ButtonDefaults.shape(shape = RoundedCornerShape(50)),
-        colors = ButtonDefaults.colors(containerColor = if (primary) Ink.Text else if (selected == true) Ink.Selected else if (outlined) Color.Transparent else Ink.High,
-            contentColor = if (primary) Ink.Background else Ink.Text, focusedContainerColor = Ink.Mint, focusedContentColor = Ink.OnMint),
-        border = ButtonDefaults.border(border = Border(BorderStroke(1.dp, if (outlined && selected != true) Ink.Divider else Color.Transparent)),
+        // Focus is the one mint fill (D064). A resting primary action is not white, which read as focused next to the
+        // real focus; its mint label marks it instead. Outlined edges use the outline role (over 3:1 on the page).
+        colors = ButtonDefaults.colors(containerColor = if (selected == true) Ink.Selected else if (outlined && !primary) Color.Transparent else Ink.High,
+            contentColor = if (primary) Ink.Mint else Ink.Text, focusedContainerColor = Ink.Mint, focusedContentColor = Ink.OnMint),
+        border = ButtonDefaults.border(border = Border(BorderStroke(1.dp, if (outlined && selected != true) Ink.Outline.copy(alpha = .6f) else Color.Transparent)),
             focusedBorder = Border(BorderStroke(TvLayout.Focus, Ink.Text), inset = 3.dp),
             focusedDisabledBorder = Border(BorderStroke(TvLayout.Focus, Ink.Muted), inset = 3.dp)),
         // No focus growth anywhere: tv-material animates it in composition (300 ms in, 500 ms out per item),

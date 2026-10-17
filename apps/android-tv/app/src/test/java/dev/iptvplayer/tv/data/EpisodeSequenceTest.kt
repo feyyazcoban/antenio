@@ -55,6 +55,16 @@ class EpisodeSequenceTest {
         val choice = EpisodeSequence.next(m3u, episodes.first(), episodes)!!
         assertTrue(choice.automaticAllowed); assertTrue(choice.notice!!.contains("başlık"))
     }
+    @Test fun m3uTagMustFollowTheShowNameAndStandAlone() {
+        assertNull(M3uParser.findEpisodeTag("8x8 (2023)"))
+        assertNull(M3uParser.findEpisodeTag("Film 1920x1080"))
+        assertNull(M3uParser.findEpisodeTag("Showx01"))
+        assertEquals("S01 E02", M3uParser.findEpisodeTag("Asırlık Gece (2026) S01 E02")!!.value)
+        assertEquals("1x03", M3uParser.findEpisodeTag("8x8 1x03")!!.value)
+        val parsed = M3uParser.parse("#EXTM3U\n#EXTINF:-1,8x8 (2023)\nhttps://media.example/series/one.mp4\n".reader(), "https://media.example/list.m3u")
+        val episode = parsed.m3uEpisodes.values.single().single()
+        assertFalse(episode.episodeOrderKnown); assertEquals(1, episode.season)
+    }
     @Test fun oldCacheWithoutNumberingEvidenceStillLoadsButDoesNotAutoplay() {
         val items = CatalogSnapshotCodec.decode(legacyCatalogFixture()).catalog.m3uEpisodes["show"]!!
         assertEquals(2, items.size); assertFalse(items.first().episodeOrderKnown)

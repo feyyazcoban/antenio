@@ -271,28 +271,31 @@ internal class EvenColumns(private val count: Int) : GridCells {
             } else if (live) Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(130.dp).height(40.dp), true, logoInset = 0.dp)
-                Text((if (favorite) "★ " else "") + entry.title, color = Ink.Text, fontFamily = Roboto, fontSize = 13.sp,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(entry.category, color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text((if (favorite) "★ " else "") + entry.title, color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp,
+                    lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(entry.category, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             } else Box(Modifier.fillMaxSize()) {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.fillMaxSize(), showFallbackTitle = false)
                 entry.ratingText?.let { RatingBadge(it, Modifier.align(Alignment.TopStart).padding(7.dp)) }
             }
         }
         if (compact) return@Column
+        // Captions sized for the larger library posters (D064): title 15 sp, the lines under it 12 sp.
         Spacer(Modifier.height(8.dp))
-        if (!live) Text((if (favorite) "★ " else "") + entry.title, fontFamily = Roboto, fontSize = 12.sp,
-            minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 17.sp)
-        // Keep the caption baseline stable even when the provider has no year.
-        if (!live) Text(entry.year, Modifier.testTag("library-year:${entry.id}"), color = Ink.Muted,
-            fontFamily = Roboto, fontSize = 10.sp, lineHeight = 14.sp, minLines = 1, maxLines = 1,
+        if (!live) Text((if (favorite) "★ " else "") + entry.title, fontFamily = Roboto, fontSize = 15.sp,
+            minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 20.sp)
+        // Year and, with several sources, the source share one line, which keeps its height without either: most
+        // M3U titles have no year, and an empty year line left a gap under every title.
+        if (!live) Text(listOf(entry.year, sourceName.orEmpty()).filter { it.isNotBlank() }.joinToString(" · "),
+            Modifier.testTag("library-year:${entry.id}"), color = Ink.Muted,
+            fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1,
             overflow = TextOverflow.Ellipsis)
-        sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+        if (live) sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
         if (live) {
             Text(guide?.now(now)?.let { "Şimdi: ${it.title}" } ?: "Program bilgisi yok", color = Ink.Muted, fontFamily = Roboto,
-                fontSize = 10.sp, lineHeight = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(guide?.next(now)?.let { "Sonra: ${it.title}" }.orEmpty(), color = Ink.Muted, fontFamily = Roboto,
-                fontSize = 10.sp, lineHeight = 14.sp, minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }

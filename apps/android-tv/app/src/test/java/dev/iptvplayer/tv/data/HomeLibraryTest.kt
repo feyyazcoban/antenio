@@ -40,6 +40,17 @@ class HomeLibraryTest {
         assertEquals(0L, PlaybackMark(4750, 5000, 0).resumeMs)
         assertEquals(1_000L, PlaybackMark(1000, 0, 0).resumeMs)
     }
+    @Test fun aFewSecondsOfAFilmAreNotWorthResuming() {
+        val film = 80 * 60_000L
+        assertFalse(PlaybackMark(19_000, film, 0).resumable)
+        assertTrue(PlaybackMark(2 * 60_000, film, 0).resumable)
+        assertTrue(PlaybackMark(10_000, 120_000, 0).resumable)
+        assertFalse(PlaybackMark(60_000, 0, 0).resumable)
+        assertFalse(PlaybackMark(film * 96 / 100, film, 0).resumable)
+        val home = homeLibrary(Catalog(listOf(entry("movie", MediaKind.MOVIE))),
+            listOf(WatchRecord("movie", MediaKind.MOVIE, positionMs = 19_000, durationMs = film)), emptySet())
+        assertTrue(home.continueWatching.isEmpty()); assertEquals(listOf("movie"), home.movies.map { it.id })
+    }
     @Test fun recentChannelsUseCurrentCatalogDataAndDropRemovedEntries() {
         val home = homeLibrary(Catalog(listOf(entry("1", MediaKind.LIVE))), listOf(WatchRecord("2", MediaKind.LIVE), WatchRecord("1", MediaKind.LIVE)), emptySet())
         assertEquals(listOf("1"), home.recentChannels.map { it.id })

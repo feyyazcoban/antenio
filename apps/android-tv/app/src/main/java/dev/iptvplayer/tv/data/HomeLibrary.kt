@@ -51,7 +51,7 @@ fun homeLibrary(catalog: Catalog, history: List<WatchRecord>, favorites: Set<Str
     val byId = visible.associateBy { it.id }
     // A finished film leaves the row; a series whose latest episode was finished stays for its next one.
     val continuing = history.asSequence().filter { it.kind != MediaKind.LIVE }
-        .distinctBy { it.parentId ?: it.id }.filter { it.progress.resumeMs > 0 || it.kind == MediaKind.EPISODE && it.progress.completed }
+        .distinctBy { it.parentId ?: it.id }.filter { it.progress.resumable || it.kind == MediaKind.EPISODE && it.progress.completed }
         .mapNotNull { record -> byId[record.parentId ?: record.id]?.let { ContinueItem(it, record) } }
         .distinctBy { it.entry.id }.take(12).toList()
     // Automatic discovery does not promote provider headings. Explicit favorites/history still work.

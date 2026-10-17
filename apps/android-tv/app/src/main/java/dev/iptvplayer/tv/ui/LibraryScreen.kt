@@ -1,5 +1,6 @@
 package dev.iptvplayer.tv.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -18,10 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.*
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -33,7 +33,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.*
-import coil3.compose.AsyncImage
 import dev.iptvplayer.tv.*
 import dev.iptvplayer.tv.data.*
 import kotlinx.coroutines.CancellationException
@@ -51,6 +50,9 @@ private data class SectionCategory(val key: String, val label: String)
 private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     val cards = HashMap<String, FocusRequester>()
     fun focus(id: String?): Boolean = try { id != null && cards[id]?.requestFocus() == true } catch (_: IllegalStateException) { false }
+    /** The first card laid out in [grid], for when the remembered one is out of view. */
+    fun focusVisible(grid: LazyGridState): Boolean =
+        grid.layoutInfo.visibleItemsInfo.firstOrNull { it.offset.y >= 0 && it.key in cards }?.let { focus(it.key as String) } == true
 }
 
 /**
@@ -138,12 +140,20 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     val imeVisible = WindowInsets.isImeVisible
     LaunchedEffect(inputFocused, imeVisible) { if (inputFocused && imeVisible) imeSeen = true }
     val typing = searchOpen && inputFocused && (imeVisible || edited && !imeSeen)
+    // Where focus is, for Back alone: plain holders, so moving between the levels does not recompose the screen.
+    val menuFocused = remember { mutableStateOf(false) }
+    val categoryFocused = remember { mutableStateOf(false) }
+    LibraryBack(model, { menuFocused.value }, { categoryFocused.value },
+        // Typing ends first (a floating keyboard may still count as typing), so the category column is laid out again.
+        toCategory = { edited = false; gridActive = false; restoreCategory = true },
+        toMenu = { try { navFocus.requestFocus() } catch (_: IllegalStateException) { model.back() } })
     val compactMin = with(density) { maxOf(132.dp, 20.dp + 19.sp.toDp() * 2 + 7.dp + 15.sp.toDp() +
         if (s.sources.size > 1) 7.dp + 14.sp.toDp() else 0.dp) }
-    // As in TiviMate, a poster grid with focus takes the category column's place (7 columns); Left from its
-    // first column brings the column back on the selected category. Live rows keep the column.
+    // A poster grid with focus takes the category column's place; Left from its first column brings the column back
+    // on the selected category. Live rows keep the column. Large posters (D064): 4 columns beside the category column
+    // and 5 without it, so a poster keeps nearly the same size (about 151 and 155 dp) when the column steps aside.
     val gridMode = gridActive && !live && !typing
-    val columns = if (live) 1 else if (typing) (if (largeText) 1 else 2) else if (gridMode) (if (largeText) 4 else 7) else if (largeText) 3 else 5
+    val columns = if (live) 1 else if (typing) (if (largeText) 1 else 2) else if (gridMode) (if (largeText) 4 else 5) else if (largeText) 3 else 4
     var viewportHeight by remember { mutableIntStateOf(0) }
     val headingVisibility = rememberCardVisibility()
     val grid = rememberLazyGridState(initialFirstVisibleItemIndex = if (initialIndex != 0) initialIndex + headerCount else 0)
@@ -172,7 +182,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     val liveEntries = remember(filtered, visible, headerCount) { visible.mapNotNull { filtered.getOrNull(it - headerCount) }.filter { it.kind == MediaKind.LIVE } }
     val programmes = guideRows(liveEntries, GuideWindow(now, now + 12 * 3_600_000L), s, model)
     fun focusContent(): Boolean = if (filtered.isEmpty()) try { emptyFocus.requestFocus() } catch (_: IllegalStateException) { false }
-        else memory.focus(filtered.firstOrNull { it.id == memory.lastId }?.id ?: filtered.firstOrNull()?.id)
+        else memory.focus(filtered.firstOrNull { it.id == memory.lastId }?.id ?: filtered.firstOrNull()?.id) || memory.focusVisible(grid)
     // The category, its size (or, with focus in the poster grid, the focused place) and the section's controls.
     @Composable fun LibraryHeading(container: Modifier, focus: Modifier) {
         Column(container.testTag("library-heading"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -197,20 +207,18 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
         }
     }
     // An empty section keeps focus on its own tab, where the active marker is, as Home and Guide do.
-    Navigation(s, model, modifier = Modifier.onFocusChanged { if (it.hasFocus) gridActive = false }, activeFocus = navFocus,
+    Navigation(s, model, modifier = Modifier.onFocusChanged { menuFocused.value = it.hasFocus; if (it.hasFocus) gridActive = false }, activeFocus = navFocus,
         contentEntry = { selectedCategoryFocus }, settings = settings) {
         Row(Modifier.fillMaxSize()) {
             if (!typing && !gridMode) CategoryColumn(categories, s.category, Modifier.focusRequester(categoryFocus)
-                .onFocusChanged { if (it.hasFocus) gridActive = false }
+                .onFocusChanged { categoryFocused.value = it.hasFocus; if (it.hasFocus) gridActive = false }
                 .onPreviewKeyEvent { event ->
                     // Right returns to the card or row that had focus; with none, the list's first item.
                     event.type == KeyEventType.KeyDown && event.key == Key.DirectionRight && focusContent()
                 }, selectedCategoryFocus) { key -> if (key != s.category) model.category(key) }
             Column(Modifier.weight(1f).fillMaxHeight()) {
-                if (!typing && filtered.isNotEmpty()) {
-                    if (live) LiveInfo({ focusedEntry.value ?: filtered.firstOrNull() }, numbers, { programmes }, now, zone)
-                    else TitleInfo { focusedEntry.value ?: filtered.firstOrNull() }
-                }
+                // Films and series show no information panel above the posters (D064): the room goes to larger posters.
+                if (!typing && filtered.isNotEmpty() && live) LiveInfo({ focusedEntry.value ?: filtered.firstOrNull() }, numbers, { programmes }, now, zone)
                 // Lined up with the cards below; the grid's own top padding and spacer keep the old 28 dp gap.
                 if (fixedHeading && !typing) LibraryHeading(Modifier.padding(start = if (gridMode) TvLayout.Gutter else 16.dp,
                     end = TvLayout.Gutter, top = 7.dp, bottom = 7.dp), Modifier)
@@ -299,7 +307,9 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     LaunchedEffect(restoreCategory) {
         if (restoreCategory) {
             withFrameNanos { }; withFrameNanos { }
-            try { selectedCategoryFocus.requestFocus() } catch (_: IllegalStateException) { categoryFocus.requestFocus() }
+            try { selectedCategoryFocus.requestFocus() } catch (_: IllegalStateException) {
+                try { categoryFocus.requestFocus() } catch (_: IllegalStateException) { navFocus.requestFocus() }
+            }
             restoreCategory = false
         }
     }
@@ -311,6 +321,9 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
         // Entered from the side menu (no title to return to): the category column on the selected category, so the
         // category level is never skipped. Back from a title returns to that title's card instead.
         if (s.focusedId == null && filtered.isNotEmpty()) {
+            // The list starts at its top, as the focus memory does: a saved scroll position would come back without
+            // the card it belonged to, and Right and the information panel would point at a title out of view.
+            if (grid.firstVisibleItemIndex != 0 || grid.firstVisibleItemScrollOffset != 0) grid.scrollToItem(0)
             if (!(try { selectedCategoryFocus.requestFocus() } catch (_: IllegalStateException) { false })) navFocus.requestFocus()
             return@LaunchedEffect
         }
@@ -346,6 +359,22 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
 
 
 /**
+ * Back steps out one level at a time (SCREENS TV-020/030/040): the list, its heading or the section search to the
+ * selected category, the category column to the section's tab in the side menu. Back on the menu is PilotApp's
+ * route Back, to Ana Sayfa. A Back that arrives after the model left the library is the new route's.
+ */
+@Composable private fun LibraryBack(model: TvViewModel, menuFocused: () -> Boolean, categoryFocused: () -> Boolean,
+    toCategory: () -> Unit, toMenu: () -> Unit) {
+    BackHandler(enabled = !menuFocused()) {
+        when {
+            model.state.value.route != Route.LIBRARY -> model.back()
+            categoryFocused() -> toMenu()
+            else -> toCategory()
+        }
+    }
+}
+
+/**
  * The category column. Moving through it does not change the list; OK on a category shows it (D060).
  * Every remote entry lands on the selected category.
  */
@@ -368,7 +397,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                     .semantics { selected = isSelected; contentDescription = category.label }.testTag("category:${category.key}"),
                 shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
                 colors = ClickableSurfaceDefaults.colors(containerColor = if (isSelected) Ink.Selected else Color.Transparent,
-                    contentColor = Ink.Text, focusedContainerColor = Ink.Text, focusedContentColor = Ink.Background),
+                    contentColor = Ink.Text, focusedContainerColor = Ink.Mint, focusedContentColor = Ink.OnMint),
                 border = ClickableSurfaceDefaults.border(focusedBorder = focusRing(10.dp)),
                 scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)) {
                 // The row takes the surface's 40 dp itself: the surface does not stretch its content, and a row of
@@ -466,27 +495,6 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
             if (current != null) Progress(current, now, Modifier.widthIn(max = 360.dp))
             Text(next?.let { "Sonra · ${guideTime(it.start, zone)} ${it.title}" } ?: entry.category, color = Ink.Muted, fontFamily = Roboto,
                 fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
-    }
-}
-
-/** The focused film or series above the grid: title, year, kind and category, the plot, and its picture. */
-@Composable private fun TitleInfo(focused: () -> MediaEntry?) {
-    val entry = focused() ?: return
-    val picture = entry.backdrop ?: entry.artwork
-    Box(Modifier.fillMaxWidth().height(176.dp).padding(start = 16.dp, end = TvLayout.Gutter, top = 4.dp, bottom = 8.dp)
-        .clip(RoundedCornerShape(TvLayout.CardRadius)).background(Ink.Container).testTag("library-info")) {
-        if (picture != null) AsyncImage(SourceArtwork(entry.sourceId, picture), null,
-            Modifier.fillMaxHeight().fillMaxWidth(.62f).align(Alignment.CenterEnd), contentScale = ContentScale.Crop)
-        Box(Modifier.matchParentSize().background(Brush.horizontalGradient(0f to Ink.Container, .42f to Ink.Container,
-            .75f to Ink.Container.copy(alpha = .55f), 1f to Ink.Container.copy(alpha = .1f))))
-        Column(Modifier.fillMaxHeight().fillMaxWidth(.6f).padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(entry.title, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 22.sp, lineHeight = 27.sp,
-                maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text(listOfNotNull(entry.ratingText?.let { "★ $it" }, entry.year, entry.kind.label, entry.category).filter { it.isNotBlank() }.joinToString(" · "), color = Ink.Mint,
-                fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            if (entry.description.isNotBlank()) Text(entry.description, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 17.sp,
-                maxLines = 3, overflow = TextOverflow.Ellipsis)
         }
     }
 }

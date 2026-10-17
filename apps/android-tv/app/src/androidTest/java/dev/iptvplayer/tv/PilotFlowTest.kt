@@ -178,7 +178,7 @@ class PilotFlowTest {
         nav("Favoriler")
         ui.onNodeWithContentDescription("Test dizisi").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
         ui.waitUntil(10_000) { !model.state.value.detailLoading }
-        click("Favorilerde")
+        click("Favorilerden çıkar")
         assertTrue(model.state.value.favoriteIds.isEmpty())
     }
 
@@ -191,7 +191,7 @@ class PilotFlowTest {
         ui.waitUntil(10_000) { !model.state.value.detailLoading }
         assertEquals(setOf(model.fixtureKey("series:4")), model.state.value.favoriteIds)
         assertEquals(setOf("series:4"), model.store.favorites(model.state.value.source!!.id))
-        click("Favorilerde"); assertTrue(model.state.value.favoriteIds.isEmpty())
+        click("Favorilerden çıkar"); assertTrue(model.state.value.favoriteIds.isEmpty())
     }
 
     @Test fun homeResumesExactEpisodeRestoresFocusAndClearsOnlyHistory() {

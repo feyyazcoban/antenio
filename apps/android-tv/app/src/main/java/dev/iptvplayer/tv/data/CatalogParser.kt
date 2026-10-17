@@ -102,7 +102,10 @@ object CatalogParser {
 
 object M3uParser {
     private val attribute = Regex("([\\w-]+)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s,]+))")
-    private val episodeTag = Regex("(?i)(?:S(\\d{1,3})\\s*E(\\d{1,4})|(\\d{1,3})x(\\d{1,4}))")
+    // A tag stands on its own (not inside 1920x1080) and follows the show's name: "8x8 (2023)" is a title, not S8E8.
+    private val episodeTag = Regex("(?i)(?<![\\p{L}\\p{N}])(?:S(\\d{1,3})\\s*E(\\d{1,4})|(\\d{1,3})x(\\d{1,4}))(?![\\p{L}\\p{N}])")
+    internal fun findEpisodeTag(name: String): MatchResult? =
+        episodeTag.findAll(name).firstOrNull { name.substring(0, it.range.first).isNotBlank() }
 
     fun parse(reader: Reader, baseUrl: String): Catalog {
         val all = mutableListOf<MediaEntry>()
@@ -163,7 +166,7 @@ object M3uParser {
                         val uri = base.resolve(line)?.takeIf { it.scheme == "http" || it.scheme == "https" }
                         if (uri == null) { invalid++; return@forEachIndexed }
                         val name = title.ifBlank { attrs["tvg-name"].orEmpty() }.ifBlank { "İçerik ${number + 1}" }
-                        val tag = episodeTag.find(name)
+                        val tag = findEpisodeTag(name)
                         val paths = uri.pathSegments
                         val kind = when {
                             "series" in paths || tag != null -> MediaKind.EPISODE

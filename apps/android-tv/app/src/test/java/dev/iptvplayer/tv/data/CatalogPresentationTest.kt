@@ -97,4 +97,12 @@ class CatalogPresentationTest {
             providerCategories(entries, listOf("TURK SPOR", "KKTC ULUSAL", "TURK ULUSAL")))
         assertEquals(listOf("TURK ULUSAL", "Diğer", "TURK SPOR", "Yeni"), providerCategories(entries, emptyList()))
     }
+    @Test fun episodeCardsShowTheEpisodesOwnName() {
+        assertEquals("Pilot Bölüm", episodeDisplayTitle("Breaking Bad - S01E01 - Pilot Bölüm", "Breaking Bad"))
+        assertEquals("", episodeDisplayTitle("Asırlık Gece (2026) S01 E01", "Asırlık Gece (2026)"))
+        assertEquals("Sırlar", episodeDisplayTitle("Dark (2017) - S01E01 - Sırlar", "Dark"))
+        assertEquals("Birinci bölüm", episodeDisplayTitle("Birinci bölüm", "Test dizisi"))
+        assertEquals("", episodeDisplayTitle("8x8 (2023)", "8x8 (2023)"))
+        assertEquals("1. Bölüm", episodeDisplayTitle("Big Cat Country - S01E01 - 1. Bölüm", "Big Cat Country"))
+    }
 }

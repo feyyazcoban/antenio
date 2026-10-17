@@ -20,6 +20,22 @@ fun catalogDisplayOrder(entries: List<MediaEntry>): List<MediaEntry> {
     return if (dividers.isEmpty()) entries else content + dividers
 }
 
+private val episodeTagText = Regex("(?i)(?<![\\p{L}\\p{N}])(?:S\\d{1,3}\\s*E\\d{1,4}|\\d{1,3}x\\d{1,4})(?![\\p{L}\\p{N}])")
+private val leadingYear = Regex("^\\s*\\(\\d{4}\\)")
+
+/**
+ * An episode's own name for its card: the provider's title without the show's name, a year right after it and the
+ * SxxEyy tag ("Breaking Bad - S01E01 - Pilot" → "Pilot"). Empty when nothing else is left. Display only: search,
+ * the player and the data keep the full title.
+ */
+fun episodeDisplayTitle(title: String, show: String): String {
+    var rest = title.trim()
+    val name = show.trim()
+    if (name.isNotEmpty() && rest.startsWith(name, ignoreCase = true)) rest = rest.substring(name.length).replace(leadingYear, " ")
+    rest = rest.replace(episodeTagText, " ")
+    return rest.trim { it.isWhitespace() || it in "-–—|:·_," }.replace(Regex("\\s{2,}"), " ")
+}
+
 internal val MediaEntry.hasBackdrop: Boolean
     get() = !backdrop.isNullOrBlank() && backdrop != artwork
 

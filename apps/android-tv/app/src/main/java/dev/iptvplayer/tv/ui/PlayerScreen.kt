@@ -129,6 +129,29 @@ import java.util.Locale
     }
     val opening = failure == null && !recoveryState.recovering && (status == Player.STATE_BUFFERING || status == Player.STATE_IDLE)
     val controlsShown = visible && !trackPanel && endState == null
+    // Remote shortcuts while the controls are hidden: the next channel opens without bringing them up, and a short
+    // note in the corner says what happened (the channel, a seek, the number being typed).
+    var quiet by remember { mutableStateOf(false) }
+    var note by remember { mutableStateOf<Pair<String, String?>?>(null) }
+    var noteAt by remember { mutableLongStateOf(0L) }
+    var digits by remember { mutableStateOf("") }
+    fun flash(text: String, detail: String? = null) { note = text to detail; noteAt = System.currentTimeMillis() }
+    fun zap(direction: Int) { quiet = !visible; digits = ""; model.changeChannel(direction) }
+    fun seekBy(deltaMs: Long) {
+        if (!player.isCurrentMediaItemSeekable) return
+        val end = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
+        val target = (player.currentPosition + deltaMs).coerceIn(0, end)
+        player.seekTo(target); position = target
+        flash("${if (deltaMs < 0) "−" else "+"}${kotlin.math.abs(deltaMs) / 1000} sn", "${clockTime(target)} / ${if (duration > 0) clockTime(duration) else "—"}")
+    }
+    LaunchedEffect(noteAt) { if (note != null) { delay(2_500); note = null } }
+    LaunchedEffect(digits) {
+        if (digits.isEmpty()) return@LaunchedEffect
+        delay(1_500)
+        val number = digits.toInt(); digits = ""
+        quiet = !visible
+        if (!model.playChannelNumber(number)) { quiet = false; flash("$number numaralı kanal yok") }
+    }
 
     DisposableEffect(player, lifecycle) {
         val listener = object : Player.Listener {
@@ -174,7 +197,11 @@ import java.util.Locale
         recovery.newMedia(media.entry.kind == MediaKind.LIVE)
         episodeEnd.newMedia(); hasPlayed = false
         tracks = Tracks.EMPTY; position = media.startMs; duration = 0
-        trackPanel = false; active = media; interact()
+        trackPanel = false; active = media
+        if (quiet) {
+            quiet = false; lastInteraction = System.currentTimeMillis()
+            flash(listOfNotNull(model.channelNumber(media.entry)?.toString(), media.entry.title).joinToString("  "))
+        } else interact()
         player.trackSelectionParameters = player.trackSelectionParameters.buildUpon().clearOverrides()
             .setPreferredAudioLanguage(model.store.audioLanguage)
             .setPreferredTextLanguage(model.store.subtitleLanguage)
@@ -220,17 +247,41 @@ import java.util.Locale
         .onPreviewKeyEvent { event ->
             if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
             lastInteraction = System.currentTimeMillis()
-            when (event.key) {
-                Key.MediaPlayPause -> {
+            val hidden = !visible && !trackPanel
+            val healthy = failure == null && !recoveryState.recovering
+            val code = event.nativeKeyEvent.keyCode
+            val digit = when (code) {
+                in android.view.KeyEvent.KEYCODE_0..android.view.KeyEvent.KEYCODE_9 -> code - android.view.KeyEvent.KEYCODE_0
+                in android.view.KeyEvent.KEYCODE_NUMPAD_0..android.view.KeyEvent.KEYCODE_NUMPAD_9 -> code - android.view.KeyEvent.KEYCODE_NUMPAD_0
+                else -> -1
+            }
+            // Held Left/Right seek further the longer they are held: 10 s, then 30 s, then a minute per step.
+            val repeat = event.nativeKeyEvent.repeatCount
+            val step = when { repeat >= 30 -> 60_000L; repeat >= 10 -> 30_000L; else -> 10_000L }
+            when {
+                event.key == Key.MediaPlayPause -> {
                     if (recoveryState.recovering) recovery.cancel()
                     else if (failure != null) recovery.retryManually()
                     else if (player.isPlaying) player.pause() else player.play()
                     true
                 }
-                Key.MediaPlay -> { if (failure != null) recovery.retryManually() else if (!recoveryState.recovering) player.play(); true }
-                Key.MediaPause -> { if (recoveryState.recovering) recovery.cancel() else player.pause(); true }
-                Key.DirectionCenter, Key.Enter, Key.DirectionLeft, Key.DirectionRight, Key.DirectionUp, Key.DirectionDown -> {
-                    if (!visible && !trackPanel) { visible = true; true } else false
+                event.key == Key.MediaPlay -> { if (failure != null) recovery.retryManually() else if (!recoveryState.recovering) player.play(); true }
+                event.key == Key.MediaPause -> { if (recoveryState.recovering) recovery.cancel() else player.pause(); true }
+                // Live: CH+/CH− always; with the controls hidden Up/Down too (Up is the next number, as CH+).
+                live && (event.key == Key.ChannelUp || event.key == Key.ChannelDown) -> { zap(if (event.key == Key.ChannelUp) 1 else -1); true }
+                live && hidden && healthy && (event.key == Key.DirectionUp || event.key == Key.DirectionDown) -> {
+                    zap(if (event.key == Key.DirectionUp) 1 else -1); true
+                }
+                // Digits pick a channel by its Canlı TV number, 1.5 s after the last one.
+                live && !trackPanel && digit >= 0 -> { if (digits.length < 4) digits += digit; flash(digits); true }
+                !live && healthy && (event.key == Key.MediaFastForward || event.key == Key.MediaRewind) -> {
+                    seekBy(if (event.key == Key.MediaFastForward) 30_000 else -10_000); true
+                }
+                !live && hidden && healthy && (event.key == Key.DirectionLeft || event.key == Key.DirectionRight) -> {
+                    seekBy(if (event.key == Key.DirectionRight) step else -step); true
+                }
+                hidden && event.key in setOf(Key.DirectionCenter, Key.Enter, Key.DirectionLeft, Key.DirectionRight, Key.DirectionUp, Key.DirectionDown) -> {
+                    visible = true; true
                 }
                 else -> false
             }
@@ -241,6 +292,15 @@ import java.util.Locale
             setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
         } }, modifier = Modifier.fillMaxSize(), onRelease = { it.player = null })
         Box(Modifier.fillMaxSize().focusRequester(canvas).focusable(!visible && !trackPanel))
+        note?.takeIf { !controlsShown }?.let { (text, detail) ->
+            Column(Modifier.align(Alignment.TopEnd).padding(top = 22.dp, end = TvLayout.Gutter).widthIn(max = 420.dp)
+                .background(Ink.Background.copy(alpha = .9f), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp, vertical = 10.dp)
+                .testTag("player-note"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(text, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 18.sp, lineHeight = 24.sp,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                detail?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, maxLines = 1) }
+            }
+        }
         // While the controls are up, their status line reports opening; the centred pill would sit under the panel.
         if (opening && !controlsShown) {
             Text("Yayın açılıyor…", Modifier.align(Alignment.Center).offset { IntOffset(if (trackPanel) (-220).dp.roundToPx() else 0, 0) }
@@ -248,8 +308,10 @@ import java.util.Locale
                 color = Ink.Text, fontFamily = Roboto, fontSize = 16.sp)
         }
         if (controlsShown) {
-            Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Black.copy(alpha = .4f),
-                .25f to Color.Transparent, .4f to Color.Transparent, .58f to Color.Black.copy(alpha = .72f), 1f to Color.Black.copy(alpha = .9f))))
+            // No panel over the picture: a scrim darkens the bottom, where the controls sit, and a lighter one keeps the
+            // top label readable. The picture stays visible above the controls.
+            Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Black.copy(alpha = .45f),
+                .16f to Color.Transparent, .5f to Color.Transparent, .74f to Color.Black.copy(alpha = .72f), 1f to Color.Black.copy(alpha = .92f))))
             // Its own surface keeps the label readable over bright frames and burned-in video text.
             Row(Modifier.align(Alignment.TopStart).padding(start = TvLayout.Gutter, end = TvLayout.Gutter, top = 22.dp)
                 .background(Ink.Background.copy(alpha = .9f), RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 6.dp),
@@ -261,41 +323,50 @@ import java.util.Locale
                     Modifier.widthIn(max = 360.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 11.sp,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(horizontal = TvLayout.Gutter, vertical = 26.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Column(Modifier.fillMaxWidth().testTag("player-panel")
-                    .background(Ink.Background.copy(alpha = .96f), RoundedCornerShape(TvLayout.HeroRadius))
-                    .border(1.dp, Ink.Divider.copy(alpha = .55f), RoundedCornerShape(TvLayout.HeroRadius))
-                    .padding(horizontal = 24.dp, vertical = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(13.dp)) {
-                Text(media.entry.title, Modifier.fillMaxWidth().testTag("player-title"),
-                    color = Ink.Text, fontSize = 28.sp, lineHeight = 33.sp,
-                    fontWeight = FontWeight.Medium, fontFamily = Roboto, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                if (recoveryState.recovering) Note(recoveryState.message)
-                else if (failure != null) Note(failure, error = true)
-                else Note(when {
-                    opening && live -> "Yayın açılıyor…"
-                    live -> "● CANLI"
-                    else -> "${clockTime(position)} / ${if (duration > 0) clockTime(duration) else "—"}" +
-                        when { opening -> " · Yayın açılıyor…"; status == Player.STATE_ENDED -> " · Bitti"; else -> "" }
-                })
+            // The controls stand on the scrim, one title line above them; 5 dp of side room keeps the focus ring whole.
+            Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(start = TvLayout.Gutter, end = TvLayout.Gutter, bottom = 18.dp)
+                .testTag("player-panel").padding(bottom = 2.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(media.entry.title, Modifier.fillMaxWidth().padding(horizontal = 5.dp).testTag("player-title"),
+                    color = Ink.Text, fontSize = 24.sp, lineHeight = 30.sp,
+                    fontWeight = FontWeight.Medium, fontFamily = Roboto, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                // Status on the left, the remote's shortcuts on the right.
+                Row(Modifier.fillMaxWidth().padding(horizontal = 5.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(when {
+                        recoveryState.recovering -> recoveryState.message
+                        failure != null -> failure
+                        opening && live -> "Yayın açılıyor…"
+                        live -> "● CANLI"
+                        else -> "${clockTime(position)} / ${if (duration > 0) clockTime(duration) else "—"}" +
+                            when { opening -> " · Yayın açılıyor…"; status == Player.STATE_ENDED -> " · Bitti"; else -> "" }
+                    }, Modifier.weight(1f), color = if (failure != null && !recoveryState.recovering) Ink.Error else Ink.Text,
+                        fontFamily = Roboto, fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(when {
+                        recoveryState.recovering -> "Geri: yeniden bağlanmayı durdur"
+                        failure != null -> ""
+                        live -> "Kontroller kapalıyken Yukarı/Aşağı: kanal · Rakam: kanal no"
+                        else -> "Kontroller kapalıyken Sol/Sağ: sar"
+                    }, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
                 if (live && failure == null && !recoveryState.recovering) {
                     Text(currentProgramme?.let { "${it.title} · ${programmeTime(it, model.guideZone())}" } ?: "Program bilgisi bulunmuyor",
-                        Modifier.testTag("player-current-programme"), color = Ink.Text, fontFamily = Roboto, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Modifier.padding(horizontal = 5.dp).testTag("player-current-programme"), color = Ink.Text, fontFamily = Roboto,
+                        fontSize = 14.sp, lineHeight = 19.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     schedule?.next(guideNow)?.let { next -> Text("Sonra · ${guideTime(next.start, model.guideZone())}  ${next.title}",
-                        color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                    currentProgramme?.end?.let { end -> Box(Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)).background(Ink.High)) {
+                        Modifier.padding(horizontal = 5.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    currentProgramme?.end?.let { end -> Box(Modifier.padding(horizontal = 5.dp).fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)).background(Color.White.copy(alpha = .25f))) {
                         Box(Modifier.fillMaxWidth(((guideNow - currentProgramme.start).toFloat() / (end - currentProgramme.start)).coerceIn(0f, 1f))
                             .fillMaxHeight().background(Ink.Mint))
                     } }
                 }
-                // Reserve the VOD progress slot so the panel does not move when the duration arrives.
-                if (!live) Box(Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp))
-                    .background(if (duration > 0) Ink.High else Color.Transparent)) {
+                // Reserve the VOD progress slot so the controls do not move when the duration arrives.
+                if (!live) Box(Modifier.padding(horizontal = 5.dp).fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp))
+                    .background(if (duration > 0) Color.White.copy(alpha = .25f) else Color.Transparent)) {
                     if (duration > 0) Box(Modifier.fillMaxWidth((position.toFloat() / duration).coerceIn(0f, 1f)).fillMaxHeight().background(Ink.Mint))
                 }
                 CompositionLocalProvider(LocalBringIntoViewSpec provides controlVisibility) {
-                Row(Modifier.fillMaxWidth().testTag("player-controls").horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.fillMaxWidth().testTag("player-controls").horizontalScroll(rememberScrollState()).padding(horizontal = 5.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                     Action(if (recoveryState.recovering) "İptal et" else if (failure != null) "Tekrar dene" else if (playing) "Duraklat" else if (status == Player.STATE_ENDED) "Baştan izle" else "Oynat",
                         Modifier.focusRequester(first), primary = true) {
                         interact()
@@ -327,10 +398,6 @@ import java.util.Locale
                     }
                     Action("Kapat") { save(); model.back() }
                 }
-                }
-                Text(if (recoveryState.recovering) "Geri: yeniden bağlanmayı durdur ve kütüphaneye dön"
-                    else if (failure != null) "Geri: kütüphaneye dön" else "Geri: kontrolleri gizle · Yeniden Geri: kütüphaneye dön",
-                    color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp)
                 }
             }
         }

@@ -637,8 +637,8 @@ class VisualPreviewTest {
         ui.onNodeWithTag("episode-metadata:${episodes.last().id}", useUnmergedTree = true)
             .assertTextContains("Devam et", substring = true)
         shot("series-mixed-episodes")
-        // Failed artwork must not repeat the full title inside its placeholder.
-        ui.onAllNodesWithText(longTitle, useUnmergedTree = true).assertCountEquals(1)
+        // Failed artwork must not repeat the title inside its placeholder; the card shows the episode's own name.
+        ui.onAllNodesWithText(longTitle.substringAfter("S01E01 - "), useUnmergedTree = true).assertCountEquals(1)
         Assert.assertEquals(45_000L, model.progress(episodes.last())?.resumeMs)
     }
 
