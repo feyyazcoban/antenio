@@ -1,5 +1,11 @@
 # Proje durumu
 
+## 0.14.41 · NEXTV teslimi · 17 Ekim 2026
+
+Kullanıcının isteğiyle ("Televizyona yükle") bu dalın üç commit'i (UX denetimi, D064, D065/D066) TV'ye kuruldu. Sürüm 0.14.41 (kod 55). Teslim: releases/NEXTV_TV_Design_Preview_0.14.41.apk (+ .sha256), SHA-256 5fa8f07da7b7572a14402fde2f819ad4bb35d3eeedd92a16e885646bd661cc61. Dosya adı ürün adıyla (D066) NEXTV oldu; önceki teslimler eski adla kaldı. İmza sertifikası 0.14.40 ile aynı (4fe97f80…6065). TV'ye `adb install -r` ile kuruldu (0.14.40'tan); kurulu dosyanın SHA-256'sı eşleşti, firstInstallTime 13 Ekim olarak kaldı, yani veri korundu. TV kurulum sırasında uykudaydı; uygulama açılmadı. Launcher'daki ad NEXTV.
+
+Kontroller: 161 JVM testi geçti (1 atlanan), lint 0 hata (D065 turunda), release derlendi. Enstrümantasyon testleri koşulmadı. TV'de görsel kontrol ve fiziksel kumanda (basılı OK süresi, CH+/CH−, rakam tuşları, rehber tuşu) kullanıcıda.
+
 ## NEXTV adı, sade adlar ve denetimin kalan maddeleri · 17 Ekim 2026
 
 Kullanıcının kararıyla ürün adı NEXTV (D066): uygulama etiketi, sol menüde amblem/logo, kurulum, yükleme, kurtarma ve Uygulama hakkında'da logo, User-Agent. Paket kimliği değişmedi. Kullanıcının "önce açık maddelere devam" isteğiyle D065: sağlayıcı adları görüntüde sadeleşti ("TR: ", "(2024) DE", "TR/FILM ~"), rehbersiz kaynakta tekrar eden metin kalktı, rehber 56 dp satır ve kanal numarası, kartlarda basılı OK menüsü, kalan süre, yükleme göstergesi, kurulumda "Bilgileri göster", 12 sp altı yazı kalmadı.

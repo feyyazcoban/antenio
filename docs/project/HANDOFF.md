@@ -1,5 +1,13 @@
 # Son devir notu
 
+## 0.14.41 · NEXTV teslimi · 17 Ekim 2026
+
+Değişen: apps/android-tv/app/build.gradle.kts (versionCode 55, versionName 0.14.41-design-preview). Teslim releases/NEXTV_TV_Design_Preview_0.14.41.apk, SHA-256 5fa8f07da7b7572a14402fde2f819ad4bb35d3eeedd92a16e885646bd661cc61, imza 0.14.40 ile aynı.
+
+TV (192.168.1.126:5555): 0.14.41 kurulu, SHA eşleşti, veri korundu, uygulama açılmadı. 5556 kapalı; üzerinde bu dalın 0.14.40 adlı ara derlemesi kurulu.
+
+Sonraki adım: kullanıcının TV'de NEXTV logosu, büyük afişler, gradient oynatıcı, kanal/sarma tuşları ve basılı OK menüsünü değerlendirmesi. Fiziksel kumandada CH+/CH−, rakam ve rehber tuşlarının gerçekten geldiği ilk kez TV'de görülecek. Açık: U19 ana sayfa rafları, kalite çeşitlerini birleştirme, NEXTV marka kontrolü, dalın main'e birleştirilmesi.
+
 ## NEXTV adı, sade adlar ve denetimin kalan maddeleri · 17 Ekim 2026
 
 Değişen kod: data/CatalogPresentation.kt (`displayTitle`, `displayCategory`); ui/PilotApp.kt (`MediaCard` adları, `guideAvailable`, `longClick`; `QuickActions`, `refocusAfterDialog`, `remainingText`; kurulumda `reveal`); ui/LibraryScreen.kt (kategori adı ve ülke kodu, kanal satırı/bilgi paneli rehbersiz metin, hızlı menü durumu, "· Rehber yok"); ui/HomeScreen.kt (kart adları, kalan süre, hızlı menü, vitrin metni boyu, menü başında amblem + `nextv_wordmark`); ui/SearchScreen.kt, ui/DetailScreen.kt, ui/PlayerScreen.kt (adlar; ayrıntıda kalan süre; `LoadingArc`; rehber tuşu); ui/GuideScreen.kt (`guideless` durumu, `numbers`, 56 dp satır, Geri önce menü, yazı boyları); ui/DesignSystem.kt (`LoadingArc`, `NextvLogo`); ui/Theme.kt (düğme 14/13 sp ve `actionHeight`, Note 13 sp, `EntryField(revealed)`); ui/LoadingScreen.kt, SourceRecoveryScreen.kt, SettingsScreen.kt, SourcesScreen.kt, EpisodeEndDialog.kt (logo ve yazı boyları); AndroidManifest `android:label="NEXTV"`; data/EpgRepository.kt, SourceRepository.kt User-Agent. Yeni kaynak: res/drawable/nextv_logo.xml, nextv_wordmark.xml (app_banner'daki yolların arka plansız kopyası). Testler: CatalogPresentationTest (ad vakaları), VisualPreviewTest ("2 dk kaldı"). Belgeler: DECISIONS D065/D066, AGENTS (ürün adı satırı), README, PRD isim notu, UX_AUDIT.
