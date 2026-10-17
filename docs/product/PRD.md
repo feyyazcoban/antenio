@@ -26,7 +26,7 @@ Kullanıcının M3U bağlantısını veya Xtream Codes hesabını ekleyerek canl
 
 İlk yayında canlı TV, film ve dizi birlikte bulunacak. VOD, isteğe bağlı film ve dizi oynatımı anlamına gelir ve ilk sürümün zorunlu kapsamındadır. Ürün adı, hedef ülkeler, gelir modeli, ekip kapasitesi ve cihaz alt sınırı henüz karara bağlanmadı.
 
-**İsim kararı:** Piyasada NexTv adlı bir IPTV oynatıcı bulunuyor. NEXTV dosya adı şimdilik çalışma referansı olarak kullanılmalı; nihai isim ayrıca seçilmeli. [R08]
+**İsim kararı:** Piyasada NexTv adlı bir IPTV oynatıcı bulunuyor. [R08] 17 Ekim 2026'da kullanıcı ürün adı olarak NEXTV'yi seçti (D066); mağaza yayını öncesi marka/ad çakışması kontrolü açık.
 
 ## 2 Kullanıcılar ve temel ihtiyaçlar
 

@@ -19,7 +19,13 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -54,6 +60,24 @@ object TvLayout {
  */
 fun focusRing(radius: Dp, color: Color = Ink.Text) =
     Border(BorderStroke(TvLayout.Focus, color), inset = TvLayout.FocusInset, shape = RoundedCornerShape(radius + TvLayout.FocusInset))
+
+/** A turning mint arc while something opens (U22); still under reduced motion. Read only while drawing. */
+@Composable internal fun LoadingArc(modifier: Modifier = Modifier, color: Color = Ink.Mint) {
+    val still = LocalReducedMotion.current
+    val turn = if (still) null else rememberInfiniteTransition(label = "loading")
+        .animateFloat(0f, 360f, infiniteRepeatable(tween(900, easing = LinearEasing)), label = "turn")
+    Canvas(modifier.size(18.dp)) {
+        rotate(turn?.value ?: 0f) {
+            drawArc(color, 0f, 270f, false, style = Stroke(2.dp.toPx(), cap = StrokeCap.Round))
+        }
+    }
+}
+
+/** The NEXTV logo (D066): the horizontal logo in headings, at [height]. */
+@Composable fun NextvLogo(modifier: Modifier = Modifier, height: Dp = 24.dp) {
+    androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(dev.iptvplayer.tv.R.drawable.nextv_logo), "NEXTV",
+        modifier.size(width = height * (460f / 130f), height = height))
+}
 
 // Reuses the stroke icon paths from prototypes/tv-flow/app.js.
 private val iconPaths = mapOf(

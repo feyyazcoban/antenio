@@ -20,6 +20,36 @@ fun catalogDisplayOrder(entries: List<MediaEntry>): List<MediaEntry> {
     return if (dividers.isEmpty()) entries else content + dividers
 }
 
+/**
+ * A provider's title as a card shows it (D065): [name] without a "TR: " country prefix or a trailing "(2024) DE" /
+ * "- 2026", [year] from the title when the provider sent none, [tag] the country or language code. Display only:
+ * search, playback and stored data keep the full title. Quality marks (HD, 4K) stay in the name: they tell
+ * channels apart. A title that would end up empty is left as it is.
+ */
+data class DisplayTitle(val name: String, val year: String, val tag: String)
+
+private val countryPrefix = Regex("^\\s*([A-Z]{2,3})\\s*[:|]\\s*(?=\\S)")
+private val yearAndLanguage = Regex("\\s*\\(((?:19|20)\\d{2})\\)\\s+([A-Z]{2})\\s*$")
+private val trailingYear = Regex("\\s*(?:\\(((?:19|20)\\d{2})\\)|[-–]\\s*((?:19|20)\\d{2}))\\s*$")
+
+fun displayTitle(title: String, year: String = ""): DisplayTitle {
+    var rest = title.trim()
+    var tag = ""
+    countryPrefix.find(rest)?.let { tag = it.groupValues[1]; rest = rest.substring(it.range.last + 1) }
+    var found = ""
+    yearAndLanguage.find(rest)?.let { found = it.groupValues[1]; tag = it.groupValues[2]; rest = rest.substring(0, it.range.first) }
+        ?: trailingYear.find(rest)?.let { found = it.groupValues[1].ifEmpty { it.groupValues[2] }; rest = rest.substring(0, it.range.first) }
+    rest = rest.trim().trimEnd('-', '–', ':', '|').trim()
+    if (rest.isEmpty()) return DisplayTitle(title.trim(), year, "")
+    return DisplayTitle(rest, year.ifBlank { found }, tag)
+}
+
+private val categoryPrefix = Regex("^\\s*([A-Z]{2,3})\\s*/\\s*[^~]*~\\s*(\\S.*)$")
+
+/** "TR/FILM ~ YERLI 2023" as "YERLI 2023" with the tag "TR"; other category names unchanged. */
+fun displayCategory(category: String): Pair<String, String> =
+    categoryPrefix.find(category)?.let { it.groupValues[2].trim() to it.groupValues[1] } ?: (category to "")
+
 private val episodeTagText = Regex("(?i)(?<![\\p{L}\\p{N}])(?:S\\d{1,3}\\s*E\\d{1,4}|\\d{1,3}x\\d{1,4})(?![\\p{L}\\p{N}])")
 private val leadingYear = Regex("^\\s*\\(\\d{4}\\)")
 

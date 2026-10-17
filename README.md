@@ -1,8 +1,8 @@
-# IPTV Player
+# NEXTV
 
 Bu klasör projenin tek ana çalışma alanıdır. Codex, Claude Code veya başka bir geliştirme aracında bu klasörü açın. Android Studio için `apps/android-tv` alt klasörünü açın.
 
-İlk platform Android TV / Google TV; canlı TV, filmler ve diziler. M3U ve Xtream Codes kaynakları desteklenir. LG, Samsung ve mobil sonraki fazlardır. NEXTV kesin ürün adı değildir.
+İlk platform Android TV / Google TV; canlı TV, filmler ve diziler. M3U ve Xtream Codes kaynakları desteklenir. LG, Samsung ve mobil sonraki fazlardır. Ürün adı NEXTV (D066).
 
 ## Önce buradan başla
 

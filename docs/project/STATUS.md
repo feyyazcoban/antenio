@@ -1,5 +1,11 @@
 # Proje durumu
 
+## NEXTV adı, sade adlar ve denetimin kalan maddeleri · 17 Ekim 2026
+
+Kullanıcının kararıyla ürün adı NEXTV (D066): uygulama etiketi, sol menüde amblem/logo, kurulum, yükleme, kurtarma ve Uygulama hakkında'da logo, User-Agent. Paket kimliği değişmedi. Kullanıcının "önce açık maddelere devam" isteğiyle D065: sağlayıcı adları görüntüde sadeleşti ("TR: ", "(2024) DE", "TR/FILM ~"), rehbersiz kaynakta tekrar eden metin kalktı, rehber 56 dp satır ve kanal numarası, kartlarda basılı OK menüsü, kalan süre, yükleme göstergesi, kurulumda "Bilgileri göster", 12 sp altı yazı kalmadı.
+
+Kontroller: 161 JVM testi geçti (1 atlanan), lint 0 hata, release/debug/test APK'ları derlendi. 5556'da gerçek Evim ile görüldü (HANDOFF). Ayarlar'da yanlışlıkla bir kez "Kataloğu yenile" çalıştı; gerçek sağlayıcıdan liste indirildi ve başarılı oldu (Evim 21.314 içerik), yeni User-Agent bununla da doğrulandı. Enstrümantasyon testleri koşulmadı. Sürüm 0.14.40'ta kaldı, TV'ye kurulmadı.
+
 ## Denetim düzeltmeleri, büyük afişler ve gradient oynatıcı · 17 Ekim 2026
 
 Kullanıcının isteğiyle (kütüphane bandını kaldır, afişleri ve yazıları büyüt; oynatıcıyı alttan gradient ile çöz) ve devam istemesiyle UX denetiminin 15 maddesi uygulandı (D064, [denetim](../design/UX_AUDIT_0.14.40.md)). Öne çıkanlar: Filmler/Diziler'de bilgi paneli yok, 4/5 sütun büyük afiş, 15/12 sp kart yazıları; oynatıcıda opak panel yerine alt scrim; canlıda CH+/CH−, Yukarı/Aşağı ve rakamla kanal; filmde Sol/Sağ ve FF/RW ile sarma; kütüphanede katmanlı Geri ve menüden girişte doğru odak; 2 dk/%2 altı izleme devam sayılmaz; "8x8" gibi başlıklar sezon sayılmaz; bölüm kartında yalnız bölüm adı; odakta tek mint dil.

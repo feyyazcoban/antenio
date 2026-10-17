@@ -33,7 +33,7 @@ import androidx.tv.material3.Text
                     } else false
                 }, verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(if (s.next == null) "BÖLÜM TAMAMLANDI" else "SONRAKİ BÖLÜM", color = Ink.Mint,
-                    fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 11.sp, letterSpacing = 1.2.sp)
+                    fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 12.sp, letterSpacing = 1.2.sp)
                 val entry = s.next?.entry ?: s.current
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Artwork(entry.sourceId, entry.artwork, "", Modifier.width(112.dp).aspectRatio(16f / 9).clip(RoundedCornerShape(8.dp)))
@@ -65,7 +65,7 @@ import androidx.tv.material3.Text
                     else Action("Baştan izle", icon = "play", onClick = replay)
                 }
                 Action("Bölümlere dön", onClick = returnToEpisodes)
-                Text("Geri: bu bölümde kal", color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp)
+                Text("Geri: bu bölümde kal", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
             }
         }
     }

@@ -147,6 +147,8 @@ import androidx.compose.ui.input.key.type
     val passwordView = remember { BringIntoViewRequester() }
     val guideView = remember { BringIntoViewRequester() }
     val fieldHeights = remember { mutableStateMapOf<BringIntoViewRequester, Int>() }
+    // Hidden fields (the M3U link, the password, the guide address) can be shown while typing them with the remote (U13).
+    var reveal by rememberSaveable { mutableStateOf(false) }
     val density = LocalDensity.current
     fun fieldView(view: BringIntoViewRequester) = Modifier.bringIntoViewRequester(view).onSizeChanged { fieldHeights[view] = it.height }
     LaunchedEffect(s.error) {
@@ -170,7 +172,7 @@ import androidx.compose.ui.input.key.type
     Row(Modifier.fillMaxSize().padding(horizontal = TvLayout.Gutter, vertical = 28.dp),
         horizontalArrangement = Arrangement.spacedBy(32.dp)) {
         Column(Modifier.weight(.8f).align(Alignment.CenterVertically), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            Text("IPTV PLAYER", color = Ink.Mint, fontSize = 12.sp, fontFamily = Roboto)
+            NextvLogo(height = 28.dp)
             Text("Televizyonun.\nSenin kütüphanen.", color = Ink.Text, fontFamily = Roboto,
                 fontSize = if (largeText) 24.sp else 34.sp, lineHeight = if (largeText) 30.sp else 40.sp)
             if (!largeText) Note("Canlı yayınların, filmlerin ve dizilerin tek yerde.")
@@ -207,20 +209,22 @@ import androidx.compose.ui.input.key.type
                 SetupEntry("Kaynak adı", s.draft.name, { model.draft(s.draft.copy(name = it)) })
                 SetupEntry(if (s.draft.type == SourceType.M3U) "M3U bağlantısı" else "Sunucu adresi · http(s)://…", s.draft.address,
                     { model.draft(s.draft.copy(address = it)) }, secret = s.draft.type == SourceType.M3U,
-                    modifier = fieldView(addressView))
+                    modifier = fieldView(addressView), revealed = reveal)
                 if (s.draft.type == SourceType.XTREAM) {
                     SetupEntry("Kullanıcı adı", s.draft.username, { model.draft(s.draft.copy(username = it)) },
                         modifier = fieldView(userView))
                     SetupEntry("Şifre", s.draft.password, { model.draft(s.draft.copy(password = it)) }, secret = true,
-                        modifier = fieldView(passwordView))
+                        modifier = fieldView(passwordView), revealed = reveal)
                 }
                 SetupEntry("XMLTV rehber adresi · isteğe bağlı", s.draft.epgUrl, { model.draft(s.draft.copy(epgUrl = it)) }, secret = true,
-                    modifier = fieldView(guideView))
+                    modifier = fieldView(guideView), revealed = reveal)
             }
             s.error?.let { Note(it, error = true, modifier = Modifier.testTag("setup-error")) }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Action("Kütüphaneyi aç", Modifier.testTag("setup-connect"), primary = true) { model.connectDraft() }
                 if (s.source != null) Action("Vazgeç") { model.back() }
+                Action(if (reveal) "Bilgileri gizle" else "Bilgileri göster", Modifier.testTag("setup-reveal"), outlined = true,
+                    selected = reveal) { reveal = !reveal }
             }
         }
     }
@@ -228,10 +232,10 @@ import androidx.compose.ui.input.key.type
 }
 
 @Composable private fun SetupEntry(label: String, value: String, onChange: (String) -> Unit,
-    modifier: Modifier = Modifier, secret: Boolean = false) {
+    modifier: Modifier = Modifier, secret: Boolean = false, revealed: Boolean = false) {
     val visibility = rememberCardVisibility()
     EntryField(label, value, onChange, modifier.then(visibility.container).then(visibility.focus),
-        secret = secret, containerColor = Ink.Background)
+        secret = secret, containerColor = Ink.Background, revealed = revealed)
 }
 
 /** Equal cells: GridCells.Fixed gives leftover pixels to the first columns, so 2:3 posters ended 1 dp apart. */
@@ -240,15 +244,21 @@ internal class EvenColumns(private val count: Int) : GridCells {
         List(count) { (availableSize - spacing * (count - 1)) / count }
 }
 
-/** [compact] is the search-result row used while the section search keyboard is open; the same Card keeps focus across modes. */
+/**
+ * [compact] is the search-result row used while the section search keyboard is open; the same Card keeps focus across
+ * modes. Names are shown through [displayTitle] (D065). [guideAvailable] false: the source has no guide, so the card
+ * does not repeat "Program bilgisi yok". [longClick] opens the quick actions (a held OK).
+ */
 @Composable internal fun MediaCard(entry: MediaEntry, favorite: Boolean, sourceName: String?, modifier: Modifier = Modifier,
     guide: GuideSlice? = null, now: Long = 0, onMeasured: (Int) -> Unit = {}, compact: Boolean = false,
-    compactMin: androidx.compose.ui.unit.Dp = 132.dp, click: () -> Unit) {
+    compactMin: androidx.compose.ui.unit.Dp = 132.dp, guideAvailable: Boolean = true, longClick: (() -> Unit)? = null, click: () -> Unit) {
     val live = entry.kind == MediaKind.LIVE
     val radius = if (live && !compact) 14.dp else TvLayout.CardRadius
     val visibility = rememberCardVisibility()
+    val shown = remember(entry.title, entry.year) { displayTitle(entry.title, entry.year) }
+    val name = (if (favorite) "★ " else "") + shown.name
     Column(visibility.container.onSizeChanged { onMeasured(it.height) }.testTag("tile:library:${entry.id}")) {
-        Card(onClick = click, modifier = modifier.then(visibility.focus).fillMaxWidth()
+        Card(onClick = click, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth()
             .then(if (compact) Modifier.heightIn(min = compactMin) else if (live) Modifier.heightIn(min = 126.dp) else Modifier.aspectRatio(2f / 3))
             .semantics { contentDescription = entry.title },
             shape = CardDefaults.shape(shape = RoundedCornerShape(radius)),
@@ -261,19 +271,19 @@ internal class EvenColumns(private val count: Int) : GridCells {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(if (live) 96.dp else 72.dp).height(if (live) 54.dp else 108.dp)
                     .clip(RoundedCornerShape(6.dp)), live, showFallbackTitle = false)
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                    Text((if (favorite) "★ " else "") + entry.title, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
+                    Text(name, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                         fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(if (live) guide?.now(now)?.let { "Şimdi: ${it.title}" } ?: entry.category
-                        else listOf(entry.kind.label, entry.year).filter { it.isNotBlank() }.joinToString(" · "),
-                        color = Ink.Mint, fontFamily = Roboto, fontSize = 11.sp, lineHeight = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp, lineHeight = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    Text(if (live) guide?.now(now)?.let { "Şimdi: ${it.title}" } ?: displayCategory(entry.category).first
+                        else listOf(entry.kind.label, shown.year, shown.tag).filter { it.isNotBlank() }.joinToString(" · "),
+                        color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
             } else if (live) Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(130.dp).height(40.dp), true, logoInset = 0.dp)
-                Text((if (favorite) "★ " else "") + entry.title, color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp,
+                Text(name, color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp,
                     lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(entry.category, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(displayCategory(entry.category).first, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             } else Box(Modifier.fillMaxSize()) {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.fillMaxSize(), showFallbackTitle = false)
                 entry.ratingText?.let { RatingBadge(it, Modifier.align(Alignment.TopStart).padding(7.dp)) }
@@ -282,22 +292,44 @@ internal class EvenColumns(private val count: Int) : GridCells {
         if (compact) return@Column
         // Captions sized for the larger library posters (D064): title 15 sp, the lines under it 12 sp.
         Spacer(Modifier.height(8.dp))
-        if (!live) Text((if (favorite) "★ " else "") + entry.title, fontFamily = Roboto, fontSize = 15.sp,
+        if (!live) Text(name, fontFamily = Roboto, fontSize = 15.sp,
             minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 20.sp)
-        // Year and, with several sources, the source share one line, which keeps its height without either: most
-        // M3U titles have no year, and an empty year line left a gap under every title.
-        if (!live) Text(listOf(entry.year, sourceName.orEmpty()).filter { it.isNotBlank() }.joinToString(" · "),
+        // Year, the language or country of the title and, with several sources, the source share one line, which keeps
+        // its height without any of them.
+        if (!live) Text(listOf(shown.year, shown.tag, sourceName.orEmpty()).filter { it.isNotBlank() }.joinToString(" · "),
             Modifier.testTag("library-year:${entry.id}"), color = Ink.Muted,
             fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1,
             overflow = TextOverflow.Ellipsis)
         if (live) sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
         if (live) {
-            Text(guide?.now(now)?.let { "Şimdi: ${it.title}" } ?: "Program bilgisi yok", color = Ink.Muted, fontFamily = Roboto,
-                fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(guide?.now(now)?.let { "Şimdi: ${it.title}" } ?: if (guideAvailable) "Program bilgisi yok" else "", color = Ink.Muted, fontFamily = Roboto,
+                fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(guide?.next(now)?.let { "Sonra: ${it.title}" }.orEmpty(), color = Ink.Muted, fontFamily = Roboto,
                 fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
+}
+
+/**
+ * Held OK on a card (U8): add or remove the favourite, or open the title, without going through its detail or player.
+ * Focus returns to the card through [dismiss].
+ */
+@Composable internal fun QuickActions(entry: MediaEntry, favorite: Boolean, toggleFavorite: () -> Unit, open: () -> Unit, dismiss: () -> Unit) {
+    val first = remember { FocusRequester() }
+    SourceDialog(displayTitle(entry.title, entry.year).name, first, dismiss, width = 440.dp) {
+        Action(if (favorite) "Favorilerden çıkar" else "Favorilere ekle", Modifier.fillMaxWidth().focusRequester(first).testTag("quick-favorite"),
+            icon = "star", iconFilled = favorite) { toggleFavorite(); dismiss() }
+        Action(if (entry.kind == MediaKind.LIVE) "İzle" else "Ayrıntılar", Modifier.fillMaxWidth().testTag("quick-open"),
+            icon = if (entry.kind == MediaKind.LIVE) "play" else null) { dismiss(); open() }
+        Action("Vazgeç", Modifier.fillMaxWidth().testTag("quick-cancel"), outlined = true, onClick = dismiss)
+    }
+}
+
+/** Focus for [requester] once this window has focus again (after a dialog), or false if it is gone. */
+internal suspend fun refocusAfterDialog(window: androidx.compose.ui.platform.WindowInfo, requester: () -> FocusRequester?) {
+    snapshotFlow { window.isWindowFocused }.first { it }
+    withFrameNanos { }
+    try { requester()?.requestFocus() } catch (_: IllegalStateException) { }
 }
 
 @Composable internal fun Artwork(owner: String, url: String?, title: String, modifier: Modifier = Modifier, logo: Boolean = false,
@@ -350,6 +382,18 @@ internal class EvenColumns(private val count: Int) : GridCells {
             Heading(title)
             content()
         }
+    }
+}
+
+/** What is left of a title, for Devam et: "35 dk kaldı", "1 sa 17 dk kaldı"; the position when the length is unknown. */
+internal fun remainingText(positionMs: Long, durationMs: Long): String {
+    if (durationMs <= 0) return clockTime(positionMs)
+    val minutes = ((durationMs - positionMs).coerceAtLeast(0) + 59_999) / 60_000
+    return when {
+        minutes < 1 -> "Bitmek üzere"
+        minutes < 60 -> "$minutes dk kaldı"
+        minutes % 60 == 0L -> "${minutes / 60} sa kaldı"
+        else -> "${minutes / 60} sa ${minutes % 60} dk kaldı"
     }
 }
 

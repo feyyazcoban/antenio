@@ -16,7 +16,7 @@ Bu dosya Codex ve Claude Code için aynı çalışma sözleşmesidir. CLAUDE.md 
 - M3U bağlantısı ve Xtream Codes hesabı desteklenir.
 - TV UI kitini ve mevcut Figma bileşenlerini temel alın.
 - LG webOS, Samsung Tizen, Android mobil ve iOS sonraki fazlardır.
-- NEXTV kesin ürün adı değildir.
+- Ürün adı NEXTV'dir (D066, kullanıcı kararı 17 Ekim 2026). Paket kimliği `dev.iptvplayer.tv.pilot` kurulu verileri korumak için değişmez; aynı adlı bir rakip olduğundan mağaza yayını öncesi marka kontrolü açıktır.
 - Takvim, ücretlendirme ve minimum cihaz desteği onaylanmış sayılmaz.
 
 ## Tek kaynak kuralı

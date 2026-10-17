@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
@@ -89,7 +90,14 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                 providerCategories(itemsOfKind, s.catalog.categoryOrder[s.kind].orEmpty()).map { SectionCategory(it, it) }
         }
     }
-    val categoryLabel = categories.firstOrNull { it.key == s.category }?.label ?: s.category
+    val categoryLabel = displayCategory(categories.firstOrNull { it.key == s.category }?.label ?: s.category).first
+    // Sources with a guide: without one, rows and the panel do not repeat "Program bilgisi yok" (U14).
+    val guided = s.guideStatus.filterValues { it.configured }.keys
+    val noGuide = live && itemsOfKind.none { it.sourceId in guided }
+    // Held OK on a card or row: the quick actions (U8); focus goes back to that card afterwards.
+    var quick by remember { mutableStateOf<MediaEntry?>(null) }
+    var refocus by remember { mutableStateOf<String?>(null) }
+    val window = LocalWindowInfo.current
     // Films and series can be ordered (Sırala); channels keep their numbers' order, Favoriler its own and
     // Geçmiş the order they were watched in.
     val sortable = !s.onlyFavorites && s.category != HistoryCategory && (s.kind == MediaKind.MOVIE || s.kind == MediaKind.SERIES)
@@ -107,6 +115,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     }
     val initialIndex = remember { filtered.indexOfFirst { it.id == s.focusedId }.coerceAtLeast(0) }
     val memory = remember { LibraryMemory(filtered.getOrNull(initialIndex)?.id, initialIndex) }
+    LaunchedEffect(refocus) { refocus?.let { id -> refocusAfterDialog(window) { memory.cards[id] }; refocus = null } }
     // The focused card's place for the heading's "3 / 120"; only that counter reads it.
     val position = remember { mutableIntStateOf(initialIndex + 1) }
     var gridActive by remember { mutableStateOf(false) }
@@ -147,8 +156,8 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
         // Typing ends first (a floating keyboard may still count as typing), so the category column is laid out again.
         toCategory = { edited = false; gridActive = false; restoreCategory = true },
         toMenu = { try { navFocus.requestFocus() } catch (_: IllegalStateException) { model.back() } })
-    val compactMin = with(density) { maxOf(132.dp, 20.dp + 19.sp.toDp() * 2 + 7.dp + 15.sp.toDp() +
-        if (s.sources.size > 1) 7.dp + 14.sp.toDp() else 0.dp) }
+    val compactMin = with(density) { maxOf(132.dp, 20.dp + 19.sp.toDp() * 2 + 7.dp + 16.sp.toDp() +
+        if (s.sources.size > 1) 7.dp + 16.sp.toDp() else 0.dp) }
     // A poster grid with focus takes the category column's place; Left from its first column brings the column back
     // on the selected category. Live rows keep the column. Large posters (D064): 4 columns beside the category column
     // and 5 without it, so a poster keeps nearly the same size (about 151 and 155 dp) when the column steps aside.
@@ -196,6 +205,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                         gridMode -> PositionNote(position, filtered.size, Modifier.testTag("library-position"))
                         else -> Note("${filtered.size} " + if (live) "kanal" else "içerik")
                     }
+                    if (noGuide && !gridMode) Note("· Rehber yok")
                 }
                 if (live) Action("Rehber", Modifier.testTag("open-guide"), compact = true, outlined = true, icon = "guide") { model.guide() }
                 if (sortable) SortAction(sort, short = largeText) { model.librarySort(s.kind, it) }
@@ -218,7 +228,8 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                 }, selectedCategoryFocus) { key -> if (key != s.category) model.category(key) }
             Column(Modifier.weight(1f).fillMaxHeight()) {
                 // Films and series show no information panel above the posters (D064): the room goes to larger posters.
-                if (!typing && filtered.isNotEmpty() && live) LiveInfo({ focusedEntry.value ?: filtered.firstOrNull() }, numbers, { programmes }, now, zone)
+                if (!typing && filtered.isNotEmpty() && live) LiveInfo({ focusedEntry.value ?: filtered.firstOrNull() }, numbers, { programmes }, now, zone,
+                    { it.sourceId in guided })
                 // Lined up with the cards below; the grid's own top padding and spacer keep the old 28 dp gap.
                 if (fixedHeading && !typing) LibraryHeading(Modifier.padding(start = if (gridMode) TvLayout.Gutter else 16.dp,
                     end = TvLayout.Gutter, top = 7.dp, bottom = 7.dp), Modifier)
@@ -296,9 +307,11 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                             focusedEntry.value = entry; position.intValue = index + 1
                         } }
                         if (entry.kind == MediaKind.LIVE && !typing && live)
-                            ChannelRow(entry, numbers[entry.id] ?: 0, entry.id in s.favoriteIds, card, programmes[entry.id], now, zone) { model.open(entry) }
+                            ChannelRow(entry, numbers[entry.id] ?: 0, entry.id in s.favoriteIds, card, programmes[entry.id], now, zone,
+                                guideAvailable = entry.sourceId in guided, longClick = { quick = entry }) { model.open(entry) }
                         else MediaCard(entry, entry.id in s.favoriteIds, if (s.sources.size > 1) s.sourceName(entry.sourceId) else null,
-                            card, programmes[entry.id], now, compact = typing, compactMin = compactMin) { model.open(entry) }
+                            card, programmes[entry.id], now, compact = typing, compactMin = compactMin,
+                            guideAvailable = entry.sourceId in guided, longClick = { quick = entry }) { model.open(entry) }
                     }
                 }
             }
@@ -312,6 +325,10 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
             }
             restoreCategory = false
         }
+    }
+    quick?.let { entry ->
+        QuickActions(entry, entry.id in s.favoriteIds, toggleFavorite = { model.toggleFavorite(entry) }, open = { model.open(entry) },
+            dismiss = { quick = null; refocus = entry.id })
     }
     LaunchedEffect(searchOpen) { if (searchOpen) { withFrameNanos { }; searchFocus.requestFocus() } }
     // The field rests at the top of the content while typing, so the first result row stays above the keyboard.
@@ -404,9 +421,13 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                 // its own text height sat at the top, its label about 2 dp above the centre.
                 Row(Modifier.fillMaxWidth().heightIn(min = 40.dp).padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text(category.label, Modifier.weight(1f), color = LocalContentColor.current, fontFamily = Roboto,
+                    // "TR/FILM ~ YERLI 2023" reads "YERLI 2023" with its country after it (D065).
+                    val (label, tag) = remember(category.label) { displayCategory(category.label) }
+                    Text(label, Modifier.weight(1f), color = LocalContentColor.current, fontFamily = Roboto,
                         fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal, fontSize = 14.sp, lineHeight = 19.sp,
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (tag.isNotEmpty()) Text(tag, Modifier.padding(start = 8.dp), color = if (focused) LocalContentColor.current else Ink.Muted,
+                        fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1)
                     if (isSelected && !focused) Box(Modifier.size(6.dp).background(Ink.Mint, RoundedCornerShape(50)))
                 }
             }
@@ -437,12 +458,13 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
 
 /** A numbered channel row: logo, name, the programme on now with its progress, and the next one. */
 @Composable private fun ChannelRow(entry: MediaEntry, number: Int, favorite: Boolean, modifier: Modifier,
-    guide: GuideSlice?, now: Long, zone: ZoneId, click: () -> Unit) {
+    guide: GuideSlice?, now: Long, zone: ZoneId, guideAvailable: Boolean = true, longClick: (() -> Unit)? = null, click: () -> Unit) {
+    val shown = remember(entry.title) { displayTitle(entry.title) }
     val visibility = rememberCardVisibility()
     val current = guide?.now(now)
     val next = guide?.next(now)
     Box(Modifier.fillMaxWidth().then(visibility.container).testTag("tile:library:${entry.id}")) {
-        Surface(onClick = click, modifier = modifier.then(visibility.focus).fillMaxWidth().heightIn(min = 48.dp)
+        Surface(onClick = click, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth().heightIn(min = 48.dp)
             .semantics { contentDescription = entry.title },
             shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
             colors = ClickableSurfaceDefaults.colors(containerColor = Ink.Container, contentColor = Ink.Text,
@@ -454,14 +476,16 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                 Text(if (number > 0) "$number" else "", Modifier.width(36.dp), color = Ink.Muted, fontFamily = Roboto,
                     fontSize = 14.sp, maxLines = 1)
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(56.dp).height(32.dp), true, logoInset = 0.dp)
-                Text((if (favorite) "★ " else "") + entry.title, Modifier.weight(.42f), color = Ink.Text, fontFamily = Roboto,
-                    fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 19.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text((if (favorite) "★ " else "") + shown.name, Modifier.weight(.42f), color = Ink.Text, fontFamily = Roboto,
+                    fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Column(Modifier.weight(.58f), verticalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterVertically)) {
-                    Text(current?.title ?: "Program bilgisi yok", color = if (current != null) Ink.Text else Ink.Muted, fontFamily = Roboto,
-                        fontSize = 13.sp, lineHeight = 17.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    // Without a guide the column names the channel's category instead of "Program bilgisi yok" on every row.
+                    Text(current?.title ?: if (guideAvailable) "Program bilgisi yok" else displayCategory(entry.category).first,
+                        color = if (current != null) Ink.Text else Ink.Muted, fontFamily = Roboto,
+                        fontSize = 14.sp, lineHeight = 19.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (current != null) Progress(current, now)
                     if (next != null) Text("Sonra · ${guideTime(next.start, zone)} ${next.title}", color = Ink.Muted, fontFamily = Roboto,
-                        fontSize = 11.sp, lineHeight = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
@@ -478,8 +502,10 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
 
 /** The focused channel above the list: logo, number and name, what is on now with its time, and what is next. */
 @Composable private fun LiveInfo(focused: () -> MediaEntry?, numbers: Map<String, Int>, programmes: () -> Map<String, GuideSlice>,
-    now: Long, zone: ZoneId) {
+    now: Long, zone: ZoneId, guideAvailable: (MediaEntry) -> Boolean = { true }) {
     val entry = focused() ?: return
+    val shown = remember(entry.title) { displayTitle(entry.title) }
+    val (category, country) = remember(entry.category) { displayCategory(entry.category) }
     val guide = programmes()[entry.id]
     val current = guide?.now(now)
     val next = guide?.next(now)
@@ -488,12 +514,13 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
         Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(128.dp).height(72.dp), true, logoInset = 0.dp)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            Text(listOfNotNull(numbers[entry.id]?.toString(), entry.title).joinToString("  "), color = Ink.Text, fontFamily = Roboto,
+            Text(listOfNotNull(numbers[entry.id]?.toString(), shown.name).joinToString("  "), color = Ink.Text, fontFamily = Roboto,
                 fontWeight = FontWeight.Medium, fontSize = 18.sp, lineHeight = 23.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(current?.let { "${it.title} · ${programmeTime(it, zone)}" } ?: "Program bilgisi yok", color = if (current != null) Ink.Text else Ink.Muted,
+            Text(current?.let { "${it.title} · ${programmeTime(it, zone)}" } ?: if (guideAvailable(entry)) "Program bilgisi yok"
+                else listOf(category, shown.tag.ifEmpty { country }).filter { it.isNotBlank() }.joinToString(" · "), color = if (current != null) Ink.Text else Ink.Muted,
                 fontFamily = Roboto, fontSize = 14.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (current != null) Progress(current, now, Modifier.widthIn(max = 360.dp))
-            Text(next?.let { "Sonra · ${guideTime(it.start, zone)} ${it.title}" } ?: entry.category, color = Ink.Muted, fontFamily = Roboto,
+            Text(next?.let { "Sonra · ${guideTime(it.start, zone)} ${it.title}" } ?: if (guideAvailable(entry)) category else "Rehber bilgisi eklenmemiş", color = Ink.Muted, fontFamily = Roboto,
                 fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }

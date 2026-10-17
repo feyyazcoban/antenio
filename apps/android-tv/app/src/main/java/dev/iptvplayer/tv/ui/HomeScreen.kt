@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
@@ -144,12 +145,15 @@ import kotlinx.coroutines.delay
             // handler, a test) keeps the item it asked for.
             .focusProperties { onEnter = { if (requestedFocusDirection != FocusDirection.Enter) activeTarget.requestFocus() } }.focusGroup()
             .testTag("navigation-bar").padding(vertical = 20.dp)) {
-            Row(Modifier.fillMaxWidth().padding(start = 16.dp).heightIn(min = 40.dp), verticalAlignment = Alignment.CenterVertically) {
+            // The NEXTV emblem on the rail; the open menu adds the letters beside it, as in the horizontal logo (D066).
+            Row(Modifier.fillMaxWidth().padding(start = 16.dp).heightIn(min = 40.dp).semantics(mergeDescendants = true) { },
+                verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.width(40.dp), contentAlignment = Alignment.Center) {
-                    Text("›", color = Ink.Mint, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(dev.iptvplayer.tv.R.drawable.ic_nextv_splash_mark), "NEXTV",
+                        Modifier.size(width = 22.dp * (119f / 148f), height = 22.dp))
                 }
-                if (expanded) Text("IPTV", color = Ink.Text, fontSize = 14.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.2.sp,
-                    fontFamily = Roboto, maxLines = 1, softWrap = false)
+                if (expanded) androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(dev.iptvplayer.tv.R.drawable.nextv_wordmark), null,
+                    Modifier.padding(start = 6.dp).size(width = 11.3.dp * (300f / 67f), height = 11.3.dp))
             }
             Spacer(Modifier.weight(1f))
             Column(Modifier.fillMaxWidth().testTag("navigation-items").verticalScroll(rememberScrollState())
@@ -233,6 +237,11 @@ private data class HomeRow(val key: String, val title: String, val entries: List
     val density = LocalDensity.current
     var viewportHeight by remember { mutableStateOf(0.dp) }
     val shelfHeights = remember { mutableStateMapOf<String, Dp>() }
+    // Held OK on a card: the quick actions (U8); focus returns to that card.
+    var quick by remember { mutableStateOf<MediaEntry?>(null) }
+    var refocus by remember { mutableStateOf<FocusRequester?>(null) }
+    val window = LocalWindowInfo.current
+    LaunchedEffect(refocus) { refocus?.let { target -> refocusAfterDialog(window) { target }; refocus = null } }
     Navigation(s, model, Modifier.onFocusChanged { menuFocused.value = it.hasFocus }, first = nav,
         contentEntry = { lastFocus.requester }, settings = settings) { Column(Modifier.fillMaxSize()) {
         if (rows.isEmpty()) {
@@ -310,7 +319,8 @@ private data class HomeRow(val key: String, val title: String, val entries: List
                             HomeCard(entry, continuing?.record, if (s.sources.size > 1) s.sourceName(entry.sourceId) else null,
                                 Modifier.then(if (key == target) Modifier.focusRequester(focus) else Modifier)
                                     .focusRequester(own)
-                                    .onFocusChanged { if (it.isFocused) { model.homeFocus(key); lastFocus.requester = own } }, row.key, headingHeight + 10.dp, viewportHeight, reserveEpisode) {
+                                    .onFocusChanged { if (it.isFocused) { model.homeFocus(key); lastFocus.requester = own } }, row.key, headingHeight + 10.dp, viewportHeight, reserveEpisode,
+                                longClick = { quick = entry; refocus = null }) {
                                 model.homeFocus(key)
                                 model.open(entry, continuing?.record)
                             }
@@ -320,6 +330,10 @@ private data class HomeRow(val key: String, val title: String, val entries: List
             }
         }
     } }
+    quick?.let { entry ->
+        QuickActions(entry, entry.id in s.favoriteIds, toggleFavorite = { model.toggleFavorite(entry) }, open = { model.open(entry) },
+            dismiss = { quick = null; refocus = lastFocus.requester })
+    }
     LaunchedEffect(Unit) {
         // A remembered key whose starter shelf gave way to its personal row (the first watch) already fell back to
         // the new target; record that before the stale-key effect below looks, so focus does not jump to the menu.
@@ -414,7 +428,7 @@ private data class HomeRow(val key: String, val title: String, val entries: List
             Row(Modifier.fillMaxWidth().heightIn(min = actionHeight(compact = true)), verticalAlignment = Alignment.CenterVertically) {
                 Text(if (newest) "YENİ EKLENEN" else "KÜTÜPHANENDEN",
                     Modifier.weight(1f).testTag("hero-label"), color = Ink.Mint, fontFamily = Roboto,
-                    fontWeight = FontWeight.Medium, fontSize = 10.sp, letterSpacing = 1.2.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    fontWeight = FontWeight.Medium, fontSize = 12.sp, letterSpacing = 1.2.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Column(Modifier.padding(top = 16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 // Every slide's text is laid out, unseen, in the same slot: the hero keeps the tallest slide's height,
@@ -454,12 +468,13 @@ private data class HomeRow(val key: String, val title: String, val entries: List
     val width = if (!slide.hasBackdrop && slide.artwork == null) 1f else if (largeText) .62f else .48f
     fun Modifier.tag(tag: String) = if (tagged) testTag(tag) else this
     Column(modifier.fillMaxWidth(width), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(slide.title, Modifier.tag("hero-title"), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
+        val shown = remember(slide.title, slide.year) { displayTitle(slide.title, slide.year) }
+        Text(shown.name, Modifier.tag("hero-title"), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
             fontSize = if (largeText) 28.sp else 44.sp, lineHeight = if (largeText) 33.sp else 50.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        Text(listOf(slide.kind.label, slide.year).filter { it.isNotBlank() }.joinToString("  ·  "),
-            color = Ink.Muted, fontFamily = Roboto, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        if (slide.description.isNotBlank()) Text(slide.description, Modifier.tag("hero-description"), fontFamily = Roboto, fontSize = 12.sp,
-            lineHeight = 17.sp, color = Ink.Muted, maxLines = if (largeText) 1 else 2, overflow = TextOverflow.Ellipsis)
+        Text(listOf(slide.kind.label, shown.year, shown.tag).filter { it.isNotBlank() }.joinToString("  ·  "),
+            color = Ink.Muted, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (slide.description.isNotBlank()) Text(slide.description, Modifier.tag("hero-description"), fontFamily = Roboto, fontSize = 14.sp,
+            lineHeight = 20.sp, color = Ink.Muted, maxLines = if (largeText) 1 else 2, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -475,8 +490,9 @@ private data class HomeRow(val key: String, val title: String, val entries: List
 }
 
 @Composable private fun HomeCard(entry: MediaEntry, record: WatchRecord?, sourceName: String?, modifier: Modifier, section: String, headingContext: Dp, viewportHeight: Dp,
-    reserveEpisode: Boolean = false, open: () -> Unit) {
+    reserveEpisode: Boolean = false, longClick: (() -> Unit)? = null, open: () -> Unit) {
     val live = entry.kind == MediaKind.LIVE
+    val shown = remember(entry.title, entry.year) { displayTitle(entry.title, entry.year) }
     // The row's own 24 dp gutter: a focused card stops on the heading edge instead of 7 dp from the screen,
     // which left a strip of the previous card with cut text at the other edge.
     val visibility = rememberCardVisibility(horizontalPadding = TvLayout.Gutter, contextAbove = headingContext, viewportHeight = viewportHeight)
@@ -484,12 +500,12 @@ private data class HomeRow(val key: String, val title: String, val entries: List
         // A finished latest episode: the card offers the series' next episode instead of a position.
         val next = record.kind == MediaKind.EPISODE && record.progress.completed
         Box(Modifier.width(TvLayout.ContinueWidth).then(visibility.container)) {
-            Card(onClick = open, modifier = modifier.then(visibility.focus).fillMaxWidth()
+            Card(onClick = open, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth()
                 .semantics {
                     contentDescription = "Devam et: ${entry.title}"
                     stateDescription = listOfNotNull(sourceName,
                         if (record.kind == MediaKind.EPISODE) "Sezon ${record.season}, bölüm ${record.episode}${if (next) " izlendi" else ""}" else null,
-                        if (next) "Sıradaki bölüm" else "İzleme konumu ${clockTime(record.positionMs)}").joinToString(". ")
+                        if (next) "Sıradaki bölüm" else remainingText(record.positionMs, record.durationMs)).joinToString(". ")
                     testTag = "$section:${entry.id}"
                 },
                 shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
@@ -504,15 +520,16 @@ private data class HomeRow(val key: String, val title: String, val entries: List
                     }
                     Column(Modifier.fillMaxWidth().padding(start = 90.dp, end = 14.dp, top = 14.dp, bottom = 17.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         // Shared title and episode slots keep card heights and progress bars aligned across the row.
-                        Text(entry.title, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
-                            fontSize = 13.sp, lineHeight = 18.sp, minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                        sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                        Text(shown.name, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp, lineHeight = 19.sp, minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                         if (record.kind == MediaKind.EPISODE) Text("S${record.season} · B${record.episode}${if (next) " izlendi" else ""}",
-                            color = Ink.Muted, fontFamily = Roboto, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         else if (reserveEpisode) Text(" ", Modifier.clearAndSetSemantics { },
-                            color = Ink.Muted, fontFamily = Roboto, fontSize = 11.sp, maxLines = 1)
-                        Text(if (next) "Sıradaki bölüm" else clockTime(record.positionMs),
-                            color = Ink.Mint, fontFamily = Roboto, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1)
+                        // What is left reads better than a position ("1 sa 17 dk kaldı", U18).
+                        Text(if (next) "Sıradaki bölüm" else remainingText(record.positionMs, record.durationMs),
+                            color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     if (record.durationMs > 0 && !next) Box(Modifier.align(Alignment.BottomStart).fillMaxWidth().height(3.dp).background(Ink.High)) {
                         Box(Modifier.fillMaxHeight().fillMaxWidth((record.positionMs.toFloat() / record.durationMs).coerceIn(0f, 1f)).background(Ink.Mint))
@@ -523,7 +540,7 @@ private data class HomeRow(val key: String, val title: String, val entries: List
         return
     }
     Column(Modifier.width(if (live) TvLayout.LiveWidth else TvLayout.PosterWidth).then(visibility.container).testTag("tile:$section:${entry.id}"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Card(onClick = open, modifier = modifier.then(visibility.focus).fillMaxWidth().aspectRatio(if (live) 16f / 9 else 2f / 3)
+        Card(onClick = open, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth().aspectRatio(if (live) 16f / 9 else 2f / 3)
             .semantics { contentDescription = "${if (section == "continue") "Devam et: " else ""}${entry.title}"; testTag = "$section:${entry.id}" },
             scale = CardDefaults.scale(focusedScale = 1f),
             shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
@@ -536,9 +553,11 @@ private data class HomeRow(val key: String, val title: String, val entries: List
                 entry.ratingText?.let { RatingBadge(it, Modifier.align(Alignment.TopStart).padding(7.dp)) }
             }
         }
-        Text(entry.title, color = Ink.Text, fontFamily = Roboto, fontSize = 12.sp, minLines = if (live) 1 else 2, maxLines = 2, lineHeight = 17.sp, overflow = TextOverflow.Ellipsis)
-        if (!live) Text(entry.year, Modifier.testTag("home-year:$section:${entry.id}"), color = Ink.Muted,
-            fontFamily = Roboto, fontSize = 10.sp, lineHeight = 14.sp, minLines = 1, maxLines = 1)
-        sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+        Text(shown.name, color = Ink.Text, fontFamily = Roboto, fontSize = 14.sp, minLines = if (live) 1 else 2, maxLines = 2, lineHeight = 19.sp, overflow = TextOverflow.Ellipsis)
+        // As in the library: year, language or country and source on one line of constant height.
+        if (!live) Text(listOf(shown.year, shown.tag, sourceName.orEmpty()).filter { it.isNotBlank() }.joinToString(" · "),
+            Modifier.testTag("home-year:$section:${entry.id}"), color = Ink.Muted,
+            fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (live) sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
     }
 }

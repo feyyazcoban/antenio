@@ -24,10 +24,7 @@ import dev.iptvplayer.tv.TvState
         Column(Modifier.widthIn(max = 720.dp).fillMaxWidth()
             .background(Ink.Container, RoundedCornerShape(24.dp)).padding(28.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                LineIcon("tv", Ink.Mint, Modifier.size(20.dp))
-                Text("IPTV PLAYER", color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp)
-            }
+            NextvLogo(height = 24.dp)
             Text(when (state.sourceTask) {
                 SourceTask.RESETTING -> "Kaynakların sıfırlanıyor"
                 SourceTask.REMOVING -> "Kaynağın kaldırılıyor"
@@ -39,7 +36,10 @@ import dev.iptvplayer.tv.TvState
                     liveRegion = LiveRegionMode.Polite
                     progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate
                 }, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(state.progressLabel, color = Ink.Text, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 20.sp)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LoadingArc()
+                    Text(state.progressLabel, color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 21.sp)
+                }
             }
             Note(when (state.sourceTask) {
                 SourceTask.IMPORTING -> "Büyük listelerin yüklenmesi biraz zaman alabilir."

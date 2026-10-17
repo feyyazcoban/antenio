@@ -74,6 +74,13 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
     val zone = model.guideZone()
     val density = LocalDensity.current
     val channels = remember(s.catalog) { s.catalog.items.filter { it.kind == MediaKind.LIVE && !it.adult } }
+    // Canlı TV's numbers ("Tüm kanallar" order), so a number means the same channel on both screens.
+    val numbers = remember(channels) { catalogDisplayOrder(channels).withIndex().associate { (i, e) -> e.id to i + 1 } }
+    // Every channel's source has reported, and none has a guide: one explanation instead of a grid of empty rows (U9).
+    val owners = remember(channels) { channels.map { it.sourceId }.distinct() }
+    val guideless = channels.isNotEmpty() && owners.all { it in s.guideStatus } && owners.none { s.guideStatus[it]?.configured == true }
+    val emptyFocus = remember { FocusRequester() }
+    var menuFocused by remember { mutableStateOf(false) }
     val retention = remember(now / 60_000, zone) { GuideWindow.around(Instant.ofEpochMilli(now), zone) }
     val anchor = (s.guideAnchor ?: now).coerceIn(retention.from, retention.until - 1)
     val day = Instant.ofEpochMilli(anchor).atZone(zone).toLocalDate()
@@ -103,8 +110,9 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
     val hourStart = Instant.ofEpochMilli(anchor).atZone(zone).truncatedTo(java.time.temporal.ChronoUnit.HOURS).toInstant().toEpochMilli()
     val viewportFrom = hourStart.coerceIn(dayWindow.from, dayWindow.until - duration)
     val viewport = GuideWindow(viewportFrom, viewportFrom + duration)
-    val channelWidth = (if (density.fontScale >= 1.5f) 232 else 196).dp
-    val rowHeight = (if (density.fontScale >= 1.5f) 90 else 65).dp
+    val channelWidth = (if (density.fontScale >= 1.5f) 232 else 210).dp
+    // 56 dp rows show seven channels at once at normal text (four at 65 dp, U9).
+    val rowHeight = (if (density.fontScale >= 1.5f) 90 else 56).dp
 
     fun select(id: String?, time: Long) { model.guideCursor(id, time.coerceIn(retention.from, retention.until - 1)) }
     fun open(entry: MediaEntry, slot: GuideSlot) {
@@ -115,9 +123,12 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
     }
     BackHandler {
         // A Back that arrives after the model left the guide, before this screen is gone, is the new route's.
-        if (model.state.value.route != Route.GUIDE) back() else if (gridFocused) navigation.requestFocus() else model.home()
+        // As in the library: the content's Back goes to the menu first, the menu's Back to Ana Sayfa.
+        if (model.state.value.route != Route.GUIDE) back() else if (!menuFocused) navigation.requestFocus() else model.home()
     }
-    LaunchedEffect(Unit) { withFrameNanos { }; if (channels.isEmpty()) navigation.requestFocus() else gridFocus.requestFocus() }
+    LaunchedEffect(Unit) { withFrameNanos { }; if (channels.isEmpty()) navigation.requestFocus() else if (!guideless) gridFocus.requestFocus() }
+    // The statuses arrive after the first frame: once they say no source has a guide, focus moves from the grid to the action.
+    LaunchedEffect(guideless) { if (guideless && !menuFocused) { withFrameNanos { }; try { emptyFocus.requestFocus() } catch (_: IllegalStateException) { } } }
     LaunchedEffect(selectedIndex) {
         val item = list.layoutInfo.visibleItemsInfo.firstOrNull { it.index == selectedIndex }
         if (item == null || item.offset < list.layoutInfo.viewportStartOffset || item.offset + item.size > list.layoutInfo.viewportEndOffset)
@@ -126,18 +137,27 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
     LaunchedEffect(channel?.id, retention) { if (channel != null && (channel.id != s.guideChannelId || anchor != s.guideAnchor)) select(channel.id, anchor) }
 
     // Right from the side menu returns to the grid or header item that had focus.
-    Navigation(s, model, guideFocus = navigation, contentEntry = { if (channels.isEmpty()) nowFocus else gridFocus }, settings = settings) { Column(Modifier.fillMaxSize().testTag("guide-screen")) {
+    Navigation(s, model, Modifier.onFocusChanged { menuFocused = it.hasFocus }, guideFocus = navigation,
+        contentEntry = { if (channels.isEmpty()) nowFocus else if (guideless) emptyFocus else gridFocus }, settings = settings) { Column(Modifier.fillMaxSize().testTag("guide-screen")) {
         Column(Modifier.weight(1f).fillMaxWidth().padding(start = TvLayout.Gutter, end = TvLayout.Gutter, top = TvLayout.PageTop, bottom = 20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 Column(Modifier.weight(1f)) {
                     Heading("Yayın rehberi")
                     Text("${guideDate(anchor, zone)} · ${if (s.guideZoneId.isEmpty()) "TV saati" else zone.id} · ${guideOffset(anchor, zone)}",
-                        color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        color = Ink.Muted, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 Text(guideTime(now, zone), color = Ink.Mint, fontFamily = Roboto, fontSize = 18.sp)
             }
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(4.dp)) {
+            if (guideless) Column(Modifier.weight(1f).fillMaxWidth().testTag("guide-unavailable"), verticalArrangement = Arrangement.Center) {
+                Text("Rehber bilgisi yok", color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 24.sp, lineHeight = 30.sp)
+                Spacer(Modifier.height(10.dp))
+                Text("Kaynağında yayın rehberi (XMLTV) adresi yok. Adresi Kaynakları yönet → Bilgiler → Rehber ayarları'ndan ekleyebilirsin; " +
+                    "kanallar rehber olmadan da Canlı TV'den izlenir.", Modifier.widthIn(max = 640.dp), color = Ink.Muted, fontFamily = Roboto,
+                    fontSize = 15.sp, lineHeight = 22.sp)
+                Spacer(Modifier.height(18.dp))
+                Action("Kaynakları yönet", Modifier.focusRequester(emptyFocus).testTag("guide-manage-sources"), primary = true) { model.manageSources() }
+            } else LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(4.dp)) {
                 item { Action("Şimdi", Modifier.focusRequester(nowFocus).focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-now"), compact = true) { select(channel?.id, now); if (channels.isNotEmpty()) gridFocus.requestFocus() } }
                 item { Action("‹ Önceki gün", Modifier.focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-day-previous"), compact = true,
                     enabled = dayWindow.from > retention.from) { select(channel?.id, Instant.ofEpochMilli(anchor).atZone(zone).minusDays(1).toInstant().toEpochMilli()) } }
@@ -146,7 +166,7 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                 item { Action("Saat dilimi", Modifier.focusRequester(zoneFocus).focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-zone"), compact = true) { zones = true } }
                 item { Action("Kaynaklar", Modifier.focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }, compact = true) { model.manageSources() } }
             }
-            if (channels.isEmpty()) {
+            if (guideless) Unit else if (channels.isEmpty()) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                     Heading("Canlı kanal bulunamadı")
                     Note("Kaynak seçimini değiştirebilir veya yeni bir kaynak ekleyebilirsin.")
@@ -156,12 +176,12 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                 // The subtitle already names the offset; repeat it per hour only across a DST change.
                 val mixedOffsets = (0 until (duration / hour).toInt()).any { guideOffset(viewport.from + it * hour, zone) != guideOffset(anchor, zone) }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("${channels.size} kanal", Modifier.width(channelWidth), color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp)
+                    Text("${channels.size} kanal", Modifier.width(channelWidth), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
                     repeat((duration / hour).toInt()) { n ->
                         val at = viewport.from + n * hour
                         Column(Modifier.weight(1f)) {
-                            Text(guideTime(at, zone), color = Ink.Text, fontFamily = Roboto, fontSize = 11.sp)
-                            if (mixedOffsets) Text(guideOffset(at, zone), color = Ink.Muted, fontFamily = Roboto, fontSize = 8.sp)
+                            Text(guideTime(at, zone), color = Ink.Text, fontFamily = Roboto, fontSize = 13.sp)
+                            if (mixedOffsets) Text(guideOffset(at, zone), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
                         }
                     }
                 }
@@ -208,12 +228,15 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                             Row(Modifier.fillMaxWidth().height(rowHeight).testTag("guide-row:${entry.id}"), verticalAlignment = Alignment.CenterVertically) {
                                 Row(Modifier.width(channelWidth).fillMaxHeight().padding(end = 12.dp), verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(72.dp).height(if (density.fontScale >= 1.5f) 44.dp else 40.dp)
+                                    Text(numbers[entry.id]?.toString().orEmpty(), Modifier.width(30.dp), color = Ink.Muted, fontFamily = Roboto,
+                                        fontSize = 12.sp, maxLines = 1)
+                                    Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(60.dp).height(if (density.fontScale >= 1.5f) 44.dp else 36.dp)
                                         .testTag("guide-logo:${entry.id}"), logo = true, logoInset = 2.dp)
                                     Column(Modifier.weight(1f)) {
-                                        Text(entry.title, color = if (index == selectedIndex) Ink.Text else Ink.Muted, fontFamily = Roboto,
-                                            fontSize = 11.sp, maxLines = 2, lineHeight = 15.sp, overflow = TextOverflow.Ellipsis)
-                                        if (s.sources.size > 1) Text(s.sourceName(entry.sourceId), color = Ink.Muted, fontFamily = Roboto, fontSize = 8.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        Text(displayTitle(entry.title).name, color = if (index == selectedIndex) Ink.Text else Ink.Muted, fontFamily = Roboto,
+                                            fontSize = 13.sp, maxLines = if (s.sources.size > 1) 1 else 2, lineHeight = 17.sp, overflow = TextOverflow.Ellipsis)
+                                        if (s.sources.size > 1) Text(s.sourceName(entry.sourceId), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp,
+                                            lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     }
                                 }
                                 BoxWithConstraints(Modifier.weight(1f).fillMaxHeight().clipToBounds()) {
@@ -240,12 +263,13 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                                                 contentDescription = "${entry.title}, $title, ${guideTime(slot.from, zone)}"
                                                 onClick("Program ayrıntısı") { open(entry, slot); true }
                                             }) {
-                                            if (cellWidth > 48.dp) Column(Modifier.padding(horizontal = 10.dp, vertical = 7.dp).align(Alignment.CenterStart)) {
+                                            if (cellWidth > 48.dp) Column(Modifier.padding(horizontal = 10.dp, vertical = 6.dp).align(Alignment.CenterStart)) {
+                                                val timed = cellWidth > 120.dp && density.fontScale < 1.5f && slot.programme != null
                                                 Text(title, color = if (slot.programmes.isEmpty()) Ink.Muted else Ink.Text, fontFamily = Roboto,
                                                     fontWeight = if (chosen) FontWeight.Medium else FontWeight.Normal,
-                                                    fontSize = 11.sp, maxLines = 2, lineHeight = 15.sp, overflow = TextOverflow.Ellipsis)
-                                                if (cellWidth > 120.dp && density.fontScale < 1.5f) slot.programme?.let { Text(programmeTime(it, zone),
-                                                    color = Ink.Muted, fontFamily = Roboto, fontSize = 9.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                                                    fontSize = 13.sp, maxLines = if (timed) 1 else 2, lineHeight = 17.sp, overflow = TextOverflow.Ellipsis)
+                                                if (timed) slot.programme?.let { Text(programmeTime(it, zone),
+                                                    color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                                             }
                                         }
                                     }
@@ -258,12 +282,12 @@ internal fun guideEmptyText(status: GuideStatus?, slice: GuideSlice?): String = 
                     verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(selectedSlot?.programme?.title ?: if ((selectedSlot?.programmes?.size ?: 0) > 1) "Bu saatte çakışan programlar var"
                         else guideEmptyText(channel?.let { s.guideStatus[it.sourceId] }, channel?.let { rows[it.id] }),
-                        color = Ink.Text, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.testTag("guide-selection-title"))
                     Text(selectedSlot?.programme?.let { programmeTime(it, zone) + if (it.isOnAt(now)) " · OK: canlı izle" else " · OK: ayrıntılar" }
-                        ?: "OK: kanal ve ayrıntılar · Geri: menü", color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        ?: "OK: kanal ve ayrıntılar · Geri: menü", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (rows[channel?.id]?.truncated == true) Text("Bu kanalın rehberi çok yoğun; bazı kayıtlar gösterilemiyor.",
-                        color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp, lineHeight = 14.sp)
+                        color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp)
                 }
             }
         }

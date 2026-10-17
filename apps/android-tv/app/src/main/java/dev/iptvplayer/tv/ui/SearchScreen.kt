@@ -59,8 +59,8 @@ private data class SearchRow(val key: String, val title: String, val entries: Li
     val largeText = density.fontScale >= 1.5f
     // One floor for every card: two title lines, the meta line and, with several sources, the source line.
     // Convert each sp separately: font scaling is non-linear on recent Android versions.
-    val cardMin = with(density) { maxOf(132.dp, 20.dp + 19.sp.toDp() * 2 + 7.dp + 15.sp.toDp() +
-        if (s.sources.size > 1) 7.dp + 14.sp.toDp() else 0.dp) }
+    val cardMin = with(density) { maxOf(132.dp, 20.dp + 19.sp.toDp() * 2 + 7.dp + 16.sp.toDp() +
+        if (s.sources.size > 1) 7.dp + 16.sp.toDp() else 0.dp) }
     // At the screen edge only the next card's artwork peeks out, never half a title.
     val cardWidth = if (largeText) 380.dp else 260.dp
     var viewportHeight by remember { mutableStateOf(0.dp) }
@@ -256,6 +256,7 @@ private data class SearchRow(val key: String, val title: String, val entries: Li
 @Composable private fun SearchCard(entry: MediaEntry, sourceName: String?, minHeight: Dp, width: Dp, contextAbove: Dp,
     viewportHeight: Dp, modifier: Modifier, open: () -> Unit) {
     val visibility = rememberCardVisibility(horizontalPadding = TvLayout.Gutter, contextAbove = contextAbove, viewportHeight = viewportHeight)
+    val shown = remember(entry.title, entry.year) { displayTitle(entry.title, entry.year) }
     Box(Modifier.width(width).then(visibility.container).testTag("tile:search:${entry.id}")) {
         Card(onClick = open, modifier = modifier.fillMaxWidth().heightIn(min = minHeight).then(visibility.focus)
             .semantics { contentDescription = entry.title; testTag = "search:${entry.id}" },
@@ -268,11 +269,12 @@ private data class SearchRow(val key: String, val title: String, val entries: Li
                 horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(if (entry.kind == MediaKind.LIVE) 96.dp else 72.dp).height(if (entry.kind == MediaKind.LIVE) 54.dp else 108.dp).clip(RoundedCornerShape(6.dp)), entry.kind == MediaKind.LIVE, showFallbackTitle = false)
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                    Text(entry.title, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
+                    Text(shown.name, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                         fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(when (entry.kind) { MediaKind.LIVE -> "Canlı TV"; MediaKind.MOVIE -> "Film"; else -> "Dizi" } +
-                        if (entry.year.isNotBlank()) " · ${entry.year}" else "", color = Ink.Mint, fontFamily = Roboto, fontSize = 11.sp, lineHeight = 15.sp)
-                    sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp, lineHeight = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    Text(listOf(when (entry.kind) { MediaKind.LIVE -> "Canlı TV"; MediaKind.MOVIE -> "Film"; else -> "Dizi" }, shown.year, shown.tag)
+                        .filter { it.isNotBlank() }.joinToString(" · "), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
             }
         }

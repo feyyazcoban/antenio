@@ -50,6 +50,7 @@ private class SeasonShelf(start: Int) {
 @Composable internal fun DetailScreen(s: TvState, model: TvViewModel, settings: () -> Unit) {
     val entry = s.selected ?: return
     val series = entry.kind == MediaKind.SERIES
+    val shown = remember(entry.title, entry.year) { displayTitle(entry.title, entry.year) }
     val first = remember { FocusRequester() }
     val back = remember { FocusRequester() }
     val visibleEpisodes = remember(s.episodes) { s.episodes.filter { !it.adult } }
@@ -123,16 +124,18 @@ private class SeasonShelf(start: Int) {
                     Column(Modifier.width(if (series) 700.dp else 560.dp).padding(top = if (series) 8.dp else 34.dp),
                         verticalArrangement = Arrangement.spacedBy(if (series) 12.dp else 14.dp)) {
                         Text(if (series) "DİZİ KÜTÜPHANENDEN" else "FİLM KÜTÜPHANENDEN", color = Ink.Mint,
-                            fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 10.sp, letterSpacing = 1.2.sp)
-                        Text(entry.title, fontFamily = Roboto, color = Ink.Text, fontWeight = FontWeight.Medium,
+                            fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 12.sp, letterSpacing = 1.2.sp)
+                        Text(shown.name, fontFamily = Roboto, color = Ink.Text, fontWeight = FontWeight.Medium,
                             fontSize = if (series) 34.sp else 36.sp, lineHeight = if (series) 39.sp else 41.sp,
                             maxLines = 2, overflow = TextOverflow.Ellipsis)
-                        val metadata = listOf(if (s.sources.size > 1) s.sourceName(entry.sourceId) else "", entry.ratingText?.let { "★ $it" }.orEmpty(), entry.year, if (entry.durationSeconds > 0) "${entry.durationSeconds / 60} dk" else "",
-                            if (series && !s.detailLoading) "${s.episodes.map { it.season }.distinct().size} sezon" else "").filter { it.isNotBlank() }
-                        if (metadata.isNotEmpty()) Note(metadata.joinToString(" · "))
+                        val metadata = listOf(if (s.sources.size > 1) s.sourceName(entry.sourceId) else "", entry.ratingText?.let { "★ $it" }.orEmpty(), shown.year, shown.tag, if (entry.durationSeconds > 0) "${entry.durationSeconds / 60} dk" else "",
+                            if (series && !s.detailLoading) "${s.episodes.map { it.season }.distinct().size} sezon" else "",
+                            // What is left of a started film (U18).
+                            if (!series && resume) remainingText(mark!!.positionMs, mark.durationMs) else "").filter { it.isNotBlank() }
+                        if (metadata.isNotEmpty()) Text(metadata.joinToString(" · "), color = Ink.Muted, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 20.sp)
                         // Most M3U titles carry no plot; a placeholder sentence on each of them is only noise.
                         if (entry.description.isNotBlank()) Text(entry.description,
-                            Modifier.widthIn(max = 510.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 19.sp,
+                            Modifier.widthIn(max = 560.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 22.sp,
                             maxLines = if (series) 2 else 3, overflow = TextOverflow.Ellipsis)
                         if (s.detailLoading) Note("Ayrıntılar yükleniyor…")
                         s.detailError?.let { Note(it, error = true) }
@@ -262,7 +265,7 @@ private class SeasonShelf(start: Int) {
             }
             Text(status.joinToString(" · "),
                 Modifier.padding(start = 10.dp, end = 10.dp, bottom = 10.dp).testTag("episode-metadata:${entry.id}"),
-                fontFamily = Roboto, color = if (resume) Ink.Mint else Ink.Muted, fontSize = 10.sp, lineHeight = 14.sp,
+                fontFamily = Roboto, color = if (resume) Ink.Mint else Ink.Muted, fontSize = 12.sp, lineHeight = 16.sp,
                 minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }

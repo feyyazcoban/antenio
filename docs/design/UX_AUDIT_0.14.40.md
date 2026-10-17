@@ -6,7 +6,9 @@
 
 Kullanıcının devam isteğiyle ve iki ek isteğiyle (kütüphane bandı ve afiş/yazı boyu; oynatıcıda alttan gradient) şu maddeler uygulandı, karar [D064](../decisions/DECISIONS.md): **U1, U2, U3, U4, U5, U7, U10, U12, U16, U17, U20, U21, U23, U24, U26** ve U8'in ayrıntı kısmı. U5, istek üzerine bilgi panelinin tamamen kaldırılması ve 4/5 sütun büyük afişle çözüldü. Gerçek "Evim" kaynağıyla 5556'da görülenler: Geri katmanları, menüden yeniden girişte odak, büyük afişler, gradient oynatıcı, CH−/Yukarı/rakamla kanal ve köşe notu, Sağ +10 sn ve İleri sarma +30 sn, kısa izlemenin devam rafına girmemesi, "8x8" düzeltmesi ve "Bölüm N" kartları.
 
-Açık kalanlar: U6 (genel tip ölçeği; yalnız kütüphane kartları büyütüldü), U9, U11, U13, U14, U15, U18, U19, U22, U25 ve U8'in bağlam menüsü. TalkBack, büyük yazı ve fiziksel TV denenmedi.
+İkinci tur (D065, D066): **U6, U8 (basılı OK menüsü), U9, U11 (NEXTV adı ve logo), U13, U14, U18, U22, U25 (adlar; kalite çeşitlerini birleştirme hariç)**. U15, 4/5 sütunla afiş boyu neredeyse sabit kaldığı için kapandı sayıldı. Gerçek Evim ile 5556'da görülenler: menüde NEXTV logosu, sadeleşmiş kanal/film adları ve "YERLI 2025 · TR" kategorileri, kanal satırında kategori, "1 sa 18 dk kaldı", basılı OK menüsü, Uygulama hakkında ve kurulumda logo, "Bilgileri göster".
+
+Açık kalanlar: U19 (ana sayfa rafları, kullanıcı kararı), kalite çeşitlerini tek kanalda toplama (ürün kararı), rehbersiz kaynakta rehber boş durumu cihazda görülmedi (5556'daki sentetik Demo kaynağının rehberi var). TalkBack, büyük yazı ve fiziksel TV denenmedi.
 
 ## Yöntem ve sınırlar
 

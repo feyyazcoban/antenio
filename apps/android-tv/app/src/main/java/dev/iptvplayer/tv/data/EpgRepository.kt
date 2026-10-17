@@ -32,7 +32,7 @@ class EpgRepository(private val client: OkHttpClient = OkHttpClient.Builder().co
 
     internal suspend fun download(url: String, window: GuideWindow, sink: EpgSink,
         dispatcher: CoroutineDispatcher = Dispatchers.IO): EpgParseReport = coroutineScope {
-        val call = client.newCall(Request.Builder().url(url).header("User-Agent", "IPTVPlayerPilot AndroidTV").build())
+        val call = client.newCall(Request.Builder().url(url).header("User-Agent", "NEXTV AndroidTV").build())
         // Stays alive through body parsing, unlike a continuation completed as soon as headers arrive.
         val cancellation = launch(Dispatchers.IO, start = CoroutineStart.UNDISPATCHED) {
             try { awaitCancellation() } finally { call.cancel() }

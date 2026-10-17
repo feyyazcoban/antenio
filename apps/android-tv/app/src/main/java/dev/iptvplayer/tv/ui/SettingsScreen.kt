@@ -167,7 +167,7 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
                                 }
                             }
                             SettingsPage.ABOUT -> {
-                                SettingsLabel("IPTV Player · Pilot")
+                                NextvLogo(height = 24.dp)
                                 Note("Sürüm ${BuildConfig.VERSION_NAME}")
                                 Note("Android ${android.os.Build.VERSION.RELEASE} · API ${android.os.Build.VERSION.SDK_INT}")
                                 Spacer(Modifier.height(6.dp))
@@ -175,7 +175,7 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
                                 Note("Uygulama içerik sağlamaz. Kendi M3U veya Xtream Codes kaynağını ekleyerek izleyebilirsin.")
                                 Note("Kaynağın ve katalog önbelleğin bu cihazda şifreli saklanır.")
                                 Spacer(Modifier.height(6.dp))
-                                SettingsLabel("Bu pilotta")
+                                SettingsLabel("Bu sürümde")
                                 Note("Canlı TV, film, dizi, arama, favori, izlemeye devam et ve yayın rehberi kullanılabilir. Rehber bilgisi kaynağın desteğine bağlıdır. PIN yönetimi henüz yok. Sağlayıcının yetişkin işaretli içerikleri gösterilmez.")
                             }
                         }
@@ -184,8 +184,8 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
                 }
                 Row(Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(if (scroll.value > scrollHintThreshold) "↑ Yukarı" else "", color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp)
-                    Text(if (scroll.maxValue - scroll.value > scrollHintThreshold) "↓ Daha fazla" else "", color = Ink.Muted, fontFamily = Roboto, fontSize = 10.sp)
+                    Text(if (scroll.value > scrollHintThreshold) "↑ Yukarı" else "", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
+                    Text(if (scroll.maxValue - scroll.value > scrollHintThreshold) "↓ Daha fazla" else "", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
                 }
             }
         }
@@ -226,7 +226,7 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT }
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text(label, color = Ink.Text, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 19.sp)
-                Text(description, color = if (attention) Ink.Error else Ink.Muted, fontFamily = Roboto, fontSize = 11.sp, lineHeight = 16.sp)
+                Text(description, color = if (attention) Ink.Error else Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 17.sp)
             }
             if (checked != null) Text(if (checked) "Açık" else "Kapalı",
                 // Ink.Selected nearly equals the focused row colour, so the focused ON chip uses the dark chip too.

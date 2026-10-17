@@ -85,7 +85,7 @@ class SourceRepository(private val client: OkHttpClient = client()) {
 
     private suspend fun get(url: String, maxBytes: Int = 32 * 1024 * 1024): String {
         try {
-            val request = Request.Builder().url(url).header("User-Agent", "IPTVPlayerPilot/0.1 AndroidTV").build()
+            val request = Request.Builder().url(url).header("User-Agent", "NEXTV AndroidTV").build()
             val call = client.newCall(request)
             val response = suspendCancellableCoroutine<Response> { continuation ->
                 continuation.invokeOnCancellation { call.cancel() }

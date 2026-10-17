@@ -65,6 +65,7 @@ import dev.iptvplayer.tv.BuildConfig
 import dev.iptvplayer.tv.TvViewModel
 import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.EpisodeSequence
+import dev.iptvplayer.tv.data.displayTitle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import java.util.Locale
@@ -200,13 +201,13 @@ import java.util.Locale
         trackPanel = false; active = media
         if (quiet) {
             quiet = false; lastInteraction = System.currentTimeMillis()
-            flash(listOfNotNull(model.channelNumber(media.entry)?.toString(), media.entry.title).joinToString("  "))
+            flash(listOfNotNull(model.channelNumber(media.entry)?.toString(), displayTitle(media.entry.title).name).joinToString("  "))
         } else interact()
         player.trackSelectionParameters = player.trackSelectionParameters.buildUpon().clearOverrides()
             .setPreferredAudioLanguage(model.store.audioLanguage)
             .setPreferredTextLanguage(model.store.subtitleLanguage)
             .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, model.store.subtitlesOff).build()
-        val http = DefaultHttpDataSource.Factory().setUserAgent("IPTVPlayerPilot/${BuildConfig.VERSION_NAME}")
+        val http = DefaultHttpDataSource.Factory().setUserAgent("NEXTV/${BuildConfig.VERSION_NAME} AndroidTV")
             .setConnectTimeoutMs(8_000).setReadTimeoutMs(8_000)
             .setDefaultRequestProperties(media.entry.headers)
         val factory = DefaultMediaSourceFactory(DefaultDataSource.Factory(context, http))
@@ -274,6 +275,8 @@ import java.util.Locale
                 }
                 // Digits pick a channel by its Canlı TV number, 1.5 s after the last one.
                 live && !trackPanel && digit >= 0 -> { if (digits.length < 4) digits += digit; flash(digits); true }
+                // The remote's guide key opens the programme guide on this channel.
+                live && event.key == Key.Guide -> { model.guide(); true }
                 !live && healthy && (event.key == Key.MediaFastForward || event.key == Key.MediaRewind) -> {
                     seekBy(if (event.key == Key.MediaFastForward) 30_000 else -10_000); true
                 }
@@ -303,9 +306,12 @@ import java.util.Locale
         }
         // While the controls are up, their status line reports opening; the centred pill would sit under the panel.
         if (opening && !controlsShown) {
-            Text("Yayın açılıyor…", Modifier.align(Alignment.Center).offset { IntOffset(if (trackPanel) (-220).dp.roundToPx() else 0, 0) }
+            Row(Modifier.align(Alignment.Center).offset { IntOffset(if (trackPanel) (-220).dp.roundToPx() else 0, 0) }
                 .background(Ink.Background.copy(alpha = .9f), RoundedCornerShape(12.dp)).padding(20.dp),
-                color = Ink.Text, fontFamily = Roboto, fontSize = 16.sp)
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                LoadingArc()
+                Text("Yayın açılıyor…", color = Ink.Text, fontFamily = Roboto, fontSize = 16.sp)
+            }
         }
         if (controlsShown) {
             // No panel over the picture: a scrim darkens the bottom, where the controls sit, and a lighter one keeps the
@@ -318,15 +324,15 @@ import java.util.Locale
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 LineIcon(if (live) "tv" else "film", Ink.Mint, Modifier.size(20.dp))
                 Text(if (live) "CANLI TV" else if (media.entry.kind == MediaKind.EPISODE) "DİZİ" else "FİLM",
-                    color = Ink.Text, fontFamily = Roboto, fontSize = 11.sp, letterSpacing = 1.4.sp)
+                    color = Ink.Text, fontFamily = Roboto, fontSize = 12.sp, letterSpacing = 1.4.sp)
                 if (screenState.sources.size > 1) Text(screenState.sourceName(media.entry.sourceId),
-                    Modifier.widthIn(max = 360.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 11.sp,
+                    Modifier.widthIn(max = 360.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             // The controls stand on the scrim, one title line above them; 5 dp of side room keeps the focus ring whole.
             Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(start = TvLayout.Gutter, end = TvLayout.Gutter, bottom = 18.dp)
                 .testTag("player-panel").padding(bottom = 2.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(media.entry.title, Modifier.fillMaxWidth().padding(horizontal = 5.dp).testTag("player-title"),
+                Text(remember(media.entry.title) { displayTitle(media.entry.title).name }, Modifier.fillMaxWidth().padding(horizontal = 5.dp).testTag("player-title"),
                     color = Ink.Text, fontSize = 24.sp, lineHeight = 30.sp,
                     fontWeight = FontWeight.Medium, fontFamily = Roboto, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 // Status on the left, the remote's shortcuts on the right.

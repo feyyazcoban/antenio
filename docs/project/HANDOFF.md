@@ -1,5 +1,17 @@
 # Son devir notu
 
+## NEXTV adı, sade adlar ve denetimin kalan maddeleri · 17 Ekim 2026
+
+Değişen kod: data/CatalogPresentation.kt (`displayTitle`, `displayCategory`); ui/PilotApp.kt (`MediaCard` adları, `guideAvailable`, `longClick`; `QuickActions`, `refocusAfterDialog`, `remainingText`; kurulumda `reveal`); ui/LibraryScreen.kt (kategori adı ve ülke kodu, kanal satırı/bilgi paneli rehbersiz metin, hızlı menü durumu, "· Rehber yok"); ui/HomeScreen.kt (kart adları, kalan süre, hızlı menü, vitrin metni boyu, menü başında amblem + `nextv_wordmark`); ui/SearchScreen.kt, ui/DetailScreen.kt, ui/PlayerScreen.kt (adlar; ayrıntıda kalan süre; `LoadingArc`; rehber tuşu); ui/GuideScreen.kt (`guideless` durumu, `numbers`, 56 dp satır, Geri önce menü, yazı boyları); ui/DesignSystem.kt (`LoadingArc`, `NextvLogo`); ui/Theme.kt (düğme 14/13 sp ve `actionHeight`, Note 13 sp, `EntryField(revealed)`); ui/LoadingScreen.kt, SourceRecoveryScreen.kt, SettingsScreen.kt, SourcesScreen.kt, EpisodeEndDialog.kt (logo ve yazı boyları); AndroidManifest `android:label="NEXTV"`; data/EpgRepository.kt, SourceRepository.kt User-Agent. Yeni kaynak: res/drawable/nextv_logo.xml, nextv_wordmark.xml (app_banner'daki yolların arka plansız kopyası). Testler: CatalogPresentationTest (ad vakaları), VisualPreviewTest ("2 dk kaldı"). Belgeler: DECISIONS D065/D066, AGENTS (ürün adı satırı), README, PRD isim notu, UX_AUDIT.
+
+Kontroller: `testDebugUnitTest` 161 (1 atlanan), `lintDebug` 0 hata, `assembleRelease`, `assembleDebugAndroidTest`. 5556'ya release kuruldu (veri korundu); gerçek Evim ile görüldü: menüde NEXTV, "beIN SPORTS 1 HD" gibi sade adlar, "U Are the Universe · 2024 · DE · Evim", kategori sütununda "YERLI 2025 TR", kanal satırında kategori, devam kartında "1 sa 18 dk kaldı", basılı OK ile hızlı menü ("MAC OZETLERI": Favorilere ekle / İzle / Vazgeç), Uygulama hakkında ve kurulumda logo, "Bilgileri göster". Rehberde Evim satırları hâlâ "Rehber adresi eklenmemiş" diyor; ızgara yerine açıklama yalnız hiçbir kaynakta rehber yokken çıkar ve 5556'daki sentetik Demo'nun rehberi olduğu için görülmedi.
+
+Yanlışlıkla yapılan: Ayarlar'da odak "Kataloğu yenile"deyken OK gitti; Evim ve Demo yenilendi, ikisi de "Kütüphanen güncellendi" (Evim 21.314 içerik). Bu, gerçek sağlayıcıya tek bir liste isteğidir, oynatma değildir. Test favorisi eklenmedi; geçmişte önceki turdan kalan kanallar ve film duruyor.
+
+Koşulmayanlar: enstrümantasyon sınıfları, TalkBack, büyük yazı, basılı OK'nin fiziksel kumandadaki süresi, fiziksel TV.
+
+Sonraki adım: kullanıcının görsel kabulü; TV'ye kurulum istenirse sürüm 0.14.41 ve releases teslimi (APK adı da NEXTV olmalı mı, kullanıcıya sorulabilir). Açık: U19 ana sayfa rafları ve kalite çeşitlerini birleştirme (kullanıcı kararı), NEXTV marka kontrolü.
+
 ## Denetim düzeltmeleri, büyük afişler ve gradient oynatıcı · 17 Ekim 2026
 
 Değişen kod (apps/android-tv/app/src/main/java/dev/iptvplayer/tv):

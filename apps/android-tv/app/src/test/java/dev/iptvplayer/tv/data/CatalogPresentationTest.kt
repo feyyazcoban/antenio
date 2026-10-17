@@ -105,4 +105,20 @@ class CatalogPresentationTest {
         assertEquals("", episodeDisplayTitle("8x8 (2023)", "8x8 (2023)"))
         assertEquals("1. Bölüm", episodeDisplayTitle("Big Cat Country - S01E01 - 1. Bölüm", "Big Cat Country"))
     }
+    @Test fun providerTitlesAreShownWithoutPrefixesYearAndLanguage() {
+        assertEquals(DisplayTitle("beIN SPORTS 1 HD", "", "TR"), displayTitle("TR: beIN SPORTS 1 HD"))
+        assertEquals(DisplayTitle("beIN SPORTS 4K (Minimum 150mbps)", "", "TR"), displayTitle("TR: beIN SPORTS 4K (Minimum 150mbps)"))
+        assertEquals(DisplayTitle("U Are the Universe", "2024", "DE"), displayTitle("U Are the Universe (2024) DE"))
+        assertEquals(DisplayTitle("Siccin 9", "2026", ""), displayTitle("Siccin 9 - 2026"))
+        assertEquals(DisplayTitle("Çatlı", "2026", ""), displayTitle("Çatlı (2026)"))
+        assertEquals(DisplayTitle("Inception", "2010", ""), displayTitle("Inception", "2010"))
+        // A year that is part of the name, or a title that is only a year, stays.
+        assertEquals(DisplayTitle("İnci Taneleri 2024", "", ""), displayTitle("İnci Taneleri 2024"))
+        assertEquals(DisplayTitle("Blade Runner 2049", "", ""), displayTitle("Blade Runner 2049"))
+        assertEquals("(2024)", displayTitle("(2024)").name)
+        assertEquals("8x8", displayTitle("8x8 (2023)").name)
+        assertEquals("YERLI 2023" to "TR", displayCategory("TR/FILM ~ YERLI 2023"))
+        assertEquals("NETFLIX" to "DE", displayCategory("DE/SERIE ~ NETFLIX"))
+        assertEquals("TURK SPOR" to "", displayCategory("TURK SPOR"))
+    }
 }

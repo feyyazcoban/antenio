@@ -81,10 +81,10 @@ import kotlinx.coroutines.flow.first
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         Text("Kaynak ${s.sources.indexOf(source) + 1} · ${source.type.label()}", Modifier.weight(1f),
-                            color = Ink.Mint, fontFamily = Roboto, fontSize = 11.sp, lineHeight = 16.sp,
+                            color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 17.sp,
                             maxLines = 1, overflow = TextOverflow.Ellipsis)
                         Text("${status.count} içerik", color = Ink.Muted, fontFamily = Roboto,
-                            fontSize = 11.sp, lineHeight = 16.sp, maxLines = 1)
+                            fontSize = 12.sp, lineHeight = 17.sp, maxLines = 1)
                     }
                     Text(s.sourceName(source.id), Modifier.fillMaxWidth().testTag("source-name:${source.id}"),
                         color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,

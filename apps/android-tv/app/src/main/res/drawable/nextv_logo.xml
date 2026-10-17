@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NEXTV horizontal logo (design/brand/nextv-yatay.svg, 460x130) for in-app headings; transparent, for dark surfaces. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="115dp"
+    android:height="32.5dp"
+    android:viewportWidth="460"
+    android:viewportHeight="130">
+    <group android:translateX="0" android:translateY="0">
+        <path
+            android:fillColor="#FF1CECAB"
+            android:pathData="M27.6233 92.1276L0 109.685V117.467L21.2803 129.104L96.1838 80.8733L78.0948 72.0886C71.1315 68.6989 62.9047 69.2062 56.4092 73.4261L27.6233 92.1276Z" />
+        <path
+            android:fillColor="#FF1CECAB"
+            android:pathData="M27.6233 77.5124L27.6233 4.08433L21.2803 0L0 11.6369V109.685L18.993 95.0606C24.4343 90.8709 27.6233 84.3868 27.6233 77.5124Z" />
+        <path
+            android:fillColor="#FF1CECAB"
+            android:pathData="M103.46 52.9153L27.6233 4.08433L29.9881 28.1475C30.6486 34.8685 34.3366 40.9196 40.0029 44.5801L96.1838 80.8733L103.46 76.1888L103.46 52.9153Z" />
+        <path
+            android:fillColor="#FF1CECAB"
+            android:pathData="M440.26 71.1322H446.84V31.6514H460V77.7123H453.42V84.2924H446.84V90.8726H440.26V97.4527H433.679V90.8726H427.099V84.2924H420.519V77.7123H413.939V31.6514H427.099V71.1322H433.679V77.7123H440.26V71.1322Z" />
+        <path
+            android:fillColor="#FF1CECAB"
+            android:pathData="M368.755 44.8116H355.595V31.6514H395.076V44.8116H381.916V97.4527H368.755V44.8116Z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M291.882 71.1322H298.462V64.552H305.042V57.9719H298.462V51.3918H291.882V31.6514H305.042V44.8116H311.623V51.3918H318.203V44.8116H324.783V31.6514H337.943V51.3918H331.363V57.9719H324.783V64.552H331.363V71.1322H337.943V97.4527H324.783V77.7123H318.203V71.1322H311.623V77.7123H305.042V97.4527H291.882V71.1322Z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M246.699 84.2924H273.019V97.4527H233.538V31.6514H273.019V44.8116H246.699V57.9719H266.439V71.1322H246.699V84.2924Z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M188.321 77.7122H181.74V64.5519H175.16V97.4526H162V31.6512H181.74V44.8115H188.321V57.9718H194.901V71.132H201.481V31.6512H214.641V97.4526H194.901V90.8724H188.321V77.7122Z" />
+    </group>
+</vector>

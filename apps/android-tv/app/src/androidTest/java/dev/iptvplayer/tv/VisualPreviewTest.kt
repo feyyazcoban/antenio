@@ -228,7 +228,7 @@ class VisualPreviewTest {
         val card = resume.getUnclippedBoundsInRoot()
         val viewport = ui.onNodeWithTag("home-content").getUnclippedBoundsInRoot()
         Assert.assertTrue(card.top >= viewport.top && card.bottom <= viewport.bottom)
-        ui.onNodeWithText("0:45", substring = true).assertIsDisplayed()
+        ui.onNodeWithText("2 dk kaldı", substring = true).assertIsDisplayed()
         shot("home-continue")
     }
 

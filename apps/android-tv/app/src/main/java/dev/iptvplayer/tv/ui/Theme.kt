@@ -81,7 +81,7 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
 
 /** Height of an [Action] pill; shared so lists of actions can snap to whole rows. */
 @Composable internal fun actionHeight(compact: Boolean = false): Dp =
-    maxOf(if (compact) 30.dp else 36.dp, with(LocalDensity.current) { 16.sp.toDp() } + if (compact) 10.dp else 16.dp)
+    maxOf(if (compact) 30.dp else 36.dp, with(LocalDensity.current) { (if (compact) 17.sp else 19.sp).toDp() } + if (compact) 10.dp else 16.dp)
 
 /**
  * [check] is for full-width list rows: their selection is a trailing check like the other list rows,
@@ -115,7 +115,7 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
         if (check) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (icon != null) LineIcon(icon, contentColor, filled = iconFilled)
-            Text(label, Modifier.weight(1f), color = contentColor, fontFamily = Roboto, fontSize = if (compact) 11.sp else 12.sp, lineHeight = 16.sp,
+            Text(label, Modifier.weight(1f), color = contentColor, fontFamily = Roboto, fontSize = if (compact) 13.sp else 14.sp, lineHeight = if (compact) 17.sp else 19.sp,
                 fontWeight = FontWeight.Medium, maxLines = 1, overflow = labelOverflow)
             if (selected == true) Text("✓", Modifier.clearAndSetSemantics { }, color = if (contentColor == Ink.OnMint) Ink.OnMint else Ink.Mint,
                 fontFamily = Roboto, fontSize = 16.sp, lineHeight = 16.sp)
@@ -130,7 +130,7 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
             }
         }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (icon != null) LineIcon(icon, contentColor, filled = iconFilled)
-            if (label.isNotEmpty()) Text(label, color = contentColor, fontFamily = Roboto, fontSize = if (compact) 11.sp else 12.sp, lineHeight = 16.sp,
+            if (label.isNotEmpty()) Text(label, color = contentColor, fontFamily = Roboto, fontSize = if (compact) 13.sp else 14.sp, lineHeight = if (compact) 17.sp else 19.sp,
                 fontWeight = FontWeight.Medium, maxLines = 1, overflow = labelOverflow)
         }
     }
@@ -138,7 +138,7 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
 
 @Composable fun EntryField(label: String, value: String, onChange: (String) -> Unit,
     modifier: Modifier = Modifier, secret: Boolean = false, onDone: (() -> Unit)? = null,
-    containerColor: Color = Ink.Container) {
+    containerColor: Color = Ink.Container, revealed: Boolean = false) {
     var focused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     val keyboard = rememberFieldKeyboard()
@@ -149,7 +149,7 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
     // A field removed while it has focus (a form closing) counts as left.
     DisposableEffect(keyboard) { onDispose { if (focused) keyboard.focusChanged(false, true) } }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        Text(label, color = Ink.Muted, fontSize = 12.sp, fontFamily = Roboto)
+        Text(label, color = Ink.Muted, fontSize = 13.sp, lineHeight = 18.sp, fontFamily = Roboto)
         // Up/down leave this single-line field; OK opens the keyboard. The TV IME consumes its own remote events.
         val field = Modifier.fillMaxWidth().onPreviewKeyEvent { event -> fieldKey(event, focusManager, keyboard) }
             .onFocusChanged { keyboard.focusChanged(it.isFocused, focused); focused = it.isFocused }
@@ -157,7 +157,8 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
             .border(if (focused) 2.dp else 1.dp, if (focused) Ink.Text else Ink.Outline.copy(alpha = .7f), RoundedCornerShape(TvLayout.CardRadius))
             .padding(12.dp)
         if (secret) BasicSecureTextField(input.state, field, inputTransformation = input.reporter, textStyle = style, keyboardOptions = options,
-            onKeyboardAction = action, cursorBrush = SolidColor(Ink.Mint), textObfuscationMode = TextObfuscationMode.Hidden)
+            onKeyboardAction = action, cursorBrush = SolidColor(Ink.Mint),
+            textObfuscationMode = if (revealed) TextObfuscationMode.Visible else TextObfuscationMode.Hidden)
         else BasicTextField(input.state, field, inputTransformation = input.reporter, textStyle = style, keyboardOptions = options,
             onKeyboardAction = action, lineLimits = TextFieldLineLimits.SingleLine, cursorBrush = SolidColor(Ink.Mint))
     }
@@ -257,8 +258,8 @@ private class FieldSync(private var known: String) {
 @Composable internal fun RatingBadge(text: String, modifier: Modifier = Modifier) {
     Row(modifier.background(Ink.Background.copy(alpha = .82f), RoundedCornerShape(6.dp)).padding(horizontal = 6.dp, vertical = 2.dp)
         .clearAndSetSemantics { }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-        Text("★", color = Ink.Mint, fontFamily = Roboto, fontSize = 10.sp, lineHeight = 13.sp)
-        Text(text, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 11.sp, lineHeight = 14.sp)
+        Text("★", color = Ink.Mint, fontFamily = Roboto, fontSize = 11.sp, lineHeight = 15.sp)
+        Text(text, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 15.sp)
     }
 }
 
@@ -268,7 +269,7 @@ private class FieldSync(private var known: String) {
 
 @Composable fun Note(text: String, error: Boolean = false, modifier: Modifier = Modifier) {
     Text(text, modifier, color = if (error) Ink.Error else Ink.Muted, fontFamily = Roboto,
-        fontSize = 12.sp, lineHeight = 18.sp)
+        fontSize = 13.sp, lineHeight = 19.sp)
 }
 
 /**
@@ -277,5 +278,5 @@ private class FieldSync(private var known: String) {
  */
 @Composable internal fun PositionNote(position: IntState, total: Int, modifier: Modifier = Modifier) {
     Text("${position.intValue.coerceIn(1, total.coerceAtLeast(1))} / $total", modifier, color = Ink.Muted, fontFamily = Roboto,
-        fontSize = 12.sp, lineHeight = 18.sp, maxLines = 1, style = LocalTextStyle.current.copy(fontFeatureSettings = "tnum"))
+        fontSize = 13.sp, lineHeight = 19.sp, maxLines = 1, style = LocalTextStyle.current.copy(fontFeatureSettings = "tnum"))
 }
