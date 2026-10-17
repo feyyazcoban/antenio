@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.42 · TV teslimi · 17 Ekim 2026
+
+Kullanıcının isteğiyle ("Sürümü 0.14.42 yap ve TV'ye veri silmeden kur") D067/D068 TV'ye kuruldu. Sürüm 0.14.42 (kod 56). Teslim: releases/NEXTV_TV_Design_Preview_0.14.42.apk (+ .sha256), SHA-256 73f2bf9531163b659a5ef38874a17c71eaab4c51e72e72c36306284790187c3a, imza 0.14.41 ile aynı. `adb install -r` ile 0.14.41'in üstüne kuruldu; kurulu dosyanın SHA-256'sı eşleşti, firstInstallTime 13 Ekim (veri korundu). TV uykudaydı, uygulama açılmadı. Xtream vitrin görselleri ve kumanda kısayolları TV'de kullanıcının değerlendirmesinde.
+
 ## Büyük vitrin, rehber kısayolları, kategori gizleme · 17 Ekim 2026
 
 Kullanıcının istekleriyle (D067, D068): vitrin üst kenara kadar, tam genişlik, 372 dp ve geniş görselle (Xtream'de slayt ayrıntısından çekilir; yoksa bulanık afiş); rehberde Geri → gün/saat düğmeleri, CH+/CH− sayfa, İleri/Geri sarma gün, rakamla kanal, alt bant kaldırıldı, 50 dp satırla altı kanal; Canlı TV listesinin üst paneli kaldırıldı; Ayarlar → İçerik'te yetişkin kategorilerini gizle (varsayılan açık) ve kategorileri tek tek aç/kapat.

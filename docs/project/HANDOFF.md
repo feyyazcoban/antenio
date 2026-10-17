@@ -1,5 +1,9 @@
 # Son devir notu
 
+## 0.14.42 · TV teslimi · 17 Ekim 2026
+
+Değişen: app/build.gradle.kts (versionCode 56, 0.14.42-design-preview). Teslim releases/NEXTV_TV_Design_Preview_0.14.42.apk, SHA-256 73f2bf9531163b659a5ef38874a17c71eaab4c51e72e72c36306284790187c3a. TV'de 0.14.42 kurulu, SHA eşleşti, veri korundu. Sonraki adım: kullanıcının TV'de vitrin (Xtream geniş görseli), rehber kısayolları ve kategori ayarlarını denemesi; Play Store hazırlık ve hukuk raporu hazırlanıyor.
+
 ## Büyük vitrin, rehber kısayolları, kategori gizleme · 17 Ekim 2026
 
 Değişen kod: ui/HomeScreen.kt (`Hero`, `HeroPicture`, `HeroText`, `runtimeText`; Home `contentTop` vitrin varken 0), ui/DesignSystem.kt (`HeroHeight` 372 dp), TvViewModel.kt (`heroDetail`, `ensureHeroDetail`: Xtream film/dizi ayrıntısı, bellek; `categoryVisible`, `hideAdultCategories`; `publishLibrary` içinde `CategoryVisibility.apply/choices`; TvState `hiddenCategories`, `hideAdultCategories`, `categoryChoices`), data/CategoryVisibility.kt (yeni), data/DeviceStore.kt (`hiddenCategories`, `hideAdultCategories`), ui/GuideScreen.kt (Geri sırası, CH±/sayfa/FF/RW/rakam, `guide-digits`, alt bant kaldırıldı, ipucu, 50 dp satır), ui/LibraryScreen.kt (`LiveInfo` ve `focusedEntry` kaldırıldı), ui/SettingsScreen.kt (İçerik bölümü, CATEGORIES/CATEGORY_LIST sayfaları, `CategoryList`). Testler: CategoryVisibilityTest (yeni); GuideFlowTest (Geri sırası, seçili program artık `guide-grid` açıklamasında), SearchNavigationTest (Ayarlar satır sırası: İçerik bölümü). Belgeler: DECISIONS D067/D068.
