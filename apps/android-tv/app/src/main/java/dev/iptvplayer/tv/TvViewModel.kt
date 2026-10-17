@@ -25,11 +25,13 @@ data class SourceDraft(val name: String = "Evim", val type: SourceType = SourceT
 data class PlayingMedia(val entry: MediaEntry, val url: String, val startMs: Long = 0) {
     override fun toString() = "PlayingMedia(id=${entry.id}, url=REDACTED)"
 }
+/** [notices] read as one paragraph: the list's warnings, or how its last refresh went. */
 data class SourceStatus(val count: Int = 0, val updatedAt: Long = 0, val refreshing: Boolean = false,
-    val notice: String? = null, val failed: Boolean = false)
+    val notices: List<UiText> = emptyList(), val failed: Boolean = false)
 /** Success belongs beside the operation; actionable failures remain visible in the catalog too. */
 enum class CatalogOperation { REFRESH, SOURCE_REMOVAL, SOURCE_FILTER }
-data class CatalogNotice(val message: String, val operation: CatalogOperation, val needsAttention: Boolean = false)
+data class CatalogNotice(val message: UiText, val operation: CatalogOperation, val needsAttention: Boolean = false)
+/** Its texts are [UiText]s: the state holds no ready sentences; the screens resolve them in the app's language. */
 data class TvState(
     val route: Route = Route.LOADING,
     val draft: SourceDraft = SourceDraft(),
@@ -43,7 +45,7 @@ data class TvState(
     val guideChannelId: String? = null,
     val guideAnchor: Long? = null,
     val guideSaveRevision: Int = 0,
-    val guideSaveError: String? = null,
+    val guideSaveError: UiText? = null,
     val editingSourceId: String? = null,
     val setupReturn: Route = Route.HOME,
     val sourcesReturn: Route = Route.HOME,
@@ -51,7 +53,7 @@ data class TvState(
     val allCatalog: Catalog = Catalog(emptyList()),
     val catalog: Catalog = Catalog(emptyList()),
     val kind: MediaKind = MediaKind.LIVE,
-    val category: String = "Tümü",
+    val category: String = CategoryFilter.ALL,
     val query: String = "",
     val libraryMatches: Set<String> = emptySet(),
     val librarySearching: Boolean = false,
@@ -71,7 +73,7 @@ data class TvState(
     val detailLoading: Boolean = false,
     val playing: PlayingMedia? = null,
     val playerReturn: Route = Route.LIBRARY,
-    val progressLabel: String = "Hazırlanıyor…",
+    val progressLabel: UiText = UiText.Res(R.string.progress_preparing),
     val sourceTask: SourceTask = SourceTask.RESTORING,
     /** The restore opening the app (D069): shown as the NEXTV cover. Retries and resets keep the operation card. */
     val restoringAtLaunch: Boolean = true,
@@ -81,8 +83,8 @@ data class TvState(
     val catalogUpdatedAt: Long = 0,
     val catalogNotice: CatalogNotice? = null,
     val recoveryCanReset: Boolean = false,
-    val error: String? = null,
-    val detailError: String? = null,
+    val error: UiText? = null,
+    val detailError: UiText? = null,
     val reducedMotion: Boolean = false,
     val startupSound: Boolean = true,
     /** D068: categories hidden in Ayarlar and the adult-name filter; [categoryChoices] lists every category for that page. */
@@ -96,8 +98,6 @@ data class TvState(
 ) {
     // Display/default selection only. Playback and personal data must use sourceFor(entry).
     val source: SourceConfig? get() = sources.firstOrNull { it.id == sourceFilterId } ?: sources.firstOrNull()
-    val sourceLabel: String get() = sources.firstOrNull { it.id == sourceFilterId }?.name
-        ?: if (sources.size == 1) sources.first().name else "Tüm kaynaklar"
     fun sourceFor(entry: MediaEntry): SourceConfig? = sources.firstOrNull { it.id == entry.sourceId }
     fun sourceName(id: String): String {
         val source = sources.firstOrNull { it.id == id } ?: return ""
@@ -150,7 +150,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         loadJob?.cancel()
         guides.forget()
         mutable.update { it.copy(route = Route.LOADING, sourceTask = SourceTask.RESTORING, restoringAtLaunch = atLaunch,
-            progressLabel = "Kayıtlı kütüphanen kontrol ediliyor…", error = null) }
+            progressLabel = UiText.Res(R.string.progress_checking_library), error = null) }
         loadJob = viewModelScope.launch {
             var observedStamp: String? = null
             try {
@@ -174,10 +174,10 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) {
                 if (generation == token) {
-                    recoveryStamp = observedStamp.takeIf { e is StoredSourcesUnavailable }
+                    recoveryStamp = observedStamp.takeIf { (e as? SourceFailure)?.reason == FailureReason.STORED_SOURCES_UNAVAILABLE }
                     mutable.update { it.copy(route = Route.RECOVERY, sourceTask = SourceTask.IDLE,
                         playing = null, recoveryCanReset = recoveryStamp != null,
-                        error = "Kayıtlı kütüphanen açılamadı. Kayıtların korunuyor; yeniden deneyebilirsin.") }
+                        error = UiText.Res(R.string.error_library_unavailable)) }
                 }
             }
         }
@@ -192,7 +192,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         previousJob?.cancel(); detailJob?.cancel(); filterJob?.cancel(); resetSearchIndex()
         guides.forget()
         mutable.update { it.copy(route = Route.LOADING, sourceTask = SourceTask.RESETTING, playing = null,
-            progressLabel = "Bu cihazdaki kaynak kayıtları temizleniyor…") }
+            progressLabel = UiText.Res(R.string.progress_resetting_sources)) }
         loadJob = viewModelScope.launch {
             try {
                 previousJob?.join()
@@ -220,7 +220,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: CancellationException) { throw e }
             catch (_: Exception) {
                 if (generation == token) mutable.update { it.copy(route = Route.RECOVERY, sourceTask = SourceTask.IDLE,
-                    error = "Temizlik tamamlanamadı. Boş alanı kontrol edip tekrar dene.", recoveryCanReset = true) }
+                    error = UiText.Res(R.string.error_reset_failed), recoveryCanReset = true) }
             }
         }
     }
@@ -255,7 +255,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                         updatedAt = snapshot?.updatedAt ?: 0)
                 }, catalogUpdatedAt = snapshots.values.maxOfOrNull { it.updatedAt } ?: 0,
                 category = old.category.takeIf { category -> catalog.items.any { !it.adult &&
-                    (if (old.onlyFavorites) it.id in favorites else it.kind == old.kind) && it.category == category } } ?: "Tümü")
+                    (if (old.onlyFavorites) it.id in favorites else it.kind == old.kind) && it.category == category } } ?: CategoryFilter.ALL)
         }
         resetSearchIndex()
         // StateFlow may retain the previous, equal Catalog instance on an unchanged refresh.
@@ -278,9 +278,9 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 state.value.editingSourceId?.let { value.copy(id = it) } ?: value
             }
             if (state.value.sources.any { it.id != source.id && sameConnection(it, source) })
-                throw SourceFailure("Bu bağlantı zaten ekli. Kaynaklar ekranından düzenleyebilirsin.")
+                throw SourceFailure(FailureReason.CONNECTION_ALREADY_ADDED)
             connect(source)
-        } catch (e: SourceFailure) { mutable.update { it.copy(error = e.message) } }
+        } catch (e: SourceFailure) { mutable.update { it.copy(error = e.text) } }
     }
 
     private fun sameConnection(a: SourceConfig, b: SourceConfig) =
@@ -299,15 +299,15 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 if (generation != token) return@launch
                 if (snapshots[source.id] != null && catalog.warnings.isNotEmpty())
-                    throw SourceFailure("Kaynağın bazı bölümleri alınamadı. Önceki hesap ve kütüphane korunuyor.")
+                    throw SourceFailure(FailureReason.PARTIAL_IMPORT)
                 val snapshot = CatalogSnapshot(catalog, System.currentTimeMillis())
-                mutable.update { it.copy(sourceTask = SourceTask.SAVING, progressLabel = "Kütüphanen cihazına kaydediliyor…") }
+                mutable.update { it.copy(sourceTask = SourceTask.SAVING, progressLabel = UiText.Res(R.string.progress_saving_library)) }
                 val saved = transactions.write {
                     val latest = readRegistry()
                     if (latest.sources.any { it.id != source.id && sameConnection(it, source) })
-                        throw SourceFailure("Bu bağlantı zaten ekli.")
+                        throw SourceFailure(FailureReason.CONNECTION_ADDED_ELSEWHERE)
                     if (state.value.editingSourceId != null && latest.sources.none { it.id == source.id })
-                        throw SourceFailure("Bu kaynak artık kayıtlı değil. Kaynaklar ekranını yeniden aç.")
+                        throw SourceFailure(FailureReason.SOURCE_NO_LONGER_SAVED)
                     // A successful import always has a durable snapshot before publishing the account.
                     catalogStore.write(source, snapshot)
                     latest.upsert(source).also { store.saveSources(it); artwork.synchronizeSources(it.sources.map { source -> source.id }) }
@@ -322,11 +322,11 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                     selected = null, episodes = emptyList(), focusedId = null,
                     sourceStatus = it.sourceStatus + (source.id to SourceStatus(
                         catalog.items.count { entry -> !entry.adult }, snapshot.updatedAt,
-                        notice = catalog.warnings.takeIf { warnings -> warnings.isNotEmpty() }?.joinToString(" "), failed = catalog.warnings.isNotEmpty()))) }
+                        notices = catalog.warnings.map { warning -> warning.text }, failed = catalog.warnings.isNotEmpty()))) }
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) {
                 if (generation == token) mutable.update { it.copy(route = Route.SETUP, sourceTask = SourceTask.IDLE,
-                    error = (e as? SourceFailure)?.message ?: "Kaynak güvenle kaydedilemedi. Tekrar dene.") }
+                    error = (e as? SourceFailure)?.text ?: UiText.Res(R.string.error_source_not_saved)) }
             }
         }
     }
@@ -350,7 +350,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         mutable.update { it.copy(refreshing = true, catalogNotice = null) }
         for (source in sources) {
             if (generation != token) return
-            status(source.id) { it.copy(refreshing = true, notice = null, failed = false) }
+            status(source.id) { it.copy(refreshing = true, notices = emptyList(), failed = false) }
             try {
                 val catalog = repository.load(source) { message ->
                     if (generation == token) mutable.update { it.copy(progressLabel = message) }
@@ -358,30 +358,30 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 currentCoroutineContext().ensureActive()
                 if (generation != token) return
                 if (catalog.warnings.isNotEmpty() && snapshots[source.id] != null)
-                    throw SourceFailure("Kaynağın bazı bölümleri yenilenemedi. Mevcut liste korunuyor.")
+                    throw SourceFailure(FailureReason.PARTIAL_REFRESH)
                 val snapshot = CatalogSnapshot(catalog, System.currentTimeMillis())
                 transactions.write {
                     // A different model may have removed/edited this account while the network was pending.
-                    if (store.loadSources().sources.none { it == source }) throw SourceFailure("Kaynak değişti; yeniden aç.")
+                    if (store.loadSources().sources.none { it == source }) throw SourceFailure(FailureReason.SOURCE_CHANGED)
                     catalogStore.write(source, snapshot)
                 }
                 currentCoroutineContext().ensureActive()
                 if (generation != token) return
                 snapshots[source.id] = snapshot
                 publishLibrary()
-                status(source.id) { it.copy(refreshing = false, notice = catalog.warnings.takeIf { it.isNotEmpty() }?.joinToString(" ")
-                    ?: "Kütüphanen güncellendi.", failed = catalog.warnings.isNotEmpty()) }
+                status(source.id) { it.copy(refreshing = false, notices = catalog.warnings.map { warning -> warning.text }
+                    .ifEmpty { listOf(UiText.Res(R.string.notice_library_updated)) }, failed = catalog.warnings.isNotEmpty()) }
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) {
                 if (generation != token) return
                 status(source.id) { it.copy(refreshing = false, failed = true,
-                    notice = (e as? SourceFailure)?.message ?: "Liste yenilenemedi. Son kaydedilen kütüphaneni kullanabilirsin.") }
+                    notices = listOf((e as? SourceFailure)?.text ?: UiText.Res(R.string.notice_refresh_failed))) }
             }
         }
         if (generation == token) mutable.update { it.copy(refreshing = false,
             catalogNotice = if (sources.any { source -> it.sourceStatus[source.id]?.failed == true })
-                CatalogNotice("Bazı kaynaklar yenilenemedi. Kayıtlı içerikler korunuyor; Kaynaklar’dan ayrıntıları görebilirsin.", CatalogOperation.REFRESH, needsAttention = true)
-            else CatalogNotice("Kütüphanen güncellendi.", CatalogOperation.REFRESH)) }
+                CatalogNotice(UiText.Res(R.string.notice_sources_not_refreshed), CatalogOperation.REFRESH, needsAttention = true)
+            else CatalogNotice(UiText.Res(R.string.notice_library_updated), CatalogOperation.REFRESH)) }
     }
 
     private fun status(id: String, change: (SourceStatus) -> SourceStatus) {
@@ -395,7 +395,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         filterJob?.cancel()
         registry = registry.copy(filterId = id)
         homeFocusKey = null
-        mutable.update { it.copy(sourceFilterId = id, catalog = filtered(it.allCatalog, id), category = "Tümü",
+        mutable.update { it.copy(sourceFilterId = id, catalog = filtered(it.allCatalog, id), category = CategoryFilter.ALL,
             focusedId = null) }
         updateLibrarySearch()
         filterJob = viewModelScope.launch {
@@ -406,7 +406,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                         store.saveSources(latest.copy(filterId = id))
                 }
             } catch (e: CancellationException) { throw e }
-            catch (_: Exception) { if (token == filterGeneration) mutable.update { it.copy(catalogNotice = CatalogNotice("Kaynak seçimi kaydedilemedi. Tekrar seçebilirsin.", CatalogOperation.SOURCE_FILTER, needsAttention = true)) } }
+            catch (_: Exception) { if (token == filterGeneration) mutable.update { it.copy(catalogNotice = CatalogNotice(UiText.Res(R.string.notice_filter_not_saved), CatalogOperation.SOURCE_FILTER, needsAttention = true)) } }
         }
     }
 
@@ -436,11 +436,11 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     fun clearGuideSaveError() { mutable.update { it.copy(guideSaveError = null) } }
     fun saveGuideUrl(id: String, address: String) {
         if (state.value.sourceTask != SourceTask.IDLE || state.value.refreshing) {
-            mutable.update { it.copy(guideSaveError = "Kaynak işlemi tamamlanınca yeniden dene.") }; return
+            mutable.update { it.copy(guideSaveError = UiText.Res(R.string.error_source_busy)) }; return
         }
         val original = state.value.sources.firstOrNull { it.id == id } ?: return
         val changed = try { original.copy(epgUrl = address).validated() }
-            catch (e: SourceFailure) { mutable.update { it.copy(guideSaveError = e.message) }; return }
+            catch (e: SourceFailure) { mutable.update { it.copy(guideSaveError = e.text) }; return }
         val token = ++generation
         loadJob?.cancel()
         mutable.update { it.copy(sourceTask = SourceTask.SAVING, guideSaveError = null) }
@@ -448,7 +448,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val saved = transactions.write {
                     val latest = readRegistry()
-                    if (latest.sources.none { it == original }) throw SourceFailure("Kaynak değişti. Ayarları yeniden aç.")
+                    if (latest.sources.none { it == original }) throw SourceFailure(FailureReason.SOURCE_CHANGED_IN_SETTINGS)
                     latest.upsert(changed).also(store::saveSources)
                 }
                 currentCoroutineContext().ensureActive()
@@ -459,12 +459,12 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 refreshGuide(id)
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) { if (generation == token) mutable.update { it.copy(sourceTask = SourceTask.IDLE,
-                guideSaveError = (e as? SourceFailure)?.message ?: "Rehber adresi kaydedilemedi.") } }
+                guideSaveError = (e as? SourceFailure)?.text ?: UiText.Res(R.string.error_guide_url_not_saved)) } }
         }
     }
     fun showKind(kind: MediaKind) {
         clearLibraryQuery()
-        mutable.update { it.copy(kind = kind, onlyFavorites = false, category = "Tümü", focusedId = null, route = Route.LIBRARY) }
+        mutable.update { it.copy(kind = kind, onlyFavorites = false, category = CategoryFilter.ALL, focusedId = null, route = Route.LIBRARY) }
     }
     fun search() { mutable.update { it.copy(route = Route.SEARCH, searchFocusedId = null) } }
     fun searchFocus(id: String) { mutable.update { it.copy(searchFocusedId = id) } }
@@ -523,7 +523,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             if (token == librarySearchGeneration) mutable.update { it.copy(libraryMatches = ids, librarySearching = false) }
         }
     }
-    fun favorites() { clearLibraryQuery(); mutable.update { it.copy(onlyFavorites = true, category = "Tümü", focusedId = null, route = Route.LIBRARY) } }
+    fun favorites() { clearLibraryQuery(); mutable.update { it.copy(onlyFavorites = true, category = CategoryFilter.ALL, focusedId = null, route = Route.LIBRARY) } }
     fun category(value: String) { mutable.update { it.copy(category = value, focusedId = null) } }
     // Each letter keeps the last results until the new ones arrive, so the list does not blink empty while typing.
     fun query(value: String) { mutable.update { it.copy(query = value, focusedId = null) }; updateLibrarySearch(clearResults = false) }
@@ -616,7 +616,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                         // detail opens on the next episode's season and the viewer starts it (as after autoplay).
                         val next = if (episode != null && resume.progress.completed) EpisodeSequence.next(source, episode, episodes) else null
                         when {
-                            episode == null -> mutable.update { it.copy(detailError = "İzlediğin bölüm artık bu kaynakta bulunamıyor. Başka bir bölüm seçebilirsin.") }
+                            episode == null -> mutable.update { it.copy(detailError = UiText.Res(R.string.error_episode_missing)) }
                             !resume.progress.completed -> { mutable.update { it.copy(season = episode.season) }; if (stillOn(show)) play(episode) }
                             next == null -> mutable.update { it.copy(season = episode.season) }
                             next.automaticAllowed -> { mutable.update { it.copy(season = next.entry.season) }; if (stillOn(show)) play(next.entry) }
@@ -629,7 +629,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                     if (resume != null && stillOn(movie)) play(movie)
                 }
             } catch (e: CancellationException) { throw e }
-            catch (e: Exception) { mutable.update { it.copy(detailLoading = false, detailError = (e as? SourceFailure)?.message ?: "Ayrıntılar alınamadı.") } }
+            catch (e: Exception) { mutable.update { it.copy(detailLoading = false, detailError = (e as? SourceFailure)?.text ?: UiText.Res(R.string.error_details_unavailable)) } }
         }
     }
 
@@ -686,7 +686,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 playerReturn = if (it.route == Route.PLAYER) it.playerReturn else it.route,
                 season = if (entry.kind == MediaKind.EPISODE && it.episodes.any { episode -> episode.id == entry.id }) entry.season else it.season,
                 error = null) }
-        } catch (e: SourceFailure) { mutable.update { it.copy(detailError = e.message) } }
+        } catch (e: SourceFailure) { mutable.update { it.copy(detailError = e.text) } }
     }
 
     fun nextEpisodeChoice(): NextEpisodeChoice? {
@@ -744,7 +744,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         val s = state.value
         val context = if (s.playerReturn == Route.SEARCH) filtered(s.allCatalog, s.searchSourceId) else s.catalog
         val channels = context.items.filter { it.kind == MediaKind.LIVE && !it.adult &&
-            (s.playerReturn != Route.LIBRARY || s.category == "Tümü" || it.category == s.category) }
+            (s.playerReturn != Route.LIBRARY || s.category == CategoryFilter.ALL || it.category == s.category) }
         if (channels.isEmpty()) return
         val index = channels.indexOfFirst { it.id == s.playing?.entry?.id }
         play(channels[Math.floorMod(index + direction, channels.size)])
@@ -829,7 +829,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         mutable.value = previous.copy(route = Route.LOADING, sourceTask = SourceTask.REMOVING,
             sources = previous.sources.filterNot { it.id == owner.id }, playing = null,
             guideStatus = previous.guideStatus - owner.id,
-            progressLabel = "Kaynak kaldırılıyor…", refreshing = false,
+            progressLabel = UiText.Res(R.string.progress_removing_source), refreshing = false,
             sourceStatus = previous.sourceStatus.mapValues { (_, value) -> value.copy(refreshing = false) })
         loadJob = viewModelScope.launch {
             try {
@@ -853,7 +853,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                     selected = null, episodes = emptyList(), error = null,
                     sourceManagerFocus = saved.sources.getOrNull(previous.sources.indexOf(owner).coerceAtMost(saved.sources.lastIndex).coerceAtLeast(0))
                         ?.let { source -> "remove-source:${source.id}" } ?: "add-source",
-                    catalogNotice = CatalogNotice("Kaynak kaldırıldı.", CatalogOperation.SOURCE_REMOVAL)) }
+                    catalogNotice = CatalogNotice(UiText.Res(R.string.notice_source_removed), CatalogOperation.SOURCE_REMOVAL)) }
             } catch (e: CancellationException) { throw e }
             catch (_: Exception) {
                 guides.synchronize(previous.sources, snapshots)
@@ -861,7 +861,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 if (generation == token) mutable.value = previous.copy(route = if (previous.route == Route.SOURCES) Route.SOURCES else Route.HOME,
                     sourceTask = SourceTask.IDLE, playing = null, refreshing = false,
                     sourceStatus = previous.sourceStatus.mapValues { (_, value) -> value.copy(refreshing = false) },
-                    error = "Kaynak kaldırılamadı. Tekrar dene.", catalogNotice = CatalogNotice("Kaynak kaldırılamadı. Tekrar dene.", CatalogOperation.SOURCE_REMOVAL, needsAttention = true))
+                    error = UiText.Res(R.string.notice_source_not_removed),
+                    catalogNotice = CatalogNotice(UiText.Res(R.string.notice_source_not_removed), CatalogOperation.SOURCE_REMOVAL, needsAttention = true))
             }
         }
     }

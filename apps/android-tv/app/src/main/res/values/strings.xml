@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Turkish is the only language until English arrives (gap plan S13); these texts then move to values-tr. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="tr">
+    <!-- Content kinds, library sort orders and the catalogue's own category -->
+    <string name="kind_live">Canlı TV</string>
+    <string name="kind_movies">Filmler</string>
+    <string name="kind_series">Diziler</string>
+    <string name="kind_episodes">Bölümler</string>
+    <string name="sort_default">Varsayılan</string>
+    <string name="sort_added">Son eklenen</string>
+    <string name="sort_title">Ad (A–Z)</string>
+    <string name="sort_year">Yıl</string>
+    <string name="sort_rating">Puan</string>
+    <string name="category_other">Diğer</string>
+
+    <!-- Progress of source operations -->
+    <string name="progress_preparing">Hazırlanıyor…</string>
+    <string name="progress_checking_library">Kayıtlı kütüphanen kontrol ediliyor…</string>
+    <string name="progress_resetting_sources">Bu cihazdaki kaynak kayıtları temizleniyor…</string>
+    <string name="progress_saving_library">Kütüphanen cihazına kaydediliyor…</string>
+    <string name="progress_removing_source">Kaynak kaldırılıyor…</string>
+    <string name="progress_downloading_list">Liste indiriliyor…</string>
+    <string name="progress_arranging_list">Kanallar ve kütüphane düzenleniyor…</string>
+    <string name="progress_checking_account">Hesap doğrulanıyor…</string>
+    <string name="progress_loading_kind">%1$s yükleniyor…</string>
+
+    <!-- Parts of a list that could not be read while the rest opened -->
+    <string name="warning_categories_unavailable">%1$s: kategori adları alınamadı.</string>
+    <string name="warning_kind_unavailable">%1$s yüklenemedi. Kaynağı yenileyerek tekrar deneyebilirsin.</string>
+    <plurals name="warning_invalid_addresses">
+        <item quantity="one">%d geçersiz adres atlandı.</item>
+        <item quantity="other">%d geçersiz adres atlandı.</item>
+    </plurals>
+    <string name="warning_feeds_limited">Listenin ilk dört yayın rehberi adresi alındı.</string>
+
+    <!-- Library, source and detail notices -->
+    <string name="error_library_unavailable">Kayıtlı kütüphanen açılamadı. Kayıtların korunuyor; yeniden deneyebilirsin.</string>
+    <string name="error_reset_failed">Temizlik tamamlanamadı. Boş alanı kontrol edip tekrar dene.</string>
+    <string name="error_source_not_saved">Kaynak güvenle kaydedilemedi. Tekrar dene.</string>
+    <string name="error_source_busy">Kaynak işlemi tamamlanınca yeniden dene.</string>
+    <string name="error_guide_url_not_saved">Rehber adresi kaydedilemedi.</string>
+    <string name="error_episode_missing">İzlediğin bölüm artık bu kaynakta bulunamıyor. Başka bir bölüm seçebilirsin.</string>
+    <string name="error_details_unavailable">Ayrıntılar alınamadı.</string>
+    <string name="notice_library_updated">Kütüphanen güncellendi.</string>
+    <string name="notice_refresh_failed">Liste yenilenemedi. Son kaydedilen kütüphaneni kullanabilirsin.</string>
+    <string name="notice_sources_not_refreshed">Bazı kaynaklar yenilenemedi. Kayıtlı içerikler korunuyor; Kaynaklar’dan ayrıntıları görebilirsin.</string>
+    <string name="notice_filter_not_saved">Kaynak seçimi kaydedilemedi. Tekrar seçebilirsin.</string>
+    <string name="notice_source_removed">Kaynak kaldırıldı.</string>
+    <string name="notice_source_not_removed">Kaynak kaldırılamadı. Tekrar dene.</string>
+
+    <!-- Guide status -->
+    <string name="guide_address_unreadable">Rehber adresi okunamadı. Kaynak ayarlarını kontrol et.</string>
+    <string name="guide_source_changed">Kaynak değişti. Rehberi yeniden açabilirsin.</string>
+    <string name="guide_refresh_failed">Rehber yenilenemedi. Kayıtlı rehber korunuyor.</string>
+    <string name="guide_refresh_cancelled">Rehber yenilemesi iptal edildi.</string>
+
+    <!-- Next episode -->
+    <string name="episode_order_unknown">Bölüm sırası net değil. Sonraki bölümü sen başlat.</string>
+    <string name="episode_gap_possible">Arada eksik bölüm olabilir. Sonraki bölümü sen başlat.</string>
+    <string name="episode_order_from_titles">Bölüm sırası listedeki başlıklardan eşleştirildi.</string>
+
+    <!-- FailureReason: source form and stored records -->
+    <string name="failure_address_invalid">http:// veya https:// ile başlayan geçerli bir adres gir.</string>
+    <string name="failure_address_has_credentials">Adres içinde kullanıcı bilgisi kullanma; hesap alanlarını doldur.</string>
+    <string name="failure_credentials_missing">Kullanıcı adı ve şifre gerekli.</string>
+    <string name="failure_guide_address_invalid">Rehber için geçerli bir http veya https adresi gir.</string>
+    <string name="failure_source_address_invalid">Kaynak adresi geçersiz.</string>
+    <string name="failure_episode_not_chosen">Önce bir bölüm seç.</string>
+    <string name="failure_stream_format_missing">Bu içeriğin yayın biçimi eksik.</string>
+    <string name="failure_stored_sources_unavailable">Kayıtlı kaynaklar açılamadı.</string>
+    <string name="failure_source_not_stored">Kaynak cihazda saklanamadı. Boş alanı kontrol et.</string>
+    <string name="failure_sources_not_stored">Kaynaklar cihazda saklanamadı. Boş alanı kontrol et.</string>
+    <string name="failure_source_not_removed">Kaynak cihazdan kaldırılamadı. Tekrar dene.</string>
+    <string name="failure_connection_already_added">Bu bağlantı zaten ekli. Kaynaklar ekranından düzenleyebilirsin.</string>
+    <string name="failure_connection_added_elsewhere">Bu bağlantı zaten ekli.</string>
+    <string name="failure_source_no_longer_saved">Bu kaynak artık kayıtlı değil. Kaynaklar ekranını yeniden aç.</string>
+    <string name="failure_source_changed">Kaynak değişti; yeniden aç.</string>
+    <string name="failure_source_changed_in_settings">Kaynak değişti. Ayarları yeniden aç.</string>
+    <string name="failure_partial_import">Kaynağın bazı bölümleri alınamadı. Önceki hesap ve kütüphane korunuyor.</string>
+    <string name="failure_partial_refresh">Kaynağın bazı bölümleri yenilenemedi. Mevcut liste korunuyor.</string>
+
+    <!-- FailureReason: provider account and catalogue -->
+    <string name="failure_account_info_missing">Sağlayıcı hesap bilgisi döndürmedi.</string>
+    <string name="failure_account_not_authenticated">Hesap doğrulanamadı. Kullanıcı adı ve şifreyi kontrol et.</string>
+    <string name="failure_account_inactive">Bu hesap aktif görünmüyor. Sağlayıcı bilgilerini kontrol et.</string>
+    <string name="failure_catalog_unavailable">Hesap doğrulandı ancak katalog alınamadı. Tekrar dene.</string>
+    <string name="failure_movie_details_unavailable">Film ayrıntıları alınamadı.</string>
+    <string name="failure_episodes_unavailable">Bölümler alınamadı. Tekrar dene.</string>
+    <string name="failure_response_malformed">Sunucu beklenen biçimde yanıt vermedi.</string>
+    <string name="failure_server_unreachable">Sunucuya ulaşılamadı. Adresi ve internet bağlantısını kontrol et.</string>
+    <string name="failure_access_denied">Kaynağa erişim reddedildi. Hesap bilgilerini kontrol et.</string>
+    <string name="failure_source_not_found">Kaynak adresi bulunamadı.</string>
+    <string name="failure_too_many_requests">Sağlayıcı çok fazla istek aldı. Biraz sonra tekrar dene.</string>
+    <string name="failure_provider_unavailable">Sağlayıcı şu anda yanıt veremiyor. Tekrar dene.</string>
+    <string name="failure_response_empty">Sunucu boş yanıt verdi.</string>
+    <string name="failure_response_too_large">Kaynak yanıtı pilot sürümün boyut sınırını aşıyor.</string>
+    <string name="failure_source_unreadable">Kaynak okunamadı. İnternet bağlantısını ve adresi kontrol et.</string>
+    <string name="failure_list_address_invalid">Liste adresi geçersiz.</string>
+    <string name="failure_list_too_large">Liste bu pilot sürümünün boyut sınırını aşıyor.</string>
+    <string name="failure_list_single_stream">Bu adres bir kanal listesi yerine tek bir HLS yayını içeriyor.</string>
+    <string name="failure_list_not_m3u">Geçerli bir M3U listesi bulunamadı.</string>
+
+    <!-- FailureReason: guide feeds -->
+    <string name="failure_guide_too_many_feeds">En fazla dört rehber adresi kullanılabilir.</string>
+    <string name="failure_guide_feed_invalid">Rehber için geçerli bir http veya https adresi gerekli.</string>
+    <string name="failure_guide_entries_unreadable">Rehberdeki program saatleri veya kanal bilgileri okunamadı.</string>
+    <string name="failure_guide_not_saved">Yayın rehberi kaydedilemedi. Son rehber korunuyor.</string>
+    <string name="failure_guide_access_denied">Yayın rehberine erişim reddedildi. Kaynak bilgilerini kontrol et.</string>
+    <string name="failure_guide_not_found">Yayın rehberi adresi bulunamadı.</string>
+    <string name="failure_guide_too_many_requests">Sağlayıcı yoğun. Yayın rehberini daha sonra yenileyebilirsin.</string>
+    <string name="failure_guide_provider_unavailable">Yayın rehberi şu anda alınamıyor. Son rehber korunuyor.</string>
+    <string name="failure_guide_response_empty">Yayın rehberi yanıtı boş.</string>
+    <string name="failure_guide_response_too_large">Yayın rehberi boyut sınırını aşıyor.</string>
+    <string name="failure_guide_download_failed">Yayın rehberi indirilemedi. Bağlantıyı kontrol et.</string>
+    <string name="failure_guide_external_definition">Rehber dış XML tanımı içeriyor.</string>
+    <string name="failure_guide_not_xmltv">Geçerli bir XMLTV rehberi bulunamadı.</string>
+    <string name="failure_guide_unreadable">Yayın rehberi okunamadı. XMLTV biçimini kontrol et.</string>
+    <string name="failure_guide_too_deep">Rehberin XML yapısı çok derin.</string>
+    <string name="failure_guide_channel_id_too_long">Rehber kanal kimliği çok uzun.</string>
+    <string name="failure_guide_too_many_channels">Rehber çok fazla kanal içeriyor.</string>
+    <string name="failure_guide_too_many_programmes">Rehber çok fazla program içeriyor.</string>
+    <string name="failure_guide_text_too_long">Rehber metni boyut sınırını aşıyor.</string>
+    <string name="failure_guide_encoding_unsupported">Rehber UTF-8 veya UTF-16 olmalı.</string>
+    <string name="failure_guide_too_large">Rehber boyut sınırını aşıyor.</string>
+    <string name="failure_guide_prolog_too_long">Rehber XML başlığı çok uzun.</string>
+    <string name="failure_guide_prolog_missing">Rehber XML başlığı eksik.</string>
+    <string name="failure_guide_internal_definitions">Rehber iç XML tanımları içeriyor.</string>
+    <string name="failure_guide_doctype_unsupported">Rehber XML tanımı desteklenmiyor.</string>
+</resources>

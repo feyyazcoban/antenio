@@ -7,7 +7,7 @@ import java.io.Reader
 
 object CatalogParser {
     fun categories(json: String): Map<String, String> = objects(JSONArray(json))
-        .associate { it.optString("category_id") to it.optString("category_name", "Diğer") }
+        .associate { it.optString("category_id") to it.optString("category_name", CategoryFilter.OTHER) }
 
     fun xtream(json: String, kind: MediaKind, categories: Map<String, String>): List<MediaEntry> {
         return objects(JSONArray(json)).mapNotNull { row ->
@@ -16,7 +16,7 @@ object CatalogParser {
             MediaEntry(
                 id = "${kind.name.lowercase()}:$id", providerId = id, kind = kind,
                 title = row.optString("name").ifBlank { "İsimsiz içerik $id" },
-                category = categories[row.optString("category_id")] ?: "Diğer",
+                category = categories[row.optString("category_id")] ?: CategoryFilter.OTHER,
                 categoryId = row.optString("category_id").takeUnless { it == "null" }.orEmpty().trim(),
                 artwork = httpArtwork(row.optString(if (kind == MediaKind.SERIES) "cover" else "stream_icon")),
                 backdrop = firstBackdrop(row), description = row.optString("plot", ""),
@@ -121,12 +121,12 @@ object M3uParser {
         var entryCount = 0
         val epgUrls = linkedSetOf<String>()
         var droppedFeeds = false
-        val base = baseUrl.toHttpUrlOrNull() ?: throw SourceFailure("Liste adresi geçersiz.")
+        val base = baseUrl.toHttpUrlOrNull() ?: throw SourceFailure(FailureReason.LIST_ADDRESS_INVALID)
         reader.buffered().useLines { lines ->
             lines.forEachIndexed { number, raw ->
                 chars += raw.length
                 if (chars > 64L * 1024 * 1024 || entryCount > 120_000) {
-                    throw SourceFailure("Liste bu pilot sürümünün boyut sınırını aşıyor.")
+                    throw SourceFailure(FailureReason.LIST_TOO_LARGE)
                 }
                 val line = raw.trim().removePrefix("\uFEFF")
                 if (line.isEmpty()) return@forEachIndexed
@@ -142,7 +142,7 @@ object M3uParser {
                                 else if (it.toString() !in epgUrls) droppedFeeds = true
                             }
                     }
-                    line.startsWith("#EXT-X-TARGETDURATION", true) -> throw SourceFailure("Bu adres bir kanal listesi yerine tek bir HLS yayını içeriyor.")
+                    line.startsWith("#EXT-X-TARGETDURATION", true) -> throw SourceFailure(FailureReason.LIST_SINGLE_STREAM)
                     line.startsWith("#EXTINF:", true) -> {
                         attrs = attribute.findAll(line).associate { match ->
                             match.groupValues[1].lowercase() to match.groupValues.drop(2).firstOrNull { it.isNotEmpty() }.orEmpty()
@@ -174,7 +174,7 @@ object M3uParser {
                             else -> MediaKind.LIVE
                         }
                         val id = "m3u:${stableId(uri.toString())}"
-                        val entry = MediaEntry(id, id, kind, name, group.ifBlank { "Diğer" },
+                        val entry = MediaEntry(id, id, kind, name, group.ifBlank { CategoryFilter.OTHER },
                             artwork = httpArtwork(attrs["tvg-logo"]), uri = uri.toString(), headers = headers.toMap(),
                             season = tag?.let { (it.groupValues[1].ifBlank { it.groupValues[3] }).toIntOrNull() } ?: 1,
                             episode = tag?.let { (it.groupValues[2].ifBlank { it.groupValues[4] }).toIntOrNull() } ?: 1,
@@ -192,10 +192,10 @@ object M3uParser {
                 }
             }
         }
-        if (!sawHeader) throw SourceFailure("Geçerli bir M3U listesi bulunamadı.")
+        if (!sawHeader) throw SourceFailure(FailureReason.LIST_NOT_M3U)
         val warning = buildList {
-            if (invalid > 0) add("$invalid geçersiz adres atlandı.")
-            if (droppedFeeds) add("Listenin ilk dört yayın rehberi adresi alındı.")
+            if (invalid > 0) add(CatalogWarning(CatalogWarning.Reason.INVALID_ADDRESSES, count = invalid))
+            if (droppedFeeds) add(CatalogWarning(CatalogWarning.Reason.FEEDS_LIMITED))
         }
         return Catalog((all + shows.values).distinctBy { it.id }, episodes.mapValues { (_, values) ->
             values.distinctBy { it.id }.sortedWith(compareBy({ it.season }, { it.episode }))

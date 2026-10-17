@@ -34,9 +34,10 @@ class LargeCatalogProbeTest {
     }
     @Test fun measureSixtyThousandEntriesThroughVisibleSearch() {
         val source = SourceConfig("large-probe", "Yerel büyük katalog", SourceType.M3U, "http://127.0.0.1:1/list.m3u")
+        val labels = MediaKind.entries.associateWith { ui.activity.getString(it.label) }
         val entries = (1..60_000).map { n ->
             val kind = when { n <= 10_000 -> MediaKind.LIVE; n <= 45_000 -> MediaKind.MOVIE; else -> MediaKind.SERIES }
-            MediaEntry("${kind.name}:$n", n.toString(), kind, "${kind.label} İstanbul $n", "Kategori ${n % 100}",
+            MediaEntry("${kind.name}:$n", n.toString(), kind, "${labels.getValue(kind)} İstanbul $n", "Kategori ${n % 100}",
                 uri = "http://127.0.0.1:1/fixture.mp4")
         }
         val result = JSONObject().put("build", BuildConfig.VERSION_NAME).put("entries", entries.size)

@@ -43,7 +43,7 @@ class EpgSourceTest {
         assertEquals(a.binding, EpgPlan.create(source.copy(name = "New"), catalog)!!.binding)
         listOf(EpgPlan.create(source.copy(id = "other"), catalog)!!, EpgPlan.create(source.copy(password = "changed"), catalog)!!,
             EpgPlan.create(source, catalog, "https://example.com/b")!!).forEach { assertNotEquals(a.binding, it.binding) }
-        assertThrows(SourceFailure::class.java) { EpgPlan.create(source, catalog, "file:///bad") }
+        assertEquals(FailureReason.GUIDE_FEED_INVALID, assertThrows(SourceFailure::class.java) { EpgPlan.create(source, catalog, "file:///bad") }.reason)
     }
     @Test fun combinedLibrariesKeepChannelIdsButNeverPoolPrivateFeedAddresses() {
         val entry = MediaEntry("live:1", "1", MediaKind.LIVE, "A", epgId = "a.epg", epgName = "Alias")
@@ -58,7 +58,7 @@ class EpgSourceTest {
     @Test fun excessFeedLimitIsVisibleInCatalogWarnings() {
         val urls = (1..5).joinToString(",") { "https://example.invalid/$it" }
         val catalog = M3uParser.parse("#EXTM3U x-tvg-url=\"$urls\"".reader(), source.address)
-        assertEquals(4, catalog.epgUrls.size); assertEquals(1, catalog.warnings.size)
+        assertEquals(4, catalog.epgUrls.size); assertEquals(listOf(CatalogWarning(CatalogWarning.Reason.FEEDS_LIMITED)), catalog.warnings)
     }
     @Test fun plainAndGzippedFeedsAreReadWithoutWholeBodyStrings() = runBlocking {
         MockWebServer().use { server ->
@@ -91,6 +91,7 @@ class EpgSourceTest {
             server.enqueue(MockResponse().setResponseCode(403).setBody("private-marker")); server.start()
             try { EpgRepository().download(server.url("/private-marker").toString(), GuideWindow(0, 1), emptySink); fail("Expected failure") }
             catch (e: SourceFailure) {
+                assertEquals(FailureReason.GUIDE_ACCESS_DENIED, e.reason)
                 generateSequence<Throwable>(e) { it.cause }.forEach { assertFalse(it.message.orEmpty().contains("private-marker")) }
             }
         }

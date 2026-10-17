@@ -1,5 +1,6 @@
 package dev.iptvplayer.tv.data
 
+import dev.iptvplayer.tv.R
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -9,14 +10,14 @@ import java.time.Instant
 import java.time.ZoneId
 
 data class GuideStatus(val configured: Boolean = false, val initialized: Boolean = false, val refreshing: Boolean = false,
-    val info: EpgSnapshotInfo? = null, val error: String? = null)
+    val info: EpgSnapshotInfo? = null, val error: UiText? = null)
 data class GuideState(val statuses: Map<String, GuideStatus> = emptyMap(), val revision: Int = 0)
 
 /** Main-thread orchestration; cache/network work is IO. Scope is owned by the ViewModel. */
 internal class GuideController(private val scope: CoroutineScope, private val store: EpgStore,
     private val device: DeviceStore, private val catalogs: CatalogStore, private val zone: () -> ZoneId,
     private val repository: EpgRepository = EpgRepository()) {
-    private class Owner(val source: SourceConfig, val plan: EpgPlan?, val error: String? = null)
+    private class Owner(val source: SourceConfig, val plan: EpgPlan?, val error: UiText? = null)
     private var owners = emptyMap<String, Owner>()
     private val jobs = mutableMapOf<String, Job>()
     private val attempts = mutableMapOf<String, Long>()
@@ -32,7 +33,7 @@ internal class GuideController(private val scope: CoroutineScope, private val st
             val plan = parsed.getOrNull()
             val old = owners[source.id]
             source.id to if (old != null && old.source == source && old.plan?.binding == plan?.binding && parsed.isSuccess) old
-                else Owner(source, plan, if (parsed.isFailure) "Rehber adresi okunamadı. Kaynak ayarlarını kontrol et." else null)
+                else Owner(source, plan, if (parsed.isFailure) UiText.Res(R.string.guide_address_unreadable) else null)
         }
         val changed = (owners.keys + next.keys).filter { id -> owners[id] !== next[id] }
         owners = next
@@ -91,14 +92,14 @@ internal class GuideController(private val scope: CoroutineScope, private val st
                         ensureActive()
                         if (owners[id] !== owner) return@launch
                         val info = withContext(Dispatchers.IO) { store.info(plan) }
-                        current = current.copy(info = info, error = if (accepted) null else "Kaynak değişti. Rehberi yeniden açabilirsin.")
+                        current = current.copy(info = info, error = if (accepted) null else UiText.Res(R.string.guide_source_changed))
                     }
                 } catch (e: CancellationException) { throw e }
-                catch (e: Exception) { current = current.copy(error = (e as? SourceFailure)?.message ?: "Rehber yenilenemedi. Kayıtlı rehber korunuyor.") }
+                catch (e: Exception) { current = current.copy(error = (e as? SourceFailure)?.text ?: UiText.Res(R.string.guide_refresh_failed)) }
                 finally {
                     if (owners[id] === owner) {
                         jobs.remove(id)
-                        update(id, current.copy(refreshing = false, error = if (cancelled.remove(id)) "Rehber yenilemesi iptal edildi." else current.error))
+                        update(id, current.copy(refreshing = false, error = if (cancelled.remove(id)) UiText.Res(R.string.guide_refresh_cancelled) else current.error))
                         if (pendingDownload.remove(id)) ensure(listOf(id))
                     }
                 }

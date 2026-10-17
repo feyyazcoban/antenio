@@ -34,7 +34,7 @@ class DeviceStore(context: Context) {
         val encrypted = cipher.doFinal(plain)
         val saved = prefs.edit().putString("source", Base64.encodeToString(cipher.iv + encrypted, Base64.NO_WRAP)).commit()
         plain.fill(0)
-        if (!saved) throw SourceFailure("Kaynak cihazda saklanamadı. Boş alanı kontrol et.")
+        if (!saved) throw SourceFailure(FailureReason.SOURCE_NOT_STORED)
     }
 
     @Synchronized internal fun seal(plain: ByteArray, binding: String): ByteArray {
@@ -64,7 +64,7 @@ class DeviceStore(context: Context) {
             return SourceConfig(json.getString("id"), json.getString("name"), SourceType.valueOf(json.getString("type")),
                 json.getString("address"), json.optString("username"), json.optString("password"), json.optString("epgUrl", ""))
         } catch (_: Exception) {
-            throw StoredSourcesUnavailable()
+            throw SourceFailure(FailureReason.STORED_SOURCES_UNAVAILABLE)
         }
     }
 
@@ -84,7 +84,7 @@ class DeviceStore(context: Context) {
             require(stored.length <= 1_400_000)
             val plain = unseal(Base64.decode(stored, Base64.NO_WRAP), "source-registry-v1")
             return try { SourceRegistryCodec.decode(plain) } finally { plain.fill(0) }
-        } catch (_: Exception) { throw StoredSourcesUnavailable() }
+        } catch (_: Exception) { throw SourceFailure(FailureReason.STORED_SOURCES_UNAVAILABLE) }
     }
 
     /** Call inside SourceTransactions. Registry replacement and scoped state cleanup share one preference commit. */
@@ -112,7 +112,7 @@ class DeviceStore(context: Context) {
             editor.remove("f:$id").remove("history:$id")
             prefs.all.keys.filter { it.startsWith(progressPrefix(id)) }.forEach { editor.remove(it) }
         }
-        if (!editor.commit()) throw SourceFailure("Kaynaklar cihazda saklanamadı. Boş alanı kontrol et.")
+        if (!editor.commit()) throw SourceFailure(FailureReason.SOURCES_NOT_STORED)
     }
 
     @Synchronized fun forgetSource(id: String) { saveSources(loadSources().without(id)) }
@@ -125,7 +125,7 @@ class DeviceStore(context: Context) {
         val removed = prefs.edit().remove("source").remove("sources_v2").apply {
             prefs.all.keys.filter { it.startsWith("p:") || it.startsWith("p2:") || it.startsWith("f:") || it.startsWith("history:") }.forEach { remove(it) }
         }.commit()
-        if (!removed) throw SourceFailure("Kaynak cihazdan kaldırılamadı. Tekrar dene.")
+        if (!removed) throw SourceFailure(FailureReason.SOURCE_NOT_REMOVED)
     }
 
     /** Explicit unreadable-record recovery only, after all encrypted catalog files are removed. */

@@ -26,10 +26,11 @@ class CatalogColdLaunchTest {
         cache.clear()
         val source = SourceConfig("cold-catalog-fixture", "Yerel katalog denemesi", SourceType.XTREAM,
             "http://127.0.0.1:1/", "fixture", "fixture")
+        val labels = MediaKind.entries.associateWith { context.getString(it.label) }
         val entries = (1..63_175).map { n ->
             val kind = when (n % 5) { 0 -> MediaKind.LIVE; 1 -> MediaKind.SERIES; else -> MediaKind.MOVIE }
             MediaEntry("${kind.name.lowercase()}:$n", n.toString(), kind,
-                "${kind.label} $n", "Kategori ${n % 100}", extension = "mp4")
+                "${labels.getValue(kind)} $n", "Kategori ${n % 100}", extension = "mp4")
         }
         store.saveSource(source)
         cache.write(source, CatalogSnapshot(Catalog(entries), System.currentTimeMillis()))

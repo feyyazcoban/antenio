@@ -58,7 +58,7 @@ import kotlinx.coroutines.flow.first
             Action("Kaynak ekle", focus("add-source").testTag("add-source"), primary = true) { model.addSource() }
             Action("Geri") { model.back() }
         }
-        s.catalogNotice?.let { Note(it.message, error = it.needsAttention) }
+        s.catalogNotice?.let { Note(it.message.resolve(), error = it.needsAttention) }
         LazyColumn(Modifier.weight(1f).testTag("sources-list")
             .scrollEdgeFade(Ink.Background, top = { list.canScrollBackward }, bottom = { list.canScrollForward }),
             state = list, verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -93,8 +93,8 @@ import kotlinx.coroutines.flow.first
                         java.text.SimpleDateFormat("d MMM, HH:mm", java.util.Locale.forLanguageTag("tr"))
                             .format(java.util.Date(status.updatedAt)) else "Henüz indirilmedi")
                     if (status.refreshing) Note("Yenileniyor… Kayıtlı içerikler kullanılabilir.")
-                    else status.notice?.let { Text(it, color = if (status.failed) Ink.Error else Ink.Muted,
-                        fontFamily = Roboto, fontSize = 12.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    else if (status.notices.isNotEmpty()) Text(status.notices.resolve(), color = if (status.failed) Ink.Error else Ink.Muted,
+                        fontFamily = Roboto, fontSize = 12.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Action("Bilgiler", Modifier.testTag("info-source:${source.id}")
                             .then(if (firstVisibleSource == source.id) Modifier.focusRequester(listEntry) else Modifier)
@@ -117,7 +117,7 @@ import kotlinx.coroutines.flow.first
         SourceDialog("Kaynak bilgileri", reader, ::dismiss, hidden = guideOptions) {
             val status = s.sourceStatus[source.id] ?: SourceStatus()
             RemoteTextReader("${s.sourceName(source.id)}\n\nKaynak ${s.sources.indexOf(source) + 1} · ${source.type.label()}\n${status.count} içerik" +
-                (status.notice?.let { "\n\n$it" } ?: "") + "\n\n" + guideStatusText(s.guideStatus[source.id], model.guideZone()),
+                (if (status.notices.isNotEmpty()) "\n\n${status.notices.resolve()}" else "") + "\n\n" + guideStatusText(s.guideStatus[source.id], model.guideZone()),
                 Modifier.weight(1f, fill = false).focusRequester(reader).focusProperties { down = guideOpener }, "source-info-reader")
             Action("Rehber ayarları", Modifier.focusRequester(guideOpener).focusProperties { up = reader }.testTag("source-guide-settings")) { guideOptions = true }
             Action("Kapat", Modifier.testTag("close-source-info")) { dismiss() }

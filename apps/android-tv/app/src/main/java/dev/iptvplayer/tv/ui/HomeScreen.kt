@@ -40,6 +40,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.*
@@ -164,7 +165,7 @@ import kotlinx.coroutines.delay
                 NavItem("Ara", "search", s.route == Route.SEARCH, open, expanded, itemHeight, itemModifiers.getValue(5)) { model.search() }
                 NavItem("Ana Sayfa", "home", s.route == Route.HOME, open, expanded, itemHeight, itemModifiers.getValue(0)) { model.home() }
                 listOf(MediaKind.LIVE to "live_tv", MediaKind.MOVIE to "movie", MediaKind.SERIES to "video_library").forEachIndexed { index, (kind, icon) ->
-                    NavItem(kind.label, icon, (s.route == Route.LIBRARY && s.kind == kind && !s.onlyFavorites) ||
+                    NavItem(stringResource(kind.label), icon, (s.route == Route.LIBRARY && s.kind == kind && !s.onlyFavorites) ||
                         (s.route == Route.GUIDE && kind == MediaKind.LIVE) || (s.route == Route.DETAIL && activeIndex == index + 1),
                         open, expanded, itemHeight, itemModifiers.getValue(index + 1)) { model.showKind(kind) }
                 }
@@ -254,14 +255,14 @@ private data class HomeRow(val key: String, val title: String, val entries: List
             // 19 + 5 dp: content on the 24 dp edge of the logo and shelves; 5 dp stays as focus-ring room.
             Column(Modifier.weight(1f).fillMaxWidth().padding(horizontal = TvLayout.Gutter - 5.dp, vertical = TvLayout.Gutter)
                 .verticalScroll(rememberScrollState()).padding(5.dp).testTag("home-empty"), verticalArrangement = Arrangement.Center) {
-                val warning = s.catalogNotice?.takeIf { it.needsAttention }?.message
+                val warning = s.catalogNotice?.takeIf { it.needsAttention }?.message?.resolve()
                 Heading(when {
                     s.refreshing -> "Kütüphanen hazırlanıyor"
                     warning != null -> "İçerikler gösterilemiyor"
                     else -> "Kütüphanen için yer hazır"
                 })
                 Spacer(Modifier.height(14.dp))
-                Note(if (s.refreshing) s.progressLabel else warning ?: if (s.catalog.items.any { !it.adult })
+                Note(if (s.refreshing) s.progressLabel.resolve() else warning ?: if (s.catalog.items.any { !it.adult })
                     "Ana sayfada öne çıkarılacak içerik bulunamadı. Tüm kayıtlarını soldaki menüden bölümlere girerek açabilirsin."
                     else "Kaynağında gösterilebilen içerik bulunamadı. Kaynağını kontrol edebilir veya yenileyebilirsin.", error = warning != null && !s.refreshing)
                 Spacer(Modifier.height(16.dp))
@@ -300,8 +301,8 @@ private data class HomeRow(val key: String, val title: String, val entries: List
                     Heading("Şimdi ne izleyelim?")
                     Note("Kanalların ve favorilerin, bıraktığın yerde.")
                 }
-                if (s.catalog.warnings.isNotEmpty()) Note(s.catalog.warnings.joinToString(" "), error = true, modifier = Modifier.padding(horizontal = TvLayout.Gutter, vertical = 8.dp))
-                s.catalogNotice?.takeIf { it.needsAttention }?.let { Note(it.message, error = true,
+                if (s.catalog.warnings.isNotEmpty()) Note(s.catalog.warnings.map { it.text }.resolve(), error = true, modifier = Modifier.padding(horizontal = TvLayout.Gutter, vertical = 8.dp))
+                s.catalogNotice?.takeIf { it.needsAttention }?.let { Note(it.message.resolve(), error = true,
                     modifier = Modifier.padding(horizontal = TvLayout.Gutter, vertical = 8.dp)) }
             }
             items(rows, key = { it.key }) { row ->

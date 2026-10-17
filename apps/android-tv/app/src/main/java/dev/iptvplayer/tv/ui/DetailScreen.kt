@@ -138,7 +138,7 @@ private class SeasonShelf(start: Int) {
                             Modifier.widthIn(max = 560.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 22.sp,
                             maxLines = if (series) 2 else 3, overflow = TextOverflow.Ellipsis)
                         if (s.detailLoading) Note("Ayrıntılar yükleniyor…")
-                        s.detailError?.let { Note(it, error = true) }
+                        s.detailError?.let { Note(it.resolve(), error = true) }
                         FlowRow(Modifier.then(actionVisibility.container).then(actionVisibility.focus).focusGroup().padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             if (canPlay) Action(if (resume) "Devam et" else "Oynat",
                                 Modifier.then(if (target == null) Modifier.focusRequester(first) else Modifier), primary = true, icon = "play") {

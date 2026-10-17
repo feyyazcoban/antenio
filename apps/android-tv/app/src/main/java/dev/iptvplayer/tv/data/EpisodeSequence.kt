@@ -1,8 +1,9 @@
 package dev.iptvplayer.tv.data
 
+import dev.iptvplayer.tv.R
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
-data class NextEpisodeChoice(val entry: MediaEntry, val automaticAllowed: Boolean, val notice: String? = null)
+data class NextEpisodeChoice(val entry: MediaEntry, val automaticAllowed: Boolean, val notice: UiText? = null)
 
 /** The provider list defines membership. Never invent a missing episode or skip an inaccessible target. */
 object EpisodeSequence {
@@ -24,9 +25,9 @@ object EpisodeSequence {
         val consecutive = (entry.season == orderedCurrent.season && entry.episode == orderedCurrent.episode + 1) ||
             (entry.season == orderedCurrent.season + 1 && entry.episode == 1)
         val notice = when {
-            !known -> "Bölüm sırası net değil. Sonraki bölümü sen başlat."
-            !consecutive -> "Arada eksik bölüm olabilir. Sonraki bölümü sen başlat."
-            source.type == SourceType.M3U -> "Bölüm sırası listedeki başlıklardan eşleştirildi."
+            !known -> UiText.Res(R.string.episode_order_unknown)
+            !consecutive -> UiText.Res(R.string.episode_gap_possible)
+            source.type == SourceType.M3U -> UiText.Res(R.string.episode_order_from_titles)
             else -> null
         }
         return NextEpisodeChoice(entry, known && consecutive, notice)

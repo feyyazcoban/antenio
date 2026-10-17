@@ -16,8 +16,22 @@ class CatalogSnapshotTest {
             "mp4", "https://media.example/film?token=%26%2B", mapOf("User-Agent" to "Fixture/1", "Referer" to "https://media.example"), adult = true)
         val episode = entry.copy(id = "e:2", kind = MediaKind.EPISODE, season = 2, episode = 7, artwork = null,
             episodeOrderKnown = true, epgId = "channel.id", epgName = "İstanbul", categoryId = "17", parentLocalId = "s:1")
-        val snapshot = CatalogSnapshot(Catalog(listOf(entry), mapOf("s:1" to listOf(episode), "empty" to emptyList()), listOf("Kısmi veri"), listOf("https://guide.example/epg.xml")), 12345)
+        val warnings = listOf(CatalogWarning(CatalogWarning.Reason.KIND_UNAVAILABLE, MediaKind.SERIES),
+            CatalogWarning(CatalogWarning.Reason.INVALID_ADDRESSES, count = 3), CatalogWarning(CatalogWarning.Reason.FEEDS_LIMITED))
+        val snapshot = CatalogSnapshot(Catalog(listOf(entry), mapOf("s:1" to listOf(episode), "empty" to emptyList()), warnings, listOf("https://guide.example/epg.xml")), 12345)
         assertEquals(snapshot, CatalogSnapshotCodec.decode(CatalogSnapshotCodec.encode(snapshot)))
+    }
+    @Test fun warningsSavedAsTurkishSentencesBeforeS01AreReadAsReasons() {
+        val sentences = listOf("Canlı TV: kategori adları alınamadı.", "Filmler yüklenemedi. Kaynağı yenileyerek tekrar deneyebilirsin.",
+            "12 geçersiz adres atlandı.", "Listenin ilk dört yayın rehberi adresi alındı.", "Bilinmeyen bir not.")
+        val bytes = java.io.ByteArrayOutputStream().also { out ->
+            java.util.zip.GZIPOutputStream(out).bufferedWriter().use { writer ->
+                writer.appendLine(org.json.JSONObject().put("version", 4).put("updatedAt", 1).put("warnings", org.json.JSONArray(sentences)).toString())
+            }
+        }.toByteArray()
+        assertEquals(listOf(CatalogWarning(CatalogWarning.Reason.CATEGORIES_UNAVAILABLE, MediaKind.LIVE),
+            CatalogWarning(CatalogWarning.Reason.KIND_UNAVAILABLE, MediaKind.MOVIE), CatalogWarning(CatalogWarning.Reason.INVALID_ADDRESSES, count = 12),
+            CatalogWarning(CatalogWarning.Reason.FEEDS_LIMITED)), CatalogSnapshotCodec.decode(bytes).catalog.warnings)
     }
     @Test fun ratingAndAddedTimeSurviveTheSnapshot() {
         val film = MediaEntry("m:9", "9", MediaKind.MOVIE, "Film", rating = 7.5f, addedAt = 1_700_000_000L)

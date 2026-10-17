@@ -1,5 +1,7 @@
 package dev.iptvplayer.tv.data
 
+import androidx.annotation.StringRes
+import dev.iptvplayer.tv.R
 import java.text.Collator
 import java.util.Locale
 
@@ -119,8 +121,9 @@ fun providerCategories(entries: List<MediaEntry>, order: List<String>): List<Str
 }
 
 /** How the film and series lists are ordered; the label is what the Sırala button shows. */
-enum class LibrarySort(val label: String) {
-    DEFAULT("Varsayılan"), ADDED("Son eklenen"), TITLE("Ad (A–Z)"), YEAR("Yıl"), RATING("Puan")
+enum class LibrarySort(@StringRes val label: Int) {
+    DEFAULT(R.string.sort_default), ADDED(R.string.sort_added), TITLE(R.string.sort_title), YEAR(R.string.sort_year),
+    RATING(R.string.sort_rating)
 }
 
 private val turkish: Locale = Locale.forLanguageTag("tr")

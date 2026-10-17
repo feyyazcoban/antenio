@@ -18,15 +18,15 @@ class XmltvParser(private val language: String = "tr") {
             "http://apache.org/xml/features/nonvalidating/load-external-dtd").forEach {
             try { reader.setFeature(it, false) } catch (_: SAXException) { /* Android/JVM feature sets differ. */ }
         }
-        reader.entityResolver = org.xml.sax.EntityResolver { _, _ -> throw SourceFailure("Rehber dış XML tanımı içeriyor.") }
+        reader.entityResolver = org.xml.sax.EntityResolver { _, _ -> throw SourceFailure(FailureReason.GUIDE_EXTERNAL_DEFINITION) }
         reader.contentHandler = handler
         reader.errorHandler = handler
         try {
             SafeProlog.open(input, checkpoint).use { reader.parse(InputSource(it)) }
-            if (!handler.rootSeen) throw SourceFailure("Geçerli bir XMLTV rehberi bulunamadı.")
+            if (!handler.rootSeen) throw SourceFailure(FailureReason.GUIDE_NOT_XMLTV)
         } catch (e: java.util.concurrent.CancellationException) { throw e }
         catch (e: SourceFailure) { throw e }
-        catch (_: Exception) { throw SourceFailure("Yayın rehberi okunamadı. XMLTV biçimini kontrol et.") }
+        catch (_: Exception) { throw SourceFailure(FailureReason.GUIDE_UNREADABLE) }
         return handler.report()
     }
 
@@ -43,20 +43,20 @@ class XmltvParser(private val language: String = "tr") {
         override fun startElement(uri: String?, localName: String, qName: String?, a: Attributes) {
             checkpoint()
             depth++
-            if (depth > 32) throw SourceFailure("Rehberin XML yapısı çok derin.")
+            if (depth > 32) throw SourceFailure(FailureReason.GUIDE_TOO_DEEP)
             if (depth == 1) {
-                if (localName != "tv" || !uri.isNullOrEmpty()) throw SourceFailure("Geçerli bir XMLTV rehberi bulunamadı.")
+                if (localName != "tv" || !uri.isNullOrEmpty()) throw SourceFailure(FailureReason.GUIDE_NOT_XMLTV)
                 rootSeen = true
             }
             if (depth == 2) {
                 parent = localName
                 channelId = (a.getValue(if (parent == "channel") "id" else "channel") ?: "").trim()
-                if (channelId.length > 512) throw SourceFailure("Rehber kanal kimliği çok uzun.")
+                if (channelId.length > 512) throw SourceFailure(FailureReason.GUIDE_CHANNEL_ID_TOO_LONG)
                 if (parent == "channel") {
-                    if (++channels > 20_000) throw SourceFailure("Rehber çok fazla kanal içeriyor.")
+                    if (++channels > 20_000) throw SourceFailure(FailureReason.GUIDE_TOO_MANY_CHANNELS)
                     names = mutableListOf()
                 } else if (parent == "programme") {
-                    if (++seen > 1_000_000) throw SourceFailure("Rehber çok fazla program içeriyor.")
+                    if (++seen > 1_000_000) throw SourceFailure(FailureReason.GUIDE_TOO_MANY_PROGRAMMES)
                     start = XmltvTime.parse(a.getValue("start"))
                     val stop = a.getValue("stop")
                     end = XmltvTime.parse(stop)
@@ -74,7 +74,7 @@ class XmltvParser(private val language: String = "tr") {
         }
         override fun characters(ch: CharArray, offset: Int, length: Int) {
             if (field.isNotEmpty()) {
-                if (text.length + length > 16_384) throw SourceFailure("Rehber metni boyut sınırını aşıyor.")
+                if (text.length + length > 16_384) throw SourceFailure(FailureReason.GUIDE_TEXT_TOO_LONG)
                 text.append(ch, offset, length)
             }
         }
@@ -116,7 +116,7 @@ private object SafeProlog {
         while (size < 4) { val n = stream.read(bytes, size, 4 - size); if (n < 0) break; size += n }
         fun at(i: Int) = if (i < size) bytes[i].toInt() and 255 else -1
         val (charset, skip) = when {
-            at(0) == 255 && at(1) == 254 && at(2) == 0 && at(3) == 0 -> throw SourceFailure("Rehber UTF-8 veya UTF-16 olmalı.")
+            at(0) == 255 && at(1) == 254 && at(2) == 0 && at(3) == 0 -> throw SourceFailure(FailureReason.GUIDE_ENCODING_UNSUPPORTED)
             at(0) == 255 && at(1) == 254 -> Charsets.UTF_16LE to 2
             at(0) == 254 && at(1) == 255 -> Charsets.UTF_16BE to 2
             at(0) == 239 && at(1) == 187 && at(2) == 191 -> Charsets.UTF_8 to 3
@@ -127,23 +127,23 @@ private object SafeProlog {
             .onUnmappableCharacter(CodingErrorAction.REPORT)).buffered()
         val bounded = object : FilterReader(decoded) {
             var count = 0L
-            fun accepted(n: Int) { checkpoint(); if (n > 0) count += n; if (count > 128L * 1024 * 1024) throw SourceFailure("Rehber boyut sınırını aşıyor.") }
+            fun accepted(n: Int) { checkpoint(); if (n > 0) count += n; if (count > 128L * 1024 * 1024) throw SourceFailure(FailureReason.GUIDE_TOO_LARGE) }
             override fun read() = super.read().also { accepted(if (it < 0) 0 else 1) }
             override fun read(b: CharArray, off: Int, len: Int) = super.read(b, off, len).also { accepted(it) }
         }
         val prefix = StringBuilder()
         var prologLength = 0
         fun take(): Char {
-            if (++prologLength > 65_536) throw SourceFailure("Rehber XML başlığı çok uzun.")
+            if (++prologLength > 65_536) throw SourceFailure(FailureReason.GUIDE_PROLOG_TOO_LONG)
             val value = bounded.read()
-            if (value < 0) throw SourceFailure("Rehber XML başlığı eksik.")
+            if (value < 0) throw SourceFailure(FailureReason.GUIDE_PROLOG_MISSING)
             return value.toChar()
         }
         var hasDoctype = false
         while (true) {
             val first = take()
             if (first.isWhitespace()) { prefix.append(first); continue }
-            if (first != '<') throw SourceFailure("Geçerli bir XMLTV rehberi bulunamadı.")
+            if (first != '<') throw SourceFailure(FailureReason.GUIDE_NOT_XMLTV)
             val second = take()
             if (second != '?' && second != '!') { prefix.append('<').append(second); break }
             val token = StringBuilder().append('<').append(second)
@@ -152,7 +152,7 @@ private object SafeProlog {
                 if (Regex("^<\\?xml\\s").containsMatchIn(token)) {
                     val encoding = Regex("encoding\\s*=\\s*['\"]([^'\"]+)['\"]").find(token)?.groupValues?.get(1)
                     val allowed = if (charset == Charsets.UTF_8) setOf("UTF-8") else setOf("UTF-16", charset.name())
-                    if (encoding != null && encoding.uppercase() !in allowed) throw SourceFailure("Rehber UTF-8 veya UTF-16 olmalı.")
+                    if (encoding != null && encoding.uppercase() !in allowed) throw SourceFailure(FailureReason.GUIDE_ENCODING_UNSUPPORTED)
                 }
                 prefix.append(token)
             } else {
@@ -166,12 +166,12 @@ private object SafeProlog {
                         val c = take(); token.append(c)
                         if (quote != null) { if (c == quote) quote = null }
                         else if (c == '\'' || c == '"') quote = c
-                        else if (c == '[') throw SourceFailure("Rehber iç XML tanımları içeriyor.")
+                        else if (c == '[') throw SourceFailure(FailureReason.GUIDE_INTERNAL_DEFINITIONS)
                         else if (c == '>') break
                     }
                     val quoted = "(?:\"[^\"]*\"|'[^']*')"
                     val external = Regex("<!DOCTYPE\\s+tv(?:\\s+(?:SYSTEM\\s+$quoted|PUBLIC\\s+$quoted\\s+$quoted))?\\s*>")
-                    if (hasDoctype || !external.matches(token)) throw SourceFailure("Rehber XML tanımı desteklenmiyor.")
+                    if (hasDoctype || !external.matches(token)) throw SourceFailure(FailureReason.GUIDE_DOCTYPE_UNSUPPORTED)
                     hasDoctype = true
                     prefix.append('\n')
                 }

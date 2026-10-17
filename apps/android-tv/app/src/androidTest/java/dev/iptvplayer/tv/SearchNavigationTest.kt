@@ -754,16 +754,17 @@ class SearchNavigationTest {
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.waitUntil(15_000) { !model.state.value.refreshing }
         val notice = model.state.value.catalogNotice!!
+        val message = notice.message.resolve(InstrumentationRegistry.getInstrumentation().targetContext.resources)
         assertTrue(notice.needsAttention)
         assertEquals(expected, model.state.value.catalog)
         row.assertIsFocused()
-        ui.onNode(hasText(notice.message) and hasAnyAncestor(hasTestTag("settings-panel"))).assertIsDisplayed()
+        ui.onNode(hasText(message) and hasAnyAncestor(hasTestTag("settings-panel"))).assertIsDisplayed()
         val rowBounds = row.getUnclippedBoundsInRoot()
         val viewport = ui.onNodeWithTag("settings-viewport").getUnclippedBoundsInRoot()
         assertTrue("The full warning row must remain visible", rowBounds.top >= viewport.top && rowBounds.bottom <= viewport.bottom)
         shot("settings-warning")
         key(KeyEvent.KEYCODE_BACK)
-        ui.onNodeWithText(notice.message).assertExists()
+        ui.onNodeWithText(message).assertExists()
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.
         ui.onNodeWithTag("category:Tümü").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
@@ -772,8 +773,8 @@ class SearchNavigationTest {
         // is correctly settled back to the cards by the library's focus policy.
         repeat(2) { key(KeyEvent.KEYCODE_DPAD_UP) }
         ui.onNode(isFocused() and hasAnyAncestor(hasTestTag("library-heading"))).assertExists()
-        ui.onNodeWithText(notice.message).assertIsDisplayed()
-        val warningBounds = ui.onNodeWithText(notice.message).getUnclippedBoundsInRoot()
+        ui.onNodeWithText(message).assertIsDisplayed()
+        val warningBounds = ui.onNodeWithText(message).getUnclippedBoundsInRoot()
         val libraryViewport = ui.onNodeWithTag("library-grid").getUnclippedBoundsInRoot()
         // The heading, warning included, stays above the grid at normal text.
         assertTrue("The entire catalog warning must be readable from the header controls",

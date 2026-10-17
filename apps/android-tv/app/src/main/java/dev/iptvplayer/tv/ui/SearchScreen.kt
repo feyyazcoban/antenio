@@ -26,7 +26,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.annotation.StringRes
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.TextStyle
@@ -41,7 +43,7 @@ import androidx.tv.material3.*
 import dev.iptvplayer.tv.*
 import dev.iptvplayer.tv.data.*
 
-private data class SearchRow(val key: String, val title: String, val entries: List<MediaEntry>)
+private data class SearchRow(val key: String, @StringRes val title: Int, val entries: List<MediaEntry>)
 
 /**
  * TV search: a wide field at the top and results in horizontal rows beneath it, one row per kind.
@@ -134,7 +136,7 @@ private data class SearchRow(val key: String, val title: String, val entries: Li
                 contentPadding = PaddingValues(horizontal = TvLayout.Gutter, vertical = 5.dp)) {
                 item { Action("Tümü", selected = s.searchKind == null, compact = true, outlined = true) { model.searchKind(null) } }
                 listOf(MediaKind.LIVE, MediaKind.MOVIE, MediaKind.SERIES).forEach { kind ->
-                    item { Action(kind.label, selected = s.searchKind == kind, compact = true, outlined = true) { model.searchKind(kind) } }
+                    item { Action(stringResource(kind.label), selected = s.searchKind == kind, compact = true, outlined = true) { model.searchKind(kind) } }
                 }
             }
             if (s.searchResults.isEmpty()) {
@@ -168,7 +170,7 @@ private data class SearchRow(val key: String, val title: String, val entries: Li
                         onDispose { if (rowStates[row.key] === rowState) rowStates.remove(row.key) }
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("${row.title} · ${row.entries.size}", Modifier.padding(horizontal = TvLayout.Gutter).testTag("search-row:${row.key}")
+                        Text("${stringResource(row.title)} · ${row.entries.size}", Modifier.padding(horizontal = TvLayout.Gutter).testTag("search-row:${row.key}")
                             .onSizeChanged { headingHeight = with(density) { it.height.toDp() } },
                             color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 17.sp, lineHeight = 22.sp)
                         LazyRow(state = rowState, horizontalArrangement = Arrangement.spacedBy(14.dp),

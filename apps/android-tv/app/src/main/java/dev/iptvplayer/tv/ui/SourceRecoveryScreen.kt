@@ -28,7 +28,7 @@ import dev.iptvplayer.tv.TvViewModel
         Column(Modifier.weight(1f, fill = false).fillMaxWidth().background(Ink.Container, RoundedCornerShape(24.dp))
             .padding(24.dp).verticalScroll(rememberScrollState()).padding(5.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)) {
-            Note(state.error ?: "Kayıtlı kaynaklar okunamadı. Yeniden deneyebilirsin.")
+            Note(state.error?.resolve() ?: "Kayıtlı kaynaklar okunamadı. Yeniden deneyebilirsin.")
             Action("Yeniden dene", Modifier.focusRequester(retry).testTag("retry-source-recovery"), primary = true) { model.restore() }
             if (state.recoveryCanReset) {
                 Note("Sorun devam ederse bu cihazdaki kaynakları sıfırlayıp hesaplarını yeniden ekleyebilirsin. Bunun için bağlantı veya hesap bilgilerin gerekecek.")

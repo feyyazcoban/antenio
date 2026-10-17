@@ -32,7 +32,6 @@ import androidx.tv.material3.*
 import dev.iptvplayer.tv.*
 import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.CategoryVisibility
-import dev.iptvplayer.tv.data.displayCategory
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 
@@ -162,10 +161,10 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATE
                                         java.util.Locale.forLanguageTag("tr")).format(java.util.Date(s.catalogUpdatedAt)),
                                         modifier = Modifier.padding(top = 4.dp))
                                     SettingRow("Kataloğu yenile", if (s.refreshing) "Yenileniyor… Kütüphanen kullanılabilir."
-                                        else refreshNotice?.message ?: "Yeni kanalları, filmleri ve dizileri getirir.",
+                                        else refreshNotice?.message?.resolve() ?: "Yeni kanalları, filmleri ve dizileri getirir.",
                                         modifier = section("Kaynaklar"), busy = s.refreshing, attention = refreshNotice?.needsAttention == true) { model.refresh() }
                                 }
-                                s.catalogNotice?.takeIf { it.operation != CatalogOperation.REFRESH }?.let { Note(it.message, error = it.needsAttention) }
+                                s.catalogNotice?.takeIf { it.operation != CatalogOperation.REFRESH }?.let { Note(it.message.resolve(), error = it.needsAttention) }
                                 if (s.sources.size == 1) SettingRow("Kaynağı düzenle", "Bağlantı ve hesap bilgilerini değiştir.", section("Kaynaklar")) { dismiss(); model.editSource() }
                                 if (s.sources.size == 1) SettingRow("Kaynağı kaldır", "Bu kaynağı ve cihazdaki kayıtlarını kaldır.", Modifier.focusRequester(remove).then(section("Kaynaklar"))) { open(SettingsPage.REMOVE) }
                                 Spacer(Modifier.height(6.dp))
@@ -246,7 +245,7 @@ private enum class SettingsPage { MAIN, REMOVE, HISTORY, ABOUT, CATEGORIES, CATE
             val choice = choices[index]
             val byAdult = s.hideAdultCategories && choice.adult
             val visible = !byAdult && CategoryVisibility.key(kind, choice.name) !in s.hiddenCategories
-            val (label, tag) = displayCategory(choice.name)
+            val (label, tag) = shownCategory(choice.name)
             SettingRow(label + if (tag.isNotEmpty()) " · $tag" else "",
                 "${choice.count} içerik" + if (byAdult) " · Yetişkin filtresi gizliyor" else "",
                 (if (index == 0) Modifier.focusRequester(first) else Modifier).testTag("category-choice:$index"), checked = visible) {

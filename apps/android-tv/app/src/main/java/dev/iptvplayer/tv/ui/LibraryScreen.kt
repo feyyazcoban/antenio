@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -41,7 +42,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import java.time.ZoneId
 
-/** Virtual categories above the provider's own; "Tümü" stays the model's key for "all of this kind". */
+/** Virtual categories above the provider's own; [CategoryFilter.ALL] stays the model's key for "all of this kind". */
 internal const val FavoritesCategory = "@favorites"
 internal const val HistoryCategory = "@history"
 
@@ -76,23 +77,26 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
         s.history.mapNotNull { r -> if (s.kind == MediaKind.SERIES) r.parentId?.takeIf { r.kind == MediaKind.EPISODE } ?: r.id.takeIf { r.kind == MediaKind.SERIES }
             else r.id.takeIf { r.kind == s.kind } }.distinct()
     }
-    val categories = remember(itemsOfKind, s.onlyFavorites, s.favoriteIds, s.category, s.kind, s.catalog.categoryOrder) {
+    // The catalogue's own "Diğer" is a stored key (D068); its label follows the app's language.
+    val other = stringResource(dev.iptvplayer.tv.R.string.category_other)
+    fun provider(name: String) = SectionCategory(name, if (name == CategoryFilter.OTHER) other else name)
+    val categories = remember(itemsOfKind, s.onlyFavorites, s.favoriteIds, s.category, s.kind, s.catalog.categoryOrder, other) {
         if (s.onlyFavorites) {
             // Favoriler offers only its own categories; keep the active one if its last favourite was just removed.
             val pool = itemsOfKind.filter { it.id in s.favoriteIds }
-            val active = listOfNotNull(s.category.takeIf { it != "Tümü" && pool.none { e -> e.category == it } })
-            listOf(SectionCategory("Tümü", "Tüm favoriler")) + (providerCategories(pool, emptyList()) + active).distinct().map { SectionCategory(it, it) }
+            val active = listOfNotNull(s.category.takeIf { it != CategoryFilter.ALL && pool.none { e -> e.category == it } })
+            listOf(SectionCategory(CategoryFilter.ALL, "Tüm favoriler")) + (providerCategories(pool, emptyList()) + active).distinct().map(::provider)
         } else {
             val all = when (s.kind) { MediaKind.LIVE -> "Tüm kanallar"; MediaKind.MOVIE -> "Tüm filmler"; else -> "Tüm diziler" }
             listOfNotNull(SectionCategory(FavoritesCategory, "Favoriler"),
                 SectionCategory(HistoryCategory, "Geçmiş").takeIf { s.kind != MediaKind.LIVE },
-                SectionCategory("Tümü", all)) +
-                providerCategories(itemsOfKind, s.catalog.categoryOrder[s.kind].orEmpty()).map { SectionCategory(it, it) }
+                SectionCategory(CategoryFilter.ALL, all)) +
+                providerCategories(itemsOfKind, s.catalog.categoryOrder[s.kind].orEmpty()).map(::provider)
         }
     }
     val categoryLabel = displayCategory(categories.firstOrNull { it.key == s.category }?.label ?: s.category).first
     // The section search filters the selected category; its label says so, and an empty result offers the whole section.
-    val searchScoped = s.category != "Tümü"
+    val searchScoped = s.category != CategoryFilter.ALL
     val searchLabel = if (searchScoped) "Bu kategoride ara" else "Bu bölümde ara"
     val widenLabel = when {
         s.onlyFavorites -> "Tüm favorilerde ara"
@@ -116,7 +120,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     val ordered = remember(itemsOfKind, sort) { if (sort == LibrarySort.DEFAULT) itemsOfKind else model.libraryOrder(s.catalog, s.kind, sort) }
     val filtered = remember(ordered, s.category, s.query, s.libraryMatches, s.onlyFavorites, s.favoriteIds, historyIds) {
         val base = when (s.category) {
-            "Tümü" -> ordered
+            CategoryFilter.ALL -> ordered
             FavoritesCategory -> ordered.filter { it.id in s.favoriteIds }
             HistoryCategory -> { val byId = itemsOfKind.associateBy { it.id }; historyIds.mapNotNull(byId::get) }
             else -> ordered.filter { it.category == s.category }
@@ -220,8 +224,8 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                 Action(if (s.query.isBlank()) searchLabel else "Arama: ${s.query}",
                     Modifier.widthIn(max = 200.dp), compact = true, outlined = true, icon = "search", selected = searchOpen || s.query.isNotBlank()) { searchOpen = !searchOpen }
             }
-            if (s.catalog.warnings.isNotEmpty()) Note(s.catalog.warnings.joinToString(" "), error = true)
-            s.catalogNotice?.takeIf { it.needsAttention }?.let { Note(it.message, error = true) }
+            if (s.catalog.warnings.isNotEmpty()) Note(s.catalog.warnings.map { it.text }.resolve(), error = true)
+            s.catalogNotice?.takeIf { it.needsAttention }?.let { Note(it.message.resolve(), error = true) }
         }
     }
     // An empty section keeps focus on its own tab, where the active marker is, as Home and Guide do.
@@ -269,7 +273,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                     // Kept for focus order; the category list itself lives in the column beside the grid.
                     item(key = "categories", span = { GridItemSpan(maxLineSpan) }) { Spacer(Modifier.height(0.dp)) }
                     if (filtered.isEmpty()) item(key = "empty", span = { GridItemSpan(maxLineSpan) }) {
-                        val hasFilter = s.query.isNotBlank() || s.category != "Tümü"
+                        val hasFilter = s.query.isNotBlank() || s.category != CategoryFilter.ALL
                         // A search that found nothing in one category: the same search over the whole section is one OK away.
                         val widen = s.query.isNotBlank() && searchScoped && !s.librarySearching
                         val emptyVisibility = rememberCardVisibility()
@@ -300,8 +304,8 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                                 else -> "Kaynakları kontrol et"
                             }, Modifier.focusRequester(emptyFocus).then(emptyVisibility.focus).testTag("library-empty-action"), primary = true) {
                                 when {
-                                    widen -> { widened = true; model.category("Tümü") }
-                                    hasFilter -> { model.query(""); model.category("Tümü"); selectedCategoryFocus.requestFocus() }
+                                    widen -> { widened = true; model.category(CategoryFilter.ALL) }
+                                    hasFilter -> { model.query(""); model.category(CategoryFilter.ALL); selectedCategoryFocus.requestFocus() }
                                     s.onlyFavorites -> model.home()
                                     else -> model.manageSources()
                                 }
@@ -465,13 +469,13 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     var open by remember { mutableStateOf(false) }
     val opener = remember { FocusRequester() }
     fun dismiss() { open = false; try { opener.requestFocus() } catch (_: IllegalStateException) { } }
-    Action(if (short) "Sırala" else "Sırala: ${current.label}", Modifier.widthIn(max = 220.dp).focusRequester(opener).testTag("library-sort"),
+    Action(if (short) "Sırala" else "Sırala: ${stringResource(current.label)}", Modifier.widthIn(max = 220.dp).focusRequester(opener).testTag("library-sort"),
         compact = true, outlined = true, selected = current != LibrarySort.DEFAULT) { open = true }
     if (open) {
         val initial = remember { FocusRequester() }
         SourceDialog("Sırala", initial, ::dismiss, width = 420.dp) {
             LibrarySort.entries.forEach { option ->
-                Action(option.label, Modifier.fillMaxWidth().then(if (option == current) Modifier.focusRequester(initial) else Modifier)
+                Action(stringResource(option.label), Modifier.fillMaxWidth().then(if (option == current) Modifier.focusRequester(initial) else Modifier)
                     .testTag("sort:${option.name}"), selected = option == current, check = true) { choose(option); dismiss() }
             }
         }
@@ -502,7 +506,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                     fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Column(Modifier.weight(.58f), verticalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterVertically)) {
                     // Without a guide the column names the channel's category instead of "Program bilgisi yok" on every row.
-                    Text(current?.title ?: if (guideAvailable) "Program bilgisi yok" else displayCategory(entry.category).first,
+                    Text(current?.title ?: if (guideAvailable) "Program bilgisi yok" else shownCategory(entry.category).first,
                         color = if (current != null) Ink.Text else Ink.Muted, fontFamily = Roboto,
                         fontSize = 14.sp, lineHeight = 19.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (current != null) Progress(current, now)

@@ -30,6 +30,7 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -160,7 +161,7 @@ import androidx.compose.ui.input.key.type
         // Only form-validation messages point at a field; import, duplicate and storage errors keep the scroll.
         val config = SourceConfig(name = d.name, type = d.type, address = d.address,
             username = d.username, password = d.password, epgUrl = d.epgUrl)
-        if (runCatching { config.validated() }.exceptionOrNull()?.message != error) return@LaunchedEffect
+        if ((runCatching { config.validated() }.exceptionOrNull() as? SourceFailure)?.text != error) return@LaunchedEffect
         val url = d.address.trim().toHttpUrlOrNull()
         val target = when {
             url == null || url.username.isNotEmpty() || url.password.isNotEmpty() -> addressView
@@ -222,7 +223,7 @@ import androidx.compose.ui.input.key.type
                 SetupEntry("XMLTV rehber adresi · isteğe bağlı", s.draft.epgUrl, { model.draft(s.draft.copy(epgUrl = it)) }, secret = true,
                     modifier = fieldView(guideView), revealed = reveal)
             }
-            s.error?.let { Note(it, error = true, modifier = Modifier.testTag("setup-error")) }
+            s.error?.let { Note(it.resolve(), error = true, modifier = Modifier.testTag("setup-error")) }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Action("Kütüphaneyi aç", Modifier.testTag("setup-connect"), primary = true) { model.connectDraft() }
                 if (s.source != null) Action("Vazgeç") { model.back() }
@@ -276,8 +277,8 @@ internal class EvenColumns(private val count: Int) : GridCells {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     Text(name, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                         fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(if (live) guide?.now(now)?.let { "Şimdi: ${it.title}" } ?: displayCategory(entry.category).first
-                        else listOf(entry.kind.label, shown.year, shown.tag).filter { it.isNotBlank() }.joinToString(" · "),
+                    Text(if (live) guide?.now(now)?.let { "Şimdi: ${it.title}" } ?: shownCategory(entry.category).first
+                        else listOf(stringResource(entry.kind.label), shown.year, shown.tag).filter { it.isNotBlank() }.joinToString(" · "),
                         color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
@@ -286,7 +287,7 @@ internal class EvenColumns(private val count: Int) : GridCells {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(130.dp).height(40.dp), true, logoInset = 0.dp)
                 Text(name, color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp,
                     lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(displayCategory(entry.category).first, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(shownCategory(entry.category).first, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             } else Box(Modifier.fillMaxSize()) {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.fillMaxSize(), showFallbackTitle = false)
                 entry.ratingText?.let { RatingBadge(it, Modifier.align(Alignment.TopStart).padding(7.dp)) }

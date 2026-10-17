@@ -255,7 +255,7 @@ class GuideFlowTest {
         slowGuide = true; click("nav:Canlı TV"); click("open-guide")
         ui.waitUntil(5_000) { requests.get() == 1 }
         ui.runOnUiThread { model.cancelGuide(source.id); repeat(5) { model.ensureGuide(listOf(source.id)) } }
-        ui.waitUntil(5_000) { model.state.value.guideStatus[source.id]?.let { !it.refreshing && it.error?.contains("iptal") == true } == true }
+        ui.waitUntil(5_000) { model.state.value.guideStatus[source.id]?.let { !it.refreshing && it.error == UiText.Res(R.string.guide_refresh_cancelled) } == true }
         ui.runOnUiThread { repeat(5) { model.ensureGuide(listOf(source.id)) } }
         assertEquals(1, requests.get())
         assertTrue(ui.activity.cacheDir.resolve("guide-staging").listFiles().orEmpty().isEmpty())

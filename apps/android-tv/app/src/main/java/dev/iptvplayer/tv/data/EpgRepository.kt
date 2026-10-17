@@ -27,7 +27,7 @@ class EpgRepository(private val client: OkHttpClient = OkHttpClient.Builder().co
             }
         } catch (e: CancellationException) { throw e }
         catch (e: SourceFailure) { throw e }
-        catch (_: Exception) { ensureActive(); throw SourceFailure("Yayın rehberi kaydedilemedi. Son rehber korunuyor.") }
+        catch (_: Exception) { ensureActive(); throw SourceFailure(FailureReason.GUIDE_NOT_SAVED) }
     } }
 
     internal suspend fun download(url: String, window: GuideWindow, sink: EpgSink,
@@ -42,13 +42,13 @@ class EpgRepository(private val client: OkHttpClient = OkHttpClient.Builder().co
                 ensureActive()
                 call.execute().use { response ->
                     if (!response.isSuccessful) throw SourceFailure(when (response.code) {
-                        401, 403 -> "Yayın rehberine erişim reddedildi. Kaynak bilgilerini kontrol et."
-                        404 -> "Yayın rehberi adresi bulunamadı."
-                        429 -> "Sağlayıcı yoğun. Yayın rehberini daha sonra yenileyebilirsin."
-                        else -> "Yayın rehberi şu anda alınamıyor. Son rehber korunuyor."
+                        401, 403 -> FailureReason.GUIDE_ACCESS_DENIED
+                        404 -> FailureReason.GUIDE_NOT_FOUND
+                        429 -> FailureReason.GUIDE_TOO_MANY_REQUESTS
+                        else -> FailureReason.GUIDE_PROVIDER_UNAVAILABLE
                     })
-                    val body = response.body ?: throw SourceFailure("Yayın rehberi yanıtı boş.")
-                    if (body.contentLength() > MAX_BYTES) throw SourceFailure("Yayın rehberi boyut sınırını aşıyor.")
+                    val body = response.body ?: throw SourceFailure(FailureReason.GUIDE_RESPONSE_EMPTY)
+                    if (body.contentLength() > MAX_BYTES) throw SourceFailure(FailureReason.GUIDE_RESPONSE_TOO_LARGE)
                     val raw = bounded(body.byteStream()).buffered()
                     raw.mark(2)
                     val gzip = raw.read() == 0x1f && raw.read() == 0x8b
@@ -60,13 +60,13 @@ class EpgRepository(private val client: OkHttpClient = OkHttpClient.Builder().co
             }
         } catch (e: CancellationException) { throw e }
         catch (e: SourceFailure) { currentCoroutineContext().ensureActive(); throw e }
-        catch (_: Exception) { currentCoroutineContext().ensureActive(); throw SourceFailure("Yayın rehberi indirilemedi. Bağlantıyı kontrol et.") }
+        catch (_: Exception) { currentCoroutineContext().ensureActive(); throw SourceFailure(FailureReason.GUIDE_DOWNLOAD_FAILED) }
         finally { cancellation.cancel() }
     }
 
     private fun bounded(input: InputStream) = object : FilterInputStream(input) {
         var count = 0L
-        fun accept(n: Int) { if (n > 0) count += n; if (count > MAX_BYTES) throw SourceFailure("Yayın rehberi boyut sınırını aşıyor.") }
+        fun accept(n: Int) { if (n > 0) count += n; if (count > MAX_BYTES) throw SourceFailure(FailureReason.GUIDE_RESPONSE_TOO_LARGE) }
         override fun read() = `in`.read().also { accept(if (it < 0) 0 else 1) }
         override fun read(b: ByteArray, off: Int, len: Int) = `in`.read(b, off, len).also { accept(it) }
     }

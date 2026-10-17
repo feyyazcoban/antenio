@@ -26,7 +26,7 @@ class EmptyHomeLayoutTest {
         ui.runOnUiThread { ui.activity.setContent { PilotTheme { Box(Modifier.fillMaxSize().background(Ink.Background)) { HomeScreen(state.value, model) {} } } } }
         for (failure in listOf(false,true)) {
             ui.runOnUiThread { state.value = TvState(route = Route.HOME, catalogNotice = if(failure)
-                CatalogNotice("Kaynak yenilenemedi. Bağlantını ve hesap bilgilerini kontrol edip yeniden deneyebilirsin. Kayıtlı kaynak bilgilerin korunuyor.", CatalogOperation.REFRESH, true) else null) }
+                CatalogNotice(dev.iptvplayer.tv.data.UiText.Raw("Kaynak yenilenemedi. Bağlantını ve hesap bilgilerini kontrol edip yeniden deneyebilirsin. Kayıtlı kaynak bilgilerin korunuyor."), CatalogOperation.REFRESH, true) else null) }
             ui.waitForIdle()
             ui.onNodeWithText(if(failure) "İçerikler gösterilemiyor" else "Kütüphanen için yer hazır").assertExists()
             // Home has no source selector; the sources are one action away.

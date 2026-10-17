@@ -38,7 +38,7 @@ import dev.iptvplayer.tv.TvState
                 }, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     LoadingArc()
-                    Text(state.progressLabel, color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 21.sp)
+                    Text(state.progressLabel.resolve(), color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 21.sp)
                 }
             }
             Note(when (state.sourceTask) {

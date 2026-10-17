@@ -23,7 +23,9 @@ object CatalogSnapshotCodec {
     fun encode(snapshot: CatalogSnapshot): ByteArray = ByteArrayOutputStream().use { output ->
         GZIPOutputStream(output).bufferedWriter(Charsets.UTF_8).use { writer ->
             writer.appendLine(JSONObject().put("version", VERSION).put("updatedAt", snapshot.updatedAt)
-                .put("warnings", JSONArray(snapshot.catalog.warnings)).put("epgUrls", JSONArray(snapshot.catalog.epgUrls))
+                .put("warnings", JSONArray(snapshot.catalog.warnings.map { warning -> JSONObject().put("reason", warning.reason.name)
+                    .put("kind", warning.kind?.name).put("count", warning.count.takeIf { it != 0 }) }))
+                .put("epgUrls", JSONArray(snapshot.catalog.epgUrls))
                 .put("categoryOrder", JSONObject(snapshot.catalog.categoryOrder.entries.associate { it.key.name to JSONArray(it.value) })).toString())
             fun entry(value: MediaEntry, group: String?) {
                 require(value.sourceId.isEmpty() && value.localId == null) { "Store only a source's local catalog" }
@@ -117,8 +119,33 @@ object CatalogSnapshotCodec {
             val categoryOrder = MediaKind.entries.mapNotNull { kind ->
                 order?.optJSONArray(kind.name)?.let { names -> kind to (0 until names.length()).map { names.getString(it) } }
             }.toMap()
-            CatalogSnapshot(Catalog(items, episodes, (0 until warnings.length()).map { warnings.getString(it) },
+            CatalogSnapshot(Catalog(items, episodes, (0 until warnings.length()).mapNotNull { warning(warnings.get(it)) },
                 (0 until feeds.length()).map { feeds.getString(it) }, categoryOrder), header.getLong("updatedAt"))
         }
+    }
+
+    /** A stored warning; one this version does not know (a newer reason) is left out rather than failing the snapshot. */
+    private fun warning(value: Any): CatalogWarning? = try {
+        when (value) {
+            is JSONObject -> CatalogWarning(CatalogWarning.Reason.valueOf(value.getString("reason")),
+                value.optString("kind").takeIf { it.isNotEmpty() }?.let(MediaKind::valueOf), value.optInt("count"))
+            is String -> legacyWarning(value)
+            else -> null
+        }
+    } catch (_: IllegalArgumentException) { null }
+
+    /** Snapshots written before S01 kept the Turkish sentence itself; these were its only forms. */
+    private fun legacyWarning(text: String): CatalogWarning? {
+        val kinds = mapOf("Canlı TV" to MediaKind.LIVE, "Filmler" to MediaKind.MOVIE, "Diziler" to MediaKind.SERIES)
+        Regex("(.+): kategori adları alınamadı\\.").matchEntire(text)?.let { match ->
+            return kinds[match.groupValues[1]]?.let { CatalogWarning(CatalogWarning.Reason.CATEGORIES_UNAVAILABLE, it) }
+        }
+        Regex("(.+) yüklenemedi\\. Kaynağı yenileyerek tekrar deneyebilirsin\\.").matchEntire(text)?.let { match ->
+            return kinds[match.groupValues[1]]?.let { CatalogWarning(CatalogWarning.Reason.KIND_UNAVAILABLE, it) }
+        }
+        Regex("(\\d+) geçersiz adres atlandı\\.").matchEntire(text)?.let { match ->
+            return match.groupValues[1].toIntOrNull()?.let { CatalogWarning(CatalogWarning.Reason.INVALID_ADDRESSES, count = it) }
+        }
+        return CatalogWarning(CatalogWarning.Reason.FEEDS_LIMITED).takeIf { text == "Listenin ilk dört yayın rehberi adresi alındı." }
     }
 }

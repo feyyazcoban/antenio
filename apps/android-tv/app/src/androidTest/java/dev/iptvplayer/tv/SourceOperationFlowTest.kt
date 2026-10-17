@@ -164,7 +164,7 @@ class SourceOperationFlowTest {
             ui.runOnUiThread { model.removeSource() }
             ui.waitUntil(10_000) { model.state.value.sourceTask == SourceTask.IDLE }
             assertEquals(Route.HOME, model.state.value.route)
-            assertEquals(CatalogNotice("Kaynak kaldırılamadı. Tekrar dene.", CatalogOperation.SOURCE_REMOVAL, needsAttention = true), model.state.value.catalogNotice)
+            assertEquals(CatalogNotice(UiText.Res(R.string.notice_source_not_removed), CatalogOperation.SOURCE_REMOVAL, needsAttention = true), model.state.value.catalogNotice)
             assertNotNull(model.store.loadSources().sources.singleOrNull())
         } finally { assertTrue(directory.setWritable(true)) }
         ui.runOnUiThread { model.removeSource() }

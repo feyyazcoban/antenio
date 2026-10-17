@@ -29,6 +29,6 @@ class SourceRegistryTest {
     @Test fun unknownVersionOrInvalidSourceCannotBecomeAnEmptyRegistry() {
         assertThrows(Exception::class.java) { SourceRegistryCodec.decode("{\"version\":99,\"sources\":[]}".toByteArray()) }
         val invalid = SourceRegistryCodec.encode(SourceRegistry(listOf(b.copy(address="file:///private"))))
-        assertThrows(SourceFailure::class.java) { SourceRegistryCodec.decode(invalid) }
+        assertEquals(FailureReason.ADDRESS_INVALID, assertThrows(SourceFailure::class.java) { SourceRegistryCodec.decode(invalid) }.reason)
     }
 }

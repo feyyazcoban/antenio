@@ -49,7 +49,7 @@ object SourceLibrary {
         SourceRegistry(sources, filterId).checked()
         val items = ArrayList<MediaEntry>()
         val episodes = LinkedHashMap<String, List<MediaEntry>>()
-        val warnings = ArrayList<String>()
+        val warnings = ArrayList<CatalogWarning>()
         val categoryOrder = LinkedHashMap<MediaKind, LinkedHashSet<String>>()
         sources.filter { filterId == null || it.id == filterId }.forEach { source ->
             val catalog = catalogs[source.id] ?: return@forEach

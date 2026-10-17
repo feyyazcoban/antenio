@@ -53,7 +53,7 @@ import androidx.tv.material3.Text
                                 .fillMaxHeight().background(Ink.Mint))
                         }
                     }
-                    val note = s.notice ?: s.next?.notice ?: if (s.next == null)
+                    val note = s.notice ?: s.next?.notice?.resolve() ?: if (s.next == null)
                         "Bu kaynakta açılabilecek başka bölüm bulunamadı. Bölüm listesine dönebilir veya yeniden izleyebilirsin."
                         else if (s.seconds == null) "Hazır olduğunda sonraki bölümü başlatabilirsin." else null
                     if (note != null) Note(note)

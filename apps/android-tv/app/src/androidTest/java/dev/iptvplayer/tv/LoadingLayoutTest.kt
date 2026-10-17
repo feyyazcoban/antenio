@@ -40,10 +40,10 @@ class LoadingLayoutTest {
         ui.runOnUiThread { ui.activity.setContent { PilotTheme { LoadingScreen(state.value) { cancelled = true } } } }
         for (task in listOf(SourceTask.RESTORING, SourceTask.IMPORTING, SourceTask.SAVING, SourceTask.REMOVING, SourceTask.RESETTING)) {
             ui.runOnUiThread { state.value = TvState(sourceTask = task, progressLabel = when(task) {
-                SourceTask.IMPORTING -> "Filmler ve diziler işleniyor · 60.000 kayıt"
-                SourceTask.RESTORING -> "Kayıtlı kütüphanen kontrol ediliyor…"
-                SourceTask.SAVING -> "Kütüphanen cihazına kaydediliyor…"
-                else -> "Bu cihazdaki kaynak kayıtları temizleniyor…"
+                SourceTask.IMPORTING -> dev.iptvplayer.tv.data.UiText.Raw("Filmler ve diziler işleniyor · 60.000 kayıt")
+                SourceTask.RESTORING -> dev.iptvplayer.tv.data.UiText.Res(R.string.progress_checking_library)
+                SourceTask.SAVING -> dev.iptvplayer.tv.data.UiText.Res(R.string.progress_saving_library)
+                else -> dev.iptvplayer.tv.data.UiText.Res(R.string.progress_resetting_sources)
             }) }
             ui.waitForIdle()
             val root = ui.onRoot().getUnclippedBoundsInRoot()

@@ -17,6 +17,7 @@ import java.time.ZoneId
 import java.util.Locale
 
 /** [header] is off where the surrounding dialog already carries the "Yayın rehberi" title. */
+@Composable @ReadOnlyComposable
 internal fun guideStatusText(status: GuideStatus?, zone: ZoneId, header: Boolean = true): String {
     if (status == null || (!status.initialized && status.configured)) return "Rehber kontrol ediliyor…"
     return buildString {
@@ -30,7 +31,7 @@ internal fun guideStatusText(status: GuideStatus?, zone: ZoneId, header: Boolean
         }
         if (status.info == null && status.configured) append("\nKayıtlı rehber bulunmuyor.")
         if (status.refreshing) append("\nYenileniyor… Kayıtlı rehber kullanılabilir.")
-        status.error?.let { append("\n$it") }
+        status.error?.let { append("\n${it.resolve()}") }
         append("\nRehber bilgisi olmasa da canlı kanallar izlenebilir.")
     }.removePrefix("\n")
 }
@@ -54,7 +55,7 @@ internal fun guideStatusText(status: GuideStatus?, zone: ZoneId, header: Boolean
                 EntryField("XMLTV adresi", address, { address = it; model.clearGuideSaveError() },
                     Modifier.focusRequester(editorFocus).testTag("guide-url-field"), secret = true)
                 Note("Boş bırak: otomatik rehberi kullan.")
-                s.guideSaveError?.let { Note(it, error = true) }
+                s.guideSaveError?.let { Note(it.resolve(), error = true) }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Action(if (s.sourceTask == SourceTask.SAVING) "Kaydediliyor…" else "Kaydet", Modifier.testTag("save-guide-url"), primary = true) { model.saveGuideUrl(source.id, address) }

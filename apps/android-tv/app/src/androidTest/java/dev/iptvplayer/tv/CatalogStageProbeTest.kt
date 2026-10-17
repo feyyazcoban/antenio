@@ -15,9 +15,10 @@ class CatalogStageProbeTest {
         assumeTrue(android.os.Build.HARDWARE.contains("ranchu") || android.os.Build.FINGERPRINT.contains("generic"))
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val source = SourceConfig("stage-probe", "Yerel aşama testi", SourceType.M3U, "http://127.0.0.1:1/list.m3u")
+        val labels = MediaKind.entries.associateWith { context.getString(it.label) }
         val entries = (1..60000).map { n ->
             val kind = when { n <= 10000 -> MediaKind.LIVE; n <= 45000 -> MediaKind.MOVIE; else -> MediaKind.SERIES }
-            MediaEntry("${kind.name}:$n", n.toString(), kind, "${kind.label} İstanbul $n", "Kategori ${n % 100}", uri = "http://127.0.0.1:1/fixture.mp4")
+            MediaEntry("${kind.name}:$n", n.toString(), kind, "${labels.getValue(kind)} İstanbul $n", "Kategori ${n % 100}", uri = "http://127.0.0.1:1/fixture.mp4")
         }
         val snapshot = CatalogSnapshot(Catalog(entries), System.currentTimeMillis())
         val store = CatalogStore(context)

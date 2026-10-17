@@ -23,13 +23,14 @@ class SourceTest {
 
     @Test fun missingVodExtensionNeverInventsMp4() {
         val source = SourceConfig(name = "Test", type = SourceType.XTREAM, address = "https://example.com", username = "u", password = "p")
-        assertThrows(SourceFailure::class.java) { source.streamUrl(entry(extension = "")) }
+        assertEquals(FailureReason.STREAM_FORMAT_MISSING, assertThrows(SourceFailure::class.java) { source.streamUrl(entry(extension = "")) }.reason)
         assertTrue(source.streamUrl(entry(MediaKind.LIVE, "")).endsWith(".ts"))
     }
 
     @Test fun sourceRejectsNonHttpAndBasicUserInfo() {
-        listOf("file:///private", "https://username:password@example.com").forEach { address ->
-            assertThrows(SourceFailure::class.java) { SourceConfig(name = "", type = SourceType.M3U, address = address).validated() }
+        mapOf("file:///private" to FailureReason.ADDRESS_INVALID,
+            "https://username:password@example.com" to FailureReason.ADDRESS_HAS_CREDENTIALS).forEach { (address, reason) ->
+            assertEquals(reason, assertThrows(SourceFailure::class.java) { SourceConfig(name = "", type = SourceType.M3U, address = address).validated() }.reason)
         }
     }
 
@@ -68,8 +69,9 @@ class SourceTest {
     }
 
     @Test fun hlsPlaylistAndHtmlAreRejectedAsCatalogs() {
-        listOf("<html>error</html>", "#EXTM3U\n#EXT-X-TARGETDURATION:6\n#EXTINF:6,\na.ts").forEach {
-            assertThrows(SourceFailure::class.java) { M3uParser.parse(it.reader(), "https://example.com/") }
+        mapOf("<html>error</html>" to FailureReason.LIST_NOT_M3U,
+            "#EXTM3U\n#EXT-X-TARGETDURATION:6\n#EXTINF:6,\na.ts" to FailureReason.LIST_SINGLE_STREAM).forEach { (text, reason) ->
+            assertEquals(reason, assertThrows(SourceFailure::class.java) { M3uParser.parse(text.reader(), "https://example.com/") }.reason)
         }
     }
 
@@ -127,8 +129,7 @@ class SourceTest {
             val source = SourceConfig(name = "Fixture", type = SourceType.XTREAM, address = server.url("/").toString(), username = "fixture", password = "fixture")
             val result = SourceRepository().load(source) {}
             assertEquals(1, result.items.size)
-            assertEquals(1, result.warnings.size)
-            assertTrue(result.warnings.single().contains("Filmler"))
+            assertEquals(listOf(CatalogWarning(CatalogWarning.Reason.KIND_UNAVAILABLE, MediaKind.MOVIE)), result.warnings)
         }
     }
 
@@ -139,6 +140,7 @@ class SourceTest {
             val source = SourceConfig(name = "Fixture", type = SourceType.XTREAM, address = server.url("/").toString(), username = "private-marker", password = "private-marker")
             try { SourceRepository().load(source) {}; fail("Expected source failure") }
             catch (e: SourceFailure) {
+                assertEquals(FailureReason.ACCESS_DENIED, e.reason)
                 assertFalse(e.message.orEmpty().contains("private-marker"))
                 assertFalse(e.message.orEmpty().contains(server.hostName))
                 // Coroutine stack recovery may copy a safe exception into its cause chain.

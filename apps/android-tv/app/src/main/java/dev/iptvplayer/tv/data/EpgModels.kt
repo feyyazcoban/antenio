@@ -75,10 +75,10 @@ class EpgPlan private constructor(val owner: String, val binding: String, intern
                 else -> catalog.epgUrls
             }
             if (raw.isEmpty()) return null
-            if (raw.size > 4) throw SourceFailure("En fazla dört rehber adresi kullanılabilir.")
+            if (raw.size > 4) throw SourceFailure(FailureReason.GUIDE_TOO_MANY_FEEDS)
             val urls = raw.map { address ->
                 address.toHttpUrlOrNull()?.takeIf { it.username.isEmpty() && it.password.isEmpty() }?.toString()
-                    ?: throw SourceFailure("Rehber için geçerli bir http veya https adresi gerekli.")
+                    ?: throw SourceFailure(FailureReason.GUIDE_FEED_INVALID)
             }.distinct()
             val binding = stableId((listOf(source.id, source.type.name, source.address, source.username, source.password) + urls)
                 .joinToString("\u0000"))

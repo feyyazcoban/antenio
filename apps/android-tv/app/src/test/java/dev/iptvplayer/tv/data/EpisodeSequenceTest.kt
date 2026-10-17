@@ -1,5 +1,6 @@
 package dev.iptvplayer.tv.data
 
+import dev.iptvplayer.tv.R
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -25,7 +26,7 @@ class EpisodeSequenceTest {
         val available = episode("3", 1, 3)
         val choice = EpisodeSequence.next(source, first, listOf(first, available))!!
         assertEquals(available, choice.entry); assertFalse(choice.automaticAllowed)
-        assertTrue(choice.notice!!.contains("eksik"))
+        assertEquals(UiText.Res(R.string.episode_gap_possible), choice.notice)
     }
     @Test fun unknownDuplicateOrInvalidNumbersRemainManual() {
         val second = episode("2", 1, 2)
@@ -53,7 +54,7 @@ class EpisodeSequenceTest {
         val episodes = restored.m3uEpisodes.values.single()
         val m3u = source.copy(type = SourceType.M3U)
         val choice = EpisodeSequence.next(m3u, episodes.first(), episodes)!!
-        assertTrue(choice.automaticAllowed); assertTrue(choice.notice!!.contains("başlık"))
+        assertTrue(choice.automaticAllowed); assertEquals(UiText.Res(R.string.episode_order_from_titles), choice.notice)
     }
     @Test fun m3uTagMustFollowTheShowNameAndStandAlone() {
         assertNull(M3uParser.findEpisodeTag("8x8 (2023)"))

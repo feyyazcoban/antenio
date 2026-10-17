@@ -170,7 +170,7 @@ class EpgStore(context: Context) {
             checkWriter()
             check(!sealed && !closed && reports.size == plan.urls.size)
             if (reports.sumOf { it.programmes } == 0 && reports.sumOf { it.invalid } > 0)
-                throw SourceFailure("Rehberdeki program saatleri veya kanal bilgileri okunamadı.")
+                throw SourceFailure(FailureReason.GUIDE_ENTRIES_UNREADABLE)
             fun count(table: String) = db.rawQuery("SELECT COUNT(*) FROM $table", null).use { it.moveToFirst(); it.getInt(0) }
             db.execSQL("INSERT INTO snapshot VALUES(?,?,?,?,?,?,?)", arrayOf<Any>(updatedAt, window.from, window.until,
                 count("channels"), count("programmes"), reports.sumOf { it.invalid }, reports.sumOf { it.outsideWindow }))

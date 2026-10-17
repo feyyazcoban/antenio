@@ -170,7 +170,7 @@ class SourceLayoutFlowTest {
         key(KeyEvent.KEYCODE_DPAD_UP); ui.onNodeWithTag("remove-source:${source.id}").assertIsFocused()
         repeat(3) { key(KeyEvent.KEYCODE_DPAD_LEFT) }
         key(KeyEvent.KEYCODE_DPAD_CENTER); readToEnd("source-info-reader")
-        ui.onNodeWithTag("source-info-reader").assert(hasAnyDescendant(hasText(model.state.value.sourceStatus[source.id]!!.notice!!, substring = true)))
+        ui.onNodeWithTag("source-info-reader").assert(hasAnyDescendant(hasText(model.state.value.sourceStatus[source.id]!!.notices.joinToString(" ") { it.resolve(ui.activity.resources) }, substring = true)))
         key(KeyEvent.KEYCODE_BACK); ui.onNodeWithTag("info-source:${source.id}").assertIsFocused()
     }
 
