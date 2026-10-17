@@ -138,20 +138,27 @@ data class CatalogWarning(val reason: Reason, val kind: MediaKind? = null, val c
     val text: UiText get() = when (reason) {
         Reason.CATEGORIES_UNAVAILABLE -> UiText.Res(R.string.warning_categories_unavailable, listOf(UiText.Res(kind!!.label)))
         Reason.KIND_UNAVAILABLE -> UiText.Res(R.string.warning_kind_unavailable, listOf(UiText.Res(kind!!.label)))
-        Reason.INVALID_ADDRESSES -> UiText.Plural(R.plurals.warning_invalid_addresses, count)
+        // The count goes in as text: Android formats %d with the device's locale, which on some devices would
+        // write the digits in another script. Number formats belong to the app's language (gap plan S03).
+        Reason.INVALID_ADDRESSES -> UiText.Plural(R.plurals.warning_invalid_addresses, count, listOf(count.toString()))
         Reason.FEEDS_LIMITED -> UiText.Res(R.string.warning_feeds_limited)
     }
 }
 
 /**
  * Category keys the app itself puts in the catalogue and in its state. They are keys, never shown as they are: the
- * screens show them in the app's language. Their values stay the Turkish words they always were, so stored
- * snapshots, hidden categories (D068) and comparisons written before keep their meaning.
+ * screens show them in the app's language.
  */
 object CategoryFilter {
-    /** Every title of the section: the library's selection before a category is chosen. */
-    const val ALL = "Tümü"
-    /** Titles the provider put in no category; kept in snapshots and in hidden-category keys. */
+    /**
+     * Every title of the section: the library's selection before a category is chosen. It lives only in the model's
+     * state, never on the device; like the library's "@favorites" and "@history" no provider category can take it.
+     */
+    const val ALL = "@all"
+    /**
+     * Titles the provider put in no category. Snapshots and hidden-category keys (D068) store this Turkish word, so
+     * it stays the value it always was.
+     */
     const val OTHER = "Diğer"
 }
 

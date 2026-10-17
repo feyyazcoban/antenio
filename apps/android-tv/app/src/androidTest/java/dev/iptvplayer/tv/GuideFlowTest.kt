@@ -315,7 +315,7 @@ class GuideFlowTest {
         inside(ui.onNodeWithTag("tile:library:${id(0)}"), ui.onNodeWithTag("library-grid"))
         shot("guide-live-cards-$scale")
         // D060: entering Canlı TV from the side menu focuses the selected "Tüm kanallar"; Right enters the first row.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused().assertIsSelected(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused().assertIsSelected(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNode(isFocused() and hasAnyAncestor(hasTestTag("tile:library:${id(0)}"))).assertExists()
         repeat(12) { key(KeyEvent.KEYCODE_DPAD_DOWN) } // One numbered row per channel: the thirteenth is twelve rows down.
         ui.onNodeWithContentDescription(raw.items[12].title).assertIsFocused()

@@ -85,7 +85,7 @@ class PilotFlowTest {
     @Test fun liveMovieSeriesTracksFavoritesAndBack() {
         connect()
         // D060: entering Canlı TV from the menu lands on the selected "Tüm kanallar" row; Right reaches the first channel.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused().assertIsSelected()
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused().assertIsSelected()
         InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
         ui.onNodeWithContentDescription("Test kanalı").assertIsFocused()
         InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)

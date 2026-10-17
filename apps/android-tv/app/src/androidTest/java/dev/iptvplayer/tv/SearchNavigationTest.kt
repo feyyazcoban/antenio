@@ -110,7 +110,7 @@ class SearchNavigationTest {
         ui.runOnUiThread { model.showKind(MediaKind.MOVIE) }; ui.waitForIdle()
         ui.onNodeWithText("Bu bölümde içerik yok").assertExists()
         // Right from the category column goes to the empty list's action.
-        ui.onNodeWithTag("category:Tümü").performSemanticsAction(SemanticsActions.RequestFocus)
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").performSemanticsAction(SemanticsActions.RequestFocus)
         key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithTag("library-empty-action").assertIsFocused()
         val panel = ui.onNodeWithTag("library-empty").getUnclippedBoundsInRoot()
@@ -131,7 +131,7 @@ class SearchNavigationTest {
         ui.waitUntil(10000) { !model.state.value.librarySearching }
         ui.onNodeWithText("Bu filtrelerle içerik bulunamadı").assertExists()
         // Right from the category column goes to the empty list's action.
-        ui.onNodeWithTag("category:Tümü").performSemanticsAction(SemanticsActions.RequestFocus)
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").performSemanticsAction(SemanticsActions.RequestFocus)
         key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithTag("library-empty-action").assertIsFocused()
         fun checkPanel() {
@@ -143,11 +143,11 @@ class SearchNavigationTest {
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.waitUntil(10000) { !model.state.value.librarySearching && model.state.value.query.isEmpty() }
         ui.onNodeWithTag("library-empty-action").assertDoesNotExist()
-        assertEquals("Tümü", model.state.value.category)
+        assertEquals(CategoryFilter.ALL, model.state.value.category)
         ui.runOnUiThread { model.favorites() }; ui.waitForIdle()
         ui.onNodeWithText("Favorilerin burada görünecek").assertExists()
         // Right from the category column goes to the empty list's action.
-        ui.onNodeWithTag("category:Tümü").performSemanticsAction(SemanticsActions.RequestFocus)
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").performSemanticsAction(SemanticsActions.RequestFocus)
         key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithTag("library-empty-action").assertIsFocused()
         checkPanel(); shot("empty-favorites")
@@ -167,7 +167,7 @@ class SearchNavigationTest {
         ui.onNodeWithTag("library-empty-action").assertIsFocused().assertTextContains("Tüm filmlerde ara")
         // OK keeps the search and widens it to every film; focus lands on the result.
         key(KeyEvent.KEYCODE_DPAD_CENTER)
-        ui.waitUntil(10_000) { model.state.value.category == "Tümü" && !model.state.value.librarySearching }
+        ui.waitUntil(10_000) { model.state.value.category == CategoryFilter.ALL && !model.state.value.librarySearching }
         assertEquals("ISIGI", model.state.value.query)
         ui.waitUntil(5_000) { ui.onAllNodes(hasContentDescription("İstanbul Işığı") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
         ui.onNodeWithText("Bu bölümde ara").assertExists()
@@ -335,15 +335,15 @@ class SearchNavigationTest {
     @Test fun sideMenuAlwaysEntersOnTheCurrentSection() {
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
         // Left: the category column on the selected category, then the side menu on the current section.
-        key(KeyEvent.KEYCODE_DPAD_LEFT); ui.onNodeWithTag("category:Tümü").assertIsFocused().assertIsSelected()
+        key(KeyEvent.KEYCODE_DPAD_LEFT); ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused().assertIsSelected()
         key(KeyEvent.KEYCODE_DPAD_LEFT); ui.onNodeWithTag("nav:Filmler").assertIsFocused().assertIsSelected()
         key(KeyEvent.KEYCODE_DPAD_DOWN); ui.onNodeWithTag("nav:Diziler").assertIsFocused()
         assertEquals(MediaKind.MOVIE, model.state.value.kind)
         // Right: back to the selected category, then the card that had focus.
-        key(KeyEvent.KEYCODE_DPAD_RIGHT); ui.onNodeWithTag("category:Tümü").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_RIGHT); ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_LEFT); ui.onNodeWithTag("nav:Filmler").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_RIGHT); key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
@@ -398,7 +398,7 @@ class SearchNavigationTest {
     @Test fun posterGridHeadingCountsTheFocusedPlace() {
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
         val counter = ui.onNodeWithTag("library-position", useUnmergedTree = true)
         fun place() = counter.fetchSemanticsNode().config[SemanticsProperties.Text].joinToString("")
@@ -417,7 +417,7 @@ class SearchNavigationTest {
         shot("library-position")
         // Back in the category column the heading shows the section's size again.
         repeat(2) { key(KeyEvent.KEYCODE_DPAD_LEFT) }
-        ui.onNodeWithTag("category:Tümü").assertIsFocused()
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused()
         ui.onNodeWithTag("library-position", useUnmergedTree = true).assertDoesNotExist()
         ui.onNodeWithText("80 içerik").assertIsDisplayed()
     }
@@ -425,12 +425,12 @@ class SearchNavigationTest {
     @Test fun categoriesFollowTheProviderWithVirtualOnesFirst() {
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
         // A focused poster grid takes the category column's place; Left brings it back on the selected category.
         ui.onNodeWithTag("library-categories").assertDoesNotExist()
         key(KeyEvent.KEYCODE_DPAD_LEFT)
-        ui.onNodeWithTag("category:Tümü").assertIsFocused()
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused()
         // On-screen order (the focused item can sit last in the semantics tree).
         val labels = ui.onNodeWithTag("library-categories").onChildren().fetchSemanticsNodes().sortedBy { it.boundsInRoot.top }
             .mapNotNull { it.config.getOrNull(SemanticsProperties.ContentDescription)?.singleOrNull() }
@@ -439,7 +439,7 @@ class SearchNavigationTest {
         repeat(2) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
         ui.onNodeWithTag("category:Koleksiyon").assertIsFocused()
         Thread.sleep(600); ui.waitForIdle()
-        assertEquals("Tümü", model.state.value.category)
+        assertEquals(CategoryFilter.ALL, model.state.value.category)
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.waitUntil(3_000) { model.state.value.category == "Koleksiyon" }
         key(KeyEvent.KEYCODE_DPAD_RIGHT)
@@ -520,7 +520,7 @@ class SearchNavigationTest {
     @Test fun dpadKeepsWholeCaptionsVisibleAndReturnsToSameCatalogCard() {
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
         repeat(7) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
         val focused = ui.onNode(isFocused()).fetchSemanticsNode().config[SemanticsProperties.ContentDescription].single()
@@ -543,7 +543,7 @@ class SearchNavigationTest {
     @Test fun refreshRecoversRemovedFocusedItemAndMissingCategoryWithoutStealingInput() {
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithContentDescription("Film 2 · Uzak Şehirlerden Uzun Bir Hikâye").assertIsFocused()
@@ -564,7 +564,7 @@ class SearchNavigationTest {
         key(KeyEvent.KEYCODE_DPAD_CENTER); ui.waitUntil(5_000) { imeShown() }
         ui.runOnUiThread { model.refresh() }
         ui.waitUntil(15_000) { !model.state.value.refreshing }
-        assertEquals("Tümü", model.state.value.category)
+        assertEquals(CategoryFilter.ALL, model.state.value.category)
         input.assertIsFocused()
         input.performTextReplacement("ISIGI")
         ui.waitUntil(10_000) { !model.state.value.librarySearching }
@@ -588,7 +588,7 @@ class SearchNavigationTest {
         // Either way the column is back, on the category the refresh fell back to.
         ui.onNodeWithTag("library-categories").assertExists()
         ui.onNode(isFocused() and hasAnyAncestor(hasTestTag("library-categories"))).assertExists()
-        ui.onNodeWithTag("category:Tümü").assertIsSelected()
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsSelected()
     }
 
     @Test fun longCategoryRowRemainsReachableFromSearchField() {
@@ -597,7 +597,7 @@ class SearchNavigationTest {
         ui.waitUntil(15_000) { !model.state.value.refreshing }
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_LEFT)
         ui.onNodeWithTag("library-categories").performScrollToIndex(40)
@@ -676,7 +676,7 @@ class SearchNavigationTest {
     @Test fun refreshKeepsAlreadyFocusedCaptionInsideShrinkingViewport() {
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
         repeat(7) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
         val title = ui.onNode(isFocused()).fetchSemanticsNode().config[SemanticsProperties.ContentDescription].single()
@@ -767,7 +767,7 @@ class SearchNavigationTest {
         ui.onNodeWithText(message).assertExists()
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused(); key(KeyEvent.KEYCODE_DPAD_RIGHT)
         ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
         // Exercise the remote path: an artificial scroll with card focus still active
         // is correctly settled back to the cards by the library's focus policy.

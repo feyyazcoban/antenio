@@ -28,8 +28,8 @@
     <string name="warning_categories_unavailable">%1$s: kategori adları alınamadı.</string>
     <string name="warning_kind_unavailable">%1$s yüklenemedi. Kaynağı yenileyerek tekrar deneyebilirsin.</string>
     <plurals name="warning_invalid_addresses">
-        <item quantity="one">%d geçersiz adres atlandı.</item>
-        <item quantity="other">%d geçersiz adres atlandı.</item>
+        <item quantity="one">%1$s geçersiz adres atlandı.</item>
+        <item quantity="other">%1$s geçersiz adres atlandı.</item>
     </plurals>
     <string name="warning_feeds_limited">Listenin ilk dört yayın rehberi adresi alındı.</string>
 

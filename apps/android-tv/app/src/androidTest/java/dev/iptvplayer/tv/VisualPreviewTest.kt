@@ -296,7 +296,7 @@ class VisualPreviewTest {
         shot("feedback-home")
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused(); instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused(); instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
         ui.onNodeWithContentDescription("Inception").assertIsFocused()
         val posterTag = "tile:library:${model.fixtureKey("movie:3") }"
         val before = bounds(posterTag)
@@ -393,7 +393,7 @@ class VisualPreviewTest {
         shot("presentation-home-poster")
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused(); instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused(); instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
         ui.onNodeWithContentDescription("Inception").assertIsFocused()
         val normal = ui.onNodeWithContentDescription("Kapaksız film").getUnclippedBoundsInRoot()
         val dividerCard = ui.onNodeWithContentDescription(divider)
@@ -422,7 +422,7 @@ class VisualPreviewTest {
         shot("presentation-detail-poster")
         click("Geri"); click("Canlı TV")
         // A section opens on its category column; Right goes to the first title.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused(); instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused(); instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
         ui.onNodeWithContentDescription(firstChannel.getString("name")).assertIsFocused()
         ui.onNodeWithContentDescription("TVP INFO").assertExists()
         shot("presentation-live")
@@ -440,7 +440,7 @@ class VisualPreviewTest {
         shot("presentation-divider-only")
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.
-        ui.onNodeWithTag("category:Tümü").assertIsFocused(); instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused(); instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
         ui.onNodeWithContentDescription(divider).assertIsFocused()
     }
 

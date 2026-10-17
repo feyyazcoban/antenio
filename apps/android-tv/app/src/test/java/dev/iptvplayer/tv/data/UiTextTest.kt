@@ -10,7 +10,10 @@ import javax.xml.parsers.DocumentBuilderFactory
 class UiTextTest {
     private fun fake(text: UiText) = text.resolve({ id, args -> "s$id${args.toList()}" }, { id, count, args -> "p$id:$count${args.toList()}" })
 
-    /** The app's Turkish texts, read from the resource file the way Android formats them. */
+    /**
+     * The app's Turkish texts, read from the resource file the way Android formats them: with the device's locale,
+     * whatever language the text is in.
+     */
     private object Turkish {
         private val names = (R.string::class.java.fields + R.plurals::class.java.fields).associate { it.getInt(null) to it.name }
         private val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(File("src/main/res/values/strings.xml"))
@@ -22,9 +25,9 @@ class UiTextTest {
                 (item.parentNode.attributes.getNamedItem("name").nodeValue to item.attributes.getNamedItem("quantity").nodeValue) to item.textContent
             } }
         }
-        private val locale = Locale.forLanguageTag("tr")
-        fun of(text: UiText) = text.resolve({ id, args -> strings.getValue(names.getValue(id)).format(locale, *args) },
-            { id, count, args -> plurals.getValue(names.getValue(id) to if (count == 1) "one" else "other").format(locale, *args) })
+        fun of(text: UiText, device: Locale = Locale.forLanguageTag("tr")) =
+            text.resolve({ id, args -> strings.getValue(names.getValue(id)).format(device, *args) },
+                { id, count, args -> plurals.getValue(names.getValue(id) to if (count == 1) "one" else "other").format(device, *args) })
     }
 
     @Test fun argumentsAreResolvedFirstAndAPluralDefaultsToItsCount() {
@@ -50,6 +53,11 @@ class UiTextTest {
             Turkish.of(CatalogWarning(CatalogWarning.Reason.KIND_UNAVAILABLE, MediaKind.SERIES).text))
         assertEquals("1 geçersiz adres atlandı.", Turkish.of(CatalogWarning(CatalogWarning.Reason.INVALID_ADDRESSES, count = 1).text))
         assertEquals("1250 geçersiz adres atlandı.", Turkish.of(CatalogWarning(CatalogWarning.Reason.INVALID_ADDRESSES, count = 1250).text))
+        // The count keeps its plain digits on a device whose own language writes numbers in another script.
+        listOf("ar-EG", "fa").forEach { device ->
+            assertEquals(device, "12 geçersiz adres atlandı.",
+                Turkish.of(CatalogWarning(CatalogWarning.Reason.INVALID_ADDRESSES, count = 12).text, Locale.forLanguageTag(device)))
+        }
         assertEquals("Bazı kaynaklar yenilenemedi. Kayıtlı içerikler korunuyor; Kaynaklar’dan ayrıntıları görebilirsin.",
             Turkish.of(UiText.Res(R.string.notice_sources_not_refreshed)))
         assertEquals("Ad (A–Z)", Turkish.of(UiText.Res(LibrarySort.TITLE.label)))
