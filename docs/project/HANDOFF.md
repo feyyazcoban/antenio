@@ -1,5 +1,21 @@
 # Son devir notu
 
+## Claude → Codex devri · 18 Ekim 2026, 17:40
+
+Kullanıcı Claude kullanım sınırına takıldı ve Codex ile devam edecek. Claude'un arka plan iş akışı durduruldu; çalışma ağacında başka araç yok.
+
+**Dal ve commit'ler:** `claude/app-ui-ux-audit-a78e98`, uç `b6157c9` (S14). S14'ün yarım inceleme düzeltmeleri `wip/s14-review-fixes` dalında (`c54a9f7`, derlenmedi, test edilmedi). Ana dalda bütün commit'ler kontrolleri geçmiş durumda (S14 dahil; S14'ün inceleme bulguları açık).
+
+**Nereden devam:** [docs/design/gap/STEPS.md](../design/gap/STEPS.md): durum, her adımın yöntemi (uygula → bağımsız inceleme → düzelt), kontrol komutu, ekran testi betiği, S14 bulguları ve S14b, S15a–S17, S18–S29'un ayrıntılı görevleri. Plan: [PLAN.md](../design/gap/PLAN.md); küme tasarımları aynı klasörde.
+
+**Kullanıcının bekleyen talimatı:** "Bitince kur": S14b (D072, yeni oynatıcı kontrolleri) bitince TV'ye kurulacak. Yöntem 0.14.44 kaydındaki gibi: dalda `versionCode` 57'de kaldı, TV'de 58 (0.14.44) var; bir sonraki TV derlemesi en az 59 olmalı (0.14.45). Release'i derle, önce 5556'da gerçek veriyle 0.14.44'ün üstüne kurup aç, sonra `adb -s 192.168.1.126:5555 install -r`, SHA ve firstInstallTime'ı doğrula, `releases/NEXTV_TV_Design_Preview_0.14.45.apk` + `.sha256` olarak sakla. TV'nin dili Türkçe (salt okunur kontrol); uygulama orada Türkçe açılır.
+
+**Cihazlar:** 5558 test emülatörü (`nextv_test_api36`) açık bırakıldı; açma komutu WORKFLOW'da. 5556 kapalı (bellek için); gerçek "Evim" kaynağı diskte ve `nextv-pre-tests` anlık görüntüsünde. 5554'e dokunulmadı. Git'e girmeyen `app/src/androidTest/assets/episode-end-fixture.mp4` bu çalışma ağacına kopyalandı. Bilgisayarda 15 GB RAM var; iki emülatör ve Gradle (Xmx 3g) birlikteyken bellek dolu, paralel derleme izinden kaçınıldı.
+
+**Belgelenmemiş kalanlar (ajanlara "STATUS/HANDOFF/DECISIONS'a dokunma" denmişti):** Faz A–C ve S14 için DECISIONS kayıtları yazılmadı. Gerekenler: PIN ve ebeveyn denetimi (BKL-028; S08'in D048/D049 sözleşmelerini değiştirmesi: boot sayacı yedeği, codec v2, `reset()`), kilit arayüzü ve "Göster / Kilitle / Gizle" (plan 4a-7 varsayılanı), kaynak ve açılış koruması, iki dil ve dil seçimi (S13), iki düzeyli Ayarlar (plan 4a-8 varsayılanı; S14 10 bölümün 6'sını kurdu), oynatıcı ayarları (S14). docs/architecture/PIN_ATTEMPTS.md ve PROTECTION_STORE.md güncel değil. BACKLOG'a PLAN §2'deki BKL-029…041 satırları eklenmedi.
+
+**Açık sorular ve bilinen sınırlar:** satış modeli, fiyat ve ücretsiz/Plus sınırı (SALES_STRATEGY §1'deki 5 karar; PLAN §0 ile çelişen noktalar orada); İngilizce metinlerin kullanıcı incelemesi; PIN bekleme metni 30 sn yerine kalan süreyi söylüyor (ör. 28 sn); Android 8–12'de dil değiştirme yolu cihazda sınanmadı; "IT: …" ile başlayan başlıkta ilk kelime kırpılıyor (bilinen sınır, testli); kaynak kaydı v2 olduğu için TV'ye 0.14.43 veya eskisi kurulursa kurtarma ekranı açılır. Stalker portalı planda reddedildi.
+
 ## 0.14.44 · TV teslimi · 18 Ekim 2026
 
 TV'de 0.14.44 (a0f1908 + sürüm 58) kurulu, SHA eşleşti, veri korundu. Dalda versionCode hâlâ 57: TV'ye giden bir sonraki derlemeden önce 58'in üstüne çıkarılmalı (aksi hâlde sürüm düşürme hatası). Teslim releases/NEXTV_TV_Design_Preview_0.14.44.apk, SHA-256 186bc0f74a62468bf6ac8d5f7550736cbb1fb08ec3eeffc216581dda2df6ce32. Arka planda gap iş akışı S11–S13'te; ardından Faz D (S14–S17) ve Faz E (S18–S29) hazır. 5556 kapalı (bellek), 5558 test emülatörü açık.

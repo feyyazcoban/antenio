@@ -1,5 +1,9 @@
 # Proje durumu
 
+## Gap çalışması: Claude bölümü sona erdi · 18 Ekim 2026
+
+Kullanıcının "Tüm gap'i kapatmak için çalışmaya başla" isteğiyle [gap planı](../design/gap/PLAN.md) uygulanıyor. Dalda bitenler (her adım uygulama + üç-dört bağımsız inceleme + düzeltme; derleme, birim testleri, lint ve test emülatöründe ekran testleri geçti): metin katmanı ve ayarlar çerçevesi, erişim kapısı, oynatıcı ve veri temelleri (S01–S07); başlık öneki düzeltmesi (X01); PIN veri katmanı, PIN penceresi ve Ebeveyn denetimi, içerik kilidi, kilit arayüzü, kaynak ve açılış koruması (S08–S12); ekran testlerinin onarımı ve üç ürün hatası (T01); İngilizce varsayılan, Türkçe ve Dil seçimi (S13); oynatıcı ayarları ve iki düzeyli Ayarlar (S14, inceleme düzeltmeleri yarım). Ayrıca: satış stratejisi raporu ([SALES_STRATEGY](../product/SALES_STRATEGY.md)), oynatıcı kontrolleri tasarımı (D072, kullanıcı onayladı), ayrı test emülatörü (5558) ve `tools/run-device-tests.sh`. TV'de 0.14.44 (a0f1908); S11–S14 TV'de yok. Devam yeri: [STEPS](../design/gap/STEPS.md) ve HANDOFF'un en üst kaydı.
+
 ## 0.14.44 · TV teslimi · 18 Ekim 2026
 
 Kullanıcının isteğiyle ("tv yi güncelle") gap planının incelenmiş son hâli TV'ye kuruldu: commit a0f1908 (Faz A temelleri S01–S07, X01 ad düzeltmesi, PIN veri katmanı S08, Ebeveyn denetimi ayarları S09, içerik kilidi kararı S10, ekran testi onarımı T01). Kilit arayüzü (S11) incelemesi bitmediği için dahil değil. Sürüm 0.14.44 (kod 58); sürüm artışı yalnız temiz derleme kopyasında yapıldı, dalda henüz 57 (bir sonraki commit'te 58'e çıkar). Teslim: releases/NEXTV_TV_Design_Preview_0.14.44.apk (+ .sha256), SHA-256 186bc0f74a62468bf6ac8d5f7550736cbb1fb08ec3eeffc216581dda2df6ce32, imza önceki sürümle aynı. `adb install -r` ile 0.14.43'ün üstüne kuruldu; kurulu dosyanın SHA-256'sı eşleşti, firstInstallTime değişmedi (veri korundu); uygulama açıldı, çökme kaydı yok.
