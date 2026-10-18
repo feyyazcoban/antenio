@@ -134,7 +134,7 @@ import androidx.compose.ui.input.key.type
                     key(state.sourceFilterId) { HomeScreen(state, model) { settings = true } }
                 }
                 Route.LIBRARY -> savedScreens.SaveableStateProvider("library:${state.sourceFilterId}:${state.kind}:${state.onlyFavorites}") {
-                    key(state.kind, state.onlyFavorites, state.sourceFilterId) { Library(state, model) { settings = true } }
+                    key(state.kind, state.onlyFavorites, state.sourceFilterId) { Library(state, model, routeBack) { settings = true } }
                 }
                 Route.SEARCH -> savedScreens.SaveableStateProvider("search") { SearchScreen(state, model, routeBack) { settings = true } }
                 Route.GUIDE -> savedScreens.SaveableStateProvider("guide:${state.sourceFilterId}") {
@@ -536,8 +536,11 @@ internal suspend fun refocusAfterDialog(window: androidx.compose.ui.platform.Win
     }
 }
 
-/** What is left of a title, for Devam et: "35 dk kaldı", "1 sa 17 dk kaldı"; the position when the length is unknown. */
-@Composable @ReadOnlyComposable
+/**
+ * What is left of a title, for Devam et: "35 dk kaldı", "1 sa 17 dk kaldı"; the position when the length is unknown.
+ * Not read-only for the same reason as [guideStatusText]: the early return emits one group fewer than the rest.
+ */
+@Composable
 internal fun remainingText(positionMs: Long, durationMs: Long): String {
     if (durationMs <= 0) return clockTime(positionMs)
     val minutes = ((durationMs - positionMs).coerceAtLeast(0) + 59_999) / 60_000

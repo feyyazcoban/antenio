@@ -444,15 +444,17 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
             LaunchedEffect(watchFocused, detailsFocused) { actionFocused = watchFocused || detailsFocused }
             val place = stringResource(R.string.hero_slide, entry.title, (current + 1).toString(), slides.size.toString())
             Row(Modifier.padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Left on İzle shows the previous slide; on the first it goes on to the menu.
+                // Left on İzle shows the previous slide; on the first it goes on to the menu. Both keys read the index
+                // itself, not this frame's copy, so two presses before the next frame turn two slides.
                 Action(stringResource(if (starting == slides[current].id) R.string.hero_opening else R.string.action_watch), actionModifier.onPreviewKeyEvent { event ->
-                    if (many && event.type == KeyEventType.KeyDown && event.key == Key.DirectionLeft && current > 0) { index = current - 1; true } else false
+                    val now = index.coerceIn(0, slides.lastIndex)
+                    if (many && event.type == KeyEventType.KeyDown && event.key == Key.DirectionLeft && now > 0) { index = now - 1; true } else false
                 }.onFocusChanged { watchFocused = it.isFocused }
                     .semantics { if (many) stateDescription = place }
                     .testTag("hero-watch"), primary = true, icon = "play") { watch(shown()) }
                 // Right on Ayrıntılar shows the next slide; with one slide it stays here rather than jumping to a shelf.
                 Action(stringResource(R.string.action_details), Modifier.onPreviewKeyEvent { event ->
-                    if (many && event.type == KeyEventType.KeyDown && event.key == Key.DirectionRight) { index = (current + 1) % slides.size; true } else false
+                    if (many && event.type == KeyEventType.KeyDown && event.key == Key.DirectionRight) { index = (index.coerceIn(0, slides.lastIndex) + 1) % slides.size; true } else false
                 }.focusProperties { right = FocusRequester.Cancel }.onFocusChanged { detailsFocused = it.isFocused }
                     .testTag("hero-details"), outlined = true, icon = "info") { open(shown()) }
                 if (many) Spacer(Modifier.width(8.dp))

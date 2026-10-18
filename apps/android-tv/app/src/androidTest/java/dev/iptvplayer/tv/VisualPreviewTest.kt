@@ -118,7 +118,8 @@ class VisualPreviewTest {
             val id = model.state.value.guideChannelId!!
             visited.add(id)
             val logo = ui.onNodeWithTag("guide-logo:$id", useUnmergedTree = true).getUnclippedBoundsInRoot()
-            Assert.assertTrue("Wide channel logos must have enough room", (logo.right - logo.left).value >= 72f)
+            // D065: the channel number shares the row, so a logo keeps 60 dp of it.
+            Assert.assertTrue("Wide channel logos must have enough room", (logo.right - logo.left).value >= 60f)
             val row = ui.onNodeWithTag("guide-row:$id").getUnclippedBoundsInRoot()
             val viewport = ui.onNodeWithTag("guide-grid").getUnclippedBoundsInRoot()
             Assert.assertTrue("Selected row must fit", row.top >= viewport.top && row.bottom <= viewport.bottom)
@@ -383,7 +384,10 @@ class VisualPreviewTest {
         val heroPoster = ui.onNodeWithTag("home-hero-poster").assertIsDisplayed().getUnclippedBoundsInRoot()
         Assert.assertEquals((heroPoster.right - heroPoster.left).value * 1.5f, (heroPoster.bottom - heroPoster.top).value, 1f)
         val heroLabel = ui.onNodeWithTag("hero-label", useUnmergedTree = true).getUnclippedBoundsInRoot()
-        Assert.assertTrue("Poster needs separation below the hero label", heroPoster.top.value >= heroLabel.bottom.value + 8)
+        val heroTitle = ui.onNodeWithTag("hero-title", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        // D067: a poster-only slide stands its poster on the right, beside the label and the title rather than below them.
+        Assert.assertTrue("Poster stays clear of the hero label and title: $heroPoster / $heroLabel / $heroTitle",
+            heroPoster.left.value >= maxOf(heroLabel.right.value, heroTitle.right.value) + 8)
         // The side menu sits beside the hero, never on it, and its section icons stay apart.
         val films = ui.onNodeWithTag("nav:Filmler").getUnclippedBoundsInRoot()
         val series = ui.onNodeWithTag("nav:Diziler").getUnclippedBoundsInRoot()

@@ -2,12 +2,21 @@ package dev.iptvplayer.tv
 
 import android.graphics.Bitmap
 import android.view.KeyEvent
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.iptvplayer.tv.data.*
+import dev.iptvplayer.tv.ui.Action
+import dev.iptvplayer.tv.ui.PilotTheme
+import dev.iptvplayer.tv.ui.RemoteTextReader
+import dev.iptvplayer.tv.ui.guideStatusText
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.*
 import okio.Buffer
@@ -357,7 +366,32 @@ class GuideFlowTest {
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.onNodeWithText("Canlı kanal bulunamadı").assertIsDisplayed()
         key(KeyEvent.KEYCODE_DPAD_DOWN)
+        // Back from the day and time controls goes to the menu, then to Ana Sayfa (D067).
+        key(KeyEvent.KEYCODE_BACK); ui.onNodeWithTag("nav:Canlı TV").assertIsFocused()
         key(KeyEvent.KEYCODE_BACK)
         assertEquals(Route.HOME, model.state.value.route)
+    }
+    /**
+     * The source info dialog's text follows every guide status. Its sentences once emitted a different number of
+     * composition groups per status straight into the dialog's own group, which duplicated the dialog's actions or
+     * crashed it (ClassCastException in Action's remember) when the status changed under the open dialog.
+     */
+    @Test fun guideStatusChangesKeepTheSourceInfoDialogIntact() {
+        val status = mutableStateOf<GuideStatus?>(null)
+        val loaded = GuideStatus(configured = true, initialized = true,
+            info = EpgSnapshotInfo(System.currentTimeMillis(), GuideWindow(0, 1), channels = 3, programmes = 10, invalid = 0, outsideWindow = 0))
+        // The dialog's shape: the status text in a reader, then its two actions.
+        ui.runOnUiThread { ui.activity.setContent { PilotTheme { Column {
+            RemoteTextReader("Görsel deneme\n\n" + guideStatusText(status.value, ZoneOffset.UTC), Modifier, "status-reader")
+            Action("Rehber ayarları", Modifier.testTag("status-settings")) { }
+            Action("Kapat", Modifier.testTag("status-close")) { }
+        } } } }
+        for (next in listOf(loaded, GuideStatus(configured = true), loaded, null,
+            loaded.copy(refreshing = true, error = UiText.Res(R.string.guide_refresh_cancelled)), GuideStatus(configured = true), GuideStatus())) {
+            ui.runOnUiThread { status.value = next }
+            ui.waitForIdle()
+            ui.onNodeWithTag("status-settings").assertExists()
+            ui.onNodeWithTag("status-close").assertExists()
+        }
     }
 }

@@ -2,6 +2,7 @@ package dev.iptvplayer.tv
 
 import android.view.KeyEvent
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -52,8 +53,10 @@ class ParentalFlowTest {
         }
         server.start()
         model = resetFixtureSources(ui)
+        // MockWebServer.url looks the host name up, which the main thread may not do.
+        val address = server.url("/").toString()
         ui.runOnUiThread {
-            model.draft(SourceDraft("Deneme kütüphanesi", SourceType.XTREAM, server.url("/").toString(), "synthetic", "synthetic"))
+            model.draft(SourceDraft("Deneme kütüphanesi", SourceType.XTREAM, address, "synthetic", "synthetic"))
             model.connectDraft()
         }
         ui.waitUntil(20_000) { model.state.value.route == Route.HOME }
@@ -262,7 +265,11 @@ class ParentalFlowTest {
         feedback("PIN yanlış. Bir yanlış deneme daha 30 saniye bekletir.")
         wrong()
         assertTrue(parental.prompt?.phase is PinPhase.Waiting)
-        ui.onNodeWithTag("pin-feedback").assertContentDescriptionEquals("Çok fazla yanlış deneme. 30 saniye sonra tekrar deneyebilirsin.")
+        // The 30 s start when the fifth try is charged, before the slow PIN check (pin.md: the reservation comes first),
+        // so the pad reads what is left of them as the wait begins.
+        val spoken = ui.onNodeWithTag("pin-feedback").fetchSemanticsNode().config[SemanticsProperties.ContentDescription].single()
+        val left = Regex("""Çok fazla yanlış deneme\. (\d+) saniye sonra tekrar deneyebilirsin\.""").matchEntire(spoken)?.groupValues?.get(1)?.toInt()
+        assertTrue("The wait reads what is left of 30 s: $spoken", left != null && left in 20..30)
         ui.onNodeWithTag("pin-key:1").assertIsNotEnabled()
         // The number keys take nothing while it lasts, not even the right PIN.
         digits("2580")
@@ -325,6 +332,8 @@ class ParentalFlowTest {
         assertEquals(setOf(CategoryVisibility.key(MediaKind.LIVE, "Spor")), model.state.value.locks.categories)
         ui.runOnUiThread { model.showKind(MediaKind.LIVE); assertFalse(model.open(entry(first))) }
         ui.waitUntil(5_000) { model.state.value.route == Route.PLAYER && playingId == first }
+        // The model gets there a frame before the player is on screen and has focus, which the remote's keys need.
+        ui.waitForIdle()
         // CH+ never asks: it passes the locked channel.
         key(KeyEvent.KEYCODE_CHANNEL_UP)
         ui.waitUntil(5_000) { playingId == news }
@@ -335,12 +344,16 @@ class ParentalFlowTest {
         ui.onNodeWithText("“Spor kanalı” kilitli. Açmak için PIN gir.").assertExists()
         assertEquals(news, playingId)
         key(KeyEvent.KEYCODE_BACK)
-        ui.waitUntil(5_000) { !padShown() }
+        ui.waitUntil(5_000) { !padShown() && ui.activity.hasWindowFocus() }
         assertEquals(news, playingId)
         key(KeyEvent.KEYCODE_0 + number)
         ui.waitUntil(5_000) { padShown() }
         digits("2580")
         waitFor { playingId == sport }
+        // The pad's window keeps the system's input focus for a moment after it closes; keys sent before the player's
+        // window has it again never reach the app.
+        ui.waitUntil(5_000) { !padShown() && ui.activity.hasWindowFocus() }
+        ui.waitForIdle()
         // Opened for the session, CH± stops on it again.
         key(KeyEvent.KEYCODE_CHANNEL_UP)
         ui.waitUntil(5_000) { playingId == news }

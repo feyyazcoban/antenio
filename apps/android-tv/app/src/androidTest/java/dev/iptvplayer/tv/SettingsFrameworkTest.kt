@@ -43,8 +43,10 @@ class SettingsFrameworkTest {
         server.start()
         model = resetFixtureSources(ui)
         ui.waitUntil(10_000) { model.state.value.route == Route.SETUP }
+        // MockWebServer.url looks the host name up, which the main thread may not do.
+        val address = server.url("/").toString()
         ui.runOnUiThread {
-            model.draft(SourceDraft("Deneme kütüphanesi", SourceType.XTREAM, server.url("/").toString(), "synthetic", "synthetic"))
+            model.draft(SourceDraft("Deneme kütüphanesi", SourceType.XTREAM, address, "synthetic", "synthetic"))
             model.connectDraft()
         }
         ui.waitUntil(20_000) { model.state.value.route == Route.HOME }

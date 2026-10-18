@@ -50,11 +50,12 @@ class ContinueCardLayoutTest {
             val bounds = card.getUnclippedBoundsInRoot()
             val viewport = ui.onNodeWithTag("home-content").getUnclippedBoundsInRoot()
             assertTrue("Whole focused card must fit", bounds.top >= viewport.top && bounds.bottom <= viewport.bottom && bounds.left.value >= 7 && bounds.right.value <= viewport.right.value - 7)
-            val time = ui.onNode(hasText("1:22:36", substring = true) and hasAnyAncestor(hasTestTag("continue:${restored[index].id}")), useUnmergedTree = true)
+            // The card shows what is left (U18, D065): 9 000 s − 4 956 s is 67 min 24 s, rounded up to whole minutes.
+            val time = ui.onNode(hasText("1 sa 8 dk kaldı") and hasAnyAncestor(hasTestTag("continue:${restored[index].id}")), useUnmergedTree = true)
             val layouts = mutableListOf<TextLayoutResult>()
             time.performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
             assertTrue(layouts.isNotEmpty())
-            assertFalse("Resume time must not be ellipsized", layouts.single().isLineEllipsized(0))
+            assertFalse("Remaining time must not be ellipsized", layouts.single().isLineEllipsized(0))
             if (index == 0 || index == entries.lastIndex) {
                 Thread.sleep(1200); ui.waitForIdle()
                 val dir=ui.activity.filesDir.resolve("continue-layout").apply { mkdirs() }

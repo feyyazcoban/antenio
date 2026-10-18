@@ -234,15 +234,19 @@ class PilotFlowTest {
     @Test fun cachedCatalogOpensWithoutRequestsAndFailedRefreshKeepsLibrary() {
         connect(openLive = false)
         val expected = model.state.value.catalog
-        val requestCount = server.requestCount
+        // Home fetches its slides' details once per session (D067); those are not catalogue calls.
+        val catalogCalls = java.util.concurrent.atomic.AtomicInteger()
         server.dispatcher = object : Dispatcher() {
-            override fun dispatch(request: RecordedRequest) = MockResponse().setResponseCode(401).setBody("{}")
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                if (request.requestUrl!!.queryParameter("action") !in setOf("get_vod_info", "get_series_info")) catalogCalls.incrementAndGet()
+                return MockResponse().setResponseCode(401).setBody("{}")
+            }
         }
         lateinit var reopened: TvViewModel
         ui.runOnUiThread { reopened = TvViewModel(ui.activity.application) }
         ui.waitUntil(10_000) { reopened.state.value.route == Route.HOME }
         assertEquals(expected, reopened.state.value.catalog)
-        assertEquals("Fresh cache must open without provider calls", requestCount, server.requestCount)
+        assertEquals("Fresh cache must open without provider calls", 0, catalogCalls.get())
         ui.runOnUiThread { model.showKind(MediaKind.MOVIE); model.refresh() }
         ui.waitUntil(15_000) { !model.state.value.refreshing }
         assertEquals(Route.LIBRARY, model.state.value.route)

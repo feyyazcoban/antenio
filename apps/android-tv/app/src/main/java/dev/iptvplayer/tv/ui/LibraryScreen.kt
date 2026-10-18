@@ -65,7 +65,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
  * are a poster grid. Focus moves only redraw the information panel.
  */
 @OptIn(ExperimentalLayoutApi::class)
-@Composable internal fun Library(s: TvState, model: TvViewModel, settings: () -> Unit) {
+@Composable internal fun Library(s: TvState, model: TvViewModel, back: () -> Unit, settings: () -> Unit) {
     val live = s.kind == MediaKind.LIVE && !s.onlyFavorites
     val itemsOfKind = remember(s.catalog, s.kind, s.onlyFavorites) {
         catalogDisplayOrder(s.catalog.items.filter { (s.onlyFavorites || it.kind == s.kind) && !it.adult })
@@ -170,7 +170,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     // Where focus is, for Back alone: plain holders, so moving between the levels does not recompose the screen.
     val menuFocused = remember { mutableStateOf(false) }
     val categoryFocused = remember { mutableStateOf(false) }
-    LibraryBack(model, { menuFocused.value }, { categoryFocused.value },
+    LibraryBack(model, back, { menuFocused.value }, { categoryFocused.value },
         // Typing ends first (a floating keyboard may still count as typing), so the category column is laid out again.
         toCategory = { edited = false; gridActive = false; restoreCategory = true },
         toMenu = { try { navFocus.requestFocus() } catch (_: IllegalStateException) { model.back() } })
@@ -411,11 +411,11 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
  * selected category, the category column to the section's tab in the side menu. Back on the menu is PilotApp's
  * route Back, to Ana Sayfa. A Back that arrives after the model left the library is the new route's.
  */
-@Composable private fun LibraryBack(model: TvViewModel, menuFocused: () -> Boolean, categoryFocused: () -> Boolean,
+@Composable private fun LibraryBack(model: TvViewModel, back: () -> Unit, menuFocused: () -> Boolean, categoryFocused: () -> Boolean,
     toCategory: () -> Unit, toMenu: () -> Unit) {
     BackHandler(enabled = !menuFocused()) {
         when {
-            model.state.value.route != Route.LIBRARY -> model.back()
+            model.state.value.route != Route.LIBRARY -> back()
             categoryFocused() -> toMenu()
             else -> toCategory()
         }

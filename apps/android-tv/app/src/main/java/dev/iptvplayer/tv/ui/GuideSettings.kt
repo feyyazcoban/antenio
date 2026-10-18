@@ -19,8 +19,12 @@ import dev.iptvplayer.tv.data.*
 import java.time.ZoneId
 import java.util.Locale
 
-/** [header] is off where the surrounding dialog already carries the "Yayın rehberi" title. */
-@Composable @ReadOnlyComposable
+/**
+ * [header] is off where the surrounding dialog already carries the "Yayın rehberi" title.
+ * Not read-only: its branches emit a different number of groups from one status to the next, which need a group of
+ * their own; inside the caller's group they shifted the dialog's slots and crashed the source info dialog.
+ */
+@Composable
 internal fun guideStatusText(status: GuideStatus?, zone: ZoneId, header: Boolean = true): String {
     if (status == null || (!status.initialized && status.configured)) return stringResource(R.string.guide_checking)
     return buildString {

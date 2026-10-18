@@ -25,6 +25,8 @@ class MultiSourceFlowTest {
     private lateinit var b: MockWebServer
     @Volatile private var failA = false
     @Volatile private var partialA = false
+    /** Both providers' calls except the slide details Home fetches once per session (D067). */
+    private val catalogCalls = java.util.concurrent.atomic.AtomicInteger()
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
 
     @Before fun setup() {
@@ -37,6 +39,7 @@ class MultiSourceFlowTest {
         fun server(first: Boolean) = MockWebServer().apply {
             dispatcher = object : Dispatcher() {
                 override fun dispatch(request: RecordedRequest): MockResponse {
+                    if (request.requestUrl!!.queryParameter("action") !in setOf("get_vod_info", "get_series_info")) catalogCalls.incrementAndGet()
                     if (first && failA) return MockResponse().setResponseCode(401)
                     if (first && partialA && request.requestUrl!!.queryParameter("action") == "get_series")
                         return MockResponse().setResponseCode(503)
@@ -128,10 +131,12 @@ class MultiSourceFlowTest {
         assertEquals("aynı film", model.state.value.searchQuery)
         assertEquals(one.id, model.state.value.searchSourceId)
         ui.onNodeWithTag("search:${filmA.id}").assertIsFocused()
-        val requests = a.requestCount + b.requestCount
+        val requests = catalogCalls.get()
         reopen()
-        assertEquals(requests, a.requestCount + b.requestCount)
-        assertEquals(two.id, model.state.value.sourceFilterId)
+        assertEquals(requests, catalogCalls.get())
+        // No screen offers a source selector, so opening the app shows every source again (D060).
+        assertNull(model.state.value.sourceFilterId)
+        assertEquals(setOf(one.id, two.id), model.state.value.catalog.items.map { it.sourceId }.toSet())
         assertEquals(2, model.state.value.history.size)
         assertEquals(setOf(filmA.id), model.state.value.favoriteIds)
         assertEquals(12000L, model.progress(filmA)!!.positionMs)

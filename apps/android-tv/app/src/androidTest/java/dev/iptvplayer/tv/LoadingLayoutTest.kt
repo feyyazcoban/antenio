@@ -10,7 +10,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.iptvplayer.tv.ui.LoadingScreen
 import dev.iptvplayer.tv.ui.LocalReducedMotion
 import dev.iptvplayer.tv.ui.PilotTheme
@@ -29,7 +29,9 @@ class LoadingLayoutTest {
             ui.waitUntil(5_000) { ui.onAllNodesWithTag("launch-loading").fetchSemanticsNodes().isNotEmpty() }
             ui.onNodeWithTag("launch-loading").assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo, ProgressBarRangeInfo.Indeterminate))
             val label = ui.onNodeWithText("Hazırlanıyor...").assertExists().getUnclippedBoundsInRoot()
-            assertTrue("The label keeps a TV-readable height", label.bottom - label.top >= 18.dp)
+            // At least 14 sp (D069). A single line's box is trimmed to the font, so it is shorter than the 18 sp line
+            // height but never shorter than the text size.
+            assertTrue("The label keeps a TV-readable height", label.bottom - label.top >= with(ui.density) { 14.sp.toDp() })
         }
     }
 
