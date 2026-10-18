@@ -598,6 +598,39 @@ internal fun runtimeText(seconds: Long): String {
         }
         return
     }
+    if (live && section == "recent") {
+        // Keep the logo, title and source inside one focus surface. Shared text slots keep
+        // short and long channel names aligned as the remote moves across the shelf.
+        Box(Modifier.width(TvLayout.RecentChannelWidth).then(visibility.container).testTag("tile:$section:${entry.id}")) {
+            Card(onClick = open, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth()
+                .semantics {
+                    contentDescription = spoken
+                    stateDescription = listOfNotNull(lockedState.takeIf { locked }, sourceName).joinToString(". ")
+                    testTag = "$section:${entry.id}"
+                },
+                scale = CardDefaults.scale(focusedScale = 1f),
+                shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
+                colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
+                border = CardDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
+                Column(Modifier.fillMaxWidth()) {
+                    Box(Modifier.fillMaxWidth().height(84.dp)
+                        .background(Brush.verticalGradient(listOf(Ink.High.copy(alpha = .5f), Color.Transparent))),
+                        contentAlignment = Alignment.Center) {
+                        Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(140.dp).height(48.dp), true, logoInset = 0.dp)
+                        if (locked) LockBadge(Modifier.align(Alignment.TopEnd).padding(8.dp))
+                    }
+                    Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(shown.name, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp, lineHeight = 19.sp, minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp,
+                            lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                    }
+                }
+            }
+        }
+        return
+    }
     val description = if (section == "continue") stringResource(R.string.continue_description, spoken) else spoken
     Column(Modifier.width(if (live) TvLayout.LiveWidth else TvLayout.PosterWidth).then(visibility.container).testTag("tile:$section:${entry.id}"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Card(onClick = open, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth().aspectRatio(if (live) 16f / 9 else 2f / 3)

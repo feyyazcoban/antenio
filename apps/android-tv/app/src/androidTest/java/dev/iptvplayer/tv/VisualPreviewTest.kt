@@ -183,6 +183,62 @@ class VisualPreviewTest {
         shot("search-dense-last-row")
     }
 
+    @Test fun recentChannelsKeepLogoTitleAndSourceTogetherWithRemote() {
+        val firstSource = model.state.value.sources.single().id
+        // The second local source also exercises a long name and the missing-logo fallback.
+        fixture.getJSONArray("get_live_streams").getJSONObject(0)
+            .put("name", "Dünyanın Dört Bir Yanından Kültür ve Belgesel Kanalı")
+        fixture.getJSONArray("get_live_streams").getJSONObject(1).put("stream_icon", "")
+        ui.runOnUiThread {
+            model.addSource()
+            model.draft(SourceDraft("Belgesel ve müzik koleksiyonu", SourceType.XTREAM, server.url("/").toString(), "visual-two", "fixture"))
+            model.connectDraft()
+        }
+        ui.waitUntil(20_000) { model.state.value.route == Route.HOME && model.state.value.sources.size == 2 && model.state.value.sourceTask == SourceTask.IDLE }
+        val channels = model.state.value.catalog.items.filter { it.kind == MediaKind.LIVE }
+            .groupBy { it.sourceId }.values.flatMap { it.take(3) }
+        Assert.assertEquals(6, channels.size)
+        for (entry in channels.reversed()) {
+            ui.runOnUiThread { model.recordViewed(entry) }
+            Thread.sleep(2) // Distinct history timestamps, independent of source merge ordering.
+        }
+        ui.waitForIdle()
+        val recent = homeLibrary(model.state.value.catalog, model.state.value.history, emptySet()).recentChannels
+        Assert.assertTrue(recent.any { it.sourceId != firstSource && it.artwork == null })
+        ui.onNodeWithTag("hero-watch").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN)
+        repeat(recent.size) { index ->
+            ui.waitForIdle()
+            val entry = recent[index]
+            val tag = "recent:${entry.id}"
+            val card = ui.onNodeWithTag(tag).assertIsFocused()
+            val tile = ui.onNodeWithTag("tile:$tag", true).getUnclippedBoundsInRoot()
+            val viewport = ui.onNodeWithTag("home-content").getUnclippedBoundsInRoot()
+            Assert.assertTrue("The whole recent card stays visible: $tile / $viewport",
+                tile.top >= viewport.top && tile.bottom <= viewport.bottom &&
+                    tile.left.value >= viewport.left.value + 7 && tile.right.value <= viewport.right.value - 7)
+            val source = model.state.value.sourceName(entry.sourceId)
+            Assert.assertTrue(card.fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.StateDescription].contains(source))
+            ui.onNode(hasText(source) and hasAnyAncestor(hasTestTag(tag)), true).assertIsDisplayed()
+            if (index == 0 || index == recent.lastIndex) shot("home-recent-$index")
+            if (index < recent.lastIndex) instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT)
+        }
+        val lastTag = "recent:${recent.last().id}"
+        ui.onNodeWithTag(lastTag).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnLongClick) { it() }
+        ui.onNodeWithTag("quick-actions").assertIsDisplayed()
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
+        ui.waitForIdle()
+        ui.onNodeWithTag(lastTag).assertIsFocused()
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10_000) { model.state.value.route == Route.PLAYER }
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
+        ui.waitForIdle()
+        if (model.state.value.route == Route.PLAYER) instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5_000) { model.state.value.route == Route.HOME }
+        ui.waitForIdle()
+        ui.onNodeWithTag(lastTag).assertIsFocused()
+    }
+
     @Test fun homePostersAndContinueRemainVisibleWithRemote() {
         for ((section, title) in listOf("movies" to "Film kütüphanen", "series" to "Dizi kütüphanen")) {
             // Release the focused hero/card before programmatic scrolling; its visibility

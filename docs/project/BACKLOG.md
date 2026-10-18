@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-019/020 · 0.14.54 / D084: son izlenen kanallarda logo/ad/kaynak tek kartta, ortak hizalama ve tüm kartı saran odak. Teslim/kanıt STATUS/HANDOFF'ta; genel görsel kabul açık.
+
 BKL-019/020 · 0.14.53 / D083: kullanıcı isteğiyle İzle/Oynat simgesi odakta dolu; ortak Action tüm ilgili düğmelerde tutarlı. Teslim/kanıt STATUS/HANDOFF'ta; genel kabul açık.
 
 BKL-019/020 · 0.14.52 / D082: kullanıcı isteğiyle YENİ EKLENEN üst etiketi 13→12 sp; ortak vitrin etiket stili güncellendi. Teslim/kanıt STATUS/HANDOFF'ta; genel kabul açık.

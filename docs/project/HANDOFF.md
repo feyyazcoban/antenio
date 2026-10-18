@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · Son izlenen kanal kartları / 0.14.54 · 18 Ekim 2026
+
+Kullanıcı “Ana sayfadaki son izlediğin kanalları biraz daha estetik yapabilir miyiz” dedi. Yalnız HomeScreen HomeCard live && section == recent için 200 dp tek kart: 84 dp logo bölümü / 140×48 dp Fit logo; altta iki satırlık 14 sp Medium ad ve çoklu kaynakta 12 sp kaynak adı. Hafif dikey yüzey geçişi, 12 dp köşe, bütün kartın odak halkası. Geçmiş sırası, D078 görünürlük, onClick/onLongClick/PIN/LockBadge ve odak kimlikleri korunur. Kaynak adı erişilebilir duruma eklendi. Diğer canlı kartlar aynı.
+
+Değişenler: HomeScreen.kt, DesignSystem.kt, build.gradle.kts; VisualPreviewTest.kt tek recent akış testi; D084, HOME_SHELVES/SCREENS, BACKLOG/STEPS, STATUS/HANDOFF; [QA](native-recent-channels-54-qa.json), LATEST.md ve recent-channels-0.14.54/recent-0.png/recent-5.png. Figma/manifest yok. hero_review nihai kaynak/test diff'ini salt okunur inceledi, bulgu yok.
+
+354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558 / tools/run-device-tests.sh --no-build: VisualPreviewTest#recentChannelsKeepLogoTitleAndSourceTogetherWithRemote 1/1; ContinueCardLayoutTest,HeroLayoutTest 3/3. İlk birleşik koşuda recent testi geçti, sonraki sınıfta emülatör bağlantısı düştü; tam başarı sayılmadı. Yeniden başlatılan emülatörde iki ayrı koşu tamamlandı. Normal iki görsel incelendi: uzun kanal/kaynak adları, logosuz kart, ilk/son kart odağı. Font matrisi yok. Ham loglar work/recent-channel-qa. Proje kontrolü/git diff --check geçti.
+
+Teslim: releases/NEXTV_TV_Design_Preview_0.14.54.apk + sha256, kod68, aynı imza/release/R8. SHA-256 75497e18a42baf82a26aaa2a46f1f01333a46864c1162c27029a53f7c1916d85. TV .53→54 install -r, firstInstallTime 2026-10-13 23:50:03 değişmedi, lastUpdateTime 2026-10-18 21:16:09. Kurulu APK çekilip hash eşleştirildi; TV uygulaması/gerçek yayın açılmadı. **5556 açılmadı ve .51/kod65'te kaldı**; veri/yükseltme mantığı değişmedi. 5558/Gradle kapalı; 5554'e dokunulmadı.
+
+Tam sonraki adım: ana checkout/main üzerinden STEPS S15a ve gap/overlay.md. Sonraki teslim en az 0.14.55/kod69; 5556 yükseltilecekse mevcut sürümü .51/kod65 olarak doğrula. Fiziksel görsel/akıcılık/TalkBack, Figma, İngilizce ve satış/fiyat kararları açık. Kullanıcı “yayına hazırla” demeden font matrisi koşma.
+
 ## Codex · Odakta dolu oynat simgesi / 0.14.53 · 18 Ekim 2026
 
 Kullanıcı “İzle butonlarındaki icon üzerine geldiğinde filled olsun” dedi. Theme.kt Action mevcut focused durumuyla filledIcon = iconFilled || (icon == "play" && focused) hesaplar; iki LineIcon dalı bunu kullanır (D083). Vitrin, ayrıntı/Oynat/Devam et, hızlı İzle ve bölüm sonu çağrıları kapsanır. Favori yıldızı gibi açık iconFilled seçimleri korunur; yeni odak/animasyon/oynatma mantığı yok.

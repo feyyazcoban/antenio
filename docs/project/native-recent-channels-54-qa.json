@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.54-design-preview",
+  "versionCode": 68,
+  "decision": "D084",
+  "change": "Home recent-channel shelf combines logo, title and source into one 200dp card; fixed logo stage, aligned title slots, full-card focus ring.",
+  "review": "Read-only hero_review reviewed final source and test diff; no actionable findings. Existing visibility, long press, focus restoration and PIN gate retained.",
+  "tests": {
+    "build": "release/debug/androidTest successful",
+    "unit": {
+      "tests": 354,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "Error": 0,
+      "Warning": 37
+    },
+    "instrumentation": "4/4 at normal font on emulator-5558 only via tools/run-device-tests.sh --no-build: VisualPreviewTest#recentChannelsKeepLogoTitleAndSourceTogetherWithRemote (1), ContinueCardLayoutTest (1), HeroLayoutTest (2).",
+    "interruptedAttempt": "First combined run passed the recent-channel test; emulator disconnected during ContinueCardLayoutTest, no completed suite result. Retried recent alone (1/1) and remaining regression classes (3/3). All logs retained.",
+    "visual": "Inspected two synthetic local-artwork screenshots: equal card alignment, long channel/source names, missing-logo fallback and focused first/last cards. No physical-TV visual acceptance claimed."
+  },
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "67",
+        "versionName": "0.14.53-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 21:07:04"
+      },
+      "after": {
+        "versionCode": "68",
+        "versionName": "0.14.54-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 21:16:09"
+      },
+      "sha256": "75497e18a42baf82a26aaa2a46f1f01333a46864c1162c27029a53f7c1916d85",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "designEmulator": "5556 stayed off at 0.14.51/code65; data/upgrade logic unchanged",
+    "emulatorsAfter": "5558 stopped; 5556/5554 untouched; Gradle daemon stopped"
+  },
+  "limitations": [
+    "No font-scale matrix per user instruction",
+    "Figma unchanged",
+    "Physical visual acceptance and TalkBack remain open"
+  ],
+  "sha256": "75497e18a42baf82a26aaa2a46f1f01333a46864c1162c27029a53f7c1916d85",
+  "images": [
+    "design/reviews/recent-channels-0.14.54/recent-0.png",
+    "design/reviews/recent-channels-0.14.54/recent-5.png"
+  ],
+  "logs": "work/recent-channel-qa/build.log, device-full.log, device-recent-full.log, device-regression-full.log (ignored)"
+}

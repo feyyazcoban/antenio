@@ -1,5 +1,13 @@
 # Ana sayfa afiş ve devam rafları
 
+## 18 Ekim 2026 · Son izlenen kanallar · D084
+
+Ana sayfanın `recent` rafında logo, kanal adı ve çoklu kaynakta kaynak adı tek kart içinde yer alır. Kart genişliği 200 dp, köşe 12 dp; logo bölümü 84 dp ve oranı korunan logo alanı 140×48 dp. Hafif dikey yüzey geçişi logoyu ayırır. Başlık 14 sp Medium, aynı yükseklikte iki satır; kaynak adı 12 sp, tek satır. Taşan metin üç noktayla kesilir. Logo yoksa ortak kanal yer tutucusu görünür.
+
+Beyaz odak halkası kartın bütününü sarar; odakta ölçek/ek animasyon yok. OK kanalı mevcut erişim/PIN kapısından açar, basılı OK hızlı menüyü açar, dönüşte odak hatırlanır. Kilit rozeti ve erişilebilir durum korunur; çoklu kaynak adı erişilebilir duruma eklenir. D078 ilk rafın kısa kaydırması geçerlidir. Başlangıç Canlı TV rafı ve favori kartları mevcut biçimini korur. Font matrisi kullanıcı “yayına hazırla” dediğinde; Figma ve fiziksel görsel kabul açık.
+
+Aşağıdaki 0.14.11 kaydı tarihçedir; `recent` kanal kartları için bu bölüm önceliklidir.
+
 15 Ekim 2026 · Android 0.14.11 · TV-010 · Kullanıcı görsel incelemesi bekliyor.
 
 Film ve dizi afişleri önce 196dp yatay kartın ortasında küçük görünüyordu. Ana sayfada artık 136×204dp, 2:3 kart kullanılır. Afiş, kütüphanedeki gibi kartı doldurur. Eksik afişte ortak Artwork yer tutucusu görünür; yatay bir görsel dikey afişmiş gibi kesilmez. Canlı kanal logoları 168dp yatay kartta oranını korur. Karışık favori rafı da içerik türüne uygun kart kullanır.

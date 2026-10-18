@@ -1,5 +1,13 @@
 # Güncel görsel inceleme
 
+## 0.14.54 · Son izlenen kanal kartları
+
+D084: logo, iki satırlık ad ve kaynak bilgisi tek kartta; hizalı alanlar ve bütün kartı saran odak halkası. Yalnız normal ölçekte, sentetik iki kaynak ve yerel görseller. Uzun ad, eksik logo ve sağa gezinme incelendi. [QA](../../docs/project/native-recent-channels-54-qa.json).
+
+![İlk son kanal odakta](recent-channels-0.14.54/recent-0.png)
+
+![Uzun ad, eksik logo ve son kanal odakta](recent-channels-0.14.54/recent-5.png)
+
 ## 0.14.53 · İzle simgesi odakta dolu
 
 D083: İzle/Oynat eylemindeki üçgen odakta dolu, odak dışında çizgili. Ortak Action kullanılır; favori gibi durum simgeleri korunur. Normal ölçekte sentetik görseller; font matrisi yok. [QA](../../docs/project/native-play-icon-53-qa.json).

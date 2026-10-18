@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.54 · Son izlenen kanal kartları · 18 Ekim 2026
+
+Kullanıcı isteğiyle son izlenen kanalların logo, ad ve kaynak bilgisi tek 200 dp kartta birleşti (D084). Eşit logo/başlık alanları, hafif yüzey geçişi ve bütün kartı saran beyaz odak halkası kullanılır. Geçmiş sırası, PIN, basılı OK ve geri dönüş odağı korunur.
+
+Bağımsız salt okunur incelemede bulgu yok. 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558/betik üzerinden normal ölçekte 4/4 ekran testi; çoklu kaynak, uzun ad, eksik logo, yatay görünürlük, hızlı menü ve oynatıcıdan dönüş doğrulandı. İlk birleşik koşu emülatör bağlantısı düştüğü için yarım kaldı; ayrı tekrarlar 1/1 ve 3/3 geçti. Font matrisi koşulmadı. [QA](native-recent-channels-54-qa.json), [görseller](../../design/reviews/LATEST.md).
+
+0.14.54-design-preview / kod68 TV'ye install -r ile kuruldu; firstInstallTime aynı, kurulu APK hash eşleşti. Son güncelleme 21:16:09; SHA-256 75497e18a42baf82a26aaa2a46f1f01333a46864c1162c27029a53f7c1916d85. TV uygulaması/gerçek yayın açılmadı. 5556 kapalı, .51/kod65'te; 5558/Gradle kapalı. Sırada S15a; sonraki paket en az .55/kod69. Fiziksel/Figma kabulü açık.
+
 ## 0.14.53 · İzle simgesi odakta dolu · 18 Ekim 2026
 
 Kullanıcı isteğiyle ortak Action bileşenindeki play simgesi odakta dolu üçgen, odak dışında çizgili (D083). Vitrin, ayrıntı/Devam et, hızlı İzle ve bölüm sonu aynı davranışı alır. Favori yıldızının açık iconFilled durumu korunur.

@@ -56,6 +56,7 @@ object TvLayout {
     val PosterWidth = 136.dp
     val ContinueWidth = 284.dp
     val LiveWidth = 168.dp
+    val RecentChannelWidth = 200.dp
 }
 
 /**
