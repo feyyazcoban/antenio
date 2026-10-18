@@ -66,6 +66,7 @@ import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.TvViewModel
 import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.EpisodeSequence
+import dev.iptvplayer.tv.data.GateResult
 import dev.iptvplayer.tv.data.displayTitle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -107,6 +108,10 @@ import kotlinx.coroutines.flow.first
     var lastInteraction by remember { mutableLongStateOf(System.currentTimeMillis()) }
     val first = remember { FocusRequester() }
     val canvas = remember { FocusRequester() }
+    val nextEpisodeFocus = remember { FocusRequester() }
+    // A locked channel typed by number, or a locked series' next episode, asks for the PIN over the picture; what plays
+    // goes on behind it (pin.md §3.7).
+    val openPin = rememberPinOpener()
     val live = media.mode == PlaybackMode.LIVE
     val favoriteTarget = remember(media.entry, screenState.catalog, screenState.selected, screenState.episodes, screenState.history) {
         model.favoriteTarget(media.entry)
@@ -177,7 +182,12 @@ import kotlinx.coroutines.flow.first
         delay(PlayerKeyRouter.DIGIT_COMMIT_MS)
         val number = digits.toInt(); digits = ""
         quiet = layer == PlayerLayer.Video
-        if (!model.playChannelNumber(number)) { quiet = false; flash(resources.getString(R.string.player_no_channel, number.toString())) }
+        when (model.playChannelNumber(number)) {
+            GateResult.Deny -> { quiet = false; flash(resources.getString(R.string.player_no_channel, number.toString())) }
+            // Once the PIN is right the channel opens with its number in the corner, as it would have at once.
+            is GateResult.NeedsPin -> openPin { if (layer == PlayerLayer.Video) canvas else first }
+            else -> Unit
+        }
     }
 
     DisposableEffect(player, lifecycle) {
@@ -375,9 +385,11 @@ import kotlinx.coroutines.flow.first
                         contentDescription = favoriteLabel
                         stateDescription = favoriteState
                     }, icon = "star", iconFilled = isFavorite, selected = isFavorite, enabled = favoriteTarget != null) { model.toggleFavorite(media.entry); interact() }
-                    if (nextChoice != null) Action(stringResource(R.string.player_next_episode)) {
+                    if (nextChoice != null) Action(stringResource(R.string.player_next_episode), Modifier.focusRequester(nextEpisodeFocus)) {
                         save()
-                        screenState.sourceFor(media.entry)?.let { model.playNextEpisode(it.id, media.entry.id, nextChoice.entry.id) }
+                        screenState.sourceFor(media.entry)?.let { source ->
+                            if (model.playNextEpisode(source.id, media.entry.id, nextChoice.entry.id) == NextResult.NEEDS_PIN) openPin { nextEpisodeFocus }
+                        }
                     }
                     Action(stringResource(R.string.action_close)) { save(); model.back() }
                 }
@@ -386,7 +398,7 @@ import kotlinx.coroutines.flow.first
         }
         if (layer == PlayerLayer.Tracks) TracksDialog(tracks, trackParameters, player, model) { perform(PlayerCommand.CloseTracks) }
         endState?.let { end -> EpisodeEndDialog(end,
-            play = { episodeEnd.playNow() },
+            play = { episodeEnd.playNow() == NextResult.NEEDS_PIN },
             stay = { perform(PlayerCommand.CloseEndCard) },
             returnToEpisodes = { episodeEnd.dismiss(); save(); model.back() },
             replay = { episodeEnd.newMedia(); player.seekTo(0); player.play(); interact() },

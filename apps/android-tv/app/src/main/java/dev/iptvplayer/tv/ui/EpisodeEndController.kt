@@ -20,10 +20,17 @@ internal data class EpisodeEndState(
     val notice: UiText? = null
 )
 
-/** The end of media, not an estimated credits offset, starts the cancellable countdown. */
+/** What asking for the next episode did: it plays, it waits for the PIN of its locked series, or it cannot open. */
+enum class NextResult { STARTED, NEEDS_PIN, UNAVAILABLE }
+
+/**
+ * The end of media, not an estimated credits offset, starts the cancellable countdown. A next episode whose locked
+ * series this session has not opened (pin.md §3.7) stays offered without a countdown; the viewer starts it, and the PIN
+ * pad asks.
+ */
 internal class EpisodeEndController(
     private val scope: CoroutineScope,
-    private val playNext: (sourceId: String, currentId: String, nextId: String, automatic: Boolean) -> Boolean
+    private val playNext: (sourceId: String, currentId: String, nextId: String, automatic: Boolean) -> NextResult
 ) {
     private val mutableState = MutableStateFlow<EpisodeEndState?>(null)
     val state = mutableState.asStateFlow()
@@ -50,17 +57,22 @@ internal class EpisodeEndController(
         }
     }
 
-    fun playNow() = play(automatic = false)
+    /** Şimdi oynat; null when there was nothing to start. NEEDS_PIN: the PIN pad opened, which the card shows. */
+    fun playNow(): NextResult? = play(automatic = false)
 
-    private fun play(automatic: Boolean) {
+    private fun play(automatic: Boolean): NextResult? {
         timer?.cancel()
-        val s = mutableState.value ?: return
-        val next = s.next ?: return
-        if (!foreground || closed) return
+        val s = mutableState.value ?: return null
+        val next = s.next ?: return null
+        if (!foreground || closed) return null
         // The model validates the current source, episode and latest target again before opening media.
-        if (playNext(s.sourceId, s.current.id, next.entry.id, automatic)) mutableState.value = null
-        else mutableState.value = s.copy(next = null, seconds = null,
-            notice = UiText.Res(R.string.episode_next_unavailable))
+        val result = playNext(s.sourceId, s.current.id, next.entry.id, automatic)
+        mutableState.value = when (result) {
+            NextResult.STARTED -> null
+            NextResult.NEEDS_PIN -> s.copy(seconds = null, notice = UiText.Res(R.string.episode_next_needs_pin))
+            NextResult.UNAVAILABLE -> s.copy(next = null, seconds = null, notice = UiText.Res(R.string.episode_next_unavailable))
+        }
+        return result
     }
 
     fun dismiss() { timer?.cancel(); mutableState.value = null }

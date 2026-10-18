@@ -82,6 +82,35 @@ class AccessPolicyTest {
         assertThrows(IllegalArgumentException::class.java) { AccessScope.Category("a", MediaKind.EPISODE, AccessCategory.ProviderId("1")) }
     }
 
+    @Test fun evaluateNamesTheRulesThatAskForThePin() {
+        val series = category(MediaKind.SERIES)
+        val rules = listOf(rule(content(show)), rule(series), rule(category()), rule(AccessScope.Source("b")))
+        val policy = AccessPolicy(rules)
+        assertEquals(rules, policy.rules)
+        assertEquals(AccessVerdict(AccessDecision.REQUIRE_PIN, setOf(category())), policy.evaluate(source, movie))
+        // An episode carries its series' locks: the series itself and its category.
+        assertEquals(AccessVerdict(AccessDecision.REQUIRE_PIN, setOf(content(show), series)),
+            policy.evaluate(source, episode, AccessPolicy.SeriesContext(show, listOf(episode))))
+        // A source lock joins whatever else locks the title.
+        assertEquals(setOf(AccessScope.Source("a"), category()),
+            AccessPolicy(rules + rule(AccessScope.Source("a"))).evaluate(source, movie).pinScopes)
+        // Only a PIN request names scopes.
+        assertEquals(AccessVerdict(AccessDecision.ALLOW), AccessPolicy(emptyList()).evaluate(source, movie))
+        assertEquals(AccessVerdict(AccessDecision.HIDDEN), AccessPolicy(listOf(rule(content(movie), true), rule(AccessScope.Source("a"))))
+            .evaluate(source, movie))
+        assertEquals(AccessVerdict(AccessDecision.UNRESOLVED), policy.evaluate(source, movie.copy(categoryId = "")))
+        assertEquals(AccessVerdict(AccessDecision.DENIED), policy.evaluate(null, movie))
+    }
+
+    @Test fun decideIsTheDecisionOfEvaluate() {
+        val policies = listOf(AccessPolicy(emptyList()), AccessPolicy(listOf(rule(category()), rule(content(show), true))),
+            AccessPolicy(listOf(rule(AccessScope.Source("a")))))
+        val context = AccessPolicy.SeriesContext(show, listOf(episode))
+        for (policy in policies) for (entry in listOf(movie, show, episode, movie.copy(adult = true), movie.copy(categoryId = "")))
+            for (series in listOf(null, context))
+                assertEquals(policy.evaluate(source, entry, series).decision, policy.decide(source, entry, series))
+    }
+
     @Test fun ruleOrderAndUnrelatedRulesCannotWeakenARestriction() {
         val rules = listOf(rule(AccessScope.Source("a")), rule(category(), true), AccessRule(content(movie)),
             rule(AccessScope.Source("b"), true))

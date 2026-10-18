@@ -23,25 +23,36 @@ internal enum class AccessDecision(val visible: Boolean, val canOpen: Boolean) {
 }
 
 /**
- * Pure, unauthenticated decision. Not wired into the UI until persistence and PIN verification exist.
+ * A [decision] and, on REQUIRE_PIN, the scopes of the rules that ask for the PIN (pin.md §6): the content, its series,
+ * its category or its source. A PIN typed for the title opens exactly these for the session (ParentalSession).
+ */
+internal data class AccessVerdict(val decision: AccessDecision, val pinScopes: Set<AccessScope> = emptySet())
+
+/**
+ * Pure, unauthenticated decision; AccessGate asks it for every open and play, ParentalProjection for the library.
  * Callers must supply the current registry source and canonical catalog entry, not a stale UI copy.
  */
 internal class AccessPolicy(rules: List<AccessRule>, val revision: Long = 0) {
-    private val rulesBySource = rules.toList().filter { it.hidden || it.pinRequired }.groupBy { it.scope.sourceId }
+    /** The rules as given, kept apart from the caller's list. */
+    val rules: List<AccessRule> = java.util.Collections.unmodifiableList(rules.toList())
+    private val rulesBySource = this.rules.filter { it.hidden || it.pinRequired }.groupBy { it.scope.sourceId }
     init { require(revision >= 0) }
 
     /** Series and episode membership must come from one authoritative repository/cache result. */
     data class SeriesContext(val series: MediaEntry, val episodes: List<MediaEntry>)
 
-    fun decide(source: SourceConfig?, entry: MediaEntry, context: SeriesContext? = null): AccessDecision {
-        if (source == null || source.id.isBlank() || !validEntry(entry, source.id) || entry.adult) return AccessDecision.DENIED
+    fun decide(source: SourceConfig?, entry: MediaEntry, context: SeriesContext? = null): AccessDecision =
+        evaluate(source, entry, context).decision
+
+    fun evaluate(source: SourceConfig?, entry: MediaEntry, context: SeriesContext? = null): AccessVerdict {
+        if (source == null || source.id.isBlank() || !validEntry(entry, source.id) || entry.adult) return AccessVerdict(AccessDecision.DENIED)
         val applicable = rulesBySource[source.id].orEmpty()
         val direct = applicable.filter { rule -> when (val scope = rule.scope) {
             is AccessScope.Source -> true
             is AccessScope.Content -> scope.ref.localId == entry.localId
             is AccessScope.Category -> false
         } }
-        if (direct.any { it.hidden }) return AccessDecision.HIDDEN
+        if (direct.any { it.hidden }) return AccessVerdict(AccessDecision.HIDDEN)
 
         var categoryEntry = entry
         val matches = direct.toMutableList()
@@ -52,29 +63,30 @@ internal class AccessPolicy(rules: List<AccessRule>, val revision: Long = 0) {
                 (entry.parentLocalId == null || entry.parentLocalId == parent.localId)
             if (!validParent) {
                 // An unrelated source's rules must not affect an unprotected legacy episode.
-                return if (applicable.isEmpty()) AccessDecision.ALLOW else AccessDecision.UNRESOLVED
+                return AccessVerdict(if (applicable.isEmpty()) AccessDecision.ALLOW else AccessDecision.UNRESOLVED)
             }
-            if (parent!!.adult) return AccessDecision.DENIED
+            if (parent!!.adult) return AccessVerdict(AccessDecision.DENIED)
             categoryEntry = parent
             matches += applicable.filter { (it.scope as? AccessScope.Content)?.ref?.localId == parent.localId }
         }
-        if (matches.any { it.hidden }) return AccessDecision.HIDDEN
+        if (matches.any { it.hidden }) return AccessVerdict(AccessDecision.HIDDEN)
         val categories = applicable.filter { (it.scope as? AccessScope.Category)?.kind == categoryEntry.kind }
         val category: AccessCategory? = when (source.type) {
             SourceType.XTREAM -> categoryEntry.categoryId.takeIf { it.isNotBlank() }?.let(AccessCategory::ProviderId)
             SourceType.M3U -> categoryEntry.category.takeIf { it.isNotBlank() }?.let(AccessCategory::M3uName)
         }
-        if (categories.isNotEmpty() && category == null) return AccessDecision.UNRESOLVED
+        if (categories.isNotEmpty() && category == null) return AccessVerdict(AccessDecision.UNRESOLVED)
         // A policy encoded for another source type cannot silently become ineffective after an edit.
         if (categories.any { rule ->
                 val key = (rule.scope as AccessScope.Category).key
                 (source.type == SourceType.XTREAM) != (key is AccessCategory.ProviderId)
-            }) return AccessDecision.UNRESOLVED
+            }) return AccessVerdict(AccessDecision.UNRESOLVED)
         matches += categories.filter { (it.scope as AccessScope.Category).key == category }
         return when {
-            matches.any { it.hidden } -> AccessDecision.HIDDEN
-            matches.any { it.pinRequired } -> AccessDecision.REQUIRE_PIN
-            else -> AccessDecision.ALLOW
+            matches.any { it.hidden } -> AccessVerdict(AccessDecision.HIDDEN)
+            matches.any { it.pinRequired } ->
+                AccessVerdict(AccessDecision.REQUIRE_PIN, matches.filter { it.pinRequired }.mapTo(LinkedHashSet()) { it.scope })
+            else -> AccessVerdict(AccessDecision.ALLOW)
         }
     }
 

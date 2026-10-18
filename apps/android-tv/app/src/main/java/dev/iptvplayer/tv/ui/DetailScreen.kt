@@ -56,6 +56,12 @@ private class SeasonShelf(start: Int) {
     val shown = remember(entry.title, entry.year) { displayTitle(entry.title, entry.year) }
     val first = remember { FocusRequester() }
     val back = remember { FocusRequester() }
+    // The detail of a locked title asks again once the session ended (the app left the screen): the PIN pad opens over
+    // it, and focus goes back to the button or episode that asked (pin.md §3.6).
+    val openPin = rememberPinOpener()
+    val playFocus = remember { FocusRequester() }
+    val restartFocus = remember { FocusRequester() }
+    val retryFocus = remember { FocusRequester() }
     val visibleEpisodes = remember(s.episodes) { s.episodes.filter { !it.adult } }
     // Provider order, one shelf per season.
     val seasons = remember(visibleEpisodes) { visibleEpisodes.groupBy { it.season }.toList() }
@@ -146,17 +152,21 @@ private class SeasonShelf(start: Int) {
                         s.detailError?.let { Note(it.resolve(), error = true) }
                         FlowRow(Modifier.then(actionVisibility.container).then(actionVisibility.focus).focusGroup().padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             if (canPlay) Action(stringResource(if (resume) R.string.action_resume else R.string.action_play),
-                                Modifier.then(if (target == null) Modifier.focusRequester(first) else Modifier), primary = true, icon = "play") {
-                                model.play(if (series) next!! else entry)
+                                Modifier.focusRequester(playFocus).then(if (target == null) Modifier.focusRequester(first) else Modifier), primary = true, icon = "play") {
+                                if (model.play(if (series) next!! else entry)) openPin { playFocus }
                             }
                             if (s.detailError != null) Action(stringResource(R.string.action_retry),
-                                Modifier.then(if (!canPlay && target == null) Modifier.focusRequester(first) else Modifier)) { model.retryDetail() }
+                                Modifier.focusRequester(retryFocus).then(if (!canPlay && target == null) Modifier.focusRequester(first) else Modifier)) {
+                                if (model.retryDetail()) openPin { retryFocus }
+                            }
                             // The label names what OK does; the filled star shows that it is a favourite now.
                             val favorite = entry.id in s.favoriteIds
                             Action(stringResource(if (favorite) R.string.favorite_remove else R.string.detail_favorite_add), icon = "star", iconFilled = favorite) { model.toggleFavorite(entry) }
                             if (entry.description.isNotBlank()) Action(stringResource(R.string.detail_description), Modifier.focusRequester(descriptionFocus).testTag("open-description")) { description = true }
                             // On the same 12 dp grid as the other actions, and only while playback is offered.
-                            if (canPlay && resume && !series) Action(stringResource(R.string.detail_restart)) { model.play(entry, restart = true) }
+                            if (canPlay && resume && !series) Action(stringResource(R.string.detail_restart), Modifier.focusRequester(restartFocus)) {
+                                if (model.play(entry, restart = true)) openPin { restartFocus }
+                            }
                         }
                     }
 
@@ -167,7 +177,9 @@ private class SeasonShelf(start: Int) {
                     Note(stringResource(R.string.detail_no_episodes), modifier = Modifier.padding(horizontal = TvLayout.Gutter))
                 }
                 items(seasons, key = { "season:${it.first}" }) { (season, episodes) ->
-                    SeasonRow(season, episodes, entry.title, shelf(season, episodes), target, first, viewportHeight, model::progress, model::play)
+                    SeasonRow(season, episodes, entry.title, shelf(season, episodes), target, first, viewportHeight, model::progress) { episode, card ->
+                        if (model.play(episode)) openPin { card }
+                    }
                 }
             }
         }
@@ -208,7 +220,7 @@ private class SeasonShelf(start: Int) {
  * row on the episode it remembers; moving along a row redraws only its counter.
  */
 @Composable private fun SeasonRow(season: Int, episodes: List<MediaEntry>, show: String, shelf: SeasonShelf, target: String?, first: FocusRequester,
-    viewportHeight: Dp, progress: (MediaEntry) -> PlaybackMark?, play: (MediaEntry) -> Unit) {
+    viewportHeight: Dp, progress: (MediaEntry) -> PlaybackMark?, play: (episode: MediaEntry, card: FocusRequester) -> Unit) {
     val density = LocalDensity.current
     var headingHeight by remember { mutableStateOf(0.dp) }
     Column(Modifier.fillMaxWidth().testTag("season:$season"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -232,7 +244,7 @@ private class SeasonShelf(start: Int) {
                 EpisodeCard(episode, show, progress(episode), Modifier.focusRequester(shelf.card(index))
                     .then(if (episode.id == target) Modifier.focusRequester(first) else Modifier)
                     .onFocusChanged { if (it.isFocused) shelf.position.intValue = index + 1 },
-                    headingHeight + 8.dp, viewportHeight) { play(episode) }
+                    headingHeight + 8.dp, viewportHeight) { play(episode, shelf.card(index)) }
             }
         }
     }

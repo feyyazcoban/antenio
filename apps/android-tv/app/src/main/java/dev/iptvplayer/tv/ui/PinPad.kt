@@ -37,11 +37,13 @@ import dev.iptvplayer.tv.data.PinPhase
 import dev.iptvplayer.tv.data.PinPrompt
 import dev.iptvplayer.tv.data.PinPurpose
 import dev.iptvplayer.tv.data.PinStep
+import dev.iptvplayer.tv.data.displayTitle
 import kotlinx.coroutines.delay
 
 /**
  * Opens the PIN pad over the calling screen or Settings page for the prompt the model has just opened (createPin,
- * requestAdmin …). It closes when the prompt ends, and focus goes back to what `returnFocus` names then.
+ * requestAdmin, a locked title's open …). It closes when the prompt ends, and focus goes back to what `returnFocus`
+ * names then.
  */
 @Composable internal fun rememberPinOpener(): (returnFocus: () -> FocusRequester?) -> Unit {
     val open = rememberOverlayOpener()
@@ -219,12 +221,16 @@ private fun PinPrompt.title(): String = stringResource(when (step) {
 })
 
 @Composable @ReadOnlyComposable
-private fun PinPrompt.message(): String = stringResource(when (step) {
-    PinStep.NEW -> if (purpose == PinPurpose.Change) R.string.pin_message_change else R.string.pin_message_create
-    PinStep.CONFIRM -> R.string.pin_message_confirm
-    PinStep.VERIFY -> when ((purpose as? PinPurpose.Verify)?.reason) {
-        AdminReason.SHOW_ADULT -> R.string.pin_reason_show_adult
-        AdminReason.CATEGORIES -> R.string.pin_reason_categories
-        AdminReason.PARENTAL, null -> R.string.pin_reason_parental
-    }
-})
+private fun PinPrompt.message(): String {
+    // A locked title is named as its card shows it (D065).
+    (purpose as? PinPurpose.Unlock)?.let { return stringResource(R.string.pin_reason_unlock, displayTitle(it.title).name) }
+    return stringResource(when (step) {
+        PinStep.NEW -> if (purpose == PinPurpose.Change) R.string.pin_message_change else R.string.pin_message_create
+        PinStep.CONFIRM -> R.string.pin_message_confirm
+        PinStep.VERIFY -> when ((purpose as? PinPurpose.Verify)?.reason) {
+            AdminReason.SHOW_ADULT -> R.string.pin_reason_show_adult
+            AdminReason.CATEGORIES -> R.string.pin_reason_categories
+            AdminReason.PARENTAL, null -> R.string.pin_reason_parental
+        }
+    })
+}

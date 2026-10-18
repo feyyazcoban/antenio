@@ -31,14 +31,17 @@ class ParentalControllerTest {
 
     private val clock = Clock(PinClock(1, 1_000))
     private val followUps = mutableListOf<AdminFollowUp>()
+    private val unlocks = mutableListOf<PinPurpose.Unlock>()
+    private var policyChanges = 0
 
     private fun TestScope.controller(storage: Storage): ParentalController {
         val dispatcher = StandardTestDispatcher(testScheduler)
-        return ParentalController(this, ParentalGuard(storage, clock, dispatcher, dispatcher), { testScheduler.currentTime }) { followUps += it }
+        return ParentalController(this, ParentalGuard(storage, clock, dispatcher, dispatcher), { testScheduler.currentTime },
+            unlocked = { unlocks += it }, policyChanged = { policyChanges++ }) { followUps += it }
     }
 
-    private fun stored(attempts: PinAttempts = PinAttempts.clear(PinClock(1, 1_000))) =
-        ProtectionSnapshot(4, 3, credential, attempts, emptyList())
+    private fun stored(attempts: PinAttempts = PinAttempts.clear(PinClock(1, 1_000)), rules: List<AccessRule> = emptyList()) =
+        ProtectionSnapshot(4, 3, credential, attempts, rules)
 
     private fun pin(digits: String) = digits.toCharArray()
     private fun wiped(pin: CharArray) = pin.all { it == '\u0000' }
@@ -184,6 +187,8 @@ class ParentalControllerTest {
         runCurrent()
         parental.submit(pin("2580"))
         advanceUntilIdle()
+        // What the old PIN opened locks again with the new one, and with none.
+        parental.grant(setOf(AccessScope.Source("a")))
         assertTrue(parental.changePin())
         assertEquals(PinPurpose.Change, parental.prompt.purpose); assertEquals(PinStep.NEW, parental.prompt.step)
         parental.submit(pin("1397")); parental.submit(pin("1397"))
@@ -191,6 +196,8 @@ class ParentalControllerTest {
         assertNull(parental.state.value.prompt); assertTrue(parental.state.value.adminUnlocked)
         assertEquals(UiText.Res(R.string.parental_changed), parental.state.value.notice)
         assertEquals(4L, storage.record!!.policyRevision)
+        assertTrue(parental.grants.isEmpty()); assertEquals(0, parental.state.value.sessionGrants)
+        parental.grant(setOf(AccessScope.Source("a")))
 
         parental.removePin()
         assertNull(parental.state.value.notice)
@@ -198,6 +205,71 @@ class ParentalControllerTest {
         assertNull(storage.record)
         assertEquals(ParentalStatus.OFF, parental.state.value.status); assertFalse(parental.state.value.adminUnlocked)
         assertEquals(UiText.Res(R.string.parental_removed), parental.state.value.notice)
+        assertTrue(parental.grants.isEmpty())
+        assertEquals(emptyList<AccessRule>(), parental.policy!!.rules)
+    }
+
+    @Test fun aLockedTitlesPinOpensItsLocksForTheSessionAndNotAyarlar() = runTest {
+        val sources = AccessRule(AccessScope.Source("a"), pinRequired = true)
+        val storage = Storage(stored(rules = listOf(sources)))
+        val parental = controller(storage)
+        assertNull(parental.policy)
+        parental.refresh()
+        assertEquals(listOf(sources), parental.policy!!.rules); assertEquals(3L, parental.policy!!.revision)
+        assertEquals(1, policyChanges)
+        val purpose = PinPurpose.Unlock(AccessTarget.Open("1:amovie:1"), "1:amovie:1", "Film")
+        // Vazgeç while the PIN is checked: the right PIN opens nothing.
+        parental.unlock(purpose)
+        runCurrent()
+        assertEquals(purpose, parental.prompt.purpose); assertEquals(PinStep.VERIFY, parental.prompt.step)
+        assertTrue(parental.prompt.canForget)
+        parental.submit(pin("2580"))
+        parental.cancel()
+        advanceUntilIdle()
+        assertTrue(unlocks.isEmpty())
+
+        parental.unlock(purpose)
+        runCurrent()
+        parental.submit(pin("2580"))
+        advanceUntilIdle()
+        assertNull(parental.state.value.prompt)
+        assertEquals(listOf(purpose), unlocks)
+        // A title's PIN is not a PIN verified in Ayarlar.
+        assertFalse(parental.state.value.adminUnlocked); assertTrue(followUps.isEmpty())
+        assertFalse(parental.state.value.mayLoosen)
+        // The model opens what locks the title.
+        parental.grant(setOf(sources.scope))
+        assertEquals(setOf(sources.scope), parental.grants); assertEquals(1, parental.state.value.sessionGrants)
+
+        // A lock added (a locked row's new identity) keeps it.
+        val other = AccessRule(AccessScope.Source("b"), pinRequired = true)
+        parental.addLocks(listOf(other, sources))
+        advanceUntilIdle()
+        assertEquals(listOf(sources, other), storage.record!!.rules); assertEquals(4L, storage.record!!.policyRevision)
+        assertEquals(storage.record!!.rules, parental.policy!!.rules); assertEquals(2, policyChanges)
+        assertEquals(setOf(sources.scope), parental.grants)
+
+        // Leaving the screen locks it again; with nothing open, Settings stays.
+        val epoch = parental.state.value.lockEpoch
+        parental.stopped()
+        assertTrue(parental.grants.isEmpty()); assertEquals(0, parental.state.value.sessionGrants)
+        assertEquals(epoch, parental.state.value.lockEpoch)
+        // Açılan kilitleri kapat.
+        parental.grant(setOf(sources.scope))
+        parental.relockContent()
+        assertTrue(parental.grants.isEmpty())
+        // A lock removed elsewhere ends the session as it is read.
+        parental.grant(setOf(sources.scope))
+        storage.record = ProtectionSnapshot(9, 5, credential, storage.record!!.attempts, listOf(other))
+        parental.refresh()
+        assertTrue(parental.grants.isEmpty()); assertEquals(3, policyChanges)
+        // An unreadable record: no rules known, every title asks.
+        storage.unavailable = true
+        parental.refresh()
+        assertNull(parental.policy); assertEquals(4, policyChanges)
+        parental.addLocks(listOf(sources))
+        advanceUntilIdle()
+        assertEquals(listOf(other), storage.record!!.rules)
     }
 
     @Test fun anUnreadableRecordAllowsNothingAndStartingOverRemovesIt() = runTest {

@@ -119,10 +119,13 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
     val zoneName = if (s.guideZoneId.isEmpty()) stringResource(R.string.guide_tv_time) else zone.id
 
     fun select(id: String?, time: Long) { model.guideCursor(id, time.coerceIn(retention.from, retention.until - 1)) }
+    // A locked channel asks for the PIN over the guide; focus goes back to the grid (pin.md §3.6).
+    val openPin = rememberPinOpener()
+    fun watch(entry: MediaEntry) { if (model.open(entry)) openPin { gridFocus } }
     fun open(entry: MediaEntry, slot: GuideSlot) {
         select(entry.id, (model.state.value.guideAnchor ?: anchor).takeIf(slot::contains) ?: slot.from)
         val programme = slot.programme
-        if (programme?.isOnAt(System.currentTimeMillis()) == true) model.open(entry)
+        if (programme?.isOnAt(System.currentTimeMillis()) == true) watch(entry)
         else detail = entry to slot
     }
     // Typed channel numbers ("12"), shown in the corner and opened 1.2 s after the last digit.
@@ -355,7 +358,7 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                 else slot.programmes.joinToString("\n\n") { "${it.title}\n${programmeTime(it, zone, unknownEnd)}\n${it.description.ifBlank { noDescription }}" }) + note
             RemoteTextReader(content, Modifier.weight(1f, fill = false).focusRequester(focus).focusProperties { down = play }, "guide-detail-reader")
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Action(stringResource(R.string.guide_watch_live), Modifier.focusRequester(play).focusProperties { up = focus }.testTag("guide-play-live"), primary = true) { detail = null; model.open(entry) }
+                Action(stringResource(R.string.guide_watch_live), Modifier.focusRequester(play).focusProperties { up = focus }.testTag("guide-play-live"), primary = true) { detail = null; watch(entry) }
                 Action(stringResource(R.string.action_close), Modifier.focusProperties { up = focus }.testTag("guide-close-detail")) { dismiss() }
             }
         }

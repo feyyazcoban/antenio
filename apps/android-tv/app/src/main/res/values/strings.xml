@@ -447,6 +447,7 @@
     <string name="episode_end_back">Geri: bu bölümde kal</string>
     <string name="episode_auto_paused">Otomatik geçiş duraklatıldı.</string>
     <string name="episode_auto_off">Otomatik geçiş kapalı.</string>
+    <string name="episode_next_needs_pin">Sonraki bölüm PIN istiyor. Başlatmak için Şimdi oynat\'a bas.</string>
     <string name="episode_next_unavailable">Sonraki bölüm artık açılamıyor. Bölüm listesinden yeniden seçebilirsin.</string>
     <string name="episode_list_changed">Bölüm listesi değişti. Devam etmek için listeden bir bölüm seç.</string>
 
@@ -559,6 +560,8 @@
     <string name="pin_reason_show_adult">Yetişkin kategorilerini göstermek için PIN gir.</string>
     <string name="pin_reason_categories">Kategori ayarlarını açmak için PIN gir.</string>
     <string name="pin_reason_parental">Ebeveyn denetimi ayarlarını açmak için PIN gir.</string>
+    <!-- A locked title; %1$s is its name. -->
+    <string name="pin_reason_unlock">“%1$s” kilitli. Açmak için PIN gir.</string>
     <!-- TalkBack for the masked digits: how many of the four are in, never which. -->
     <string name="pin_entered">%1$s / %2$s rakam girildi</string>
     <string name="pin_delete">Sil</string>
@@ -581,6 +584,9 @@
     <string name="pin_forgot_question">PIN\'i unuttun mu?</string>
     <string name="pin_forgot_note">PIN yalnız bu cihazda şifreli saklanır ve hiçbir sunucuya gönderilmez; bu yüzden geri getirilemez. Sıfırlamak için bu cihazdaki kaynaklar, favoriler, izleme geçmişi ve PIN silinir; yetişkin filtresi açık kalır. Kaynak bilgilerini yeniden girmen gerekir.</string>
     <string name="pin_forgot_reset">Her şeyi sıfırla</string>
+    <!-- The corner note after a PIN for a locked title, or a title whose lock cannot be read. -->
+    <string name="access_gone">Bu içerik artık bulunamıyor.</string>
+    <string name="access_unresolved">Bu içeriğin kilit bilgisi doğrulanamadı. Kataloğu yenileyip tekrar dene.</string>
 
     <!-- Kaynakların -->
     <string name="sources_title">Kaynakların</string>

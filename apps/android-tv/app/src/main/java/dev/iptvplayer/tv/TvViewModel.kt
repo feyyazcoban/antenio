@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.compose.runtime.mutableStateMapOf
 import dev.iptvplayer.tv.data.*
+import dev.iptvplayer.tv.ui.NextResult
 import dev.iptvplayer.tv.ui.appLocale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -106,6 +107,10 @@ data class TvState(
     val librarySorts: Map<MediaKind, LibrarySort> = emptyMap(),
     /** The parental PIN, the PIN pad on screen and what a PIN verified in Ayarlar allows (pin.md §7). */
     val parental: ParentalUi = ParentalUi(),
+    /** What the lock rules make of the published library: the titles, category rows and sources that ask for the PIN. */
+    val locks: ParentalLocks = ParentalLocks(),
+    /** What the access gate has to say in the corner: a title gone by the time its PIN was typed, a lock it cannot read. */
+    val accessNotice: UiText? = null,
     val revision: Int = 0
 ) {
     // Display/default selection only. Playback and personal data must use sourceFor(entry).
@@ -141,21 +146,25 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     private var librarySearchGeneration = 0
     private val guides = GuideController(viewModelScope, epgStore, store, catalogStore, { guideZone() })
     private val parental = ParentalController(viewModelScope,
-        ParentalGuard(ProtectionStore(application), AndroidPinClock(application.contentResolver)), SystemClock::elapsedRealtime) { followUp ->
+        ParentalGuard(ProtectionStore(application), AndroidPinClock(application.contentResolver)), SystemClock::elapsedRealtime,
+        unlocked = ::unlocked,
+        // New lock rules change what the library shows locked; a restore or an import publishes it on its own.
+        policyChanged = { if (state.value.sourceTask == SourceTask.IDLE) viewModelScope.launch { publishLibrary() } }) { followUp ->
         when (followUp) { AdminFollowUp.SHOW_ADULT -> setHideAdult(false) }
     }
 
     init {
         viewModelScope.launch { guides.state.collect { value -> mutable.update { it.copy(guideStatus = value.statuses, guideRevision = value.revision) } } }
         viewModelScope.launch { parental.state.collect { value -> mutable.update { it.copy(parental = value) } } }
-        viewModelScope.launch { parental.refresh() }
+        // The restore reads the PIN and its locks first.
         restore(atLaunch = true)
     }
 
     /**
      * NEXTV came on screen (MainActivity.onStart) or left it (onStop: Home, another app, standby). What may live only
-     * while the viewer sees the app hangs here as it arrives (gap plan T3, T6): a PIN verified in Ayarlar ends and an
-     * open PIN pad closes, Settings with them. The foreground timer and a local transfer join later.
+     * while the viewer sees the app hangs here as it arrives (gap plan T3, T6): what PINs opened locks again, a PIN
+     * verified in Ayarlar ends and an open PIN pad closes, Settings with them. The foreground timer and a local transfer
+     * join later.
      */
     fun appStarted() { }
     fun appStopped() { parental.stopped() }
@@ -181,6 +190,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         loadJob = viewModelScope.launch {
             var observedStamp: String? = null
             try {
+                // The locks before the library: until they are read, the gate opens nothing without the PIN.
+                parental.refresh()
                 val (saved, cached) = transactions.write {
                     observedStamp = store.recoveryStamp()
                     val saved = readRegistry()
@@ -299,22 +310,29 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         catalog.items.filter { it.sourceId == id },
         catalog.m3uEpisodes.filterKeys { ContentRef.parse(it)?.sourceId == id }, catalog.warnings, categoryOrder = catalog.categoryOrder)
 
+    /**
+     * The library the screens read: every source's list, without hidden categories (D068) and titles whose lock cannot
+     * be read, with what the lock rules lock (ParentalProjection). A locked category row's new identity gets its rule.
+     */
     private suspend fun publishLibrary() {
         val saved = registry
         val raw = snapshots.mapValues { it.value.catalog }
         val hidden = store.hiddenCategories
         val hideAdult = store.hideAdultCategories
-        val (all, choices) = withContext(Dispatchers.Default) {
+        val policy = parental.policy
+        val (view, choices) = withContext(Dispatchers.Default) {
             val combined = SourceLibrary.combine(saved.sources, raw)
-            CategoryVisibility.apply(combined, hidden, hideAdult) to CategoryVisibility.choices(combined)
+            ParentalProjection.project(saved.sources, CategoryVisibility.apply(combined, hidden, hideAdult), policy) to
+                CategoryVisibility.choices(combined)
         }
+        val all = view.catalog
         val favorites = SourceLibrary.favorites(saved.sources, store::favorites)
         val history = SourceLibrary.history(saved.sources, store::history)
         guides.synchronize(saved.sources, snapshots)
         mutable.update { old ->
             val filter = registry.filterId?.takeIf { id -> saved.sources.any { it.id == id } }
             val catalog = filtered(all, filter)
-            old.copy(sources = saved.sources, sourceFilterId = filter, allCatalog = all, catalog = catalog,
+            old.copy(sources = saved.sources, sourceFilterId = filter, allCatalog = all, catalog = catalog, locks = view.locks,
                 hiddenCategories = hidden, hideAdultCategories = hideAdult, categoryChoices = choices,
                 favoriteIds = favorites, history = history,
                 searchSourceId = old.searchSourceId?.takeIf { id -> saved.sources.any { it.id == id } },
@@ -328,11 +346,13 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                     (if (old.onlyFavorites) it.id in favorites else it.kind == old.kind) && it.category == category } } ?: CategoryFilter.ALL)
         }
         // A detail the gate now refuses (its category hidden from Ayarlar, a refresh dropped the title) closes as Back
-        // would, instead of keeping an Oynat and episodes that do nothing, like a card that is no longer shown.
+        // would, instead of keeping an Oynat and episodes that do nothing, like a card that is no longer shown. One that
+        // now asks for the PIN stays: its Oynat asks.
         state.value.selected?.takeIf { state.value.route == Route.DETAIL }?.let { detail ->
             val target = AccessTarget.Open(detail.id)
             if (AccessGate.decide(target, gateSnapshot(target)) == GateResult.Deny) back()
         }
+        parental.addLocks(view.missing)
         resetSearchIndex()
         // StateFlow may retain the previous, equal Catalog instance on an unchanged refresh.
         // Prepare the published instance so the first query reuses this work.
@@ -615,6 +635,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun categoryVisible(kind: MediaKind, category: String, visible: Boolean) {
         if (visible && !parental.state.value.mayLoosen) return
+        // A loosening locks again what PINs opened (pin.md §2).
+        if (visible) parental.relockContent()
         val key = CategoryVisibility.key(kind, category)
         store.hiddenCategories = if (visible) store.hiddenCategories - key else store.hiddenCategories + key
         mutable.update { it.copy(hiddenCategories = store.hiddenCategories) }
@@ -626,6 +648,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun setHideAdult(hide: Boolean): Boolean {
         if (!hide && !parental.state.value.mayLoosen) return parental.requestAdmin(AdminReason.SHOW_ADULT, AdminFollowUp.SHOW_ADULT)
+        if (!hide) parental.relockContent()
         store.hideAdultCategories = hide
         mutable.update { it.copy(hideAdultCategories = hide) }
         viewModelScope.launch { publishLibrary() }
@@ -648,6 +671,10 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     fun closePin() = parental.close()
     /** The Settings panel closed: what a PIN verified there allowed ends with it. */
     fun closeSettings() = parental.closeSettings()
+    /** "Açılan kilitleri kapat": what PINs opened in this session asks again. */
+    fun relockNow() = parental.relockContent()
+    /** The corner note was shown. */
+    fun accessNoticeShown() { mutable.update { it.copy(accessNotice = null) } }
     private fun storedSorts(): Map<MediaKind, LibrarySort> = listOf(MediaKind.MOVIE, MediaKind.SERIES).associateWith(store::librarySort)
     private val libraryOrders = LibraryOrderCache()
     /** Films or series in a Sırala order; sorted once per catalogue and choice. */
@@ -698,13 +725,40 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * Every open and play passes here (gap plan T3). The gate finds the title by its identity in this model's state,
      * never in a screen's copy, and decides; an allowed target then runs on the entry the gate found. Deny leaves
-     * everything as it is. The PIN pad (S10) and the Plus page (S37) will answer NeedsPin and NeedsPlus from here.
+     * everything as it is. NeedsPin opens the PIN pad for the title (pin.md §3.6), which the screen that asked shows;
+     * only the target waits, and it is decided again once the PIN is right. The Plus page (S37) will answer NeedsPlus.
      */
-    fun request(target: AccessTarget): GateResult {
-        val result = AccessGate.decide(target, gateSnapshot(target))
-        if (result is GateResult.Allow) perform(target, result.entry)
+    fun request(target: AccessTarget): GateResult = request(target, ask = true)
+
+    /** [ask]: false for what runs on its own after an allowed target (a detail's resume): a lock then only stops it. */
+    private fun request(target: AccessTarget, ask: Boolean): GateResult {
+        val snapshot = gateSnapshot(target)
+        val finding = AccessGate.find(target, snapshot)
+        val result = AccessGate.answer(target, finding)
+        when (result) {
+            is GateResult.Allow -> perform(target, result.entry)
+            is GateResult.NeedsPin -> if (ask && finding != null)
+                parental.unlock(PinPurpose.Unlock(target, finding.entry.id, finding.entry.title))
+            // An episode whose series cannot be told, or a title of an older list, while a lock of its source needs it.
+            else -> if (ask && finding?.verdict?.decision == AccessDecision.UNRESOLVED)
+                notice(UiText.Res(R.string.access_unresolved))
+        }
         return result
     }
+
+    /**
+     * The PIN typed for a locked title was right: the target is found again on the state as it is now, what locks it
+     * now opens for the session, and it runs. A title gone meanwhile (a refresh, a removed source, renumbered channels)
+     * runs nothing.
+     */
+    private fun unlocked(pending: PinPurpose.Unlock) {
+        val finding = AccessGate.find(pending.target, gateSnapshot(pending.target))
+        if (finding == null || finding.entry.id != pending.id) { notice(UiText.Res(R.string.access_gone)); return }
+        parental.grant(finding.verdict.pinScopes)
+        request(pending.target, ask = false)
+    }
+
+    private fun notice(text: UiText) { mutable.update { it.copy(accessNotice = text) } }
 
     private fun gateSnapshot(target: AccessTarget): GateSnapshot {
         val s = state.value
@@ -713,7 +767,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 is AccessTarget.ChannelNumber -> numberedChannels()
                 is AccessTarget.ChannelStep -> zapChannels()
                 else -> emptyList()
-            }, autoNextEpisode = s.autoNextEpisode, entitlements = entitlements)
+            }, autoNextEpisode = s.autoNextEpisode, policy = parental.policy, unlocked = parental.grants,
+            entitlements = entitlements)
     }
 
     private fun perform(target: AccessTarget, entry: MediaEntry) {
@@ -728,21 +783,37 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // The screens' openers, unchanged for their callers; each asks the gate with the title's identity only.
-    fun open(entry: MediaEntry, resume: WatchRecord? = null) { request(AccessTarget.Open(entry.id, resume)) }
-    fun watch(entry: MediaEntry) { request(AccessTarget.Watch(entry.id)) }
-    fun play(entry: MediaEntry, restart: Boolean = false) { request(AccessTarget.Play(entry.id, restart)) }
+    // The screens' openers; each asks the gate with the title's identity only. True when the title is locked and the
+    // PIN pad opened for it: the screen shows the pad, and focus goes back to the card when it closes.
+    fun open(entry: MediaEntry, resume: WatchRecord? = null): Boolean = request(AccessTarget.Open(entry.id, resume)) is GateResult.NeedsPin
+    fun watch(entry: MediaEntry): Boolean = request(AccessTarget.Watch(entry.id)) is GateResult.NeedsPin
+    fun play(entry: MediaEntry, restart: Boolean = false): Boolean = request(AccessTarget.Play(entry.id, restart)) is GateResult.NeedsPin
 
     private fun openAllowed(entry: MediaEntry, resume: WatchRecord?) {
         mutable.update { it.copy(focusedId = entry.id) }
         if (entry.kind == MediaKind.LIVE) { startPlayback(entry); return }
         detailJob?.cancel()
         mutable.update { it.copy(route = Route.DETAIL, selected = entry, episodes = emptyList(), detailLoading = true,
-            detailError = null, detailReturn = when (it.route) { Route.HOME -> Route.HOME; Route.SEARCH -> Route.SEARCH; else -> Route.LIBRARY }) }
+            detailError = null, detailReturn = when (it.route) {
+                Route.HOME -> Route.HOME; Route.SEARCH -> Route.SEARCH; Route.DETAIL -> it.detailReturn; else -> Route.LIBRARY
+            }) }
         loadDetail(entry, resume)
     }
 
-    fun retryDetail() { state.value.selected?.let { loadDetail(it) } }
+    /**
+     * Yeniden dene on a detail loads it again once the gate still allows its title, so nothing of a locked one is
+     * fetched without the PIN. A session that ended since it opened asks again, and the right PIN opens it anew; true
+     * when the PIN pad opened.
+     */
+    fun retryDetail(): Boolean {
+        val detail = state.value.selected ?: return false
+        val target = AccessTarget.Open(detail.id)
+        return when (AccessGate.decide(target, gateSnapshot(target))) {
+            is GateResult.Allow -> { loadDetail(detail); false }
+            is GateResult.NeedsPin -> request(target) is GateResult.NeedsPin
+            else -> false
+        }
+    }
     private fun loadDetail(entry: MediaEntry, resume: WatchRecord? = null) {
         val source = state.value.sourceFor(entry) ?: return
         detailJob?.cancel()
@@ -762,16 +833,16 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                         val next = if (episode != null && resume.progress.completed) EpisodeSequence.next(source, episode, episodes) else null
                         when {
                             episode == null -> mutable.update { it.copy(detailError = UiText.Res(R.string.error_episode_missing)) }
-                            !resume.progress.completed -> { mutable.update { it.copy(season = episode.season) }; if (stillOn(show)) play(episode) }
+                            !resume.progress.completed -> { mutable.update { it.copy(season = episode.season) }; if (stillOn(show)) continueWith(episode) }
                             next == null -> mutable.update { it.copy(season = episode.season) }
-                            next.automaticAllowed -> { mutable.update { it.copy(season = next.entry.season) }; if (stillOn(show)) play(next.entry) }
+                            next.automaticAllowed -> { mutable.update { it.copy(season = next.entry.season) }; if (stillOn(show)) continueWith(next.entry) }
                             else -> mutable.update { it.copy(season = next.entry.season) }
                         }
                     }
                 } else {
                     val movie = repository.movie(source, entry.withoutSource()).inSource(source.id)
                     mutable.update { it.copy(selected = movie, detailLoading = false) }
-                    if (resume != null && stillOn(movie)) play(movie)
+                    if (resume != null && stillOn(movie)) continueWith(movie)
                 }
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) { mutable.update { it.copy(detailLoading = false, detailError = (e as? SourceFailure)?.text ?: UiText.Res(R.string.error_details_unavailable)) } }
@@ -804,14 +875,14 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 mutable.update { it.copy(heroStarting = null) }
                 if (state.value.route != Route.HOME) return@launch
-                if (next == null) { open(entry); return@launch }
+                if (next == null) { request(AccessTarget.Open(entry.id), ask = false); return@launch }
                 // The player's next-episode countdown reads the series from the state, as after the detail's Oynat.
                 mutable.update { it.copy(selected = show, episodes = episodes, season = next.season) }
-                play(next)
+                continueWith(next)
             } catch (e: CancellationException) { mutable.update { it.copy(heroStarting = null) }; throw e }
             catch (_: Exception) {
                 mutable.update { it.copy(heroStarting = null) }
-                if (state.value.route == Route.HOME) open(entry)
+                if (state.value.route == Route.HOME) request(AccessTarget.Open(entry.id), ask = false)
             }
         }
     }
@@ -820,8 +891,14 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     private fun stillOn(entry: MediaEntry) = state.value.route == Route.DETAIL && state.value.selected?.id == entry.id
 
     /**
+     * Plays what an allowed open goes on with (a resume, the hero's episode), through the gate again. Its locks are its
+     * series' or its own, which the open passed; should the session have ended meanwhile, it stops without asking.
+     */
+    private fun continueWith(entry: MediaEntry) { request(AccessTarget.Play(entry.id), ask = false) }
+
+    /**
      * Starts [entry] in the player. Only an allowed target reaches here, with the entry the gate found; anything that
-     * plays later (a detail's resume, the hero's episode) calls [play], which asks the gate again then.
+     * plays later (a detail's resume, the hero's episode) calls [continueWith], which asks the gate again then.
      */
     private fun startPlayback(entry: MediaEntry, restart: Boolean = false) {
         val source = state.value.sourceFor(entry) ?: return
@@ -843,10 +920,16 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun nextEpisode(): MediaEntry? = nextEpisodeChoice()?.entry
 
-    /** True when [nextId] now plays: the gate checks that the player still shows [currentId] and that it comes next. */
-    fun playNextEpisode(sourceId: String, currentId: String, nextId: String, automatic: Boolean = false): Boolean =
-        request(AccessTarget.NextEpisode(sourceId, currentId, nextId, automatic)) is GateResult.Allow &&
-            state.value.playing?.entry?.id == nextId
+    /**
+     * Starts [nextId]: the gate checks that the player still shows [currentId] and that it comes next. A locked series
+     * whose PIN this session has not opened answers NEEDS_PIN; by hand the PIN pad opens, the countdown asks nothing.
+     */
+    fun playNextEpisode(sourceId: String, currentId: String, nextId: String, automatic: Boolean = false): NextResult =
+        when (request(AccessTarget.NextEpisode(sourceId, currentId, nextId, automatic), ask = !automatic)) {
+            is GateResult.Allow -> if (state.value.playing?.entry?.id == nextId) NextResult.STARTED else NextResult.UNAVAILABLE
+            is GateResult.NeedsPin -> NextResult.NEEDS_PIN
+            else -> NextResult.UNAVAILABLE
+        }
 
     /**
      * The hero's films with their details (D067): an Xtream list sends no wide picture or plot for films, only their
@@ -857,6 +940,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     fun heroDetail(entry: MediaEntry): MediaEntry = heroDetails[entry.id] ?: entry
     fun ensureHeroDetail(entry: MediaEntry) {
         if (entry.kind != MediaKind.MOVIE && entry.kind != MediaKind.SERIES) return
+        // Nothing of a locked title is fetched before its PIN (pin.md §3.6).
+        if (entry.id in state.value.locks.ids) return
         if ((entry.hasBackdrop && entry.description.isNotBlank()) || !heroRequests.add(entry.id)) return
         val source = state.value.sourceFor(entry)?.takeIf { it.type == SourceType.XTREAM } ?: return
         viewModelScope.launch {
@@ -876,9 +961,13 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     private fun numberedChannels(): List<MediaEntry> =
         catalogDisplayOrder(state.value.catalog.items.filter { it.kind == MediaKind.LIVE && !it.adult })
     fun channelNumber(entry: MediaEntry): Int? = numberedChannels().indexOfFirst { it.id == entry.id }.takeIf { it >= 0 }?.plus(1)
-    /** Plays channel [number] of "Tüm kanallar" (the one playing stays as it is); false when there is no such channel. */
-    fun playChannelNumber(number: Int): Boolean = request(AccessTarget.ChannelNumber(number)) != GateResult.Deny
+    /**
+     * Plays channel [number] of "Tüm kanallar" (the one playing stays as it is). Deny: there is no such channel.
+     * NeedsPin: it is locked, and the PIN pad opened; the channel playing goes on behind it until the PIN is right.
+     */
+    fun playChannelNumber(number: Int): GateResult = request(AccessTarget.ChannelNumber(number))
 
+    /** CH±: the next channel that plays without the PIN; with none, the player stays where it is. */
     fun changeChannel(direction: Int) { request(AccessTarget.ChannelStep(direction)) }
     /** The channels CH± steps through: those of the list the player was opened from (a category, Ara's source, all). */
     private fun zapChannels(): List<MediaEntry> {

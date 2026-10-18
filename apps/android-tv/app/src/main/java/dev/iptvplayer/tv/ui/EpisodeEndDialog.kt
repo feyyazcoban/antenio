@@ -23,11 +23,18 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.tv.material3.Text
 import dev.iptvplayer.tv.R
 
-/** The card is its own window: [back] and [key] take its Back and remote keys to the player's PlayerKeyRouter. */
-@Composable internal fun EpisodeEndDialog(s: EpisodeEndState, play: () -> Unit, stay: () -> Unit,
+/**
+ * The card is its own window: [back] and [key] take its Back and remote keys to the player's PlayerKeyRouter. [play]
+ * is true when the next episode's locked series asks for the PIN: the pad opens over the card, focus back on Şimdi
+ * oynat when it closes.
+ */
+@Composable internal fun EpisodeEndDialog(s: EpisodeEndState, play: () -> Boolean, stay: () -> Unit,
     returnToEpisodes: () -> Unit, replay: () -> Unit, back: () -> Unit, key: (KeyEvent) -> Boolean) {
     val first = remember { FocusRequester() }
+    val playNow = remember { FocusRequester() }
     Dialog(onDismissRequest = back, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        // Opened from inside the card's window, so focus returns there.
+        val openPin = rememberPinOpener()
         Box(Modifier.fillMaxSize().padding(horizontal = 38.dp, vertical = 26.dp), contentAlignment = Alignment.BottomEnd) {
             Column(Modifier.width(480.dp).background(Ink.Container, RoundedCornerShape(16.dp))
                 .border(1.dp, Ink.Divider, RoundedCornerShape(16.dp)).padding(24.dp).testTag("episode-end")
@@ -61,7 +68,8 @@ import dev.iptvplayer.tv.R
                 // Cancel has the initial focus: a single OK prevents an unwanted automatic transition.
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Action(stringResource(R.string.episode_end_stay), Modifier.focusRequester(first), primary = s.seconds != null, onClick = stay)
-                    if (s.next != null) Action(stringResource(R.string.episode_end_play_now), primary = s.seconds == null, icon = "play", onClick = play)
+                    if (s.next != null) Action(stringResource(R.string.episode_end_play_now), Modifier.focusRequester(playNow),
+                        primary = s.seconds == null, icon = "play") { if (play()) openPin { playNow } }
                     else Action(stringResource(R.string.action_replay), icon = "play", onClick = replay)
                 }
                 Action(stringResource(R.string.episode_end_episodes), onClick = returnToEpisodes)

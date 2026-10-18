@@ -27,7 +27,7 @@ class AccessGateTest {
         assertEquals(target.toString(), GateResult.Allow(entry), decide(target, at))
     private fun denies(target: AccessTarget, at: GateSnapshot = snapshot) = assertEquals(target.toString(), GateResult.Deny, decide(target, at))
 
-    @Test fun publishedTitlesOpenAndNothingAsksForAPinOrPlusYet() {
+    @Test fun publishedTitlesWithoutLocksOpenOnEveryPath() {
         allows(movie, AccessTarget.Open(movie.id))
         allows(news, AccessTarget.Open(news.id))
         allows(show, AccessTarget.Watch(show.id))
@@ -129,6 +129,82 @@ class AccessGateTest {
         allows(news, AccessTarget.ChannelStep(1), channels.copy(playing = movie))
         denies(AccessTarget.ChannelStep(1), snapshot.copy(playing = news))
         denies(AccessTarget.ChannelNumber(1), snapshot.copy(channels = listOf(movie)))
+    }
+
+    private fun content(entry: MediaEntry) = AccessScope.Content(ContentRef(entry.sourceId, entry.localId!!))
+    private fun lock(scope: AccessScope) = AccessRule(scope, pinRequired = true)
+    private val locks = AccessPolicy(listOf(lock(content(movie)), lock(content(show)), lock(content(sport))))
+
+    @Test fun aLockedTitleAsksForThePinOnEveryPath() {
+        val locked = inSeries.copy(policy = locks, playing = first, playerShown = true, channels = listOf(news, sport))
+        for (target in listOf(AccessTarget.Open(movie.id), AccessTarget.Watch(show.id), AccessTarget.Play(movie.id, restart = true),
+            AccessTarget.Play(first.id), AccessTarget.ChannelNumber(2), AccessTarget.NextEpisode("a", first.id, second.id, automatic = false),
+            AccessTarget.NextEpisode("a", first.id, second.id, automatic = true)))
+            assertEquals(target.toString(), GateResult.NeedsPin(target), decide(target, locked))
+        // What a lock does not reach opens as before.
+        allows(news, AccessTarget.ChannelNumber(1), locked)
+        allows(listEpisode, AccessTarget.Play(listEpisode.id), locked)
+        // The gate names what locks a title: an episode is locked by its series.
+        assertEquals(setOf(content(show)), AccessGate.find(AccessTarget.Play(first.id), locked)!!.verdict.pinScopes)
+        assertEquals(first, AccessGate.find(AccessTarget.Play(first.id), locked)!!.entry)
+        // A refusal stays a refusal: adult, gone or without its source.
+        denies(AccessTarget.Open(adult.id), locked)
+        denies(AccessTarget.Open(movie.id), locked.copy(allCatalog = raw.copy(items = raw.items - movie)))
+        denies(AccessTarget.Open(movie.id), locked.copy(sources = listOf(list)))
+    }
+
+    @Test fun whatThePinOpenedOpensWithoutAskingUntilTheSessionEnds() {
+        val unlocked = inSeries.copy(policy = locks, unlocked = setOf(content(show), content(movie)))
+        allows(movie, AccessTarget.Open(movie.id), unlocked)
+        allows(show, AccessTarget.Watch(show.id), unlocked)
+        allows(first, AccessTarget.Play(first.id), unlocked)
+        // Only the scopes that locked a title: another lock still asks.
+        val twice = AccessPolicy(locks.rules + lock(AccessScope.Source("a")))
+        assertEquals(GateResult.NeedsPin(AccessTarget.Open(movie.id)), decide(AccessTarget.Open(movie.id), unlocked.copy(policy = twice)))
+        assertEquals(GateResult.NeedsPin(AccessTarget.Open(news.id)), decide(AccessTarget.Open(news.id), unlocked.copy(policy = twice)))
+        allows(movie, AccessTarget.Open(movie.id), unlocked.copy(policy = twice, unlocked = unlocked.unlocked + AccessScope.Source("a")))
+    }
+
+    @Test fun channelStepsPassLockedChannels() {
+        val tv = MediaEntry("live:11", "11", MediaKind.LIVE, "Belgesel", "Belgesel", extension = "ts").inSource("a")
+        val channels = snapshot.copy(allCatalog = raw.copy(items = raw.items + tv), channels = listOf(news, sport, tv), policy = locks)
+        allows(tv, AccessTarget.ChannelStep(1), channels.copy(playing = news))
+        allows(news, AccessTarget.ChannelStep(-1), channels.copy(playing = tv))
+        // CH± never asks: with no other channel that plays, the player stays where it is.
+        denies(AccessTarget.ChannelStep(1), channels.copy(channels = listOf(news, sport), playing = news))
+        // A channel the PIN opened in this session is no longer passed.
+        allows(sport, AccessTarget.ChannelStep(1), channels.copy(playing = news, unlocked = setOf(content(sport))))
+    }
+
+    @Test fun anUnreadLockRecordAsksForEveryTitle() {
+        // Not read yet, or unreadable (D049): every title asks, whatever a PIN opened before.
+        val unknown = inSeries.copy(policy = null, unlocked = setOf(AccessScope.Source("a"), AccessScope.Source("b")))
+        for (target in listOf(AccessTarget.Open(news.id), AccessTarget.Play(first.id), AccessTarget.Play(listEpisode.id)))
+            assertEquals(target.toString(), GateResult.NeedsPin(target), decide(target, unknown))
+        denies(AccessTarget.ChannelStep(1), unknown.copy(playing = news, channels = listOf(news, sport)))
+        denies(AccessTarget.Open(adult.id), unknown)
+        denies(AccessTarget.Open(movie.id), unknown.copy(sources = listOf(list)))
+    }
+
+    @Test fun aDetailIsJudgedOnTheLibrarysEntry() {
+        // The film's detail lacks the category its list entry has; the category's lock still asks.
+        val film = MediaEntry("movie:12", "12", MediaKind.MOVIE, "Film", "Aile", categoryId = "7", extension = "mp4").inSource("a")
+        val family = AccessScope.Category("a", MediaKind.MOVIE, AccessCategory.ProviderId("7"))
+        val detail = film.copy(categoryId = "", extension = "mkv")
+        val open = snapshot.copy(allCatalog = raw.copy(items = raw.items + film), selected = detail, policy = AccessPolicy(listOf(lock(family))))
+        assertEquals(GateResult.NeedsPin(AccessTarget.Play(film.id)), decide(AccessTarget.Play(film.id), open))
+        allows(detail, AccessTarget.Play(film.id), open.copy(unlocked = setOf(family)))
+    }
+
+    @Test fun anEpisodeWhoseSeriesCannotBeToldIsNotOpenedWhileALockOfItsSourceNeedsIt() {
+        // Listed under a series it does not name.
+        val stray = listEpisode.copy(parentLocalId = "m3u-show:99")
+        val unresolved = snapshot.copy(allCatalog = raw.copy(m3uEpisodes = mapOf(listShow.id to listOf(stray))),
+            policy = AccessPolicy(listOf(lock(content(listShow)))))
+        assertEquals(AccessDecision.UNRESOLVED, AccessGate.find(AccessTarget.Play(stray.id), unresolved)!!.verdict.decision)
+        denies(AccessTarget.Play(stray.id), unresolved)
+        // Locks of another source do not touch it.
+        allows(stray, AccessTarget.Play(stray.id), unresolved.copy(policy = locks))
     }
 
     @Test fun everyFeatureIsFreeUntilSalesOpen() {

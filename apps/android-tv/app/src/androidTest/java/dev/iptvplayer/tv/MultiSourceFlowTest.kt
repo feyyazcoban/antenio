@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.iptvplayer.tv.data.*
+import dev.iptvplayer.tv.ui.NextResult
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.*
 import okio.Buffer
@@ -213,8 +214,8 @@ class MultiSourceFlowTest {
         assertTrue(model.store.favorites(one.id).isEmpty())
         assertEquals(setOf("series:4"), model.store.favorites(two.id))
         assertEquals(two.id, model.nextEpisode()!!.sourceId)
-        assertFalse(model.playNextEpisode(one.id, episode.id, model.nextEpisode()!!.id))
-        ui.runOnUiThread { assertTrue(model.playNextEpisode(two.id, episode.id, model.nextEpisode()!!.id)) }
+        assertEquals(NextResult.UNAVAILABLE, model.playNextEpisode(one.id, episode.id, model.nextEpisode()!!.id))
+        ui.runOnUiThread { assertEquals(NextResult.STARTED, model.playNextEpisode(two.id, episode.id, model.nextEpisode()!!.id)) }
         assertTrue(model.state.value.playing!!.url.startsWith(b.url("/").toString()))
         back()
     }

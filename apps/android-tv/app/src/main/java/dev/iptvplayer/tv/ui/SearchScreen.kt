@@ -55,6 +55,8 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
 @Composable internal fun SearchScreen(s: TvState, model: TvViewModel, back: () -> Unit, settings: () -> Unit) {
     val input = remember { FocusRequester() }
     val resultFocus = remember { FocusRequester() }
+    // A locked result's PIN pad; focus goes back to the result (pin.md §3.6).
+    val openPin = rememberPinOpener()
     val nav = remember { FocusRequester() }
     val list = rememberLazyListState()
     val rowStates = remember { mutableStateMapOf<String, LazyListState>() }
@@ -182,7 +184,7 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
                                     .then(if (target?.id == entry.id) Modifier.focusRequester(resultFocus) else Modifier)
                                     .onFocusChanged { if (it.isFocused) {
                                         resultsActive = true; returnToResults = true; lastIndex = s.searchResults.indexOf(entry); model.searchFocus(entry.id)
-                                    } }) { model.searchFocus(entry.id); model.open(entry) }
+                                    } }) { model.searchFocus(entry.id); if (model.open(entry)) openPin { resultFocus } }
                             }
                         }
                     }

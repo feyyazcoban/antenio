@@ -209,7 +209,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
     val kind: MediaKind? = null, val continuing: List<ContinueItem> = emptyList())
 
 @Composable internal fun HomeScreen(s: TvState, model: TvViewModel, settings: () -> Unit) {
-    val library = remember(s.catalog, s.history, s.favoriteIds) { homeLibrary(s.catalog, s.history, s.favoriteIds) }
+    val library = remember(s.catalog, s.history, s.favoriteIds, s.locks.ids) { homeLibrary(s.catalog, s.history, s.favoriteIds, s.locks.ids) }
     val rows = remember(library) {
         buildList {
             if (library.continueWatching.isNotEmpty()) add(HomeRow("continue", R.string.home_continue, library.continueWatching.map { it.entry }, continuing = library.continueWatching))
@@ -245,8 +245,10 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
     val density = LocalDensity.current
     var viewportHeight by remember { mutableStateOf(0.dp) }
     val shelfHeights = remember { mutableStateMapOf<String, Dp>() }
-    // Held OK on a card: the quick actions (U8) above the screen; focus returns to that card.
+    // Held OK on a card: the quick actions (U8) above the screen; focus returns to that card. A locked title's PIN pad
+    // too (pin.md §3.6).
     val overlay = rememberOverlayOpener()
+    val openPin = rememberPinOpener()
     // The hero runs to the top edge (D067); without it the page keeps the usual top margin.
     Navigation(s, model, Modifier.onFocusChanged { menuFocused.value = it.hasFocus }, first = nav,
         contentTop = if (slides.isNotEmpty() && rows.isNotEmpty()) 0.dp else TvLayout.HeaderTop,
@@ -294,7 +296,8 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                     Modifier.then(if (target == "hero") Modifier.focusRequester(focus) else Modifier)
                     .focusRequester(heroFocus)
                     .onFocusChanged { if (it.hasFocus) { model.homeFocus("hero"); lastFocus.requester = heroFocus } },
-                    detail = model::heroDetail, ensure = model::ensureHeroDetail, starting = s.heroStarting, watch = model::watch) { model.open(it) }
+                    detail = model::heroDetail, ensure = model::ensureHeroDetail, starting = s.heroStarting,
+                    watch = { if (model.watch(it)) openPin { heroFocus } }) { if (model.open(it)) openPin { heroFocus } }
                 else Column(Modifier.padding(horizontal = TvLayout.Gutter, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.home_kicker), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, letterSpacing = 2.sp)
                     Heading(stringResource(R.string.home_prompt))
@@ -329,7 +332,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                                     .onFocusChanged { if (it.isFocused) { model.homeFocus(key); lastFocus.requester = own } }, row.key, headingHeight + 10.dp, viewportHeight, reserveEpisode,
                                 longClick = { overlay(AppOverlay.Quick(entry)) { lastFocus.requester } }) {
                                 model.homeFocus(key)
-                                model.open(entry, continuing?.record)
+                                if (model.open(entry, continuing?.record)) openPin { own }
                             }
                         }
                     }

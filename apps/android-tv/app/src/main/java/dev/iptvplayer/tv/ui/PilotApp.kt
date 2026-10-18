@@ -44,6 +44,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,6 +62,7 @@ import dev.iptvplayer.tv.data.*
 import dev.iptvplayer.tv.ui.settings.Settings
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
@@ -142,6 +145,7 @@ import androidx.compose.ui.input.key.type
             }
             if (settings) Settings(state, model) { settings = false; model.closeSettings() }
             AppOverlayHost(overlays, state, model)
+            state.accessNotice?.let { notice -> AccessNote(notice.resolve()) { model.accessNoticeShown() } }
             if (exitAsk && state.route == Route.HOME) ExitDialog { exitAsk = false }
             if (opening) LaunchCover(state.reducedMotion,
                 loading = state.route == Route.LOADING && state.sourceTask == SourceTask.RESTORING, finish = endOpening)
@@ -385,9 +389,11 @@ internal val LocalAppOverlays = staticCompositionLocalOf { AppOverlays() }
 @Composable private fun AppOverlayHost(overlays: AppOverlays, s: TvState, model: TvViewModel) {
     overlays.shown?.let { opened -> key(opened) {
         when (val overlay = opened.overlay) {
+            // A locked title's PIN pad takes the menu's place for the same card, focus going back to it.
             is AppOverlay.Quick -> QuickActions(overlay.entry, quickActions(overlay.entry, overlay.entry.id in s.favoriteIds,
-                toggleFavorite = { model.toggleFavorite(overlay.entry) }, open = { model.open(overlay.entry) }, close = overlays::close),
-                overlays::close)
+                toggleFavorite = { model.toggleFavorite(overlay.entry) }, open = {
+                    if (model.open(overlay.entry)) overlays.show(AppOverlays.Opened(AppOverlay.Pin, opened.owner, opened.window, opened.returnFocus))
+                }, close = overlays::close), overlays::close)
             // The prompt ended in the model (a PIN taken, Vazgeç, Back): the window closes and focus goes back.
             AppOverlay.Pin -> s.parental.prompt.let { prompt ->
                 if (prompt != null) PinDialog(prompt, model) else LaunchedEffect(Unit) { overlays.close() }
@@ -456,6 +462,18 @@ internal fun quickActions(entry: MediaEntry, favorite: Boolean, toggleFavorite: 
     }
     Action(label, modifier.fillMaxWidth().bringIntoViewRequester(relocation).onSizeChanged { height = it.height }
         .onFocusChanged { focused = it.isFocused }, icon = icon, iconFilled = iconFilled, outlined = outlined, onClick = onClick)
+}
+
+/**
+ * What the access gate has to say (TvState.accessNotice) in the top corner for three seconds, where the player's notes
+ * sit; TalkBack reads it once. It takes no focus.
+ */
+@Composable private fun BoxScope.AccessNote(text: String, shown: () -> Unit) {
+    LaunchedEffect(text) { delay(3_000); shown() }
+    Text(text, Modifier.align(Alignment.TopEnd).padding(top = 22.dp, end = TvLayout.Gutter).widthIn(max = 420.dp)
+        .background(Ink.Background.copy(alpha = .9f), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp, vertical = 10.dp)
+        .semantics { liveRegion = LiveRegionMode.Polite }.testTag("access-note"),
+        color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 21.sp)
 }
 
 /** Focus for [requester] once this window has focus again (after a dialog), or false if it is gone. */

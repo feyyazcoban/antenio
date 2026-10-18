@@ -9,7 +9,9 @@ data class CategoryChoice(val name: String, val count: Int, val adult: Boolean)
  * Categories the viewer hides (D068), by kind and provider name across all sources, and the categories whose name
  * reads as adult (XXX, Adult, +18, Yetişkin …), hidden by default. Hidden titles leave the catalog the screens read:
  * Ana Sayfa, the library, Ara, the guide, channel numbers and the player's next channel. The provider's own adult flag
- * stays hidden in any case. Not an access control: anyone with the remote can show them again (PIN is BKL-028).
+ * stays hidden in any case. Hiding is not a lock: with a parental PIN set, showing a category or turning the filter off
+ * asks for it (TvViewModel), and ends what PINs opened in the session; without one, anyone with the remote can. A locked
+ * category stays listed and asks for the PIN on opening (AccessPolicy, ParentalProjection).
  */
 object CategoryVisibility {
     private val adultWords = Regex("(?<![a-z0-9])(xxx|adults?|porno?|yetiskin|erotik|erotic|sex|18\\s*\\+|\\+\\s*18)(?![a-z0-9])")

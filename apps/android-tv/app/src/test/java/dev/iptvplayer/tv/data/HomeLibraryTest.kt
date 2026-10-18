@@ -74,6 +74,29 @@ class HomeLibraryTest {
         // Newest first; no artwork, no date, channels and adult titles never qualify; equal dates keep list order.
         assertEquals(listOf("s1", "m2", "m1", "tie", "x8", "x7"), home.newest.map { it.id })
     }
+    @Test fun lockedTitlesStayOutOfTheHeroAndAutomaticShelvesButNotOutOfWhatTheViewerChose() {
+        fun titled(id: String, kind: MediaKind, added: Long = 0) =
+            MediaEntry(id, id, kind, "Title $id", artwork = "http://img/$id.jpg", backdrop = "http://img/$id-wide.jpg", addedAt = added)
+        val catalog = Catalog(listOf(titled("film", MediaKind.MOVIE, 100), titled("night", MediaKind.MOVIE, 900),
+            titled("show", MediaKind.SERIES, 800), titled("lockedShow", MediaKind.SERIES, 700),
+            titled("news", MediaKind.LIVE), titled("sport", MediaKind.LIVE)))
+        val locked = setOf("night", "lockedShow", "sport")
+        val history = listOf(WatchRecord("night", MediaKind.MOVIE, positionMs = 600_000, durationMs = 5_400_000),
+            WatchRecord("sport", MediaKind.LIVE))
+        val home = homeLibrary(catalog, history, setOf("lockedShow"), locked)
+        assertEquals(listOf("show", "film"), home.newest.map { it.id })
+        assertEquals(listOf("film"), home.movies.map { it.id })
+        assertEquals(listOf("show"), home.series.map { it.id })
+        assertEquals(listOf("news"), home.channels.map { it.id })
+        assertFalse(home.featured!!.id in locked)
+        // Chosen by the viewer: they stay, and ask for the PIN when opened.
+        assertEquals(listOf("night"), home.continueWatching.map { it.entry.id })
+        assertEquals(listOf("sport"), home.recentChannels.map { it.id })
+        assertEquals(listOf("lockedShow"), home.favorites.map { it.id })
+        // Without locks the same titles are promoted.
+        assertEquals(listOf("night", "show", "lockedShow", "film"), homeLibrary(catalog, history, emptySet()).newest.map { it.id })
+    }
+
     @Test fun aListWithoutDatesHasNoNewestSlidesAndKeepsTheFeaturedTitle() {
         val catalog = Catalog(listOf(MediaEntry("m", "m", MediaKind.MOVIE, "Movie", artwork = "http://img/m.jpg")))
         val home = homeLibrary(catalog, emptyList(), emptySet())

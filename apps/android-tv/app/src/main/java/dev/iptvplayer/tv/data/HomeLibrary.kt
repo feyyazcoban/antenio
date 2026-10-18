@@ -40,13 +40,14 @@ data class ContinueItem(val entry: MediaEntry, val record: WatchRecord)
 
 /**
  * [newest] is the hero carousel: the most recently added films and series the provider dates. [featured] is the
- * single hero for a catalog without dates (M3U lists).
+ * single hero for a catalog without dates (M3U lists). A locked title is never promoted: it stays out of the hero and
+ * the automatic shelves, and keeps its place in what the viewer chose (continue, recent channels, favourites).
  */
 data class HomeLibrary(val continueWatching: List<ContinueItem>, val recentChannels: List<MediaEntry>,
     val favorites: List<MediaEntry>, val channels: List<MediaEntry>, val movies: List<MediaEntry>,
     val series: List<MediaEntry>, val featured: MediaEntry?, val newest: List<MediaEntry> = emptyList())
 
-fun homeLibrary(catalog: Catalog, history: List<WatchRecord>, favorites: Set<String>): HomeLibrary {
+fun homeLibrary(catalog: Catalog, history: List<WatchRecord>, favorites: Set<String>, locked: Set<String> = emptySet()): HomeLibrary {
     val visible = catalog.items.filterNot { it.adult }
     val byId = visible.associateBy { it.id }
     // A finished film leaves the row; a series whose latest episode was finished stays for its next one.
@@ -54,8 +55,8 @@ fun homeLibrary(catalog: Catalog, history: List<WatchRecord>, favorites: Set<Str
         .distinctBy { it.parentId ?: it.id }.filter { it.progress.resumable || it.kind == MediaKind.EPISODE && it.progress.completed }
         .mapNotNull { record -> byId[record.parentId ?: record.id]?.let { ContinueItem(it, record) } }
         .distinctBy { it.entry.id }.take(12).toList()
-    // Automatic discovery does not promote provider headings. Explicit favorites/history still work.
-    val automatic = visible.filterNot { it.isProviderDivider() }
+    // Automatic discovery does not promote provider headings or locked titles. Explicit favorites/history still work.
+    val automatic = visible.filterNot { it.isProviderDivider() || it.id in locked }
     val movies = automatic.filter { it.kind == MediaKind.MOVIE }
     val series = automatic.filter { it.kind == MediaKind.SERIES }
     return HomeLibrary(continuing,

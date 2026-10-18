@@ -20,11 +20,19 @@ enum class AdminReason { SHOW_ADULT, CATEGORIES, PARENTAL }
 /** What a PIN verified or made on the pad then does in the model. Opening a page stays with the Settings panel. */
 enum class AdminFollowUp { SHOW_ADULT }
 
-/** What the pad is for: the first PIN, a new one for the PIN set, or the PIN checked before [Verify.reason]. */
+/**
+ * What the pad is for: the first PIN, a new one for the PIN set, the PIN checked before [Verify.reason], or the PIN that
+ * opens a locked title ([Unlock]).
+ */
 sealed interface PinPurpose {
     data object Create : PinPurpose
     data object Change : PinPurpose
     data class Verify(val reason: AdminReason) : PinPurpose
+    /**
+     * A locked title (pin.md §3.6): [target] is decided again once the PIN is right, and runs if it still names [id];
+     * [title] is the name the pad shows. It grants nothing in Ayarlar.
+     */
+    data class Unlock(val target: AccessTarget, val id: String, val title: String) : PinPurpose
 }
 
 /** A new PIN, the same PIN again, or the PIN to check. */
@@ -62,23 +70,27 @@ enum class StartOver(@StringRes val notice: Int, val needsAttention: Boolean) {
  * Parental control as the screens see it. [adminUnlocked]: a PIN verified or made since Settings opened, which a
  * loosening needs while [guarded]. [prompt] is the PIN pad on screen. [notice] says how the last change on Ebeveyn
  * denetimi went. [lockEpoch] grows when Settings must close: the app left the screen, or the TV starts over.
+ * [sessionGrants]: how many lock scopes PINs typed for locked titles opened in this session (ParentalSession).
  */
 data class ParentalUi(val status: ParentalStatus = ParentalStatus.LOADING, val adminUnlocked: Boolean = false,
-    val prompt: PinPrompt? = null, val notice: UiText? = null, val lockEpoch: Int = 0) {
+    val prompt: PinPrompt? = null, val notice: UiText? = null, val lockEpoch: Int = 0, val sessionGrants: Int = 0) {
     /** Loosening asks for the PIN: one is set, or the record is not read yet or cannot be (fail closed, D049). */
     val guarded: Boolean get() = status != ParentalStatus.OFF
     val mayLoosen: Boolean get() = !guarded || adminUnlocked
 }
 
 /**
- * The PIN pad's steps and the grant in Ayarlar (pin.md §3.1–3.3, §3.10–3.11), between the screens and ParentalGuard,
- * which does the slow and durable work. Main thread. A new PIN is asked twice and kept in memory only between the two
- * steps. A verified PIN grants Ayarlar until the panel closes or the app leaves the screen. A result that arrives after
- * the pad closed only updates the status: Vazgeç never grants anything, and a try it cut short stays charged (D048).
- * Vazgeç does not cut a new PIN's save short, as the PIN would change all the same without the parent knowing.
+ * The PIN pad's steps, the grant in Ayarlar and the content locks (pin.md §3.1–3.3, §3.6, §3.10–3.11), between the
+ * screens and ParentalGuard, which does the slow and durable work. Main thread. A new PIN is asked twice and kept in
+ * memory only between the two steps. A verified PIN grants Ayarlar until the panel closes or the app leaves the screen;
+ * a PIN typed for a locked title hands its purpose to [unlocked], and the model opens that title's locks for the
+ * session ([grant]). A result that arrives after the pad closed only updates the status: Vazgeç never grants anything,
+ * and a try it cut short stays charged (D048). Vazgeç does not cut a new PIN's save short, as the PIN would change all
+ * the same without the parent knowing. [policyChanged] runs when the lock rules read from the record change.
  */
 internal class ParentalController(private val scope: CoroutineScope, private val guard: ParentalGuard,
-    private val elapsed: () -> Long, private val followUp: (AdminFollowUp) -> Unit) {
+    private val elapsed: () -> Long, private val unlocked: (PinPurpose.Unlock) -> Unit = {},
+    private val policyChanged: () -> Unit = {}, private val followUp: (AdminFollowUp) -> Unit) {
     private val mutable = MutableStateFlow(ParentalUi())
     val state = mutable.asStateFlow()
     private var prompts = 0
@@ -87,27 +99,76 @@ internal class ParentalController(private val scope: CoroutineScope, private val
     /** The policy revision the last verified or new PIN saw; a PIN change made with an older one is refused. */
     private var revision: Long? = null
     private var waitJob: Job? = null
+    private val session = ParentalSession()
 
-    /** Reads whether this TV has a PIN: as the app opens, and after the record may have changed. */
+    /**
+     * The lock rules as last read from the record, empty without a PIN; null until it is read, and while it cannot be,
+     * when every title asks for the PIN (D049).
+     */
+    var policy: AccessPolicy? = null
+        private set
+
+    /** The lock scopes PINs opened in this session. */
+    val grants: Set<AccessScope> get() = session.grants
+
+    /** Reads whether this TV has a PIN and its locks: as the app opens, and after the record may have changed. */
     suspend fun refresh() {
-        val status = when (guard.read()) {
+        val read = guard.read()
+        val status = when (read) {
             ProtectionRead.Unconfigured -> ParentalStatus.OFF
             is ProtectionRead.Ready -> ParentalStatus.ON
             ProtectionRead.Unavailable -> ParentalStatus.UNAVAILABLE
         }
         mutable.update { it.copy(status = status, adminUnlocked = it.adminUnlocked && status == ParentalStatus.ON) }
+        learn(when (read) {
+            ProtectionRead.Unconfigured -> AccessPolicy(emptyList())
+            is ProtectionRead.Ready -> read.snapshot.policy()
+            ProtectionRead.Unavailable -> null
+        })
     }
 
     /** True when the PIN pad opened before [reason], [then] to follow; false when nothing needs asking. */
     fun requestAdmin(reason: AdminReason, then: AdminFollowUp? = null): Boolean {
         if (state.value.mayLoosen) return false
-        val id = open(PinPurpose.Verify(reason), PinStep.VERIFY, then)
-        // A wait that earlier tries started is still running: the pad opens waiting. A PIN already sent meets it itself.
-        scope.launch {
-            val ms = guard.waitMs() ?: 0L
-            if (ms > 0 && state.value.prompt?.let { it.id == id && it.phase == PinPhase.Entry } == true) wait(id, ms)
-        }
+        ask(PinPurpose.Verify(reason), then)
         return true
+    }
+
+    /** Opens the pad for a locked title; [purpose] goes back to the model once the PIN is right. */
+    fun unlock(purpose: PinPurpose.Unlock) { ask(purpose, null) }
+
+    /** Opens [scopes] for the session: the locks on the title a PIN was just typed for. */
+    fun grant(scopes: Set<AccessScope>) {
+        session.grant(scopes)
+        mutable.update { it.copy(sessionGrants = session.grants.size) }
+    }
+
+    /**
+     * Locks again what PINs opened: "Açılan kilitleri kapat", or a protection loosened in Ayarlar (a hidden category
+     * shown, the adult filter off).
+     */
+    fun relockContent() {
+        session.clear()
+        mutable.update { it.copy(sessionGrants = 0) }
+    }
+
+    /**
+     * Adds [rules] the library needs (a locked category row's new identity, pin.md §5). A tightening, so it asks for no
+     * PIN; what the record refuses is tried again at the next publish.
+     */
+    fun addLocks(rules: List<AccessRule>) {
+        val read = policy?.revision ?: return
+        if (rules.isEmpty()) return
+        scope.launch {
+            val change = guard.edit(read) { current ->
+                current.copy(rules = current.rules + rules.filter { rule -> current.rules.none { it.scope == rule.scope } })
+            }
+            when (change) {
+                is ParentalGuard.Change.Saved -> learn(change.snapshot.policy())
+                ParentalGuard.Change.Stale -> refresh()
+                else -> Unit
+            }
+        }
     }
 
     /** True when the pad opened for the first PIN, [then] to follow once it is saved; false while a PIN may be set. */
@@ -182,6 +243,7 @@ internal class ParentalController(private val scope: CoroutineScope, private val
     /** "PIN'i kaldır", with the PIN verified in this visit; hidden categories and the adult filter stay as they are. */
     fun removePin() {
         if (state.value.status != ParentalStatus.ON || !state.value.adminUnlocked) return
+        relockContent()
         mutable.update { it.copy(notice = null) }
         scope.launch {
             val removed = guard.reset()
@@ -195,13 +257,19 @@ internal class ParentalController(private val scope: CoroutineScope, private val
     /** The Settings panel closed: what a verified PIN opened there ends with it. */
     fun closeSettings() { mutable.update { it.copy(adminUnlocked = false, notice = null) } }
 
-    /** The app left the screen (MainActivity.onStop): a grant or an open pad ends, and Settings closes over it. */
-    fun stopped() { if (state.value.adminUnlocked || state.value.prompt != null) relock() }
+    /**
+     * The app left the screen (MainActivity.onStop): what PINs opened locks again, and a grant or an open pad ends,
+     * Settings closing over it.
+     */
+    fun stopped() {
+        relockContent()
+        if (state.value.adminUnlocked || state.value.prompt != null) relock()
+    }
 
-    /** Ends the grant and the pad, and closes Settings ([ParentalUi.lockEpoch]). */
+    /** Ends the grant, the pad and what PINs opened, and closes Settings ([ParentalUi.lockEpoch]). */
     fun relock() {
-        forgetFirst(); waitJob?.cancel()
-        mutable.update { it.copy(adminUnlocked = false, prompt = null, notice = null, lockEpoch = it.lockEpoch + 1) }
+        forgetFirst(); waitJob?.cancel(); session.clear()
+        mutable.update { it.copy(adminUnlocked = false, prompt = null, notice = null, lockEpoch = it.lockEpoch + 1, sessionGrants = 0) }
     }
 
     /**
@@ -216,6 +284,31 @@ internal class ParentalController(private val scope: CoroutineScope, private val
         refresh()
         return if (removed) StartOver.DONE else StartOver.PIN_KEPT
     }
+
+    /** Opens the pad to check the PIN for [purpose]. */
+    private fun ask(purpose: PinPurpose, then: AdminFollowUp?) {
+        val id = open(purpose, PinStep.VERIFY, then)
+        // A wait that earlier tries started is still running: the pad opens waiting. A PIN already sent meets it itself.
+        scope.launch {
+            val ms = guard.waitMs() ?: 0L
+            if (ms > 0 && state.value.prompt?.let { it.id == id && it.phase == PinPhase.Entry } == true) wait(id, ms)
+        }
+    }
+
+    /**
+     * The lock rules are now [next]: the session keeps what PINs opened only while no restriction went, and the model
+     * hears of a change.
+     */
+    private fun learn(next: AccessPolicy?) {
+        val old = policy
+        policy = next
+        if ((old == null) == (next == null) && old?.rules == next?.rules) return
+        if (next == null) session.clear() else session.policyChanged(old?.rules.orEmpty(), next.rules)
+        mutable.update { it.copy(sessionGrants = session.grants.size) }
+        policyChanged()
+    }
+
+    private fun ProtectionSnapshot.policy() = AccessPolicy(rules, policyRevision)
 
     private fun open(purpose: PinPurpose, step: PinStep, then: AdminFollowUp?): Int {
         forgetFirst(); waitJob?.cancel()
@@ -234,6 +327,9 @@ internal class ParentalController(private val scope: CoroutineScope, private val
     private suspend fun saved(prompt: PinPrompt, change: ParentalGuard.Change) {
         if (change is ParentalGuard.Change.Saved) {
             revision = change.snapshot.policyRevision
+            // A new PIN: what the old one opened locks again.
+            if (prompt.purpose == PinPurpose.Change) relockContent()
+            learn(change.snapshot.policy())
             val open = isOpen(prompt)
             mutable.update { it.copy(status = ParentalStatus.ON, adminUnlocked = it.adminUnlocked || open,
                 prompt = if (open) null else it.prompt, notice = if (!open) it.notice else
@@ -249,8 +345,16 @@ internal class ParentalController(private val scope: CoroutineScope, private val
     private suspend fun verified(prompt: PinPrompt, result: ParentalGuard.Verify) {
         when (result) {
             is ParentalGuard.Verify.Correct -> {
-                revision = result.snapshot.policyRevision
+                learn(result.snapshot.policy())
                 val open = isOpen(prompt)
+                val purpose = prompt.purpose
+                if (purpose is PinPurpose.Unlock) {
+                    // A title's PIN opens that title's locks, not Ayarlar.
+                    mutable.update { it.copy(status = ParentalStatus.ON, prompt = if (open) null else it.prompt) }
+                    if (open) unlocked(purpose)
+                    return
+                }
+                revision = result.snapshot.policyRevision
                 mutable.update { it.copy(status = ParentalStatus.ON, adminUnlocked = it.adminUnlocked || open,
                     prompt = if (open) null else it.prompt) }
                 if (open) prompt.then?.let(followUp)
