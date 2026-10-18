@@ -27,6 +27,7 @@ class PlaybackRecoveryFlowTest {
     private val secondRequests = AtomicInteger()
     private val hlsRequests = AtomicInteger()
     @Volatile private var mode = "temporary"
+    @Volatile private var firstTitle = "Kurtarma filmi"
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
 
     @Before fun setup() {
@@ -38,7 +39,7 @@ class PlaybackRecoveryFlowTest {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 val path = request.requestUrl!!.encodedPath
                 if (path == "/list.m3u") return MockResponse().setBody(
-                    "#EXTM3U\n#EXTINF:-1,Kurtarma filmi\n${server.url("/movie/one.mp4")}\n#EXTINF:-1,Diğer film\n${server.url("/movie/two.mp4")}\n#EXTINF:-1,HLS denemesi\n${server.url("/movie/three.m3u8")}\n")
+                    "#EXTM3U\n#EXTINF:-1,$firstTitle\n${server.url("/movie/one.mp4")}\n#EXTINF:-1,Diğer film\n${server.url("/movie/two.mp4")}\n#EXTINF:-1,HLS denemesi\n${server.url("/movie/three.m3u8")}\n")
                 if (path.endsWith("three.m3u8")) return MockResponse().addHeader("Content-Type", "application/vnd.apple.mpegurl")
                     .setBody("#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:4\n#EXT-X-MEDIA-SEQUENCE:0\n#EXT-X-PLAYLIST-TYPE:VOD\n#EXTINF:4.0,\nsegment.ts\n#EXT-X-ENDLIST\n")
                 if (path.endsWith("segment.ts")) return if (hlsRequests.incrementAndGet() == 1) MockResponse().setResponseCode(503)
@@ -95,10 +96,11 @@ class PlaybackRecoveryFlowTest {
 
     @Test fun longTitleRecoveryAndFailureKeepControlsInsideScreen() {
         mode = "unavailable"
-        ui.runOnUiThread {
-            model.play(model.state.value.catalog.items.first().copy(title =
-                "İstanbul’dan dünyaya uzanan çok uzun bir yolculuk: unutulmaz hikâyeler ve beklenmedik karşılaşmalar"))
-        }
+        // The long title comes from the list: the model plays the catalogue's entry, never a copy handed to it.
+        firstTitle = "İstanbul’dan dünyaya uzanan çok uzun bir yolculuk: unutulmaz hikâyeler ve beklenmedik karşılaşmalar"
+        ui.runOnUiThread { model.refresh() }
+        ui.waitUntil(10_000) { !model.state.value.refreshing && model.state.value.catalog.items.first().title == firstTitle }
+        ui.runOnUiThread { model.play(model.state.value.catalog.items.first()) }
         fun assertPanelFits() {
             val panel = ui.onNodeWithTag("player-panel").getUnclippedBoundsInRoot()
             val viewport = ui.onRoot().getUnclippedBoundsInRoot()

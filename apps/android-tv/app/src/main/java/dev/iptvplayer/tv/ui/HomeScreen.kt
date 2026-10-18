@@ -43,7 +43,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
@@ -246,11 +245,8 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
     val density = LocalDensity.current
     var viewportHeight by remember { mutableStateOf(0.dp) }
     val shelfHeights = remember { mutableStateMapOf<String, Dp>() }
-    // Held OK on a card: the quick actions (U8); focus returns to that card.
-    var quick by remember { mutableStateOf<MediaEntry?>(null) }
-    var refocus by remember { mutableStateOf<FocusRequester?>(null) }
-    val window = LocalWindowInfo.current
-    LaunchedEffect(refocus) { refocus?.let { target -> refocusAfterDialog(window) { target }; refocus = null } }
+    // Held OK on a card: the quick actions (U8) above the screen; focus returns to that card.
+    val overlay = rememberOverlayOpener()
     // The hero runs to the top edge (D067); without it the page keeps the usual top margin.
     Navigation(s, model, Modifier.onFocusChanged { menuFocused.value = it.hasFocus }, first = nav,
         contentTop = if (slides.isNotEmpty() && rows.isNotEmpty()) 0.dp else TvLayout.HeaderTop,
@@ -331,7 +327,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                                 Modifier.then(if (key == target) Modifier.focusRequester(focus) else Modifier)
                                     .focusRequester(own)
                                     .onFocusChanged { if (it.isFocused) { model.homeFocus(key); lastFocus.requester = own } }, row.key, headingHeight + 10.dp, viewportHeight, reserveEpisode,
-                                longClick = { quick = entry; refocus = null }) {
+                                longClick = { overlay(AppOverlay.Quick(entry)) { lastFocus.requester } }) {
                                 model.homeFocus(key)
                                 model.open(entry, continuing?.record)
                             }
@@ -341,10 +337,6 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
             }
         }
     } }
-    quick?.let { entry ->
-        QuickActions(entry, entry.id in s.favoriteIds, toggleFavorite = { model.toggleFavorite(entry) }, open = { model.open(entry) },
-            dismiss = { quick = null; refocus = lastFocus.requester })
-    }
     LaunchedEffect(Unit) {
         // A remembered key whose starter shelf gave way to its personal row (the first watch) already fell back to
         // the new target; record that before the stale-key effect below looks, so focus does not jump to the menu.

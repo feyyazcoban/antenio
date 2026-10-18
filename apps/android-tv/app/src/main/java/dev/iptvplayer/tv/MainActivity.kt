@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
         super.onUserInteraction()
         if (opening) { opening = false; startupSound.stop() }
     }
-    override fun onStart() { super.onStart(); startupSound.start() }
-    override fun onStop() { startupSound.stop(); super.onStop() }
+    override fun onStart() { super.onStart(); startupSound.start(); model.appStarted() }
+    override fun onStop() { startupSound.stop(); model.appStopped(); super.onStop() }
     override fun onDestroy() { startupSound.stop(); super.onDestroy() }
 }

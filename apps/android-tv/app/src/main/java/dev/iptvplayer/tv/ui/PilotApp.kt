@@ -2,6 +2,7 @@ package dev.iptvplayer.tv.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
+import androidx.annotation.StringRes
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.BringIntoViewSpec
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
@@ -28,6 +29,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -38,6 +40,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -72,6 +75,7 @@ import androidx.compose.ui.input.key.type
     val state by model.state.collectAsStateWithLifecycle()
     var settings by remember { mutableStateOf(false) }
     var exitAsk by remember { mutableStateOf(false) }
+    val overlays = remember { AppOverlays() }
     val savedScreens = rememberSaveableStateHolder()
     // Keep already-visible cards in place instead of moving every TV focus to a fixed pivot.
     val bringIntoView = remember { object : BringIntoViewSpec {} }
@@ -110,7 +114,8 @@ import androidx.compose.ui.input.key.type
         }
         handler
     }
-    CompositionLocalProvider(LocalReducedMotion provides state.reducedMotion, LocalBringIntoViewSpec provides bringIntoView) {
+    CompositionLocalProvider(LocalReducedMotion provides state.reducedMotion, LocalBringIntoViewSpec provides bringIntoView,
+        LocalAppOverlays provides overlays) {
         Box(Modifier.fillMaxSize().background(Ink.Background).onPreviewKeyEvent { event -> escapeAsBack(event) }) {
             when (state.route) {
                 Route.RECOVERY -> SourceRecoveryScreen(state, model)
@@ -134,6 +139,7 @@ import androidx.compose.ui.input.key.type
                 Route.PLAYER -> state.playing?.let { PlayerScreen(it, model, routeBack) }
             }
             if (settings) Settings(state, model) { settings = false }
+            AppOverlayHost(overlays, state, model)
             if (exitAsk && state.route == Route.HOME) ExitDialog { exitAsk = false }
             if (opening) LaunchCover(state.reducedMotion,
                 loading = state.route == Route.LOADING && state.sourceTask == SourceTask.RESTORING, finish = endOpening)
@@ -320,18 +326,120 @@ internal class EvenColumns(private val count: Int) : GridCells {
 }
 
 /**
- * Held OK on a card (U8): add or remove the favourite, or open the title, without going through its detail or player.
- * Focus returns to the card through [dismiss].
+ * A window above every screen and the Settings panel (gap plan T3), one at a time: the quick actions today; the PIN
+ * pad, a reminder and the Plus page later. Screens open one through [rememberOverlayOpener]; [PilotApp] shows it.
  */
-@Composable internal fun QuickActions(entry: MediaEntry, favorite: Boolean, toggleFavorite: () -> Unit, open: () -> Unit, dismiss: () -> Unit) {
-    val first = remember { FocusRequester() }
-    SourceDialog(displayTitle(entry.title, entry.year).name, first, dismiss, width = 440.dp) {
-        Action(stringResource(if (favorite) R.string.favorite_remove else R.string.favorite_add), Modifier.fillMaxWidth().focusRequester(first).testTag("quick-favorite"),
-            icon = "star", iconFilled = favorite) { toggleFavorite(); dismiss() }
-        Action(stringResource(if (entry.kind == MediaKind.LIVE) R.string.action_watch else R.string.action_details), Modifier.fillMaxWidth().testTag("quick-open"),
-            icon = if (entry.kind == MediaKind.LIVE) "play" else null) { dismiss(); open() }
-        Action(stringResource(R.string.action_cancel), Modifier.fillMaxWidth().testTag("quick-cancel"), outlined = true, onClick = dismiss)
+internal sealed interface AppOverlay {
+    /** Held OK on [entry]'s card (U8). */
+    data class Quick(val entry: MediaEntry) : AppOverlay
+}
+
+/**
+ * The [AppOverlay] on screen. A new one takes the place of the one open. Once it closes, focus goes back to its
+ * opener's requester in the opener's window (refocusAfterDialog). An opener that leaves the screen first takes its
+ * overlay and that focus return along, as it did when each screen composed its own dialog.
+ */
+@Stable internal class AppOverlays {
+    class Opened(val overlay: AppOverlay, val owner: Any, val window: WindowInfo, val returnFocus: () -> FocusRequester?)
+
+    var shown by mutableStateOf<Opened?>(null)
+        private set
+    /** The overlay that closed, until its opener's window has focus again and the requester has taken it. */
+    var returning by mutableStateOf<Opened?>(null)
+        private set
+
+    fun show(opened: Opened) { returning = null; shown = opened }
+    /** An action, Vazgeç or Back closed the overlay on screen. */
+    fun close() { returning = shown ?: return; shown = null }
+    fun returned(opened: Opened) { if (returning === opened) returning = null }
+    fun leave(owner: Any) {
+        if (shown?.owner === owner) shown = null
+        if (returning?.owner === owner) returning = null
     }
+}
+
+/** The app's [AppOverlays]; a screen composed on its own (a layout test) gets one that nothing shows. */
+internal val LocalAppOverlays = staticCompositionLocalOf { AppOverlays() }
+
+/**
+ * Opens [AppOverlay]s for the calling screen, which owns them: one closes when the screen leaves. Focus goes back to
+ * what `returnFocus` names when the overlay closes, looked up then, as the card may have been composed again.
+ */
+@Composable internal fun rememberOverlayOpener(): (overlay: AppOverlay, returnFocus: () -> FocusRequester?) -> Unit {
+    val overlays = LocalAppOverlays.current
+    val window = LocalWindowInfo.current
+    val owner = remember { Any() }
+    DisposableEffect(overlays, owner) { onDispose { overlays.leave(owner) } }
+    return remember(overlays, window) { { overlay, returnFocus -> overlays.show(AppOverlays.Opened(overlay, owner, window, returnFocus)) } }
+}
+
+/** The overlay on screen, composed after the screens and Settings so its window opens above them, and focus back. */
+@Composable private fun AppOverlayHost(overlays: AppOverlays, s: TvState, model: TvViewModel) {
+    overlays.shown?.let { opened -> key(opened) {
+        when (val overlay = opened.overlay) {
+            is AppOverlay.Quick -> QuickActions(overlay.entry, quickActions(overlay.entry, overlay.entry.id in s.favoriteIds,
+                toggleFavorite = { model.toggleFavorite(overlay.entry) }, open = { model.open(overlay.entry) }, close = overlays::close),
+                overlays::close)
+        }
+    } }
+    val returning = overlays.returning
+    LaunchedEffect(returning) { returning?.let { refocusAfterDialog(it.window, it.returnFocus); overlays.returned(it) } }
+}
+
+/**
+ * A row of the quick actions: [key] names it for tests ("quick-$key"); [run] does what it says and closes the menu,
+ * before or after as the action needs. Later steps add rows (Kilitle, Yeniden adlandır, Taşı, Gizle …).
+ */
+internal data class QuickAction(val key: String, @StringRes val label: Int, val icon: String? = null,
+    val iconFilled: Boolean = false, val run: () -> Unit)
+
+/** Held OK on a card (U8): add or remove the favourite, or open the title, without going through its detail or player. */
+internal fun quickActions(entry: MediaEntry, favorite: Boolean, toggleFavorite: () -> Unit, open: () -> Unit, close: () -> Unit) = listOf(
+    QuickAction("favorite", if (favorite) R.string.favorite_remove else R.string.favorite_add, "star", iconFilled = favorite) { toggleFavorite(); close() },
+    QuickAction("open", if (entry.kind == MediaKind.LIVE) R.string.action_watch else R.string.action_details,
+        if (entry.kind == MediaKind.LIVE) "play" else null) { close(); open() })
+
+/**
+ * The quick actions for [entry], then Vazgeç. A list longer than the window (large text) scrolls by whole rows (D053),
+ * and the focused row keeps half a gap around it in view, the room of its focus ring.
+ */
+@Composable internal fun QuickActions(entry: MediaEntry, actions: List<QuickAction>, dismiss: () -> Unit) {
+    val first = remember { FocusRequester() }
+    val gap = 16.dp
+    val pitch = with(LocalDensity.current) { (actionHeight() + gap).roundToPx() }
+    SourceDialog(displayTitle(entry.title, entry.year).name, first, dismiss, width = 440.dp) {
+        // Half a gap above and below the rows, pulled out over the dialog's spacing: at rest each row sits where the
+        // dialog's own column put it, and a scrolled window holds whole rows.
+        Column(Modifier.weight(1f, fill = false).layout { measurable, constraints ->
+                val room = (gap / 2).roundToPx()
+                val max = if (!constraints.hasBoundedHeight) constraints.maxHeight
+                    else ((constraints.maxHeight + 2 * room) / pitch).coerceAtLeast(1) * pitch
+                val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = max))
+                layout(placeable.width, (placeable.height - 2 * room).coerceIn(constraints.minHeight, constraints.maxHeight)) {
+                    placeable.place(0, -room)
+                }
+            }.verticalScroll(rememberScrollState()).padding(vertical = gap / 2), verticalArrangement = Arrangement.spacedBy(gap)) {
+            actions.forEachIndexed { index, action ->
+                QuickRow(stringResource(action.label), Modifier.then(if (index == 0) Modifier.focusRequester(first) else Modifier)
+                    .testTag("quick-${action.key}"), gap / 2, action.icon, action.iconFilled, onClick = action.run)
+            }
+            QuickRow(stringResource(R.string.action_cancel), Modifier.testTag("quick-cancel"), gap / 2, outlined = true, onClick = dismiss)
+        }
+    }
+}
+
+/** A full-width row of the quick actions that keeps [edge] around it in view while it has focus. */
+@Composable private fun QuickRow(label: String, modifier: Modifier, edge: Dp, icon: String? = null, iconFilled: Boolean = false,
+    outlined: Boolean = false, onClick: () -> Unit) {
+    val relocation = remember { BringIntoViewRequester() }
+    var focused by remember { mutableStateOf(false) }
+    var height by remember { mutableIntStateOf(0) }
+    val room = with(LocalDensity.current) { edge.toPx() }
+    LaunchedEffect(focused, height) {
+        if (focused) { withFrameNanos { }; relocation.bringIntoView(Rect(0f, -room, 1f, height + room)) }
+    }
+    Action(label, modifier.fillMaxWidth().bringIntoViewRequester(relocation).onSizeChanged { height = it.height }
+        .onFocusChanged { focused = it.isFocused }, icon = icon, iconFilled = iconFilled, outlined = outlined, onClick = onClick)
 }
 
 /** Focus for [requester] once this window has focus again (after a dialog), or false if it is gone. */

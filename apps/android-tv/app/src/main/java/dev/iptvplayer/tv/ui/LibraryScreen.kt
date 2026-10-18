@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -114,10 +113,8 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     // Sources with a guide: without one, rows and the panel do not repeat "Program bilgisi yok" (U14).
     val guided = s.guideStatus.filterValues { it.configured }.keys
     val noGuide = live && itemsOfKind.none { it.sourceId in guided }
-    // Held OK on a card or row: the quick actions (U8); focus goes back to that card afterwards.
-    var quick by remember { mutableStateOf<MediaEntry?>(null) }
-    var refocus by remember { mutableStateOf<String?>(null) }
-    val window = LocalWindowInfo.current
+    // Held OK on a card or row: the quick actions (U8) above the screen; focus goes back to that card afterwards.
+    val overlay = rememberOverlayOpener()
     // Films and series can be ordered (Sırala); channels keep their numbers' order, Favoriler its own and
     // Geçmiş the order they were watched in.
     val sortable = !s.onlyFavorites && s.category != HistoryCategory && (s.kind == MediaKind.MOVIE || s.kind == MediaKind.SERIES)
@@ -135,7 +132,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     }
     val initialIndex = remember { filtered.indexOfFirst { it.id == s.focusedId }.coerceAtLeast(0) }
     val memory = remember { LibraryMemory(filtered.getOrNull(initialIndex)?.id, initialIndex) }
-    LaunchedEffect(refocus) { refocus?.let { id -> refocusAfterDialog(window) { memory.cards[id] }; refocus = null } }
+    fun quick(entry: MediaEntry) = overlay(AppOverlay.Quick(entry)) { memory.cards[entry.id] }
     // The focused card's place for the heading's "3 / 120"; only that counter reads it.
     val position = remember { mutableIntStateOf(initialIndex + 1) }
     var gridActive by remember { mutableStateOf(false) }
@@ -333,10 +330,10 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                         } }
                         if (entry.kind == MediaKind.LIVE && !typing && live)
                             ChannelRow(entry, numbers[entry.id] ?: 0, entry.id in s.favoriteIds, card, programmes[entry.id], now, zone,
-                                guideAvailable = entry.sourceId in guided, longClick = { quick = entry }) { model.open(entry) }
+                                guideAvailable = entry.sourceId in guided, longClick = { quick(entry) }) { model.open(entry) }
                         else MediaCard(entry, entry.id in s.favoriteIds, if (s.sources.size > 1) s.sourceName(entry.sourceId) else null,
                             card, programmes[entry.id], now, compact = typing, compactMin = compactMin,
-                            guideAvailable = entry.sourceId in guided, longClick = { quick = entry }) { model.open(entry) }
+                            guideAvailable = entry.sourceId in guided, longClick = { quick(entry) }) { model.open(entry) }
                     }
                 }
             }
@@ -350,10 +347,6 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
             }
             restoreCategory = false
         }
-    }
-    quick?.let { entry ->
-        QuickActions(entry, entry.id in s.favoriteIds, toggleFavorite = { model.toggleFavorite(entry) }, open = { model.open(entry) },
-            dismiss = { quick = null; refocus = entry.id })
     }
     // The field is the list's first row: show the list from its top, so the whole field and its label are in view.
     LaunchedEffect(searchOpen) {

@@ -136,6 +136,14 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         restore(atLaunch = true)
     }
 
+    /**
+     * NEXTV came on screen (MainActivity.onStart) or left it (onStop: Home, another app, standby). What may live only
+     * while the viewer sees the app hangs here as it arrives (gap plan T3, T6): unlocks with the PIN end, the foreground
+     * timer pauses, a local transfer closes. Nothing does yet.
+     */
+    fun appStarted() { }
+    fun appStopped() { }
+
     /** Migration is serialized with accepted writes from a previous ViewModel. */
     private fun readRegistry(): SourceRegistry {
         val current = store.loadSources()
@@ -590,10 +598,50 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         mutable.update { it.copy(favoriteIds = SourceLibrary.favorites(it.sources, store::favorites)) }
     }
 
-    fun open(entry: MediaEntry, resume: WatchRecord? = null) {
-        if (entry.adult || state.value.sourceFor(entry) == null) return
+    /** What the app may use of NEXTV Plus: everything until sales open (gap plan S37). */
+    val entitlements: Entitlements = AllFree
+
+    /**
+     * Every open and play passes here (gap plan T3). The gate finds the title by its identity in this model's state,
+     * never in a screen's copy, and decides; an allowed target then runs on the entry the gate found. Deny leaves
+     * everything as it is. The PIN pad (S10) and the Plus page (S37) will answer NeedsPin and NeedsPlus from here.
+     */
+    fun request(target: AccessTarget): GateResult {
+        val result = AccessGate.decide(target, gateSnapshot(target))
+        if (result is GateResult.Allow) perform(target, result.entry)
+        return result
+    }
+
+    private fun gateSnapshot(target: AccessTarget): GateSnapshot {
+        val s = state.value
+        return GateSnapshot(s.sources, s.allCatalog, s.selected, s.episodes, s.playing?.entry, s.route == Route.PLAYER,
+            channels = when (target) {
+                is AccessTarget.ChannelNumber -> numberedChannels()
+                is AccessTarget.ChannelStep -> zapChannels()
+                else -> emptyList()
+            }, autoNextEpisode = s.autoNextEpisode, entitlements = entitlements)
+    }
+
+    private fun perform(target: AccessTarget, entry: MediaEntry) {
+        when (target) {
+            is AccessTarget.Open -> openAllowed(entry, target.resume)
+            is AccessTarget.Watch -> watchAllowed(entry)
+            is AccessTarget.Play -> startPlayback(entry, target.restart)
+            // The channel already playing stays as it is.
+            is AccessTarget.ChannelNumber -> if (entry.id != state.value.playing?.entry?.id) startPlayback(entry)
+            is AccessTarget.ChannelStep -> startPlayback(entry)
+            is AccessTarget.NextEpisode -> startPlayback(entry, restart = true)
+        }
+    }
+
+    // The screens' openers, unchanged for their callers; each asks the gate with the title's identity only.
+    fun open(entry: MediaEntry, resume: WatchRecord? = null) { request(AccessTarget.Open(entry.id, resume)) }
+    fun watch(entry: MediaEntry) { request(AccessTarget.Watch(entry.id)) }
+    fun play(entry: MediaEntry, restart: Boolean = false) { request(AccessTarget.Play(entry.id, restart)) }
+
+    private fun openAllowed(entry: MediaEntry, resume: WatchRecord?) {
         mutable.update { it.copy(focusedId = entry.id) }
-        if (entry.kind == MediaKind.LIVE) { play(entry); return }
+        if (entry.kind == MediaKind.LIVE) { startPlayback(entry); return }
         detailJob?.cancel()
         mutable.update { it.copy(route = Route.DETAIL, selected = entry, episodes = emptyList(), detailLoading = true,
             detailError = null, detailReturn = when (it.route) { Route.HOME -> Route.HOME; Route.SEARCH -> Route.SEARCH; else -> Route.LIBRARY }) }
@@ -640,13 +688,12 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
      * The hero's İzle (D071): a film plays, from where it was left when it was started; a series plays its next
      * episode, the way its detail's Oynat/Devam et would: the episode being watched, the one after a finished one, else
      * the first. The episodes load first; leaving Ana Sayfa meanwhile cancels the start. With no episode, or when they
-     * cannot be loaded, the series' detail opens and explains.
+     * cannot be loaded, the series' detail opens and explains. What runs after the load asks the gate again.
      */
-    fun watch(entry: MediaEntry) {
-        if (entry.adult || state.value.sourceFor(entry) == null) return
+    private fun watchAllowed(entry: MediaEntry) {
         val source = state.value.sourceFor(entry) ?: return
         mutable.update { it.copy(focusedId = entry.id) }
-        if (entry.kind != MediaKind.SERIES) { play(entry); return }
+        if (entry.kind != MediaKind.SERIES) { startPlayback(entry); return }
         detailJob?.cancel()
         mutable.update { it.copy(heroStarting = entry.id) }
         detailJob = viewModelScope.launch {
@@ -678,8 +725,11 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     /** A resume opened from a card plays only while its detail is still the screen; leaving during the load cancels it. */
     private fun stillOn(entry: MediaEntry) = state.value.route == Route.DETAIL && state.value.selected?.id == entry.id
 
-    fun play(entry: MediaEntry, restart: Boolean = false) {
-        if (entry.adult || state.value.sourceFor(entry) == null) return
+    /**
+     * Starts [entry] in the player. Only an allowed target reaches here, with the entry the gate found; anything that
+     * plays later (a detail's resume, the hero's episode) calls [play], which asks the gate again then.
+     */
+    private fun startPlayback(entry: MediaEntry, restart: Boolean = false) {
         val source = state.value.sourceFor(entry) ?: return
         try {
             val uri = source.streamUrl(entry)
@@ -699,14 +749,10 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun nextEpisode(): MediaEntry? = nextEpisodeChoice()?.entry
 
-    fun playNextEpisode(sourceId: String, currentId: String, nextId: String, automatic: Boolean = false): Boolean {
-        val s = state.value
-        if (s.route != Route.PLAYER || s.playing?.entry?.sourceId != sourceId || s.playing?.entry?.id != currentId) return false
-        val next = nextEpisodeChoice() ?: return false
-        if (next.entry.id != nextId || (automatic && (!s.autoNextEpisode || !next.automaticAllowed))) return false
-        play(next.entry, restart = true)
-        return state.value.playing?.entry?.id == nextId
-    }
+    /** True when [nextId] now plays: the gate checks that the player still shows [currentId] and that it comes next. */
+    fun playNextEpisode(sourceId: String, currentId: String, nextId: String, automatic: Boolean = false): Boolean =
+        request(AccessTarget.NextEpisode(sourceId, currentId, nextId, automatic)) is GateResult.Allow &&
+            state.value.playing?.entry?.id == nextId
 
     /**
      * The hero's films with their details (D067): an Xtream list sends no wide picture or plot for films, only their
@@ -737,20 +783,15 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         catalogDisplayOrder(state.value.catalog.items.filter { it.kind == MediaKind.LIVE && !it.adult })
     fun channelNumber(entry: MediaEntry): Int? = numberedChannels().indexOfFirst { it.id == entry.id }.takeIf { it >= 0 }?.plus(1)
     /** Plays channel [number] of "Tüm kanallar" (the one playing stays as it is); false when there is no such channel. */
-    fun playChannelNumber(number: Int): Boolean {
-        val channel = numberedChannels().getOrNull(number - 1) ?: return false
-        if (channel.id != state.value.playing?.entry?.id) play(channel)
-        return true
-    }
+    fun playChannelNumber(number: Int): Boolean = request(AccessTarget.ChannelNumber(number)) != GateResult.Deny
 
-    fun changeChannel(direction: Int) {
+    fun changeChannel(direction: Int) { request(AccessTarget.ChannelStep(direction)) }
+    /** The channels CH± steps through: those of the list the player was opened from (a category, Ara's source, all). */
+    private fun zapChannels(): List<MediaEntry> {
         val s = state.value
         val context = if (s.playerReturn == Route.SEARCH) filtered(s.allCatalog, s.searchSourceId) else s.catalog
-        val channels = context.items.filter { it.kind == MediaKind.LIVE && !it.adult &&
+        return context.items.filter { it.kind == MediaKind.LIVE && !it.adult &&
             (s.playerReturn != Route.LIBRARY || s.category == CategoryFilter.ALL || it.category == s.category) }
-        if (channels.isEmpty()) return
-        val index = channels.indexOfFirst { it.id == s.playing?.entry?.id }
-        play(channels[Math.floorMod(index + direction, channels.size)])
     }
 
     fun progress(entry: MediaEntry): PlaybackMark? = state.value.sourceFor(entry)?.let { store.progress(it.id, entry.withoutSource().id) }
