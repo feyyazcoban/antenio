@@ -340,6 +340,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                                 Modifier.then(if (key == target) Modifier.focusRequester(focus) else Modifier)
                                     .focusRequester(own)
                                     .onFocusChanged { if (it.isFocused) { model.homeFocus(key); lastFocus.requester = own } }, row.key, headingHeight + 10.dp, viewportHeight, reserveEpisode,
+                                frameShelf = slides.isEmpty() || row.key != rows.first().key,
                                 locked = s.locks.asksPin(entry.id), longClick = { overlay(AppOverlay.Quick(entry)) { lastFocus.requester } }) {
                                 model.homeFocus(key)
                                 if (model.open(entry, continuing?.record)) openPin { own }
@@ -542,14 +543,17 @@ internal fun runtimeText(seconds: Long): String {
  * hold such a title (homeLibrary).
  */
 @Composable private fun HomeCard(entry: MediaEntry, record: WatchRecord?, sourceName: String?, modifier: Modifier, section: String, headingContext: Dp, viewportHeight: Dp,
-    reserveEpisode: Boolean = false, locked: Boolean = false, longClick: (() -> Unit)? = null, open: () -> Unit) {
+    reserveEpisode: Boolean = false, frameShelf: Boolean = true, locked: Boolean = false, longClick: (() -> Unit)? = null, open: () -> Unit) {
     val live = entry.kind == MediaKind.LIVE
     val shown = rememberShownTitle(entry.title, entry.year)
     val spoken = rememberShownName(entry.title)
     val lockedState = stringResource(R.string.lock_state)
     // The row's own 24 dp gutter: a focused card stops on the heading edge instead of 7 dp from the screen,
     // which left a strip of the previous card with cut text at the other edge.
-    val visibility = rememberCardVisibility(horizontalPadding = TvLayout.Gutter, contextAbove = headingContext, viewportHeight = viewportHeight)
+    // The first shelf is already just below the hero. Reveal its card and heading without moving the
+    // whole shelf to the top: that long relocation also composes several lower shelves during the key press.
+    val visibility = rememberCardVisibility(horizontalPadding = TvLayout.Gutter, contextAbove = headingContext,
+        viewportHeight = viewportHeight, frameShelf = frameShelf)
     if (record != null) {
         // A finished latest episode: the card offers the series' next episode instead of a position.
         val next = record.kind == MediaKind.EPISODE && record.progress.completed

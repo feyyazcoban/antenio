@@ -1,5 +1,11 @@
 # Güncel görsel inceleme
 
+18 Ekim 2026 · **0.14.48 · Vitrinden ilk rafa kısa kaydırma (D078).** Sentetik aynı geçişte 381 dp yerine gereken 38,5 dp kaydırılır. Kart ve başlığı görünür; vitrin gereksiz yere tamamen kaybolmaz. Normal yazı, debug, yalnız 5558. [QA](../../docs/project/native-home-scroll-48-qa.json). Fiziksel kare süresi ölçülmedi.
+
+![İlk devam kartında odak](home-scroll-0.14.48/continue-after.png)
+
+## Önceki: 0.14.47
+
 18 Ekim 2026 · **0.14.47 · S14b oynatıcı kontrolleri.** Sentetik yerel medya, yalnız 5558 test emülatörü, debug derlemesi. Yeni alt bilgi bloğu, kontrol simgeleri, odak etiketi ve sarma önizlemesi. Cihaz testi sonuçları ve release teslimi [QA](../../docs/project/native-player-controls-47-qa.json) ile [HANDOFF](../../docs/project/HANDOFF.md) içinde; görseller fiziksel TV kabulü değildir. [Davranış ve sınırlar](../../docs/design/PLAYER_PRESENTATION.md).
 
 | Konu | Görüntü |

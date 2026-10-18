@@ -7,6 +7,7 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.unit.dp
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.iptvplayer.tv.data.*
 import dev.iptvplayer.tv.ui.*
@@ -44,7 +45,19 @@ class ContinueCardLayoutTest {
         // Home opens on the hero when there is one (D070); Down reaches the continue shelf.
         if (ui.onAllNodesWithTag("hero-watch").fetchSemanticsNodes().isNotEmpty()) {
             ui.onNodeWithTag("hero-watch").assertIsFocused()
+            ui.onNodeWithTag("hero-details").performSemanticsAction(SemanticsActions.RequestFocus)
+            ui.waitForIdle()
+            val heroBefore = ui.onNodeWithTag("home-hero").getUnclippedBoundsInRoot()
+            val firstBefore = ui.onNodeWithTag("continue:${restored.first().id}").getUnclippedBoundsInRoot()
+            val viewportBefore = ui.onNodeWithTag("home-content").getUnclippedBoundsInRoot()
             InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle()
+            val heroAfter = ui.onNodeWithTag("home-hero").getUnclippedBoundsInRoot()
+            val needed = maxOf(0.dp, firstBefore.bottom + 27.dp - viewportBefore.bottom)
+            android.util.Log.i("HomeScrollCheck", "needed=$needed, moved=${heroBefore.top - heroAfter.top}")
+            assertTrue("Hero to continue must only reveal the card, not pin the shelf: needed=$needed, moved=${heroBefore.top - heroAfter.top}",
+                heroBefore.top - heroAfter.top <= needed + 4.dp)
+            val heading = ui.onNodeWithTag("shelf-heading:continue").getUnclippedBoundsInRoot()
+            assertTrue("Continue heading stays visible", heading.top >= viewportBefore.top)
         }
         repeat(restored.size) { index ->
             val card = ui.onNodeWithTag("continue:${restored[index].id}").assertIsFocused()

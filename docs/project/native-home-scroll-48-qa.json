@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.48-design-preview",
+  "versionCode": 62,
+  "decision": "D078",
+  "sha256": "71014ce84547b954b796585f902e98e40222987114a4d055a0d871ce8a0ec88a",
+  "change": "Home first shelf below a hero uses minimum card+heading visibility instead of a viewport-sized top-framing request. Lower shelves and homes without a hero retain D051.",
+  "reproduction": {
+    "device": "emulator-5558 / nextv_test_api36",
+    "fontScale": "default 1.0; no font matrix",
+    "source": "synthetic local catalog, no real playback",
+    "before": "ContinueCardLayoutTest fails on unchanged 0.14.47 app: required 38.5 dp, actual 381.0 dp",
+    "after": "Same test passes on 0.14.48: required and actual both 38.5 dp"
+  },
+  "tests": {
+    "unit": {
+      "tests": 354,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 37
+    },
+    "build": "release/debug/androidTest successful",
+    "instrumentation": "5/5, only tools/run-device-tests.sh --no-build: ContinueCardLayoutTest, HeroLayoutTest, VisualPreviewTest#homePostersAndContinueRemainVisibleWithRemote, VisualPreviewTest#remoteVerticalShelvesKeepTheirHeadingAndFullCardTogether"
+  },
+  "review": "Main agent reviewed the diff; no subagent used. Existing CardVisibility minimum-scroll path reused; no new dependency or animation API.",
+  "image": "design/reviews/home-scroll-0.14.48/continue-after.png",
+  "logs": "work/home-scroll-qa/before-full.log, after-full.log, measurement.log (ignored)",
+  "officialReference": "https://developer.android.com/training/tv/playback/compose/lists",
+  "limitations": [
+    "No physical-TV frame-time/FPS measurement or claim; user perceived smoothness remains to be accepted",
+    "Font matrix deferred until user says yayına hazırla",
+    "Figma unchanged"
+  ],
+  "delivery": {
+    "designEmulator": {
+      "device": "emulator-5556",
+      "before": {
+        "versionCode": "61",
+        "versionName": "0.14.47-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:26:32"
+      },
+      "after": {
+        "versionCode": "62",
+        "versionName": "0.14.48-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:38:30"
+      },
+      "sha256": "71014ce84547b954b796585f902e98e40222987114a4d055a0d871ce8a0ec88a",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "evimVisible": true,
+      "appRunning": true,
+      "crashRecordForApp": false
+    },
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "61",
+        "versionName": "0.14.47-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 20:27:00"
+      },
+      "after": {
+        "versionCode": "62",
+        "versionName": "0.14.48-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 20:38:51"
+      },
+      "sha256": "71014ce84547b954b796585f902e98e40222987114a4d055a0d871ce8a0ec88a",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "emulatorsAfter": "5556 and 5558 stopped; 5554 untouched"
+  }
+}

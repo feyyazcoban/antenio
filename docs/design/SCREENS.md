@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**18 Ekim · TV-010 / D078:** Vitrin varsa ilk raf, Aşağı ile odaklandığında yalnız başlık ve kartı görünür kılacak mesafe kadar kayar; ekranın üstüne zorla taşınmaz. Alt raflarda başlık hizalama korunur. [Raf sözleşmesi](HOME_SHELF_FRAMING.md).
+
 **14 Ekim:** TV-010/020/030/031/040 için [görsel revizyon](VISUAL_REVISION.md) hazır. Aday üst gezinme: yatay sekme, aşağı içerik; kartta sağ/sol aynı satırda kalır. Android0.14 tasarım önizlemesinde üst gezinme uygulanmıştır. Aşağıdaki çekmece anlatımı0.13 ve ilk prototipin tarihli davranışıdır; [güncel native sözleşme](NATIVE_VISUAL_REVISION.md) önceliklidir.17 ekranın tamamı yeniden tasarlanmış sayılmaz.
 
 **Kapsam:** Canlı TV + filmler + diziler. **Durum:** Ekran envanteri ve davranış sözleşmesi; F01–F06 yerel akışları gerçek görsellerle incelemeye hazır. Figma ekran çizimleri henüz yok.

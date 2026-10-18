@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-019/020 · 0.14.48 / D078: kullanıcının vitrinden ilk devam kartına geçişte takılma bildirimi için gereksiz üst hizalama kaldırıldı. Normal ölçekte önce/sonra ve raf/odak kontrolleri; teslim ve kalan fiziksel kabul STATUS/HANDOFF'ta. Genel tasarım kabulü done yapılmadı.
+
 ## Gap planı izleme · 18 Ekim 2026
 
 Önceki notlar tarihçedir. S01–S14'ün tamamlanmış turları Claude devrinde kayıtlıdır; bu tablo teslim/kullanıcı kabulü gerektiren işleri done yapmaz. S14b, BKL-020 ve BKL-031 altında izlenir.

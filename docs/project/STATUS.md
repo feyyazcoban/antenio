@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.48 · Ana sayfa aşağı geçişi · 18 Ekim 2026
+
+Kullanıcının hero Ayrıntılar → İzlemeye devam et geçişindeki takılma bildirimi düzeltildi (D078). İlk raf artık ekranın tepesine taşınmak yerine kart ve başlığı gösterecek kadar kayar; diğer rafların D051 davranışı korunur. Aynı sentetik senaryoda gereken 38,5 dp iken eski kaynak 381 dp kaydırıyordu; düzeltme 38,5 dp kaydırır. Fiziksel TV kare süresi ölçülmedi; kullanıcının akıcılık kabulü açık.
+
+Kontroller: eski kaynakta yeni regresyon testi beklenen nedenle başarısız; son kaynakta yalnız 5558 / tools/run-device-tests.sh ile ilgili 5/5 kontrol geçti. 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest derlemeleri başarılı. Yazı boyutu matrisi çalıştırılmadı. [QA](native-home-scroll-48-qa.json) ve [görsel](../../design/reviews/LATEST.md) kayıtlı.
+
+0.14.48-design-preview / kod 62, 5556 ve TV'ye install -r ile kuruldu; ilk kurulum tarihleri ve kurulu APK hash eşitliği doğrulandı. 5556'da Evim görünür, uygulama açık, çökme kaydı yok. TV güncellemesi 20:38:51; veri silme ve gerçek yayın açma yok. SHA-256: 71014ce84547b954b796585f902e98e40222987114a4d055a0d871ce8a0ec88a. Emülatörler ve Gradle kapalı. Sıradaki kapsam S15a; sonraki paket en az 0.14.49/kod 63. Font matrisi yalnız kullanıcı “yayına hazırla” dediğinde.
+
 ## 0.14.47 · Yeni oynatıcı TV'de · 18 Ekim 2026
 
 S14b (D072) native kontrol yenilemesi **46f4743** ile tamamlandı ve main'e fast-forward edildi. Yeni alt bilgi bloğu, simgeli kontroller, odaklanabilir sarma çubuğu (bekleyen hedef/tek uygulama/Geri iptali), gizli sarma önizlemesi ve canlı kanal çipleri var; D077 hız seçimi korundu. Bağımsız incelemedeki çubuk odağına özel OK/Geri ipucu düzeltildi. Önceki 0.14.46 hız ekliyordu; yeni kontrol tasarımı bu 0.14.47 teslimindedir.

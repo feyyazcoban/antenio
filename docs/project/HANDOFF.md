@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · Home geçiş düzeltmesi / 0.14.48 · 18 Ekim 2026
+
+Kullanıcının fotoğrafındaki Ayrıntılar → İzlemeye devam et geçişine odaklanıldı. HomeScreen ilk hero altı raf için mevcut CardVisibility minimum görünürlük yolunu kullanır; ortak kaydırma kodu ve diğer raflar değişmez. D078, D051'e bu dar istisnayı kaydeder. ContinueCardLayoutTest gerçek Down tuşuyla hareket mesafesini ve kart/başlık görünürlüğünü denetler. Önce aynı test eski .47 uygulamada gereken 38,5 dp yerine 381 dp hareketi yakaladı; son .48 kaynakta ikisi de 38,5 dp.
+
+Değişenler: HomeScreen.kt, ContinueCardLayoutTest.kt, build.gradle.kts; DECISIONS/D078, HOME_SHELF_FRAMING, SCREENS, BACKLOG, STEPS, STATUS/HANDOFF; design/reviews/LATEST.md ve home-scroll-0.14.48/continue-after.png; [QA](native-home-scroll-48-qa.json). Figma/manifest yok. Ana ajan diff incelemesi yaptı; yeni bağımsız ajan kullanılmadı.
+
+Kontroller: 354 JVM sonucu, 0 hata, 1 atlanan; lint 0 hata/37 uyarı; release/debug/androidTest derlemesi. Yalnız 5558 ve tools/run-device-tests.sh ile ContinueCardLayoutTest, HeroLayoutTest ve iki Home dikey/görünürlük regresyonu toplam 5/5 geçti. Normal ölçekte sentetik görsel incelendi. Yazı boyutu matrisi yapılmadı. Ham önce/sonra logları work/home-scroll-qa içinde Git dışında. Fiziksel TV FPS/kare süresi ve kullanıcının algıladığı akıcılık doğrulanmış sayılmaz.
+
+Teslim: releases/NEXTV_TV_Design_Preview_0.14.48.apk + sha256, kod 62, önceki imza/release/R8. SHA-256 71014ce84547b954b796585f902e98e40222987114a4d055a0d871ce8a0ec88a. 5556 .47→48 üstüne kurulumda Evim görünürlüğü, çalışan uygulama, çökme kaydı yokluğu ve APK hash eşitliği doğrulandı; firstInstallTime 2026-10-14 08:57:19. TV üstüne kurulumda firstInstallTime 2026-10-13 23:50:03 değişmedi, lastUpdateTime 2026-10-18 20:38:51; çekilen APK hash eşleşti. TV uygulaması/gerçek yayın açılmadı. 5556/5558 ve Gradle kapalı; 5554'e dokunulmadı.
+
+Tam sonraki adım: kullanıcının bu geçişe ilişkin geri bildirimini dikkate al; STEPS S15a ve gap/overlay.md üzerinden kanal kapsamı/hatırlama verisine devam et. Sonraki teslim en az 0.14.49/kod 63. Fiziksel kabul, Figma, İngilizce ve satış/fiyat kararları açık. Kullanıcı “yayına hazırla” demeden font matrisi koşma.
+
 ## Codex · S14b / 0.14.47 teslimi · 18 Ekim 2026
 
 **Çalışma yeri ana checkout / main.** `72fc520` güncel Git dosyalarıyla proje kontrolünü onarır; `46f4743` S14b uygulama, testler, inceleme düzeltmeleri ve görsel kanıttır. Main'e fast-forward edildi. Birleşmiş `codex/player-controls-s14b` ile `claude/app-ui-ux-audit-a78e98` dalları `git branch -d` ile kapatıldı. Eski geliştirme worktree'si güncel kaynakla detached tutulur; aynı adlı klasör kaynak kaybı olmadan durur. Yerel yalnız main dalı var; remote/PR yok.
