@@ -1,5 +1,15 @@
 # Son devir notu
 
+## Codex · İlk kaydırma hedefi / 0.14.65 · 19 Ekim 2026
+
+D095: CardVisibility public BringIntoViewModifierNode/RevealBounds, normalizeFocusRequest defaultfalse; yalnız Home Hero/HomeCard true. Hero0/0, ilk rafta pinleme yok, cancellation zinciri aynı. CardVisibilityMotionTest gerçek LazyColumn>LazyRow>TVCard/caption+Down ilk ve bütün rect'leri doğrular; remoteVertical gerçek HeroDown ile başlar. Eski .64 ilk hedef120 yerine228dp ile FAILED. Bağımsız hero_review son diff açık bulgusuz.
+
+Final fullbuild6m04s,362JVM/1skip/0hata,lint0/40. 5558/tools/run-device-tests.sh normal: Motion/Continue/Hero5/5, home/detail/provider/search/remoteVertical5/5. İlk birleşik turdaemülatörkoptu; globalnormalizasyon Search uncancelled-requests hatası verdi, opt-in Home'a daraltılıp finalSearch geçti. Ayrıntılar QA native-home-reveal-65-qa.json; ham work/home-reveal-motion-qa. Sentetik continue-first.png incelendi; design/reviews/home-reveal-0.14.65. FizikselFPS/fontmatrisi yok.
+
+Kod79/.65 aynısertifika/debugkapalı/R8; SHA-256 8b60db603c3f882b1cd4f09b865f564a0ca0a4dd10b71d31df79cbeb89328837. TVinstall-r ilk kurulum2026-10-13 23:50:03 aynı,update2026-10-19 00:42:18,kuruluAPKhasheşit; app/yayınaçılmadı. 5556install-r ilk kurulum2026-10-14 08:57:19 aynı,appRunningtrue/crashfalse,EvimetiketiHome'dagörünmüyor. 5556 kullanıcı için AÇIK. 5558/Gradlekapalı. Kaynak main'e fast-forward ve temiz auditcheckout eşleme teslim adımıdır.
+
+Tam sonraki .66/kod80: gerçek ilk Activity splash ölçümü ve ana thread yükü. TVglobalanimasyonları1.0 (work/cold-launch-qa/tv-animation-settings.json). Salt okunur player_review/scrollbar_review planı: SourceRepository/ArtworkCache/EpgRepository lazyHTTP+IOilkbaşlatma; immutable rawcatalogcountsDefault, ALLkategorifastpath; FavoriteTargets.migrate mappingadayıyoksa erkenreturn; LaunchCover glowBrush drawWithCache, alpha/bloomkoru. Testtaslakları work/cold-launch-qa/ColdFrames.kt,CatalogColdLaunchTest.kt,run-device-tests.sh henüz üretim/testkaynağınaalınmadı. Gerçek yeni process+Activity, currentregistryfixture63175, ilkFrameMetrics+ilk2800mscadence, ayrıgörselrun. Application/instrumentation başlangıcı ve fizikselgösterimehariç. Önce .65debugilebaseline, sonra.66karşılaştırması. Wrapperstrict5558;5556kullanıcıaçık; fontmatrisiyok.
+
 ## Codex · Kanallar çekmecesi / 0.14.64 · 19 Ekim 2026
 
 D094: data/ChannelScope+LiveIndex; AccessTarget.ChannelPick/AccessTargets; TvViewModel scope/cache/gate/favorites normalization; ui/ChannelDrawer, PlayerKeys/Screen/Controls/Symbols, LibraryScreen virtual category; EN/TR strings. JVM AccessGate/ChannelScope/PlayerKeyRouter ve PlayerControlsLayout/ParentalFlow testleri. Salt okunur player_review/scrollbar_review: favorites refresh, numaralama bağlamı, stale requester ve hızlı Back→OK odak sorunları düzeltildi; son inceleme açık bulgusuz. Aynı player nesnesi korunur, yayın seçimi PIN kapısından; panel opacity tercihi ve EOF/hata durumunda açık kalma var. Tüm S15 tamam değildir.

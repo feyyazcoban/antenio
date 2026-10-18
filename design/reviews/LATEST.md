@@ -1,5 +1,11 @@
 # Güncel görsel inceleme
 
+## 0.14.65 · Home ilk kaydırma hedefi
+
+D095; normal ölçek/sentetik uzun başlık. İlk otomatik hedef ve sonraki istekler aynı tam alanı kullanır. [QA](../../docs/project/native-home-reveal-65-qa.json).
+
+![İlk devam kartı](home-reveal-0.14.65/continue-first.png)
+
 ## 0.14.64 · Canlı Kanallar çekmecesi
 
 D094; normal ölçek, sentetik yayın. [QA](../../docs/project/native-channel-drawer-64-qa.json).

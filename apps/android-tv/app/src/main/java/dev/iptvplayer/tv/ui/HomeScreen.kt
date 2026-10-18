@@ -432,7 +432,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
         }
     }
     val fade = if (motion) tween<Float>(450) else snap()
-    val visibility = rememberCardVisibility(topPadding = 0.dp, bottomPadding = 0.dp)
+    val visibility = rememberCardVisibility(topPadding = 0.dp, bottomPadding = 0.dp, normalizeFocusRequest = true)
     val heroHeight = maxOf(TvLayout.HeroHeight, viewportHeight)
     Box(Modifier.fillMaxWidth().heightIn(min = heroHeight)
         .then(visibility.container).then(visibility.focus).clipToBounds().background(Ink.Background).testTag("home-hero")) {
@@ -560,7 +560,7 @@ internal fun runtimeText(seconds: Long): String {
     // The first shelf is already just below the hero. Reveal its card and heading without moving the
     // whole shelf to the top: that long relocation also composes several lower shelves during the key press.
     val visibility = rememberCardVisibility(horizontalPadding = TvLayout.Gutter, contextAbove = headingContext,
-        viewportHeight = viewportHeight, frameShelf = frameShelf)
+        viewportHeight = viewportHeight, frameShelf = frameShelf, normalizeFocusRequest = true)
     if (record != null) {
         // A finished latest episode: the card offers the series' next episode instead of a position.
         val next = record.kind == MediaKind.EPISODE && record.progress.completed

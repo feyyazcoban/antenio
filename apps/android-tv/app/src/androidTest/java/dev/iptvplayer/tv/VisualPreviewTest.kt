@@ -328,10 +328,10 @@ class VisualPreviewTest {
     }
 
     @Test fun remoteVerticalShelvesKeepTheirHeadingAndFullCardTogether() {
-        val firstLive = ui.onAllNodes(SemanticsMatcher("live shelf") {
-            it.config.getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag)?.startsWith("live:") == true
-        })[0]
-        firstLive.performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        // The full-screen Hero leaves the first shelf outside LazyColumn's composed viewport.
+        ui.onNodeWithTag("hero-watch").assertIsFocused()
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.waitForIdle()
         fun tag(): String {
             ui.waitForIdle()
             return ui.onNode(isFocused()).fetchSemanticsNode().config

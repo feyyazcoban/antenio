@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-013/019/020 · D095 / 0.14.65: Home ilk otomatik BringIntoView isteği tam kart/pay alanına normalize edilir; eski120dp→beklenen228dp regresyonu kanıtlandı. Final 10/10 cihaz kontrolü,362JVM/1skip/0hata ve veri koruyan TV/5556 teslimi tamam; fiziksel akıcılık kabulü ve cold splash açık.
+
 BKL-032 · D094 / 0.14.64 teslim: canlı Kanallar düğmesi ve hızlı seçim çekmecesi; kapsam, PIN, aynı player ve odak akışı 5/5 cihaz testiyle doğrulandı. Genel S15a–c/mini rehber/önceki-son kanal işi açık; QA/teslim STATUS/HANDOFF esas alınır.
 
 BKL-019/020/028/030/031 · 0.14.63 / D093: kategori/ana menü kayma geçişleri; PIN ortalama/geri sil/Cancel payı; ayarlar liste scrollbar bağlantısı ve sürükleme; kategori adı ve afiş caption düzeni; player ayarlar çarkı; ekranı kaplayan oranlı vitrin. Kontroller/teslim STATUS/HANDOFF'ta; genel fiziksel/Figma kabulü açık. BKL-032 Kanallar drawer isteği sıradaki iş; iki scroll ve soğuk splash geri bildirimleri ayrıca açık.

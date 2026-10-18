@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-19",
+  "version": "0.14.65-design-preview",
+  "versionCode": 79,
+  "decision": "D095",
+  "change": "Home first focus request and later resize request share full card/caption/margin geometry. Opt-in only Home Hero/HomeCard.",
+  "review": "Read-only hero_review; all first/upstream rect assertions added; final diff has no concrete finding.",
+  "tests": {
+    "jvm": {
+      "tests": 362,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 40
+    },
+    "build": "Final unit/lint/release/debug/androidTest successful in 6m04s; one worker, heap1536MB, in-process Kotlin.",
+    "baseline": "Unchanged .64 first Down requested 120dp; new regression expected 228dp and failed as intended.",
+    "device": "Final emulator-5558 only through tools/run-device-tests.sh --no-build: Motion/Continue/Hero5/5 and home/detail/provider/search/remoteVertical5/5 passed.",
+    "visual": "Synthetic Continue first-card screenshot inspected; full card, heading and bottom margin visible.",
+    "iterations": [
+      "Initial combined device run disconnected after two completed tests; not counted as full pass.",
+      "Global normalization triggered Compose uncancelled requests on Search twice. Final implementation opts in only Home; final Search test passed.",
+      "Old remoteVertical test forced uncomposed live node; changed to actual Down from focused Hero."
+    ],
+    "limitations": [
+      "No font-scale matrix.",
+      "No physical TV frame-time measurement; physical smoothness acceptance remains open.",
+      "True cold splash remains separate work."
+    ]
+  },
+  "rawEvidence": "work/home-reveal-motion-qa",
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "78",
+        "versionName": "0.14.64-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-19 00:15:24"
+      },
+      "after": {
+        "versionCode": "79",
+        "versionName": "0.14.65-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-19 00:42:18"
+      },
+      "sha256": "8b60db603c3f882b1cd4f09b865f564a0ca0a4dd10b71d31df79cbeb89328837",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "design": {
+      "device": "emulator-5556",
+      "before": {
+        "versionCode": "78",
+        "versionName": "0.14.64-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:08:38"
+      },
+      "after": {
+        "versionCode": "79",
+        "versionName": "0.14.65-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:35:27"
+      },
+      "sha256": "8b60db603c3f882b1cd4f09b865f564a0ca0a4dd10b71d31df79cbeb89328837",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "evimVisible": false,
+      "appRunning": true,
+      "crashRecordForApp": false
+    }
+  },
+  "sha256": "8b60db603c3f882b1cd4f09b865f564a0ca0a4dd10b71d31df79cbeb89328837",
+  "signatureSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065",
+  "releaseDebuggable": false
+}

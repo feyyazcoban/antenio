@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.65 · İlk kaydırma hedefi · 19 Ekim 2026
+
+D095: Home ilk odak isteği ve geç resize kontrolü aynı tam kart/caption/pay alanını hedefler. Eski APK 120dp ilk hedef gönderirken yeni test 228dp beklediği için başarısızdı; düzeltme final testlerde geçti. Normalizasyon yalnız Home; Search eski yolu korur.
+
+Bağımsız inceleme tamam. 362 JVM/1skip/0hata, lint0/40; full build6m04s; yalnız5558/betik10/10 ilgili test. Sentetik Continue görseli incelendi. [QA](native-home-reveal-65-qa.json). Font matrisi/fizikselFPS yok.
+
+Kod79/.65 TV ve5556'ya install-r kuruldu; ilk kurulum zamanı ve çekilen APKhash aynı. SHA-256 8b60db603c3f882b1cd4f09b865f564a0ca0a4dd10b71d31df79cbeb89328837. TVapp açılmadı;5556 kullanıcı için açık/çalışır,crash kaydı yok. 5558/Gradle kapalı. Sonraki iş gerçek cold splash; genel S15a–c ve fiziksel akıcılık kabulü açık.
+
 ## 0.14.64 · Canlı Kanallar çekmecesi · 19 Ekim 2026
 
 D094: Play yanındaki ipucu yerine Kanallar düğmesi; soldan kayan hızlı seçim listesi. Aynı player, kaynak/kategori/favori kapsamı, PIN kapısı ve liste odağı korunur. Favoriler yenilenince veya silinince odak geçerli satıra/Kapat'a döner; Geri Kanallar düğmesine döner.
