@@ -83,7 +83,7 @@ class HomeLibraryTest {
         val locked = setOf("night", "lockedShow", "sport")
         val history = listOf(WatchRecord("night", MediaKind.MOVIE, positionMs = 600_000, durationMs = 5_400_000),
             WatchRecord("sport", MediaKind.LIVE))
-        val home = homeLibrary(catalog, history, setOf("lockedShow"), locked)
+        val home = homeLibrary(catalog, history, setOf("lockedShow"), ParentalLocks(locked))
         assertEquals(listOf("show", "film"), home.newest.map { it.id })
         assertEquals(listOf("film"), home.movies.map { it.id })
         assertEquals(listOf("show"), home.series.map { it.id })
@@ -95,6 +95,13 @@ class HomeLibraryTest {
         assertEquals(listOf("lockedShow"), home.favorites.map { it.id })
         // Without locks the same titles are promoted.
         assertEquals(listOf("night", "show", "lockedShow", "film"), homeLibrary(catalog, history, emptySet()).newest.map { it.id })
+        // The locks cannot be read (D049): every title asks for the PIN, so none is promoted; what the viewer chose stays.
+        val unknown = homeLibrary(catalog, history, setOf("lockedShow"), ParentalLocks(unknown = true))
+        assertTrue(unknown.newest.isEmpty()); assertNull(unknown.featured)
+        assertTrue(unknown.movies.isEmpty() && unknown.series.isEmpty() && unknown.channels.isEmpty())
+        assertEquals(listOf("night"), unknown.continueWatching.map { it.entry.id })
+        assertEquals(listOf("sport"), unknown.recentChannels.map { it.id })
+        assertEquals(listOf("lockedShow"), unknown.favorites.map { it.id })
     }
 
     @Test fun aListWithoutDatesHasNoNewestSlidesAndKeepsTheFeaturedTitle() {

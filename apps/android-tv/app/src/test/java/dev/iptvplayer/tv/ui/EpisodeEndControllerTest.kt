@@ -70,6 +70,18 @@ class EpisodeEndControllerTest {
         advanceTimeBy(20_000); runCurrent(); assertEquals(2, calls.size)
         c.close()
     }
+    @Test fun anEpisodeThatEndedUnderItsNextEpisodesPinPadOffersItWithoutACountdown() = runTest {
+        val calls = mutableListOf<Boolean>()
+        val c = EpisodeEndController(this) { _, _, _, automatic -> calls.add(automatic); NextResult.NEEDS_PIN }
+        c.ended("s", current, next, true, needsPin = true); advanceTimeBy(20_000); runCurrent()
+        assertTrue(calls.isEmpty())
+        assertEquals(next, c.state.value!!.next); assertNull(c.state.value!!.seconds)
+        assertEquals(UiText.Res(R.string.episode_next_needs_pin), c.state.value!!.notice)
+        assertEquals(NextResult.NEEDS_PIN, c.playNow()); assertEquals(listOf(false), calls)
+        // The last episode has nothing to ask for.
+        c.newMedia(); c.ended("s", current, null, true, needsPin = true)
+        assertNull(c.state.value!!.notice); c.close()
+    }
     @Test fun playNowSaysWhatHappened() = runTest {
         var result = NextResult.UNAVAILABLE
         val c = EpisodeEndController(this) { _, _, _, _ -> result }

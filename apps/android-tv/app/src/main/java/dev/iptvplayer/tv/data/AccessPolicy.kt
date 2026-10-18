@@ -75,7 +75,12 @@ internal class AccessPolicy(rules: List<AccessRule>, val revision: Long = 0) {
             SourceType.XTREAM -> categoryEntry.categoryId.takeIf { it.isNotBlank() }?.let(AccessCategory::ProviderId)
             SourceType.M3U -> categoryEntry.category.takeIf { it.isNotBlank() }?.let(AccessCategory::M3uName)
         }
-        if (categories.isNotEmpty() && category == null) return AccessVerdict(AccessDecision.UNRESOLVED)
+        // A list read now keeps an Xtream title's category ID whenever the provider sends one; without one the title
+        // is filed under "Diğer", in no category a rule can name. Only an older record lost the ID of a category it
+        // names, and that one cannot be told (D045).
+        val uncategorized = source.type == SourceType.XTREAM && categoryEntry.categoryId.isBlank() &&
+            categoryEntry.category == CategoryFilter.OTHER
+        if (categories.isNotEmpty() && category == null && !uncategorized) return AccessVerdict(AccessDecision.UNRESOLVED)
         // A policy encoded for another source type cannot silently become ineffective after an edit.
         if (categories.any { rule ->
                 val key = (rule.scope as AccessScope.Category).key

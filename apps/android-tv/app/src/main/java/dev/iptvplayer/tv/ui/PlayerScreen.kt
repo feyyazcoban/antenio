@@ -125,6 +125,15 @@ import kotlinx.coroutines.flow.first
         }
     }
     val endState by episodeEnd.state.collectAsStateWithLifecycle()
+    // An episode that ends under the PIN pad its Sonraki bölüm opened keeps the card back until the pad closes, so its
+    // window never covers the pad: a right PIN starts the next episode, and Vazgeç shows the card without a countdown.
+    var endedUnderPin by remember { mutableStateOf(false) }
+    fun episodeEnded(needsPin: Boolean = false) {
+        val current = active?.entry
+        val s = model.state.value
+        if (hasPlayed && current != null && s.playing?.entry?.id == current.id && s.sourceFor(current) != null)
+            episodeEnd.ended(current.sourceId, current, model.nextEpisodeChoice(), s.autoNextEpisode, needsPin)
+    }
     // The end card covers whatever was open; EpisodeEndController keeps it.
     fun top(): PlayerLayer = if (endState != null) PlayerLayer.EpisodeEnd else layer
     val nextChoice = remember(media.entry, screenState.sources, screenState.episodes) {
@@ -198,10 +207,7 @@ import kotlinx.coroutines.flow.first
                     layer = PlayerLayer.Controls
                     position = player.currentPosition.coerceAtLeast(0); duration = player.duration.coerceAtLeast(0)
                     save()
-                    val current = active?.entry
-                    val s = model.state.value
-                    if (hasPlayed && current != null && s.playing?.entry?.id == current.id && s.sourceFor(current) != null)
-                        episodeEnd.ended(current.sourceId, current, model.nextEpisodeChoice(), s.autoNextEpisode)
+                    if (model.state.value.parental.prompt != null) endedUnderPin = true else episodeEnded()
                 }
             }
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -233,7 +239,7 @@ import kotlinx.coroutines.flow.first
         // Stop the old request before opening a new channel: one source session at a time.
         player.stop(); player.clearMediaItems()
         recovery.newMedia(request.mode == PlaybackMode.LIVE)
-        episodeEnd.newMedia(); hasPlayed = false
+        episodeEnd.newMedia(); endedUnderPin = false; hasPlayed = false
         tracks = Tracks.EMPTY; position = request.startMs; duration = 0
         if (layer == PlayerLayer.Tracks) layer = PlayerLayer.Controls
         active = media
@@ -252,12 +258,18 @@ import kotlinx.coroutines.flow.first
             position = player.currentPosition.coerceAtLeast(0)
             duration = player.duration.coerceAtLeast(0)
             if (++ticks % 10 == 0) save()
+            // The PIN pad over the picture takes the remote's keys: the controls that opened it stay until it closes,
+            // and for the usual while after, so focus can go back to them.
+            if (model.state.value.parental.prompt != null) lastInteraction = System.currentTimeMillis()
             if (player.isPlaying && layer == PlayerLayer.Controls && recovery.state.value.failure == null &&
                 !recovery.state.value.recovering && System.currentTimeMillis() - lastInteraction > 8000) layer = PlayerLayer.Video
         }
     }
     LaunchedEffect(top()) {
         if (top() == PlayerLayer.Controls || top() == PlayerLayer.Video) { withFrameNanos { }; if (layer == PlayerLayer.Video) canvas.requestFocus() else first.requestFocus() }
+    }
+    LaunchedEffect(endedUnderPin, screenState.parental.prompt == null) {
+        if (endedUnderPin && screenState.parental.prompt == null) { endedUnderPin = false; episodeEnded(needsPin = true) }
     }
     LaunchedEffect(screenState.autoNextEpisode) { episodeEnd.preferenceChanged(screenState.autoNextEpisode) }
     LaunchedEffect(nextChoice) { episodeEnd.availabilityChanged(nextChoice) }

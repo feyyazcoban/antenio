@@ -108,6 +108,21 @@ internal class ParentalController(private val scope: CoroutineScope, private val
     var policy: AccessPolicy? = null
         private set
 
+    /** The rules last given to [addLocks]: a locked category row's new identities, saved or not yet. */
+    private var pendingLocks: List<AccessRule> = emptyList()
+
+    /**
+     * The rules the gate decides with: [policy] and the rules [addLocks] is adding, so a locked row's new identity asks
+     * for the PIN before the record holds its rule, and still does while the record refuses it (fail closed).
+     */
+    val gatePolicy: AccessPolicy? get() {
+        val saved = policy ?: return null
+        if (pendingLocks.isEmpty()) return saved
+        val ruled = saved.rules.mapTo(HashSet()) { it.scope }
+        val adding = pendingLocks.filter { it.scope !in ruled }
+        return if (adding.isEmpty()) saved else AccessPolicy(saved.rules + adding, saved.revision)
+    }
+
     /** The lock scopes PINs opened in this session. */
     val grants: Set<AccessScope> get() = session.grants
 
@@ -153,10 +168,13 @@ internal class ParentalController(private val scope: CoroutineScope, private val
     }
 
     /**
-     * Adds [rules] the library needs (a locked category row's new identity, pin.md §5). A tightening, so it asks for no
-     * PIN; what the record refuses is tried again at the next publish.
+     * Adds [rules] the library needs (a locked category row's new identity, pin.md §5), in place of those the last
+     * publish needed. A tightening, so it asks for no PIN, and a PIN verified in Ayarlar just before still changes the
+     * PIN and the locks. The gate reads them as locks at once ([gatePolicy]); what the record refuses (the 1024 limit, a
+     * failed write) is tried again at the next publish.
      */
     fun addLocks(rules: List<AccessRule>) {
+        pendingLocks = rules
         val read = policy?.revision ?: return
         if (rules.isEmpty()) return
         scope.launch {
@@ -164,7 +182,10 @@ internal class ParentalController(private val scope: CoroutineScope, private val
                 current.copy(rules = current.rules + rules.filter { rule -> current.rules.none { it.scope == rule.scope } })
             }
             when (change) {
-                is ParentalGuard.Change.Saved -> learn(change.snapshot.policy())
+                is ParentalGuard.Change.Saved -> {
+                    if (revision == read) revision = change.snapshot.policyRevision
+                    learn(change.snapshot.policy())
+                }
                 ParentalGuard.Change.Stale -> refresh()
                 else -> Unit
             }
@@ -303,6 +324,8 @@ internal class ParentalController(private val scope: CoroutineScope, private val
         val old = policy
         policy = next
         if ((old == null) == (next == null) && old?.rules == next?.rules) return
+        // With no category lock left (the PIN removed, say), no row gains a rule.
+        if (next != null && next.rules.none { it.pinRequired && !it.hidden && it.scope is AccessScope.Category }) pendingLocks = emptyList()
         if (next == null) session.clear() else session.policyChanged(old?.rules.orEmpty(), next.rules)
         mutable.update { it.copy(sessionGrants = session.grants.size) }
         policyChanged()

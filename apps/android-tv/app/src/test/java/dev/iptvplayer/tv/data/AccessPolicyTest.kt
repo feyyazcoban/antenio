@@ -41,6 +41,19 @@ class AccessPolicyTest {
     @Test fun missingOldCategoryIdentityDoesNotBypassCategoryRule() {
         assertEquals(AccessDecision.UNRESOLVED, AccessPolicy(listOf(rule(category()))).decide(source, movie.copy(categoryId = "")))
     }
+    @Test fun aTitleTheProviderFiledUnderNoCategoryIsInNoLockedCategory() {
+        // Read now without a category ID, the title is under "Diğer": no category rule names it, its other rules still do.
+        val loose = movie.copy(category = CategoryFilter.OTHER, categoryId = "")
+        assertEquals(AccessDecision.ALLOW, AccessPolicy(listOf(rule(category()))).decide(source, loose))
+        assertEquals(AccessVerdict(AccessDecision.REQUIRE_PIN, setOf(content(movie))),
+            AccessPolicy(listOf(rule(category()), rule(content(movie)))).evaluate(source, loose))
+        // An episode follows its series.
+        val context = AccessPolicy.SeriesContext(show.copy(category = CategoryFilter.OTHER, categoryId = ""), listOf(episode))
+        assertEquals(AccessDecision.ALLOW, AccessPolicy(listOf(rule(category(MediaKind.SERIES)))).decide(source, episode, context))
+        // A rule of the other source type cannot be read on it either.
+        assertEquals(AccessDecision.UNRESOLVED, AccessPolicy(listOf(rule(AccessScope.Category("a", MediaKind.MOVIE,
+            AccessCategory.M3uName("Diğer"))))).decide(source, loose))
+    }
     @Test fun m3uCategoryLabelHasSeparateNamespaceAndDoesNotNormalizeNames() {
         val m3u = source.copy(type = SourceType.M3U)
         val policy = AccessPolicy(listOf(rule(AccessScope.Category("a", MediaKind.MOVIE, AccessCategory.M3uName("Aile")))))

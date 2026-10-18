@@ -93,6 +93,17 @@ internal object AccessGate {
         return judge(resolved, snapshot)
     }
 
+    /**
+     * The PIN typed for [target], asked for the title [id], was right (pin.md §3.6): the target is found again on
+     * [snapshot], and what locks it now is what the session opens before it runs, a lock added since the pad opened
+     * included. Null when it names another title by now (renumbered channels) or nothing it may open (a refresh, a
+     * removed source, a hidden category): nothing runs.
+     */
+    fun unlockScopes(target: AccessTarget, id: String, snapshot: GateSnapshot): Set<AccessScope>? =
+        find(target, snapshot)?.takeIf { finding ->
+            finding.entry.id == id && finding.verdict.decision.let { it == AccessDecision.ALLOW || it == AccessDecision.REQUIRE_PIN }
+        }?.verdict?.pinScopes
+
     private fun judge(target: ResolvedTarget, snapshot: GateSnapshot): GateFinding? = with(snapshot) {
         val entry = target.entry
         val source = sources.firstOrNull { it.id == entry.sourceId }

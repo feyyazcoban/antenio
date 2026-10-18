@@ -152,6 +152,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         policyChanged = { if (state.value.sourceTask == SourceTask.IDLE) viewModelScope.launch { publishLibrary() } }) { followUp ->
         when (followUp) { AdminFollowUp.SHOW_ADULT -> setHideAdult(false) }
     }
+    /** The locked category rows of the last publish and the rules each rests on; a renumbered row follows them. */
+    private var lockedRows: Map<String, Set<AccessScope.Category>> = emptyMap()
 
     init {
         viewModelScope.launch { guides.state.collect { value -> mutable.update { it.copy(guideStatus = value.statuses, guideRevision = value.revision) } } }
@@ -312,7 +314,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
      * The library the screens read: every source's list, without hidden categories (D068) and titles whose lock cannot
-     * be read, with what the lock rules lock (ParentalProjection). A locked category row's new identity gets its rule.
+     * be read, with what the lock rules lock (ParentalProjection). A locked category row's new identity gets its rule,
+     * and locks before the record holds it.
      */
     private suspend fun publishLibrary() {
         val saved = registry
@@ -320,11 +323,15 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         val hidden = store.hiddenCategories
         val hideAdult = store.hideAdultCategories
         val policy = parental.policy
+        val before = lockedRows
         val (view, choices) = withContext(Dispatchers.Default) {
             val combined = SourceLibrary.combine(saved.sources, raw)
-            ParentalProjection.project(saved.sources, CategoryVisibility.apply(combined, hidden, hideAdult), policy) to
+            ParentalProjection.project(saved.sources, CategoryVisibility.apply(combined, hidden, hideAdult), policy, before) to
                 CategoryVisibility.choices(combined)
         }
+        lockedRows = view.rows
+        // Before the library goes out, so the gate already reads the rules being added.
+        parental.addLocks(view.missing)
         val all = view.catalog
         val favorites = SourceLibrary.favorites(saved.sources, store::favorites)
         val history = SourceLibrary.history(saved.sources, store::history)
@@ -352,7 +359,6 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             val target = AccessTarget.Open(detail.id)
             if (AccessGate.decide(target, gateSnapshot(target)) == GateResult.Deny) back()
         }
-        parental.addLocks(view.missing)
         resetSearchIndex()
         // StateFlow may retain the previous, equal Catalog instance on an unchanged refresh.
         // Prepare the published instance so the first query reuses this work.
@@ -748,13 +754,13 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
      * The PIN typed for a locked title was right: the target is found again on the state as it is now, what locks it
-     * now opens for the session, and it runs. A title gone meanwhile (a refresh, a removed source, renumbered channels)
-     * runs nothing.
+     * now opens for the session, and it runs (AccessGate.unlockScopes). A title gone meanwhile (a refresh, a removed
+     * source, renumbered channels) runs nothing.
      */
     private fun unlocked(pending: PinPurpose.Unlock) {
-        val finding = AccessGate.find(pending.target, gateSnapshot(pending.target))
-        if (finding == null || finding.entry.id != pending.id) { notice(UiText.Res(R.string.access_gone)); return }
-        parental.grant(finding.verdict.pinScopes)
+        val scopes = AccessGate.unlockScopes(pending.target, pending.id, gateSnapshot(pending.target))
+            ?: return notice(UiText.Res(R.string.access_gone))
+        parental.grant(scopes)
         request(pending.target, ask = false)
     }
 
@@ -767,7 +773,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 is AccessTarget.ChannelNumber -> numberedChannels()
                 is AccessTarget.ChannelStep -> zapChannels()
                 else -> emptyList()
-            }, autoNextEpisode = s.autoNextEpisode, policy = parental.policy, unlocked = parental.grants,
+            }, autoNextEpisode = s.autoNextEpisode, policy = parental.gatePolicy, unlocked = parental.grants,
             entitlements = entitlements)
     }
 
@@ -940,8 +946,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     fun heroDetail(entry: MediaEntry): MediaEntry = heroDetails[entry.id] ?: entry
     fun ensureHeroDetail(entry: MediaEntry) {
         if (entry.kind != MediaKind.MOVIE && entry.kind != MediaKind.SERIES) return
-        // Nothing of a locked title is fetched before its PIN (pin.md §3.6).
-        if (entry.id in state.value.locks.ids) return
+        // Nothing of a locked title is fetched before its PIN (pin.md §3.6), nor of any while the locks cannot be read.
+        if (state.value.locks.locked(entry.id)) return
         if ((entry.hasBackdrop && entry.description.isNotBlank()) || !heroRequests.add(entry.id)) return
         val source = state.value.sourceFor(entry)?.takeIf { it.type == SourceType.XTREAM } ?: return
         viewModelScope.launch {

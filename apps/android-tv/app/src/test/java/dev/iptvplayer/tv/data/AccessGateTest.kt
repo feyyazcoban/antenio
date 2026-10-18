@@ -176,6 +176,26 @@ class AccessGateTest {
         allows(sport, AccessTarget.ChannelStep(1), channels.copy(playing = news, unlocked = setOf(content(sport))))
     }
 
+    @Test fun theRightPinOpensWhatLocksTheTargetNow() {
+        val locked = inSeries.copy(policy = locks, channels = listOf(news, sport))
+        assertEquals(setOf(content(movie)), AccessGate.unlockScopes(AccessTarget.Open(movie.id), movie.id, locked))
+        assertEquals(setOf(content(show)), AccessGate.unlockScopes(AccessTarget.Play(first.id), first.id, locked))
+        assertEquals(setOf(content(sport)), AccessGate.unlockScopes(AccessTarget.ChannelNumber(2), sport.id, locked))
+        // A lock added while the pad was open is opened as well: the title runs at once.
+        val tighter = locked.copy(policy = AccessPolicy(locks.rules + lock(AccessScope.Source("a"))))
+        val scopes = AccessGate.unlockScopes(AccessTarget.Open(movie.id), movie.id, tighter)
+        assertEquals(setOf(content(movie), AccessScope.Source("a")), scopes)
+        allows(movie, AccessTarget.Open(movie.id), tighter.copy(unlocked = scopes!!))
+        // A lock removed meanwhile: nothing to open, and it runs.
+        assertEquals(emptySet<AccessScope>(), AccessGate.unlockScopes(AccessTarget.Open(movie.id), movie.id, locked.copy(policy = AccessPolicy(emptyList()))))
+        // Channel 2 is another channel by now, or the title is gone, hidden or without its source: nothing runs.
+        assertNull(AccessGate.unlockScopes(AccessTarget.ChannelNumber(2), sport.id, locked.copy(channels = listOf(sport, news))))
+        assertNull(AccessGate.unlockScopes(AccessTarget.Open(movie.id), movie.id, locked.copy(allCatalog = raw.copy(items = raw.items - movie))))
+        assertNull(AccessGate.unlockScopes(AccessTarget.Open(movie.id), movie.id,
+            locked.copy(policy = AccessPolicy(locks.rules + AccessRule(content(movie), hidden = true)))))
+        assertNull(AccessGate.unlockScopes(AccessTarget.Open(movie.id), movie.id, locked.copy(sources = listOf(list))))
+    }
+
     @Test fun anUnreadLockRecordAsksForEveryTitle() {
         // Not read yet, or unreadable (D049): every title asks, whatever a PIN opened before.
         val unknown = inSeries.copy(policy = null, unlocked = setOf(AccessScope.Source("a"), AccessScope.Source("b")))

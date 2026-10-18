@@ -537,6 +537,8 @@
     <string name="parental_off_note">Yetişkin kategorileri PIN olmadan da gizli kalır.</string>
     <string name="parental_change">PIN\'i değiştir</string>
     <string name="parental_change_note">Yeni bir 4 haneli PIN seç.</string>
+    <string name="parental_relock">Açılan kilitleri kapat</string>
+    <string name="parental_relock_note">Bu oturumda PIN ile açtığın içerikler yeniden kilitlenir.</string>
     <string name="parental_remove">PIN\'i kaldır</string>
     <string name="parental_remove_note">Yetişkin filtresi ve kategori ayarları artık PIN istemez.</string>
     <string name="parental_remove_question">PIN kaldırılsın mı?</string>

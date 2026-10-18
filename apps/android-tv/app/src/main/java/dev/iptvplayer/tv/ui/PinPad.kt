@@ -52,6 +52,8 @@ import kotlinx.coroutines.delay
 
 private val keyRows = listOf("123", "456", "789")
 private val keyGap = 10.dp
+/** The most of a locked title's name the pad's sentence holds: at 2,0 text it then takes no more lines than the others. */
+private const val UNLOCK_TITLE_MAX = 32
 
 /**
  * The PIN pad (pin.md §3.1–3.2, §4): four digits from the remote's number keys or the pad on screen, masked as dots.
@@ -222,8 +224,13 @@ private fun PinPrompt.title(): String = stringResource(when (step) {
 
 @Composable @ReadOnlyComposable
 private fun PinPrompt.message(): String {
-    // A locked title is named as its card shows it (D065).
-    (purpose as? PinPurpose.Unlock)?.let { return stringResource(R.string.pin_reason_unlock, displayTitle(it.title).name) }
+    // A locked title is named as its card shows it (D065), cut short so that a long name at large text leaves the boxes
+    // and the feedback line in view below it.
+    (purpose as? PinPurpose.Unlock)?.let { unlock ->
+        val name = displayTitle(unlock.title).name
+        return stringResource(R.string.pin_reason_unlock,
+            if (name.length <= UNLOCK_TITLE_MAX) name else name.take(UNLOCK_TITLE_MAX - 1).trimEnd() + "…")
+    }
     return stringResource(when (step) {
         PinStep.NEW -> if (purpose == PinPurpose.Change) R.string.pin_message_change else R.string.pin_message_create
         PinStep.CONFIRM -> R.string.pin_message_confirm

@@ -272,6 +272,42 @@ class ParentalControllerTest {
         assertEquals(listOf(other), storage.record!!.rules)
     }
 
+    @Test fun locksAddedOnTheirOwnLockAtOnceAndKeepAPinVerifiedInAyarlar() = runTest {
+        fun sports(id: String) = AccessRule(AccessScope.Category("a", MediaKind.LIVE, AccessCategory.ProviderId(id)), pinRequired = true)
+        val storage = Storage(stored(rules = listOf(sports("10"))))
+        val parental = controller(storage)
+        parental.refresh()
+        parental.requestAdmin(AdminReason.PARENTAL)
+        runCurrent()
+        parental.submit(pin("2580"))
+        advanceUntilIdle()
+        assertTrue(parental.state.value.adminUnlocked)
+        // A publish finds a locked row's new identity: the gate reads its rule before the record holds it.
+        parental.addLocks(listOf(sports("12")))
+        assertEquals(listOf(sports("10")), parental.policy!!.rules)
+        assertEquals(listOf(sports("10"), sports("12")), parental.gatePolicy!!.rules)
+        advanceUntilIdle()
+        assertEquals(listOf(sports("10"), sports("12")), storage.record!!.rules); assertEquals(4L, storage.record!!.policyRevision)
+        assertSame(parental.policy, parental.gatePolicy)
+        // That tightening leaves the PIN verified just before it good for a change.
+        assertTrue(parental.changePin())
+        parental.submit(pin("1397")); parental.submit(pin("1397"))
+        advanceUntilIdle()
+        assertEquals(UiText.Res(R.string.parental_changed), parental.state.value.notice)
+        assertEquals(5L, storage.record!!.policyRevision)
+        // One the record refuses still locks, and the next publish tries it again.
+        storage.failWrites = true
+        parental.addLocks(listOf(sports("13")))
+        advanceUntilIdle()
+        assertEquals(listOf(sports("10"), sports("12")), storage.record!!.rules)
+        assertEquals(sports("13"), parental.gatePolicy!!.rules.last())
+        // With the PIN gone no row is locked, so nothing is being added.
+        storage.failWrites = false
+        parental.removePin()
+        advanceUntilIdle()
+        assertEquals(emptyList<AccessRule>(), parental.gatePolicy!!.rules)
+    }
+
     @Test fun anUnreadableRecordAllowsNothingAndStartingOverRemovesIt() = runTest {
         val storage = Storage(stored()).apply { unavailable = true }
         val parental = controller(storage)

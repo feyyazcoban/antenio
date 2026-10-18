@@ -209,7 +209,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
     val kind: MediaKind? = null, val continuing: List<ContinueItem> = emptyList())
 
 @Composable internal fun HomeScreen(s: TvState, model: TvViewModel, settings: () -> Unit) {
-    val library = remember(s.catalog, s.history, s.favoriteIds, s.locks.ids) { homeLibrary(s.catalog, s.history, s.favoriteIds, s.locks.ids) }
+    val library = remember(s.catalog, s.history, s.favoriteIds, s.locks) { homeLibrary(s.catalog, s.history, s.favoriteIds, s.locks) }
     val rows = remember(library) {
         buildList {
             if (library.continueWatching.isNotEmpty()) add(HomeRow("continue", R.string.home_continue, library.continueWatching.map { it.entry }, continuing = library.continueWatching))

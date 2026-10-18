@@ -66,10 +66,10 @@ internal val parentalPageList: List<SettingsPageSpec> = listOf(
 }
 
 /**
- * Without a PIN: make one. With one (verified to get here): change it or remove it. What the last change did reads at
- * the top; focus then rests on the page's first row, as the row that opened the pad may be gone. A PIN this visit did
- * not verify or make (one saved after its pad was closed from elsewhere) sends the page back to its row, rather than
- * offer rows that would refuse.
+ * Without a PIN: make one. With one (verified to get here): change it, lock again what PINs opened in this session
+ * ("Açılan kilitleri kapat"), or remove it. What the last change did reads at the top; focus then rests on the page's
+ * first row, as the row that opened the pad may be gone. A PIN this visit did not verify or make (one saved after its
+ * pad was closed from elsewhere) sends the page back to its row, rather than offer rows that would refuse.
  */
 @Composable private fun SettingsScope.ParentalControl() {
     val openPin = rememberPinOpener()
@@ -82,6 +82,11 @@ internal val parentalPageList: List<SettingsPageSpec> = listOf(
             NoteRow(stringResource(R.string.parental_note))
             ActionRow("change-pin", stringResource(R.string.parental_change), stringResource(R.string.parental_change_note),
                 Modifier.testTag("parental-change")) { if (model.changePin()) openPin { rowEntry("change-pin") } }
+            // Only while PINs opened locked titles in this session; focus moves up as the row leaves.
+            if (s.parental.sessionGrants > 0) ActionRow("relock", stringResource(R.string.parental_relock),
+                stringResource(R.string.parental_relock_note), Modifier.testTag("parental-relock")) {
+                rowEntry("change-pin")?.requestFocus(); model.relockNow()
+            }
             PageRow("remove-pin", stringResource(R.string.parental_remove), stringResource(R.string.parental_remove_note),
                 removePinPage, Modifier.testTag("parental-remove"))
         }

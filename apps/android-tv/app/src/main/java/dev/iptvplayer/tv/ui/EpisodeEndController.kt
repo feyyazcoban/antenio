@@ -41,12 +41,18 @@ internal class EpisodeEndController(
 
     fun newMedia() { timer?.cancel(); mutableState.value = null; handled = false }
 
-    fun ended(sourceId: String, current: MediaEntry, next: NextEpisodeChoice?, autoEnabled: Boolean) {
+    /** [needsPin]: the viewer already met the next episode's PIN pad; the card offers it without a countdown. */
+    fun ended(sourceId: String, current: MediaEntry, next: NextEpisodeChoice?, autoEnabled: Boolean, needsPin: Boolean = false) {
         if (closed || handled || current.kind != MediaKind.EPISODE) return
         handled = true
-        val automatic = next?.automaticAllowed == true && autoEnabled && foreground
+        val automatic = next?.automaticAllowed == true && autoEnabled && foreground && !needsPin
         mutableState.value = EpisodeEndState(sourceId, current, next, if (automatic) COUNTDOWN_SECONDS else null,
-            when { !foreground -> UiText.Res(R.string.episode_auto_paused); !autoEnabled && next != null -> UiText.Res(R.string.episode_auto_off); else -> null })
+            when {
+                !foreground -> UiText.Res(R.string.episode_auto_paused)
+                needsPin && next != null -> UiText.Res(R.string.episode_next_needs_pin)
+                !autoEnabled && next != null -> UiText.Res(R.string.episode_auto_off)
+                else -> null
+            })
         if (automatic) timer = scope.launch {
             for (seconds in COUNTDOWN_SECONDS - 1 downTo 0) {
                 delay(1000)
