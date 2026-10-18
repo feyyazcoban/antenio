@@ -41,6 +41,12 @@ TV'ye giden teslimler 0.14.29'dan beri `.\gradlew.bat assembleRelease` çıktıs
 - Fiziksel 65U95A: kullanıcının önceki güncelleme isteği kapsamında 16 Ekim'de kullanıcının isteğiyle 0.14.38 (release) kuruldu; güncel sürüm STATUS üzerinden doğrulanır. Bağlı veya açık olduğu varsayılmaz; test/reset yapılmaz, güncelleme kullanıcı isteğiyle gerçekleştirilir.
 - Toplu `connectedAndroidTest`, `installDebug` gibi Gradle cihaz görevlerini çalıştırma: bağlı bütün cihazlara (TV ve 5554 dahil) kurarlar. Her kurulum/test komutunda doğrulanmış seri kimliğini açıkça belirt.
 
+### İlk Activity açılış ölçümü
+
+Önce debug ve androidTest APK'larını derle, Gradle'ı durdur, sonra yalnız test emülatörünü aç. `tools/run-device-tests.sh --no-build --cold-catalog prepare` 63.175 sentetik içerikle current-registry kaydını hazırlar. Ardından `--cold-catalog verify` ayrı process ve gerçek saatle MainActivity karelerini ölçer; `--cold-catalog visual` görseller için ayrı koşudur. Her iki mod da yalnız doğrulanmış 5558 process'ini durdurur; kaynak/hafıza/cihaz ayarlarını gerçek cihazlara taşımaz. Sonda `--cold-catalog clean` sentetik kaynakları temizler veya test emülatörü snapshot kaydetmeden kapatılır.
+
+`files/cold-restore-verification.json` ham FrameMetrics ve restore gözlemlerini, görsel modda gerçek yakalama zamanlarını içerir. İlk 2.800 ms vsync penceresi geciken animasyonun tamamını kapsamayabilir; Application/instrumentation hazırlığı ve fiziksel sunum ölçüm dışıdır. Screenshot koşusunu timing-only performans karşılaştırmasına katma. Atlanan test başarılı ölçüm sayılmaz; wrapper bunu reddeder.
+
 ## Dosya yerleşimi
 
 | İçerik | Yer |

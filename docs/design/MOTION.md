@@ -1,5 +1,9 @@
 # TV animasyon ve hareket rehberi
 
+## 19 Ekim 2026 · İlk açılış yükü · D096
+
+Splash zaman çizgisi ve atlama davranışı aynı; köşe ışıkları boyuta göre cache edilir, opaklık animasyonu çizim sırasında okunur. Kaynak hazırlığı ve katalog sayımları ana thread dışına taşınır. İlk Activity kareleri gerçek saatle, normal animasyon ve sentetik büyük katalogla ölçülür; Application/instrumentation hazırlığı ve fiziksel sunum hariç. Ölçüm sonuçları STATUS/HANDOFF/QA'da.
+
 ## 18 Ekim 2026 · Kategori ve ana menü · D093
 
 Native panel açılma 240 ms, kapanma 180 ms FastOutSlowIn; hedef hareket sırasında değişirse mevcut konumdan tersine döner. Büyük afiş listesi sabit beş sütun ölçüsünde yalnız yatay kayar (büyük yazı dört); kategori açıkken dört sütun görünür, beşinci sağda ekran dışında kalır (büyük yazı üç görünür). Satırlar yeniden gruplanmaz, kartlar çapraz hareket etmez. Normal ekranda açık panelin sağ afiş payı yaklaşık 7,5 dp, kapalıda 24 dp. Tam satır arama/boş içerik küçük alanları görünür genişliğe ölçülür. Küçük üst başlık sağdaki Sırala/Ara eylemlerini ekranda tutar. Kapanırken hâlâ çizilen kategori satırları fokus alamaz. Ana menü yazı/wordmark doğal genişliğini koruyarak açılan alanda ortaya çıkar. Hareketi azalt tüm konumları doğrudan hedefe alır.

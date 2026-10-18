@@ -37,13 +37,14 @@ internal class ArtworkCache(private val context: Context) : Interceptor {
     private var sweepAfter = 0L
     private val calls = ConcurrentHashMap<Call, String>()
     private val ownerKey = Extras.Key("")
-    private val client = OkHttpClient.Builder().connectTimeout(8, TimeUnit.SECONDS).readTimeout(8, TimeUnit.SECONDS)
-        .callTimeout(20, TimeUnit.SECONDS).build()
+    private val client by lazy { OkHttpClient.Builder().connectTimeout(8, TimeUnit.SECONDS).readTimeout(8, TimeUnit.SECONDS)
+        .callTimeout(20, TimeUnit.SECONDS).build() }
     private val network = object : NetworkClient {
         override suspend fun <T> executeRequest(request: NetworkRequest, block: suspend (NetworkResponse) -> T): T {
             val owner = checkNotNull(request.extras[ownerKey])
+            val http = withContext(Dispatchers.IO) { client }
             var call: Call? = null
-            val factory = Call.Factory { raw -> client.newCall(raw).also {
+            val factory = Call.Factory { raw -> http.newCall(raw).also {
                 call = it
                 calls[it] = owner
                 // Registration can race with removal. Inactive owners never start a late socket.

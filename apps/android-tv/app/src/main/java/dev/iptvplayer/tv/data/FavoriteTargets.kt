@@ -19,6 +19,9 @@ object FavoriteTargets {
     fun migrate(ids: Set<String>, catalog: Catalog, selected: MediaEntry? = null,
         episodes: List<MediaEntry> = emptyList(), history: List<WatchRecord> = emptyList()): Set<String> {
         if (ids.isEmpty()) return ids
+        // Ordinary movie/channel stars need no full-catalog episode-parent index on every publish.
+        if (catalog.m3uEpisodes.isEmpty() && history.none { it.kind == MediaKind.EPISODE && it.parentId != null } &&
+            !(selected?.kind == MediaKind.SERIES && !selected.adult && episodes.isNotEmpty())) return ids
         val parents = catalog.items.filter { it.kind == MediaKind.SERIES && !it.adult }.mapTo(HashSet()) { it.id }
         val mapping = mutableMapOf<String, String>()
         history.filter { it.kind == MediaKind.EPISODE && it.parentId in parents }

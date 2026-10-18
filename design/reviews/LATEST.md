@@ -1,5 +1,15 @@
 # Güncel görsel inceleme
 
+## 0.14.66 · Açılış ölçümü
+
+D096; normal ölçek/sentetik kaynak. [QA](../../docs/project/native-cold-launch-66-qa.json). Kontrollü clock logo/harf aşamaları ile gerçek ilk Activity karesi ayrı kanıtlardır. İlk duraklama belirgin değişmedi; tamamen akıcı splash iddiası yok.
+
+![Kontrollü saat: logo](cold-launch-0.14.66/controlled-mark.png)
+
+![Kontrollü saat: harfler](cold-launch-0.14.66/controlled-letters.png)
+
+![Gerçek Activity: 3696ms'de alınan kare](cold-launch-0.14.66/actual-startup-3696ms.png)
+
 ## 0.14.65 · Home ilk kaydırma hedefi
 
 D095; normal ölçek/sentetik uzun başlık. İlk otomatik hedef ve sonraki istekler aynı tam alanı kullanır. [QA](../../docs/project/native-home-reveal-65-qa.json).

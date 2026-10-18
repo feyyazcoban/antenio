@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · İlk açılış yükü / 0.14.66 · 19 Ekim 2026
+
+Üretim: SourceRepository/ArtworkCache/EpgRepository lazyHTTP ve IO/GuideWriter ilk erişim; TvViewModel immutable raw counts Default + ALL fastpath; FavoriteTargets mapping adayı yoksa erken dönüş; LaunchCover viewport bazlı cached glow, draw aşamasında alpha. Kod80/.66, D096. Salt okunur scrollbar_review üretim diff'inde somut bulgu yok. player_review test setup try/finally düzeltildi. Figma yok.
+
+Testler: ColdFrames yeni gerçek Activity listener/ilk FrameMetrics, CatalogColdLaunchTest current-registry63175 sentetik kaynak/normal motion/sessiz/yeni PID, wrapperstrict --cold-catalog prepare|verify|visual|clean. İlk build362JVM/1skip/0hata sonrasında lint RequiresApi hatası; SdkSuppress düzeltmesiyle finalfullbuild3m15s,lint0/40. Baseline .65 cold3/3; final .66cold3/3; LaunchAnimation2+startupgate1+Artwork owner/cancel2+EPG transaction/cancel2=7/7. Yalnız5558/betik; fontmatrisi yok. QA native-cold-launch-66-qa.json; ham work/cold-launch-qa; görseller design/reviews/cold-launch-0.14.66.
+
+Ölçüm: tek debug/software emülatör örneği, aynı clean snapshot. Restore5399→4924ms; ilk2800msvsyncmaxgap1233,3→1216,7ms; ilkdraw1208,4→1162,0ms; P95511,9→466,6ms; kayıp rapor0. **İlk duraklama belirgin düzelmedi; splash donması kapatılmaz.** Application/instrumentation/ses ve fiziksel sunum ölçülmez. İlk2800ms gecikmiş animasyonun tamamı değildir. Ayrı visualrun hedef400/1200/2000/2800/3600; ilk hedefler geç,2955mskare siyah,3696mskarelogo/sonharfdevam. Kontrollü clock mark→letters/complete geçti; gerçek sürekli akıcılık kanıtı yok.
+
+Teslim: aynısertifika/debugkapalı/R8; SHA-256 2e59f56a1612e511776916ca6b22376a753200b3ea3fec7a7d8983cdfc28391f. TVinstall-r ilk kurulum2026-10-13 23:50:03 aynı,update2026-10-19 00:56:47,kuruluAPKhash eşit,app/yayınaçılmadı.5556install-r ilk kurulum2026-10-14 08:57:19 aynı,appRunningtrue/crashfalse; Evim tam ekran Home'da görünmüyor.5556 AÇIK kalsın;5558/Gradle kapalı. .65main80b2029/audit önceki eşleme tamam; .66 commit/mainfast-forward/auditsync bu teslimin son adımıdır.
+
+Tam sonraki adım: ilk Activity duraklamasını FrameMetrics DRAW/LAYOUT/SYNC/COMMAND/GPU alt süreleriyle ayır; aynı gerçek açılışta görünür logo aşamasını daha sık örnekle (ör.3200/3600/4200ms, ayrıvisualrun). İlk2,8sn grafiğinden animasyon tamamı için hüküm verme. Debug/JIT/software emulator başlangıcını fiziksel release sorunuyla özdeşleştirme; fiziksel TV uygulamasını/yayını otomatik açma. Kanıt olmadan animasyon süresini değiştirme veya restore'u giriş sonuna bağlama. Fiziksel kullanıcı testi ile scroll/splash kabulü ayrıca açık. Sonraki paket en az kod81/.67; genelS15 ancak açık geri bildirimlerden sonra.5556/testkaynağı/fontmatrisi kuralları sürer.
+
 ## Codex · İlk kaydırma hedefi / 0.14.65 · 19 Ekim 2026
 
 D095: CardVisibility public BringIntoViewModifierNode/RevealBounds, normalizeFocusRequest defaultfalse; yalnız Home Hero/HomeCard true. Hero0/0, ilk rafta pinleme yok, cancellation zinciri aynı. CardVisibilityMotionTest gerçek LazyColumn>LazyRow>TVCard/caption+Down ilk ve bütün rect'leri doğrular; remoteVertical gerçek HeroDown ile başlar. Eski .64 ilk hedef120 yerine228dp ile FAILED. Bağımsız hero_review son diff açık bulgusuz.

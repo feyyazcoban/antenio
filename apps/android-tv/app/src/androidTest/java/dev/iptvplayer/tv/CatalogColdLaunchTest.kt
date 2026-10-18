@@ -32,7 +32,9 @@ class CatalogColdLaunchTest {
             MediaEntry("${kind.name.lowercase()}:$n", n.toString(), kind,
                 "${labels.getValue(kind)} $n", "Kategori ${n % 100}", extension = "mp4")
         }
-        store.saveSource(source)
+        store.reducedMotion = false
+        store.startupSound = false
+        store.saveSources(SourceRegistry(listOf(source)))
         cache.write(source, CatalogSnapshot(Catalog(entries), System.currentTimeMillis()))
         store.favorites(source.id, setOf("movie:2"))
         store.saveProgress(source.id, "movie:2", 45000L, 120000L)
@@ -41,19 +43,32 @@ class CatalogColdLaunchTest {
         check(cache.read(source)?.catalog?.items?.size == 63_175)
         context.filesDir.resolve("cold-seed-pid.txt").writeText(android.os.Process.myPid().toString())
     }
+    @androidx.test.filters.SdkSuppress(minSdkVersion = 34)
     @Test fun verifyRestoredAfterProcessRestart() {
         assumeTrue(InstrumentationRegistry.getArguments().getString("verifyColdCatalog") == "true")
         assumeTrue(android.os.Build.HARDWARE.contains("ranchu") || android.os.Build.FINGERPRINT.contains("generic"))
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val seedPid = context.filesDir.resolve("cold-seed-pid.txt").readText().trim().toInt()
         assertNotEquals("Verifier must run in a different process", seedPid, android.os.Process.myPid())
+        assertTrue("System animations must be enabled", android.animation.ValueAnimator.areAnimatorsEnabled())
         val start = SystemClock.elapsedRealtime()
+        val frames = ColdFrames(InstrumentationRegistry.getInstrumentation())
+        try {
+        frames.register()
+        val visual = InstrumentationRegistry.getArguments().getString("captureColdEntrance") == "true"
+        val samples = if (visual) frames.sampleEntrance() else null
+        val launchNs = System.nanoTime()
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             lateinit var model: TvViewModel
             scenario.onActivity { model = ViewModelProvider(it)[TvViewModel::class.java] }
             val deadline = start + 30000
             while (model.state.value.sourceTask != SourceTask.IDLE && SystemClock.elapsedRealtime() < deadline) SystemClock.sleep(50)
+            val restoredMs = SystemClock.elapsedRealtime() - start
             val state = model.state.value
+            frames.waitForObservation()
+            val entrance = samples?.get(15, java.util.concurrent.TimeUnit.SECONDS)
+            val timing = frames.report(launchNs)
+            // Assertions scanning the catalog run after the measured entrance, not alongside its rendering.
             assertEquals(Route.HOME, state.route)
             assertEquals(63175, state.allCatalog.items.size)
             assertEquals(63175, state.catalog.items.size)
@@ -67,10 +82,19 @@ class CatalogColdLaunchTest {
             val result = JSONObject().put("build", BuildConfig.VERSION_NAME).put("entries", state.catalog.items.size)
                 .put("sourceCount", state.sources.size).put("favoriteRestored", true).put("continueWatchingRestored", true).put("progressRestoredMs", 45000)
                 .put("seedPid", seedPid).put("verifyPid", android.os.Process.myPid())
-                .put("launchToRestoredStateMs", SystemClock.elapsedRealtime() - start)
-                .put("scope", "Instrumentation starts a new process, then ActivityScenario launches MainActivity. State readiness only, not first rendered content or physical startup timing.")
+                .put("launchToRestoredStateMs", restoredMs)
+                .put("scope", "New instrumented process and actual Activity startup with restored current-registry fixture; Application startup and physical display presentation excluded. Silent startup; no simulated Compose clock.")
+                .put("visualSampling", visual).put("frameMetrics", timing)
+            if (entrance != null) result.put("entranceSamples", entrance)
             context.filesDir.resolve("cold-restore-verification.json").writeText(result.toString(2))
+            assertFalse(state.reducedMotion)
+            assertEquals(1, timing.getInt("activityCount"))
+            assertEquals(1, timing.getInt("initialFrameFlag"))
+            assertTrue("Actual frames captured", timing.getInt("frames") >= 10)
+            assertTrue("Actual rendered timeline covers the entrance", timing.getDouble("vsyncSpanMs") >= 2800)
+            assertEquals("Dropped metric reports invalidate cadence comparison", 0, timing.getInt("droppedMetricReports"))
         }
+        } finally { frames.close() }
     }
 
     @Test fun cleanColdCatalogFixture() {

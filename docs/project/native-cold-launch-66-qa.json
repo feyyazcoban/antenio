@@ -1,0 +1,191 @@
+{
+  "date": "2026-10-19",
+  "version": "0.14.66-design-preview",
+  "versionCode": 80,
+  "decision": "D096",
+  "change": "Defer HTTP setup to IO; move immutable catalog counts off main; avoid empty episode-parent scans; cache splash glow shaders by viewport.",
+  "review": "Read-only scrollbar_review found no concrete production issue. player_review cleanup finding fixed by including register/sample setup inside try/finally.",
+  "tests": {
+    "jvm": {
+      "tests": 362,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "Error": 0,
+      "Warning": 40
+    },
+    "build": "Initial build stopped on test RequiresApi lint. Fixed SdkSuppress; final unit/lint/release/debug/androidTest passed in 3m15s. One worker/1536MB/in-process Kotlin.",
+    "device": "Only emulator-5558/tools/run-device-tests.sh: baseline prepare/verify/visual 3/3; final prepare/verify/visual 3/3; LaunchAnimation2, startup content gate1, Artwork cancellation/shared owner2, EPG transaction/cancellation2 =7/7.",
+    "visual": "Controlled clock mark/letters images inspected. Actual cold Activity frame at completed3695.9ms shows logo and unfinished final letter; prior sample at2955.3ms is black. These sparse frames do not prove continuous animation.",
+    "fontScaleMatrix": false
+  },
+  "measurement": {
+    "baseline": {
+      "build": "0.14.65-design-preview",
+      "entries": 63175,
+      "sourceCount": 1,
+      "favoriteRestored": true,
+      "continueWatchingRestored": true,
+      "progressRestoredMs": 45000,
+      "seedPid": 3332,
+      "verifyPid": 3440,
+      "launchToRestoredStateMs": 5399,
+      "scope": "New instrumented process and actual Activity startup with restored current-registry fixture; Application startup and physical display presentation excluded. Silent startup; no simulated Compose clock.",
+      "visualSampling": false,
+      "frameMetrics": {
+        "activityCount": 1,
+        "frames": 111,
+        "initialFrameFlag": 1,
+        "vsyncSpanMs": 6066.666424,
+        "firstDrawFlags": 1,
+        "droppedMetricReports": 0,
+        "launchToFirstCallbackMs": 2399.2295,
+        "preCreateToFirstCallbackMs": 2096.8324,
+        "firstFrameTotalMs": 1208.40933,
+        "observationSpanMs": 4424.5072,
+        "introFrames": 36,
+        "introVsyncMaxGapMs": 1233.333284,
+        "introTotalP95Ms": 511.906346,
+        "introTotalMaxMs": 545.116314,
+        "restoreStates": [
+          {
+            "afterPreCreateMs": 315.245,
+            "state": "RESTORING"
+          },
+          {
+            "afterPreCreateMs": 5037.5379,
+            "state": "IDLE"
+          }
+        ],
+        "scope": "New instrumented process, actual MainActivity creation and real clock. Application/instrumentation setup and physical display presentation are outside this measurement. No fixed FPS pass threshold."
+      }
+    },
+    "final": {
+      "build": "0.14.66-design-preview",
+      "entries": 63175,
+      "sourceCount": 1,
+      "favoriteRestored": true,
+      "continueWatchingRestored": true,
+      "progressRestoredMs": 45000,
+      "seedPid": 3231,
+      "verifyPid": 3329,
+      "launchToRestoredStateMs": 4924,
+      "scope": "New instrumented process and actual Activity startup with restored current-registry fixture; Application startup and physical display presentation excluded. Silent startup; no simulated Compose clock.",
+      "visualSampling": false,
+      "frameMetrics": {
+        "activityCount": 1,
+        "frames": 119,
+        "initialFrameFlag": 1,
+        "vsyncSpanMs": 5716.666438,
+        "firstDrawFlags": 1,
+        "droppedMetricReports": 0,
+        "launchToFirstCallbackMs": 2449.7013,
+        "preCreateToFirstCallbackMs": 2135.5924,
+        "firstFrameTotalMs": 1162.039838,
+        "observationSpanMs": 4130.9787,
+        "introFrames": 35,
+        "introVsyncMaxGapMs": 1216.666618,
+        "introTotalP95Ms": 466.647924,
+        "introTotalMaxMs": 550.707758,
+        "restoreStates": [
+          {
+            "afterPreCreateMs": 379.6193,
+            "state": "RESTORING"
+          },
+          {
+            "afterPreCreateMs": 4552.6787,
+            "state": "IDLE"
+          }
+        ],
+        "scope": "New instrumented process, actual MainActivity creation and real clock. Application/instrumentation setup and physical display presentation are outside this measurement. No fixed FPS pass threshold."
+      }
+    },
+    "finalVisualSamples": [
+      {
+        "targetMs": 400,
+        "requestedMs": 1540.524544,
+        "completedMs": 2011.118344,
+        "logoPixels": 0
+      },
+      {
+        "targetMs": 1200,
+        "requestedMs": 2076.665444,
+        "completedMs": 2148.853044,
+        "logoPixels": 0
+      },
+      {
+        "targetMs": 2000,
+        "requestedMs": 2198.319044,
+        "completedMs": 2259.319844,
+        "logoPixels": 0
+      },
+      {
+        "targetMs": 2800,
+        "requestedMs": 2801.306444,
+        "completedMs": 2955.256244,
+        "logoPixels": 0
+      },
+      {
+        "targetMs": 3600,
+        "requestedMs": 3602.951344,
+        "completedMs": 3695.926244,
+        "logoPixels": 14727
+      }
+    ],
+    "interpretation": "One sample per version, debug APK on same clean software-rendered emulator. Restore observation5399→4924ms; first-window maximum vsync gap1233.3→1216.7ms, essentially unchanged. No statistically established gain or resolved splash-freeze claim.",
+    "limitations": [
+      "Initial2800ms vsync window may not cover the entire delayed entrance.",
+      "Application/instrumentation setup, sound and physical display presentation are excluded.",
+      "Screenshot runs are separate from timing-only runs; early target samples arrived late.",
+      "No physical TV playback/frame measurement. Cold initial delay and physical smoothness acceptance remain open."
+    ]
+  },
+  "rawEvidence": "work/cold-launch-qa",
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "79",
+        "versionName": "0.14.65-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-19 00:42:18"
+      },
+      "after": {
+        "versionCode": "80",
+        "versionName": "0.14.66-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-19 00:56:47"
+      },
+      "sha256": "2e59f56a1612e511776916ca6b22376a753200b3ea3fec7a7d8983cdfc28391f",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "design": {
+      "device": "emulator-5556",
+      "before": {
+        "versionCode": "79",
+        "versionName": "0.14.65-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:35:27"
+      },
+      "after": {
+        "versionCode": "80",
+        "versionName": "0.14.66-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:49:50"
+      },
+      "sha256": "2e59f56a1612e511776916ca6b22376a753200b3ea3fec7a7d8983cdfc28391f",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "evimVisible": false,
+      "appRunning": true,
+      "crashRecordForApp": false
+    }
+  },
+  "sha256": "2e59f56a1612e511776916ca6b22376a753200b3ea3fec7a7d8983cdfc28391f",
+  "signatureSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065",
+  "releaseDebuggable": false
+}

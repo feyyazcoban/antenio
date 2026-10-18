@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -82,20 +83,30 @@ import kotlin.math.abs
         NextvGlyphs.map { g -> PathParser().parsePathString(g.data).toPath().let { ParsedGlyph(it, it.getBounds().center, g.mint) } }
     }
     BoxWithConstraints(Modifier.fillMaxSize().graphicsLayer { this.alpha = alpha.value }.background(Color.Black)) {
+        Spacer(Modifier.fillMaxSize().drawWithCache {
+            val span = maxOf(size.width, size.height) * .62f
+            // Cache shaders by viewport size; only their draw alpha changes with the entrance clock.
+            val maxGlow = 1.24f
+            val bottomGlow = Brush.radialGradient(listOf(NextvMint.copy(alpha = .34f * maxGlow),
+                NextvMint.copy(alpha = .11f * maxGlow), Color.Transparent),
+                Offset(size.width * (-319f / RefW), size.height * (1306f / RefH)), span)
+            val topGlow = Brush.radialGradient(listOf(NextvMint.copy(alpha = .30f * maxGlow),
+                NextvMint.copy(alpha = .10f * maxGlow), Color.Transparent),
+                Offset(size.width * (1774f / RefW), size.height * (-414f / RefH)), span)
+            onDrawBehind {
+                val t = intro.value
+                // Corner glows stay dark through the build, arrive with the mark on the impact and bloom briefly on it.
+                val glowIn = Ease.Out.transform(segment(t, Impact - .14f, Impact + .05f))
+                val bloom = smoothPulse(t, Impact, .13f)
+                // Still covers do not breathe: nothing moves but the spinner.
+                val idle = if (still) .5f else breath.value
+                val glow = glowIn * lerp(.82f, 1f, idle) * (1f + .24f * bloom)
+                drawRect(bottomGlow, alpha = glow / maxGlow)
+                drawRect(topGlow, alpha = glow / maxGlow)
+            }
+        })
         Canvas(Modifier.fillMaxSize()) {
             val t = intro.value
-            // Corner glows stay dark through the build, arrive with the mark on the impact and bloom briefly on it.
-            val glowIn = Ease.Out.transform(segment(t, Impact - .14f, Impact + .05f))
-            val bloom = smoothPulse(t, Impact, .13f)
-            // Still covers do not breathe: nothing moves but the spinner.
-            val idle = if (still) .5f else breath.value
-            val glow = glowIn * lerp(.82f, 1f, idle) * (1f + .24f * bloom)
-            val span = maxOf(size.width, size.height) * .62f
-            drawRect(Brush.radialGradient(listOf(NextvMint.copy(alpha = .34f * glow), NextvMint.copy(alpha = .11f * glow),
-                Color.Transparent), Offset(size.width * (-319f / RefW), size.height * (1306f / RefH)), span))
-            drawRect(Brush.radialGradient(listOf(NextvMint.copy(alpha = .30f * glow), NextvMint.copy(alpha = .10f * glow),
-                Color.Transparent), Offset(size.width * (1774f / RefW), size.height * (-414f / RefH)), span))
-
             // Play mark + wordmark (design/brand/nextv-dikey.svg), a GroupW × GroupH box centred on the 1920×1080 stage.
             val unit = minOf(size.width / RefW, size.height / RefH)
             withTransform({

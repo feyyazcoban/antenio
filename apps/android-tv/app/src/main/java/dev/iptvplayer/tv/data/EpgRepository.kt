@@ -8,8 +8,9 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.Executors
 import java.util.zip.GZIPInputStream
 
-class EpgRepository(private val client: OkHttpClient = OkHttpClient.Builder().connectTimeout(15, TimeUnit.SECONDS)
-    .readTimeout(30, TimeUnit.SECONDS).callTimeout(180, TimeUnit.SECONDS).followSslRedirects(false).build()) {
+class EpgRepository(client: OkHttpClient? = null) {
+    private val client by lazy { client ?: OkHttpClient.Builder().connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS).callTimeout(180, TimeUnit.SECONDS).followSslRedirects(false).build() }
 
     /** Reads feeds sequentially. A failed or cancelled feed never replaces the last complete guide.
      * accept is checked inside the shared source transaction; UI must validate its current source binding there.
@@ -32,7 +33,7 @@ class EpgRepository(private val client: OkHttpClient = OkHttpClient.Builder().co
 
     internal suspend fun download(url: String, window: GuideWindow, sink: EpgSink,
         dispatcher: CoroutineDispatcher = Dispatchers.IO, languages: List<String> = emptyList()): EpgParseReport = coroutineScope {
-        val call = client.newCall(SourceHttp.guide(url))
+        val call = withContext(dispatcher) { client.newCall(SourceHttp.guide(url)) }
         // Stays alive through body parsing, unlike a continuation completed as soon as headers arrive.
         val cancellation = launch(Dispatchers.IO, start = CoroutineStart.UNDISPATCHED) {
             try { awaitCancellation() } finally { call.cancel() }

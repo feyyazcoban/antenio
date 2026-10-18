@@ -19,7 +19,9 @@ import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class SourceRepository(private val client: OkHttpClient = client()) {
+class SourceRepository(client: OkHttpClient? = null) {
+    // All requests enter through IO; do not initialize TLS while constructing the ViewModel.
+    private val client by lazy { client ?: Companion.client() }
     suspend fun load(source: SourceConfig, onProgress: (UiText) -> Unit): Catalog = withContext(Dispatchers.IO) {
         if (source.type == SourceType.M3U) {
             onProgress(UiText.Res(R.string.progress_downloading_list))

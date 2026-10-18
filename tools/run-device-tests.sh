@@ -7,6 +7,10 @@
 #   tools/run-device-tests.sh GuideFlowTest,SearchNavigationTest   # short or fully qualified class names
 #   tools/run-device-tests.sh GuideFlowTest#emptyGuideHasReachableNavigationAndNoUnattachedFocusTarget
 #   tools/run-device-tests.sh --no-build PilotFlowTest            # reuse the APKs already built
+#   tools/run-device-tests.sh --no-build --cold-catalog prepare   # seed only the dedicated test emulator
+#   tools/run-device-tests.sh --no-build --cold-catalog verify    # fresh process, timing without screenshots
+#   tools/run-device-tests.sh --no-build --cold-catalog visual    # separate frame captures; not timing comparison
+#   tools/run-device-tests.sh --no-build --cold-catalog clean     # remove only the synthetic fixture
 #   tools/run-device-tests.sh --font-scale 2.0 SettingsFrameworkTest  # at that text size; the emulator's comes back after
 #
 # Build first (or let the script do it): ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest
@@ -21,14 +25,27 @@ APP="$ROOT/apps/android-tv"
 
 build=1
 scale=""
+cold=""
+runner_args=()
 while [ $# -gt 0 ]; do
     case "$1" in
         --no-build) build=0; shift ;;
+        --cold-catalog) [ $# -ge 2 ] || { echo "--cold-catalog needs prepare, verify, visual or clean" >&2; exit 64; }; cold="$2"; shift 2 ;;
         --font-scale) [ $# -ge 2 ] || { echo "--font-scale needs a value such as 1.5" >&2; exit 64; }; scale="$2"; shift 2 ;;
         *) break ;;
     esac
 done
-[ $# -ge 1 ] || { echo "usage: $0 [--no-build] [--font-scale 1.5] Class[,Class#method,...]" >&2; exit 64; }
+if [ -n "$cold" ]; then
+    [ $# -eq 0 ] && [ -z "$scale" ] || { echo "Cold mode takes no class or font-scale arguments." >&2; exit 64; }
+    case "$cold" in
+        prepare) set -- 'CatalogColdLaunchTest#prepareEncryptedCatalogForColdLaunch'; runner_args=(-e prepareColdCatalog true) ;;
+        verify|visual) set -- 'CatalogColdLaunchTest#verifyRestoredAfterProcessRestart'; runner_args=(-e verifyColdCatalog true)
+            if [ "$cold" = visual ]; then runner_args+=(-e captureColdEntrance true); fi ;;
+        clean) set -- 'CatalogColdLaunchTest#cleanColdCatalogFixture'; runner_args=(-e cleanColdCatalog true) ;;
+        *) echo "Unknown cold mode: $cold" >&2; exit 64 ;;
+    esac
+fi
+[ $# -ge 1 ] || { echo "usage: $0 [--no-build] [--font-scale 1.5] Class[,Class#method,...] | --cold-catalog prepare|verify|visual|clean" >&2; exit 64; }
 case "$scale" in ""|[0-9].[0-9]|[0-9].[0-9][0-9]|[0-9]) ;; *) echo "--font-scale takes a number such as 1.5" >&2; exit 64 ;; esac
 
 name="$(adb -s "$SERIAL" emu avd name 2>/dev/null | head -1 | tr -d '\r' || true)"
@@ -66,8 +83,13 @@ if [ -n "$scale" ]; then
     echo "Font scale $scale (was ${before:-unset})"
 fi
 
+if [ "$cold" = verify ] || [ "$cold" = visual ]; then
+    adb -s "$SERIAL" shell am force-stop dev.iptvplayer.tv.pilot
+    running="$(adb -s "$SERIAL" shell pidof dev.iptvplayer.tv.pilot 2>/dev/null | tr -d '\r' || true)"
+    [ -z "$running" ] || { echo "Cold verifier requires a stopped target process." >&2; exit 4; }
+fi
 log="$(mktemp)"
-adb -s "$SERIAL" shell am instrument -w -r -e class "$classes" "$RUNNER" > "$log" 2>&1 || true
+adb -s "$SERIAL" shell am instrument -w -r -e class "$classes" "${runner_args[@]}" "$RUNNER" > "$log" 2>&1 || true
 # Every failing test with the first lines of its stack, then the totals.
 awk '/^INSTRUMENTATION_STATUS: class=/{c=substr($0,31)} /^INSTRUMENTATION_STATUS: test=/{t=substr($0,30)}
      /^INSTRUMENTATION_STATUS: stack=/{s=substr($0,31); getline n1; getline n2; st=s " | " n1 " | " n2}
@@ -75,3 +97,6 @@ awk '/^INSTRUMENTATION_STATUS: class=/{c=substr($0,31)} /^INSTRUMENTATION_STATUS
 grep -E "^(OK \(|Tests run:|FAILURES|INSTRUMENTATION_FAILED|INSTRUMENTATION_CODE)" "$log" || true
 echo "Full log: $log"
 grep -q "^OK (" "$log"
+if [ -n "$cold" ]; then
+    grep -q '^INSTRUMENTATION_STATUS_CODE: 0' "$log" || { echo "Cold test did not execute successfully (possibly skipped)." >&2; exit 5; }
+fi

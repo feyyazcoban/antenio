@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.66 · İlk açılış yükü ve ölçümü · 19 Ekim 2026
+
+D096: HTTP hazırlığı ilk IO isteğine ertelendi; katalog kaynak sayımları Default'a taşındı, gereksiz kategori/favori taramaları kaldırıldı. Splash glow shader'ları boyuta göre cache edilir. Zaman çizgisi/atlama/reduced motion ve veri sözleşmesi aynı.
+
+362 JVM/1skip/0hata, lint0/40; final full build3m15s. 5558/betik ile baseline3/3, final cold3/3 ve ilişkili7/7; bağımsız inceleme tamam. [QA](native-cold-launch-66-qa.json). Tek debug emülatör örneğinde restore5399→4924ms; ilk2,8snvsyncmaxgap1233→1217ms, belirgin değişim yok. **Splash donması tamamen çözüldü sayılmıyor.** Kontrollü saatle logo/harf ilerleyişi geçti; gerçek açılışın seyrek görselleri sürekli akıcılık kanıtı değil.
+
+Kod80/.66 TV ve5556'ya install-r kuruldu; ilk kurulum zamanı ve kuruluAPKhash aynı. SHA-256 2e59f56a1612e511776916ca6b22376a753200b3ea3fec7a7d8983cdfc28391f. TVapp açılmadı,5556 kullanıcı için açık/çalışır/crash yok. 5558/Gradle kapalı. İlk soğuk kare gecikmesi, fiziksel akıcılık kabulü ve genel S15a–c açık; font matrisi mağaza öncesine ertelendi.
+
 ## 0.14.65 · İlk kaydırma hedefi · 19 Ekim 2026
 
 D095: Home ilk odak isteği ve geç resize kontrolü aynı tam kart/caption/pay alanını hedefler. Eski APK 120dp ilk hedef gönderirken yeni test 228dp beklediği için başarısızdı; düzeltme final testlerde geçti. Normalizasyon yalnız Home; Search eski yolu korur.

@@ -453,10 +453,11 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         val hideAdult = store.hideAdultCategories
         val policy = parental.policy
         val before = lockedRows
-        val (view, choices) = withContext(Dispatchers.Default) {
+        val (view, choices, counts) = withContext(Dispatchers.Default) {
             val combined = SourceLibrary.combine(saved.sources, raw)
-            ParentalProjection.project(saved.sources, CategoryVisibility.apply(combined, hidden, hideAdult), policy, before) to
-                CategoryVisibility.choices(combined)
+            Triple(ParentalProjection.project(saved.sources, CategoryVisibility.apply(combined, hidden, hideAdult), policy, before),
+                CategoryVisibility.choices(combined),
+                raw.mapValues { (_, catalog) -> catalog.items.count { !it.adult && it.kind != MediaKind.EPISODE } })
         }
         if (upTo != publishCalls) return
         lockedRows = view.rows
@@ -477,10 +478,10 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 sourceStatus = saved.sources.associate { source ->
                     val snapshot = snapshots[source.id]
                     source.id to (old.sourceStatus[source.id] ?: SourceStatus()).copy(
-                        count = snapshot?.catalog?.items?.count { !it.adult && it.kind != MediaKind.EPISODE } ?: 0,
+                        count = counts[source.id] ?: 0,
                         updatedAt = snapshot?.updatedAt ?: 0)
                 }, catalogUpdatedAt = snapshots.values.maxOfOrNull { it.updatedAt } ?: 0,
-                category = old.category.takeIf { category -> category == ChannelScope.FAVORITES || catalog.items.any { !it.adult &&
+                category = old.category.takeIf { category -> category == CategoryFilter.ALL || category == ChannelScope.FAVORITES || catalog.items.any { !it.adult &&
                     (if (old.onlyFavorites) it.id in favorites else it.kind == old.kind) && it.category == category } } ?: CategoryFilter.ALL)
         }
         publishedThrough = upTo
