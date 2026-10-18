@@ -7,6 +7,7 @@
 #   tools/run-device-tests.sh GuideFlowTest,SearchNavigationTest   # short or fully qualified class names
 #   tools/run-device-tests.sh GuideFlowTest#emptyGuideHasReachableNavigationAndNoUnattachedFocusTarget
 #   tools/run-device-tests.sh --no-build PilotFlowTest            # reuse the APKs already built
+#   tools/run-device-tests.sh --font-scale 2.0 SettingsFrameworkTest  # at that text size; the emulator's comes back after
 #
 # Build first (or let the script do it): ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest
 set -euo pipefail
@@ -19,8 +20,16 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$ROOT/apps/android-tv"
 
 build=1
-if [ "${1:-}" = "--no-build" ]; then build=0; shift; fi
-[ $# -ge 1 ] || { echo "usage: $0 [--no-build] Class[,Class#method,...]" >&2; exit 64; }
+scale=""
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --no-build) build=0; shift ;;
+        --font-scale) [ $# -ge 2 ] || { echo "--font-scale needs a value such as 1.5" >&2; exit 64; }; scale="$2"; shift 2 ;;
+        *) break ;;
+    esac
+done
+[ $# -ge 1 ] || { echo "usage: $0 [--no-build] [--font-scale 1.5] Class[,Class#method,...]" >&2; exit 64; }
+case "$scale" in ""|[0-9].[0-9]|[0-9].[0-9][0-9]|[0-9]) ;; *) echo "--font-scale takes a number such as 1.5" >&2; exit 64 ;; esac
 
 name="$(adb -s "$SERIAL" emu avd name 2>/dev/null | head -1 | tr -d '\r' || true)"
 if [ "$name" != "$EXPECTED_AVD" ]; then
@@ -44,6 +53,18 @@ for item in "${items[@]}"; do
     case "$item" in *.*) full="$item" ;; *) full="$PACKAGE.$item" ;; esac
     classes="${classes:+$classes,}$full"
 done
+
+if [ -n "$scale" ]; then
+    # The text size of the whole emulator, as a viewer sets it; the one it had comes back however the run ends.
+    before="$(adb -s "$SERIAL" shell settings get system font_scale | tr -d '\r')"
+    restore() {
+        if [ "$before" = "null" ] || [ -z "$before" ]; then adb -s "$SERIAL" shell settings delete system font_scale >/dev/null
+        else adb -s "$SERIAL" shell settings put system font_scale "$before"; fi
+    }
+    trap restore EXIT
+    adb -s "$SERIAL" shell settings put system font_scale "$scale"
+    echo "Font scale $scale (was ${before:-unset})"
+fi
 
 log="$(mktemp)"
 adb -s "$SERIAL" shell am instrument -w -r -e class "$classes" "$RUNNER" > "$log" 2>&1 || true

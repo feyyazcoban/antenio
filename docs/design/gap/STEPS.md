@@ -5,8 +5,9 @@
 ## Durum (dal `claude/app-ui-ux-audit-a78e98`)
 
 - Bitti ve yeşil: Faz A (S01–S07), X01, Faz B (S08–S12), T01 (ekran testleri onarımı), Faz C (S13), S14 (`b6157c9`: kontrolleri ve ekran testleri geçti; incelemesi yapıldı, düzeltmeleri yarım).
-- Yarım: S14 inceleme düzeltmeleri → dal `wip/s14-review-fixes` (`c54a9f7`, derlenmedi, test edilmedi). Ya bu dalı alıp bitirin ya da aşağıdaki bulguları ana dalda yeniden uygulayın.
-- Sırada: S14 düzeltmeleri → S14b (D072, yeni oynatıcı kontrolleri) → **TV kurulumu: kullanıcı "Bitince kur" dedi; S14b bitince 0.14.45 (versionCode 59) olarak TV'ye veri silmeden kurulacak** → S15a–S17 → Faz E (S18–S29) → Faz F–J (PLAN §2).
+- S14 inceleme düzeltmeleri: `c54a9f7` alındı ve tamamlandı. PCM destek uyarısı mevcut `flash` yolundan medya başına bir kez; ses çıkışı hataları genel hata; panellerde açık opaklık; uzun değerlerde alta geçen değer etiketi; gezinme testleri `SectionId` sırasından. 340 JVM testi (1 atlanan), lint 0 hata, release/androidTest derlemesi; 5558'de normal yazıda 16, 1,5 ve 2,0 ölçekte ayrı ayrı 12 ekran testi geçti. AC-3 destek kontrolü saf JVM testinde; gerçek cihazda desteklenmeyen AC-3 akışı/TalkBack doğrulanmadı. Altı bölümlü Ayarlar sınırı D076'da açıkça kayıtlı.
+- Kullanıcının güncel isteği: **son hazır sürümü hemen TV'ye kur**. Bu nedenle 0.14.45 (kod 59), S14 ve inceleme düzeltmelerinin teslimidir; S14b tamamlanmış sayılmaz. Kurulum sonucu STATUS/HANDOFF'ta.
+- Sırada: kullanıcının istediği film/dizi oynatma hızı (0,5×–2×) → S14b (D072) → S15a–S17 → Faz E (S18–S29) → Faz F–J (PLAN §2). Sonraki TV paketi en az kod 60 / 0.14.46 olmalı. Hız seçimi S14b/S16 Seçenekler düzenine taşınmalı; canlı yayın normal hızda kalır.
 
 ## Her adımda yöntem
 
@@ -24,7 +25,7 @@ cd apps/android-tv && export JAVA_HOME="/c/Program Files/Android/Android Studio/
 
 **Ürün kuralları (AGENTS.md):** gerçek IPTV adresi, kullanıcı adı, parola ve token commit edilmez; `.private/` açılmaz; korsanlık çağrıştıran ifade kullanılmaz; tek oynatma oturumu (StreamBudget); metinler `values` (İngilizce) ve `values-tr` (Türkçe) dosyalarına yazılır; STATUS, HANDOFF ve DECISIONS her faz sonunda güncellenir.
 
-## S14 incelemesinin bulguları (düzeltilecek)
+## S14 incelemesinin bulguları (tarihçe; sonuç yukarıda)
 
 - [medium] "Cihazda çöz" (PCM) can mute a stream silently: the unsupported-audio note from the design is missing (apps/android-tv/app/src/main/java/dev/iptvplayer/tv/ui/PlayerScreen.kt): In PlayerScreen's onTracksChanged, when `screenState.playback.audioOutput == AudioOutput.PCM`, check for at least one TRACK_TYPE_AUDIO group with no supported track (`Tracks.Group.isSupported`). If so, flash the note once per media through the existing `note`/`flash` path. Add the string to values and values-tr. Keep the check in a small pure helper, such as `unplayableAudio(tracks, output)`, with a JVM test. Add a device case to PlayerSettingsFlowTest, or a FakePlayer test with an AC-3-only Tracks.
 - [low] Two-level Ayarlar ships 6 of the 10 sections the step and plan decision 4a-8 list, so later steps must reshuffle hard-coded traversal tests (apps/android-tv/app/src/main/java/dev/iptvplayer/tv/ui/settings/SettingsPages.kt): Either add the Rehber and Yedekleme ve ana ekran sections now (Rehber could hold a note pointing to the guide's own settings), or raise the reduced list to the owner as an open 4a-8 question in the documentation step. Also make the traversal tests derive their counts from `SectionId.entries`, not literal repeat counts, so later sections do not break them.

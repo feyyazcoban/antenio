@@ -1,7 +1,10 @@
 package dev.iptvplayer.tv
 
 import android.graphics.Bitmap
+import android.os.Build
 import android.view.KeyEvent
+import android.view.WindowManager
+import android.view.inspector.WindowInspector
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.compose.ui.semantics.Role
@@ -12,7 +15,10 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.*
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
+import dev.iptvplayer.tv.data.PanelOpacity
+import dev.iptvplayer.tv.data.PlaybackPreferences
 import dev.iptvplayer.tv.ui.PilotTheme
 import dev.iptvplayer.tv.ui.TracksDialog
 import org.junit.*
@@ -25,13 +31,15 @@ class TracksLayoutTest {
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
     private var dismissed = false
 
-    private fun open(tracks: Tracks) {
+    /** The panel over [tracks], its body as Oynatıcı panelleri says: the default unless [opacity] is given. */
+    private fun open(tracks: Tracks, opacity: PanelOpacity = PlaybackPreferences().panelOpacity) {
         ui.runOnUiThread {
             val model = ViewModelProvider(ui.activity)[TvViewModel::class.java]
             val engine = ExoPlayer.Builder(ui.activity).build().also { player = it }
             ui.activity.setContent {
-                var visible by remember { mutableStateOf(true) }
-                PilotTheme { if (visible) TracksDialog(tracks, engine.trackSelectionParameters, engine, model) {
+                // setContent keeps the last panel's state in place; each open shows a new one.
+                var visible by remember(engine) { mutableStateOf(true) }
+                PilotTheme { if (visible) TracksDialog(tracks, engine.trackSelectionParameters, engine, model, opacity) {
                     visible = false
                     dismissed = true
                 } }
@@ -150,4 +158,30 @@ class TracksLayoutTest {
         ui.waitUntil(5_000) { dismissed }
     }
 
+    /**
+     * Oynatıcı panelleri (S14, playback.md §3.1): while the panel lets the picture through, its window dims nothing
+     * behind it, or the picture would show through as a dark grey; an opaque panel keeps the dimmed picture it had.
+     */
+    @SdkSuppress(minSdkVersion = Build.VERSION_CODES.Q)
+    @Test fun aSeeThroughPanelLeavesThePictureBehindItUndimmed() {
+        for (opacity in PanelOpacity.entries) {
+            open(Tracks.EMPTY, opacity)
+            ui.onNodeWithTag("tracks-panel").assertExists()
+            ui.onNodeWithText("Ses parçası bulunamadı; yayın henüz açılmamış olabilir.").assertExists()
+            ui.waitForIdle()
+            lateinit var window: WindowManager.LayoutParams
+            ui.runOnUiThread {
+                // The panel's own window, above the activity's.
+                window = WindowInspector.getGlobalWindowViews().mapNotNull { it.layoutParams as? WindowManager.LayoutParams }
+                    .last { it.type == WindowManager.LayoutParams.TYPE_APPLICATION }
+            }
+            val dimmed = (window.flags and WindowManager.LayoutParams.FLAG_DIM_BEHIND) != 0 && window.dimAmount > 0f
+            Assert.assertEquals("$opacity: dim ${window.dimAmount}", opacity == PanelOpacity.OPAQUE, dimmed)
+            if (opacity == PlaybackPreferences().panelOpacity) shot("tracks-see-through")
+            instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
+            ui.waitUntil(5_000) { dismissed }
+            dismissed = false
+            ui.runOnUiThread { player?.release(); player = null }
+        }
+    }
 }

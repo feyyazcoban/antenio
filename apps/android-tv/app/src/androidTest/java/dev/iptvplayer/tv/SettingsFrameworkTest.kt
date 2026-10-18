@@ -1,5 +1,7 @@
 package dev.iptvplayer.tv
 
+import dev.iptvplayer.tv.ui.settings.SectionId
+
 import android.graphics.Bitmap
 import android.view.KeyEvent
 import androidx.compose.ui.semantics.SemanticsActions
@@ -107,7 +109,8 @@ class SettingsFrameworkTest {
             "Oynatıcı" to listOf("Otomatik sonraki bölüm", "Altyazı görünümü", "Kontrollerin kapanma süresi", "Oynatıcı panelleri",
                 "Kare hızı eşleştirme", "Arabellek", "Kod çözücü", "Ses çıkışı", "Tünelli oynatma (deneysel)"),
             "Kütüphane" to listOf("İzleme geçmişini temizle"))
-        (sections.map { it.first } + "Hakkında").forEachIndexed { index, label ->
+        SectionId.entries.forEachIndexed { index, section ->
+            val label = ui.activity.getString(section.label)
             if (index > 0) key(KeyEvent.KEYCODE_DPAD_DOWN)
             row(label).assertIsFocused()
             assertFocusedRowReadable()

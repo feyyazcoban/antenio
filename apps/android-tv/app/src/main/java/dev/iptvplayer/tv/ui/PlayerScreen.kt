@@ -34,7 +34,9 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.IntOffset
@@ -89,7 +91,8 @@ import kotlinx.coroutines.flow.first
     val currentProgramme = schedule?.now(guideNow)
     // Settings → Oynatıcı as they were when the player opened: Settings opens from the other screens only, so a change
     // holds from the next stream.
-    val player = remember { PlayerFactory.create(context, model.store, screenState.playback) }
+    val opened = remember { screenState.playback }
+    val player = remember { PlayerFactory.create(context, model.store, opened) }
     val accessibility = remember(context) { context.getSystemService(AccessibilityManager::class.java) }
     // The notes, the top label and the Ses / Altyazı panel let as much of the picture through as Oynatıcı panelleri says.
     val panelAlpha = screenState.playback.panelOpacity.alpha
@@ -101,6 +104,8 @@ import kotlinx.coroutines.flow.first
     // What the viewer has open over the picture: the controls, the tracks panel or nothing.
     var layer by remember { mutableStateOf<PlayerLayer>(PlayerLayer.Controls) }
     var tracks by remember { mutableStateOf(Tracks.EMPTY) }
+    // Warn once per media if decoding on this device leaves every audio track unsupported.
+    var silent by remember { mutableStateOf(false) }
     var trackParameters by remember { mutableStateOf(player.trackSelectionParameters) }
     var status by remember { mutableIntStateOf(Player.STATE_IDLE) }
     var playing by remember { mutableStateOf(false) }
@@ -148,8 +153,11 @@ import kotlinx.coroutines.flow.first
     var quiet by remember { mutableStateOf(false) }
     var note by remember { mutableStateOf<Pair<String, String?>?>(null) }
     var noteAt by remember { mutableLongStateOf(0L) }
+    var audioNote by remember { mutableStateOf(false) }
     var digits by remember { mutableStateOf("") }
-    fun flash(text: String, detail: String? = null) { note = text to detail; noteAt = System.currentTimeMillis() }
+    fun flash(text: String, detail: String? = null, audio: Boolean = false) {
+        note = text to detail; audioNote = audio; noteAt = System.currentTimeMillis()
+    }
     fun zap(direction: Int) { quiet = layer == PlayerLayer.Video; digits = ""; model.changeChannel(direction) }
     fun seekBy(deltaMs: Long) {
         if (!player.isCurrentMediaItemSeekable) return
@@ -187,7 +195,7 @@ import kotlinx.coroutines.flow.first
         val command = PlayerKeyRouter.route(key, keys(event.nativeKeyEvent.repeatCount)) ?: return false
         perform(command); return true
     }
-    LaunchedEffect(noteAt) { if (note != null) { delay(2_500); note = null } }
+    LaunchedEffect(noteAt) { if (note != null) { delay(if (audioNote) 8_000 else 2_500); note = null } }
     LaunchedEffect(digits) {
         if (digits.isEmpty()) return@LaunchedEffect
         delay(PlayerKeyRouter.DIGIT_COMMIT_MS)
@@ -216,7 +224,12 @@ import kotlinx.coroutines.flow.first
                 playing = isPlaying
                 if (isPlaying) { hasPlayed = true; active?.entry?.let { model.recordViewed(it) } }
             }
-            override fun onTracksChanged(value: Tracks) { tracks = value }
+            override fun onTracksChanged(value: Tracks) {
+                tracks = value
+                if (!silent && unplayableAudio(value, opened.audioOutput)) {
+                    silent = true; flash(resources.getString(R.string.player_audio_unplayable), audio = true)
+                }
+            }
             override fun onTrackSelectionParametersChanged(parameters: TrackSelectionParameters) { trackParameters = parameters }
         }
         var resumeOnStart = false
@@ -250,7 +263,7 @@ import kotlinx.coroutines.flow.first
         player.stop(); player.clearMediaItems()
         recovery.newMedia(request.mode == PlaybackMode.LIVE)
         episodeEnd.newMedia(); endedUnderPin = false; hasPlayed = false
-        tracks = Tracks.EMPTY; position = request.startMs; duration = 0
+        tracks = Tracks.EMPTY; silent = false; position = request.startMs; duration = 0
         if (layer == PlayerLayer.Tracks) layer = PlayerLayer.Controls
         active = media
         if (quiet) {
@@ -302,12 +315,12 @@ import kotlinx.coroutines.flow.first
             view.subtitleView?.let { PlayerFactory.subtitles(it, screenState.playback.subtitle) }
         }, onRelease = { it.player = null })
         Box(Modifier.fillMaxSize().focusRequester(canvas).focusable(layer == PlayerLayer.Video))
-        note?.takeIf { !controlsShown }?.let { (text, detail) ->
+        note?.takeIf { !controlsShown || audioNote }?.let { (text, detail) ->
             Column(Modifier.align(Alignment.TopEnd).padding(top = 22.dp, end = TvLayout.Gutter).widthIn(max = 420.dp)
                 .background(Ink.Background.copy(alpha = panelAlpha), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp, vertical = 10.dp)
-                .testTag("player-note"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                .semantics { liveRegion = LiveRegionMode.Polite }.testTag("player-note"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(text, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 18.sp, lineHeight = 24.sp,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    maxLines = if (audioNote) 4 else 1, overflow = TextOverflow.Ellipsis)
                 detail?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, maxLines = 1) }
             }
         }
@@ -440,7 +453,7 @@ import kotlinx.coroutines.flow.first
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable internal fun TracksDialog(tracks: Tracks, parameters: TrackSelectionParameters, player: ExoPlayer, model: TvViewModel,
-    opacity: PanelOpacity = PanelOpacity.OPAQUE, dismiss: () -> Unit) {
+    opacity: PanelOpacity, dismiss: () -> Unit) {
     val first = remember { FocusRequester() }
     val focusEdge = with(LocalDensity.current) { 8.dp.toPx() }
     val trackVisibility = remember(focusEdge) { object : BringIntoViewSpec {

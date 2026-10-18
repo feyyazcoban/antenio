@@ -1,5 +1,15 @@
 # Proje durumu
 
+## 0.14.45 · S14 inceleme düzeltmeleri ve TV teslimi · 18 Ekim 2026
+
+Kullanıcının güncel “televizyona son sürümü yükleyebilir miyiz” isteğiyle S14b beklenmeden son hazır sürüm kuruldu. 0.14.45 (kod 59), S11–S14 ve S14 inceleme düzeltmelerini içerir: PCM destek uyarısı, doğru decoder hata kapsamı, açık panel opaklığı, uzun değerler/büyük yazı düzeni ve bölüm sırasına bağlı gezinme testleri. S14b kontrol yenilemesi ve istenen oynatma hızı henüz bu pakette yok.
+
+Kontroller: 340 JVM testi (0 hata, 1 atlanan), lint 0 hata/37 uyarı, release ve androidTest derlemesi. Yalnız 5558'de ve `tools/run-device-tests.sh` ile normal ölçekte 16, 1,5 ve 2,0 ölçekte ayrı ayrı 12 ekran testi geçti; font_scale 1.0'a geri geldi. İngilizce 1,5/2,0 ekranları görsel olarak da okundu. `git diff --check` geçti. `check_project.py` bu worktree'de bulunmayan tarihî `releases` dosyalarının bağlantılarını bildiriyor; başarılı sayılmadı.
+
+5556'da 0.14.44 üstüne `install -r`, açılış, gerçek Evim kaynağının görünmesi ve Ayarlar açılması doğrulandı; ilk kurulum tarihi aynı, çökme kaydı yok. TV'de `install -r` başarılı, firstInstallTime `2026-10-13 23:50:03` kaldı; kurulu APK çekilerek SHA-256 eşleştirildi: `e4e771a9ef98e31a556b976426676df6ef4622c16092ae89d3503289f0619f64`. Teslim `releases/NEXTV_TV_Design_Preview_0.14.45.apk` ve `.sha256` (ana checkout'taki teslim arşivine de kopyalandı). TV'de uygulama açılmadı; fiziksel kumanda/TalkBack ve desteklenmeyen gerçek AC-3 akışı denenmedi.
+
+Devirde eksik kalan kayıtlar tamamlandı: D073–D076, PIN_ATTEMPTS/PROTECTION_STORE ve BKL-029…041. Altı bölümlü Ayarlar kapsamı, Android 8–12 dil yolu, İngilizce incelemesi ve satış kararları açık. Sıradaki iş film/dizi hızı, sonra S14b; bir sonraki TV paketi en az kod 60 / 0.14.46.
+
 ## Gap çalışması: Claude bölümü sona erdi · 18 Ekim 2026
 
 Kullanıcının "Tüm gap'i kapatmak için çalışmaya başla" isteğiyle [gap planı](../design/gap/PLAN.md) uygulanıyor. Dalda bitenler (her adım uygulama + üç-dört bağımsız inceleme + düzeltme; derleme, birim testleri, lint ve test emülatöründe ekran testleri geçti): metin katmanı ve ayarlar çerçevesi, erişim kapısı, oynatıcı ve veri temelleri (S01–S07); başlık öneki düzeltmesi (X01); PIN veri katmanı, PIN penceresi ve Ebeveyn denetimi, içerik kilidi, kilit arayüzü, kaynak ve açılış koruması (S08–S12); ekran testlerinin onarımı ve üç ürün hatası (T01); İngilizce varsayılan, Türkçe ve Dil seçimi (S13); oynatıcı ayarları ve iki düzeyli Ayarlar (S14, inceleme düzeltmeleri yarım). Ayrıca: satış stratejisi raporu ([SALES_STRATEGY](../product/SALES_STRATEGY.md)), oynatıcı kontrolleri tasarımı (D072, kullanıcı onayladı), ayrı test emülatörü (5558) ve `tools/run-device-tests.sh`. TV'de 0.14.44 (a0f1908); S11–S14 TV'de yok. Devam yeri: [STEPS](../design/gap/STEPS.md) ve HANDOFF'un en üst kaydı.

@@ -1,5 +1,7 @@
 package dev.iptvplayer.tv
 
+import dev.iptvplayer.tv.ui.settings.SectionId
+
 import android.graphics.Bitmap
 import android.view.KeyEvent
 import androidx.compose.ui.semantics.SemanticsActions
@@ -663,7 +665,7 @@ class SearchNavigationTest {
         key(KeyEvent.KEYCODE_BACK)
         ui.onNode(hasText("Genel ve dil") and hasClickAction()).assertIsFocused()
         // Genel ve dil, Kaynaklar, İçerik ve ebeveyn denetimi, Oynatıcı, Kütüphane, Hakkında.
-        repeat(5) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
+        repeat(SectionId.ABOUT.ordinal) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
         ui.onNode(hasText("Hakkında") and hasClickAction()).assertIsFocused()
         ui.onNodeWithTag("settings-title").assertIsDisplayed()
         ui.onNodeWithTag("settings-close").assertIsDisplayed()
@@ -677,7 +679,7 @@ class SearchNavigationTest {
         ui.onNodeWithTag("settings-close").assertIsDisplayed()
         key(KeyEvent.KEYCODE_BACK)
         ui.onNode(hasText("Hakkında") and hasClickAction()).assertIsFocused()
-        repeat(4) { key(KeyEvent.KEYCODE_DPAD_UP) }
+        repeat(SectionId.ABOUT.ordinal - SectionId.SOURCES.ordinal) { key(KeyEvent.KEYCODE_DPAD_UP) }
         ui.onNode(hasText("Kaynaklar") and hasClickAction()).assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         // Kaynakları yönet, Kataloğu yenile, Kaynağı düzenle, Kaynağı kaldır.
@@ -753,10 +755,10 @@ class SearchNavigationTest {
             for (index in 1..rows.lastIndex) { key(KeyEvent.KEYCODE_DPAD_DOWN); check(rows[index]); if (index == shotAt) shot(name) }
             for (index in rows.lastIndex - 1 downTo 0) { key(KeyEvent.KEYCODE_DPAD_UP); check(rows[index]) }
         }
-        val sections = listOf("Genel ve dil", "Kaynaklar", "İçerik ve ebeveyn denetimi", "Oynatıcı", "Kütüphane", "Hakkında")
+        val sections = SectionId.entries.map { ui.activity.getString(it.label) }
         walk(sections, sections.lastIndex, "section-list")
         // The longest section: the player's settings.
-        repeat(3) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
+        repeat(SectionId.PLAYER.ordinal) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         header.assertTextEquals("Oynatıcı")
         val player = listOf("Otomatik sonraki bölüm", "Altyazı görünümü", "Kontrollerin kapanma süresi", "Oynatıcı panelleri",

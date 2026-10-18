@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · 0.14.45 TV teslimi ve devam · 18 Ekim 2026
+
+Çalışma yeri `.claude/worktrees/app-ui-ux-audit-a78e98`, dal `claude/app-ui-ux-audit-a78e98`. Kullanıcının “son sürümü yükle” talimatı eski “S14b bitince kur” zamanlamasını öne aldı: S14 + inceleme düzeltmeleri **0.14.45 / kod 59** olarak TV'de; S14b/hız henüz dahil değil. Ana checkout'un kaynakları değişmedi; teslim APK'sı her iki checkout'un `releases` klasöründe. Bir sonraki TV paketi **en az 60 / 0.14.46** olmalı.
+
+Değişenler: `PlayerScreen`, `PlaybackRecovery`, `SettingsRows`, EN/TR strings; `PlayerSettingsFlowTest`, `SettingsFrameworkTest`, `SearchNavigationTest`, `TracksLayoutTest`, `PlaybackRecoveryTest`; test betiğinin `--font-scale` seçeneği; sürüm. `c54a9f7` WIP alınıp PCM uyarısı mevcut flash yoluna taşındı, 8 sn/polite duyuru ve motor açılış ayarıyla eşleştirildi. Belgeler: D073–D076 geçmiş uygulama kararlarını kaydeder, yeni kullanıcı onayı sayılmaz; PIN_ATTEMPTS/PROTECTION_STORE güncel, BACKLOG BKL-029…041 eklendi; STEPS teslim sırası güncel. Figma/node/manifest değişmedi.
+
+Kontroller: 340 JVM testi, 1 atlanan, 0 hata; lint 0 hata/37 uyarı; release/androidTest başarılı. 5558 betiği normal yazıda 16, 1,5 ve 2,0 yazıda ayrı ayrı 12 test geçirdi. 5556'da 0.14.44 → 0.14.45 yükseltmesi; Evim kaynak görünürlüğü, açılış ve Ayarlar, aynı firstInstallTime, çökme kaydı yok. TV `install -r`, aynı firstInstallTime `2026-10-13 23:50:03`, çekilen APK hash eşleşti: `e4e771a9ef98e31a556b976426676df6ef4622c16092ae89d3503289f0619f64`. Uygulama TV'de açılmadı. 5558 kapatıldı; 5556 açık, NEXTV'de Ayarlar kontrol edildi, gerçek veri yerinde. Enstrümantasyon yine yalnız 5558/betik.
+
+Kalan sınırlar: desteklenmeyen AC-3 koşulu JVM'de sentetik Tracks ile; medya başına tek uyarı davranışı FakePlayer/cihazda ayrıca doğrulanmadı. Fiziksel kumanda/TalkBack, İngilizce kullanıcı incelemesi ve API 26–32 dil geçişi açık. `check_project.py`, worktree'de olmayan tarihî release dosyaları nedeniyle bağlantı hataları veriyor. Bağımsız yeni ajan incelemesi koşulmadı; Claude'un kayıtlı bulguları üzerinden kod incelemesi/düzeltme yapıldı.
+
+Tam sonraki adım: kullanıcının “player'a hız ayarı” isteği için film/dizide 0,5×–2× seçim (ses perdesi korunur, canlı normal hız); ayrı derlemede doğrula. Ardından STEPS S14b ve devamı. Satış/fiyat/İngilizce kararları kullanıcıda.
+
 ## Claude → Codex devri · 18 Ekim 2026, 17:40
 
 Kullanıcı Claude kullanım sınırına takıldı ve Codex ile devam edecek. Claude'un arka plan iş akışı durduruldu; çalışma ağacında başka araç yok.

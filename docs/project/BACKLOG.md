@@ -1,5 +1,27 @@
 # İş listesi
 
+## Gap planı izleme · 18 Ekim 2026
+
+Önceki notlar tarihçedir. S01–S14'ün tamamlanmış turları Claude devrinde kayıtlıdır; bu tablo teslim/kullanıcı kabulü gerektiren işleri done yapmaz. S14b, BKL-020 ve BKL-031 altında izlenir.
+
+| ID | İş ve adımlar | Kabul sınırı / bağımlılık | Durum |
+| --- | --- | --- | --- |
+| BKL-029 | Metinler ve iki dil · S01–03, S13 | İki dil ve yerel biçimler uygulandı; İngilizce inceleme ve API 26–32 cihaz turu açık | review |
+| BKL-030 | Ortak temeller · S04–07 | Ayar/erişim/oynatıcı/veri temelleri uygulandı; sonraki adımlar aynı API'leri kullanır | review |
+| BKL-031 | Oynatıcı ayarları ve kontroller · S14, S14b, S16, S45–48 | S14 incelemesi; S14b D072, sonra seçenekler ve fiziksel cihaz kapısı | in progress |
+| BKL-032 | Oynatıcıda kanal listesi · S15a–c | S14b sonrası; kapsam, liste, bilgi bandı, önceki/son kanal | planned |
+| BKL-033 | Timeshift · S17, S56–57, S64 | Sağlayıcı penceresi ve akış bütçesi önce; cihaz doğrulaması | planned |
+| BKL-034 | EPG · S19–21, S26–28 | Kaynak şeması, öncelik, kaydırma, elle eşleme ve arama | planned |
+| BKL-035 | Catch-up ve hatırlatıcı · S22–25, S29 | S21 sonrası arşiv; ortak erişim kapısı ve tek oturum | planned |
+| BKL-036 | Bağlantı ve güncelleme · S18, S30 | Kaynağa bağlı şifreli başlıklar ve ön plan zamanlayıcısı | planned |
+| BKL-037 | Kütüphane düzeni · S31–34 | Favori grupları, ad/gizleme/sıra; kimlik ve kilit korunur | planned |
+| BKL-038 | NEXTV Plus · S35–37 | Satış modeli, fiyat, sınır ve açılış kararı kullanıcıda | planned |
+| BKL-039 | Watch Next · S38–40 | Cihaz desteği, erişim kapısı, silme/geri dönüş | planned |
+| BKL-040 | Yedekleme · S41–44 | Şifreli aktarım, kurtarma ve cihaz doğrulaması | planned |
+| BKL-041 | Kayıt ve çoklu ekran · S49–65 | S49 cihaz kapısı, kaynak bütçesi, depolama/yaşam döngüsü | planned |
+
+BKL-028: S08–S12 native PIN/erişim entegrasyonu mevcut; fiziksel TV, TalkBack ve kullanıcı kabulü açık olduğundan in progress korunur. D073–D076 ve güncel HANDOFF esas alınır.
+
 Durumlar: done, review, ready, planned, blocked, in progress. Review çalışan taslağın kullanıcı incelemesini beklediğini; done somut çıktı/kontrolün tamamlandığını gösterir.
 
 | ID | Öncelik | İş | Kabul ölçütü | Durum |
