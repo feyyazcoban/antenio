@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**18 Ekim · D083:** Ortak İzle/Oynat eylemlerinin play simgesi odak geldiğinde dolu, ayrıldığında çizgili. Vitrin, ayrıntı, hızlı İzle ve bölüm sonu eylemleri tutarlı; favori gibi seçili durum simgelerinin doluluğu korunur.
+
 **18 Ekim · TV-010 / D082:** Vitrinin YENİ EKLENEN / KÜTÜPHANENDEN üst etiketi 12 sp (önce 13); diğer metinler aynı. D081 iki satır açıklama, D080 420 dp yükseklik ve D079 tek İzle korunur.
 
 **18 Ekim · TV-010 / D081:** Vitrin açıklaması normal ölçekte en fazla iki satır, taşan sonu üç nokta; büyük yazıdaki mevcut tek satır üst sınırı korunur. D080 yükseklik/D079 tek İzle/D078 kaydırma aynı.

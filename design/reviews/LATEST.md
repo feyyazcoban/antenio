@@ -1,5 +1,13 @@
 # Güncel görsel inceleme
 
+## 0.14.53 · İzle simgesi odakta dolu
+
+D083: İzle/Oynat eylemindeki üçgen odakta dolu, odak dışında çizgili. Ortak Action kullanılır; favori gibi durum simgeleri korunur. Normal ölçekte sentetik görseller; font matrisi yok. [QA](../../docs/project/native-play-icon-53-qa.json).
+
+![Odakta dolu oynat simgesi](play-icon-0.14.53/focused.png)
+
+![Odak kartta, oynat simgesi çizgili](play-icon-0.14.53/unfocused.png)
+
 ## 0.14.52 · Daha küçük üst etiket
 
 D082: YENİ EKLENEN / KÜTÜPHANENDEN ortak vitrin etiketi 13→12 sp. Diğer metinler aynı. Normal ölçekte sentetik görsel; font ölçeği matrisi yok. [QA](../../docs/project/native-hero-label-52-qa.json).

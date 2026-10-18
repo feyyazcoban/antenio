@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-019/020 · 0.14.53 / D083: kullanıcı isteğiyle İzle/Oynat simgesi odakta dolu; ortak Action tüm ilgili düğmelerde tutarlı. Teslim/kanıt STATUS/HANDOFF'ta; genel kabul açık.
+
 BKL-019/020 · 0.14.52 / D082: kullanıcı isteğiyle YENİ EKLENEN üst etiketi 13→12 sp; ortak vitrin etiket stili güncellendi. Teslim/kanıt STATUS/HANDOFF'ta; genel kabul açık.
 
 BKL-019/020 · 0.14.51 / D081: kullanıcı isteğiyle vitrin açıklaması en fazla iki satır; taşan metin üç noktayla kesilir. Diğer ölçüler ve odak davranışı aynı. Teslim/kanıt STATUS/HANDOFF'ta; genel kabul açık.

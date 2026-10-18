@@ -140,9 +140,11 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
         scale = FilledControl.scale(),
         contentPadding = PaddingValues(horizontal = if (compact) 14.dp else 20.dp, vertical = if (compact) 5.dp else 8.dp)) {
         val contentColor = LocalContentColor.current
+        // D083: watch/play actions fill their triangle on focus; explicit state icons keep their own fill.
+        val filledIcon = iconFilled || (icon == "play" && focused)
         if (check) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (icon != null) LineIcon(icon, contentColor, filled = iconFilled)
+            if (icon != null) LineIcon(icon, contentColor, filled = filledIcon)
             ActionLabel(label, labelText, contentColor, compact, labelOverflow, Modifier.weight(1f))
             if (selected == true) Text("✓", Modifier.clearAndSetSemantics { }, color = if (contentColor == Ink.OnMint) Ink.OnMint else Ink.Mint,
                 fontFamily = Roboto, fontSize = 16.sp, lineHeight = 16.sp)
@@ -156,7 +158,7 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
                     strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
             }
         }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (icon != null) LineIcon(icon, contentColor, filled = iconFilled)
+            if (icon != null) LineIcon(icon, contentColor, filled = filledIcon)
             if (label.isNotEmpty()) ActionLabel(label, labelText, contentColor, compact, labelOverflow)
         }
     }

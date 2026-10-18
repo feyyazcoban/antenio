@@ -1,5 +1,15 @@
 # Son devir notu
 
+## Codex · Odakta dolu oynat simgesi / 0.14.53 · 18 Ekim 2026
+
+Kullanıcı “İzle butonlarındaki icon üzerine geldiğinde filled olsun” dedi. Theme.kt Action mevcut focused durumuyla filledIcon = iconFilled || (icon == "play" && focused) hesaplar; iki LineIcon dalı bunu kullanır (D083). Vitrin, ayrıntı/Oynat/Devam et, hızlı İzle ve bölüm sonu çağrıları kapsanır. Favori yıldızı gibi açık iconFilled seçimleri korunur; yeni odak/animasyon/oynatma mantığı yok.
+
+Değişenler: Theme.kt, build.gradle.kts; D083, CONTROL_POLISH_25/SCREENS, BACKLOG/STEPS, STATUS/HANDOFF; [QA](native-play-icon-53-qa.json), LATEST.md ve play-icon-0.14.53/focused.png/unfocused.png. Figma/manifest yok. hero_review nihai diff ve çağrıları salt okunur inceledi, bulgu yok. 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558 / tools/run-device-tests.sh --no-build HeroLayoutTest,ContinueCardLayoutTest: 3/3. Normal görsellerde odakta dolu/odak dışında çizgili üçgen incelendi. Yeni test/font ölçeği matrisi yok. Ham loglar work/play-icon-qa. Proje kontrolü/git diff --check geçti.
+
+Teslim: releases/NEXTV_TV_Design_Preview_0.14.53.apk + sha256, kod67, aynı imza/release/R8. SHA-256 76fe4076709e81174c0bdc30fa84517f4ea4a6c76ea062058df27b74a0018cd3. TV .52→53 install -r, firstInstallTime 2026-10-13 23:50:03 değişmedi, lastUpdateTime 2026-10-18 21:07:04. Kurulu APK çekilip hash eşleştirildi; TV uygulaması/gerçek yayın açılmadı. **5556 bu tur açılmadı ve .51/kod65'te kaldı**; veri/yükseltme mantığı değişmedi. 5558/Gradle kapalı; 5554'e dokunulmadı.
+
+Tam sonraki adım: ana checkout/main üzerinden STEPS S15a ve gap/overlay.md. Sonraki teslim en az 0.14.54/kod68; 5556 yükseltilecekse mevcut sürümü .51/kod65 olarak doğrula. Fiziksel görsel/akıcılık/TalkBack, Figma, İngilizce ve satış/fiyat kararları açık. Kullanıcı “yayına hazırla” demeden font matrisi koşma.
+
 ## Codex · Vitrin üst etiketi / 0.14.52 · 18 Ekim 2026
 
 Kullanıcı “Yeni eklenen başlığı biraz daha küçük olsun” dedi. HomeScreen.kt hero-label fontSize 13→12 sp (D082); ortak KÜTÜPHANENDEN fallback'i de aynı stil. Ağırlık/renk/harf aralığı ve diğer metinler aynı. Değişenler: HomeScreen.kt, build.gradle.kts; D082, HOME_HERO/SCREENS, BACKLOG/STEPS, STATUS/HANDOFF; [QA](native-hero-label-52-qa.json), LATEST.md ve hero-label-0.14.52/hero.png. Figma/manifest yok.

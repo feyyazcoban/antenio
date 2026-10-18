@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.53 · İzle simgesi odakta dolu · 18 Ekim 2026
+
+Kullanıcı isteğiyle ortak Action bileşenindeki play simgesi odakta dolu üçgen, odak dışında çizgili (D083). Vitrin, ayrıntı/Devam et, hızlı İzle ve bölüm sonu aynı davranışı alır. Favori yıldızının açık iconFilled durumu korunur.
+
+Bağımsız salt okunur incelemede bulgu yok. 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558/betik üzerinden normal ölçekte mevcut HeroLayoutTest ve ContinueCardLayoutTest 3/3; dolu/çizgili iki durum görsel doğrulandı. Yeni test/font matrisi yok. [QA](native-play-icon-53-qa.json), [görseller](../../design/reviews/LATEST.md).
+
+0.14.53-design-preview / kod67 TV'ye install -r ile kuruldu; firstInstallTime aynı, kurulu APK hash eşleşti. Son güncelleme 21:07:04; SHA-256 76fe4076709e81174c0bdc30fa84517f4ea4a6c76ea062058df27b74a0018cd3. TV uygulaması/gerçek yayın açılmadı. 5556 kapalı, .51/kod65'te; 5558/Gradle kapalı. Sırada S15a; sonraki paket en az .54/kod68. Fiziksel/Figma kabulü açık.
+
 ## 0.14.52 · Daha küçük YENİ EKLENEN · 18 Ekim 2026
 
 Kullanıcı isteğiyle vitrin üst etiketi 13→12 sp (D082). Aynı stil KÜTÜPHANENDEN için de geçerli; içerik başlığı, iki satır açıklama, 420 dp yükseklik, tek İzle ve kaydırma aynı.

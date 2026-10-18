@@ -1,5 +1,7 @@
 # Seçim, form ve arama düzeni
 
+**18 Ekim 2026 · 0.14.53 / D083:** Action play simgesi odakta dolu üçgene geçer; odak dışındayken çizgili. iconFilled ile belirtilen durum simgeleri (favori yıldızı) odaktan bağımsız kalır. Odak rengi/halkası ve eylem davranışı aynı.
+
 15 Ekim 2026 · 0.14.25 tasarım önizlemesi · BKL-020.
 
 Mevcut Google TV yönü, Roboto, anlamsal renkler ve Compose for TV bileşenleri kullanılır. Bu tur TV-002/003 kaynak formu, TV-060 arama ve ortak seçim düğmelerine odaklanır.

@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.53-design-preview",
+  "versionCode": 67,
+  "decision": "D083",
+  "change": "Shared Action play icon fills when focused; outlined when unfocused. Explicit iconFilled state retained.",
+  "review": "Read-only hero_review confirmed final diff and callsites; both Action icon branches use focus fill, explicit iconFilled remains; no actionable findings.",
+  "tests": {
+    "build": "release/debug/androidTest successful",
+    "unit": {
+      "tests": 354,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 37
+    },
+    "instrumentation": "3/3, emulator-5558 only via tools/run-device-tests.sh --no-build HeroLayoutTest,ContinueCardLayoutTest; normal font only; existing tests unchanged",
+    "visual": "Inspected normal screenshots: Watch icon is filled while focused and outlined after focus moves to continue card; button geometry and focus ring preserved."
+  },
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "66",
+        "versionName": "0.14.52-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 21:02:21"
+      },
+      "after": {
+        "versionCode": "67",
+        "versionName": "0.14.53-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 21:07:04"
+      },
+      "sha256": "76fe4076709e81174c0bdc30fa84517f4ea4a6c76ea062058df27b74a0018cd3",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "designEmulator": "5556 stayed off at 0.14.51/code65; no data or upgrade logic changed",
+    "emulatorsAfter": "5558 stopped; 5556/5554 untouched; Gradle daemon stopped"
+  },
+  "limitations": [
+    "No font-scale matrix per user instruction",
+    "Figma unchanged",
+    "Physical visual acceptance remains open"
+  ],
+  "sha256": "76fe4076709e81174c0bdc30fa84517f4ea4a6c76ea062058df27b74a0018cd3",
+  "images": [
+    "design/reviews/play-icon-0.14.53/focused.png",
+    "design/reviews/play-icon-0.14.53/unfocused.png"
+  ],
+  "logs": "work/play-icon-qa/device.log, device-full.log (ignored)"
+}
