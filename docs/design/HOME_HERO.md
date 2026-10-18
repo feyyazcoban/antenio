@@ -1,5 +1,7 @@
 # Ana sayfa üst alanı
 
+**18 Ekim 2026 · 0.14.51 / D081:** Vitrin açıklaması normal ölçekte en fazla iki satır ve taşma sonu üç nokta. Büyük yazıdaki mevcut tek satır sınırı korunur. Hem gizli slayt ölçümü hem görünür metin aynı HeroText ile uygulanır; 420 dp yükseklik ve tek İzle değişmez.
+
 **18 Ekim 2026 · 0.14.50 / D080:** Vitrin 372→420 dp: aşağıya 48 dp daha geniş görsel alanı. Üst kenar ve metin ölçüleri aynı; alt hizalı metin/İzle aşağı taşınır. Normal 960×540 dp ekranda ilk raf başlığı ve kartların bir kısmı görünür; Aşağı yalnız kartı tamamlayacak kadar kaydırır. D079 tek düğme korunur.
 
 **18 Ekim 2026 · 0.14.49 / D079:** Güncel vitrinde tek eylem İzle. Ayrıntılar kaldırıldı; Sağ sonraki slayt, Sol önceki slayt/ilk slaytta menü; tek slaytta Sağ yerinde kalır. Menüden Sağ İzle'ye döner, Aşağı D078 ile ilk rafa geçer. İzle'nin film devamı/dizi bölüm seçimi ve yükleniyor davranışı değişmez. Aşağıdaki 0.14.13 ölçüleri tarihçedir; güncel büyük vitrin D067 ve D079'dur.

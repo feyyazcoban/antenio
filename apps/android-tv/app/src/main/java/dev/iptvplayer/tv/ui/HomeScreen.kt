@@ -509,7 +509,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                 color = Ink.Text.copy(alpha = .8f), fontFamily = Roboto, fontSize = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         if (slide.description.isNotBlank()) Text(slide.description, Modifier.tag("hero-description"), fontFamily = Roboto, fontSize = 15.sp,
-            lineHeight = 22.sp, color = Ink.Text.copy(alpha = .78f), maxLines = if (largeText) 1 else 3, overflow = TextOverflow.Ellipsis)
+            lineHeight = 22.sp, color = Ink.Text.copy(alpha = .78f), maxLines = if (largeText) 1 else 2, overflow = TextOverflow.Ellipsis)
     }
 }
 

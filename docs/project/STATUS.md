@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.51 · Vitrin açıklaması iki satır · 18 Ekim 2026
+
+Kullanıcı isteğiyle vitrin açıklaması normal ölçekte üç yerine en fazla iki satır (D081); taşan sonu üç nokta. Büyük yazıdaki mevcut tek satır sınırı, 420 dp vitrin, tek İzle ve odak/kaydırma davranışları korunur. Normal görüntüde uzun açıklamanın iki satırda kesildiği görüldü.
+
+Bağımsız salt okunur diff incelemesinde bulgu yok. 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Mevcut HeroLayoutTest normal ölçekte yalnız 5558/betik ile 2/2 geçti; yeni test veya font matrisi yok. [QA](native-hero-description-51-qa.json), [görsel](../../design/reviews/LATEST.md).
+
+0.14.51-design-preview / kod 65, 5556 ve TV'ye install -r ile kuruldu; aynı ilk kurulum tarihleri ve kurulu APK hash eşitliği doğrulandı. 5556'da Evim görünür, uygulama çalışıyor, çökme kaydı yok. TV güncellemesi 20:57:57; SHA-256 161c16b930413e64a774836404c12a20d3129562929a10b84c3df1974283bd4e. TV'de uygulama/gerçek yayın açılmadı. Emülatörler/Gradle kapalı. Fiziksel/Figma kabulü açık; sırada S15a, sonraki paket en az 0.14.52/kod 66.
+
 ## 0.14.50 · Vitrin aşağı uzatıldı · 18 Ekim 2026
 
 Kullanıcı isteğiyle vitrin minimum yüksekliği 372→420 dp (+48 dp, yaklaşık %13) oldu (D080). Yazı boyutları ve yatay ölçüler aynı; ilk raf başlığı/kart önizlemesi görünür. Tek İzle ve D078 korunur; devam kartına gereken/gerçek kaydırma 86,5 dp.

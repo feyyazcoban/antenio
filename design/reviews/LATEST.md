@@ -1,5 +1,11 @@
 # Güncel görsel inceleme
 
+## 0.14.51 · Vitrin açıklaması iki satır
+
+D081: normal ölçekte açıklama en fazla iki satır; taşan sonu üç nokta. 420 dp vitrin ve tek İzle korunur. Normal ölçekte sentetik uzun açıklama ekranda incelendi; font matrisi yapılmadı. [QA](../../docs/project/native-hero-description-51-qa.json).
+
+![İki satırlı vitrin açıklaması](hero-description-0.14.51/hero.png)
+
 ## 0.14.50 · Aşağı doğru daha büyük vitrin
 
 D080: minimum yükseklik 372→420 dp (+48 dp, yaklaşık %13). Yazılar aynı boyutta; ilk raf başlığı/kart önizlemesi görünür. D079 tek İzle ve D078 yalnız gereken kaydırma korunur. Normal ölçekte sentetik kapaksız katalog. [QA](../../docs/project/native-hero-taller-50-qa.json).

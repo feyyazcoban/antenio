@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · Açıklama iki satır / 0.14.51 · 18 Ekim 2026
+
+Kullanıcının “Açıklama max 2 satır olsun” isteği D081 ile uygulandı. HomeScreen.kt HeroText açıklamasında tek satır kod değişikliği: maxLines if (largeText) 1 else 3 → 1 else 2. Ellipsis, büyük yazıdaki tek satır sınırı, başlık ve ayrıntı ekranı aynı. Ölçüm ve görünür slayt ortak HeroText kullandığı için tutarlı. D078/D079/D080 korunur.
+
+Değişenler: HomeScreen.kt, build.gradle.kts; DECISIONS/D081, HOME_HERO/SCREENS, BACKLOG/STEPS, STATUS/HANDOFF, [QA](native-hero-description-51-qa.json), design/reviews/LATEST.md ve hero-description-0.14.51/hero.png. Figma/manifest yok. hero_review son diff'i salt okunur inceledi, bulgu yok. Yeni test yazılmadı.
+
+Kontroller: 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558 / tools/run-device-tests.sh --no-build HeroLayoutTest, 2/2. Normal ölçekte sentetik uzun açıklama iki satır ve sonu üç nokta olarak görsel doğrulandı. Font matrisi yok. Ham loglar work/hero-description-qa. Proje kontrolü/git diff --check geçti.
+
+Teslim: releases/NEXTV_TV_Design_Preview_0.14.51.apk + sha256, kod 65, aynı imza/release/R8. SHA-256 161c16b930413e64a774836404c12a20d3129562929a10b84c3df1974283bd4e. 5556 .50→51 install -r, Evim görünür/çökme kaydı yok/çalışan uygulama; firstInstallTime 2026-10-14 08:57:19. TV .50→51 install -r, firstInstallTime 2026-10-13 23:50:03 değişmedi, lastUpdateTime 2026-10-18 20:57:57. İki kurulu APK çekilip hash eşleştirildi. TV uygulaması/gerçek yayın açılmadı. 5556/5558 ve Gradle kapalı; 5554'e dokunulmadı.
+
+Tam sonraki adım: ana checkout/main üzerinden STEPS S15a ve gap/overlay.md. Sonraki teslim en az 0.14.52/kod 66. Fiziksel görsel/akıcılık/TalkBack, Figma, İngilizce ve satış/fiyat kararları açık. Kullanıcı “yayına hazırla” demeden font matrisi koşma.
+
 ## Codex · Daha uzun vitrin / 0.14.50 · 18 Ekim 2026
 
 Kullanıcının “Vitrini biraz daha büyütebiliriz aşağı doğru” isteği D080 ile uygulandı. DesignSystem.kt / TvLayout.HeroHeight 372→420 dp; yalnız minimum yükseklik ve açıklaması değişti. HomeScreen alt hizalı metin/İzle ve görsel alanı aşağı uzar. D079 tek düğme ve D078 minimum kaydırma aynı. Normal 960×540 dp ekranda ilk raf başlığı ve kart önizlemesi görünür; Aşağı sonrası devam kartı tam görünür. Gereken/gerçek kaydırma 86,5 dp (yüksekliğe eklenen 48 dp kadar artış).

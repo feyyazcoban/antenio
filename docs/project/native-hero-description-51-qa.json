@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.51-design-preview",
+  "versionCode": 65,
+  "decision": "D081",
+  "change": "Hero description normal maxLines 3 to 2 with Ellipsis; existing large-text maxLines 1 retained. No font-size or other geometry changes.",
+  "review": "Read-only hero_review confirmed final diff: only normal hero description maxLines 3 to 2; no actionable findings.",
+  "tests": {
+    "build": "release/debug/androidTest successful",
+    "unit": {
+      "tests": 354,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 37
+    },
+    "instrumentation": "2/2, emulator-5558 only via tools/run-device-tests.sh --no-build HeroLayoutTest, normal font only; existing tests unchanged",
+    "visual": "Inspected normal-font long-description screenshot: exactly two lines, second line ellipsized; Watch and first shelf visible"
+  },
+  "delivery": {
+    "designEmulator": {
+      "device": "emulator-5556",
+      "before": {
+        "versionCode": "64",
+        "versionName": "0.14.50-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:52:07"
+      },
+      "after": {
+        "versionCode": "65",
+        "versionName": "0.14.51-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:57:35"
+      },
+      "sha256": "161c16b930413e64a774836404c12a20d3129562929a10b84c3df1974283bd4e",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "evimVisible": true,
+      "appRunning": true,
+      "crashRecordForApp": false
+    },
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "64",
+        "versionName": "0.14.50-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 20:52:28"
+      },
+      "after": {
+        "versionCode": "65",
+        "versionName": "0.14.51-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 20:57:57"
+      },
+      "sha256": "161c16b930413e64a774836404c12a20d3129562929a10b84c3df1974283bd4e",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "emulatorsAfter": "5556 and 5558 stopped; 5554 untouched; Gradle daemon stopped"
+  },
+  "limitations": [
+    "No font-size matrix per user instruction",
+    "Figma unchanged",
+    "Physical visual acceptance remains open"
+  ],
+  "sha256": "161c16b930413e64a774836404c12a20d3129562929a10b84c3df1974283bd4e",
+  "image": "design/reviews/hero-description-0.14.51/hero.png",
+  "logs": "work/hero-description-qa/device.log, device-full.log (ignored)"
+}
