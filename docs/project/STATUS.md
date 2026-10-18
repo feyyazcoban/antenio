@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.55 · Daha büyük dizi afişleri ve adları · 18 Ekim 2026
+
+Kullanıcı isteğiyle ana sayfadaki “Dizi kütüphanen” rafı büyütüldü (D085): afiş 136×204→160×240 dp, dizi adı 14/19→16/22 sp Medium. İki satırlık başlık, 2:3 oran ve ortak odak/görünürlük korunur.
+
+Bağımsız salt okunur incelemede bulgu yok. 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558/betik üzerinden normal ölçekte mevcut iki raf testi 2/2: afiş+başlık görünürlüğü, yatay/dikey gezinme ve ayrıntıdan dönüş. Yeni test/font matrisi yok. [QA](native-series-shelf-55-qa.json), [görsel](../../design/reviews/LATEST.md).
+
+0.14.55-design-preview / kod69 TV'ye install -r ile kuruldu; firstInstallTime aynı, kurulu APK hash eşleşti. Son güncelleme 21:21:38; SHA-256 db997ea033d063575af4522e7bf47b3f3c4f30264268bc3bc8ba81f68b45ed65. TV uygulaması/gerçek yayın açılmadı. 5556 kapalı, .51/kod65'te; 5558/Gradle kapalı. Sırada S15a; sonraki paket en az .56/kod70. Fiziksel/Figma kabulü açık.
+
 ## 0.14.54 · Son izlenen kanal kartları · 18 Ekim 2026
 
 Kullanıcı isteğiyle son izlenen kanalların logo, ad ve kaynak bilgisi tek 200 dp kartta birleşti (D084). Eşit logo/başlık alanları, hafif yüzey geçişi ve bütün kartı saran beyaz odak halkası kullanılır. Geçmiş sırası, PIN, basılı OK ve geri dönüş odağı korunur.

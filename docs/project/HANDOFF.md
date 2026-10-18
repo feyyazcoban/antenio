@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · Daha büyük dizi rafı / 0.14.55 · 18 Ekim 2026
+
+Kullanıcı “Dizi kütüphanendeki içerikleri biraz daha büyütüp başlıkları da büyütür müsün” dedi. Ana sayfanın HomeCard section == series && kind == SERIES yolu 160 dp genişlik / 2:3 afiş, 16 sp başlık / 22 sp satır yüksekliği / Medium kullanır. Başlık iki satır, ellipsis; metadataya dokunulmadı. Diğer raflar ve ayrı kütüphane ekranı aynı. Ortak görünürlük, PIN/uzun OK/geri dönüş odağı korunur.
+
+Değişenler: HomeScreen.kt, DesignSystem.kt, build.gradle.kts; D085, HOME_SHELVES/SCREENS, BACKLOG/STEPS, STATUS/HANDOFF; [QA](native-series-shelf-55-qa.json), LATEST.md ve series-shelf-0.14.55/series.png. Figma/manifest yok. hero_review nihai diff'i salt okunur inceledi, bulgu yok.
+
+354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558 / tools/run-device-tests.sh --no-build: VisualPreviewTest#homePostersAndContinueRemainVisibleWithRemote, VisualPreviewTest#remoteVerticalShelvesKeepTheirHeadingAndFullCardTogether, 2/2. Mevcut testler değiştirilmedi. Normal görselde büyük afiş/başlık ve tam görünürlük incelendi. Font matrisi yok. Ham loglar work/series-shelf-qa. Proje kontrolü/git diff --check geçti.
+
+Teslim: releases/NEXTV_TV_Design_Preview_0.14.55.apk + sha256, kod69, aynı imza/release/R8. SHA-256 db997ea033d063575af4522e7bf47b3f3c4f30264268bc3bc8ba81f68b45ed65. TV .54→55 install -r, firstInstallTime 2026-10-13 23:50:03 değişmedi, lastUpdateTime 2026-10-18 21:21:38. Kurulu APK çekilip hash eşleştirildi; TV uygulaması/gerçek yayın açılmadı. **5556 açılmadı ve .51/kod65'te kaldı**. 5558/Gradle kapalı; 5554'e dokunulmadı.
+
+Tam sonraki adım: ana checkout/main üzerinden STEPS S15a ve gap/overlay.md. Sonraki teslim en az 0.14.56/kod70; 5556 yükseltilecekse mevcut sürümü .51/kod65 olarak doğrula. Fiziksel görsel/akıcılık/TalkBack, Figma, İngilizce ve satış/fiyat kararları açık. Kullanıcı “yayına hazırla” demeden font matrisi koşma.
+
 ## Codex · Son izlenen kanal kartları / 0.14.54 · 18 Ekim 2026
 
 Kullanıcı “Ana sayfadaki son izlediğin kanalları biraz daha estetik yapabilir miyiz” dedi. Yalnız HomeScreen HomeCard live && section == recent için 200 dp tek kart: 84 dp logo bölümü / 140×48 dp Fit logo; altta iki satırlık 14 sp Medium ad ve çoklu kaynakta 12 sp kaynak adı. Hafif dikey yüzey geçişi, 12 dp köşe, bütün kartın odak halkası. Geçmiş sırası, D078 görünürlük, onClick/onLongClick/PIN/LockBadge ve odak kimlikleri korunur. Kaynak adı erişilebilir duruma eklendi. Diğer canlı kartlar aynı.

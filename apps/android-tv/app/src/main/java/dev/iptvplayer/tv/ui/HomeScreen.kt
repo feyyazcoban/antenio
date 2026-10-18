@@ -632,7 +632,9 @@ internal fun runtimeText(seconds: Long): String {
         return
     }
     val description = if (section == "continue") stringResource(R.string.continue_description, spoken) else spoken
-    Column(Modifier.width(if (live) TvLayout.LiveWidth else TvLayout.PosterWidth).then(visibility.container).testTag("tile:$section:${entry.id}"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    val seriesShelf = section == "series" && entry.kind == MediaKind.SERIES
+    val width = if (live) TvLayout.LiveWidth else if (seriesShelf) TvLayout.SeriesShelfWidth else TvLayout.PosterWidth
+    Column(Modifier.width(width).then(visibility.container).testTag("tile:$section:${entry.id}"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Card(onClick = open, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth().aspectRatio(if (live) 16f / 9 else 2f / 3)
             .semantics { contentDescription = description; if (locked) stateDescription = lockedState; testTag = "$section:${entry.id}" },
             scale = CardDefaults.scale(focusedScale = 1f),
@@ -648,7 +650,9 @@ internal fun runtimeText(seconds: Long): String {
                 if (locked) LockBadge(Modifier.align(Alignment.TopEnd).padding(7.dp))
             }
         }
-        Text(shown.name, color = Ink.Text, fontFamily = Roboto, fontSize = 14.sp, minLines = if (live) 1 else 2, maxLines = 2, lineHeight = 19.sp, overflow = TextOverflow.Ellipsis)
+        Text(shown.name, color = Ink.Text, fontFamily = Roboto,
+            fontSize = if (seriesShelf) 16.sp else 14.sp, fontWeight = if (seriesShelf) FontWeight.Medium else null,
+            minLines = if (live) 1 else 2, maxLines = 2, lineHeight = if (seriesShelf) 22.sp else 19.sp, overflow = TextOverflow.Ellipsis)
         // As in the library: year, language or country and source on one line of constant height.
         if (!live) Text(listOf(shown.year, shown.tag, sourceName.orEmpty()).filter { it.isNotBlank() }.joinToString(" · "),
             Modifier.testTag("home-year:$section:${entry.id}"), color = Ink.Muted,

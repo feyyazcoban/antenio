@@ -1,5 +1,11 @@
 # Güncel görsel inceleme
 
+## 0.14.55 · Daha büyük dizi rafı
+
+D085: ana sayfa dizi rafında 160×240 dp afiş ve 16 sp Medium dizi adları; iki satır ve 2:3 oran korunur. Normal ölçekte yerel sentetik kaynak görseli. [QA](../../docs/project/native-series-shelf-55-qa.json).
+
+![Büyütülen dizi afişleri ve adları](series-shelf-0.14.55/series.png)
+
 ## 0.14.54 · Son izlenen kanal kartları
 
 D084: logo, iki satırlık ad ve kaynak bilgisi tek kartta; hizalı alanlar ve bütün kartı saran odak halkası. Yalnız normal ölçekte, sentetik iki kaynak ve yerel görseller. Uzun ad, eksik logo ve sağa gezinme incelendi. [QA](../../docs/project/native-recent-channels-54-qa.json).

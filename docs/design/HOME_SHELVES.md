@@ -1,5 +1,11 @@
 # Ana sayfa afiş ve devam rafları
 
+## 18 Ekim 2026 · Daha büyük dizi rafı · D085
+
+Ana sayfadaki “Dizi kütüphanen” (`series`) rafının afişi 136×204 dp yerine 160×240 dp; 2:3 oran korunur. Dizi adı 14/19 sp yerine 16/22 sp, Medium ağırlıkta ve iki satırlık yer tutar; sığmayan sonu üç nokta. Yıl/kaynak satırı 12 sp kalır. Raf başlığı, 20 dp kart aralığı ve odak halkası mevcut sistemi kullanır. Ortak görünürlük hesabı afiş ve alt metnin tümünü kapsar; OK ayrıntı, basılı OK hızlı menü ve Geri odağı korunur.
+
+Bu değişiklik yalnız ana sayfanın dizi rafındadır. Film/favori/kanal/devam rafları ve ayrı Diziler kütüphane ekranı aynı kalır. Normal ölçekte ilgili ekran akışları kontrol edilir; yazı ölçeği matrisi kullanıcı “yayına hazırla” dediğinde. Figma ve fiziksel görsel kabul açık.
+
 ## 18 Ekim 2026 · Son izlenen kanallar · D084
 
 Ana sayfanın `recent` rafında logo, kanal adı ve çoklu kaynakta kaynak adı tek kart içinde yer alır. Kart genişliği 200 dp, köşe 12 dp; logo bölümü 84 dp ve oranı korunan logo alanı 140×48 dp. Hafif dikey yüzey geçişi logoyu ayırır. Başlık 14 sp Medium, aynı yükseklikte iki satır; kaynak adı 12 sp, tek satır. Taşan metin üç noktayla kesilir. Logo yoksa ortak kanal yer tutucusu görünür.
