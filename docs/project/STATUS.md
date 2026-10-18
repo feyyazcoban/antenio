@@ -1,5 +1,11 @@
 # Proje durumu
 
+## Birleşmiş dal temizliği · 18 Ekim 2026
+
+Kullanıcının isteğiyle main'e tamamen birleşmiş üç yerel dal silindi: `claude/logo-splash-files-f4683f`, `claude/sabah-kahvaltisi-oneri-870a0c`, `claude/trusting-margulis-73aa19`. Silmeden önce ilgili HEAD'ler/main atalık ilişkisi ve temiz çalışma ağaçları doğrulandı. Güncel uygulama dalı ve `wip/s14-review-fixes` korundu; main'e merge yapılmadı. TV'deki 0.14.46 değişmedi.
+
+Klasör temizliği sınırlı kaldı: logo worktree kaydı Git tarafından kaldırıldı, fakat Windows erişim hatası nedeniyle dizin kısmen silinmiş durumda. Kalan dosyaları özyinelemeli silme girişimini otomatik onay incelemesi politika nedeniyle engelledi; tekrar denenmedi. Diğer iki eski worktree kendi commit'lerinde detached HEAD olarak tutuldu. Bu temizlik kaydı dışında kod değişmedi; uygulama testi gerekmedi, `git diff --check` kullanıldı.
+
 ## 0.14.46 · Oynatma hızı ve TV teslimi · 18 Ekim 2026
 
 Kullanıcının hız ayarı isteği D077 ile tamamlandı ve en son sürümü kurma talebi kapsamında TV'ye veriler silinmeden kuruldu. Film/dizide Seçenekler → Oynatma hızı: 0,5×–2× (yedi değer). Ses perdesi 1'de tutulur; hız mevcut oynatıcı oturumu boyunca geçerli, çıkışta normal; canlıya geçince 1×. OK uygular, Geri uygulamadan bir düzey döner ve açan düğmeyi odaklar. Motorun gerçek hızı gösterilir, tahmini bitiş buna göre hesaplanır. Tünelli oynatma açıkken açıklamalı kapalı durum bulunur. S14b'nin kontrol tasarımı yenilemesi hâlâ sırada.

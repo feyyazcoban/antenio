@@ -1,5 +1,13 @@
 # Son devir notu
 
+## Birleşmiş dallar kapatıldı · 18 Ekim 2026
+
+Üç yerel dal main'e birleştiği doğrulanarak `git branch -d` ile kaldırıldı: `claude/logo-splash-files-f4683f`, `claude/sabah-kahvaltisi-oneri-870a0c`, `claude/trusting-margulis-73aa19`. İlgili çalışma ağaçları öncesinde temizdi; yalnız logo/trusting içinde yeniden üretilebilir Gradle/build çıktıları ve local.properties vardı. Ana/güncel çalışma dalına merge yapılmadı; `claude/app-ui-ux-audit-a78e98` ve `wip/s14-review-fixes` korunuyor.
+
+Kalan klasör durumu: `.claude/worktrees/logo-splash-files-f4683f` Git worktree kaydından çıktı, fakat klasörün silinmesi Windows erişim hatasıyla yarıda kaldı. Kalan dizini PowerShell ile özyinelemeli silme isteği otomatik politika tarafından reddedildi; bu engeli aşmak için başka silme yöntemi denenmedi. `sabah-kahvaltisi-oneri-870a0c` ve `trusting-margulis-73aa19` kendi commit'lerinde detached worktree olarak duruyor. Eski branch referansları yoktur; içerik zaten main geçmişindedir.
+
+Commit bekleyen ürün değişikliği yok. Bu kayıt öncesinde güncel geliştirme dalı main'in 44 commit ilerisindeydi, main tarafında ayrışan commit yoktu. Güncel dalın merge'i kullanıcı tarafından bu turda istenmedi; sıradaki ürün işi önceki kayıttaki S14b. TV/cihazlara dokunulmadı.
+
 ## Codex · 0.14.46 hız ayarı teslim edildi · 18 Ekim 2026
 
 TV ve 5556'da **0.14.46 / versionCode 60** kurulu. Kullanıcının iki isteği tamam: son sürüm TV'de; film/dizide **Seçenekler → Oynatma hızı** (0,5×, 0,75×, 1×, 1,25×, 1,5×, 1,75×, 2×). 0.14.45 önce S14 teslimi olarak kurulmuştu; 0.14.46 hız ekler. S14b yapılmış sayılmaz. Ana checkout main'deki kaynaklar değişmedi; çalışma hâlâ `.claude/worktrees/app-ui-ux-audit-a78e98` / `claude/app-ui-ux-audit-a78e98` içinde.
