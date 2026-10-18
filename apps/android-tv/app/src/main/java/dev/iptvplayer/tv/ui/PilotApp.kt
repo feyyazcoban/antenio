@@ -54,6 +54,7 @@ import coil3.compose.AsyncImage
 import dev.iptvplayer.tv.*
 import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.*
+import dev.iptvplayer.tv.ui.settings.Settings
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive

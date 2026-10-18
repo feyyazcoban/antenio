@@ -512,6 +512,10 @@
     <string name="settings_about_release_note">Canlı TV, film, dizi, arama, favori, izlemeye devam et ve yayın rehberi kullanılabilir. Rehber bilgisi kaynağın desteğine bağlıdır. PIN yönetimi henüz yok. Sağlayıcının yetişkin işaretli içerikleri hiç gösterilmez; adı yetişkin içerik bildiren kategoriler Ayarlar\'dan kapatılır.</string>
     <string name="settings_scroll_up">↑ Yukarı</string>
     <string name="settings_scroll_more">↓ Daha fazla</string>
+    <!-- A stepper row's buttons: − and + read by TalkBack, and back to the default value. -->
+    <string name="settings_decrease">Azalt</string>
+    <string name="settings_increase">Artır</string>
+    <string name="settings_reset">Sıfırla</string>
 
     <!-- Kaynakların -->
     <string name="sources_title">Kaynakların</string>
