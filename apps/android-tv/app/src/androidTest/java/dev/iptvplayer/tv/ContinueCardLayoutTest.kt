@@ -45,8 +45,6 @@ class ContinueCardLayoutTest {
         // Home opens on the hero when there is one (D070); Down reaches the continue shelf.
         if (ui.onAllNodesWithTag("hero-watch").fetchSemanticsNodes().isNotEmpty()) {
             ui.onNodeWithTag("hero-watch").assertIsFocused()
-            ui.onNodeWithTag("hero-details").performSemanticsAction(SemanticsActions.RequestFocus)
-            ui.waitForIdle()
             val heroBefore = ui.onNodeWithTag("home-hero").getUnclippedBoundsInRoot()
             val firstBefore = ui.onNodeWithTag("continue:${restored.first().id}").getUnclippedBoundsInRoot()
             val viewportBefore = ui.onNodeWithTag("home-content").getUnclippedBoundsInRoot()

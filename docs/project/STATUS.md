@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.49 · Vitrinde tek İzle düğmesi · 18 Ekim 2026
+
+Kullanıcı isteğiyle vitrindeki Ayrıntılar kaldırıldı (D079); yalnız İzle kaldı. Sağ/Sol slaytı değiştirir, ilk slaytta Sol menüyü açar, menüden Sağ İzle'ye döner. Tek slaytta Sağ odağı korur. İzle'nin mevcut oynatma/PIN davranışı ve D078 kısa aşağı kaydırması değişmedi.
+
+Bağımsız salt okunur incelemede bulgu yok. 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558/betik üzerinden normal ölçekte ilgili 4/4 ekran kontrolü geçti; ilk rafa gereken/gerçek kaydırma 38,5 dp. Font matrisi yapılmadı. [QA](native-hero-single-49-qa.json), [görsel](../../design/reviews/LATEST.md).
+
+0.14.49-design-preview / kod 63, 5556 ve TV'ye veri silmeden install -r ile kuruldu; ilk kurulum tarihleri ve kurulu APK hash eşitliği doğrulandı. 5556'da Evim görünür, uygulama çalışıyor, çökme kaydı yok. TV güncellemesi 20:46:40; SHA-256 2de0ca68cd80c5aba01133876413340a9956eae4ffcc18587779aa14911bdf95. TV'de uygulama/gerçek yayın açılmadı. Emülatörler/Gradle kapalı. Fiziksel/Figma kabulü açık; sırada S15a, sonraki paket en az 0.14.50/kod 64.
+
 ## 0.14.48 · Ana sayfa aşağı geçişi · 18 Ekim 2026
 
 Kullanıcının hero Ayrıntılar → İzlemeye devam et geçişindeki takılma bildirimi düzeltildi (D078). İlk raf artık ekranın tepesine taşınmak yerine kart ve başlığı gösterecek kadar kayar; diğer rafların D051 davranışı korunur. Aynı sentetik senaryoda gereken 38,5 dp iken eski kaynak 381 dp kaydırıyordu; düzeltme 38,5 dp kaydırır. Fiziksel TV kare süresi ölçülmedi; kullanıcının akıcılık kabulü açık.

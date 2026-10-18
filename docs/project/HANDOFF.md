@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · Tek vitrin düğmesi / 0.14.49 · 18 Ekim 2026
+
+Kullanıcının “Vitrinde tek buton bırakalım” isteği D079 ile uygulandı. HomeScreen Hero'da tek İzle var; Ayrıntılar ve kullanılmayan open callback'i kaldırıldı. Sağ/Sol doğrudan slayt değiştirir; tek slaytta Sağ yerinde, ilk slaytta Sol menüye; menüden Sağ İzle'ye. watch(shown()), PIN dönüşü, otomatik slayt/TalkBack/Hareketi azalt davranışı korunur. D078 kısa aşağı geçişi İzle'den de 38,5 dp gereksinim/38,5 dp gerçek hareketle doğrulandı.
+
+Değişenler: HomeScreen.kt, HeroLayoutTest.kt, ContinueCardLayoutTest.kt, build.gradle.kts; D079, HOME_HERO/SCREENS, BACKLOG/STEPS, STATUS/HANDOFF, [QA](native-hero-single-49-qa.json), design/reviews/LATEST.md ve hero-single-0.14.49/hero.png. HeroLayoutTest mevcut vakaları tek/çok slayt, menüye dönüş ve kaldırılan düğmenin yokluğu için güncellendi; yeni gereksiz test sınıfı yok. hero_review bağımsız salt okunur diff incelemesinde bulgu bildirmedi. Figma/manifest değişmedi.
+
+Kontroller: 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest derlemeleri. Yalnız 5558 / tools/run-device-tests.sh --no-build ile HeroLayoutTest (2), ContinueCardLayoutTest (1), VisualPreviewTest#homePostersAndContinueRemainVisibleWithRemote (1), toplam 4/4. Normal ölçekte sentetik görüntü incelendi. Yazı boyutu matrisi yapılmadı. Ham loglar work/hero-single-qa içinde. Proje bağlantı/ekran/değişken kontrolü ve git diff --check geçti.
+
+Teslim: releases/NEXTV_TV_Design_Preview_0.14.49.apk + sha256, kod 63, aynı imza/release/R8. SHA-256 2de0ca68cd80c5aba01133876413340a9956eae4ffcc18587779aa14911bdf95. 5556 .48→49 install -r, Evim görünür/çökme kaydı yok/çalışan uygulama, firstInstallTime 2026-10-14 08:57:19. TV .48→49 install -r, firstInstallTime 2026-10-13 23:50:03 değişmedi; lastUpdateTime 2026-10-18 20:46:40. İki kurulu APK çekilerek hash eşleşti. TV uygulaması/gerçek yayın açılmadı. 5556/5558 ve Gradle kapalı, 5554'e dokunulmadı.
+
+Tam sonraki adım: ana checkout/main üzerinden STEPS S15a ve gap/overlay.md. Sonraki teslim en az 0.14.50/kod 64. Fiziksel kumanda/akıcılık/TalkBack, Figma, İngilizce ve satış/fiyat kararları açık. Kullanıcı “yayına hazırla” demeden font matrisi koşma.
+
 ## Codex · Home geçiş düzeltmesi / 0.14.48 · 18 Ekim 2026
 
 Kullanıcının fotoğrafındaki Ayrıntılar → İzlemeye devam et geçişine odaklanıldı. HomeScreen ilk hero altı raf için mevcut CardVisibility minimum görünürlük yolunu kullanır; ortak kaydırma kodu ve diğer raflar değişmez. D078, D051'e bu dar istisnayı kaydeder. ContinueCardLayoutTest gerçek Down tuşuyla hareket mesafesini ve kart/başlık görünürlüğünü denetler. Önce aynı test eski .47 uygulamada gereken 38,5 dp yerine 381 dp hareketi yakaladı; son .48 kaynakta ikisi de 38,5 dp.

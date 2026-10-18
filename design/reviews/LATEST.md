@@ -1,5 +1,11 @@
 # Güncel görsel inceleme
 
+## 0.14.49 · Vitrinde tek düğme
+
+D079: yalnız İzle; sağ/sol slayt, ilk slaytta sola menü, menüden sağa İzle. D078 kısa aşağı geçişi korunur. Normal ölçekte sentetik kapaksız katalog; yazı boyutu matrisi yapılmadı. [QA](../../docs/project/native-hero-single-49-qa.json).
+
+![Vitrinde tek İzle düğmesi](hero-single-0.14.49/hero.png)
+
 18 Ekim 2026 · **0.14.48 · Vitrinden ilk rafa kısa kaydırma (D078).** Sentetik aynı geçişte 381 dp yerine gereken 38,5 dp kaydırılır. Kart ve başlığı görünür; vitrin gereksiz yere tamamen kaybolmaz. Normal yazı, debug, yalnız 5558. [QA](../../docs/project/native-home-scroll-48-qa.json). Fiziksel kare süresi ölçülmedi.
 
 ![İlk devam kartında odak](home-scroll-0.14.48/continue-after.png)

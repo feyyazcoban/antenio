@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.49-design-preview",
+  "versionCode": 63,
+  "decision": "D079",
+  "change": "Hero shows only Watch. Right/Left turn slides, first Left opens menu, single-slide Right retains focus; D078 minimum first-shelf scroll retained.",
+  "review": "Read-only independent hero_review: no actionable findings. Main agent implemented and reviewed; reviewer did not mutate files or run devices/build.",
+  "tests": {
+    "build": "release/debug/androidTest successful",
+    "unit": {
+      "tests": 354,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 37
+    },
+    "instrumentation": "4/4, emulator-5558 only via tools/run-device-tests.sh --no-build: HeroLayoutTest (2), ContinueCardLayoutTest (1), VisualPreviewTest#homePostersAndContinueRemainVisibleWithRemote (1), normal font only",
+    "firstShelfScroll": "From Watch: needed=38.5 dp, moved=38.5 dp"
+  },
+  "limitations": [
+    "No font-size matrix, per user instruction",
+    "Figma unchanged",
+    "Physical remote/TalkBack acceptance remains open"
+  ],
+  "delivery": {
+    "designEmulator": {
+      "device": "emulator-5556",
+      "before": {
+        "versionCode": "62",
+        "versionName": "0.14.48-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:38:30"
+      },
+      "after": {
+        "versionCode": "63",
+        "versionName": "0.14.49-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:46:18"
+      },
+      "sha256": "2de0ca68cd80c5aba01133876413340a9956eae4ffcc18587779aa14911bdf95",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "evimVisible": true,
+      "appRunning": true,
+      "crashRecordForApp": false
+    },
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "62",
+        "versionName": "0.14.48-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 20:38:51"
+      },
+      "after": {
+        "versionCode": "63",
+        "versionName": "0.14.49-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 20:46:40"
+      },
+      "sha256": "2de0ca68cd80c5aba01133876413340a9956eae4ffcc18587779aa14911bdf95",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "emulatorsAfter": "5556 and 5558 stopped; 5554 untouched; Gradle daemon stopped"
+  },
+  "sha256": "2de0ca68cd80c5aba01133876413340a9956eae4ffcc18587779aa14911bdf95",
+  "image": "design/reviews/hero-single-0.14.49/hero.png",
+  "logs": "work/hero-single-qa/device.log, device-full.log (ignored)"
+}

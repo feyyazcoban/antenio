@@ -307,7 +307,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                     .focusRequester(heroFocus)
                     .onFocusChanged { if (it.hasFocus) { model.homeFocus("hero"); lastFocus.requester = heroFocus } },
                     detail = model::heroDetail, ensure = model::ensureHeroDetail, starting = s.heroStarting,
-                    watch = { if (model.watch(it)) openPin { heroFocus } }) { if (model.open(it)) openPin { heroFocus } }
+                    watch = { if (model.watch(it)) openPin { heroFocus } })
                 else Column(Modifier.padding(horizontal = TvLayout.Gutter, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.home_kicker), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, letterSpacing = 2.sp)
                     Heading(stringResource(R.string.home_prompt))
@@ -383,15 +383,14 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
  * The hero carousel (D067): a large, full-width picture from the top edge down to the shelves. A slide with a wide
  * picture fills the hero with it; a poster-only slide fills it with its own poster, much enlarged and softened, and
  * shows the poster beside the text. Films from an Xtream source get their wide picture from their details
- * ([detail], fetched through [ensure] for the slide on screen and the next). Two actions (D071): İzle ([watch]: the
- * film from where it was left, a series' next episode) and Ayrıntılar ([open]). Slides advance every 8 s (15 s while
- * an action has focus, none with TalkBack or reduced motion); the row's ends turn them: Right on Ayrıntılar shows the
- * next slide, Left on İzle the previous one (Left on the first reaches the menu). The actions are one composable
- * across slides, so focus never leaves them; [actionModifier] is İzle's, the hero's focus target.
+ * ([detail], fetched through [ensure] for the slide on screen and the next). One action (D079): İzle ([watch]: the
+ * film from where it was left, a series' next episode). Slides advance every 8 s (15 s while the action has focus,
+ * none with TalkBack or reduced motion); Right shows the next slide, Left the previous one (Left on the first
+ * reaches the menu). The action is one composable across slides, so focus never leaves it;
+ * [actionModifier] is İzle's, the hero's focus target.
  */
 @Composable private fun Hero(slides: List<MediaEntry>, newest: Boolean, reducedMotion: Boolean, actionModifier: Modifier,
-    detail: (MediaEntry) -> MediaEntry, ensure: (MediaEntry) -> Unit, starting: String?, watch: (MediaEntry) -> Unit,
-    open: (MediaEntry) -> Unit) {
+    detail: (MediaEntry) -> MediaEntry, ensure: (MediaEntry) -> Unit, starting: String?, watch: (MediaEntry) -> Unit) {
     val largeText = LocalDensity.current.fontScale >= 1.5f
     val motion = !reducedMotion && android.animation.ValueAnimator.areAnimatorsEnabled()
     val many = slides.size > 1
@@ -450,24 +449,20 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
             }
             // An OK within half a second of an automatic turn meant the slide that was on screen.
             fun shown() = turnedFrom?.takeIf { System.currentTimeMillis() - turnedAt < 600 } ?: slides[current]
-            var watchFocused by remember { mutableStateOf(false) }
-            var detailsFocused by remember { mutableStateOf(false) }
-            LaunchedEffect(watchFocused, detailsFocused) { actionFocused = watchFocused || detailsFocused }
             val place = stringResource(R.string.hero_slide, shownName(entry.title), (current + 1).toString(), slides.size.toString())
             Row(Modifier.padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 // Left on İzle shows the previous slide; on the first it goes on to the menu. Both keys read the index
                 // itself, not this frame's copy, so two presses before the next frame turn two slides.
                 Action(stringResource(if (starting == slides[current].id) R.string.hero_opening else R.string.action_watch), actionModifier.onPreviewKeyEvent { event ->
                     val now = index.coerceIn(0, slides.lastIndex)
-                    if (many && event.type == KeyEventType.KeyDown && event.key == Key.DirectionLeft && now > 0) { index = now - 1; true } else false
-                }.onFocusChanged { watchFocused = it.isFocused }
+                    if (event.type == KeyEventType.KeyDown) when {
+                        event.key == Key.DirectionRight -> { if (many) index = (now + 1) % slides.size; true }
+                        event.key == Key.DirectionLeft && now > 0 -> { index = now - 1; true }
+                        else -> false
+                    } else false
+                }.focusProperties { right = FocusRequester.Cancel }.onFocusChanged { actionFocused = it.isFocused }
                     .semantics { if (many) stateDescription = place }
                     .testTag("hero-watch"), primary = true, icon = "play") { watch(shown()) }
-                // Right on Ayrıntılar shows the next slide; with one slide it stays here rather than jumping to a shelf.
-                Action(stringResource(R.string.action_details), Modifier.onPreviewKeyEvent { event ->
-                    if (many && event.type == KeyEventType.KeyDown && event.key == Key.DirectionRight) { index = (index.coerceIn(0, slides.lastIndex) + 1) % slides.size; true } else false
-                }.focusProperties { right = FocusRequester.Cancel }.onFocusChanged { detailsFocused = it.isFocused }
-                    .testTag("hero-details"), outlined = true, icon = "info") { open(shown()) }
                 if (many) Spacer(Modifier.width(8.dp))
                 if (many) SlideDots(slides.size, current)
             }

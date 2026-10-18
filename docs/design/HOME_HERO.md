@@ -1,5 +1,7 @@
 # Ana sayfa üst alanı
 
+**18 Ekim 2026 · 0.14.49 / D079:** Güncel vitrinde tek eylem İzle. Ayrıntılar kaldırıldı; Sağ sonraki slayt, Sol önceki slayt/ilk slaytta menü; tek slaytta Sağ yerinde kalır. Menüden Sağ İzle'ye döner, Aşağı D078 ile ilk rafa geçer. İzle'nin film devamı/dizi bölüm seçimi ve yükleniyor davranışı değişmez. Aşağıdaki 0.14.13 ölçüleri tarihçedir; güncel büyük vitrin D067 ve D079'dur.
+
 15 Ekim 2026 · Android0.14.13 · TV-010.
 
 Kaynak seçimi ve bölüm etiketi ayrı bir üst satıra taşındı. Başlık, yıl, özet ve ana eylemler bu satırın altında yerleşir; kaynak düğmesi başlığın üstüne binmez. İç pay28dp yatay/20dp dikey, satırlar arası12dp. Mevcut32dp ekran kenarı,20dp köşe ve koyu/mint palet korunur.

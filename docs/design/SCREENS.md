@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**18 Ekim · TV-010 / D079:** Vitrinde yalnız İzle bulunur. İlk odak/menüden dönüş bu düğmeye; OK oynatır/devam eder, Sağ/Sol slaytı değiştirir, ilk slaytta Sol menüyü açar, tek slaytta Sağ odakta kalır. Ayrıntılar düğmesi kaldırıldı; ayrıntılar raf/kütüphane kartlarından açılır. Aşağı geçişte D078 korunur.
+
 **18 Ekim · TV-010 / D078:** Vitrin varsa ilk raf, Aşağı ile odaklandığında yalnız başlık ve kartı görünür kılacak mesafe kadar kayar; ekranın üstüne zorla taşınmaz. Alt raflarda başlık hizalama korunur. [Raf sözleşmesi](HOME_SHELF_FRAMING.md).
 
 **14 Ekim:** TV-010/020/030/031/040 için [görsel revizyon](VISUAL_REVISION.md) hazır. Aday üst gezinme: yatay sekme, aşağı içerik; kartta sağ/sol aynı satırda kalır. Android0.14 tasarım önizlemesinde üst gezinme uygulanmıştır. Aşağıdaki çekmece anlatımı0.13 ve ilk prototipin tarihli davranışıdır; [güncel native sözleşme](NATIVE_VISUAL_REVISION.md) önceliklidir.17 ekranın tamamı yeniden tasarlanmış sayılmaz.
