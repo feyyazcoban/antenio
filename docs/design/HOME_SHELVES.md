@@ -1,5 +1,11 @@
 # Ana sayfa afiş ve devam rafları
 
+## 18 Ekim 2026 · Kompakt son kanal kartları · D091
+
+Kullanıcı D084 kartlarını dağınık buldu. `recent` rafı artık 272 dp genişlik ve en az 100 dp yükseklikte yatay kartlardan oluşur. Tek düz yüzeyde 16 dp iç boşluk; solda oranı korunan 80×56 dp logo, 16 dp sonra sağda kanal adı ve 4 dp altında kaynak adı. Başlık 14/19 sp Medium, en fazla iki gerçek satır; kısa adda boş ikinci satır ayrılmaz. Kaynak yalnız çoklu kaynakta, 12/16 sp tek satır ve taşarsa üç nokta. Metin grubu dikey ortalanır; yükseklik gerekirse içerikle büyür.
+
+Üst logo sahnesi ve gradient kaldırıldı. Eksik/yüklenemeyen logo ortak yer tutucuyu kullanır; kilit mevcut LockMark ile kanal adının yanında ve erişilebilir durumda belirtilir. Beyaz odak halkası, odakta büyümeme, OK/PIN, basılı OK, geçmiş sırası ve dönüş odağı korunur. Yalnız `recent` kartının D084 görsel yerleşiminin yerine geçer; diğer raflar aynı. Normal ölçekte kumanda/görsel kontrolü yapılır; yazı ölçeği matrisi kullanıcı “yayına hazırla” dediğinde.
+
 ## 18 Ekim 2026 · Dizi adı ve yıl birlikte · D086
 
 Kullanıcının başlık ve yılın uzak durduğu geri bildirimiyle `series` rafında başlık artık boş ikinci satır ayırmaz: minLines 1, maxLines 2. Yıl/kaynak satırı gerçek başlığın 4 dp altında gelir (önce boş satır +8 dp). Afiş–başlık aralığı 8 dp, 160×240 dp afiş ve 16/22 sp Medium başlık korunur. D085'in sabit iki satırlık yer ayırma kısmının yerine geçer. Diğer rafların metin aralıkları aynı kalır. Font ölçeği matrisi mağaza öncesi kullanıcı talebini bekler.

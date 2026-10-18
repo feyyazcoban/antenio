@@ -1,0 +1,89 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.61-design-preview",
+  "versionCode": 75,
+  "decision": "D091",
+  "request": "Recent-channel cards look too scattered; redesign them",
+  "change": "Compact horizontal recent-channel cards: 272 dp wide, minimum 100 dp high, 16 dp padding, 80x56 dp logo, 16 dp gap then title and 4 dp source gap. Flat surface; no forced empty title line. Existing LockMark beside title.",
+  "review": "hero_review read-only final diff: no blocking geometry or behavior finding; verify logo balance and long title/source visually.",
+  "tests": {
+    "unit": {
+      "tests": 357,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 37
+    },
+    "build": "release/debug/androidTest successful in 6m22s; no parallel, one worker",
+    "instrumentation": "4/4 completed across separate wrapper runs on emulator-5558: recent-channel flow 1/1, HeroLayoutTest and ContinueCardLayoutTest 3/3. Normal scale only.",
+    "interruptedAttempt": "Initial combined run completed recent and both hero tests, then emulator disconnected during ContinueCardLayoutTest; no suite success claimed. Retried recent alone and regression classes separately; both passed.",
+    "visual": "First/last screenshots inspected: compact horizontal cards, nearby title/source, long-name ellipsis and missing-logo fallback. No physical acceptance claimed.",
+    "newTestsAdded": false,
+    "projectCheck": "passed before final docs"
+  },
+  "rawEvidence": "work/recent-channel-redesign-qa",
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "74",
+        "versionName": "0.14.60-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 22:20:53"
+      },
+      "after": {
+        "versionCode": "75",
+        "versionName": "0.14.61-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 22:53:32"
+      },
+      "sha256": "7ed8e9ab379dff74c6e315fc113c4e2e47f351b2bacaace3c13b18c0748c235e",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "designEmulator": {
+      "device": "emulator-5556",
+      "before": {
+        "versionCode": "60",
+        "versionName": "0.14.46-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 15:43:07"
+      },
+      "after": {
+        "versionCode": "75",
+        "versionName": "0.14.61-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 15:46:01"
+      },
+      "sha256": "7ed8e9ab379dff74c6e315fc113c4e2e47f351b2bacaace3c13b18c0748c235e",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "evimVisible": true,
+      "appRunning": true,
+      "crashRecordForApp": false
+    },
+    "firstTvAttempt": "ADB daemon restart during install: helper failed before verification. Device still reported code74; retry succeeded.",
+    "designVersionMismatch": "5556 default_boot snapshot opened .46/code60, although previous handoff expected .51/code65. No wipe/snapshot restore performed; observed .46 upgraded in place. Evim visible after update.",
+    "endState": "5556 left visible with app open at user request. 5558 and Gradle stopped; 5554 untouched."
+  },
+  "limitations": [
+    "No font-scale matrix per user instruction",
+    "Figma unchanged; physical visual acceptance open",
+    "Existing remote tests do not separately exercise locked-channel PIN flow"
+  ],
+  "images": [
+    "design/reviews/recent-channel-redesign-0.14.61/recent-0.png",
+    "design/reviews/recent-channel-redesign-0.14.61/recent-5.png"
+  ],
+  "package": {
+    "sha256": "7ed8e9ab379dff74c6e315fc113c4e2e47f351b2bacaace3c13b18c0748c235e",
+    "path": "releases/NEXTV_TV_Design_Preview_0.14.61.apk",
+    "id": "dev.iptvplayer.tv.pilot",
+    "build": "R8 release, not debuggable",
+    "signerSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065"
+  }
+}

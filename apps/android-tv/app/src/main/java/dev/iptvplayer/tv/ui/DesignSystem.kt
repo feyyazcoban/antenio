@@ -57,7 +57,7 @@ object TvLayout {
     val SeriesShelfWidth = 160.dp
     val ContinueWidth = 284.dp
     val LiveWidth = 168.dp
-    val RecentChannelWidth = 200.dp
+    val RecentChannelWidth = 272.dp
 }
 
 /**

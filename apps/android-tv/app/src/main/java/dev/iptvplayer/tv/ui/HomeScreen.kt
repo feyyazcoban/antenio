@@ -605,8 +605,8 @@ internal fun runtimeText(seconds: Long): String {
         return
     }
     if (live && section == "recent") {
-        // Keep the logo, title and source inside one focus surface. Shared text slots keep
-        // short and long channel names aligned as the remote moves across the shelf.
+        // D091: compact logo/name row; the source follows the actual title, without an empty line.
+        // A minimum height aligns the shelf while allowing larger text to grow naturally.
         Box(Modifier.width(TvLayout.RecentChannelWidth).then(visibility.container).testTag("tile:$section:${entry.id}")) {
             Card(onClick = open, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth()
                 .semantics {
@@ -618,17 +618,19 @@ internal fun runtimeText(seconds: Long): String {
                 shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
                 colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
                 border = CardDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
-                Column(Modifier.fillMaxWidth()) {
-                    Box(Modifier.fillMaxWidth().height(84.dp)
-                        .background(Brush.verticalGradient(listOf(Ink.High.copy(alpha = .5f), Color.Transparent))),
+                Row(Modifier.fillMaxWidth().heightIn(min = 100.dp).padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Box(Modifier.width(80.dp).height(56.dp),
                         contentAlignment = Alignment.Center) {
-                        Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(140.dp).height(48.dp), true, logoInset = 0.dp)
-                        if (locked) LockBadge(Modifier.align(Alignment.TopEnd).padding(8.dp))
+                        Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.fillMaxSize(), true, logoInset = 0.dp)
                     }
-                    Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 12.dp),
+                    Column(Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(shown.name, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
-                            fontSize = 14.sp, lineHeight = 19.sp, minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            if (locked) LockMark()
+                            Text(shown.name, Modifier.weight(1f), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
+                                fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        }
                         sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp,
                             lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                     }

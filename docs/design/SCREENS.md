@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**18 Ekim · TV-010 / D091:** Son izlenen kanallar kompakt yatay kart: solda logo, sağda kanal adı ve yakın kaynak satırı. 272 dp genişlik, en az 100 dp yükseklik, tek düz yüzey; kısa adda boş ikinci satır yok. D084 yerleşimini değiştirir. [Raf sözleşmesi](HOME_SHELVES.md).
+
 **18 Ekim · D090:** Ortak İzle/Oynat eylemlerinin simgesi her zaman dolu, Material Symbols Rounded play_arrow FILL 1. D083'ün odakta dolu/odak dışında çizgi kuralının yerine geçer. 16 dp kutu, düğme ölçüleri, odak renk/çerçevesi ve favori yıldızının seçili doluluğu korunur.
 
 **18 Ekim · TV-010 / D088:** Vitrin→ilk raf hareketi kart görünür olduğunda yarıda iptal edilmez; görsel ön yüklemesi odak değişiminden ayrıdır. [Raf geçişi](HOME_SHELF_FRAMING.md), [vitrin](HOME_HERO.md).

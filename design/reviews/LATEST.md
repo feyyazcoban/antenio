@@ -1,5 +1,13 @@
 # Güncel görsel inceleme
 
+## 0.14.61 · Kompakt son kanal kartları
+
+D091: tek düz yüzeyde solda logo, sağda yakın kanal adı/kaynak. Uzun ad iki satıra kadar; logosuz kanal ortak yer tutucu. Normal ölçekte sentetik kaynaklar. [QA](../../docs/project/native-recent-channel-redesign-61-qa.json).
+
+![İlk son kanal](recent-channel-redesign-0.14.61/recent-0.png)
+
+![Uzun ad, kaynak ve eksik logo](recent-channel-redesign-0.14.61/recent-5.png)
+
 ## 0.14.60 · Her zaman dolu, yuvarlatılmış oynat simgesi
 
 D090: İzle/Oynat eylemindeki simge odaktan bağımsız Material Symbols Rounded FILL1. Normal ölçekte sentetik görseller; 16 dp alan ve düğme geometrisi aynı. [QA](../../docs/project/native-rounded-play-60-qa.json).

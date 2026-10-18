@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.61 · Kompakt son kanal kartları · 18 Ekim 2026
+
+Kullanıcı D084 kartlarını dağınık buldu. Son kanallar tek düz yatay kartta: solda 80×56 dp logo, sağda kanal adı ve yakın kaynak; 272 dp genişlik/minimum 100 dp yükseklik, boş ikinci başlık satırı yok (D091). Bağımsız incelemede somut bulgu yok. 357 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. İlk birleşik ekran turunda emülatör son testte koptu; ayrı tekrarlar 1/1 + 3/3 geçti. Normal görseller incelendi, font matrisi yok. [QA](native-recent-channel-redesign-61-qa.json), [görseller](../../design/reviews/LATEST.md).
+
+Kod75/0.14.61 TV'ye ve kullanıcının test isteğiyle 5556'ya install -r kuruldu; iki cihazda firstInstallTime ve kurulu APK hash doğrulandı. SHA-256 7ed8e9ab379dff74c6e315fc113c4e2e47f351b2bacaace3c13b18c0748c235e. TV saatiyle 22:53:32; TV'de uygulama/yayın açılmadı. 5556 eski default_boot ile .46/kod60 açıldı, .61'e yükseltildi; Evim görünüyor, uygulama kullanıcı testi için görünür/açık. Eski .51 bekleyişi güncel cihaz durumu değildir. 5558/Gradle kapalı.
+
+**Yeni açık kullanıcı işleri:** listeleme sayfalarında boş ikinci başlık satırını kaldırma, afiş–başlık aralığını artırma, başlığı 1–2 sp büyütme ve yılı daha soluk yapma; vitrin→ilk raf hâlâ iki kez kayıyor; splash tamamen kapatıp açınca da donuyor. Bunlar .61'e dahil değil. Tam inceleme bulguları HANDOFF'ta. Sonraki paket en az .62/kod76; genel S15a planından önce bu geri bildirimler.
+
 ## 0.14.60 · Her durumda dolu, yuvarlatılmış oynat simgesi · 18 Ekim 2026
 
 Kullanıcı isteğiyle ortak İzle/Oynat eylemleri odaktan bağımsız Material Symbols Rounded FILL1 simgesini kullanır (D090, D083'ün odak şartını değiştirir). 16 dp simge alanı, düğme geometrisi ve diğer simgelerin seçili durumları korunur.
