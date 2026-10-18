@@ -76,6 +76,33 @@ class PinAttemptsTest {
         assertEquals(1, early.next.charged)
     }
 
+    @Test fun waitMsChargesNothingAndAgreesWithReserve() {
+        val state = chargedFive()
+        for (now in listOf(PinClock(1, 11_000), PinClock(1, 31_000), PinClock(2, 100_000), PinClock(1, 500))) {
+            val reservation = state.reserve(now)
+            assertEquals(if (reservation.mayVerify) 0L else reservation.retryAfterMs, state.waitMs(now))
+        }
+        assertEquals(20_000L, state.waitMs(PinClock(1, 11_000)))
+        assertEquals(0L, state.waitMs(PinClock(1, 31_000)))
+        // Looking any number of times leaves the budget as it was.
+        repeat(3) { state.waitMs(PinClock(1, 11_000)) }
+        assertEquals(5, state.charged)
+        assertFalse(state.reserve(PinClock(1, 11_000)).mayVerify)
+    }
+
+    @Test fun rebaseStartsTheFullWaitOnceAndKeepsItWhenSaved() {
+        val rebooted = chargedFive().rebase(PinClock(2, 100_000))
+        assertEquals(2L, rebooted.boot)
+        assertEquals(130_000L, rebooted.availableAtMs)
+        // Saved, the next look counts down instead of starting over.
+        assertEquals(10_000L, rebooted.waitMs(PinClock(2, 120_000)))
+        assertEquals(rebooted.availableAtMs, rebooted.rebase(PinClock(2, 120_000)).availableAtMs)
+        // Before the fifth try a reboot leaves nothing to wait for.
+        val few = PinAttempts.clear(PinClock(1, 1_000)).reserve(PinClock(1, 1_000)).next
+        assertEquals(0L, few.waitMs(PinClock(2, 50)))
+        assertEquals(0L, few.rebase(PinClock(2, 50)).availableAtMs)
+    }
+
     @Test fun invalidStateAndOverflowingClockAreRejected() {
         assertThrows(IllegalArgumentException::class.java) { PinClock(-1, 0) }
         assertThrows(IllegalArgumentException::class.java) { PinClock(1, Long.MAX_VALUE) }

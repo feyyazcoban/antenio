@@ -5,8 +5,15 @@ import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
+/**
+ * What a set PIN guards besides locked titles (pin.md §5). [sourcesNeedPin]: adding, editing and removing sources asks
+ * for it. [launchNeedsPin]: the app opens on a lock screen.
+ */
+internal data class ProtectionOptions(val sourcesNeedPin: Boolean = true, val launchNeedsPin: Boolean = false)
+
 internal class ProtectionSnapshot(val generation: Long, val policyRevision: Long,
-    val credential: PinCredential, val attempts: PinAttempts, rules: List<AccessRule>) {
+    val credential: PinCredential, val attempts: PinAttempts, rules: List<AccessRule>,
+    val options: ProtectionOptions = ProtectionOptions()) {
     val rules: List<AccessRule> = java.util.Collections.unmodifiableList(rules.toList())
     init {
         require(generation >= 0 && policyRevision >= 0 && rules.size <= 1024)
@@ -15,12 +22,18 @@ internal class ProtectionSnapshot(val generation: Long, val policyRevision: Long
     override fun toString() = "ProtectionSnapshot([redacted])"
 }
 
+/** v2 adds one byte of [ProtectionOptions] after the rules; a v1 record reads with the default options. */
 internal object ProtectionCodec {
     const val MAX_BYTES = 1_048_576
+    private const val V1 = 0x50525601
+    private const val V2 = 0x50525602
+    private const val SOURCES_NEED_PIN = 1
+    private const val LAUNCH_NEEDS_PIN = 2
+
     fun encode(value: ProtectionSnapshot): ByteArray {
         val buffer = ByteArrayOutputStream()
         DataOutputStream(buffer).use { out ->
-            out.writeInt(0x50525601)
+            out.writeInt(V2)
             out.writeLong(value.generation); out.writeLong(value.policyRevision)
             val credential = value.credential.encode()
             try { out.write(credential) } finally { credential.fill(0) }
@@ -42,6 +55,10 @@ internal object ProtectionCodec {
                 out.writeBoolean(rule.hidden); out.writeBoolean(rule.pinRequired)
                 require(buffer.size() <= MAX_BYTES)
             }
+            with(value.options) {
+                out.writeByte((if (sourcesNeedPin) SOURCES_NEED_PIN else 0) or (if (launchNeedsPin) LAUNCH_NEEDS_PIN else 0))
+            }
+            require(buffer.size() <= MAX_BYTES)
         }
         return buffer.toByteArray()
     }
@@ -49,7 +66,8 @@ internal object ProtectionCodec {
     fun decode(bytes: ByteArray): ProtectionSnapshot {
         require(bytes.size <= MAX_BYTES)
         return DataInputStream(ByteArrayInputStream(bytes)).use { input ->
-            require(input.readInt() == 0x50525601)
+            val version = input.readInt()
+            require(version == V1 || version == V2)
             val generation = input.readLong(); val revision = input.readLong()
             val raw = ByteArray(52); input.readFully(raw)
             val credential = try { PinCredential.decode(raw) } finally { raw.fill(0) }
@@ -74,8 +92,14 @@ internal object ProtectionCodec {
                 }
                 AccessRule(scope, flag(), flag())
             }
+            val options = if (version == V1) ProtectionOptions() else {
+                // An option this build does not know could be a protection it would silently drop.
+                val bits = input.readUnsignedByte()
+                require(bits and (SOURCES_NEED_PIN or LAUNCH_NEEDS_PIN).inv() == 0)
+                ProtectionOptions(bits and SOURCES_NEED_PIN != 0, bits and LAUNCH_NEEDS_PIN != 0)
+            }
             require(input.read() == -1)
-            ProtectionSnapshot(generation, revision, credential, attempts, rules)
+            ProtectionSnapshot(generation, revision, credential, attempts, rules, options)
         }
     }
 }

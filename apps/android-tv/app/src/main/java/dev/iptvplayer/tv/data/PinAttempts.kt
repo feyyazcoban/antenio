@@ -26,10 +26,7 @@ internal data class PinAttempts(
      * mayVerify is usable ONLY after next is durably committed; a write failure grants nothing.
      */
     fun reserve(now: PinClock): Reservation {
-        val rebootOrRollback = now.boot != boot || now.elapsedMs < lastObservedMs
-        val rebased = if (rebootOrRollback) copy(boot = now.boot, lastObservedMs = now.elapsedMs,
-            availableAtMs = if (charged >= 5) now.elapsedMs + delay(charged) else 0)
-        else copy(lastObservedMs = now.elapsedMs)
+        val rebased = rebase(now)
         val remaining = (rebased.availableAtMs - now.elapsedMs).coerceAtLeast(0)
         if (remaining > 0) return Reservation(rebased, false, remaining)
         val nextCount = (charged + 1).coerceAtMost(9)
@@ -37,6 +34,18 @@ internal data class PinAttempts(
             availableAtMs = if (nextCount >= 5) now.elapsedMs + delay(nextCount) else 0)
         return Reservation(next, true, 0)
     }
+
+    /** What [reserve] would make the caller wait at [now], charging nothing: the PIN pad can open already waiting. */
+    fun waitMs(now: PinClock): Long = (rebase(now).availableAtMs - now.elapsedMs).coerceAtLeast(0)
+
+    /**
+     * This budget as seen at [now]. After a reboot or a monotonic clock that went back, the full delay starts over
+     * from [now]; the caller saves that once, or every later look would start it over again.
+     */
+    fun rebase(now: PinClock): PinAttempts =
+        if (now.boot != boot || now.elapsedMs < lastObservedMs) copy(boot = now.boot, lastObservedMs = now.elapsedMs,
+            availableAtMs = if (charged >= 5) now.elapsedMs + delay(charged) else 0)
+        else copy(lastObservedMs = now.elapsedMs)
 
     companion object {
         private const val MAX_DELAY = 300_000L

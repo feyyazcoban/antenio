@@ -17,20 +17,31 @@ internal sealed interface ProtectionRead {
     data object Unavailable : ProtectionRead
 }
 
-/** Off-main, single-process storage primitive, not an authentication boundary. No reset API. */
-internal class ProtectionStore(context: Context, namespace: String = "primary") {
+/** What ParentalGuard needs of the record, so its JVM tests can stand in a fake. */
+internal interface ProtectionStorage {
+    fun read(): ProtectionRead
+    fun write(snapshot: ProtectionSnapshot, expectedGeneration: Long?)
+    fun reset()
+}
+
+/**
+ * Off-main, single-process storage primitive, not an authentication boundary. [reset] has two callers only: removing
+ * the PIN after it was verified, and "PIN'i unuttum" after the sources are wiped (pin.md §3.10, §3.11).
+ */
+internal class ProtectionStore(context: Context, namespace: String = "primary") : ProtectionStorage {
     init { require(namespace.matches(Regex("[a-z0-9_-]{1,48}"))) }
     internal val file = File(context.filesDir, "protection/$namespace.bin")
     internal val alias = "iptv_protection_v1_$namespace"
     private val aad = "iptv-protection-v1:$namespace".toByteArray(Charsets.UTF_8)
     private val atomic = AtomicFile(file)
 
-    fun read(): ProtectionRead = synchronized(lock) {
+    override fun read(): ProtectionRead = synchronized(lock) {
         try { readLocked() } catch (_: Exception) { ProtectionRead.Unavailable }
     }
 
     private fun keyStore() = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
-    private fun hasFile() = listOf(file, File(file.path + ".bak"), File(file.path + ".new")).any { it.exists() }
+    private fun files() = listOf(file, File(file.path + ".bak"), File(file.path + ".new"))
+    private fun hasFile() = files().any { it.exists() }
     private fun readLocked(): ProtectionRead {
         val store = keyStore()
         if (!store.containsAlias(alias)) return if (hasFile()) ProtectionRead.Unavailable else ProtectionRead.Unconfigured
@@ -60,7 +71,7 @@ internal class ProtectionStore(context: Context, namespace: String = "primary") 
     }
 
     /** null expected generation means first setup. Caller must authenticate all later policy edits. */
-    fun write(snapshot: ProtectionSnapshot, expectedGeneration: Long?) = synchronized(lock) {
+    override fun write(snapshot: ProtectionSnapshot, expectedGeneration: Long?) = synchronized(lock) {
         val plain = ProtectionCodec.encode(snapshot)
         try {
             val current = readLocked()
@@ -71,8 +82,9 @@ internal class ProtectionStore(context: Context, namespace: String = "primary") 
                     check(expectedGeneration == previous.generation && previous.generation < Long.MAX_VALUE &&
                         snapshot.generation == previous.generation + 1 && snapshot.policyRevision >= previous.policyRevision)
                     val fresh = snapshot.credential.encode(); val old = previous.credential.encode()
-                    val changed = try { snapshot.rules != previous.rules || !fresh.contentEquals(old) }
-                        finally { fresh.fill(0); old.fill(0) }
+                    val changed = try {
+                        snapshot.rules != previous.rules || snapshot.options != previous.options || !fresh.contentEquals(old)
+                    } finally { fresh.fill(0); old.fill(0) }
                     check(!changed || snapshot.policyRevision > previous.policyRevision)
                 }
                 ProtectionRead.Unavailable -> error("Protection unavailable")
@@ -100,6 +112,22 @@ internal class ProtectionStore(context: Context, namespace: String = "primary") 
         } catch (_: Exception) {
             throw IllegalStateException("Protection record could not be saved")
         } finally { plain.fill(0) }
+    }
+
+    /**
+     * Back to Unconfigured: the files go first, then the key. Stopped halfway, the key without a file reads as
+     * Unavailable, never as a cleared PIN, and the same call finishes the job.
+     */
+    override fun reset() {
+        synchronized(lock) {
+            try {
+                files().forEach { check(it.deleteRecursively()) }
+                val store = keyStore()
+                if (store.containsAlias(alias)) store.deleteEntry(alias)
+            } catch (_: Exception) {
+                throw IllegalStateException("Protection record could not be reset")
+            }
+        }
     }
 
     private companion object { val lock = Any() }
