@@ -2,12 +2,13 @@ package dev.iptvplayer.tv.data
 
 /**
  * What the lock rules make of the published library, for the screens (pin.md §4, §7). [ids]: the channels, films and
- * series that ask for the PIN. [categories]: the locked category rows, as CategoryVisibility.key names them in Ayarlar.
- * [sources]: the locked sources. [unresolved]: titles of an older list left out because their category identity is
- * missing while a category rule of their source needs it; a refresh brings them back. [unknown]: the rules are not
- * read, or cannot be, so every title asks for the PIN (D049) and none is promoted or fetched before it. [contents]: the
- * titles with a lock of their own (Kilitle in the quick menu), by identity, listed in the library or not. [open]: the
- * locked titles whose every lock a PIN opened in this session; they read as unlocked until the app leaves the screen.
+ * series that ask for the PIN. [categories]: the locked category rows the library shows, as CategoryVisibility.key names
+ * them in Ayarlar; a hidden one is not among them. [sources]: the locked sources. [unresolved]: titles of an older list
+ * left out because their category identity is missing while a category rule of their source needs it; a refresh brings
+ * them back. [unknown]: the rules are not read, or cannot be, so every title asks for the PIN (D049) and none is
+ * promoted or fetched before it. [contents]: the titles with a lock of their own (Kilitle in the quick menu), by
+ * identity, listed in the library or not. [open]: the locked titles whose every lock a PIN opened in this session; they
+ * read as unlocked until the app leaves the screen.
  */
 data class ParentalLocks(val ids: Set<String> = emptySet(), val categories: Set<String> = emptySet(),
     val sources: Set<String> = emptySet(), val unresolved: Int = 0, val unknown: Boolean = false,
@@ -80,7 +81,9 @@ internal object ParentalProjection {
             }
         }
         val catalog = if (items.size == visible.items.size) visible else visible.copy(items = items)
-        return ParentalView(catalog, ParentalLocks(locked, lockedRows.keys.toSet(),
+        // The screens list a locked row while the library shows it. One hidden in Ayarlar keeps its rules and its memory
+        // in [rows], but reads as hidden alone, before and after the app restarts.
+        return ParentalView(catalog, ParentalLocks(locked, lockedRows.keys.filterTo(HashSet()) { it in rows },
             pinned.mapNotNullTo(HashSet()) { (it.scope as? AccessScope.Source)?.sourceId }, unresolved,
             contents = pinned.mapNotNullTo(LinkedHashSet()) { (it.scope as? AccessScope.Content)?.ref?.key }),
             missing, lockedRows, groups)

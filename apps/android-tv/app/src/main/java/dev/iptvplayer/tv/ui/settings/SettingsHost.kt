@@ -18,7 +18,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,6 +34,7 @@ import dev.iptvplayer.tv.TvViewModel
 import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.ui.Action
 import dev.iptvplayer.tv.ui.Ink
+import dev.iptvplayer.tv.ui.Note
 import dev.iptvplayer.tv.ui.Roboto
 import dev.iptvplayer.tv.ui.resolve
 import dev.iptvplayer.tv.ui.scrollEdgeFade
@@ -95,7 +98,11 @@ private class PagePlace {
         val pageGate = gate ?: rememberPinGate(s, model)
         fun open(route: SettingsRoute, fromRowKey: String?) {
             val guard = (route as? SettingsRoute.Page)?.let { settingsPages.getValue(it.id).guard } ?: PageGuard.None
-            pageGate.request(guard, { rows.entry(fromRowKey) }) { nav.open(route, fromRowKey); current = nav.top }
+            pageGate.request(guard, { rows.entry(fromRowKey) }) {
+                nav.open(route, fromRowKey); current = nav.top
+                // A page's note belongs to it: the next page, a ChoicePage too, starts without one.
+                model.settingsPageOpened()
+            }
         }
         // The page's own buttons leave only this page (SettingsNav.back), the Back key and the header action the top one.
         val pageScope = SettingsScope(s, model, rows, place.list, visibleItems, navigate = ::open,
@@ -130,6 +137,12 @@ private class PagePlace {
                     color = Ink.Mint, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                     fontSize = 12.sp, lineHeight = 17.sp)
                 Box(Modifier.fillMaxWidth().height(1.dp).background(Ink.Divider))
+                // What the last change on this page said, fixed above its rows: in view whichever row has focus, even far
+                // down a long list, and read out as it arrives.
+                page?.notice?.invoke(s)?.let { notice ->
+                    Note(notice.resolve(), modifier = Modifier.padding(start = 28.dp, end = 28.dp, top = 14.dp)
+                        .semantics { liveRegion = LiveRegionMode.Polite }.testTag("settings-notice"))
+                }
                 Box(Modifier.weight(1f).testTag(if (reading) "settings-reading" else "settings-viewport")
                     .then(if (reading) Modifier
                     .padding(12.dp)

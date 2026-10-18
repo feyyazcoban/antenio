@@ -107,12 +107,14 @@ internal class SettingsScope(
 
     /**
      * A row that acts on OK. [busy] reads as working; [attention] shows the description as a warning. [value] stands at
-     * the end as a switch's state does, read as the row's state ("Kilitli").
+     * the end as a switch's state does, read as the row's state ("Kilitli"). [clickLabel] says what OK does to TalkBack,
+     * for a row whose OK acts at once where its name does not say so ("Kilidi kaldır").
      */
     @Composable fun ActionRow(key: String, label: String, description: String, modifier: Modifier = Modifier,
-        section: SectionId? = null, busy: Boolean = false, attention: Boolean = false, value: String? = null, onClick: () -> Unit) {
+        section: SectionId? = null, busy: Boolean = false, attention: Boolean = false, value: String? = null,
+        clickLabel: String? = null, onClick: () -> Unit) {
         SettingRow(label, description, Modifier.row(rowFocus(key), section).then(modifier), value = value, busy = busy,
-            attention = attention, onClick = onClick)
+            attention = attention, clickLabel = clickLabel, onClick = onClick)
     }
 
     /** A row that opens [route]; Back returns to it. */
@@ -213,12 +215,17 @@ internal class SettingsScope(
     return edge
 }
 
-/** A switch when [checked] is given, its state at the end; else a row that shows [value] there, if any. */
+/**
+ * A switch when [checked] is given, its state at the end; else a row that shows [value] there, if any. [clickLabel] names
+ * the row's OK action for TalkBack.
+ */
 @Composable private fun SettingRow(label: String, description: String, modifier: Modifier = Modifier,
-    checked: Boolean? = null, value: String? = null, busy: Boolean = false, attention: Boolean = false, onClick: () -> Unit) {
+    checked: Boolean? = null, value: String? = null, busy: Boolean = false, attention: Boolean = false,
+    clickLabel: String? = null, onClick: () -> Unit) {
     val edge = rememberFocusEdge()
     val focused = edge.focused
     val state = stringResource(if (checked == true) R.string.switch_on else R.string.switch_off)
+    val click = onClick
     Card(onClick, modifier.then(edge.modifier).fillMaxWidth().heightIn(min = 62.dp).semantics {
         if (checked != null) {
             role = Role.Switch
@@ -226,6 +233,8 @@ internal class SettingsScope(
             stateDescription = state
         } else if (value != null) stateDescription = value
         if (busy) progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate
+        // Set ahead of the card's own click action, so it takes that action's place with a name.
+        if (clickLabel != null) onClick(clickLabel) { click(); true }
     }, shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
         colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
         scale = CardDefaults.scale(focusedScale = 1f),

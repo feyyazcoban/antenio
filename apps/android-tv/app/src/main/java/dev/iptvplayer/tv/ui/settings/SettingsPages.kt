@@ -12,9 +12,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.iptvplayer.tv.BuildConfig
 import dev.iptvplayer.tv.CatalogOperation
-import dev.iptvplayer.tv.CategoryAccess
 import dev.iptvplayer.tv.R
+import dev.iptvplayer.tv.TvState
 import dev.iptvplayer.tv.data.AdminReason
+import dev.iptvplayer.tv.data.CategoryAccess
 import dev.iptvplayer.tv.data.CategoryVisibility
 import dev.iptvplayer.tv.data.Feature
 import dev.iptvplayer.tv.data.MediaKind
@@ -56,7 +57,8 @@ internal enum class PageBody {
 
 /**
  * A page of the Settings panel: its [title] in the header, the [section] it belongs to (none for the main page) and
- * what it asks before opening. A new setting is a page here (PLAN §2, rule 5).
+ * what it asks before opening. [notice] is what the last change made on the page said, shown under the header above
+ * the rows, so it is in view whichever row has focus. A new setting is a page here (PLAN §2, rule 5).
  */
 internal data class SettingsPageSpec(
     val id: String,
@@ -64,8 +66,12 @@ internal data class SettingsPageSpec(
     val section: SectionId?,
     val guard: PageGuard = PageGuard.None,
     val body: PageBody = PageBody.LIST,
+    val notice: (TvState) -> UiText? = { null },
     val content: @Composable SettingsScope.() -> Unit
 )
+
+/** The note of a page where the PIN, its locks or a category row's lock change (ParentalUi.notice). */
+internal val parentalNotice: (TvState) -> UiText? = { it.parental.notice }
 
 internal val mainPage = SettingsRoute.Page("main")
 private val removeSourcePage = SettingsRoute.Page("remove-source")
@@ -93,7 +99,8 @@ internal val settingsPageList: List<SettingsPageSpec> = listOf(
     SettingsPageSpec(categoriesPage.id, UiText.Res(R.string.settings_categories), SectionId.CONTENT,
         PageGuard.Pin(AdminReason.CATEGORIES), PageBody.SHORT_LIST) { CategoryKinds() },
 ) + categoryKinds.map { kind ->
-    SettingsPageSpec(categoryListPage(kind).id, UiText.Res(kind.label), SectionId.CONTENT, body = PageBody.LAZY) { CategoryList(kind) }
+    SettingsPageSpec(categoryListPage(kind).id, UiText.Res(kind.label), SectionId.CONTENT, body = PageBody.LAZY,
+        notice = parentalNotice) { CategoryList(kind) }
 } + parentalPageList
 
 internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.associateBy { it.id }
@@ -193,8 +200,8 @@ internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.ass
 /**
  * One section's categories in the provider's order, each Açık, Kilitli or Gizli at its end; OK offers Göster, Kilitle
  * and Gizle as a ChoicePage (pin.md §3.4). Kilitle on a TV without a PIN makes one first. Adult-looking ones stay hidden
- * while the adult filter is on, and say so; they offer nothing. What the last change could not do reads above the list.
- * A lazy list: a provider can have hundreds of categories.
+ * while the adult filter is on, and say so; they offer nothing. What the last change could not do reads above the list
+ * (SettingsPageSpec.notice). A lazy list: a provider can have hundreds of categories.
  */
 @Composable private fun SettingsScope.CategoryList(kind: MediaKind) {
     val choices = s.categoryChoices[kind].orEmpty()
@@ -208,7 +215,6 @@ internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.ass
     val states = listOf(R.string.category_state_shown, R.string.lock_state, R.string.category_state_hidden).map { stringResource(it) }
     LazyColumn(Modifier.fillMaxSize().testTag("settings-categories"), state = listState,
         contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 18.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        s.parental.notice?.let { notice -> item(key = "notice") { NoteRow(notice.resolve(), modifier = Modifier.testTag("settings-notice")) } }
         items(choices.size, key = { choices[it].name }) { index ->
             val choice = choices[index]
             val key = "category:${choice.name}"

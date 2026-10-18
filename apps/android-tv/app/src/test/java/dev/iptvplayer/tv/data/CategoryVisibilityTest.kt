@@ -1,6 +1,5 @@
 package dev.iptvplayer.tv.data
 
-import dev.iptvplayer.tv.CategoryAccess
 import dev.iptvplayer.tv.TvState
 import org.junit.Assert.*
 import org.junit.Test

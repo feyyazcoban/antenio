@@ -351,7 +351,9 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
         val focus = remember { FocusRequester() }
         val play = remember { FocusRequester() }
         fun dismiss() { detail = null; gridFocus.requestFocus() }
-        SourceDialog(stringResource(R.string.guide_programme_detail), focus, ::dismiss, width = 600.dp) {
+        // A channel a PIN opened locks again as the app leaves the screen: its programmes go with it (pin.md §4).
+        if (s.locks.asksPin(entry.id)) LaunchedEffect(Unit) { dismiss() }
+        else SourceDialog(stringResource(R.string.guide_programme_detail), focus, ::dismiss, width = 600.dp) {
             // A programme that has not started is not catch-up; point to what the live action opens instead.
             val upcoming = slot.programmes.isNotEmpty() && slot.programmes.all { it.start > now }
             val ended = slot.programmes.isNotEmpty() && slot.programmes.all { (it.end ?: (it.start + 1)) <= now }

@@ -81,8 +81,8 @@ enum class StartOver(@StringRes val notice: Int, val needsAttention: Boolean) {
 
 /**
  * Parental control as the screens see it. [adminUnlocked]: a PIN verified or made since Settings opened, which a
- * loosening needs while [guarded]. [prompt] is the PIN pad on screen. [notice] says how the last change on Ebeveyn
- * denetimi went. [lockEpoch] grows when Settings must close: the app left the screen, or the TV starts over.
+ * loosening needs while [guarded]. [prompt] is the PIN pad on screen. [notice] says how the last change on the Settings
+ * page open went (Ebeveyn denetimi, Kilitli içerikler, a Kategorileri yönet list). [lockEpoch] grows when Settings must close: the app left the screen, or the TV starts over.
  * [sessionGrants]: how many lock scopes PINs typed for locked titles opened in this session (ParentalSession).
  */
 data class ParentalUi(val status: ParentalStatus = ParentalStatus.LOADING, val adminUnlocked: Boolean = false,
@@ -242,8 +242,11 @@ internal class ParentalController(private val scope: CoroutineScope, private val
         }
     }
 
-    /** Says [notice] on the Settings page open, as the last change made there; the panel closing forgets it. */
-    fun tell(notice: UiText) { mutable.update { it.copy(notice = notice) } }
+    /**
+     * Says [notice] on the Settings page open, as the last change made there; null forgets it (another page opened, a new
+     * change began), as the panel closing does.
+     */
+    fun tell(notice: UiText?) { mutable.update { it.copy(notice = notice) } }
 
     /** True when the pad opened for the first PIN, [then] to follow once it is saved; false while a PIN may be set. */
     fun createPin(then: AdminFollowUp? = null): Boolean {

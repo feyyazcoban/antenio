@@ -86,9 +86,13 @@ class ParentalProjectionTest {
         val first = project(Catalog(listOf(news, sport)), lock(sportsId))
         val row = CategoryVisibility.key(MediaKind.LIVE, "Spor")
         assertEquals(mapOf(row to setOf(sportsId)), first.rows)
-        // A publish without the row (hidden from Ayarlar for a while) keeps what it rested on.
+        // A publish without the row (hidden from Ayarlar for a while) keeps what it rested on, but the screens do not list
+        // the row as locked: it reads as hidden alone, as it does once the app restarts without that memory.
         val policy = AccessPolicy(listOf(lock(sportsId)))
-        assertEquals(first.rows, ParentalProjection.project(sources, Catalog(listOf(news)), policy, first.rows).rows)
+        val hidden = ParentalProjection.project(sources, Catalog(listOf(news)), policy, first.rows)
+        assertEquals(first.rows, hidden.rows)
+        assertTrue(hidden.locks.categories.isEmpty())
+        assertTrue(ParentalProjection.project(sources, Catalog(listOf(news)), policy).locks.categories.isEmpty())
         // A refresh: "Spor" is ID 12 now, and ID 10 is gone.
         val renumbered = Catalog(listOf(news, channel("2", "Spor", "12")))
         val view = ParentalProjection.project(sources, renumbered, policy, first.rows)

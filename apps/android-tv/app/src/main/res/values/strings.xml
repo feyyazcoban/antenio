@@ -566,8 +566,10 @@
     <string name="parental_locked_source_note">Bu kaynaktaki bütün kanallar, filmler ve diziler PIN ister.</string>
 
     <!-- Content locks (pin.md §3.4–3.5, §4): badges, the quick menu, Kategorileri yönet. -->
-    <!-- TalkBack's state of a locked card, row or category; also the chip of a locked category row. -->
+    <!-- TalkBack's state of a locked card or row; also the chip of a locked row in Kategorileri yönet and Kilitli içerikler. -->
     <string name="lock_state">Kilitli</string>
+    <!-- A locked category in the library's column, as TalkBack reads it; %1$s is its name. -->
+    <string name="lock_named">%1$s, kilitli</string>
     <!-- Instead of a locked channel's programmes, in the guide and the channel lists. -->
     <string name="lock_channel">Kilitli kanal</string>
     <string name="lock_add">Kilitle</string>

@@ -434,12 +434,12 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
 /**
  * The category column. Moving through it does not change the list; OK on a category shows it (D060).
  * Every remote entry lands on the selected category. A locked category shows the lock after its name and reads
- * "Kilitli"; choosing it asks for nothing, its titles ask on opening (pin.md §4).
+ * "{ad}, kilitli", still saying whether it is the one shown ("Seçili"); choosing it asks for nothing, its titles ask on
+ * opening (pin.md §4).
  */
 @Composable private fun CategoryColumn(categories: List<SectionCategory>, current: String, modifier: Modifier,
     selectedFocus: FocusRequester, select: (String) -> Unit) {
     val selectedIndex = categories.indexOfFirst { it.key == current }.coerceAtLeast(0)
-    val lockedState = stringResource(R.string.lock_state)
     val list = rememberLazyListState(initialFirstVisibleItemIndex = (selectedIndex - 3).coerceAtLeast(0))
     LazyColumn(modifier.width(196.dp).fillMaxHeight()
         .focusProperties { onEnter = { if (requestedFocusDirection != FocusDirection.Enter) try { selectedFocus.requestFocus() } catch (_: IllegalStateException) { } } }
@@ -448,12 +448,14 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
         itemsIndexed(categories, key = { _, c -> c.key }) { _, category ->
             val isSelected = category.key == current
             var focused by remember { mutableStateOf(false) }
+            // "Kilitli" goes with the name: a state description would take the place of the spoken "Seçili".
+            val spoken = if (category.locked) stringResource(R.string.lock_named, category.label) else category.label
             // Moving through the column does not change the list; OK on a category shows it.
             Surface(onClick = { select(category.key) },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp)
                     .then(if (isSelected) Modifier.focusRequester(selectedFocus) else Modifier)
                     .onFocusChanged { focused = it.isFocused }
-                    .semantics { selected = isSelected; contentDescription = category.label; if (category.locked) stateDescription = lockedState }
+                    .semantics { selected = isSelected; contentDescription = spoken }
                     .testTag("category:${category.key}"),
                 shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
                 colors = ClickableSurfaceDefaults.colors(containerColor = if (isSelected) Ink.Selected else Color.Transparent,
