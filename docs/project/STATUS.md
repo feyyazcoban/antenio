@@ -1,5 +1,13 @@
 # Proje durumu
 
+## Main birleşmesi ve TV kurulumu · 18 Ekim 2026
+
+Kullanıcının isteğiyle güncel geliştirme dalının 45 commit'i main'e fast-forward ile alındı. Daha önce ff48b68 içinde uygulanıp düzeltilen S14 WIP geçmişi a87db7c ile birleştirildi; PlayerScreen çakışması incelenip test edilmiş 0.14.46 davranışı korundu. Birleşme ağacı 2bc7f54 ile aynı; uygulama ve cihaz testi betiği 7ef216a ile aynı. `wip/s14-review-fixes` birleştiği doğrulandıktan sonra silindi. Merge bekleyen dal kalmadı; ana checkout artık güncel.
+
+TV'ye doğrulanmış `releases/NEXTV_TV_Design_Preview_0.14.46.apk` yeniden `install -r` ile kuruldu (kod 60). Çekilen kurulu APK'nın SHA-256'sı eşleşti: `b826893b7a9b1fdea69ff06339cbbd94c1778c01c146c5228fcc8208b179d185`. firstInstallTime aynı (`2026-10-13 23:50:03`), lastUpdateTime `2026-10-18 19:15:09`; veri silinmedi. Uygulama kodu değişmediğinden yeni paket/sürüm veya uygulama testi üretilmedi. Emülatörler açılmadı; TV'de uygulama/oynatma başlatılmadı.
+
+Kontroller: kaynak ağacı eşitliği, Git atalık ilişkileri ve `git diff --check`. `check_project.py` eski/nested worktree'lerdeki eksik tarihî teslimler ve kısmen kaldırılmış logo klasörünün bağlantıları nedeniyle başarısız; teslim APK'sına ilişkin hata değil. Sıradaki ürün işi STEPS S14b; fiziksel kumanda/ses/TalkBack kabulü ve önceki ürün kararları hâlâ açık.
+
 ## Birleşmiş dal temizliği · 18 Ekim 2026
 
 Kullanıcının isteğiyle main'e tamamen birleşmiş üç yerel dal silindi: `claude/logo-splash-files-f4683f`, `claude/sabah-kahvaltisi-oneri-870a0c`, `claude/trusting-margulis-73aa19`. Silmeden önce ilgili HEAD'ler/main atalık ilişkisi ve temiz çalışma ağaçları doğrulandı. Güncel uygulama dalı ve `wip/s14-review-fixes` korundu; main'e merge yapılmadı. TV'deki 0.14.46 değişmedi.

@@ -1,5 +1,15 @@
 # Son devir notu
 
+## Codex · Main güncel, TV son paketle doğrulandı · 18 Ekim 2026
+
+Kullanıcının "merge bekleyenleri mergeleyelim ve son paketi televizyona yükleyelim" isteği tamamlandı. **Ana proje checkout'u / main artık güncel çalışma kaynağıdır.** Geliştirme dalındaki 45 commit fast-forward ile alındı; a87db7c, c54a9f7 WIP geçmişini de birleştirdi. WIP'in dokuz dosyası karşılaştırıldı: altısı güncel dosyalarla aynı, iki strings dosyasında yalnız sonraki hız metinleri var; PlayerScreen'de sonraki medya başına uyarı ve hız davranışı bulunuyor. Normal merge'in bu dosyadaki çakışması güncel/test edilmiş davranış korunarak çözüldü. Merge ağacı 2bc7f54 ile tamamen aynı. Birleşen `wip/s14-review-fixes` dalı `git branch -d` ile kaldırıldı; aktif geliştirme worktree'si main'e fast-forward edilerek korunur. Eski klasör temizliği yeniden denenmedi.
+
+**Teslim:** uygulama ve `tools/run-device-tests.sh`, 0.14.46'nın 7ef216a kaynaklarıyla birebir aynı. Önceki doğrulanmış release APK'sı kullanıldı, yeniden derleme ve sürüm artışı yapılmadı. Fiziksel TV'ye açık seri kimliğiyle `install -r` başarılı; paket 0.14.46-design-preview / kod 60. Kurulu APK çekilip arşivle karşılaştırıldı: SHA-256 `b826893b7a9b1fdea69ff06339cbbd94c1778c01c146c5228fcc8208b179d185`. firstInstallTime önce/sonra `2026-10-13 23:50:03`, son güncelleme `2026-10-18 19:15:09`. Yerel doğrulama kopyası `work/merge-delivery-qa/tv-installed.apk`; Git dışında. Veri temizleme/kaldırma veya TV'de oynatma yapılmadı; 5556/5558 kapalı kaldı.
+
+**Kontroller ve sınır:** Git atalık/ağaç eşitliği ve `git diff --check`; bu tur uygulama testi tekrar koşulmadı, önceki 0.14.46 testleri geçerli. `python tools/check_project.py`, ana kök altındaki eski worktree'leri de tarayarak eksik tarihî APK/README ve yarım silinmiş logo klasörünün bağlantılarında başarısız oldu. Uygulama kaynağı veya teslim paketinde yeni fark yok. Bu tur yalnız STATUS/HANDOFF güncellendi; yeni ürün kabulü veya karar olmadığından BACKLOG/DECISIONS değişmedi.
+
+**Tam sonraki adım:** ana checkout'tan `docs/design/gap/STEPS.md` S14b (D072), ardından S15a–S17. D077 oynatma hızı ve odak dönüşünü yeni kontrollere taşı. Yeni uygulama değişikliğiyle hazırlanacak sonraki TV paketi en az kod 61 / 0.14.47 olmalı; aynı 0.14.46'nın bu yeniden kurulumu sürüm artışı gerektirmedi. Fiziksel kumanda/ses/TalkBack, İngilizce incelemesi ve satış/fiyat kararları açık.
+
 ## Birleşmiş dallar kapatıldı · 18 Ekim 2026
 
 Üç yerel dal main'e birleştiği doğrulanarak `git branch -d` ile kaldırıldı: `claude/logo-splash-files-f4683f`, `claude/sabah-kahvaltisi-oneri-870a0c`, `claude/trusting-margulis-73aa19`. İlgili çalışma ağaçları öncesinde temizdi; yalnız logo/trusting içinde yeniden üretilebilir Gradle/build çıktıları ve local.properties vardı. Ana/güncel çalışma dalına merge yapılmadı; `claude/app-ui-ux-audit-a78e98` ve `wip/s14-review-fixes` korunuyor.
