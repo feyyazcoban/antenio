@@ -140,11 +140,9 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
         scale = FilledControl.scale(),
         contentPadding = PaddingValues(horizontal = if (compact) 14.dp else 20.dp, vertical = if (compact) 5.dp else 8.dp)) {
         val contentColor = LocalContentColor.current
-        // D083: watch/play actions fill their triangle on focus; explicit state icons keep their own fill.
-        val filledIcon = iconFilled || (icon == "play" && focused)
         if (check) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            if (icon != null) LineIcon(icon, contentColor, filled = filledIcon)
+            if (icon != null) ActionIcon(icon, contentColor, iconFilled)
             ActionLabel(label, labelText, contentColor, compact, labelOverflow, Modifier.weight(1f))
             if (selected == true) Text("✓", Modifier.clearAndSetSemantics { }, color = if (contentColor == Ink.OnMint) Ink.OnMint else Ink.Mint,
                 fontFamily = Roboto, fontSize = 16.sp, lineHeight = 16.sp)
@@ -158,10 +156,16 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
                     strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
             }
         }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (icon != null) LineIcon(icon, contentColor, filled = filledIcon)
+            if (icon != null) ActionIcon(icon, contentColor, iconFilled)
             if (label.isNotEmpty()) ActionLabel(label, labelText, contentColor, compact, labelOverflow)
         }
     }
+}
+
+/** D090: watch/play stays filled and rounded in every state; other icons retain their selected-state fill. */
+@Composable private fun ActionIcon(name: String, color: Color, filled: Boolean) {
+    if (name == "play") PlayerSymbol("play_arrow_filled", color, Modifier.size(16.dp))
+    else LineIcon(name, color, filled = filled)
 }
 
 /**

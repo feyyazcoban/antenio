@@ -9,7 +9,7 @@
 - Teslim tarihçesi: 0.14.45 (kod 59) S14 düzeltmeleri; 0.14.46 (kod 60) D077 oturumluk film/dizi hızı (0,5×–2×). Kullanıcının son paketi TV'ye veri silmeden kurma talimatı sürer.
 - S14b (D072) native uygulaması 0.14.47 / kod 61'de: alt blok, yeni kontroller, bekleyen sarma ve gizli sarma önizlemesi, büyük yazı düzeni; D077 hızı korunur. Gerçekten koşulan testler ve cihaz teslimi [QA](../../project/native-player-controls-47-qa.json), STATUS/HANDOFF'ta. Bağımsız incelemedeki P3 çubuk odak ipucu düzeltildi. Fiziksel/Figma/görsel kabul açık; BKL-031 done değildir.
 - 0.14.59 / D089: kullanıcı splash donması bildirdi; girişten sonra içerik oluşturma ve yeni basış/tek başına bırakma ayrımı. Yeni normal animasyon/gate testleri; font matrisi yok. Kanıt ve teslim STATUS/HANDOFF, [QA](../../project/native-splash-59-qa.json).
-- Sırada: S15a–S17 → Faz E (S18–S29) → Faz F–J (PLAN §2). S15a kanal kapsamı/son ve önceki kanal verisiyle başla. Bir sonraki değişiklik içeren TV paketi en az kod 74 / 0.14.60 olmalı. D077 hız seçimi S16'da korunmalı; canlı yayın normal hızda kalır.
+- Sırada: S15a–S17 → Faz E (S18–S29) → Faz F–J (PLAN §2). S15a kanal kapsamı/son ve önceki kanal verisiyle başla. Bir sonraki değişiklik içeren TV paketi en az kod 75 / 0.14.61 olmalı. D077 hız seçimi S16'da korunmalı; canlı yayın normal hızda kalır.
 
 ## Her adımda yöntem
 

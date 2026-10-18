@@ -1,5 +1,13 @@
 # Güncel görsel inceleme
 
+## 0.14.60 · Her zaman dolu, yuvarlatılmış oynat simgesi
+
+D090: İzle/Oynat eylemindeki simge odaktan bağımsız Material Symbols Rounded FILL1. Normal ölçekte sentetik görseller; 16 dp alan ve düğme geometrisi aynı. [QA](../../docs/project/native-rounded-play-60-qa.json).
+
+![İzle odakta, dolu yuvarlatılmış simge](rounded-play-0.14.60/focused.png)
+
+![Odak devam kartında, İzle simgesi yine dolu](rounded-play-0.14.60/unfocused.png)
+
 ## 0.14.59 · Splash girişinin görünür kalması
 
 D089: Home hazırlığı girişten sonra opak kapak altında başlar; tek başına tuş bırakma giriş animasyonunu iptal etmez. Normal ölçekte kontrollü Compose saatiyle ara kareler. Bunlar fiziksel TV kare süresi ölçümü değildir. [QA](../../docs/project/native-splash-59-qa.json).

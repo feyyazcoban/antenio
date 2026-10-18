@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · Her zaman filled/rounded İzle simgesi / 0.14.60 · 18 Ekim 2026
+
+Kullanıcı D083'ün “odaklandığında dolu” kuralını “Hep filled olsun rounded şekilde” olarak değiştirdi (D090). Theme.Action'ın iki simge yolu ortak ActionIcon yardımcısına bağlandı: play için mevcut PlayerSymbol renderer'ında yeni play_arrow_filled, diğerlerinde eski LineIcon/selected fill. Resmî Material Symbols Rounded play_arrow FILL1/400/24 yolu kaynak SVG ile birebir eşleşiyor. Açık 16 dp alan düğmeyi büyütmez. Mevcut oynatıcı denetim simgeleri değişmedi.
+
+Dosyalar: ui/Theme.kt, ui/PlayerSymbols.kt, build.gradle.kts; D090, SCREENS/HOME_HERO, BACKLOG/STEPS, STATUS/HANDOFF, [QA](native-rounded-play-60-qa.json), LATEST ve rounded-play-0.14.60 görselleri. Figma/manifest değişmedi. hero_review salt okunur bağımsız inceleme yaptı; açık somut bulgu yok.
+
+Kontroller: 357 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı, no-parallel/max-workers=1. Yalnız 5558/tools/run-device-tests.sh --no-build ile HeroLayoutTest ve ContinueCardLayoutTest 3/3 geçti. Odak düğmedeyken ve devam kartındayken dolu yuvarlatılmış simge görsel olarak doğrulandı. Yeni test yok; font matrisi kullanıcı isteğiyle yapılmadı. Ham kayıtlar work/rounded-play-qa.
+
+Teslim: releases/NEXTV_TV_Design_Preview_0.14.60.apk + sha256, kod74, R8/release, debuggable değil, aynı imza. SHA-256 427f6d4b17a66941a82f394d29536639beb918a76f2172f203f47da5a45201fb. TV .59→60 install -r; firstInstallTime 2026-10-13 23:50:03 aynı, lastUpdateTime 2026-10-18 22:20:53. Kurulu APK çekilip hash eşleştirildi. TV uygulaması/gerçek yayın açılmadı. 5556 açılmadı, .51/kod65'te; 5558/Gradle kapalı, 5554'e dokunulmadı.
+
+Tam sonraki adım: kullanıcının fiziksel geri bildirimi öncelikli; açık plan ana checkout/main üzerinden STEPS S15a / gap/overlay.md. Sonraki teslim en az .61/kod75. Fiziksel/Figma/TalkBack, İngilizce ve satış/fiyat kararları açık. Kullanıcı “yayına hazırla” demeden font matrisi koşma.
+
 ## Codex · Splash animasyonu / 0.14.59 · 18 Ekim 2026
 
 Kullanıcı “Splash screen donuyor animasyonu göremiyorum” dedi. Kodda LaunchCover girişinin altında Home/Setup ve restore sırasında ikinci RestoringCover oluşturuluyordu. Büyük kataloğun homeLibrary hesabı ve ilk Home ölçümü girişle aynı UI thread'i kullanıyordu. PilotApp contentPrepared kapısı giriş bitene ve RESTORING tamamlanana kadar içerik/overlay ağacını bekletir. LaunchCover prepareContent callback'ini opak bitmiş logo altında çağırır, iki frame sınırını geçip 220 ms açılır. Reduced motion üç saniye/fade beklemez. Bu Home hesaplama maliyetini kaldırmaz.

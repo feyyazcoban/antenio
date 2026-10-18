@@ -1,5 +1,7 @@
 # Ana sayfa üst alanı
 
+**18 Ekim 2026 · 0.14.60 / D090:** İzle simgesi odakta ve odak dışında her zaman dolu, Material Symbols Rounded play_arrow FILL 1. 16 dp ikon kutusu ve tek İzle düğmesinin ölçüleri/etkileşimi aynı.
+
 **18 Ekim 2026 · 0.14.58 / D088:** Sonraki slayt görselinin ön yüklemesi yalnız kaynak/görsel kimliği değişince başlar. İzle'ye odak girip çıkması yalnız otomatik slayt zamanlayıcısını yeniler; aynı görseli yeniden çözmez. 15/8 saniye, TalkBack, Hareketi azalt, sağ/sol slayt ve tek İzle davranışı aynı.
 
 **18 Ekim 2026 · 0.14.52 / D082:** Vitrin üst etiketi 13→12 sp; Medium/mint/1,6 sp harf aralığı/tek satır aynı. Ortak YENİ EKLENEN ve KÜTÜPHANENDEN etiketi için geçerli; içerik başlığı ve açıklama ölçüleri değişmez.

@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**18 Ekim · D090:** Ortak İzle/Oynat eylemlerinin simgesi her zaman dolu, Material Symbols Rounded play_arrow FILL 1. D083'ün odakta dolu/odak dışında çizgi kuralının yerine geçer. 16 dp kutu, düğme ölçüleri, odak renk/çerçevesi ve favori yıldızının seçili doluluğu korunur.
+
 **18 Ekim · TV-010 / D088:** Vitrin→ilk raf hareketi kart görünür olduğunda yarıda iptal edilmez; görsel ön yüklemesi odak değişiminden ayrıdır. [Raf geçişi](HOME_SHELF_FRAMING.md), [vitrin](HOME_HERO.md).
 
 **18 Ekim · TV-050 / D087:** Oynatıcı simgeleri gerçek düğme merkezine hizalanır; odak etiketleri ortak satırda, zaman çubuğundan ve halkadan ayrı ölçülmüş alanda. [Oynatıcı sözleşmesi](PLAYER_PRESENTATION.md).

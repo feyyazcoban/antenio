@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.60 · Her durumda dolu, yuvarlatılmış oynat simgesi · 18 Ekim 2026
+
+Kullanıcı isteğiyle ortak İzle/Oynat eylemleri odaktan bağımsız Material Symbols Rounded FILL1 simgesini kullanır (D090, D083'ün odak şartını değiştirir). 16 dp simge alanı, düğme geometrisi ve diğer simgelerin seçili durumları korunur.
+
+Bağımsız incelemede açık bulgu yok. 357 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558 ve tools/run-device-tests.sh ile mevcut 3/3 ekran testi geçti. Normal ölçekte odaklı/odaksız görseller incelendi; yeni test/font matrisi yok. [QA](native-rounded-play-60-qa.json), [görseller](../../design/reviews/LATEST.md).
+
+0.14.60-design-preview / kod74 TV'ye install -r ile kuruldu; firstInstallTime korundu, kurulu APK hash eşleşti. Güncelleme 2026-10-18 22:20:53; SHA-256 427f6d4b17a66941a82f394d29536639beb918a76f2172f203f47da5a45201fb. TV uygulaması/gerçek yayın açılmadı. 5556 .51/kod65'te kapalı; 5558/Gradle kapalı. Sonraki paket en az .61/kod75. Açık planda S15a sırada; fiziksel/Figma kabulü açık.
+
 ## 0.14.59 · Splash girişinin görünür kalması · 18 Ekim 2026
 
 Kullanıcının “Splash screen donuyor animasyonu göremiyorum” bildirimi için iki yol düzeltildi (D089): Home/ikinci kapak giriş sırasında oluşturulmaz; logo yerleştikten ve kaynaklar açıldıktan sonra içerik opak kapak altında hazırlanır. Tek başına launcher tuş bırakması artık animasyonu iptal etmez. İlk yeni yön/OK/Enter/Back/Esc basışı yalnız atlar; aynı basışın tekrar/bırakması tüketilir, ses/medya tuşları normal iletilir. Süreç başına bir kez ve Hareketi azalt/D069 davranışı korunur.

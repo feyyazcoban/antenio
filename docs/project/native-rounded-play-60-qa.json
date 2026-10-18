@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.60-design-preview",
+  "versionCode": 74,
+  "decision": "D090",
+  "request": "İzle simgesi hep filled ve rounded olsun",
+  "change": "Shared Action play icons use Material Symbols Rounded play_arrow FILL1 in every focus/selection state. Existing 16dp layout box, button geometry and other icons selected-state fill are preserved. Player controls retain their existing symbols.",
+  "source": {
+    "url": "https://raw.githubusercontent.com/google/material-design-icons/master/symbols/web/play_arrow/materialsymbolsrounded/play_arrow_fill1_24px.svg",
+    "license": "Apache-2.0, same existing PlayerSymbols attribution",
+    "svgSha256": "a0a39a2aef0c113c0ce19dfe2f59dbc363d9619d7af5a97f0cbd286c880d29e8",
+    "embeddedPathMatchesOfficialSvg": true
+  },
+  "review": "hero_review read-only final source review: both Action branches share helper; correct filled rounded path, explicit 16dp, no outstanding concrete finding.",
+  "tests": {
+    "unit": {
+      "tests": 357,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 37
+    },
+    "build": "release/debug/androidTest successful; no parallel projects, one worker",
+    "newTestsAdded": false,
+    "instrumentation": {
+      "device": "emulator-5558",
+      "command": "tools/run-device-tests.sh --no-build \"HeroLayoutTest,ContinueCardLayoutTest\"",
+      "passed": 3,
+      "failed": 0,
+      "fontScale": "normal only"
+    },
+    "visualInspection": {
+      "result": "Focused and unfocused Watch icons are solid with rounded corners; button geometry and focus ring preserved. Synthetic fixture images inspected.",
+      "images": [
+        "design/reviews/rounded-play-0.14.60/focused.png",
+        "design/reviews/rounded-play-0.14.60/unfocused.png"
+      ]
+    }
+  },
+  "rawEvidence": "work/rounded-play-qa",
+  "delivery": {
+    "device": "192.168.1.126:5555",
+    "before": {
+      "versionCode": "73",
+      "versionName": "0.14.59-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-18 22:08:48"
+    },
+    "after": {
+      "versionCode": "74",
+      "versionName": "0.14.60-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-18 22:20:53"
+    },
+    "sha256": "427f6d4b17a66941a82f394d29536639beb918a76f2172f203f47da5a45201fb",
+    "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+    "realPlaybackStarted": false,
+    "appLaunchedOnTv": false
+  },
+  "limitations": [
+    "No font-scale matrix per user instruction",
+    "Figma unchanged; physical visual acceptance open"
+  ],
+  "package": {
+    "path": "releases/NEXTV_TV_Design_Preview_0.14.60.apk",
+    "sha256": "427f6d4b17a66941a82f394d29536639beb918a76f2172f203f47da5a45201fb",
+    "id": "dev.iptvplayer.tv.pilot",
+    "build": "R8 release; not debuggable",
+    "signerSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065"
+  },
+  "endState": {
+    "emulator5558": "stopped after tests",
+    "gradle": "stopped before emulator tests",
+    "emulator5556": "not started; remains 0.14.51/code65",
+    "emulator5554": "untouched",
+    "tvAppLaunched": false,
+    "realPlaybackStarted": false
+  }
+}
