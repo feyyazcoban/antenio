@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oynatıcı kontrolleri önerisi</title>
+<style>
+:root{
+  --bg:#15191E; --container:#252C33; --high:#343E47; --text:#F0F3F1; --muted:#B7C1C7;
+  --mint:#A8DFCB; --onmint:#152B22; --selected:#35423F; --outline:#9EAFB4; --divider:#48535C; --error:#FFB4AB;
+  --rest:rgba(52,62,71,.72);      /* Ink.High %72: videonun üstünde dinlenen dolgulu denetim */
+  --bubble:rgba(21,25,30,.94);    /* Ink.Background %94: zaman balonu ve odak etiketi */
+  --page:#0B0E11; --card:#12161B; --line:#232A31; --guide:#FF5CBE;
+  --font:Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--page);color:var(--text)}
+body{font-family:var(--font);padding:32px 16px 80px;letter-spacing:0}
+.wrap{width:960px;margin:0 auto}
+@media (max-width:1000px){.wrap{zoom:.75}}
+@media (max-width:760px){.wrap{zoom:.5}}
+@media (max-width:520px){.wrap{zoom:.36}}
+
+/* ---------- sayfa (TV karesi değil) ---------- */
+header h1{font:500 26px/34px var(--font)}
+header .sub{margin-top:8px;font:400 14px/22px var(--font);color:var(--muted);max-width:860px}
+header .sub a{color:var(--mint)}
+.legend{margin-top:18px;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;font:400 13px/18px var(--font);color:var(--muted)}
+.legend .it{display:inline-flex;align-items:center;gap:12px}
+.lg-f{width:36px;height:36px;border-radius:50%;background:var(--mint);color:var(--onmint);display:grid;place-items:center;outline:2px solid var(--text);outline-offset:3px;margin:5px}
+.lg-r{width:36px;height:36px;border-radius:50%;background:var(--high);color:var(--mint);display:grid;place-items:center}
+.lg-f svg,.lg-r svg{width:20px;height:20px}
+.lg-b{background:var(--high);border-radius:8px;padding:4px 10px;font:500 13px/18px var(--font);color:var(--text)}
+.toggle{display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--text)}
+.toggle input{accent-color:var(--mint);width:16px;height:16px}
+.shot{margin-top:44px}
+.shot h2{font:500 16px/22px var(--font);margin-bottom:10px}
+.shot h2 span{color:var(--muted);font-weight:400}
+.cap{margin-top:12px;font:400 14px/22px var(--font);color:var(--muted);max-width:940px}
+.cap b{color:var(--text);font-weight:500}
+.cap .src{display:inline-block;margin-left:4px;padding:0 6px;border-radius:4px;background:#1B2128;color:var(--muted);font-size:12px;line-height:18px}
+
+/* ---------- TV karesi: 960 × 540 dp, 1 dp = 1 px ---------- */
+.frame{--fs:1;position:relative;width:960px;height:540px;overflow:hidden;background:#000;border-radius:4px;
+  box-shadow:0 0 0 1px #262D34,0 18px 40px rgba(0,0,0,.45);isolation:isolate}
+.fs15{--fs:1.5}
+.video,.video *{position:absolute}
+.video{inset:0}
+/* Tek alt scrim; üst scrim ve üst hap yok. Dengeli'nin parlak karede ölçülen durakları, alt %60'lık kutuya taşındı. */
+.scrim{position:absolute;left:0;right:0;bottom:0;height:60%;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.62) 36.7%,rgba(0,0,0,.86) 66.7%,rgba(0,0,0,.94) 100%)}
+.fs15 .scrim{height:70%;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.62) 34.3%,rgba(0,0,0,.86) 65.7%,rgba(0,0,0,.94) 100%)}
+.scrim.band{height:44%;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.6) 45%,rgba(0,0,0,.82) 100%)}
+.scrim.peek{height:150px;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.6) 100%)}
+
+.block{position:absolute;left:24px;right:24px;bottom:24px;display:flex;flex-direction:column}
+/* başlık satırı */
+.trow{display:flex;align-items:center;gap:12px;min-height:calc(34px*var(--fs))}
+.title{font:500 calc(28px*var(--fs))/calc(34px*var(--fs)) var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.clock{margin-left:auto;padding-left:24px;flex:none;font:400 calc(20px*var(--fs))/calc(26px*var(--fs)) var(--font);color:var(--muted);font-variant-numeric:tabular-nums}
+.num{flex:none;min-width:calc(28px*var(--fs));text-align:right;font:400 calc(24px*var(--fs))/calc(34px*var(--fs)) var(--font);color:var(--muted);font-variant-numeric:tabular-nums}
+.logo{flex:none;width:56px;height:34px;border-radius:6px;background:var(--container);display:grid;place-items:center;
+  font:700 13px/1 var(--font);letter-spacing:.04em;color:var(--muted);box-shadow:inset 0 0 0 1px rgba(240,243,241,.06)}
+.badge{flex:none;display:inline-flex;align-items:center;gap:6px;height:calc(max(24px, 12px*var(--fs)*1.34 + 8px));padding:0 10px 0 8px;border-radius:999px;
+  background:rgba(21,25,30,.72);font:500 calc(12px*var(--fs))/1 var(--font);letter-spacing:.08em;color:var(--text)}
+.badge.behind{letter-spacing:0;font-size:calc(13px*var(--fs));font-variant-numeric:tabular-nums}
+.dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--text)}
+.dot.hollow{background:transparent;box-shadow:inset 0 0 0 1.5px var(--muted)}
+/* meta satırı */
+.meta{margin-top:4px;display:flex;align-items:center;gap:8px;white-space:nowrap;min-height:calc(20px*var(--fs));
+  font:400 calc(15px*var(--fs))/calc(20px*var(--fs)) var(--font);color:var(--muted)}
+.meta .tx{color:var(--text)}
+.meta .pg{font-weight:500;font-size:calc(16px*var(--fs));color:var(--text)}
+.meta .nx{margin-left:auto;font-size:calc(14px*var(--fs))}
+.meta.err{color:var(--error);white-space:normal}
+.tag{flex:none;font:500 calc(12px*var(--fs))/calc(16px*var(--fs)) var(--font);letter-spacing:.1em;color:var(--text);
+  padding:1px 7px;border:1px solid rgba(158,175,180,.6);border-radius:4px}
+/* çubuk satırı */
+.barrow{margin-top:12px;height:calc(max(28px, 26px*var(--fs)));display:flex;align-items:center;gap:16px}
+.lab{flex:none;white-space:nowrap;font:400 calc(20px*var(--fs))/calc(26px*var(--fs)) var(--font);font-variant-numeric:tabular-nums}
+.lab.now{font-weight:500;min-width:calc(76px*var(--fs))}
+.lab.end{color:var(--muted);min-width:calc(88px*var(--fs));text-align:right}
+.lab.s.now{min-width:calc(56px*var(--fs))}
+.lab.s.end{min-width:calc(66px*var(--fs))}
+.lab.clk{color:var(--muted);font-weight:400}
+.track{position:relative;flex:1;height:4px;border-radius:2px;background:rgba(240,243,241,.24)}
+.track i{position:absolute;top:0;bottom:0;left:0;border-radius:inherit}
+.track .buf{background:rgba(240,243,241,.42)}
+.track .played{background:rgba(240,243,241,.92)}
+.track .delta{background:rgba(168,223,203,.45);border-radius:0}
+.track .behindseg{background:repeating-linear-gradient(90deg,rgba(240,243,241,.55) 0 5px,transparent 5px 9px);border-radius:0}
+.track .thumb{top:50%;bottom:auto;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--text)}
+.track .tick{top:50%;bottom:auto;width:2px;height:16px;margin:-8px 0 0 -1px;border-radius:1px;background:var(--text)}
+.track.on{height:6px;border-radius:3px}
+.track.on .played{background:var(--mint)}
+.track.on .thumb{width:18px;height:18px;margin:-9px 0 0 -9px;background:var(--mint);outline:2px solid var(--text);outline-offset:3px}
+.track.empty{background:rgba(240,243,241,.14)}
+.edge{flex:none;display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:calc(88px*var(--fs));
+  font:500 calc(14px*var(--fs))/1 var(--font);letter-spacing:.08em;color:var(--muted)}
+.edge.live{color:var(--text)}
+.tbub{position:absolute;bottom:25px;transform:translateX(-50%);display:flex;align-items:baseline;gap:10px;
+  padding:6px 12px;border-radius:10px;background:var(--bubble);white-space:nowrap;z-index:2}
+.tbub::after{content:"";position:absolute;left:50%;top:100%;margin-left:-6px;border:6px solid transparent;border-top-color:var(--bubble)}
+.tbub b{font:500 calc(20px*var(--fs))/calc(26px*var(--fs)) var(--font);font-variant-numeric:tabular-nums}
+.tbub em{font:500 calc(14px*var(--fs))/1 var(--font);font-style:normal;color:var(--mint);font-variant-numeric:tabular-nums}
+.peek .tbub{bottom:21px}
+/* odak etiketi bölgesi: çubuk ile düğmeler arası 24 dp × yazı ölçeği */
+.bgap{height:calc(24px*var(--fs));flex:none}
+/* kontrol satırı */
+.row{height:64px;display:flex;align-items:center;flex:none}
+.cluster{display:flex;align-items:center;gap:12px;flex:none}
+.chips{margin-left:auto;display:flex;align-items:center;gap:8px;flex:none}
+.tb,.hap,.chip{position:relative;flex:none;display:flex;align-items:center;justify-content:center;background:var(--rest);color:var(--text)}
+.tb{border-radius:50%}
+.tb.s52{width:52px;height:52px}
+.tb.s64{width:64px;height:64px}
+.tb svg{width:28px;height:28px}
+.tb.s64 svg{width:32px;height:32px}
+.tb.pri{color:var(--mint)}
+.hap{height:52px;padding:0 20px 0 16px;border-radius:26px;gap:8px;font:500 calc(15px*var(--fs))/1 var(--font);white-space:nowrap}
+.hap svg{width:22px;height:22px;flex:none}
+.chip{height:calc(max(44px, 15px*var(--fs)*1.34 + 16px));padding:0 16px 0 12px;border-radius:999px;gap:8px;
+  font:500 calc(15px*var(--fs))/calc(20px*var(--fs)) var(--font);white-space:nowrap}
+.chip svg{width:20px;height:20px;flex:none}
+.chip.ic{width:calc(max(44px, 15px*var(--fs)*1.34 + 16px));padding:0}
+.chip.sel{background:var(--selected);color:var(--mint)}
+.off{opacity:.38}
+/* D064: odaktaki dolgulu denetim = mint dolgu, koyu içerik, 3 dp boşluklu 2 dp beyaz halka; büyüme yok (D056) */
+.focus{background:var(--mint)!important;color:var(--onmint)!important;outline:2px solid var(--text);outline-offset:3px;opacity:1}
+/* odak etiketi: odaktaki denetimin kendisi çizer; kümede sola, çiplerde sağa yaslı */
+.fl{position:absolute;bottom:calc(100% + 6px);white-space:nowrap;background:var(--bubble);border-radius:8px;padding:4px 10px;
+  font:500 calc(13px*var(--fs))/calc(18px*var(--fs)) var(--font);color:var(--text);z-index:3}
+.cluster .fl{left:0}
+.chips .fl{right:0}
+.fl span{font-weight:400;color:var(--muted)}
+.fl.st{font-weight:400}
+/* tuş ipucu: kümeden 24 dp sonra, sığan parçalar */
+.hint{margin-left:24px;margin-right:24px;display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;white-space:nowrap;
+  font:400 calc(13px*var(--fs))/calc(18px*var(--fs)) var(--font);color:var(--muted)}
+.hint i{font-style:normal;margin:0 2px}
+.kc{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:18px;padding:0 5px;border-radius:4px;
+  border:1px solid rgba(158,175,180,.6);font:500 12px/1 var(--font);color:var(--text)}
+.kc svg{width:8px;height:8px}
+.fs15 .hint{display:none}
+
+/* ölçü kılavuzu (aç/kapa) */
+.guides{display:none;position:absolute;inset:0;pointer-events:none;z-index:9}
+body:has(#g:checked) .guides{display:block}
+.guides .v{position:absolute;top:0;bottom:0;border-left:1px dashed var(--guide)}
+.guides .h{position:absolute;left:0;right:0;border-top:1px dashed rgba(255,92,190,.75)}
+.guides b{position:absolute;font:500 11px/14px var(--font);color:#fff;background:var(--guide);padding:1px 5px;border-radius:3px;white-space:nowrap}
+
+/* ek kareler */
+.minis{display:grid;grid-template-columns:470px 470px;gap:20px}
+.mini{position:relative;width:470px;height:265px;overflow:hidden;border-radius:4px;box-shadow:0 0 0 1px #262D34}
+.mini .frame{position:absolute;left:0;top:0;transform:scale(.4896);transform-origin:0 0;box-shadow:none;border-radius:0}
+.minicap{margin-top:8px;font:400 13px/20px var(--font);color:var(--muted)}
+.minicap b{color:var(--text);font-weight:500}
+
+/* özet kartları */
+.cards{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.card h3{font:500 15px/22px var(--font);margin-bottom:10px}
+.card ul{list-style:none;font:400 13px/20px var(--font);color:var(--muted)}
+.card li{padding:4px 0;border-top:1px solid #1C2229}
+.card li:first-child{border-top:0}
+.card li b{color:var(--text);font-weight:500}
+.card.wide{grid-column:1 / -1}
+table.t{width:100%;border-collapse:collapse;font:400 13px/19px var(--font);color:var(--muted)}
+table.t th{text-align:left;font-weight:500;color:var(--text);padding:6px 8px;border-bottom:1px solid var(--line)}
+table.t td{padding:6px 8px;border-bottom:1px solid #1C2229;vertical-align:top}
+table.t td:first-child{color:var(--text)}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;box-shadow:0 0 0 1px rgba(255,255,255,.15)}
+h2.sec{margin-top:56px;font:500 20px/28px var(--font)}
+p.secsub{margin-top:6px;font:400 14px/22px var(--font);color:var(--muted);max-width:860px}
+
+/* ---------- video: soyut, sentetik ---------- */
+.v-film{background:
+  radial-gradient(ellipse 4% 20% at 63% 74%, rgba(255,190,130,.45), rgba(255,190,130,0) 70%),
+  radial-gradient(ellipse 26% 20% at 63% 57%, rgba(255,214,160,.95) 0%, rgba(255,160,100,.55) 40%, rgba(255,120,90,0) 75%),
+  linear-gradient(180deg,#141d33 0%,#2e2d4f 24%,#6d4565 42%,#c96f58 54%,#f2a873 59.4%,#40283a 60%,#1a1219 78%,#0e0a0f 100%)}
+.v-film .far{left:0;right:0;top:270px;height:54px;background:#4b2f45;opacity:.9;clip-path:polygon(0% 100%,0% 62%,3% 62%,3% 40%,5% 40%,5% 70%,9% 70%,9% 28%,10.5% 28%,10.5% 8%,11.5% 8%,11.5% 28%,13% 28%,13% 58%,18% 58%,18% 44%,22% 44%,22% 66%,27% 66%,27% 36%,30% 36%,30% 52%,35% 52%,35% 74%,41% 74%,41% 48%,44% 48%,44% 30%,46% 30%,46% 60%,51% 60%,51% 78%,57% 78%,57% 64%,61% 64%,61% 82%,68% 82%,68% 56%,71% 56%,71% 22%,72.5% 22%,72.5% 4%,73.5% 4%,73.5% 22%,75% 22%,75% 50%,80% 50%,80% 34%,84% 34%,84% 62%,89% 62%,89% 42%,93% 42%,93% 68%,97% 68%,97% 50%,100% 50%,100% 100%)}
+.v-film .nearL{left:0;width:34%;top:196px;height:128px;background:#1d141c;clip-path:polygon(0 100%,0 12%,6% 12%,6% 0,14% 0,14% 22%,22% 22%,22% 40%,30% 40%,30% 18%,38% 18%,38% 46%,50% 46%,50% 30%,58% 30%,58% 58%,70% 58%,70% 44%,78% 44%,78% 70%,90% 70%,90% 80%,100% 80%,100% 100%)}
+.v-film .nearR{right:0;width:26%;top:212px;height:112px;background:#1d141c;clip-path:polygon(0 100%,0 74%,10% 74%,10% 52%,22% 52%,22% 30%,30% 30%,30% 8%,40% 8%,40% 30%,52% 30%,52% 16%,64% 16%,64% 42%,76% 42%,76% 22%,88% 22%,88% 50%,100% 50%,100% 100%)}
+.v-film .nearL::after,.v-film .nearR::after{content:"";position:absolute;inset:0;opacity:.6;
+  background-image:radial-gradient(circle,rgba(255,196,120,.85) 0 1.1px,transparent 1.7px);background-size:9px 12px}
+.v-film .water{left:0;right:0;top:324px;bottom:0;background:linear-gradient(180deg,rgba(242,168,115,.22),rgba(0,0,0,0) 40%),repeating-linear-gradient(180deg,rgba(255,190,120,.07) 0 2px,transparent 2px 9px)}
+.vig{inset:0;background:radial-gradient(ellipse 80% 72% at 50% 45%,rgba(0,0,0,0) 55%,rgba(0,0,0,.42) 100%)}
+/* parlak dizi karesi: scrim kontrastının en kötü durumu */
+.v-series{background:linear-gradient(180deg,#8ea6b6 0%,#cfdbe0 28%,#b9c8d0 42%,#7d929f 55%,#3e4f5b 70%,#161d24 100%)}
+.v-series .sun{left:170px;top:60px;width:340px;height:240px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.8),rgba(255,255,255,0))}
+.v-series .m1{left:0;right:0;top:28%;height:47%;background:linear-gradient(180deg,#eef3f5 0%,#a9bbc5 16%,#62798a 38%,#435664 100%);clip-path:polygon(0 62%,8% 48%,14% 54%,24% 26%,31% 40%,38% 34%,47% 52%,56% 30%,63% 12%,70% 32%,78% 44%,86% 28%,93% 38%,100% 32%,100% 100%,0 100%)}
+.v-series .mist{left:0;right:0;top:46%;height:16%;background:linear-gradient(180deg,transparent,rgba(226,235,239,.5),transparent)}
+.v-series .m2{left:0;right:0;top:56%;height:44%;background:linear-gradient(180deg,#8aa0ad,#5d7280 40%,#2d3a44);clip-path:polygon(0 40%,10% 26%,20% 36%,31% 16%,42% 34%,50% 28%,60% 42%,72% 22%,84% 36%,92% 30%,100% 38%,100% 100%,0 100%)}
+.v-series .snow{inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.55) 0 1px,transparent 1.6px),radial-gradient(circle,rgba(255,255,255,.35) 0 1.2px,transparent 1.8px);background-size:41px 33px,67px 53px;background-position:0 0,19px 11px}
+/* soyut haber stüdyosu */
+.v-live{background:radial-gradient(ellipse 70% 62% at 50% 30%,#2f6fb0 0%,#1a467e 40%,#0c1f3d 75%,#070f1f 100%)}
+.v-live .scr{top:84px;width:232px;height:190px;border-radius:8px;box-shadow:0 0 48px rgba(80,160,255,.25);
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 14px),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 1px,transparent 1px 14px),linear-gradient(160deg,rgba(110,180,255,.55),rgba(40,90,180,.25) 60%,rgba(20,50,110,.3))}
+.v-live .s1{left:56px}.v-live .s2{right:56px}
+.v-live .globe{left:350px;top:40px;width:260px;height:260px;border-radius:50%;border:1px solid rgba(150,200,255,.28);
+  background:radial-gradient(circle at 40% 35%,rgba(120,190,255,.32),rgba(30,80,160,.1) 60%,rgba(30,80,160,0) 71%)}
+.v-live .globe::before,.v-live .globe::after{content:"";position:absolute;border:1px solid rgba(150,200,255,.2);border-radius:50%}
+.v-live .globe::before{inset:0 70px}.v-live .globe::after{inset:70px 0}
+.v-live .head{left:452px;top:190px;width:56px;height:62px;border-radius:50%;background:radial-gradient(circle at 45% 40%,#7a675d,#3b2f2c)}
+.v-live .body{left:380px;top:246px;width:200px;height:130px;border-radius:90px 90px 0 0;background:linear-gradient(#22324a,#162235)}
+.v-live .desk{left:150px;top:300px;width:660px;height:150px;background:linear-gradient(#1d3556,#0b1628);clip-path:polygon(5% 0,95% 0,100% 100%,0 100%)}
+.v-live .deskline{left:186px;top:300px;width:588px;height:2px;background:rgba(130,190,255,.45);box-shadow:0 0 14px rgba(130,190,255,.35)}
+.v-live .floor{left:0;right:0;bottom:0;height:110px;background:linear-gradient(#0a1426,#050a14)}
+.v-live .ticker{left:0;right:0;top:404px;height:30px;background:linear-gradient(90deg,#b8303a,#7a1d2a);opacity:.9}
+.v-live .ticker::after{content:"";position:absolute;left:120px;right:40px;top:11px;height:8px;border-radius:4px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.75) 0 46px,transparent 46px 60px)}
+.ic{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+</style>
+</head>
+<body>
+
+<!-- Simgeler: Material Symbols Rounded biçiminde yer tutucular. Uygulamada PlayerSymbols.kt (Apache 2.0 yol verisi) kullanılır. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.6v12.8c0 .8.9 1.3 1.6.9l10-6.4c.6-.4.6-1.3 0-1.7l-10-6.4C8.9 4.3 8 4.8 8 5.6z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.3" y="5" width="4" height="14" rx="1.3" fill="currentColor"/><rect x="13.7" y="5" width="4" height="14" rx="1.3" fill="currentColor"/></symbol>
+    <symbol id="i-back10" viewBox="0 0 24 24"><path class="ic" d="M12 4.6A7.9 7.9 0 1 1 4.6 10"/><path class="ic" d="M14.5 2.2 12 4.6l2.5 2.5"/><text x="12.4" y="15.9" text-anchor="middle" font-size="7.4" font-weight="700" fill="currentColor" font-family="Roboto,system-ui,sans-serif">10</text></symbol>
+    <symbol id="i-fwd10" viewBox="0 0 24 24"><path class="ic" d="M12 4.6A7.9 7.9 0 1 0 19.4 10"/><path class="ic" d="M9.5 2.2 12 4.6 9.5 7.1"/><text x="11.6" y="15.9" text-anchor="middle" font-size="7.4" font-weight="700" fill="currentColor" font-family="Roboto,system-ui,sans-serif">10</text></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M5.5 6.4v11.2c0 .7.8 1.1 1.4.7l8-5.6c.5-.4.5-1.1 0-1.4l-8-5.6c-.6-.4-1.4 0-1.4.7z" fill="currentColor"/><rect x="16.3" y="5.4" width="2.6" height="13.2" rx="1.2" fill="currentColor"/></symbol>
+    <symbol id="i-live" viewBox="0 0 24 24"><path class="ic" d="M3.8 12h11.4M11 7.4l4.6 4.6-4.6 4.6"/><path class="ic" d="M19.8 5.5v13"/></symbol>
+    <symbol id="i-subs" viewBox="0 0 24 24"><rect class="ic" x="3" y="5" width="18" height="14" rx="2.6"/><path class="ic" d="M7 11.5h4M13.5 11.5H17M7 15h6.5M16 15h1"/></symbol>
+    <symbol id="i-tune" viewBox="0 0 24 24"><path class="ic" d="M4 7h8.5M17.5 7H20M4 12h2.5M11.5 12H20M4 17h10.5M19.5 17h.5"/><circle class="ic" cx="15" cy="7" r="2.3"/><circle class="ic" cx="9" cy="12" r="2.3"/><circle class="ic" cx="17" cy="17" r="2.3"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path class="ic" d="m12 3.2 2.7 5.5 6 .9-4.4 4.2 1 6-5.3-2.8-5.4 2.8 1-6-4.3-4.2 6-.9Z"/></symbol>
+    <symbol id="i-starf" viewBox="0 0 24 24"><path d="m12 3.2 2.7 5.5 6 .9-4.4 4.2 1 6-5.3-2.8-5.4 2.8 1-6-4.3-4.2 6-.9Z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path class="ic" d="M9.5 6.5H20M9.5 12H20M9.5 17.5H20"/><circle cx="5" cy="6.5" r="1.4" fill="currentColor"/><circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="5" cy="17.5" r="1.4" fill="currentColor"/></symbol>
+    <symbol id="i-recall" viewBox="0 0 24 24"><path class="ic" d="M8.6 5 4.5 9.1l4.1 4.1"/><path class="ic" d="M4.5 9.1H14a5.4 5.4 0 0 1 0 10.8h-3.2"/></symbol>
+    <symbol id="i-retry" viewBox="0 0 24 24"><path class="ic" d="M19.2 12a7.2 7.2 0 1 1-2.1-5.1"/><path class="ic" d="M19.4 4.6v4.2h-4.2"/></symbol>
+    <symbol id="k-l" viewBox="0 0 8 8"><path d="M6 1v6L1.5 4z" fill="currentColor"/></symbol>
+    <symbol id="k-r" viewBox="0 0 8 8"><path d="M2 1v6l4.5-3z" fill="currentColor"/></symbol>
+    <symbol id="k-u" viewBox="0 0 8 8"><path d="M1 6h6L4 1.5z" fill="currentColor"/></symbol>
+    <symbol id="k-d" viewBox="0 0 8 8"><path d="M1 2h6L4 6.5z" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+<header>
+  <h1>Oynatıcı kontrolleri · önerilen tasarım</h1>
+  <p class="sub">Öneri, sahip onayı değil. Altı kare 960 × 540 dp (1 dp = 1 px); içerik sentetik, video soyut CSS gradyanı. Taban <b>Dengeli</b>'nin iskeleti (başlık sol altta, tek alt scrim); üstüne <b>Sinematik</b>'in yuvarlak oynatma kümesi, dolgulu çipleri ve sarma çubuğu; <b>Bilgi bantlı</b>'dan canlı kuralları ve tek bileşenli bilgi bandı. Bugünkü kontrollerle yan yana bakmak için <a href="current.html">current.html</a>. Ölçüler tarayıcıda sistem yazı tipiyle; fiziksel TV'de doğrulanmadı.</p>
+  <div class="legend">
+    <span class="it"><span class="lg-f"><svg><use href="#i-pause"/></svg></span>Odak (D064): mint dolgu, koyu içerik, 3 dp boşlukla 2 dp beyaz halka, büyüme yok</span>
+    <span class="it"><span class="lg-r"><svg><use href="#i-pause"/></svg></span>Dinlenen: High %72 dolgu; birincilde simge mint</span>
+    <span class="it"><span class="lg-b">10 sn ileri</span>Odak etiketi: odaktaki denetimin üstünde ad ya da durum</span>
+    <label class="toggle"><input type="checkbox" id="g">Ölçüleri göster (kare 1)</label>
+  </div>
+</header>
+
+<!-- ============ 1 ============ -->
+<section class="shot">
+  <h2>1 · Film <span>· kontroller açık, odak Duraklat'ta</span></h2>
+  <div class="frame">
+    <div class="video v-film"><div class="far"></div><div class="nearL"></div><div class="nearR"></div><div class="water"></div><div class="vig"></div></div>
+    <div class="scrim"></div>
+    <div class="block">
+      <div class="trow"><div class="title">Uzak Şehirler</div><div class="clock">21:14</div></div>
+      <div class="meta"><span class="tag">FİLM</span><span>2023 · 1 sa 48 dk · Bitiş 22:20</span></div>
+      <div class="barrow">
+        <div class="lab now">0:42:16</div>
+        <div class="track"><i class="buf" style="width:46%"></i><i class="played" style="width:39.14%"></i><i class="thumb" style="left:39.14%"></i></div>
+        <div class="lab end">−1:05:44</div>
+      </div>
+      <div class="bgap"></div>
+      <div class="row">
+        <div class="cluster">
+          <div class="tb s52" aria-label="10 saniye geri"><svg><use href="#i-back10"/></svg></div>
+          <div class="tb s64 pri focus" aria-label="Duraklat"><svg><use href="#i-pause"/></svg></div>
+          <div class="tb s52" aria-label="10 saniye ileri"><svg><use href="#i-fwd10"/></svg></div>
+        </div>
+        <div class="hint">Gizliyken <span class="kc"><svg><use href="#k-l"/></svg></span><span class="kc"><svg><use href="#k-r"/></svg></span> sar <i>·</i> basılı tut: daha hızlı</div>
+        <div class="chips">
+          <div class="chip"><svg><use href="#i-subs"/></svg>Ses / Altyazı</div>
+          <div class="chip ic" aria-label="Seçenekler"><svg><use href="#i-tune"/></svg></div>
+          <div class="chip ic" aria-label="Favorilere ekle"><svg><use href="#i-star"/></svg></div>
+        </div>
+      </div>
+    </div>
+    <div class="guides">
+      <div class="v" style="left:24px"></div><div class="v" style="left:936px"></div>
+      <div class="h" style="top:330px"></div><div class="h" style="top:400px"></div><div class="h" style="top:428px"></div><div class="h" style="top:452px"></div><div class="h" style="top:516px"></div>
+      <b style="left:30px;top:6px">kenar 24</b><b style="left:880px;top:6px">kenar 24</b>
+      <b style="left:300px;top:314px">blok üstü y 330 (alt 210 dp)</b>
+      <b style="left:440px;top:384px">çubuk satırı 28 · y 400–428</b>
+      <b style="left:300px;top:432px">odak etiketi bölgesi 24</b>
+      <b style="left:520px;top:476px">kontrol satırı 64 · y 452–516</b>
+      <b style="left:440px;top:520px">alt 24</b>
+      <b style="left:24px;top:438px">52</b><b style="left:100px;top:438px">64</b><b style="left:900px;top:446px">44</b>
+    </div>
+  </div>
+  <p class="cap"><b>Hiyerarşi:</b> başlık 28 sp → meta (tür etiketi, yıl, süre, <b>Bitiş</b>) → 20 sp geçen/kalan zaman ve çubuk → oynatma kümesi. Bütün bilgi sol altta tek blokta; üst hap ve üst scrim kalktı, resmin üst %60'ı temiz. <b>Küme yalnız zamanı yönetir</b>: −10 · Duraklat (64 dp) · +10; ilk odak ortada, Sol/Sağ gizli sarmanın yönüyle aynı. Çipler sağa yaslı (bir hap belirince kaymazlar). Aradaki boşlukta tuş ipucu: kontroller gizliyken ne olduğunu öğretir. "Kapat" yok: Geri önce kontrolleri gizler, ikinci Geri oynatıcıdan çıkar. <span class="src">iskelet: Dengeli · küme, çip: Sinematik</span></p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="shot">
+  <h2>2 · Film <span>· çubuk odakta, ileri sarılıyor</span></h2>
+  <div class="frame">
+    <div class="video v-film"><div class="far"></div><div class="nearL"></div><div class="nearR"></div><div class="water"></div><div class="vig"></div></div>
+    <div class="scrim"></div>
+    <div class="block">
+      <div class="trow"><div class="title">Uzak Şehirler</div><div class="clock">21:14</div></div>
+      <div class="meta"><span class="tag">FİLM</span><span>2023 · 1 sa 48 dk · Bitiş 22:20</span></div>
+      <div class="barrow">
+        <div class="lab now">0:42:16</div>
+        <div class="track on">
+          <i class="buf" style="width:46%"></i>
+          <i class="played" style="width:39.14%"></i>
+          <i class="delta" style="left:39.14%;width:9.26%"></i>
+          <i class="tick" style="left:39.14%"></i>
+          <i class="thumb" style="left:48.40%"></i>
+          <div class="tbub" style="left:48.40%"><b>0:52:16</b><em>+10:00</em></div>
+        </div>
+        <div class="lab end">−1:05:44</div>
+      </div>
+      <div class="bgap"></div>
+      <div class="row">
+        <div class="cluster">
+          <div class="tb s52"><svg><use href="#i-back10"/></svg></div>
+          <div class="tb s64 pri"><svg><use href="#i-pause"/></svg></div>
+          <div class="tb s52"><svg><use href="#i-fwd10"/></svg></div>
+        </div>
+        <div class="hint"><span class="kc"><svg><use href="#k-l"/></svg></span><span class="kc"><svg><use href="#k-r"/></svg></span> 10 sn <i>·</i> basılı: 30 sn, 1 dk <i>·</i> <span class="kc">OK</span> git <i>·</i> <span class="kc">Geri</span> vazgeç</div>
+        <div class="chips">
+          <div class="chip"><svg><use href="#i-subs"/></svg>Ses / Altyazı</div>
+          <div class="chip ic"><svg><use href="#i-tune"/></svg></div>
+          <div class="chip ic"><svg><use href="#i-star"/></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="cap"><b>Sarma çubuğu:</b> Duraklat'tan Yukarı ile gelindi, Sağ basılı tutuldu. Odakta iz 4 → 6 dp, oynanan kısım beyazdan mint'e döner, tutamaç 18 dp mint ve halkalı (D064 dolgulu denetim dili). İnce beyaz çentik başlangıç noktası, açık mint parça gidilecek mesafe; balonda hedef ve fark tek satırda. Video oynamaya devam eder, tek bir <code>seekTo</code> yapılır: <b>OK</b> hemen gider, son basıştan <b>1 sn</b> sonra kendiliğinden gider, odak çubuktan çıkınca gider; <b>Geri</b> vazgeçer. <b>Aşağı</b> hedefi uygular ve gelinen düğmeye döner. Tuş ipucu çubuğun tuşlarına geçer. Kontroller açıkken İleri/Geri sarma tuşları da bu hedefi +30/−10 sn kaydırır. <span class="src">çubuk: Sinematik · odakta mint, Aşağı, FF/RW: Dengeli</span></p>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="shot">
+  <h2>3 · Dizi bölümü <span>· odak Ses / Altyazı'da, Sonraki bölüm var</span></h2>
+  <div class="frame">
+    <div class="video v-series"><div class="sun"></div><div class="m1"></div><div class="mist"></div><div class="m2"></div><div class="snow"></div><div class="vig"></div></div>
+    <div class="scrim"></div>
+    <div class="block">
+      <div class="trow"><div class="title">Kuzey Rüzgârı</div><div class="clock">21:14</div></div>
+      <div class="meta"><span class="tag">DİZİ</span><span class="tx">S2 B5 · Yol Ayrımı</span><span>· 52 dk · Bitiş 21:28</span></div>
+      <div class="barrow">
+        <div class="lab now s">38:05</div>
+        <div class="track"><i class="buf" style="width:78%"></i><i class="played" style="width:73.24%"></i><i class="thumb" style="left:73.24%"></i></div>
+        <div class="lab end s">−13:55</div>
+      </div>
+      <div class="bgap"></div>
+      <div class="row">
+        <div class="cluster">
+          <div class="tb s52"><svg><use href="#i-back10"/></svg></div>
+          <div class="tb s64 pri"><svg><use href="#i-pause"/></svg></div>
+          <div class="tb s52"><svg><use href="#i-fwd10"/></svg></div>
+          <div class="hap"><svg><use href="#i-next"/></svg>Sonraki bölüm</div>
+        </div>
+        <div class="hint">Gizliyken <span class="kc"><svg><use href="#k-l"/></svg></span><span class="kc"><svg><use href="#k-r"/></svg></span> sar</div>
+        <div class="chips">
+          <div class="chip focus"><svg><use href="#i-subs"/></svg>Ses / Altyazı<div class="fl st">Türkçe · Altyazı kapalı</div></div>
+          <div class="chip ic"><svg><use href="#i-tune"/></svg></div>
+          <div class="chip ic sel" aria-label="Diziyi favorilerden çıkar, Favorilerde"><svg><use href="#i-starf"/></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="cap"><b>Parlak kare</b> (scrim'in en kötü durumu): başlık yaklaşık .62, düğmeler .86 siyahın üstünde. Dizi adı başlıkta, "S2 B5 · Yol Ayrımı" meta satırında beyaz. <b>Sonraki bölüm</b> kümenin sonunda etiketli hap; yalnız sonraki bölüm biliniyorsa çizilir, çipler sağa yaslı olduğu için hiçbir şey kaymaz. Odaktaki çipin üstündeki <b>odak etiketi</b> durumunu söyler; denetim kendi etiketini çizer, satır düzeyinde odak durumu tutulmaz. Dizi favoride: Selected zemin, dolu mint yıldız. Tuş ipucu sığan ilk parçaya iner. OK 440 dp ses panelini açar; Geri odağı bu çipe döndürür. <span class="src">odak etiketi: Dengeli fikri, Sinematik biçimi</span></p>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="shot">
+  <h2>4 · Canlı TV <span>· kontroller açık, odak Duraklat'ta (pencere yok)</span></h2>
+  <div class="frame">
+    <div class="video v-live"><div class="scr s1"></div><div class="scr s2"></div><div class="globe"></div><div class="floor"></div><div class="body"></div><div class="head"></div><div class="desk"></div><div class="deskline"></div><div class="vig"></div></div>
+    <div class="scrim"></div>
+    <div class="block">
+      <div class="trow"><div class="num">12</div><div class="logo">H24</div><div class="title">Haber 24</div><div class="badge"><i class="dot"></i>CANLI</div><div class="clock">19:42</div></div>
+      <div class="meta"><span class="pg">Akşam Bülteni</span><span>· 18 dk kaldı</span><span class="nx">Sonra · 20:00 Gündem Özel</span></div>
+      <div class="barrow">
+        <div class="lab s now clk">19:00</div>
+        <div class="track"><i class="played" style="width:70%"></i></div>
+        <div class="lab s end">20:00</div>
+      </div>
+      <div class="bgap"></div>
+      <div class="row">
+        <div class="cluster">
+          <div class="tb s64 pri focus"><svg><use href="#i-pause"/></svg></div>
+        </div>
+        <div class="hint">Gizliyken <span class="kc"><svg><use href="#k-u"/></svg></span><span class="kc"><svg><use href="#k-d"/></svg></span> kanal <i>·</i> <span class="kc">OK</span> kanallar</div>
+        <div class="chips">
+          <div class="chip"><svg><use href="#i-list"/></svg>Kanallar</div>
+          <div class="chip"><svg><use href="#i-recall"/></svg>Önceki kanal</div>
+          <div class="chip"><svg><use href="#i-subs"/></svg>Ses / Altyazı</div>
+          <div class="chip ic"><svg><use href="#i-tune"/></svg></div>
+          <div class="chip ic"><svg><use href="#i-star"/></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="cap"><b>Canlı kimlik</b> başlık satırında: numara, logo kutusu (logo yoksa harf yedeği), kanal adı, CANLI rozeti (beyaz nokta), sağda saat. Meta satırı çubuğun göstermediği bilgiyi taşır: şimdiki program, kalan süre, sonraki program. Program ilerlemesi odak almaz. Pencere yokken küme yalnız Duraklat'tır; ±10 ve kanal düğmesi kümeye girmez, böylece aynı yuva hiç anlam değiştirmez. Kanal eylemleri çiptir: <b>Kanallar</b> sol paneli (S15) açar, <b>Önceki kanal</b> görünür kalır, yoksa pasif. ‹ Kanal / Kanal › kalktı (S15 gelene kadar çiplerde geçici "Kanal −/+" durur); CH±, gizliyken Yukarı/Aşağı, rakamlar ve kısa OK kalır. Boşlukta canlı tuş ipucu. <span class="src">canlı kimlik: Bilgi bantlı · çipler: Sinematik</span></p>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="shot">
+  <h2>5 · Canlı TV <span>· sağlayıcı penceresinde 4 dk 12 sn geride, odak Canlıya dön'de</span></h2>
+  <div class="frame">
+    <div class="video v-live" style="filter:saturate(.92) brightness(.97)"><div class="scr s1"></div><div class="scr s2"></div><div class="globe"></div><div class="floor"></div><div class="body"></div><div class="head"></div><div class="desk"></div><div class="deskline"></div><div class="vig"></div></div>
+    <div class="scrim"></div>
+    <div class="block">
+      <div class="trow"><div class="num">12</div><div class="logo">H24</div><div class="title">Haber 24</div><div class="badge behind"><i class="dot hollow"></i>4 dk 12 sn geride · 19:37</div><div class="clock">19:42</div></div>
+      <div class="meta"><span class="pg">Akşam Bülteni</span><span>· 19:00–20:00</span><span class="nx">Sonra · 20:00 Gündem Özel</span></div>
+      <div class="barrow">
+        <div class="lab s now clk">19:12</div>
+        <div class="track">
+          <i class="buf" style="width:100%"></i>
+          <i class="played" style="width:86%"></i>
+          <i class="behindseg" style="left:86%;width:14%"></i>
+          <i class="thumb" style="left:86%"></i>
+        </div>
+        <div class="edge"><i class="dot hollow"></i>CANLI</div>
+      </div>
+      <div class="bgap"></div>
+      <div class="row">
+        <div class="cluster">
+          <div class="tb s52"><svg><use href="#i-back10"/></svg></div>
+          <div class="tb s64 pri"><svg><use href="#i-pause"/></svg></div>
+          <div class="tb s52"><svg><use href="#i-fwd10"/></svg></div>
+          <div class="hap focus"><svg><use href="#i-live"/></svg>Canlıya dön</div>
+        </div>
+        <div class="chips">
+          <div class="chip"><svg><use href="#i-list"/></svg>Kanallar</div>
+          <div class="chip ic" aria-label="Önceki kanal: 7 Kent TV"><svg><use href="#i-recall"/></svg></div>
+          <div class="chip"><svg><use href="#i-subs"/></svg>Ses / Altyazı</div>
+          <div class="chip ic"><svg><use href="#i-tune"/></svg></div>
+          <div class="chip ic"><svg><use href="#i-star"/></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="cap"><b>Pencereli canlı (S17):</b> çubuk program değil 30 dk'lık pencereyi gösterir (19:12 → canlı kenar), EPG eşlemesine bağlı değildir. Kesikli parça canlıdan geride kalan süre; sağ uçtaki CANLI sönük, noktası içi boş. Rozet "4 dk 12 sn geride · 19:37" olur. Küme VOD ile aynıdır (−10 · Duraklat · +10); <b>Canlıya dön</b> sona eklenir, +10'un yuvası korunur. 10 sn geride belirir, 3 sn'nin altına inince kalkar; OK canlı kenara gider, hap kaybolur, odak Duraklat'a geçer. Satır sığmadığı için önce "Önceki kanal" etiketi düşer, adı odak etiketinde kalır. Tuş ipucu sığmadığında çizilmez. <span class="src">pencere görseli: Sinematik · eşik: Bilgi bantlı</span></p>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="shot">
+  <h2>6 · Kare 1, yazı ölçeği 1,5</h2>
+  <div class="frame fs15">
+    <div class="video v-film"><div class="far"></div><div class="nearL"></div><div class="nearR"></div><div class="water"></div><div class="vig"></div></div>
+    <div class="scrim"></div>
+    <div class="block">
+      <div class="trow"><div class="title">Uzak Şehirler</div><div class="clock">21:14</div></div>
+      <div class="meta"><span class="tag">FİLM</span><span>2023 · 1 sa 48 dk · Bitiş 22:20</span></div>
+      <div class="barrow">
+        <div class="lab now">0:42:16</div>
+        <div class="track"><i class="buf" style="width:46%"></i><i class="played" style="width:39.14%"></i><i class="thumb" style="left:39.14%"></i></div>
+        <div class="lab end">−1:05:44</div>
+      </div>
+      <div class="bgap"></div>
+      <div class="row">
+        <div class="cluster">
+          <div class="tb s52"><svg><use href="#i-back10"/></svg></div>
+          <div class="tb s64 pri focus"><svg><use href="#i-pause"/></svg></div>
+          <div class="tb s52"><svg><use href="#i-fwd10"/></svg></div>
+        </div>
+                <div class="chips">
+          <div class="chip"><svg><use href="#i-subs"/></svg>Ses / Altyazı</div>
+          <div class="chip ic"><svg><use href="#i-tune"/></svg></div>
+          <div class="chip ic"><svg><use href="#i-star"/></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="cap"><b>1,5 yazı:</b> başlık 42 sp (≥ 1,3'te en çok 2 satır), meta 22,5 sp, zamanlar 30 sp, saat 30 sp; çubuk kısalır ama tam genişlikte kalır. Odak etiketi bölgesi 36 dp'ye, çipler 47 dp'ye büyür; oynatma daireleri dp'de sabit, bu yüzden satır hiçbir ölçekte yatay kaymaz. Tuş ipucu ve kaynak adı ≥ 1,3'te gizlenir, scrim büyük yazı duraklarına geçer. Blok üstü y ≈ 280 (1,0'da 330). Sığmayan satırda etiketler sırayla düşer: Önceki kanal → Ses / Altyazı → Kanallar; Sonraki bölüm ve Canlıya dön 2,0'da daireye iner.</p>
+</section>
+
+<!-- ============ ek kareler ============ -->
+<h2 class="sec">Ek kareler · aynı bileşenin öbür kipleri</h2>
+<p class="secsub">Bilgi bandı ve sarma önizlemesi kontrollerle aynı <code>PlayerInfoBlock</code>'tan çıkar (Bilgi bantlı'nın tek bileşen fikri, Dengeli/Sinematik'in scrim tabanı). Odak almazlar, alt kenara (24 dp) otururlar; kontroller açılınca 120 ms çapraz geçiş.</p>
+<div class="minis" style="margin-top:18px">
+  <div>
+    <div class="mini"><div class="frame">
+      <div class="video v-live"><div class="scr s1"></div><div class="scr s2"></div><div class="globe"></div><div class="floor"></div><div class="body"></div><div class="head"></div><div class="desk"></div><div class="deskline"></div><div class="vig"></div></div>
+      <div class="scrim band"></div>
+      <div class="block">
+        <div class="trow"><div class="num">12</div><div class="logo">H24</div><div class="title">Haber 24</div><div class="badge"><i class="dot"></i>CANLI</div><div class="clock">19:42</div></div>
+        <div class="meta"><span class="pg">Akşam Bülteni</span><span>· 18 dk kaldı</span><span class="nx">Sonra · 20:00 Gündem Özel</span></div>
+        <div class="barrow"><div class="lab s now clk">19:00</div><div class="track"><i class="played" style="width:70%"></i></div><div class="lab s end">20:00</div></div>
+      </div>
+    </div></div>
+    <p class="minicap"><b>A · Kanal değişiminde bilgi bandı (TV-053, S15).</b> Kontroller ve liste kapalıyken 4 sn; kontrollerin üst üç satırı, düğmesiz. Hafif scrim (0 → .82).</p>
+  </div>
+  <div>
+    <div class="mini"><div class="frame">
+      <div class="video v-film"><div class="far"></div><div class="nearL"></div><div class="nearR"></div><div class="water"></div><div class="vig"></div></div>
+      <div class="scrim peek"></div>
+      <div class="block peek">
+        <div class="barrow"><div class="lab now">0:42:46</div>
+          <div class="track"><i class="buf" style="width:46%"></i><i class="played" style="width:39.6%"></i><i class="thumb" style="left:39.6%"></i>
+            <div class="tbub" style="left:39.6%"><b>+30 sn</b></div></div>
+          <div class="lab end">−1:05:14</div></div>
+      </div>
+    </div></div>
+    <p class="minicap"><b>B · Gizliyken sarma önizlemesi.</b> Kontroller kapalıyken Sol/Sağ: köşe notu yerine yalnız çubuk satırı ve balon 2,5 sn görünür; sarma bugünkü gibi anında.</p>
+  </div>
+  <div>
+    <div class="mini"><div class="frame">
+      <div class="video v-film"><div class="far"></div><div class="nearL"></div><div class="nearR"></div><div class="water"></div><div class="vig"></div></div>
+      <div class="scrim"></div>
+      <div class="block">
+        <div class="trow"><div class="title">Uzak Şehirler</div><div class="clock">21:14</div></div>
+        <div class="meta"><span class="tag">FİLM</span><span>2023 · 1 sa 48 dk · Bitiş 22:20</span></div>
+        <div class="barrow"><div class="lab now">0:42:26</div><div class="track"><i class="buf" style="width:46%"></i><i class="played" style="width:39.29%"></i><i class="thumb" style="left:39.29%"></i></div><div class="lab end">−1:05:34</div></div>
+        <div class="bgap"></div>
+        <div class="row">
+          <div class="cluster">
+            <div class="tb s52"><svg><use href="#i-back10"/></svg></div>
+            <div class="tb s64 pri"><svg><use href="#i-pause"/></svg></div>
+            <div class="tb s52 focus"><svg><use href="#i-fwd10"/></svg><div class="fl">10 sn ileri</div></div>
+          </div>
+          <div class="hint">Gizliyken <span class="kc"><svg><use href="#k-l"/></svg></span><span class="kc"><svg><use href="#k-r"/></svg></span> sar <i>·</i> basılı tut: daha hızlı</div>
+          <div class="chips">
+            <div class="chip"><svg><use href="#i-subs"/></svg>Ses / Altyazı</div>
+            <div class="chip ic"><svg><use href="#i-tune"/></svg></div>
+            <div class="chip ic"><svg><use href="#i-star"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <p class="minicap"><b>C · Simge düğmede odak etiketi.</b> Yalnız simgeli her denetim odakta adını gösterir (kümede sola, çiplerde sağa yaslı); "10" glifinin 3 m'deki okunurluk riskini kapatır.</p>
+  </div>
+  <div>
+    <div class="mini"><div class="frame">
+      <div class="video v-live" style="filter:grayscale(.6) brightness(.7)"><div class="scr s1"></div><div class="scr s2"></div><div class="globe"></div><div class="floor"></div><div class="body"></div><div class="head"></div><div class="desk"></div><div class="deskline"></div><div class="vig"></div></div>
+      <div class="scrim"></div>
+      <div class="block">
+        <div class="trow"><div class="num">12</div><div class="logo">H24</div><div class="title">Haber 24</div><div class="clock">19:42</div></div>
+        <div class="meta err">Yayın açılamadı · Sunucu yanıt vermedi</div>
+        <div class="barrow"><div class="lab s now clk">19:00</div><div class="track empty"></div><div class="lab s end">20:00</div></div>
+        <div class="bgap"></div>
+        <div class="row">
+          <div class="cluster"><div class="tb s64 pri focus"><svg><use href="#i-retry"/></svg><div class="fl">Tekrar dene</div></div></div>
+          <div class="chips">
+            <div class="chip"><svg><use href="#i-list"/></svg>Kanallar</div>
+            <div class="chip"><svg><use href="#i-recall"/></svg>Önceki kanal</div>
+            <div class="chip off"><svg><use href="#i-subs"/></svg>Ses / Altyazı</div>
+            <div class="chip ic off"><svg><use href="#i-tune"/></svg></div>
+            <div class="chip ic"><svg><use href="#i-star"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <p class="minicap"><b>D · Hata.</b> Durum meta satırında Error renginde (en çok 2 satır); birincil daire "Tekrar dene" olur ve adını odak etiketinde gösterir. Ses ve Seçenekler pasif, D-pad atlar; Kanallar açık. Kontroller kendiliğinden gizlenmez.</p>
+  </div>
+</div>
+
+<!-- ============ kararlar ============ -->
+<h2 class="sec">Neden bu birleşim</h2>
+<p class="secsub">Puanlar (kumanda · görsel · mühendislik): Sinematik 7,5 · 8 · 6; Dengeli 7 · 7 · 7,5; Bilgi bantlı 6 · 6 · 7. İlk ikisi 7,17 ortalamada berabere; her birinin güçlü yanı öbürünün zayıf yanını kapatıyor.</p>
+<div class="cards">
+  <div class="card">
+    <h3>Alınanlar</h3>
+    <ul>
+      <li><b>Dengeli:</b> başlık sol altta, tek alt scrim ve parlak karede ölçülen durakları; player-panel / player-title / player-controls geometri testleri geçerli kalır; FF/RW açıkken hedefi kaydırır; çubuktan Aşağı gelinen düğmeye döner; hedef yokken çubukta OK oynat/duraklat; etiket düşme önceliği; test planı.</li>
+      <li><b>Sinematik:</b> 64/52 dp oynatma kümesi, ilk odak ortada; dolgulu saydam çipler (tek düğme ailesi); sarma çubuğu, çentik ve balon; 20 sp tabular zaman, en küçük genişlik ölçülü; sağa yaslı çipler; pencere ölçekli canlı çubuk, kesikli "geride" parçası; Menü ve Bilgi tuşuyla kontroller.</li>
+      <li><b>Bilgi bantlı:</b> Canlıya dön 10 sn / 3 sn eşiği; <code>PlaybackClock</code>; tek bileşen üç kip (tam, bilgi bandı, sarma önizlemesi); Material Symbols Rounded ile <code>PlayerSymbols.kt</code>; Önceki kanal pasif ama görünür; canlı numara + logo kimliği.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Çözülen çatışmalar</h3>
+    <ul>
+      <li><b>Başlığın yeri:</b> Sinematik üste taşıyordu (iki scrim, testler kırılır, D064'te kaldırılan üst karartma geri gelir) → sol altta, saat başlık satırının sağında.</li>
+      <li><b>‹ Kanal ›:</b> kümede kalırsa VOD'daki ±10 yuvası anlam değiştirir; tamamen kalkarsa S15'ten önce görünür kanal yolu kalmaz → kümeye girmez; S15'e kadar çiplerde geçici "Kanal −/+", S15'te Kanallar ve Önceki kanal yerini alır.</li>
+      <li><b>Odak adı:</b> Dengeli'nin şeridi koordinat takibi ve 20 dp yükseklik istiyordu; satır sonu etiketi odaktan uzak → denetimin kendi çizdiği odak etiketi (YouTube/Apple TV deseni), çubuk ile satır arasındaki 24 dp bölgede.</li>
+      <li><b>Canlıya dön:</b> Duraklat'ın hemen sağı (1 basış) +10 yuvasını bozuyordu → kümenin sonu (2 basış); İleri sarma tuşu da +30 sn adımla canlı kenara kadar gider.</li>
+      <li><b>Kendiliğinden gitme:</b> 700 / 1200 / 1500 ms → 1 000 ms, cihazda ayarlanır.</li>
+      <li><b>Mint:</b> Bilgi bantlı'nın dinlenen mint çubuğu odakla yarışıyordu → dinlenirken beyaz, odakta mint. CANLI noktası Error yerine beyaz.</li>
+    </ul>
+  </div>
+  <div class="card wide">
+    <h3>Ölçüler (1,0 yazı, dp / sp)</h3>
+    <table class="t">
+      <tr><th>Öğe</th><th>Değer</th><th>Öğe</th><th>Değer</th></tr>
+      <tr><td>Blok</td><td>kenar 24, alt 24; üst y 330 (VOD ve canlı)</td><td>Oynat/Duraklat</td><td>64 daire, simge 32; birincil simge mint</td></tr>
+      <tr><td>Başlık · saat</td><td>28/34 Medium · 20/26 Muted tabular</td><td>−10 / +10</td><td>52 daire, simge 28</td></tr>
+      <tr><td>Meta</td><td>15/20 Muted; etiket 12/16 Medium, harf aralığı ,1 em</td><td>Hap (Sonraki bölüm, Canlıya dön)</td><td>52 yükseklik, iç boşluk 16/20, simge 22, 15 sp</td></tr>
+      <tr><td>Çubuk satırı</td><td>28; etiketler 20/26 tabular; iz 4 → odakta 6</td><td>Çip</td><td>max(44, satır + 16); iç boşluk 12/16, simge 20, 15 sp; simgeli 44 × 44</td></tr>
+      <tr><td>Tutamaç</td><td>12 Text → odakta 18 Mint + 2 dp halka</td><td>Aralıklar</td><td>küme 12, çip 8, küme ↔ çip en az 32, ipucu kenar 24</td></tr>
+      <tr><td>Zaman balonu</td><td>20/26 + 14 mint; köşe 10; iz merkezinin 22 üstü</td><td>Odak etiketi</td><td>13/18; köşe 8; denetimin 6 üstü</td></tr>
+      <tr><td>Odak etiketi bölgesi</td><td>24 × yazı ölçeği</td><td>Tuş ipucu</td><td>13/18 Muted; tuş kapağı 18 yükseklik, 12 sp</td></tr>
+    </table>
+  </div>
+  <div class="card wide">
+    <h3>Renk (yeni token yok)</h3>
+    <table class="t">
+      <tr><td><span class="sw" style="background:#A8DFCB"></span>Mint</td><td>odak dolgusu, odaktaki çubuk ve tutamaç, dinlenen birincil simge, balondaki fark, favori yıldızı</td></tr>
+      <tr><td><span class="sw" style="background:#343E47"></span>High %72</td><td>dinlenen daire, hap ve çip</td></tr>
+      <tr><td><span class="sw" style="background:#35423F"></span>Selected</td><td>favorideki yıldızın zemini</td></tr>
+      <tr><td><span class="sw" style="background:#F0F3F1"></span>Text</td><td>başlık, simgeler, halka, oynanan çubuk %92, çentik, CANLI noktası</td></tr>
+      <tr><td><span class="sw" style="background:#B7C1C7"></span>Muted</td><td>meta, kalan süre, saat, ipucu, geride rozeti noktası</td></tr>
+      <tr><td><span class="sw" style="background:#15191E"></span>Background %94 / %72</td><td>balonlar / rozet</td></tr>
+      <tr><td><span class="sw" style="background:#FFB4AB"></span>Error</td><td>yalnız hata metni</td></tr>
+    </table>
+  </div>
+  <div class="card wide">
+    <h3>Sahip kararları (cevap gelmezse varsayılan uygulanır)</h3>
+    <table class="t">
+      <tr><th>#</th><th>Karar</th><th>Varsayılan (öneri)</th><th>Alternatif</th></tr>
+      <tr><td>1</td><td>"Kapat" düğmesi</td><td>Kalkar; ilk Geri kontrolleri gizler, ikincisi çıkar</td><td>Çiplerin sonunda × simgesi olarak kalır</td></tr>
+      <tr><td>2</td><td>‹ Kanal / Kanal ›</td><td>Kümeye girmez; S15'e kadar çiplerde geçici "Kanal −/+", S15'te Kanallar + Önceki kanal yerini alır</td><td>S15'ten sonra da "Kanal −/+" çipleri kalır (canlı satır 7 durak, ipucu sığmaz)</td></tr>
+      <tr><td>3</td><td>Çubuğun sağ etiketi</td><td>Kalan süre "−1:05:44"; toplam süre ve Bitiş meta satırında</td><td>Toplam süre "1:48:00"</td></tr>
+      <tr><td>4</td><td>Çubukta kendiliğinden gitme</td><td>1 000 ms; OK hemen gider</td><td>700 ms ya da her adımda hemen sarma</td></tr>
+      <tr><td>5</td><td>Gizliyken Sol/Sağ</td><td>Bugünkü gibi anında; köşe notu yerine sarma önizlemesi (B)</td><td>Çubukla aynı bekleyen hedef (tek <code>seekTo</code>)</td></tr>
+      <tr><td>6</td><td>CANLI noktası</td><td>Beyaz (Text)</td><td>Error #FFB4AB (kırmızıya yakın, hata rengini paylaşır)</td></tr>
+      <tr><td>7</td><td>Saat ve Bitiş</td><td>Saat başlık satırının sağında, Bitiş meta satırında</td><td>İkisi de yok</td></tr>
+      <tr><td>8</td><td>Önceki kanal yokken</td><td>Pasif ama görünür (sonradan belirip odaktaki çipi kaydırmasın)</td><td>Gizli</td></tr>
+      <tr><td>9</td><td>Odak etiketi</td><td>Simgeli denetimde ad, etiketli çipte durum</td><td>Yalnız simgeli denetimlerde</td></tr>
+      <tr><td>10</td><td>Bilgi bandı genişliği</td><td>Kontrol bloğuyla aynı (912 dp), kontroller açılınca hiza değişmez</td><td>overlay.md'deki en çok 640 dp</td></tr>
+    </table>
+  </div>
+</div>
+</div>
+</body>
+</html>
