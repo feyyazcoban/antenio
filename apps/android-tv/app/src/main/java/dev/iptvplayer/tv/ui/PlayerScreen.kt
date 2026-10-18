@@ -52,19 +52,16 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.*
-import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
 import androidx.tv.material3.Text
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Border
 import androidx.compose.foundation.BorderStroke
+import dev.iptvplayer.tv.PlaybackMode
 import dev.iptvplayer.tv.PlayingMedia
 import dev.iptvplayer.tv.Route
-import dev.iptvplayer.tv.BuildConfig
 import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.TvViewModel
 import dev.iptvplayer.tv.data.MediaKind
@@ -92,21 +89,14 @@ import kotlinx.coroutines.flow.first
     val guideEntries = remember(media.entry) { if (media.entry.kind == MediaKind.LIVE) listOf(media.entry) else emptyList() }
     val schedule = guideRows(guideEntries, dev.iptvplayer.tv.data.GuideWindow(guideNow, guideNow + 12 * 3_600_000L), screenState, model)[media.entry.id]
     val currentProgramme = schedule?.now(guideNow)
-    val player = remember { ExoPlayer.Builder(context).build().apply {
-        setAudioAttributes(AudioAttributes.DEFAULT, true)
-        setHandleAudioBecomingNoisy(true)
-        trackSelectionParameters = trackSelectionParameters.buildUpon()
-            .setPreferredAudioLanguage(model.store.audioLanguage)
-            .setPreferredTextLanguage(model.store.subtitleLanguage)
-            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, model.store.subtitlesOff).build()
-    } }
+    val player = remember { PlayerFactory.create(context, model.store) }
     val scope = rememberCoroutineScope()
     val recovery = remember(player) { PlaybackRecovery(player, scope) }
     val recoveryState by recovery.state.collectAsStateWithLifecycle()
     val failure = recoveryState.failure
     var active by remember { mutableStateOf<PlayingMedia?>(null) }
-    var visible by remember { mutableStateOf(true) }
-    var trackPanel by remember { mutableStateOf(false) }
+    // What the viewer has open over the picture: the controls, the tracks panel or nothing.
+    var layer by remember { mutableStateOf<PlayerLayer>(PlayerLayer.Controls) }
     var tracks by remember { mutableStateOf(Tracks.EMPTY) }
     var trackParameters by remember { mutableStateOf(player.trackSelectionParameters) }
     var status by remember { mutableIntStateOf(Player.STATE_IDLE) }
@@ -117,24 +107,26 @@ import kotlinx.coroutines.flow.first
     var lastInteraction by remember { mutableLongStateOf(System.currentTimeMillis()) }
     val first = remember { FocusRequester() }
     val canvas = remember { FocusRequester() }
-    val live = media.entry.kind == MediaKind.LIVE
+    val live = media.mode == PlaybackMode.LIVE
     val favoriteTarget = remember(media.entry, screenState.catalog, screenState.selected, screenState.episodes, screenState.history) {
         model.favoriteTarget(media.entry)
     }
     val isFavorite = favoriteTarget?.id in screenState.favoriteIds
     fun save() { active?.let { model.saveProgress(it.entry, player.currentPosition.coerceAtLeast(0), player.duration.coerceAtLeast(0)) } }
-    fun interact() { lastInteraction = System.currentTimeMillis(); visible = true }
+    fun interact() { lastInteraction = System.currentTimeMillis(); if (layer == PlayerLayer.Video) layer = PlayerLayer.Controls }
     val episodeEnd = remember(player) {
         EpisodeEndController(scope) { sourceId, currentId, nextId, automatic ->
             save(); model.playNextEpisode(sourceId, currentId, nextId, automatic)
         }
     }
     val endState by episodeEnd.state.collectAsStateWithLifecycle()
+    // The end card covers whatever was open; EpisodeEndController keeps it.
+    fun top(): PlayerLayer = if (endState != null) PlayerLayer.EpisodeEnd else layer
     val nextChoice = remember(media.entry, screenState.sources, screenState.episodes) {
         screenState.sourceFor(media.entry)?.let { EpisodeSequence.next(it, media.entry, screenState.episodes) }
     }
     val opening = failure == null && !recoveryState.recovering && (status == Player.STATE_BUFFERING || status == Player.STATE_IDLE)
-    val controlsShown = visible && !trackPanel && endState == null
+    val controlsShown = top() == PlayerLayer.Controls
     // Remote shortcuts while the controls are hidden: the next channel opens without bringing them up, and a short
     // note in the corner says what happened (the channel, a seek, the number being typed).
     var quiet by remember { mutableStateOf(false) }
@@ -142,7 +134,7 @@ import kotlinx.coroutines.flow.first
     var noteAt by remember { mutableLongStateOf(0L) }
     var digits by remember { mutableStateOf("") }
     fun flash(text: String, detail: String? = null) { note = text to detail; noteAt = System.currentTimeMillis() }
-    fun zap(direction: Int) { quiet = !visible; digits = ""; model.changeChannel(direction) }
+    fun zap(direction: Int) { quiet = layer == PlayerLayer.Video; digits = ""; model.changeChannel(direction) }
     fun seekBy(deltaMs: Long) {
         if (!player.isCurrentMediaItemSeekable) return
         val end = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
@@ -151,12 +143,31 @@ import kotlinx.coroutines.flow.first
         flash(resources.getString(if (deltaMs < 0) R.string.player_seek_back else R.string.player_seek_forward, (kotlin.math.abs(deltaMs) / 1000).toString()),
             "${clockTime(target)} / ${if (duration > 0) clockTime(duration) else "—"}")
     }
+    // The player as PlayerKeyRouter reads it when a key or Back arrives; its commands are carried out here.
+    fun keys(repeat: Int = 0) = KeyContext(media.mode, top(), recoveryState.recovering, failure != null, player.isPlaying, repeat)
+    fun perform(command: PlayerCommand) {
+        when (command) {
+            PlayerCommand.Play -> player.play()
+            PlayerCommand.Pause -> player.pause()
+            PlayerCommand.Retry -> recovery.retryManually()
+            PlayerCommand.StopRecovery -> recovery.cancel()
+            PlayerCommand.Consume -> Unit
+            is PlayerCommand.Zap -> zap(command.direction)
+            is PlayerCommand.AppendDigit -> { digits = PlayerKeyRouter.appendDigit(digits, command.digit); flash(digits) }
+            PlayerCommand.OpenGuide -> model.guide()
+            is PlayerCommand.Seek -> seekBy(command.deltaMs)
+            PlayerCommand.ShowControls -> layer = PlayerLayer.Controls
+            PlayerCommand.HideControls -> layer = PlayerLayer.Video
+            PlayerCommand.CloseTracks -> { layer = PlayerLayer.Controls; interact() }
+            is PlayerCommand.Exit -> { if (command.stopRecovery) recovery.cancel(); save(); model.back() }
+        }
+    }
     LaunchedEffect(noteAt) { if (note != null) { delay(2_500); note = null } }
     LaunchedEffect(digits) {
         if (digits.isEmpty()) return@LaunchedEffect
-        delay(1_500)
+        delay(PlayerKeyRouter.DIGIT_COMMIT_MS)
         val number = digits.toInt(); digits = ""
-        quiet = !visible
+        quiet = layer == PlayerLayer.Video
         if (!model.playChannelNumber(number)) { quiet = false; flash(resources.getString(R.string.player_no_channel, number.toString())) }
     }
 
@@ -165,7 +176,7 @@ import kotlinx.coroutines.flow.first
             override fun onPlaybackStateChanged(playbackState: Int) {
                 status = playbackState
                 if (playbackState == Player.STATE_ENDED) {
-                    visible = true; trackPanel = false
+                    layer = PlayerLayer.Controls
                     position = player.currentPosition.coerceAtLeast(0); duration = player.duration.coerceAtLeast(0)
                     save()
                     val current = active?.entry
@@ -198,27 +209,21 @@ import kotlinx.coroutines.flow.first
     }
 
     LaunchedEffect(media) {
+        val request = PlayerFactory.request(media)
         save()
         // Stop the old request before opening a new channel: one source session at a time.
         player.stop(); player.clearMediaItems()
-        recovery.newMedia(media.entry.kind == MediaKind.LIVE)
+        recovery.newMedia(request.mode == PlaybackMode.LIVE)
         episodeEnd.newMedia(); hasPlayed = false
-        tracks = Tracks.EMPTY; position = media.startMs; duration = 0
-        trackPanel = false; active = media
+        tracks = Tracks.EMPTY; position = request.startMs; duration = 0
+        if (layer == PlayerLayer.Tracks) layer = PlayerLayer.Controls
+        active = media
         if (quiet) {
             quiet = false; lastInteraction = System.currentTimeMillis()
             flash(listOfNotNull(model.channelNumber(media.entry)?.toString(), displayTitle(media.entry.title).name).joinToString("  "))
         } else interact()
-        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon().clearOverrides()
-            .setPreferredAudioLanguage(model.store.audioLanguage)
-            .setPreferredTextLanguage(model.store.subtitleLanguage)
-            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, model.store.subtitlesOff).build()
-        val http = DefaultHttpDataSource.Factory().setUserAgent("NEXTV/${BuildConfig.VERSION_NAME} AndroidTV")
-            .setConnectTimeoutMs(8_000).setReadTimeoutMs(8_000)
-            .setDefaultRequestProperties(media.entry.headers)
-        val factory = DefaultMediaSourceFactory(DefaultDataSource.Factory(context, http))
-            .setLoadErrorHandlingPolicy(SingleAttemptLoadPolicy())
-        player.setMediaSource(factory.createMediaSource(MediaItem.fromUri(media.url)), media.startMs)
+        player.trackSelectionParameters = PlayerFactory.rememberedTracks(player.trackSelectionParameters, model.store)
+        player.setMediaSource(PlayerFactory.mediaSource(context, request), request.startMs)
         player.prepare(); player.play()
     }
     LaunchedEffect(player) {
@@ -228,79 +233,38 @@ import kotlinx.coroutines.flow.first
             position = player.currentPosition.coerceAtLeast(0)
             duration = player.duration.coerceAtLeast(0)
             if (++ticks % 10 == 0) save()
-            if (player.isPlaying && visible && !trackPanel && recovery.state.value.failure == null &&
-                !recovery.state.value.recovering && System.currentTimeMillis() - lastInteraction > 8000) visible = false
+            if (player.isPlaying && layer == PlayerLayer.Controls && recovery.state.value.failure == null &&
+                !recovery.state.value.recovering && System.currentTimeMillis() - lastInteraction > 8000) layer = PlayerLayer.Video
         }
     }
-    LaunchedEffect(visible, trackPanel, endState != null) {
-        if (!trackPanel && endState == null) { withFrameNanos { }; if (visible) first.requestFocus() else canvas.requestFocus() }
+    LaunchedEffect(top()) {
+        if (top() == PlayerLayer.Controls || top() == PlayerLayer.Video) { withFrameNanos { }; if (layer == PlayerLayer.Video) canvas.requestFocus() else first.requestFocus() }
     }
     LaunchedEffect(screenState.autoNextEpisode) { episodeEnd.preferenceChanged(screenState.autoNextEpisode) }
     LaunchedEffect(nextChoice) { episodeEnd.availabilityChanged(nextChoice) }
     LaunchedEffect(recoveryState.recovering, failure) {
-        if (recoveryState.recovering || failure != null) { trackPanel = false; interact() }
+        if (recoveryState.recovering || failure != null) { layer = PlayerLayer.Controls; interact() }
     }
     BackHandler {
         // A Back that arrives after the model left the player, before this screen is gone, is the new route's.
         if (model.state.value.route != Route.PLAYER) return@BackHandler back()
-        when {
-            trackPanel -> { trackPanel = false; interact() }
-            recoveryState.recovering -> { recovery.cancel(); save(); model.back() }
-            visible && failure == null -> visible = false
-            else -> { save(); model.back() }
-        }
+        perform(PlayerKeyRouter.back(keys()))
     }
     Box(Modifier.fillMaxSize().background(Color.Black)
         .onPreviewKeyEvent { event ->
             if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
             lastInteraction = System.currentTimeMillis()
-            val hidden = !visible && !trackPanel
-            val healthy = failure == null && !recoveryState.recovering
-            val code = event.nativeKeyEvent.keyCode
-            val digit = when (code) {
-                in android.view.KeyEvent.KEYCODE_0..android.view.KeyEvent.KEYCODE_9 -> code - android.view.KeyEvent.KEYCODE_0
-                in android.view.KeyEvent.KEYCODE_NUMPAD_0..android.view.KeyEvent.KEYCODE_NUMPAD_9 -> code - android.view.KeyEvent.KEYCODE_NUMPAD_0
-                else -> -1
-            }
-            // Held Left/Right seek further the longer they are held: 10 s, then 30 s, then a minute per step.
-            val repeat = event.nativeKeyEvent.repeatCount
-            val step = when { repeat >= 30 -> 60_000L; repeat >= 10 -> 30_000L; else -> 10_000L }
-            when {
-                event.key == Key.MediaPlayPause -> {
-                    if (recoveryState.recovering) recovery.cancel()
-                    else if (failure != null) recovery.retryManually()
-                    else if (player.isPlaying) player.pause() else player.play()
-                    true
-                }
-                event.key == Key.MediaPlay -> { if (failure != null) recovery.retryManually() else if (!recoveryState.recovering) player.play(); true }
-                event.key == Key.MediaPause -> { if (recoveryState.recovering) recovery.cancel() else player.pause(); true }
-                // Live: CH+/CH− always; with the controls hidden Up/Down too (Up is the next number, as CH+).
-                live && (event.key == Key.ChannelUp || event.key == Key.ChannelDown) -> { zap(if (event.key == Key.ChannelUp) 1 else -1); true }
-                live && hidden && healthy && (event.key == Key.DirectionUp || event.key == Key.DirectionDown) -> {
-                    zap(if (event.key == Key.DirectionUp) 1 else -1); true
-                }
-                // Digits pick a channel by its Canlı TV number, 1.5 s after the last one.
-                live && !trackPanel && digit >= 0 -> { if (digits.length < 4) digits += digit; flash(digits); true }
-                // The remote's guide key opens the programme guide on this channel.
-                live && event.key == Key.Guide -> { model.guide(); true }
-                !live && healthy && (event.key == Key.MediaFastForward || event.key == Key.MediaRewind) -> {
-                    seekBy(if (event.key == Key.MediaFastForward) 30_000 else -10_000); true
-                }
-                !live && hidden && healthy && (event.key == Key.DirectionLeft || event.key == Key.DirectionRight) -> {
-                    seekBy(if (event.key == Key.DirectionRight) step else -step); true
-                }
-                hidden && event.key in setOf(Key.DirectionCenter, Key.Enter, Key.DirectionLeft, Key.DirectionRight, Key.DirectionUp, Key.DirectionDown) -> {
-                    visible = true; true
-                }
-                else -> false
-            }
+            // PlayerKeyRouter decides; a key it leaves goes on to the focused control.
+            val key = PlayerKey.of(event.nativeKeyEvent.keyCode) ?: return@onPreviewKeyEvent false
+            val command = PlayerKeyRouter.route(key, keys(event.nativeKeyEvent.repeatCount)) ?: return@onPreviewKeyEvent false
+            perform(command); true
         }) {
         AndroidView(factory = { PlayerView(it).apply {
             this.player = player; useController = false; keepScreenOn = true
             isFocusable = false; descendantFocusability = android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS
             setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
         } }, modifier = Modifier.fillMaxSize(), onRelease = { it.player = null })
-        Box(Modifier.fillMaxSize().focusRequester(canvas).focusable(!visible && !trackPanel))
+        Box(Modifier.fillMaxSize().focusRequester(canvas).focusable(layer == PlayerLayer.Video))
         note?.takeIf { !controlsShown }?.let { (text, detail) ->
             Column(Modifier.align(Alignment.TopEnd).padding(top = 22.dp, end = TvLayout.Gutter).widthIn(max = 420.dp)
                 .background(Ink.Background.copy(alpha = .9f), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp, vertical = 10.dp)
@@ -312,7 +276,7 @@ import kotlinx.coroutines.flow.first
         }
         // While the controls are up, their status line reports opening; the centred pill would sit under the panel.
         if (opening && !controlsShown) {
-            Row(Modifier.align(Alignment.Center).offset { IntOffset(if (trackPanel) (-220).dp.roundToPx() else 0, 0) }
+            Row(Modifier.align(Alignment.Center).offset { IntOffset(if (layer == PlayerLayer.Tracks) (-220).dp.roundToPx() else 0, 0) }
                 .background(Ink.Background.copy(alpha = .9f), RoundedCornerShape(12.dp)).padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 LoadingArc()
@@ -398,7 +362,7 @@ import kotlinx.coroutines.flow.first
                         Action(stringResource(R.string.player_seek_back, "10"), enabled = player.isCurrentMediaItemSeekable) { interact(); player.seekTo((player.currentPosition - 10_000).coerceAtLeast(0)) }
                         Action(stringResource(R.string.player_seek_forward, "10"), enabled = player.isCurrentMediaItemSeekable) { interact(); player.seekTo((player.currentPosition + 10_000).coerceAtMost(duration.takeIf { it > 0 } ?: Long.MAX_VALUE)) }
                     }
-                    Action(stringResource(R.string.player_tracks), icon = "sound", enabled = failure == null && !recoveryState.recovering) { interact(); trackPanel = true }
+                    Action(stringResource(R.string.player_tracks), icon = "sound", enabled = failure == null && !recoveryState.recovering) { interact(); layer = PlayerLayer.Tracks }
                     // The shared star icon at icon size, filled while it is a favourite; the meaning stays in semantics.
                     val favoriteLabel = stringResource(when {
                         favoriteTarget == null -> R.string.player_favorite_unavailable
@@ -419,7 +383,7 @@ import kotlinx.coroutines.flow.first
                 }
             }
         }
-        if (trackPanel) TracksDialog(tracks, trackParameters, player, model) { trackPanel = false; interact() }
+        if (layer == PlayerLayer.Tracks) TracksDialog(tracks, trackParameters, player, model) { perform(PlayerCommand.CloseTracks) }
         endState?.let { end -> EpisodeEndDialog(end,
             play = { episodeEnd.playNow() },
             stay = { episodeEnd.dismiss(); interact() },

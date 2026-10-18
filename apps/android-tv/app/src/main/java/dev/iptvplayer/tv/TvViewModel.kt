@@ -24,8 +24,12 @@ data class SourceDraft(val name: String? = null, val type: SourceType = SourceTy
     val address: String = "", val username: String = "", val password: String = "", val epgUrl: String = "") {
     override fun toString() = "SourceDraft(type=$type, credentials=REDACTED)"
 }
-data class PlayingMedia(val entry: MediaEntry, val url: String, val startMs: Long = 0) {
-    override fun toString() = "PlayingMedia(id=${entry.id}, url=REDACTED)"
+/** How the player treats what it plays (gap plan T4). ARCHIVE, a past programme, arrives with catch-up (S24). */
+enum class PlaybackMode { LIVE, VOD, ARCHIVE;
+    companion object { fun of(kind: MediaKind) = if (kind == MediaKind.LIVE) LIVE else VOD }
+}
+data class PlayingMedia(val entry: MediaEntry, val url: String, val startMs: Long, val mode: PlaybackMode) {
+    override fun toString() = "PlayingMedia(id=${entry.id}, mode=$mode, url=REDACTED)"
 }
 /** [notices] read as one paragraph: the list's warnings, or how its last refresh went. */
 data class SourceStatus(val count: Int = 0, val updatedAt: Long = 0, val refreshing: Boolean = false,
@@ -740,7 +744,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         try {
             val uri = source.streamUrl(entry)
             val position = if (restart || entry.kind == MediaKind.LIVE) 0 else store.progress(source.id, entry.withoutSource().id)?.takeIf { it.resumable }?.resumeMs ?: 0
-            mutable.update { it.copy(route = Route.PLAYER, playing = PlayingMedia(entry, uri, position),
+            mutable.update { it.copy(route = Route.PLAYER, playing = PlayingMedia(entry, uri, position, PlaybackMode.of(entry.kind)),
                 guideChannelId = if (entry.kind == MediaKind.LIVE && it.route == Route.PLAYER && it.playerReturn == Route.GUIDE) entry.id else it.guideChannelId,
                 playerReturn = if (it.route == Route.PLAYER) it.playerReturn else it.route,
                 season = if (entry.kind == MediaKind.EPISODE && it.episodes.any { episode -> episode.id == entry.id }) entry.season else it.season,
