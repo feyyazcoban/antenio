@@ -30,22 +30,15 @@ import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.*
 import kotlinx.coroutines.delay
 import java.time.*
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
-private val guideLocale = Locale.forLanguageTag("tr")
-internal fun guideTime(time: Long, zone: ZoneId): String = Instant.ofEpochMilli(time).atZone(zone).format(DateTimeFormatter.ofPattern("HH:mm", guideLocale))
-internal fun guideDate(time: Long, zone: ZoneId): String = Instant.ofEpochMilli(time).atZone(zone).format(DateTimeFormatter.ofPattern("d MMM EEEE", guideLocale))
-internal fun guideOffset(time: Long, zone: ZoneId): String = "UTC" + Instant.ofEpochMilli(time).atZone(zone).offset.id.let { if (it == "Z") "+00:00" else it }
 /** "20:00 — 21:30", with dates or offsets where they change; [unknownEnd] stands for an end the guide does not give. */
 internal fun programmeTime(programme: EpgProgramme, zone: ZoneId, unknownEnd: String): String {
     val start = Instant.ofEpochMilli(programme.start).atZone(zone)
     val end = programme.end?.let { Instant.ofEpochMilli(it).atZone(zone) }
     val dates = end != null && start.toLocalDate() != end.toLocalDate()
     val offsets = end != null && start.offset != end.offset
-    val format = DateTimeFormatter.ofPattern(if (dates) "d MMM HH:mm" else "HH:mm", guideLocale)
-    fun label(value: ZonedDateTime) = value.format(format) + if (offsets) " (${guideOffset(value.toInstant().toEpochMilli(), zone)})" else ""
-    return label(start) + " — " + (end?.let(::label) ?: unknownEnd)
+    fun label(time: Long) = (if (dates) guideDayTime(time, zone) else guideTime(time, zone)) + if (offsets) " (${guideOffset(time, zone)})" else ""
+    return label(programme.start) + " — " + (programme.end?.let(::label) ?: unknownEnd)
 }
 
 @Composable @ReadOnlyComposable

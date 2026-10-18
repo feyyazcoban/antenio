@@ -92,9 +92,8 @@ import kotlinx.coroutines.flow.first
                     Text(s.sourceName(source.id), Modifier.fillMaxWidth().testTag("source-name:${source.id}"),
                         color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                         fontSize = 18.sp, lineHeight = 24.sp, maxLines = 1, overflow = TextOverflow.MiddleEllipsis)
-                    Note(if (status.updatedAt > 0) stringResource(R.string.last_updated,
-                        java.text.SimpleDateFormat("d MMM, HH:mm", java.util.Locale.forLanguageTag("tr"))
-                            .format(java.util.Date(status.updatedAt))) else stringResource(R.string.sources_not_downloaded))
+                    Note(if (status.updatedAt > 0) stringResource(R.string.last_updated, updatedTime(status.updatedAt))
+                        else stringResource(R.string.sources_not_downloaded))
                     if (status.refreshing) Note(stringResource(R.string.sources_refreshing))
                     else if (status.notices.isNotEmpty()) Text(status.notices.resolve(), color = if (status.failed) Ink.Error else Ink.Muted,
                         fontFamily = Roboto, fontSize = 12.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)

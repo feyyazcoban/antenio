@@ -27,10 +27,12 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.graphics.Color
@@ -69,13 +71,21 @@ object Ink {
 val Roboto = FontFamily(Font(R.font.roboto))
 val LocalReducedMotion = staticCompositionLocalOf { false }
 
+/**
+ * Left to right in every language until right-to-left layouts are designed: the remote's Left and Right are read as
+ * screen directions (Left opens the menu, the hero's slide edges in D071), which a mirrored layout would turn around.
+ * The manifest's supportsRtl="false" covers the platform views; Compose starts from the configuration's direction,
+ * which follows the TV's language whatever the manifest says, so it is pinned here as well. Dialogs inherit it.
+ */
 @Composable fun PilotTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = darkColorScheme(
-        primary = Ink.Mint, onPrimary = Ink.OnMint, surface = Ink.Background,
-        onSurface = Ink.Text, surfaceVariant = Ink.Container, onSurfaceVariant = Ink.Muted,
-        error = Ink.Error
-    )) {
-        ProvideTextStyle(TextStyle(fontFamily = Roboto, fontSize = 16.sp, color = Ink.Text, letterSpacing = 0.sp), content)
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        MaterialTheme(colorScheme = darkColorScheme(
+            primary = Ink.Mint, onPrimary = Ink.OnMint, surface = Ink.Background,
+            onSurface = Ink.Text, surfaceVariant = Ink.Container, onSurfaceVariant = Ink.Muted,
+            error = Ink.Error
+        )) {
+            ProvideTextStyle(TextStyle(fontFamily = Roboto, fontSize = 16.sp, color = Ink.Text, letterSpacing = 0.sp), content)
+        }
     }
 }
 

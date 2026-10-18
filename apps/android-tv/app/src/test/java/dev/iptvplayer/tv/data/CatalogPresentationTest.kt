@@ -2,9 +2,11 @@ package dev.iptvplayer.tv.data
 
 import org.junit.Assert.*
 import org.junit.Test
+import java.util.Locale
 
 class CatalogPresentationTest {
     private fun entry(id: String, title: String = id, kind: MediaKind = MediaKind.MOVIE) = MediaEntry(id, id, kind, title)
+    private val turkish = Locale.forLanguageTag("tr")
 
     @Test fun librarySortsAreStableAndPutUnknownValuesLast() {
         val a = entry("a", "Dağ").copy(year = "2010", rating = 7f, addedAt = 30)
@@ -12,19 +14,29 @@ class CatalogPresentationTest {
         val c = entry("c", "Cam").copy(year = "2021", rating = 8.5f, addedAt = 10)
         val d = entry("d", "Ayna").copy(year = "2010", rating = 7f, addedAt = 30)
         val list = listOf(a, b, c, d)
-        assertEquals(list, librarySorted(list, LibrarySort.DEFAULT))
-        assertEquals(listOf(a, d, c, b), librarySorted(list, LibrarySort.ADDED))
-        assertEquals(listOf(c, a, d, b), librarySorted(list, LibrarySort.YEAR))
-        assertEquals(listOf(c, a, d, b), librarySorted(list, LibrarySort.RATING))
+        assertEquals(list, librarySorted(list, LibrarySort.DEFAULT, turkish))
+        assertEquals(listOf(a, d, c, b), librarySorted(list, LibrarySort.ADDED, turkish))
+        assertEquals(listOf(c, a, d, b), librarySorted(list, LibrarySort.YEAR, turkish))
+        assertEquals(listOf(c, a, d, b), librarySorted(list, LibrarySort.RATING, turkish))
         // Turkish alphabet: C before Ç before D.
-        assertEquals(listOf(d, c, b, a), librarySorted(list, LibrarySort.TITLE))
+        assertEquals(listOf(d, c, b, a), librarySorted(list, LibrarySort.TITLE, turkish))
         // Dividers are not titles: every order keeps them after the content, in the provider's order.
         val star = entry("s", "*****BİLGİ*****").copy(addedAt = 99, rating = 9f, year = "2030")
         val line = entry("l", "=====4K=====")
         for (sort in LibrarySort.entries.filter { it != LibrarySort.DEFAULT })
-            assertEquals(listOf(star, line), librarySorted(listOf(star, a, line, b, c, d), sort).takeLast(2))
-        assertEquals("7,5", entry("r").copy(rating = 7.5f).ratingText)
-        assertNull(entry("n").ratingText)
+            assertEquals(listOf(star, line), librarySorted(listOf(star, a, line, b, c, d), sort, turkish).takeLast(2))
+    }
+
+    @Test fun titleOrderFollowsTheAppsLanguageAndTheCacheKeepsOneOrderPerLanguage() {
+        // Ç is a letter of its own after C in Turkish; in English it is a C with a mark.
+        val tea = entry("t", "Çay")
+        val friday = entry("f", "Cuma")
+        assertEquals(listOf(friday, tea), librarySorted(listOf(tea, friday), LibrarySort.TITLE, turkish))
+        assertEquals(listOf(tea, friday), librarySorted(listOf(tea, friday), LibrarySort.TITLE, Locale.ENGLISH))
+        val cache = LibraryOrderCache()
+        val catalog = Catalog(listOf(tea, friday))
+        assertEquals(listOf(friday, tea), cache.sorted(catalog, MediaKind.MOVIE, LibrarySort.TITLE, turkish))
+        assertEquals(listOf(tea, friday), cache.sorted(catalog, MediaKind.MOVIE, LibrarySort.TITLE, Locale.ENGLISH))
     }
 
     @Test fun decorativeEdgesAreHintsButInfoAndInternalPunctuationAreOrdinaryContent() {

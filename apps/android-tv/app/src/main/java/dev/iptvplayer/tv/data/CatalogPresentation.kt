@@ -126,14 +126,13 @@ enum class LibrarySort(@StringRes val label: Int) {
     RATING(R.string.sort_rating)
 }
 
-private val turkish: Locale = Locale.forLanguageTag("tr")
-
 /**
  * Orders a list for the library. Newest, highest and A–Z come first; titles without a date, year or rating go
- * last. Every order is stable, so equal titles keep the provider's order. Provider dividers are not titles: they
- * stay after the content in their own order, as [catalogDisplayOrder] puts them.
+ * last; A–Z follows the alphabet of [locale], the app's language. Every order is stable, so equal titles keep the
+ * provider's order. Provider dividers are not titles: they stay after the content in their own order, as
+ * [catalogDisplayOrder] puts them.
  */
-fun librarySorted(entries: List<MediaEntry>, sort: LibrarySort): List<MediaEntry> {
+fun librarySorted(entries: List<MediaEntry>, sort: LibrarySort, locale: Locale): List<MediaEntry> {
     if (sort == LibrarySort.DEFAULT) return entries
     val (dividers, content) = entries.partition { it.isProviderDivider() }
     // Each key is computed once per title, not on every comparison.
@@ -144,7 +143,7 @@ fun librarySorted(entries: List<MediaEntry>, sort: LibrarySort): List<MediaEntry
         LibrarySort.ADDED -> by(true) { it.addedAt }
         LibrarySort.YEAR -> by(true) { it.year.take(4).toIntOrNull() ?: 0 }
         LibrarySort.RATING -> by(true) { it.rating }
-        LibrarySort.TITLE -> Collator.getInstance(turkish).apply { strength = Collator.SECONDARY }
+        LibrarySort.TITLE -> Collator.getInstance(locale).apply { strength = Collator.SECONDARY }
             .let { collator -> by(false) { collator.getCollationKey(it.title.trim()) } }
     }
     return sorted + dividers
@@ -155,18 +154,15 @@ fun librarySorted(entries: List<MediaEntry>, sort: LibrarySort): List<MediaEntry
  * and sorting tens of thousands of titles again on every return would hold up its first frame.
  */
 class LibraryOrderCache {
-    private class Kept(val catalog: Catalog, val sort: LibrarySort, val items: List<MediaEntry>)
+    private class Kept(val catalog: Catalog, val sort: LibrarySort, val locale: Locale, val items: List<MediaEntry>)
     private val kept = HashMap<MediaKind, Kept>()
 
-    /** The section's titles as Library lists them (no adult titles, dividers last), in [sort] order. */
-    fun sorted(catalog: Catalog, kind: MediaKind, sort: LibrarySort): List<MediaEntry> {
-        synchronized(this) { kept[kind]?.takeIf { it.catalog === catalog && it.sort == sort }?.let { return it.items } }
+    /** The section's titles as Library lists them (no adult titles, dividers last), in [sort] order for [locale]. */
+    fun sorted(catalog: Catalog, kind: MediaKind, sort: LibrarySort, locale: Locale): List<MediaEntry> {
+        synchronized(this) { kept[kind]?.takeIf { it.catalog === catalog && it.sort == sort && it.locale == locale }?.let { return it.items } }
         // Sorted outside the lock, so a read on the main thread never waits for a sort running elsewhere.
-        val items = librarySorted(catalogDisplayOrder(catalog.items.filter { it.kind == kind && !it.adult }), sort)
-        synchronized(this) { kept[kind] = Kept(catalog, sort, items) }
+        val items = librarySorted(catalogDisplayOrder(catalog.items.filter { it.kind == kind && !it.adult }), sort, locale)
+        synchronized(this) { kept[kind] = Kept(catalog, sort, locale, items) }
         return items
     }
 }
-
-/** "7,5" for a known rating, null otherwise. */
-val MediaEntry.ratingText: String? get() = rating.takeIf { it > 0f }?.let { String.format(turkish, "%.1f", it) }

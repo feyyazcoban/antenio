@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.compose.runtime.mutableStateMapOf
 import dev.iptvplayer.tv.data.*
+import dev.iptvplayer.tv.ui.appLocale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -548,13 +549,13 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     private fun storedSorts(): Map<MediaKind, LibrarySort> = listOf(MediaKind.MOVIE, MediaKind.SERIES).associateWith(store::librarySort)
     private val libraryOrders = LibraryOrderCache()
     /** Films or series in a Sırala order; sorted once per catalogue and choice. */
-    fun libraryOrder(catalog: Catalog, kind: MediaKind, sort: LibrarySort): List<MediaEntry> = libraryOrders.sorted(catalog, kind, sort)
+    fun libraryOrder(catalog: Catalog, kind: MediaKind, sort: LibrarySort): List<MediaEntry> = libraryOrders.sorted(catalog, kind, sort, appLocale)
     fun librarySort(kind: MediaKind, sort: LibrarySort) {
         store.librarySort(kind, sort)
         val catalog = state.value.catalog
         viewModelScope.launch {
             // Sort away from the main thread first; the list then changes in one step.
-            if (sort != LibrarySort.DEFAULT) withContext(Dispatchers.Default) { libraryOrders.sorted(catalog, kind, sort) }
+            if (sort != LibrarySort.DEFAULT) withContext(Dispatchers.Default) { libraryOrders.sorted(catalog, kind, sort, appLocale) }
             mutable.update { it.copy(librarySorts = it.librarySorts + (kind to sort), focusedId = null) }
         }
     }
@@ -562,7 +563,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     private fun prepareLibraryOrders() {
         val s = state.value
         val pending = s.librarySorts.filterValues { it != LibrarySort.DEFAULT }
-        if (pending.isNotEmpty()) viewModelScope.launch(Dispatchers.Default) { pending.forEach { (kind, sort) -> libraryOrders.sorted(s.catalog, kind, sort) } }
+        if (pending.isNotEmpty()) viewModelScope.launch(Dispatchers.Default) { pending.forEach { (kind, sort) -> libraryOrders.sorted(s.catalog, kind, sort, appLocale) } }
     }
     fun autoNextEpisode() { store.autoNextEpisode = !state.value.autoNextEpisode; mutable.update { it.copy(autoNextEpisode = store.autoNextEpisode) } }
 

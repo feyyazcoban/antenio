@@ -72,7 +72,6 @@ import dev.iptvplayer.tv.data.EpisodeSequence
 import dev.iptvplayer.tv.data.displayTitle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import java.util.Locale
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable internal fun PlayerScreen(media: PlayingMedia, model: TvViewModel, back: () -> Unit) {
@@ -549,8 +548,7 @@ import java.util.Locale
 
 @Composable @ReadOnlyComposable
 private fun trackLabel(format: Format, number: Int, type: Int): String {
-    val language = format.language?.takeUnless { it == "und" || it.isBlank() }
-        ?.let { Locale.forLanguageTag(it).getDisplayLanguage(Locale.forLanguageTag("tr")).ifBlank { it } }
+    val language = languageName(format.language)
         ?: stringResource(if (type == C.TRACK_TYPE_AUDIO) R.string.tracks_audio_fallback else R.string.tracks_subtitles)
     val channels = if (format.channelCount > 0) when (format.channelCount) {
         1 -> stringResource(R.string.tracks_mono); 2 -> stringResource(R.string.tracks_stereo); 6 -> "5.1"; 8 -> "7.1"

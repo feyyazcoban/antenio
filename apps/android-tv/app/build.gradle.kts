@@ -16,6 +16,8 @@ android {
     }
     buildFeatures { compose = true; buildConfig = true }
     buildTypes {
+        // en-XA (longer, accented text) and ar-XB (right to left) for layout checks on the emulator; never in release.
+        debug { isPseudoLocalesEnabled = true }
         // TV deliveries use this type: debuggable builds run Compose without ART optimisations or the
         // libraries' baseline profiles and stutter on TV SoCs. Instrumentation tests keep using debug.
         release {

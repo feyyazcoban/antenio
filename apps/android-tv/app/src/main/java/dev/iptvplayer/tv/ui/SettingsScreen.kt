@@ -171,8 +171,7 @@ private enum class SectionId(@StringRes val label: Int) {
                                 val refreshNotice = s.catalogNotice?.takeIf { it.operation == CatalogOperation.REFRESH }
                                 // The timestamp captions the refresh row: 4 dp more above, 8 dp below (clear of the focus ring).
                                 Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    if (s.catalogUpdatedAt > 0) Note(stringResource(R.string.last_updated, java.text.SimpleDateFormat("d MMM, HH:mm",
-                                        java.util.Locale.forLanguageTag("tr")).format(java.util.Date(s.catalogUpdatedAt))),
+                                    if (s.catalogUpdatedAt > 0) Note(stringResource(R.string.last_updated, updatedTime(s.catalogUpdatedAt)),
                                         modifier = Modifier.padding(top = 4.dp))
                                     SettingRow(stringResource(R.string.settings_refresh), if (s.refreshing) stringResource(R.string.settings_refreshing)
                                         else refreshNotice?.message?.resolve() ?: stringResource(R.string.settings_refresh_note),
