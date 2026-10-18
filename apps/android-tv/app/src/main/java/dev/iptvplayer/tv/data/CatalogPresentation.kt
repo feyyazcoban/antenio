@@ -31,20 +31,41 @@ fun catalogDisplayOrder(entries: List<MediaEntry>): List<MediaEntry> {
 data class DisplayTitle(val name: String, val year: String, val tag: String)
 
 /**
- * The country and language codes a leading "TR: " or "TR/FILM ~" may carry: ISO 3166-1 and ISO 639 codes providers
- * use, plus UK, ARB and LAT (Britain, Arabic, Latin America). Any other short capitals before a colon belong to the
- * name ("CSI: Vegas", "FBI: Most Wanted"), and so do quality marks (D065). A code missing here only leaves the
- * provider's title as it is.
+ * The codes a leading "TR: " or a trailing "(2024) DE" may carry: every ISO 3166-1 country code, every ISO 639-1
+ * language code, and the forms providers use besides them (ARB Arabic, LAT Latin America, KSA, UAE, ENG, GER...).
+ * Any other short capitals before a colon belong to the name ("CSI: Vegas", "FBI: Most Wanted"), and so do quality
+ * marks (D065): SD is left out, and so are TV and AI, which start names more often than they stand for Tuvalu or
+ * Anguilla. Only the title is known here, so a name that starts with a code still loses it ("IT: Welcome to Derry"
+ * reads as "Welcome to Derry", tagged IT).
  */
-private val providerTags = setOf(
-    "AE", "AL", "AR", "AT", "AU", "AZ", "BA", "BE", "BG", "BR", "CA", "CH", "CN", "CY", "CZ", "DE", "DK", "EG", "EN",
-    "ES", "FA", "FI", "FR", "GB", "GR", "HR", "HU", "IE", "IL", "IN", "IQ", "IR", "IT", "JP", "KR", "KU", "LB", "MA",
-    "MK", "MX", "NL", "NO", "PH", "PK", "PL", "PT", "RO", "RS", "RU", "SA", "SE", "SI", "SK", "TH", "TR", "UA", "UK",
-    "US", "ZA",
-    "ALB", "ARA", "ARB", "AUS", "AUT", "AZE", "BEL", "BIH", "BRA", "BUL", "CAN", "CRO", "CZE", "DEN", "DEU", "ENG",
-    "ESP", "FIN", "FRA", "GBR", "GER", "GRE", "HUN", "IND", "IRN", "ITA", "KUR", "LAT", "MEX", "NED", "NLD", "NOR",
-    "PAK", "POL", "POR", "PRT", "ROM", "ROU", "RUS", "SPA", "SRB", "SUI", "SVK", "SWE", "TUR", "UKR", "USA"
-)
+private val providerTags: Set<String> = (
+    // ISO 3166-1 alpha-2
+    "AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW " +
+    "BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI " +
+    "FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN " +
+    "IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME " +
+    "MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF " +
+    "PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV " +
+    "SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE " +
+    "YT ZA ZM ZW " +
+    // ISO 639-1, the codes that are not also a country
+    "AA AB AK AN AV AY CE CS DA DV EL EN EO EU FA FF FY GV HA HE HI HO HY HZ IA IG II IK IU IW JA JI JV KA KJ " +
+    "KK KL KO KS KU KV LG LN LO MI NB ND NN NV NY OC OJ OR OS PI QU RM RN SQ SU SW TA TE TI TS TY UK UR VO WA " +
+    "WO XH YI YO ZH ZU " +
+    // ISO 3166-1 alpha-3
+    "ABW AFG AGO AIA ALA ALB AND ARE ARG ARM ASM ATA ATF ATG AUS AUT AZE BDI BEL BEN BES BFA BGD BGR BHR BHS " +
+    "BIH BLM BLR BLZ BMU BOL BRA BRB BRN BTN BVT BWA CAF CAN CCK CHE CHL CHN CIV CMR COD COG COK COL COM CPV " +
+    "CRI CUB CUW CXR CYM CYP CZE DEU DJI DMA DNK DOM DZA ECU EGY ERI ESH ESP EST ETH FIN FJI FLK FRA FRO FSM " +
+    "GAB GBR GEO GGY GHA GIB GIN GLP GMB GNB GNQ GRC GRD GRL GTM GUF GUM GUY HKG HMD HND HRV HTI HUN IDN IMN " +
+    "IND IOT IRL IRN IRQ ISL ISR ITA JAM JEY JOR JPN KAZ KEN KGZ KHM KIR KNA KOR KWT LAO LBN LBR LBY LCA LIE " +
+    "LKA LSO LTU LUX LVA MAC MAF MAR MCO MDA MDG MDV MEX MHL MKD MLI MLT MMR MNE MNG MNP MOZ MRT MSR MTQ MUS " +
+    "MWI MYS MYT NAM NCL NER NFK NGA NIC NIU NLD NOR NPL NRU NZL OMN PAK PAN PCN PER PHL PLW PNG POL PRI PRK " +
+    "PRT PRY PSE PYF QAT REU ROU RUS RWA SAU SDN SEN SGP SGS SHN SJM SLB SLE SLV SMR SOM SPM SRB SSD STP SUR " +
+    "SVK SVN SWE SWZ SXM SYC SYR TCA TCD TGO THA TJK TKL TKM TLS TON TTO TUN TUR TUV TWN TZA UGA UKR UMI URY " +
+    "USA UZB VAT VCT VEN VGB VIR VNM VUT WLF WSM YEM ZAF ZMB ZWE " +
+    // Other forms providers use
+    "AFR ARA ARB BUL CRO DEN ENG FRE GER GRE HIN KSA KUR LAT NED POR ROM SLO SPA SUI TAM UAE URD"
+).split(' ').toHashSet() - setOf("AI", "SD", "TV")
 private val countryPrefix = Regex("^\\s*([A-Z]{2,3})\\s*[:|]\\s*(?=\\S)")
 private val yearAndLanguage = Regex("\\s*\\(((?:19|20)\\d{2})\\)\\s+([A-Z]{2})\\s*$")
 private val trailingYear = Regex("\\s*(?:\\(((?:19|20)\\d{2})\\)|[-–]\\s*((?:19|20)\\d{2}))\\s*$")
@@ -55,8 +76,13 @@ fun displayTitle(title: String, year: String = ""): DisplayTitle {
     countryPrefix.find(rest)?.takeIf { it.groupValues[1] in providerTags }
         ?.let { tag = it.groupValues[1]; rest = rest.substring(it.range.last + 1) }
     var found = ""
-    yearAndLanguage.find(rest)?.let { found = it.groupValues[1]; tag = it.groupValues[2]; rest = rest.substring(0, it.range.first) }
-        ?: trailingYear.find(rest)?.let { found = it.groupValues[1].ifEmpty { it.groupValues[2] }; rest = rest.substring(0, it.range.first) }
+    yearAndLanguage.find(rest)?.let {
+        val code = it.groupValues[2]
+        found = it.groupValues[1]
+        // "(2024) HD" gives its year too, but a quality mark stays in the name; only a code becomes the tag.
+        if (code in providerTags) tag = code
+        rest = rest.substring(0, it.range.first) + if (code in providerTags) "" else " $code"
+    } ?: trailingYear.find(rest)?.let { found = it.groupValues[1].ifEmpty { it.groupValues[2] }; rest = rest.substring(0, it.range.first) }
     rest = rest.trim().trimEnd('-', '–', ':', '|').trim()
     if (rest.isEmpty()) return DisplayTitle(title.trim(), year, "")
     return DisplayTitle(rest, year.ifBlank { found }, tag)
@@ -64,10 +90,12 @@ fun displayTitle(title: String, year: String = ""): DisplayTitle {
 
 private val categoryPrefix = Regex("^\\s*([A-Z]{2,3})\\s*/\\s*[^~]*~\\s*(\\S.*)$")
 
-/** "TR/FILM ~ YERLI 2023" as "YERLI 2023" with the tag "TR"; other category names unchanged. */
+/**
+ * "TR/FILM ~ YERLI 2023" as "YERLI 2023" with the tag "TR"; other category names unchanged. The code before the "/"
+ * is the provider's own mark, never part of a name, so any code moves to the tag ("VIP/FILM ~ AKSIYON" → "AKSIYON").
+ */
 fun displayCategory(category: String): Pair<String, String> =
-    categoryPrefix.find(category)?.takeIf { it.groupValues[1] in providerTags }
-        ?.let { it.groupValues[2].trim() to it.groupValues[1] } ?: (category to "")
+    categoryPrefix.find(category)?.let { it.groupValues[2].trim() to it.groupValues[1] } ?: (category to "")
 
 private val episodeTagText = Regex("(?i)(?<![\\p{L}\\p{N}])(?:S\\d{1,3}\\s*E\\d{1,4}|\\d{1,3}x\\d{1,4})(?![\\p{L}\\p{N}])")
 private val leadingYear = Regex("^\\s*\\(\\d{4}\\)")

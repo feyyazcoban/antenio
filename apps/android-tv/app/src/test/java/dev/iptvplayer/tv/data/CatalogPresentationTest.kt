@@ -139,14 +139,29 @@ class CatalogPresentationTest {
         assertEquals(DisplayTitle("Das Erste HD", "", "DE"), displayTitle("DE | Das Erste HD"))
         assertEquals(DisplayTitle("BBC One HD", "", "UK"), displayTitle("UK: BBC One HD"))
         assertEquals(DisplayTitle("The Crown", "", "ENG"), displayTitle("ENG: The Crown"))
-        // Short capitals that are part of the name stay, and so do quality marks.
+        assertEquals(DisplayTitle("MBC 1", "", "UAE"), displayTitle("UAE: MBC 1"))
+        assertEquals(DisplayTitle("VTV1 HD", "", "VN"), displayTitle("VN | VTV1 HD"))
+        // Short capitals that are no country or language code stay in the name, and so do quality marks.
         assertEquals(DisplayTitle("CSI: Vegas", "", ""), displayTitle("CSI: Vegas"))
         assertEquals(DisplayTitle("NCIS: Origins", "", ""), displayTitle("NCIS: Origins"))
         assertEquals(DisplayTitle("FBI: Most Wanted", "", ""), displayTitle("FBI: Most Wanted"))
         assertEquals(DisplayTitle("BBC: Earth", "", ""), displayTitle("BBC: Earth"))
         assertEquals(DisplayTitle("CSI: Miami", "2002", ""), displayTitle("CSI: Miami (2002)"))
         assertEquals(DisplayTitle("VIP: Sinema 1", "", ""), displayTitle("VIP: Sinema 1"))
+        assertEquals(DisplayTitle("SD: Sinema 1", "", ""), displayTitle("SD: Sinema 1"))
+        assertEquals(DisplayTitle("Gladiator II HD", "2024", ""), displayTitle("Gladiator II (2024) HD"))
+        // Known limit: only the title is known, so a name that starts with a code loses it.
+        assertEquals(DisplayTitle("Welcome to Derry", "2025", "IT"), displayTitle("IT: Welcome to Derry (2025)"))
+        // In a category the code before "/" is the provider's mark, never a name, so any code becomes the tag.
         assertEquals("ACTION" to "UK", displayCategory("UK/MOVIES ~ ACTION"))
-        assertEquals("VIP/FILM ~ AKSIYON" to "", displayCategory("VIP/FILM ~ AKSIYON"))
+        assertEquals("FUTBOL" to "KSA", displayCategory("KSA/SPOR ~ FUTBOL"))
+        assertEquals("AKSIYON" to "VIP", displayCategory("VIP/FILM ~ AKSIYON"))
+    }
+    @Test fun everyIsoCountryAndLanguageCodeIsTakenOffTheFront() {
+        // The codes are written out in CatalogPresentation; this keeps the list from missing one the JDK knows.
+        val codes = Locale.getISOCountries().toList() + Locale.getISOCountries(Locale.IsoCountryCode.PART1_ALPHA3) +
+            Locale.getISOLanguages().map { it.uppercase(Locale.ROOT) }
+        for (code in codes.toSet() - setOf("AI", "SD", "TV"))
+            assertEquals(code, DisplayTitle("Kanal 1", "", code), displayTitle("$code: Kanal 1"))
     }
 }
