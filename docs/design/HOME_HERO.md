@@ -1,5 +1,9 @@
 # Ana sayfa üst alanı
 
+## 18 Ekim 2026 · Tam ekran vitrin · D093
+
+Vitrin içerik menüsünün sağıyla sınırlı değildir: ekranın sol kenarından sağ kenarına, en az viewport yüksekliğine uzanır (normal ekranda 960×540 dp). Backdrop oranı korunarak FillWidth/TopCenter ile tüm genişliği kaplar; geniş sinema oranında altta koyu zemin kalabilir, daha dar oranlarda taşan alt bölüm kırpılır. Kapalı menünün zemini saydamdır, ikonlar görselin üzerinde kalır; açıldıkça mevcut koyu zemin gelir. Metinler önceki sol güvenli hizalarını korur, metin arkasında karartma vardır. Poster-only keskin afiş 420 dp alan sınırını korur. D080'in 420 dp/ilk raf önizlemesi bölümü değişir; ilk raf vitrin altında başlar. Geri yukarı odağında vitrin üstü tam görünür olmalıdır. İki aşamalı Home kaydırma ve cold splash sorunu ayrı açık işlerdir.
+
 **18 Ekim 2026 · 0.14.60 / D090:** İzle simgesi odakta ve odak dışında her zaman dolu, Material Symbols Rounded play_arrow FILL 1. 16 dp ikon kutusu ve tek İzle düğmesinin ölçüleri/etkileşimi aynı.
 
 **18 Ekim 2026 · 0.14.58 / D088:** Sonraki slayt görselinin ön yüklemesi yalnız kaynak/görsel kimliği değişince başlar. İzle'ye odak girip çıkması yalnız otomatik slayt zamanlayıcısını yeniler; aynı görseli yeniden çözmez. 15/8 saniye, TalkBack, Hareketi azalt, sağ/sol slayt ve tek İzle davranışı aynı.

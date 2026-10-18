@@ -120,7 +120,7 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
 @Composable fun Action(label: String, modifier: Modifier = Modifier, selected: Boolean? = null,
     enabled: Boolean = true, primary: Boolean = false, icon: String? = null, compact: Boolean = false,
     labelOverflow: TextOverflow = TextOverflow.Ellipsis, outlined: Boolean = false, check: Boolean = false,
-    iconFilled: Boolean = false, labelText: AnnotatedString? = null, onClick: () -> Unit) {
+    iconFilled: Boolean = false, labelText: AnnotatedString? = null, centerContent: Boolean = false, onClick: () -> Unit) {
     val height = actionHeight(compact)
     // The TV Button stays focusable while disabled. The D-pad must not enter a disabled action;
     // one that becomes disabled while focused keeps focus, so focus never jumps or disappears.
@@ -146,7 +146,7 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
             ActionLabel(label, labelText, contentColor, compact, labelOverflow, Modifier.weight(1f))
             if (selected == true) Text("✓", Modifier.clearAndSetSemantics { }, color = if (contentColor == Ink.OnMint) Ink.OnMint else Ink.Mint,
                 fontFamily = Roboto, fontSize = 16.sp, lineHeight = 16.sp)
-        } else Row(Modifier.drawWithContent {
+        } else Row((if (centerContent) Modifier.fillMaxSize() else Modifier).drawWithContent {
             drawContent()
             if (selected == true) {
                 // Same offset and mint as the navigation marker, clear of descenders; the clamp keeps it inside the pill.
@@ -155,7 +155,7 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
                     Offset(size.width / 2 - 6.dp.toPx(), y), Offset(size.width / 2 + 6.dp.toPx(), y),
                     strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
             }
-        }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
             if (icon != null) ActionIcon(icon, contentColor, iconFilled)
             if (label.isNotEmpty()) ActionLabel(label, labelText, contentColor, compact, labelOverflow)
         }

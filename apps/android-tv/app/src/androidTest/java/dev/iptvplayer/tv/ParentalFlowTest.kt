@@ -224,6 +224,22 @@ class ParentalFlowTest {
         row("PIN oluştur").assertIsFocused()
         openPad()
         padTitle("PIN oluştur")
+        for (digit in '0'..'9') {
+            val button = ui.onNodeWithTag("pin-key:$digit").getUnclippedBoundsInRoot()
+            val text = ui.onNode(hasText(digit.toString()) and hasAnyAncestor(hasTestTag("pin-key:$digit")), useUnmergedTree = true).getUnclippedBoundsInRoot()
+            assertEquals("Digit $digit is horizontally centered", (button.left.value + button.right.value) / 2, (text.left.value + text.right.value) / 2, 1f)
+            assertEquals("Digit $digit is vertically centered", (button.top.value + button.bottom.value) / 2, (text.top.value + text.bottom.value) / 2, 1f)
+        }
+        ui.onNodeWithTag("pin-cancel").performSemanticsAction(SemanticsActions.RequestFocus)
+        val cancel = ui.onNodeWithTag("pin-cancel").getUnclippedBoundsInRoot()
+        val viewport = ui.onNodeWithTag("pin-message-viewport").getUnclippedBoundsInRoot()
+        assertTrue("Cancel ring has room below", cancel.bottom.value + 5 <= viewport.bottom.value + .5f)
+        val folder = ui.activity.filesDir.resolve("pin-preview").apply { mkdirs() }
+        ui.waitForIdle(); Thread.sleep(300)
+        instrumentation.uiAutomation.takeScreenshot().let { bitmap ->
+            folder.resolve("cancel-and-keypad.png").outputStream().use { bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }; bitmap.recycle()
+        }
+        ui.onNodeWithTag("pin-key:1").performSemanticsAction(SemanticsActions.RequestFocus)
         // An easy PIN is refused.
         digits("1111")
         feedback("Bu PIN kolay tahmin edilir. Farklı bir PIN seç.")

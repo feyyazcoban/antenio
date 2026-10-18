@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**18 Ekim · D093 / 0.14.63:** TV-010 vitrini ekran genişliği/yüksekliğine uzanır, oranlı üst hizalı görsel kapalı menü arkasına geçer; ilk raf aşağıdadır. TV-020/030/040 kategori ve menü kayarak açılır/kapanır (240/180 ms, azaltılmış harekette doğrudan). Ortak afiş başlığı 16/22 sp, afiş aralığı 12 dp, yıl gerçek başlığın 4 dp altında daha soluk; kategori adı 13/18 sp ve dil güvenli title case. PIN sayıları/geri sil ortalı, Cancel halkası kesilmez; ayarlar scrollbar gerçek listeyi izler ve sürüklenebilir. Player Seçenekler simgesi ayarlar çarkıdır. [Karar](../decisions/DECISIONS.md).
+
 **18 Ekim · TV-050/051 / D092:** VOD tür etiketi başlığın üstünde, kaynak adı kaldırıldı; geçen süre sola, kalan süre sağa yaslı. Hata/yeniden bağlanma metadata yerine üstte ayrı kalıcı bildirim; retry/Back odağı korunur. [Oynatıcı](PLAYER_PRESENTATION.md).
 
 **18 Ekim · TV-010 / D091:** Son izlenen kanallar kompakt yatay kart: solda logo, sağda kanal adı ve yakın kaynak satırı. 272 dp genişlik, en az 100 dp yükseklik, tek düz yüzey; kısa adda boş ikinci satır yok. D084 yerleşimini değiştirir. [Raf sözleşmesi](HOME_SHELVES.md).

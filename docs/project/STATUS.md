@@ -1,5 +1,15 @@
 # Proje durumu
 
+## 0.14.63 · Gezinme ve ekran geri bildirimleri · 18 Ekim 2026
+
+D093: kategori ve ana menü kayarak açılır/kapanır; PIN rakamları/geri sil ortalı, Vazgeç halkası tam görünür. Scrollbar gerçek listeyi izler ve sürüklenir. Kategori adları daha küçük ve dile duyarlı; afiş başlığı 16/22 sp, poster boşluğu 12 dp, yıl gerçek başlığın 4 dp altında daha soluk. Player ayarlar çarkı kullanır. Vitrin tüm genişliği, sol menünün arkasını ve viewport yüksekliğini kaplar; FillWidth/TopCenter oranı korur, sinema oranında altta boşluk kalabilir.
+
+Bağımsız inceleme tamamlandı; 358 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/39 uyarı. Release/debug/androidTest başarılı; yalnız 5558/betik üzerinden ilgili normal ölçek kontrolleri geçti. İlk test/ara kare sorunları ve düzeltmeleri [QA](native-navigation-feedback-63-qa.json)'da; [görseller](../../design/reviews/LATEST.md) incelendi. Font matrisi yapılmadı.
+
+Kod77/.63 TV ve 5556'ya install -r kuruldu; firstInstallTime korundu, kurulu APK hash doğrulandı. SHA-256 9a8e33134c90334e38cb16505fd168411affe62801b727cb7e67956d22b19469. TV uygulaması/yayın açılmadı. 5556 Ana Sayfa/İzle görünür, kullanıcı testi için açık; 5558 ve Gradle kapalı.
+
+Sıradaki kullanıcı işi canlı player Kanallar drawer. İki aşamalı Home kaydırma ve gerçek soğuk splash donması ayrı açık işler; bu sürümde çözülmüş sayılmadı.
+
 ## 0.14.62 · Oynatıcı bilgi hiyerarşisi · 18 Ekim 2026
 
 D092: geçen/kalan süre dış kenarlarda, film/dizi türü başlığın üstünde; kaynak adı kaldırıldı. Hata/yeniden bağlanma üstte kalıcı ayrı bildirim; yeniden deneme sonrası kaybolur. Bağımsız inceleme tamam; 357 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. 5558/betik normal ölçekte 5/5 + 3/3; görseller incelendi. [QA](native-player-info-62-qa.json).

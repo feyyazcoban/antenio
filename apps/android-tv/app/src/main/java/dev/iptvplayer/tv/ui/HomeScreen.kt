@@ -66,7 +66,7 @@ import kotlinx.coroutines.delay
  */
 @Composable internal fun Navigation(s: TvState, model: TvViewModel, modifier: Modifier = Modifier,
     first: FocusRequester? = null, searchFocus: FocusRequester? = null, guideFocus: FocusRequester? = null,
-    activeFocus: FocusRequester? = null, contentEntry: (() -> FocusRequester?)? = null, contentTop: Dp = TvLayout.HeaderTop,
+    activeFocus: FocusRequester? = null, contentEntry: (() -> FocusRequester?)? = null, contentTop: Dp = TvLayout.HeaderTop, contentInset: Dp = TvLayout.RailWidth,
     settings: () -> Unit, content: @Composable () -> Unit) {
     val defaults = remember { List(7) { FocusRequester() } }
     val contentFocus = remember { FocusRequester() }
@@ -122,7 +122,7 @@ import kotlinx.coroutines.delay
     val reducedMotion = LocalReducedMotion.current
     // Read in layout and draw only: the open/close motion does not recompose the menu every frame.
     val width = animateDpAsState(if (open) openWidth else TvLayout.RailWidth,
-        if (reducedMotion) snap() else tween(if (open) 160 else 120, easing = FastOutSlowInEasing), label = "rail")
+        if (reducedMotion) snap() else tween(if (open) 240 else 180, easing = FastOutSlowInEasing), label = "rail")
     // Layout follows the panel edge, so labels stay until the closing panel has passed them.
     val expanded by remember { derivedStateOf { width.value > TvLayout.RailWidth + 0.5.dp } }
     // Right returns to the item the screen remembers ([contentEntry]: its last focused card, field or grid).
@@ -134,7 +134,7 @@ import kotlinx.coroutines.delay
         if (!restored) contentFocus.requestFocus()
     }
     Box(Modifier.fillMaxSize().background(Ink.Background)) {
-        Box(Modifier.fillMaxSize().padding(start = TvLayout.RailWidth, top = contentTop)
+        Box(Modifier.fillMaxSize().padding(start = contentInset, top = contentTop)
             .focusRequester(contentFocus).focusGroup()
             // The content slides right by as much as the menu opens. A layer translation only: nothing is
             // measured or laid out again (MOT04), and its right edge simply leaves the screen.
@@ -149,7 +149,11 @@ import kotlinx.coroutines.delay
                 val w = width.value.roundToPx()
                 val placeable = measurable.measure(constraints.copy(minWidth = w, maxWidth = w))
                 layout(w, placeable.height) { placeable.place(0, 0) }
-            }.fillMaxHeight().background(Ink.Background).clipToBounds()
+            }.fillMaxHeight().drawWithContent {
+                val fraction = ((width.value - TvLayout.RailWidth) / (openWidth - TvLayout.RailWidth)).coerceIn(0f, 1f)
+                drawRect(Ink.Background.copy(alpha = if (contentInset == 0.dp) fraction else 1f))
+                drawContent()
+            }.clipToBounds()
             .onFocusChanged { open = it.hasFocus }
             .onPreviewKeyEvent { event ->
                 if (event.type == KeyEventType.KeyDown && event.key == Key.DirectionRight) { enterContent(); true } else false
@@ -166,7 +170,7 @@ import kotlinx.coroutines.delay
                         Modifier.size(width = 22.dp * (119f / 148f), height = 22.dp))
                 }
                 if (expanded) androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(dev.iptvplayer.tv.R.drawable.nextv_wordmark), null,
-                    Modifier.padding(start = 6.dp).size(width = 11.3.dp * (300f / 67f), height = 11.3.dp))
+                    Modifier.padding(start = 6.dp).wrapContentWidth(Alignment.Start, unbounded = true).size(width = 11.3.dp * (300f / 67f), height = 11.3.dp))
             }
             Spacer(Modifier.weight(1f))
             Column(Modifier.fillMaxWidth().testTag("navigation-items").verticalScroll(rememberScrollState())
@@ -202,7 +206,8 @@ import kotlinx.coroutines.delay
         Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
             // Material Symbols Rounded; the current section uses the filled form.
             MenuSymbol(icon, filled = active, color = if (active && !focused) Ink.Mint else LocalContentColor.current, modifier = Modifier.size(22.dp))
-            if (expanded) Text(label, Modifier.padding(start = 14.dp).testTag("nav-label:$label"), color = LocalContentColor.current,
+            // Measure the label at its natural width once; the panel edge reveals it without squeezing its text.
+            if (expanded) Text(label, Modifier.padding(start = 14.dp).wrapContentWidth(Alignment.Start, unbounded = true).testTag("nav-label:$label"), color = LocalContentColor.current,
                 fontSize = 13.sp, lineHeight = 18.sp, fontFamily = Roboto, fontWeight = FontWeight.Medium, letterSpacing = 0.sp,
                 maxLines = 1, softWrap = false)
         }
@@ -257,11 +262,12 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
     val openPin = rememberPinOpener()
     // The hero runs to the top edge (D067); without it the page keeps the usual top margin.
     Navigation(s, model, Modifier.onFocusChanged { menuFocused.value = it.hasFocus }, first = nav,
-        contentTop = if (slides.isNotEmpty() && rows.isNotEmpty()) 0.dp else TvLayout.HeaderTop,
+        contentTop = if (slides.isNotEmpty() && rows.isNotEmpty()) 0.dp else TvLayout.HeaderTop, contentInset = 0.dp,
         contentEntry = { lastFocus.requester }, settings = settings) { Column(Modifier.fillMaxSize()) {
         if (rows.isEmpty()) {
             // 19 + 5 dp: content on the 24 dp edge of the logo and shelves; 5 dp stays as focus-ring room.
-            Column(Modifier.weight(1f).fillMaxWidth().padding(horizontal = TvLayout.Gutter - 5.dp, vertical = TvLayout.Gutter)
+            Column(Modifier.weight(1f).fillMaxWidth().padding(start = TvLayout.RailWidth)
+                .padding(horizontal = TvLayout.Gutter - 5.dp, vertical = TvLayout.Gutter)
                 .verticalScroll(rememberScrollState()).padding(5.dp).testTag("home-empty"), verticalArrangement = Arrangement.Center) {
                 val warning = s.catalogNotice?.takeIf { it.needsAttention }?.message?.resolve()
                 Heading(stringResource(when {
@@ -306,20 +312,20 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                     Modifier.then(if (target == "hero") Modifier.focusRequester(focus) else Modifier)
                     .focusRequester(heroFocus)
                     .onFocusChanged { if (it.hasFocus) { model.homeFocus("hero"); lastFocus.requester = heroFocus } },
-                    detail = model::heroDetail, ensure = model::ensureHeroDetail, starting = s.heroStarting,
+                    detail = model::heroDetail, ensure = model::ensureHeroDetail, starting = s.heroStarting, viewportHeight = viewportHeight,
                     watch = { if (model.watch(it)) openPin { heroFocus } })
-                else Column(Modifier.padding(horizontal = TvLayout.Gutter, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                else Column(Modifier.padding(start = TvLayout.RailWidth).padding(horizontal = TvLayout.Gutter, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.home_kicker), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, letterSpacing = 2.sp)
                     Heading(stringResource(R.string.home_prompt))
                     Note(stringResource(R.string.home_prompt_note))
                 }
-                if (s.catalog.warnings.isNotEmpty()) Note(s.catalog.warnings.map { it.text }.resolve(), error = true, modifier = Modifier.padding(horizontal = TvLayout.Gutter, vertical = 8.dp))
+                if (s.catalog.warnings.isNotEmpty()) Note(s.catalog.warnings.map { it.text }.resolve(), error = true, modifier = Modifier.padding(start = TvLayout.RailWidth).padding(horizontal = TvLayout.Gutter, vertical = 8.dp))
                 s.catalogNotice?.takeIf { it.needsAttention }?.let { Note(it.message.resolve(), error = true,
-                    modifier = Modifier.padding(horizontal = TvLayout.Gutter, vertical = 8.dp)) }
+                    modifier = Modifier.padding(start = TvLayout.RailWidth).padding(horizontal = TvLayout.Gutter, vertical = 8.dp)) }
             }
             items(rows, key = { it.key }) { row ->
                 var headingHeight by remember { mutableStateOf(0.dp) }
-                Column(Modifier.onSizeChanged {
+                Column(Modifier.padding(start = TvLayout.RailWidth).onSizeChanged {
                     shelfHeights[row.key] = with(density) { it.height.toDp() }
                 }.padding(top = if (row == rows.first()) 0.dp else 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     // Every heading row keeps the compact action's height (it held "Tümünü gör"), so the shelf rhythm is unchanged.
@@ -390,7 +396,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
  * [actionModifier] is İzle's, the hero's focus target.
  */
 @Composable private fun Hero(slides: List<MediaEntry>, newest: Boolean, reducedMotion: Boolean, actionModifier: Modifier,
-    detail: (MediaEntry) -> MediaEntry, ensure: (MediaEntry) -> Unit, starting: String?, watch: (MediaEntry) -> Unit) {
+    detail: (MediaEntry) -> MediaEntry, ensure: (MediaEntry) -> Unit, starting: String?, viewportHeight: Dp, watch: (MediaEntry) -> Unit) {
     val largeText = LocalDensity.current.fontScale >= 1.5f
     val motion = !reducedMotion && android.animation.ValueAnimator.areAnimatorsEnabled()
     val many = slides.size > 1
@@ -426,20 +432,20 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
         }
     }
     val fade = if (motion) tween<Float>(450) else snap()
-    val visibility = rememberCardVisibility()
-    val heroHeight = TvLayout.HeroHeight
+    val visibility = rememberCardVisibility(topPadding = 0.dp, bottomPadding = 0.dp)
+    val heroHeight = maxOf(TvLayout.HeroHeight, viewportHeight)
     Box(Modifier.fillMaxWidth().heightIn(min = heroHeight)
         .then(visibility.container).then(visibility.focus).clipToBounds().background(Ink.Background).testTag("home-hero")) {
         Crossfade(entry, Modifier.matchParentSize(), animationSpec = fade, label = "hero-backdrop") { slide -> HeroPicture(slide, largeText) }
         // Dark on the text side, clear on the picture side, and into the page at the bottom where the shelves begin.
         Box(Modifier.matchParentSize().background(Brush.horizontalGradient(
-            0f to Ink.Background, .26f to Ink.Background.copy(alpha = .9f), .5f to Ink.Background.copy(alpha = .5f),
+            0f to Ink.Background.copy(alpha = .72f), .26f to Ink.Background.copy(alpha = .9f), .5f to Ink.Background.copy(alpha = .5f),
             .72f to Ink.Background.copy(alpha = .12f), 1f to Color.Transparent)))
         Box(Modifier.matchParentSize().background(Brush.verticalGradient(
             0f to Ink.Background.copy(alpha = .35f), .18f to Color.Transparent, .58f to Color.Transparent,
             .86f to Ink.Background.copy(alpha = .8f), 1f to Ink.Background)))
         Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().heightIn(min = heroHeight)
-            .padding(start = TvLayout.Gutter, end = TvLayout.Gutter, top = 28.dp, bottom = 22.dp), verticalArrangement = Arrangement.Bottom) {
+            .padding(start = TvLayout.RailWidth + TvLayout.Gutter, end = TvLayout.Gutter, top = 28.dp, bottom = 22.dp), verticalArrangement = Arrangement.Bottom) {
             Text(stringResource(if (newest) R.string.hero_newest else R.string.hero_library), Modifier.testTag("hero-label"), color = Ink.Mint, fontFamily = Roboto,
                 fontWeight = FontWeight.Medium, fontSize = 12.sp, letterSpacing = 1.6.sp, maxLines = 1)
             Spacer(Modifier.height(10.dp))
@@ -483,8 +489,8 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
 @Composable private fun HeroPicture(slide: MediaEntry, largeText: Boolean) {
     val context = LocalContext.current
     Box(Modifier.fillMaxSize()) {
-        if (slide.hasBackdrop) AsyncImage(SourceArtwork(slide.sourceId, slide.backdrop!!), null, Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop, alignment = BiasAlignment(0f, -.35f))
+        if (slide.hasBackdrop) AsyncImage(SourceArtwork(slide.sourceId, slide.backdrop!!), null, Modifier.fillMaxSize().testTag("home-hero-backdrop"),
+            contentScale = ContentScale.FillWidth, alignment = Alignment.TopCenter)
         else if (slide.artwork != null) {
             val soft = remember(slide.sourceId, slide.artwork) {
                 ImageRequest.Builder(context).data(SourceArtwork(slide.sourceId, slide.artwork)).size(coil3.size.Size(48, 72)).build()
@@ -492,7 +498,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
             AsyncImage(soft, null, Modifier.fillMaxSize().graphicsLayer { alpha = .75f }
                 .then(if (android.os.Build.VERSION.SDK_INT >= 31) Modifier.blur(24.dp) else Modifier), contentScale = ContentScale.Crop)
             Box(Modifier.fillMaxSize().background(Ink.Background.copy(alpha = if (android.os.Build.VERSION.SDK_INT >= 31) .35f else .55f)))
-            Box(Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(top = if (largeText) 64.dp else 44.dp, bottom = 34.dp, end = 56.dp)) {
+            Box(Modifier.align(Alignment.CenterEnd).heightIn(max = TvLayout.HeroHeight).fillMaxHeight().padding(top = if (largeText) 64.dp else 44.dp, bottom = 34.dp, end = 56.dp)) {
                 Artwork(slide.sourceId, slide.artwork, rememberShownName(slide.title), Modifier.fillMaxHeight().aspectRatio(2f / 3)
                     .shadow(24.dp, RoundedCornerShape(TvLayout.CardRadius)).clip(RoundedCornerShape(TvLayout.CardRadius)).testTag("home-hero-poster"))
             }

@@ -46,14 +46,14 @@ class ContinueCardLayoutTest {
         if (ui.onAllNodesWithTag("hero-watch").fetchSemanticsNodes().isNotEmpty()) {
             ui.onNodeWithTag("hero-watch").assertIsFocused()
             val heroBefore = ui.onNodeWithTag("home-hero").getUnclippedBoundsInRoot()
-            val firstBefore = ui.onNodeWithTag("continue:${restored.first().id}").getUnclippedBoundsInRoot()
             val viewportBefore = ui.onNodeWithTag("home-content").getUnclippedBoundsInRoot()
             InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle()
             val heroAfter = ui.onNodeWithTag("home-hero").getUnclippedBoundsInRoot()
-            val needed = maxOf(0.dp, firstBefore.bottom + 27.dp - viewportBefore.bottom)
-            android.util.Log.i("HomeScrollCheck", "needed=$needed, moved=${heroBefore.top - heroAfter.top}")
-            assertTrue("Hero to continue must only reveal the card, not pin the shelf: needed=$needed, moved=${heroBefore.top - heroAfter.top}",
-                heroBefore.top - heroAfter.top <= needed + 4.dp)
+            // A full-screen hero leaves the first shelf uncomposed until D-pad beyond-bounds search reaches it.
+            val firstAfter = ui.onNodeWithTag("continue:${restored.first().id}").assertIsFocused().getUnclippedBoundsInRoot()
+            assertTrue("Down scrolls away from the full-screen hero", heroAfter.top < heroBefore.top)
+            assertEquals("Only reveal the continue card with its 27dp margin, never pin the shelf",
+                viewportBefore.bottom.value - 27f, firstAfter.bottom.value, 4f)
             val heading = ui.onNodeWithTag("shelf-heading:continue").getUnclippedBoundsInRoot()
             assertTrue("Continue heading stays visible", heading.top >= viewportBefore.top)
         }

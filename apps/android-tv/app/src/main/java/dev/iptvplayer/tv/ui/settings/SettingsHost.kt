@@ -2,6 +2,8 @@ package dev.iptvplayer.tv.ui.settings
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +18,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
@@ -24,6 +27,9 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,6 +49,8 @@ import dev.iptvplayer.tv.ui.resolve
 import dev.iptvplayer.tv.ui.scrollEdgeFade
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import kotlin.math.roundToInt
 
 /**
  * Decides whether a page with a [PageGuard] opens: [open] runs now, after a question, or not at all. A question asked
@@ -107,6 +115,36 @@ private val navSaver = Saver<SettingsNav, ArrayList<String>>(
     val reading = body == PageBody.READING
     val place = places.getOrPut(shown) { PagePlace() }
     val scroll = place.scroll
+    val lazy = body == PageBody.LAZY
+    val indicator = if (lazy) place.list.scrollIndicatorState else scroll.scrollIndicatorState
+    val canScrollBack = if (lazy) place.list.canScrollBackward else scroll.canScrollBackward
+    val canScrollNext = if (lazy) place.list.canScrollForward else scroll.canScrollForward
+    var scrollbarJob by remember(place) { mutableStateOf<Job?>(null) }
+    fun moveScrollbar(fraction: Float) {
+        val info = indicator ?: return
+        val target = ((info.contentSize - info.viewportSize).coerceAtLeast(0) * fraction.coerceIn(0f, 1f)).roundToInt()
+        scrollbarJob?.cancel()
+        scrollbarJob = scope.launch {
+            if (lazy) {
+                val layout = place.list.layoutInfo
+                val count = layout.totalItemsCount
+                if (count > 0) {
+                    when {
+                        fraction <= 0f -> place.list.scrollToItem(0)
+                        fraction >= 1f -> place.list.scrollToItem(count - 1)
+                        else -> {
+                            val average = (layout.visibleItemsInfo.map { it.size }.average() +
+                                layout.mainAxisItemSpacing).toFloat()
+                            if (average.isFinite() && average > 0f) {
+                                val index = (target / average).toInt().coerceIn(0, count - 1)
+                                place.list.scrollToItem(index, (target - index * average).roundToInt().coerceAtLeast(0))
+                            }
+                        }
+                    }
+                }
+            } else scroll.scrollTo(target)
+        }
+    }
 
     Dialog(onDismissRequest = { back() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         // Made in the panel's window, so a PIN pad over the panel gives focus back to a row in this window.
@@ -190,25 +228,54 @@ private val navSaver = Saver<SettingsNav, ArrayList<String>>(
                             else choice?.let { pageScope.ChoicePage(it) }
                         }
                     }
-                    if (scroll.maxValue > 0) ScrollIndicator(scroll, Modifier.align(Alignment.CenterEnd).padding(end = 10.dp, top = 10.dp, bottom = 10.dp))
+                    if (indicator != null && (canScrollBack || canScrollNext)) ScrollIndicator(indicator, canScrollBack, canScrollNext,
+                        Modifier.align(Alignment.CenterEnd).padding(end = 2.dp, top = 10.dp, bottom = 10.dp), ::moveScrollbar)
                 }
                 Row(Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(if (scroll.value > scrollHintThreshold) stringResource(R.string.settings_scroll_up) else "", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
-                    Text(if (scroll.maxValue - scroll.value > scrollHintThreshold) stringResource(R.string.settings_scroll_more) else "", color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
+                    Text(if (if (lazy) canScrollBack else scroll.value > scrollHintThreshold) stringResource(R.string.settings_scroll_up) else "", Modifier.testTag("settings-scroll-up"), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
+                    Text(if (if (lazy) canScrollNext else scroll.maxValue - scroll.value > scrollHintThreshold) stringResource(R.string.settings_scroll_more) else "", Modifier.testTag("settings-scroll-more"), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
                 }
             }
         }
     }
 }
 
-@Composable private fun ScrollIndicator(scroll: ScrollState, modifier: Modifier) {
-    Canvas(modifier.width(3.dp).fillMaxHeight()) {
-        val total = scroll.viewportSize + scroll.maxValue
-        val thumb = (size.height * scroll.viewportSize / total.toFloat()).coerceAtLeast(20.dp.toPx()).coerceAtMost(size.height)
-        val top = (size.height - thumb) * scroll.value / scroll.maxValue.toFloat()
-        drawRoundRect(Ink.Divider, cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.width / 2))
-        drawRoundRect(Ink.Outline, topLeft = androidx.compose.ui.geometry.Offset(0f, top),
-            size = androidx.compose.ui.geometry.Size(size.width, thumb), cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.width / 2))
+@Composable private fun ScrollIndicator(info: ScrollIndicatorState, backward: Boolean, forward: Boolean, modifier: Modifier,
+    move: (Float) -> Unit) {
+    val range = (info.contentSize - info.viewportSize).coerceAtLeast(0)
+    if (info.viewportSize <= 0 || info.contentSize == Int.MAX_VALUE || range == 0) return
+    val progress = when { !backward -> 0f; !forward -> 1f; else -> (info.scrollOffset.toFloat() / range).coerceIn(0f, 1f) }
+    val seek by rememberUpdatedState(move)
+    val ratio by rememberUpdatedState(info.viewportSize.toFloat() / info.contentSize)
+    val minimum = with(LocalDensity.current) { 20.dp.toPx() }
+    val position by rememberUpdatedState(progress)
+    Canvas(modifier.width(18.dp).fillMaxHeight().testTag("settings-scrollbar").semantics {
+        progressBarRangeInfo = ProgressBarRangeInfo(progress, 0f..1f)
+        setProgress { seek(it); true }
+    }.pointerInput(info) {
+        detectTapGestures { point ->
+            val thumb = (size.height * ratio).coerceIn(minimum.coerceAtMost(size.height.toFloat()), size.height.toFloat())
+            seek(((point.y - thumb / 2) / (size.height - thumb).coerceAtLeast(1f)).coerceIn(0f, 1f))
+        }
+    }.pointerInput(info) {
+        var grab = 0f
+        detectDragGestures(onDragStart = { point ->
+            val thumb = (size.height * ratio).coerceIn(minimum.coerceAtMost(size.height.toFloat()), size.height.toFloat())
+            val top = (size.height - thumb) * position
+            grab = if (point.y in top..top + thumb) point.y - top else thumb / 2
+        }) { change, _ ->
+            change.consume()
+            val thumb = (size.height * ratio).coerceIn(minimum.coerceAtMost(size.height.toFloat()), size.height.toFloat())
+            seek(((change.position.y - grab) / (size.height - thumb).coerceAtLeast(1f)).coerceIn(0f, 1f))
+        }
+    }) {
+        val thumb = (size.height * ratio).coerceAtLeast(minimum).coerceAtMost(size.height)
+        val top = (size.height - thumb) * progress
+        val width = 3.dp.toPx(); val left = (size.width - width) / 2
+        val corners = androidx.compose.ui.geometry.CornerRadius(width / 2)
+        drawRoundRect(Ink.Divider, topLeft = androidx.compose.ui.geometry.Offset(left, 0f), size = androidx.compose.ui.geometry.Size(width, size.height), cornerRadius = corners)
+        drawRoundRect(Ink.Outline, topLeft = androidx.compose.ui.geometry.Offset(left, top),
+            size = androidx.compose.ui.geometry.Size(width, thumb), cornerRadius = corners)
     }
 }

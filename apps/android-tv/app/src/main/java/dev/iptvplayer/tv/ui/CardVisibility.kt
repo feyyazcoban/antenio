@@ -20,17 +20,17 @@ internal data class CardVisibility(val container: Modifier, val focus: Modifier)
  * fitting heading ([contextAbove]) is kept in view with the tile but the shelf is not pinned to the viewport top.
  */
 @Composable internal fun rememberCardVisibility(horizontalPadding: Dp = 0.dp, contextAbove: Dp = 0.dp,
-    viewportHeight: Dp = 0.dp, frameShelf: Boolean = true): CardVisibility {
+    viewportHeight: Dp = 0.dp, frameShelf: Boolean = true, topPadding: Dp = 7.dp, bottomPadding: Dp = 27.dp): CardVisibility {
     val request = remember { BringIntoViewRequester() }
     var focused by remember { mutableStateOf(false) }
     var clipped by remember { mutableStateOf(false) }
     var size by remember { mutableStateOf(IntSize.Zero) }
     val edge = with(LocalDensity.current) { horizontalPadding.toPx() }
-    val top = with(LocalDensity.current) { 7.dp.toPx() }
-    val bottom = with(LocalDensity.current) { 27.dp.toPx() }
+    val top = with(LocalDensity.current) { topPadding.toPx() }
+    val bottom = with(LocalDensity.current) { bottomPadding.toPx() }
     val context = with(LocalDensity.current) { contextAbove.toPx() }
     val viewport = with(LocalDensity.current) { viewportHeight.toPx() }
-    LaunchedEffect(focused, context, viewport, frameShelf, edge) {
+    LaunchedEffect(focused, context, viewport, frameShelf, edge, top, bottom) {
         if (focused) {
             // Becoming visible is an outcome of this scroll, not a new destination. In particular,
             // the card becomes unclipped before its bottom safety margin has finished moving.

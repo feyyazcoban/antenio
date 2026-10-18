@@ -363,14 +363,13 @@ internal class EvenColumns(private val count: Int) : GridCells {
             }
         }
         if (compact) return@Column
-        // Captions sized for the larger library posters (D064): title 15 sp, the lines under it 12 sp.
-        Spacer(Modifier.height(8.dp))
-        if (!live) Text(name, fontFamily = Roboto, fontSize = 15.sp,
-            minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 20.sp)
+        Spacer(Modifier.height(if (live) 8.dp else 12.dp))
+        if (!live) Text(name, Modifier.testTag("library-title:${entry.id}"), fontFamily = Roboto, fontSize = 16.sp,
+            fontWeight = FontWeight.Medium, minLines = 1, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 22.sp)
         // Year, the language or country of the title and, with several sources, the source share one line, which keeps
         // its height without any of them.
         if (!live) Text(listOf(shown.year, shown.tag, sourceName.orEmpty()).filter { it.isNotBlank() }.joinToString(" · "),
-            Modifier.testTag("library-year:${entry.id}"), color = Ink.Muted,
+            Modifier.padding(top = 4.dp).testTag("library-year:${entry.id}"), color = Ink.Muted.copy(alpha = .78f),
             fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1,
             overflow = TextOverflow.Ellipsis)
         if (live) sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }

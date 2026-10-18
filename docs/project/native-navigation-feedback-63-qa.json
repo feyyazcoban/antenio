@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.63-design-preview",
+  "versionCode": 77,
+  "decision": "D093",
+  "change": "Sliding navigation/category panels with stable grid columns; PIN centering/backspace/unclipped Cancel; actual-list scrollbar with drag and SetProgress; locale-safe category display; compact larger captions; player settings cog; full-width viewport Hero behind the rail, FillWidth/TopCenter.",
+  "review": "Read-only hero_review/player_review/scrollbar_review. Fixed natural wordmark measurement, Hero reveal padding, scrollbar endpoint padding, Roman numeral matching. Replaced diagonal animateItem reflow with stable columns. Final review caught Fit side gaps for narrow backdrops; FillWidth now guarantees full width. No remaining concrete finding.",
+  "tests": {
+    "jvm": {
+      "tests": 358,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 39
+    },
+    "build": "Final release/debug/unit/lint successful; androidTest APK compiled successfully in prior full build. One worker, heap1536 MB, in-process Kotlin; Gradle stopped before 5558.",
+    "device": [
+      "5558 only via tools/run-device-tests.sh --no-build; PIN+Hero+Continue 4/4; visual/sidemenu/player 5/5.",
+      "Stable-column motion reversal and reduced motion, catalog focus/count, empty library and search 5/5; scrollbar drag and endpoints passed but arrow assertion initially mismatched exact text.",
+      "Final Settings scrollbar + Back/focus + provider categories 3/3; post-FillWidth Hero visual flow 1/1."
+    ],
+    "visual": "Synthetic normal-scale Hero, PIN, captions, settings cog, category closing/reopening, main menu intermediate frames, scrollbar middle/end inspected.",
+    "iterations": [
+      "Initial androidTest compilation failed on DpRect helper properties; replaced with explicit edges.",
+      "Initial motion test single-frame reversal assumption and scrollbar ambiguous focus selector failed; changed to frame sequence and descendant-scoped selection.",
+      "Intermediate screenshots caught animateItem diagonal overlaps; switched to stable columns and placement-only slide.",
+      "Final scrollbar test exact-text assertion expected only an arrow; corrected to localized full label and reran successfully."
+    ]
+  },
+  "rawEvidence": "work/navigation-feedback-qa",
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "76",
+        "versionName": "0.14.62-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 23:09:49"
+      },
+      "after": {
+        "versionCode": "77",
+        "versionName": "0.14.63-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 23:52:45"
+      },
+      "sha256": "9a8e33134c90334e38cb16505fd168411affe62801b727cb7e67956d22b19469",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "design": {
+      "device": "emulator-5556",
+      "before": {
+        "versionCode": "76",
+        "versionName": "0.14.62-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 16:03:05"
+      },
+      "after": {
+        "versionCode": "77",
+        "versionName": "0.14.63-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 16:45:58"
+      },
+      "sha256": "9a8e33134c90334e38cb16505fd168411affe62801b727cb7e67956d22b19469",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "evimVisible": false,
+      "appRunning": true,
+      "crashRecordForApp": false,
+      "homeWatchVisible": true,
+      "fullScreenHeroHasNoSourceLabel": true
+    }
+  },
+  "limitations": [
+    "Normal scale only; font matrix deferred by user.",
+    "Figma unchanged and physical visual acceptance open.",
+    "Existing Home two-stage scroll and true cold-start splash remain separate open work.",
+    "Live Channels drawer is the next requested feature."
+  ]
+}

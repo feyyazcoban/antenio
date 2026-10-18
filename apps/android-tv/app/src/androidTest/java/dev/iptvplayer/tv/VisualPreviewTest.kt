@@ -271,6 +271,12 @@ class VisualPreviewTest {
     }
 
     @Test fun homePostersAndContinueRemainVisibleWithRemote() {
+        val backdrop = ui.onNodeWithTag("home-hero-backdrop").getUnclippedBoundsInRoot()
+        val homeViewport = ui.onNodeWithTag("home-content").getUnclippedBoundsInRoot()
+        Assert.assertEquals("Backdrop starts under the menu", 0f, backdrop.left.value, 1f)
+        Assert.assertEquals("Backdrop reaches the right edge", homeViewport.right.value, backdrop.right.value, 1f)
+        Assert.assertEquals("Hero reaches the bottom edge", homeViewport.bottom.value, backdrop.bottom.value, 1f)
+        shot("home-fullscreen-backdrop")
         for ((section, title) in listOf("movies" to "Film kütüphanen", "series" to "Dizi kütüphanen")) {
             // Release the focused hero/card before programmatic scrolling; its visibility
             // requester otherwise correctly pulls the viewport back toward that focus.
@@ -496,7 +502,11 @@ class VisualPreviewTest {
         Assert.assertTrue("Divider follows ordinary content", dividerCard.getUnclippedBoundsInRoot().left > normal.left)
         val dated = ui.onNodeWithTag("library-year:${model.fixtureKey("movie:3")}", true).getUnclippedBoundsInRoot()
         val undated = ui.onNodeWithTag("library-year:${model.fixtureKey("movie:991")}", true).getUnclippedBoundsInRoot()
-        Assert.assertEquals("Missing year keeps the metadata baseline", dated.top.value, undated.top.value, 1f)
+        for (id in listOf(model.fixtureKey("movie:3"), model.fixtureKey("movie:991"))) {
+            val titleBox = ui.onNodeWithTag("library-title:$id", true).getUnclippedBoundsInRoot()
+            val yearBox = ui.onNodeWithTag("library-year:$id", true).getUnclippedBoundsInRoot()
+            Assert.assertEquals("Metadata follows the actual title with 4dp gap", titleBox.bottom.value + 4, yearBox.top.value, 1f)
+        }
         Assert.assertEquals("Missing year reserves the same line height", (dated.bottom - dated.top).value, (undated.bottom - undated.top).value, 1f)
         shot("presentation-movies")
         ui.onNodeWithContentDescription("Kapaksız film").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }

@@ -89,7 +89,7 @@ private const val UNLOCK_TITLE_MAX = 32
         LaunchedEffect(waiting != null) { if (waiting != null && !pad.typed) refocusAfterDialog(window) { cancel } }
         Row(Modifier.fillMaxWidth().testTag("pin-pad").pinDigitKeys(pad) { takesDigits }, horizontalArrangement = Arrangement.spacedBy(24.dp)) {
             // A large font scrolls this column; the keys keep their size beside it.
-            Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.weight(1f).testTag("pin-message-viewport").verticalScroll(rememberScrollState()).padding(vertical = 5.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 // A new step ("Aynı 4 haneyi bir kez daha gir.") is read as it comes, not only the boxes emptying.
                 Note(prompt.message(), modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
                 PinBoxes(if (checking) PinFormat.LENGTH else pad.count)
@@ -311,15 +311,15 @@ private fun Modifier.pinDigitKeys(pad: PinDigits, takesDigits: () -> Boolean) = 
             Row(horizontalArrangement = Arrangement.spacedBy(keyGap)) {
                 row.forEach { digit ->
                     Action(digit.toString(), Modifier.width(keyWidth).then(if (digit == '1' && first != null) Modifier.focusRequester(first) else Modifier)
-                        .testTag("pin-key:$digit"), enabled = enabled) { type(digit) }
+                        .testTag("pin-key:$digit"), enabled = enabled, centerContent = true) { type(digit) }
                 }
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(keyGap)) {
             Spacer(Modifier.width(keyWidth))
-            Action("0", Modifier.width(keyWidth).testTag("pin-key:0"), enabled = enabled) { type('0') }
-            Action(stringResource(R.string.pin_delete), Modifier.width(keyWidth).semantics { contentDescription = deleteDescription }
-                .testTag("pin-key:delete"), enabled = enabled) { erase() }
+            Action("0", Modifier.width(keyWidth).testTag("pin-key:0"), enabled = enabled, centerContent = true) { type('0') }
+            Action("", Modifier.width(keyWidth).semantics { contentDescription = deleteDescription }
+                .testTag("pin-key:delete"), icon = "backspace", enabled = enabled, centerContent = true) { erase() }
         }
     }
 }

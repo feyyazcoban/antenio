@@ -186,6 +186,56 @@ class SearchNavigationTest {
         ui.onNodeWithText("Bu bölümde ara").assertExists()
     }
 
+    @Test fun categoryAndMenuTransitionsKeepIntermediatePositionsAndReverseImmediately() {
+        ui.runOnUiThread { if (model.state.value.reducedMotion) model.reducedMotion(); model.showKind(MediaKind.MOVIE) }
+        ui.waitForIdle()
+        ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused()
+        fun cardX() = ui.onNodeWithContentDescription("İstanbul Işığı").getUnclippedBoundsInRoot().left.value
+        fun railWidth() = ui.onNodeWithTag("navigation-bar").getUnclippedBoundsInRoot().let { (it.right - it.left).value }
+        val start = cardX()
+        ui.mainClock.autoAdvance = false
+        try {
+            key(KeyEvent.KEYCODE_DPAD_RIGHT)
+            ui.mainClock.advanceTimeBy(80); ui.waitForIdle()
+            ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
+            val middle = cardX()
+            assertTrue("Grid must slide through an intermediate position: $middle / $start", middle < start - 2 && middle > 100)
+            shot("categories-closing-middle")
+            key(KeyEvent.KEYCODE_DPAD_LEFT)
+            val reverseFrames = (1..8).map { ui.mainClock.advanceTimeBy(16); ui.waitForIdle(); cardX() }
+            ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused()
+            val reversed = cardX()
+            shot("categories-reopening-middle")
+            // A new target is applied on the next frame; the preceding tween may advance once first.
+            assertTrue("Reverse before reaching the closed endpoint: start=$start, middle=$middle, frames=$reverseFrames",
+                reverseFrames.min() > start - 188 + 2 && reversed > reverseFrames.min() + 2 && reversed < start - 1 &&
+                    reverseFrames.last() > reverseFrames[reverseFrames.lastIndex - 1])
+            ui.mainClock.advanceTimeBy(400); ui.waitForIdle()
+            assertEquals(start, cardX(), 1f)
+            key(KeyEvent.KEYCODE_DPAD_LEFT)
+            ui.mainClock.advanceTimeBy(80); ui.waitForIdle()
+            ui.onNodeWithTag("nav:Filmler").assertIsFocused()
+            val railMiddle = railWidth()
+            assertTrue("Menu has intermediate widths", railMiddle > 74f && railMiddle < 206f)
+            shot("menu-opening-middle")
+            key(KeyEvent.KEYCODE_DPAD_RIGHT)
+            val closingFrames = (1..6).map { ui.mainClock.advanceTimeBy(16); ui.waitForIdle(); railWidth() }
+            assertTrue("Menu reverses without finishing its opening: $closingFrames",
+                closingFrames.max() < 206f && closingFrames.last() < closingFrames.max() - 2 && closingFrames.last() > 72f)
+            ui.mainClock.advanceTimeBy(400); ui.waitForIdle()
+            ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused()
+            assertEquals(72f, railWidth(), 1f)
+        } finally { ui.mainClock.autoAdvance = true }
+        ui.runOnUiThread { model.reducedMotion() }
+        try {
+            key(KeyEvent.KEYCODE_DPAD_RIGHT)
+            ui.onNodeWithContentDescription("İstanbul Işığı").assertIsFocused()
+            ui.onNodeWithTag("library-categories").assertDoesNotExist()
+            key(KeyEvent.KEYCODE_DPAD_LEFT)
+            ui.onNodeWithTag("category:${CategoryFilter.ALL}").assertIsFocused()
+        } finally { ui.runOnUiThread { model.reducedMotion() } }
+    }
+
     @Test fun sideMenuLabelsFitAndRemoteCanReachSettingsAndReturn() {
         val order = listOf("Ara", "Ana Sayfa", "Canlı TV", "Filmler", "Diziler", "Favoriler", "Ayarlar")
         val density = ui.activity.resources.displayMetrics.density

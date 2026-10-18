@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-019/020/028/030/031 · 0.14.63 / D093: kategori/ana menü kayma geçişleri; PIN ortalama/geri sil/Cancel payı; ayarlar liste scrollbar bağlantısı ve sürükleme; kategori adı ve afiş caption düzeni; player ayarlar çarkı; ekranı kaplayan oranlı vitrin. Kontroller/teslim STATUS/HANDOFF'ta; genel fiziksel/Figma kabulü açık. BKL-032 Kanallar drawer isteği sıradaki iş; iki scroll ve soğuk splash geri bildirimleri ayrıca açık.
+
 BKL-020/031 · 0.14.62 / D092: kullanıcı isteğiyle süreler dış kenarlara, tür etiketi başlık üstüne; kaynak adı kaldırıldı, hata üst bildirime ayrıldı. Kontrol/teslim durumu STATUS/HANDOFF; genel kullanıcı/Figma kabulü açık.
 
 BKL-019/020 · 0.14.61 / D091: kullanıcı D084 son kanal kartlarını dağınık buldu; logo solda, kanal adı/kaynak sağda kompakt yatay düzen uygulandı. Genel kullanıcı/Figma kabulü açık; test ve teslim durumu STATUS/HANDOFF'ta.

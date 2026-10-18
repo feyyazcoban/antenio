@@ -1,5 +1,15 @@
 # Son devir notu
 
+## Codex · Gezinme ve ekran geri bildirimleri / 0.14.63 · 18 Ekim 2026
+
+D093: HomeScreen/LibraryScreen/PanelMotion; SettingsHost scrollbar; PinPad/Theme/DesignSystem; CatalogPresentation/PilotApp captions; PlayerSymbols/PlayerScreen cog. Kategori geçişi sabit 5 sütunu kaydırır, açıkken 4 görünür (large4/3); başlık/arama/boş durum görünür genişlikte kalır. Ara karede çapraz animateItem hareketi görülünce kaldırıldı. Bağımsız salt okunur hero_review/player_review/scrollbar_review bulguları giderildi: doğal wordmark, Hero payı, scrollbar padding hesabı, Roma sayı regex, dar backdrop Fit yan boşluğu. Final FillWidth/TopCenter, üstten oranlı tam genişlik; dar oranda alt taşma kırpılır.
+
+358 JVM (1skip/0hata), lint0/39; release/debug/androidTest başarılı. Tek worker/1536MB, 5556 açık. 5558 yalnız tools/run-device-tests.sh: PIN/Hero/Continue4/4; görsel/menü/player5/5; son motion/katalog/arama5/5; scrollbar ilk exact-text assertion hatası düzeltildikten sonra Settings/Back/provider3/3; FillWidth sonrası Hero görsel1/1. İlk compile, test seçici ve ara kare başarısızlıkları QA'da saklı. Sentetik görseller incelendi; Figma/font matrisi yok. Ham work/navigation-feedback-qa; QA native-navigation-feedback-63-qa.json; görseller design/reviews/navigation-feedback-0.14.63.
+
+Release kod77/.63 APK+sha arşivlendi, aynı sertifika/debug kapalı/R8. SHA-256 9a8e33134c90334e38cb16505fd168411affe62801b727cb7e67956d22b19469. TV install-r, ilk kurulum 2026-10-13 23:50:03 aynı, güncelleme 2026-10-18 23:52:45, çekilen APK hash eşit; TVapp/yayın açılmadı. 5556 install-r, ilk kurulum 2026-10-14 08:57:19 aynı, Ana Sayfa/İzle görünür, appRunningtrue/crashfalse; tam ekran vitrin kaynak adını göstermediği için Evim UI kontrolü false. 5556 kullanıcı için görünür açık kalır; 5558/Gradle kapalı.
+
+Tam sonraki adım .64/kod78: canlı player Play yanındaki tips yerine Kanallar ve soldan kayan hızlı kanal drawer. Aynı player korunmalı; mevcut kanal ilk odak, OK seçimi AccessTarget.ChannelPick + PIN kapısından, Back Kanallar düğmesine. Kaynak/kategori/favori kapsamı tek liste; önizleme için paralel yayın yok. Bu dar istek bütün S15a–c'yi done yapmaz. Ardından önceki devirdeki ilk BringIntoView isteğini container rect'ine yükseltme ve gerçek cold-start main-thread yükü işleri; iki scroll/splash açık. S15 genel plan bunlardan sonra. Kullanıcı 'yayına hazırla' demeden font matrisi yok.
+
 ## Codex · Oynatıcı bilgi düzeni / 0.14.62 · 18 Ekim 2026
 
 PlayerControls.kt: elapsed Start/remaining End, ölçülen labelWidth/scrub geometrisi aynı; VOD türü başlığın6dp üstünde, source parametresi kaldırıldı. PlayerScreen.kt: recovery/failure üst ortada max640dp koyu ayrı bildirim, polite live region, fokus yok; panel/PIN üzerinde gizli, geçici notla çakışmaz; metadata sadece normal bilgi. Retry/Back/Peek/canlı korunur. PlayerControlsLayoutTest ve PlaybackRecoveryFlowTest mevcut senaryoları güçlendi; ikinci sentetik kaynak URL'si ?source=second ile ayırt edildi (inceleme bulgusu).

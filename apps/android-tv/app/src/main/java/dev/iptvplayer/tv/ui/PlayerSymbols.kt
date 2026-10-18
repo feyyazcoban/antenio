@@ -30,6 +30,10 @@ private val playerSymbols = mapOf(
 )
 
 @Composable internal fun PlayerSymbol(name: String, color: Color, modifier: Modifier = Modifier) {
+    if (name == "settings") {
+        MenuSymbol("settings", filled = false, color = color, modifier = modifier)
+        return
+    }
     val data = playerSymbols.getValue(name)
     val vector = remember(data) {
         ImageVector.Builder(defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 960f, viewportHeight = 960f)

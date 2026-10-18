@@ -1,5 +1,21 @@
 # Güncel görsel inceleme
 
+## 0.14.63 · Gezinme ve ekran geri bildirimleri
+
+D093; normal ölçek, sentetik kaynaklar. Geçiş ara kareleri, PIN, afiş ve scrollbar yerleşimi. [QA](../../docs/project/native-navigation-feedback-63-qa.json).
+
+![Tam genişlik vitrin](navigation-feedback-0.14.63/home-fullscreen-backdrop.png)
+
+![PIN](navigation-feedback-0.14.63/cancel-and-keypad.png)
+
+![Kategori kayma ara karesi](navigation-feedback-0.14.63/categories-closing-middle.png)
+
+![Ana menü kayma ara karesi](navigation-feedback-0.14.63/menu-opening-middle.png)
+
+![Liste başlıkları](navigation-feedback-0.14.63/presentation-movies.png)
+
+![Scrollbar son konum](navigation-feedback-0.14.63/category-scroll-bottom.png)
+
 ## 0.14.62 · Oynatıcı bilgi düzeni
 
 D092: süreler dış kenarlarda, tür başlığın üzerinde, kaynak adı kaldırıldı; hata ayrı üst bildirimde. Normal ölçek/sentetik kaynaklar. [QA](../../docs/project/native-player-info-62-qa.json).

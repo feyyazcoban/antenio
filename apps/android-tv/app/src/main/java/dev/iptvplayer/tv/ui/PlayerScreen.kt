@@ -465,7 +465,7 @@ import kotlinx.coroutines.flow.first
                         add(PlayerControl("player-tracks", stringResource(R.string.player_tracks), "subtitles", state = selectedTrackSummary(tracks, trackParameters), enabled = healthy, requester = tracksFocus) {
                             scrub.commit(); interact(); layer = PlayerLayer.Tracks
                         })
-                        if (!live) add(PlayerControl("player-options", stringResource(R.string.player_options), "tune", state = PlaybackSpeed.label(speed),
+                        if (!live) add(PlayerControl("player-options", stringResource(R.string.player_options), "settings", state = PlaybackSpeed.label(speed),
                             enabled = healthy, requester = optionsFocus) { scrub.commit(); interact(); layer = PlayerLayer.Options })
                         add(PlayerControl("player-favorite", favoriteLabel, if (isFavorite) "star_filled" else "star", state = favoriteState,
                             selected = isFavorite, enabled = favoriteTarget != null) { model.toggleFavorite(media.entry); interact() })

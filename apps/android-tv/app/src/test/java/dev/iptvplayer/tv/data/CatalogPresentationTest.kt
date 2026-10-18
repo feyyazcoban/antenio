@@ -138,6 +138,19 @@ class CatalogPresentationTest {
         assertEquals("NETFLIX" to "DE", displayCategory("DE/SERIE ~ NETFLIX"))
         assertEquals("TURK SPOR" to "", displayCategory("TURK SPOR"))
     }
+    @Test fun categoryCaseUsesProviderLanguageWithoutGuessingLostLettersOrBrands() {
+        assertEquals("Dokumentation", categoryDisplayName("DOKUMENTATION", "DE"))
+        assertEquals("Civil War", categoryDisplayName("CIVIL WAR", "EN"))
+        assertEquals("Ältere Filme – Teil IV", categoryDisplayName("ÄLTERE FILME – TEIL IV", "DE"))
+        assertEquals("İstanbul Işık", categoryDisplayName("İSTANBUL IŞIK", "TR"))
+        assertEquals("Kutsal Damacana 2026", categoryDisplayName("KUTSAL DAMACANA 2026", "TR"))
+        assertEquals("YERLI 2026", categoryDisplayName("YERLI 2026", "TR"))
+        assertEquals("KIRIK", categoryDisplayName("KIRIK", "TR"))
+        assertEquals("BBC TV HD 4K – Movies", categoryDisplayName("BBC TV HD 4K – MOVIES", "EN"))
+        assertEquals("beIN SPORTS", categoryDisplayName("beIN SPORTS", "TR"))
+        assertEquals("DOKUMENTATION", categoryDisplayName("DOKUMENTATION", "VIP"))
+        assertEquals("أفلام", categoryDisplayName("أفلام", "AR"))
+    }
     @Test fun onlyCountryAndLanguageCodesAreTakenOffTheFront() {
         assertEquals(DisplayTitle("Kurtlar Vadisi", "", "TR"), displayTitle("TR: Kurtlar Vadisi"))
         assertEquals(DisplayTitle("Tatort", "", "DE"), displayTitle("DE: Tatort"))

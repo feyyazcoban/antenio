@@ -88,6 +88,7 @@ fun focusRing(radius: Dp, color: Color = Ink.Text) =
 
 // Reuses the stroke icon paths from prototypes/tv-flow/app.js.
 private val iconPaths = mapOf(
+    "backspace" to "M9 5H21V19H9L3 12Z M12 9L18 15 M18 9L12 15",
     "home" to "M3 10 12 3l9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z",
     "tv" to "M4 5h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2ZM8 23h8M8 1l4 4 4-4",
     "film" to "M3 3h18v18H3ZM7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4",

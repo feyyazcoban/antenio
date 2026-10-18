@@ -19,8 +19,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -104,7 +106,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                 providerCategories(itemsOfKind, s.catalog.categoryOrder[s.kind].orEmpty()).map(::provider)
         }
     }
-    val categoryLabel = displayCategory(categories.firstOrNull { it.key == s.category }?.label ?: s.category).first
+    val categoryLabel = displayCategory(categories.firstOrNull { it.key == s.category }?.label ?: s.category).let { (name, tag) -> categoryDisplayName(name, tag) }
     // The section search filters the selected category; its label says so, and an empty result offers the whole section.
     val searchScoped = s.category != CategoryFilter.ALL
     val searchLabel = stringResource(if (searchScoped) R.string.library_search_category else R.string.library_search_section)
@@ -183,13 +185,22 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
         if (s.sources.size > 1) 7.dp + 16.sp.toDp() else 0.dp) }
     // A poster grid with focus takes the category column's place; Left from its first column brings the column back
     // on the selected category. Live rows keep the column. Large posters (D064): 4 columns beside the category column
-    // and 5 without it, so a poster keeps nearly the same size (about 151 and 155 dp) when the column steps aside.
+    // visible and 5 without it. Keep five actual columns so the fifth is revealed by sliding, without cards crossing
+    // rows or captions while the category panel moves. Large text uses four actual / three preview columns.
     val gridMode = gridActive && !live && !typing
-    val columns = if (live) 1 else if (typing) (if (largeText) 1 else 2) else if (gridMode) (if (largeText) 4 else 5) else if (largeText) 3 else 4
+    val columns = if (live) 1 else if (typing) (if (largeText) 1 else 2) else if (largeText) 4 else 5
     var viewportHeight by remember { mutableIntStateOf(0) }
     val headingVisibility = rememberCardVisibility()
     val grid = rememberLazyGridState(initialFirstVisibleItemIndex = if (initialIndex != 0) initialIndex + headerCount else 0)
     val reducedMotion = LocalReducedMotion.current
+    val showCategories = !typing && !gridMode
+    val categoryInset = panelPosition(if (showCategories) 196.dp else 0.dp, showCategories, "categories")
+    val targetStart = (if (showCategories) 196.dp else 0.dp) + if (gridMode) TvLayout.Gutter else 16.dp
+    val contentStart = panelPosition(targetStart, showCategories, "library-content")
+    val posterGrid = !live && !typing
+    val gridStart = if (posterGrid) TvLayout.Gutter else targetStart
+    val fullRowWidth = if (posterGrid) Modifier.panelVisibleWidth(contentStart, TvLayout.Gutter) else Modifier
+    val keepCategories by remember(showCategories, categoryInset) { derivedStateOf { showCategories || categoryInset.value > 0.dp } }
     LaunchedEffect(gridActive, headerCount, largeText, reducedMotion) {
         if (largeText && gridActive) snapshotFlow {
             val heading = grid.layoutInfo.visibleItemsInfo.firstOrNull { it.key == "heading" }
@@ -245,23 +256,15 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     // An empty section keeps focus on its own tab, where the active marker is, as Home and Guide do.
     Navigation(s, model, modifier = Modifier.onFocusChanged { menuFocused.value = it.hasFocus; if (it.hasFocus) gridActive = false }, activeFocus = navFocus,
         contentEntry = { selectedCategoryFocus }, settings = settings) {
-        Row(Modifier.fillMaxSize()) {
-            if (!typing && !gridMode) CategoryColumn(categories, s.category, Modifier.focusRequester(categoryFocus)
-                .onFocusChanged { categoryFocused.value = it.hasFocus; if (it.hasFocus) gridActive = false }
-                .onPreviewKeyEvent { event ->
-                    // Right returns to the card or row that had focus; with none, the list's first item.
-                    event.type == KeyEventType.KeyDown && event.key == Key.DirectionRight && focusContent()
-                }, selectedCategoryFocus) { key -> if (key != s.category) model.category(key) }
-            Column(Modifier.weight(1f).fillMaxHeight()) {
-                // No information panel above the list (D064 posters, D067 channels): the room goes to the list itself.
-                // Lined up with the cards below; the grid's own top padding and spacer keep the old 28 dp gap.
-                if (fixedHeading && !typing) LibraryHeading(Modifier.padding(start = if (gridMode) TvLayout.Gutter else 16.dp,
-                    end = TvLayout.Gutter, top = 7.dp, bottom = 7.dp), Modifier)
-                // At large text the header scrolls with the cards: a focused tile's labels must never be cropped.
+        Box(Modifier.fillMaxSize().clipToBounds()) {
+            Column(Modifier.fillMaxSize()) {
+                // The header resizes; poster rows keep their width and only move horizontally.
+                if (fixedHeading && !typing) LibraryHeading(Modifier.slidingHeaderInset(contentStart)
+                    .padding(end = TvLayout.Gutter, top = 7.dp, bottom = 7.dp), Modifier)
                 LazyVerticalGrid(columns = EvenColumns(columns), state = grid,
-                    modifier = Modifier.weight(1f).fillMaxWidth().padding(start = (if (gridMode) TvLayout.Gutter else 16.dp) - 7.dp, end = TvLayout.Gutter - 7.dp)
+                    modifier = Modifier.weight(1f).fillMaxWidth().slidingInset(gridStart - 7.dp,
+                        remember(contentStart) { derivedStateOf { contentStart.value - 7.dp } }).padding(end = TvLayout.Gutter - 7.dp)
                         .onPreviewKeyEvent { event ->
-                            // Left from a first-column poster: the category column comes back on the selected category.
                             if (gridMode && event.type == KeyEventType.KeyDown && event.key == Key.DirectionLeft && memory.lastIndex % columns == 0) {
                                 gridActive = false; restoreCategory = true; true
                             } else false
@@ -272,10 +275,10 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                     horizontalArrangement = Arrangement.spacedBy(if (live) 0.dp else 16.dp, Alignment.CenterHorizontally)) {
                     if (!fixedHeading) item(key = "heading", span = { GridItemSpan(maxLineSpan) }) {
                         // As on Ara, the heading steps aside while typing; a short result list could not scroll it away.
-                        if (!typing) LibraryHeading(headingVisibility.container, headingVisibility.focus)
+                        if (!typing) LibraryHeading(fullRowWidth.then(headingVisibility.container), headingVisibility.focus)
                     }
                     if (searchOpen) item(key = "input", span = { GridItemSpan(maxLineSpan) }) {
-                        Row(Modifier.onFocusChanged { if (it.hasFocus) gridActive = false }.focusGroup(),
+                        Row(fullRowWidth.onFocusChanged { if (it.hasFocus) gridActive = false }.focusGroup(),
                             verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             // Down goes to the results under the field, keyboard open or closed; Left reaches the categories.
                             val fieldLabel = if (!typing || s.query.isBlank()) searchLabel else stringResource(R.string.text_pair, searchLabel,
@@ -294,7 +297,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                         // A search that found nothing in one category: the same search over the whole section is one OK away.
                         val widen = s.query.isNotBlank() && searchScoped && !s.librarySearching
                         val emptyVisibility = rememberCardVisibility()
-                        Column(Modifier.fillMaxWidth().then(emptyVisibility.container).testTag("library-empty")
+                        Column(fullRowWidth.fillMaxWidth().then(emptyVisibility.container).testTag("library-empty")
                             .background(Ink.Container, RoundedCornerShape(20.dp)).padding(24.dp),
                             verticalArrangement = Arrangement.spacedBy(14.dp)) {
                             Text(stringResource(when {
@@ -349,6 +352,13 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                     }
                 }
             }
+            if (keepCategories) CategoryColumn(categories, s.category, Modifier
+                .graphicsLayer { translationX = (categoryInset.value - 196.dp).toPx() }
+                .background(Ink.Background).focusRequester(categoryFocus)
+                .onFocusChanged { categoryFocused.value = it.hasFocus; if (it.hasFocus) gridActive = false }
+                .onPreviewKeyEvent { event ->
+                    event.type == KeyEventType.KeyDown && event.key == Key.DirectionRight && focusContent()
+                }, selectedCategoryFocus, enabled = showCategories) { key -> if (key != s.category) model.category(key) }
         }
     }
     LaunchedEffect(restoreCategory) {
@@ -438,7 +448,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
  * opening (pin.md §4).
  */
 @Composable private fun CategoryColumn(categories: List<SectionCategory>, current: String, modifier: Modifier,
-    selectedFocus: FocusRequester, select: (String) -> Unit) {
+    selectedFocus: FocusRequester, enabled: Boolean = true, select: (String) -> Unit) {
     val selectedIndex = categories.indexOfFirst { it.key == current }.coerceAtLeast(0)
     val list = rememberLazyListState(initialFirstVisibleItemIndex = (selectedIndex - 3).coerceAtLeast(0))
     LazyColumn(modifier.width(196.dp).fillMaxHeight()
@@ -451,11 +461,12 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
             // "Kilitli" goes with the name: a state description would take the place of the spoken "Seçili".
             val spoken = if (category.locked) stringResource(R.string.lock_named, category.label) else category.label
             // Moving through the column does not change the list; OK on a category shows it.
-            Surface(onClick = { select(category.key) },
+            Surface(onClick = { if (enabled) select(category.key) },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp)
                     .then(if (isSelected) Modifier.focusRequester(selectedFocus) else Modifier)
                     .onFocusChanged { focused = it.isFocused }
                     .semantics { selected = isSelected; contentDescription = spoken }
+                    .focusProperties { canFocus = enabled }
                     .testTag("category:${category.key}"),
                 shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
                 colors = ClickableSurfaceDefaults.colors(containerColor = if (isSelected) Ink.Selected else Color.Transparent,
@@ -468,8 +479,8 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                     verticalAlignment = Alignment.CenterVertically) {
                     // "TR/FILM ~ YERLI 2023" reads "YERLI 2023" with its country after it (D065).
                     val (label, tag) = remember(category.label) { displayCategory(category.label) }
-                    Text(label, Modifier.weight(1f), color = LocalContentColor.current, fontFamily = Roboto,
-                        fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal, fontSize = 14.sp, lineHeight = 19.sp,
+                    Text(remember(label, tag) { categoryDisplayName(label, tag) }, Modifier.weight(1f), color = LocalContentColor.current, fontFamily = Roboto,
+                        fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal, fontSize = 13.sp, lineHeight = 18.sp,
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (tag.isNotEmpty()) Text(tag, Modifier.padding(start = 8.dp), color = if (focused) LocalContentColor.current else Ink.Muted,
                         fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1)

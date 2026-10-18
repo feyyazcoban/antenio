@@ -75,6 +75,15 @@ class HeroLayoutTest {
             val b=ui.onNodeWithTag(tag,useUnmergedTree=true).getUnclippedBoundsInRoot()
             assertTrue("$tag fits inside hero", b.left >= hero.left && b.right <= hero.right && b.top >= hero.top && b.bottom <= hero.bottom)
         }
+        assertEquals("Hero reaches the left screen edge", 0f, hero.left.value, 1f)
+        assertEquals("Hero fills viewport width", (viewport.right - viewport.left).value, (hero.right - hero.left).value, 1f)
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle()
+        ui.onNodeWithTag("hero-watch").assertIsNotFocused()
+        assertTrue("Down scrolls into a shelf", ui.onNodeWithTag("home-hero").getUnclippedBoundsInRoot().top < viewport.top)
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_UP); ui.waitForIdle()
+        ui.onNodeWithTag("hero-watch").assertIsFocused()
+        assertEquals("Returning to hero restores its top edge", viewport.top.value,
+            ui.onNodeWithTag("home-hero").getUnclippedBoundsInRoot().top.value, 1f)
         val title=ui.onNodeWithTag("hero-title",useUnmergedTree=true).getUnclippedBoundsInRoot()
         val label=ui.onNodeWithTag("hero-label",useUnmergedTree=true).getUnclippedBoundsInRoot()
         assertTrue("The label keeps its own header line",label.bottom <= title.top)

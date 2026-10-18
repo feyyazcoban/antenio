@@ -97,6 +97,31 @@ private val categoryPrefix = Regex("^\\s*([A-Z]{2,3})\\s*/\\s*[^~]*~\\s*(\\S.*)$
 fun displayCategory(category: String): Pair<String, String> =
     categoryPrefix.find(category)?.let { it.groupValues[2].trim() to it.groupValues[1] } ?: (category to "")
 
+private val categoryLocales = mapOf(
+    "TR" to "tr", "TUR" to "tr", "AZ" to "az", "AZE" to "az",
+    "DE" to "de", "DEU" to "de", "GER" to "de", "EN" to "en", "ENG" to "en", "GB" to "en", "UK" to "en", "US" to "en",
+    "FR" to "fr", "FRA" to "fr", "FRE" to "fr", "ES" to "es", "ESP" to "es", "SPA" to "es",
+    "IT" to "it", "ITA" to "it", "NL" to "nl", "NLD" to "nl", "NED" to "nl", "PT" to "pt", "POR" to "pt",
+    "PL" to "pl", "RU" to "ru", "RUS" to "ru", "EL" to "el", "GR" to "el", "GRE" to "el")
+private val categoryAcronyms = setOf("TV", "TRT", "BBC", "HBO", "CNN", "MBC", "RTL", "ARD", "ZDF", "HD", "SD", "UHD", "FHD", "HDR", "4K", "8K", "VIP", "VOD", "DVD", "USA", "UK", "UEFA", "NBA", "NFL")
+private val categoryWords = Regex("[\\p{L}\\p{M}\\p{N}]+(?:['’][\\p{L}\\p{M}]+)*")
+private val romanNumeral = Regex("M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})")
+
+/** Display only. Unknown language, mixed-case brands and lossy Turkish ASCII I tokens stay untouched. */
+fun categoryDisplayName(name: String, tag: String): String {
+    if (name.any(Char::isLowerCase)) return name
+    val language = categoryLocales[tag] ?: return name
+    val locale = Locale.forLanguageTag(language)
+    return categoryWords.replace(name) { match ->
+        val word = match.value
+        when {
+            word in categoryAcronyms || romanNumeral.matches(word) || word.first().isDigit() -> word
+            language in setOf("tr", "az") && 'I' in word && word.all { it.code < 128 } -> word
+            else -> word.lowercase(locale).replaceFirstChar { it.titlecase(locale) }
+        }
+    }
+}
+
 private val episodeTagText = Regex("(?i)(?<![\\p{L}\\p{N}])(?:S\\d{1,3}\\s*E\\d{1,4}|\\d{1,3}x\\d{1,4})(?![\\p{L}\\p{N}])")
 private val leadingYear = Regex("^\\s*\\(\\d{4}\\)")
 

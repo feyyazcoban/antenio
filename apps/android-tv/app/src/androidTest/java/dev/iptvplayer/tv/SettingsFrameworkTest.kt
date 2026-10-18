@@ -27,6 +27,7 @@ class SettingsFrameworkTest {
     @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private lateinit var model: TvViewModel
     private lateinit var server: MockWebServer
+    @Volatile private var manyCategories = false
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
 
     @Before fun setup() {
@@ -36,9 +37,13 @@ class SettingsFrameworkTest {
                 val body = when (request.requestUrl!!.queryParameter("action")) {
                     null -> """{"user_info":{"auth":1,"status":"Active"}}"""
                     "get_live_categories", "get_series_categories" -> """[{"category_id":"1","category_name":"Genel"}]"""
-                    "get_vod_categories" -> """[{"category_id":"1","category_name":"Genel"},{"category_id":"2","category_name":"Koleksiyon"}]"""
+                    "get_vod_categories" -> if (manyCategories) org.json.JSONArray().apply {
+                        for (i in 1..40) put(org.json.JSONObject().put("category_id", "$i").put("category_name", "Kategori %02d".format(i)))
+                    }.toString() else """[{"category_id":"1","category_name":"Genel"},{"category_id":"2","category_name":"Koleksiyon"}]"""
                     "get_live_streams" -> """[{"stream_id":1,"name":"Deneme kanalı","category_id":"1"}]"""
-                    "get_vod_streams" -> """[{"stream_id":2,"name":"Deneme filmi","category_id":"1","container_extension":"mp4"},{"stream_id":3,"name":"Koleksiyon filmi","category_id":"2","container_extension":"mp4"}]"""
+                    "get_vod_streams" -> if (manyCategories) org.json.JSONArray().apply {
+                        for (i in 1..40) put(org.json.JSONObject().put("stream_id", i).put("name", "Film $i").put("category_id", "$i").put("container_extension", "mp4"))
+                    }.toString() else """[{"stream_id":2,"name":"Deneme filmi","category_id":"1","container_extension":"mp4"},{"stream_id":3,"name":"Koleksiyon filmi","category_id":"2","container_extension":"mp4"}]"""
                     "get_series" -> """[{"series_id":4,"name":"Deneme dizisi","category_id":"1"}]"""
                     else -> "[]"
                 }
@@ -134,6 +139,38 @@ class SettingsFrameworkTest {
         }
         key(KeyEvent.KEYCODE_BACK)
         ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
+    }
+
+    @Test fun categoryScrollbarFollowsTheListAndSupportsDragging() {
+        manyCategories = true
+        ui.runOnUiThread { model.refresh() }
+        ui.waitUntil(20_000) { !model.state.value.refreshing && model.state.value.categoryChoices[MediaKind.MOVIE]?.size == 40 }
+        openSettings(); openSection("İçerik ve ebeveyn denetimi")
+        row("Kategorileri yönet").performSemanticsAction(SemanticsActions.RequestFocus)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.onNodeWithTag("category-kind:MOVIE").performSemanticsAction(SemanticsActions.RequestFocus)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        fun progress() = ui.onNodeWithTag("settings-scrollbar").fetchSemanticsNode().config[SemanticsProperties.ProgressBarRangeInfo].current
+        assertEquals(0f, progress(), .01f)
+        repeat(18) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
+        assertTrue("Thumb follows remote list scrolling", progress() > .2f && progress() < .8f)
+        val focused = ui.onNode(isFocused() and hasAnyAncestor(hasTestTag("settings-panel"))).fetchSemanticsNode().config[SemanticsProperties.TestTag]
+        val previous = progress()
+        key(KeyEvent.KEYCODE_DPAD_CENTER); key(KeyEvent.KEYCODE_BACK)
+        ui.onNodeWithTag(focused).assertIsFocused()
+        assertEquals("Back keeps list position", previous, progress(), .02f)
+        shot("category-scroll-middle")
+        ui.onNodeWithTag("settings-scrollbar").performSemanticsAction(SemanticsActions.SetProgress) { it(0f) }
+        ui.waitForIdle()
+        ui.onNodeWithTag("settings-scrollbar").performTouchInput { swipe(center.copy(y = 8f), center.copy(y = height - 1f), 500) }
+        ui.waitForIdle()
+        assertTrue("Dragging the thumb reaches the lower list", progress() > .85f)
+        ui.onNodeWithTag("settings-scrollbar").performSemanticsAction(SemanticsActions.SetProgress) { it(1f) }
+        ui.waitForIdle()
+        assertEquals(1f, progress(), .01f)
+        ui.onNodeWithTag("settings-scroll-more").assertTextEquals("")
+        ui.onNodeWithTag("settings-scroll-up").assertTextEquals(ui.activity.getString(R.string.settings_scroll_up))
+        shot("category-scroll-bottom")
     }
 
     @Test fun backLeavesOnePageAndFocusReturnsToTheRowThatOpenedIt() {

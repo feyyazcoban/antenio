@@ -1,5 +1,9 @@
 # TV animasyon ve hareket rehberi
 
+## 18 Ekim 2026 · Kategori ve ana menü · D093
+
+Native panel açılma 240 ms, kapanma 180 ms FastOutSlowIn; hedef hareket sırasında değişirse mevcut konumdan tersine döner. Büyük afiş listesi sabit beş sütun ölçüsünde yalnız yatay kayar (büyük yazı dört); kategori açıkken dört sütun görünür, beşinci sağda ekran dışında kalır (büyük yazı üç görünür). Satırlar yeniden gruplanmaz, kartlar çapraz hareket etmez. Normal ekranda açık panelin sağ afiş payı yaklaşık 7,5 dp, kapalıda 24 dp. Tam satır arama/boş içerik küçük alanları görünür genişliğe ölçülür. Küçük üst başlık sağdaki Sırala/Ara eylemlerini ekranda tutar. Kapanırken hâlâ çizilen kategori satırları fokus alamaz. Ana menü yazı/wordmark doğal genişliğini koruyarak açılan alanda ortaya çıkar. Hareketi azalt tüm konumları doğrudan hedefe alır.
+
 **Tarih:** 13 Ekim 2026 · **Sürüm:** 0.1 · **Durum:** Araştırma destekli tasarım önerisi; gerçek TV doğrulaması bekliyor.
 
 Hedef, kullanıcının kumandaya bastığında sonucu hemen görmesi, nerede olduğunu koruması ve yeni komut için animasyonun bitmesini beklememesidir. Canlı TV, film ve dizi akışlarının tamamında aynı davranış dili kullanılır. Aşağıdaki süre ve ölçekler ürün için başlangıç adaylarıdır; bilimsel olarak kanıtlanmış evrensel optimum değerler değildir.
