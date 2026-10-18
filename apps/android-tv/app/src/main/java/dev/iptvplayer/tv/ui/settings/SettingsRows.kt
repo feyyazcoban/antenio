@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -57,8 +58,12 @@ internal class PageRows {
         returnKey?.let(rows::get) ?: start?.let(rows::get) ?: rows.values.firstOrNull()
 }
 
-/** What a ChoiceRow offers, kept by the panel while its ChoicePage is open. [selected] is an index of [options]. */
-internal class ChoiceSpec(val title: String, val options: List<String>, val selected: Int, val choose: (Int) -> Unit)
+/**
+ * What a ChoiceRow offers, kept by the panel while its ChoicePage is open. [selected] is an index of [options];
+ * [titleText] and [optionTexts] are the same texts with spans of their own (ChoiceRow).
+ */
+internal class ChoiceSpec(val title: String, val options: List<String>, val selected: Int, val choose: (Int) -> Unit,
+    val titleText: AnnotatedString? = null, val optionTexts: List<AnnotatedString>? = null)
 
 /**
  * What a page's content works with: the app's state and model, the rows, and the panel around it. Each row takes a
@@ -108,13 +113,14 @@ internal class SettingsScope(
     /**
      * A row that acts on OK. [busy] reads as working; [attention] shows the description as a warning. [value] stands at
      * the end as a switch's state does, read as the row's state ("Kilitli"). [clickLabel] says what OK does to TalkBack,
-     * for a row whose OK acts at once where its name does not say so ("Kilidi kaldır").
+     * for a row whose OK acts at once where its name does not say so ("Kilidi kaldır"). [labelText] and
+     * [descriptionText] are the label and description with spans of their own, such as the language each part is read in.
      */
     @Composable fun ActionRow(key: String, label: String, description: String, modifier: Modifier = Modifier,
         section: SectionId? = null, busy: Boolean = false, attention: Boolean = false, value: String? = null,
-        clickLabel: String? = null, onClick: () -> Unit) {
+        clickLabel: String? = null, labelText: AnnotatedString? = null, descriptionText: AnnotatedString? = null, onClick: () -> Unit) {
         SettingRow(label, description, Modifier.row(rowFocus(key), section).then(modifier), value = value, busy = busy,
-            attention = attention, clickLabel = clickLabel, onClick = onClick)
+            attention = attention, clickLabel = clickLabel, labelText = labelText, descriptionText = descriptionText, onClick = onClick)
     }
 
     /** A row that opens [route]; Back returns to it. */
@@ -125,12 +131,15 @@ internal class SettingsScope(
 
     /**
      * One of [options], the chosen one as its description; OK opens them as a ChoicePage and Back returns here. With a
-     * [description] of its own, the row shows the choice as [value] at its end (Açık, Kilitli, Gizli).
+     * [description] of its own, the row shows the choice as [value] at its end (Açık, Kilitli, Gizli). [labelText] and
+     * [optionTexts] are the label and options with spans of their own, on the row and its page alike.
      */
     @Composable fun ChoiceRow(key: String, label: String, options: List<String>, selected: Int, modifier: Modifier = Modifier,
-        section: SectionId? = null, description: String? = null, value: String? = null, choose: (Int) -> Unit) {
-        ActionRow(key, label, description ?: options.getOrElse(selected) { "" }, modifier, section, value = value) {
-            showChoice(key, ChoiceSpec(label, options, selected, choose))
+        section: SectionId? = null, description: String? = null, value: String? = null, labelText: AnnotatedString? = null,
+        optionTexts: List<AnnotatedString>? = null, choose: (Int) -> Unit) {
+        ActionRow(key, label, description ?: options.getOrElse(selected) { "" }, modifier, section, value = value, labelText = labelText,
+            descriptionText = optionTexts?.getOrNull(selected)?.takeIf { description == null }) {
+            showChoice(key, ChoiceSpec(label, options, selected, choose, labelText, optionTexts))
         }
     }
 
@@ -178,7 +187,8 @@ internal class SettingsScope(
 @Composable internal fun SettingsScope.ChoicePage(choice: ChoiceSpec) {
     choice.options.forEachIndexed { index, option ->
         Action(option, rememberFocusEdge().modifier.focusRequester(rowFocus("option:$index", start = index == choice.selected))
-            .fillMaxWidth().testTag("settings-option:$index"), selected = index == choice.selected, check = true) {
+            .fillMaxWidth().testTag("settings-option:$index"), selected = index == choice.selected, check = true,
+            labelText = choice.optionTexts?.getOrNull(index)) {
             choice.choose(index); back()
         }
     }
@@ -221,7 +231,7 @@ internal class SettingsScope(
  */
 @Composable private fun SettingRow(label: String, description: String, modifier: Modifier = Modifier,
     checked: Boolean? = null, value: String? = null, busy: Boolean = false, attention: Boolean = false,
-    clickLabel: String? = null, onClick: () -> Unit) {
+    clickLabel: String? = null, labelText: AnnotatedString? = null, descriptionText: AnnotatedString? = null, onClick: () -> Unit) {
     val edge = rememberFocusEdge()
     val focused = edge.focused
     val state = stringResource(if (checked == true) R.string.switch_on else R.string.switch_off)
@@ -242,8 +252,9 @@ internal class SettingsScope(
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Text(label, color = Ink.Text, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 19.sp)
-                Text(description, color = if (attention) Ink.Error else Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 17.sp)
+                Text(labelText ?: AnnotatedString(label), color = Ink.Text, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 19.sp)
+                Text(descriptionText ?: AnnotatedString(description), color = if (attention) Ink.Error else Ink.Muted, fontFamily = Roboto,
+                    fontSize = 12.sp, lineHeight = 17.sp)
             }
             if (checked != null) Text(state,
                 // Ink.Selected nearly equals the focused row colour, so the focused ON chip uses the dark chip too.

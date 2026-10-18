@@ -7,18 +7,21 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
 import android.os.LocaleList
-import android.text.format.DateFormat
+import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import dev.iptvplayer.tv.data.DeviceStore
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.Locale
 
 /**
  * The language chosen in Settings → Dil / Language; [SYSTEM] follows the TV. [tag] is what DeviceStore keeps, [label]
- * the option, the same in every language.
+ * the option, the same in every language; [labelLanguages] the languages its " / " parts are written in, for TalkBack.
  */
-enum class AppLanguage(val tag: String, @StringRes val label: Int) {
-    SYSTEM("", R.string.language_system), TURKISH("tr", R.string.language_turkish), ENGLISH("en", R.string.language_english);
+enum class AppLanguage(val tag: String, @StringRes val label: Int, val labelLanguages: List<String>) {
+    SYSTEM("", R.string.language_system, listOf("tr", "en")), TURKISH("tr", R.string.language_turkish, listOf("tr")),
+    ENGLISH("en", R.string.language_english, listOf("en"));
 
     companion object {
         /** A stored or system tag; anything the app does not speak follows the TV. */
@@ -28,10 +31,12 @@ enum class AppLanguage(val tag: String, @StringRes val label: Int) {
 
 /**
  * The language the app speaks (gap plan S13): English by default, Turkish, or the TV's language when the app speaks it.
- * Android 13 and later keep the viewer's choice themselves (LocaleManager) and bring the activity back in it. Android
- * 8–12 have no language of their own for an app: DeviceStore keeps the choice, [wrap] gives MainActivity a context in
- * it and [choose] recreates the activity. MainActivity stays a ComponentActivity: AppCompat's per-app language does
- * the same on those versions, but only for an AppCompatActivity with an AppCompat theme.
+ * DeviceStore keeps the viewer's choice on every Android version, so a backup carries it. Android 13 and later also
+ * keep it themselves (LocaleManager), where the TV's own settings can change it, and bring the activity back in it;
+ * DeviceStore follows them ([handover]). Android 8–12 have no language of their own for an app: [wrap] gives
+ * MainActivity a context in the choice and [choose] recreates the activity. MainActivity stays a ComponentActivity:
+ * AppCompat's per-app language does the same on those versions, but only for an AppCompatActivity with an AppCompat
+ * theme.
  *
  * [locale] is what every date, time, number and title order follows (Formats.appLocale), read from the activity each
  * time it is created; [guideLanguages] is the order XMLTV titles are picked in.
@@ -55,9 +60,9 @@ object LocaleController {
 
     /** Keeps [language] for the next activity without recreating one: a test sets the app's language before it starts. */
     fun store(context: Context, language: AppLanguage) {
+        DeviceStore(context).appLanguage = language.tag
         if (Build.VERSION.SDK_INT >= 33) localeManager(context).applicationLocales =
             if (language == AppLanguage.SYSTEM) LocaleList.getEmptyLocaleList() else LocaleList.forLanguageTags(language.tag)
-        else DeviceStore(context).appLanguage = language.tag
     }
 
     /** [base] in the chosen language on Android 12 and older, for MainActivity.attachBaseContext. */
@@ -68,12 +73,47 @@ object LocaleController {
         return base.createConfigurationContext(configuration)
     }
 
-    /** Reads the language the activity's texts resolved to and the TV's clock; MainActivity calls it as it is created. */
-    fun update(activity: Activity) {
-        locale = shownLocale(activity.resources.configuration.locales.first(), DateFormat.is24HourFormat(activity))
-        val device = if (Build.VERSION.SDK_INT >= 33) localeManager(activity).systemLocales else Resources.getSystem().configuration.locales
-        guideLanguages = guideLanguages(locale, device.first())
+    /**
+     * Reads the language the activity's texts resolved to and the TV's clock; MainActivity calls it as it is created.
+     * True when the app's language is another than the last activity's: what follows its alphabet is sorted again.
+     */
+    fun update(activity: Activity): Boolean {
+        if (Build.VERSION.SDK_INT >= 33) syncChoice(activity)
+        val device = (if (Build.VERSION.SDK_INT >= 33) localeManager(activity).systemLocales else Resources.getSystem().configuration.locales).first()
+        val before = locale.language
+        locale = shownLocale(activity.resources.configuration.locales.first(),
+            hour24(Settings.System.getString(activity.contentResolver, Settings.System.TIME_12_24), device))
+        guideLanguages = guideLanguages(locale, device)
+        return locale.language != before
     }
+
+    /** DeviceStore and LocaleManager agree on Android 13 and later: see [handover]. */
+    @RequiresApi(33) private fun syncChoice(context: Context) {
+        val store = DeviceStore(context)
+        val system = AppLanguage.of(localeManager(context).applicationLocales.first()?.language)
+        val given = handover(system, AppLanguage.of(store.appLanguage), store.appLanguageHandedOver)
+        if (given != null) localeManager(context).applicationLocales = LocaleList.forLanguageTags(given.tag)
+        val kept = given ?: system
+        if (store.appLanguage != kept.tag) store.appLanguage = kept.tag
+        if (!store.appLanguageHandedOver) store.appLanguageHandedOver = true
+    }
+
+    /**
+     * What LocaleManager is given as the app starts on Android 13 or later; null keeps its own choice, which DeviceStore
+     * then follows (one made in the TV's settings, or "" for the TV's language). Only the first start there gives it the
+     * [stored] choice, made before the TV updated from Android 12 or older, and only while it holds none of its own.
+     */
+    internal fun handover(system: AppLanguage, stored: AppLanguage, handedOver: Boolean): AppLanguage? =
+        stored.takeIf { !handedOver && system == AppLanguage.SYSTEM && it != AppLanguage.SYSTEM }
+
+    /**
+     * Whether the TV keeps a 24-hour clock: its own setting (Settings.System.TIME_12_24, "24" or "12"), or without one
+     * the custom of its language [device], as Android decides. Never the app's language, which DateFormat.is24HourFormat
+     * reads from an activity: an English app on a Turkish TV still shows 20:30.
+     */
+    internal fun hour24(setting: String?, device: Locale?): Boolean = setting?.let { it == "24" }
+        ?: (DateFormat.getTimeInstance(DateFormat.LONG, device ?: Locale.getDefault()) as? SimpleDateFormat)?.toPattern()?.contains('H')
+        ?: true
 
     /**
      * The locale of the texts on screen when [first] leads the activity's locales (Android puts there the TV language

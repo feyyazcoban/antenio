@@ -511,13 +511,14 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     guide: GuideSlice?, now: Long, zone: ZoneId, guideAvailable: Boolean = true, locked: Boolean = false,
     longClick: (() -> Unit)? = null, click: () -> Unit) {
     val shown = rememberShownTitle(entry.title)
+    val spoken = rememberShownName(entry.title)
     val visibility = rememberCardVisibility()
     val current = guide?.takeIf { !locked }?.now(now)
     val next = guide?.takeIf { !locked }?.next(now)
     val lockedState = stringResource(R.string.lock_state)
     Box(Modifier.fillMaxWidth().then(visibility.container).testTag("tile:library:${entry.id}")) {
         Surface(onClick = click, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth().heightIn(min = 48.dp)
-            .semantics { contentDescription = entry.title; if (locked) stateDescription = lockedState },
+            .semantics { contentDescription = spoken; if (locked) stateDescription = lockedState },
             shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
             colors = ClickableSurfaceDefaults.colors(containerColor = Ink.Container, contentColor = Ink.Text,
                 focusedContainerColor = Ink.High, focusedContentColor = Ink.Text),

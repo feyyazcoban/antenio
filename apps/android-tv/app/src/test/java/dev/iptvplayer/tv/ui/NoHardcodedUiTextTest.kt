@@ -8,7 +8,9 @@ import java.util.Locale
 /**
  * The screens and the view model take every text from the string resources (S01, S02), so the app can speak another
  * language. This reads their sources and fails on a string literal that looks Turkish: one with a letter only Turkish
- * uses among the app's languages, or with a common word of its Turkish copy. Comments and test tags are not texts.
+ * uses among the app's languages, or with a common word of its Turkish copy. Since the default texts are English (S13),
+ * it fails as well on one that looks English: a capitalised word, or two words with a space. Icon names, keys and date
+ * patterns are neither. Comments and test tags are not texts.
  */
 class NoHardcodedUiTextTest {
     private val turkishLetters = Regex("[çğıöşüÇĞİÖŞÜ]")
@@ -23,14 +25,18 @@ class NoHardcodedUiTextTest {
     )
 
     /**
-     * Literals that read as Turkish but never reach the screen as text, each with the calls it may stand in and its
-     * reason: icon names, keys kept on the device, provider data. The same word in any other call is still a text. An
+     * Literals that read as Turkish or English but are no text of the app's, each with the calls it may stand in and its
+     * reason: icon names, keys kept on the device, provider data, names the same in every language. The same word in
+     * any other call is still a text. An
      * entry or a call no source uses any more fails the test, so the list stays exact.
      */
     private class Allowed(val text: String, val within: Set<String>, val reason: String)
 
     private val allowed = listOf(
         Allowed("film", setOf("LineIcon", "iconPaths"), "icon name: LineIcon draws it from DesignSystem.iconPaths"),
+        Allowed("Europe/Istanbul", setOf("listOf"), "time zone id, listed first in the guide's zones as it is named"),
+        Allowed("Europe/Berlin", setOf("listOf"), "time zone id, listed first in the guide's zones as it is named"),
+        Allowed("Android   · API  ", setOf("NoteRow"), "the platform and its version in Uygulama hakkında, the same in every language"),
     )
 
     /**
@@ -92,14 +98,19 @@ class NoHardcodedUiTextTest {
         return found
     }
 
+    private val englishText = Regex("\\b[A-Z][a-z]{2,}\\b|\\b[a-z]{2,} [a-z]{2,}\\b")
+
     private fun looksTurkish(text: String) = turkishLetters.containsMatchIn(text) ||
         Regex("\\p{L}+").findAll(text).any { it.value.lowercase(Locale.ROOT) in turkishWords }
 
+    private fun looksEnglish(text: String) = englishText.containsMatchIn(text)
+
     private fun isAllowed(literal: Literal) = allowed.any { it.text == literal.text && literal.call in it.within }
 
-    private fun offenders(literals: List<Literal>) = literals.filter { !it.testTag && !isAllowed(it) && looksTurkish(it.text) }
+    private fun offenders(literals: List<Literal>) =
+        literals.filter { !it.testTag && !isAllowed(it) && (looksTurkish(it.text) || looksEnglish(it.text)) }
 
-    @Test fun screensAndTheViewModelHoldNoTurkishText() {
+    @Test fun screensAndTheViewModelHoldNoTurkishOrEnglishText() {
         val root = File("src/main/java/dev/iptvplayer/tv")
         val files = root.resolve("ui").walkTopDown().filter { it.extension == "kt" }.toList() + root.resolve("TvViewModel.kt")
         assertTrue("the sources moved", files.size > 10 && files.all { it.isFile })
@@ -132,5 +143,19 @@ class NoHardcodedUiTextTest {
         // An icon name is allowed where an icon is named, and the same word is a text everywhere else.
         assertEquals(listOf("LineIcon", "iconPaths", "Text"), literals.filter { it.text == "film" }.map { it.call })
         assertEquals(listOf("Kaynak ekle" to 4, "Kanal" to 5, "Geçersiz adres" to 6, "film" to 10), offenders(literals).map { it.text to it.line })
+    }
+
+    @Test fun englishTextsAreFoundAndIconNamesKeysAndPatternsAreNot() {
+        val source = """
+            Text("Loading")
+            Note("no results yet")
+            Action(if (live) "Watch" else stringResource(R.string.action_play))
+            LineIcon("live_tv")
+            Modifier.focusRequester(focus("edit-source:${'$'}{source.id}"))
+            format(time, zone, if (turkish) "d MMM EEEE" else "EEEE d MMM", locale)
+            pattern(locale, "EEEEdMMM", "h:mm a")
+            Image(painter, "NEXTV")
+        """.trimIndent()
+        assertEquals(listOf("Loading", "no results yet", "Watch"), offenders(literals(source, "Sample.kt")).map { it.text })
     }
 }

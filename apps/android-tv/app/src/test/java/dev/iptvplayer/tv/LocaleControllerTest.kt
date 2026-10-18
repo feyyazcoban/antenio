@@ -31,6 +31,26 @@ class LocaleControllerTest {
         assertEquals(listOf("tr", "en"), LocaleController.guideLanguages(LocaleController.shownLocale(Locale.forLanguageTag("tr"), true), Locale.US))
     }
 
+    @Test fun theClockFollowsTheTvsSettingOrItsLanguageNeverTheApps() {
+        assertTrue(LocaleController.hour24("24", Locale.US))
+        assertFalse(LocaleController.hour24("12", Locale.forLanguageTag("tr-TR")))
+        // No setting of its own: the TV's language decides, so an English app on a Turkish TV still reads 20:30.
+        assertTrue(LocaleController.hour24(null, Locale.forLanguageTag("tr-TR")))
+        assertTrue(LocaleController.hour24(null, Locale.UK))
+        assertFalse(LocaleController.hour24(null, Locale.US))
+    }
+
+    @Test fun androidThirteenTakesOverAChoiceMadeBeforeTheTvUpdatedOnlyOnce() {
+        val system = AppLanguage.SYSTEM
+        // Chosen on Android 12, then the TV updated: LocaleManager holds nothing yet and is given the choice.
+        assertEquals(AppLanguage.TURKISH, LocaleController.handover(system, AppLanguage.TURKISH, handedOver = false))
+        // A language the TV's own settings set wins, and DeviceStore follows it.
+        assertNull(LocaleController.handover(AppLanguage.ENGLISH, AppLanguage.TURKISH, handedOver = false))
+        // After the first start the system is the record: back to the TV's language in its settings stays so.
+        assertNull(LocaleController.handover(system, AppLanguage.TURKISH, handedOver = true))
+        assertNull(LocaleController.handover(system, system, handedOver = false))
+    }
+
     @Test fun onlyTheAppsLanguagesAreKeptAsAChoice() {
         assertEquals(AppLanguage.TURKISH, AppLanguage.of("tr"))
         assertEquals(AppLanguage.ENGLISH, AppLanguage.of("en"))

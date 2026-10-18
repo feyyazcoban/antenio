@@ -122,16 +122,23 @@ internal class GuideController(private val scope: CoroutineScope, private val st
         }
     }
 
-    /** Old, outside the window, or read for titles in another language than the app and the TV now speak. */
     private fun stale(info: EpgSnapshotInfo?): Boolean {
         val now = System.currentTimeMillis()
-        val wanted = GuideWindow.around(Instant.ofEpochMilli(now), zone())
-        return info == null || info.updatedAt < now - 6 * 60 * 60_000L || info.updatedAt > now + 5 * 60_000 ||
-            info.window.from > wanted.from || info.window.until < wanted.until || info.languages != languages()
+        return stale(info, now, GuideWindow.around(Instant.ofEpochMilli(now), zone()), languages())
     }
     private fun update(id: String, value: GuideStatus?) {
         val old = mutable.value
         if (old.statuses[id] == value) return
         mutable.value = GuideState(if (value == null) old.statuses - id else old.statuses + (id to value), old.revision + 1)
+    }
+
+    companion object {
+        /**
+         * A saved guide to download again: none, older than six hours or dated ahead of the clock, not covering the
+         * [wanted] window, or read for titles in another order of [languages] than the app and the TV now speak in.
+         */
+        fun stale(info: EpgSnapshotInfo?, now: Long, wanted: GuideWindow, languages: List<String>): Boolean =
+            info == null || info.updatedAt < now - 6 * 60 * 60_000L || info.updatedAt > now + 5 * 60_000 ||
+                info.window.from > wanted.from || info.window.until < wanted.until || info.languages != languages
     }
 }

@@ -230,6 +230,7 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                     else guideEmptyText(channel?.let { s.guideStatus[it.sourceId] }, channel?.let { rows[it.id] }))
                 val openLabel = stringResource(R.string.guide_open_programme)
                 val detailLabel = stringResource(R.string.guide_programme_detail)
+                val channelName = channel?.let { shownName(it.title) }.orEmpty()
                 BoxWithConstraints(Modifier.weight(1f).fillMaxWidth().focusRequester(gridFocus).onFocusChanged { gridFocused = it.isFocused }
                     .onPreviewKeyEvent { event ->
                         val latest = model.state.value
@@ -275,7 +276,7 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                             }
                         }
                     }.focusable().testTag("guide-grid").semantics {
-                        contentDescription = channel?.title.orEmpty() + ", " + guideTime(anchor, zone) + ", " + selectedText
+                        contentDescription = channelName + ", " + guideTime(anchor, zone) + ", " + selectedText
                         onClick(openLabel) { if (channel != null && selectedSlot != null) open(channel, selectedSlot); true }
                     }) {
                     // Size the list to whole rows: every scroll position, including the end, lands on a row
@@ -289,6 +290,7 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                         itemsIndexed(channels, key = { _, entry -> entry.id }) { index, entry ->
                             val rowLocked = s.locks.asksPin(entry.id)
                             val rowSlots = allSlots[entry.id] ?: emptySlots
+                            val spoken = rememberShownName(entry.title)
                             Row(Modifier.fillMaxWidth().height(rowHeight).testTag("guide-row:${entry.id}"), verticalAlignment = Alignment.CenterVertically) {
                                 Row(Modifier.width(channelWidth).fillMaxHeight().padding(end = 12.dp), verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -329,7 +331,7 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                                                 if (chosen && gridFocused) Ink.Text else Ink.Divider.copy(alpha = .5f), RoundedCornerShape(6.dp))
                                             .testTag("guide-cell:${entry.id}:${slot.from}").semantics {
                                                 selected = chosen
-                                                contentDescription = "${entry.title}, $title, ${guideTime(slot.from, zone)}"
+                                                contentDescription = "$spoken, $title, ${guideTime(slot.from, zone)}"
                                                 onClick(detailLabel) { open(entry, slot); true }
                                             }) {
                                             if (cellWidth > 48.dp) Column(Modifier.padding(horizontal = 10.dp, vertical = 6.dp).align(Alignment.CenterStart)) {
@@ -373,7 +375,7 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
             }
             val unknownEnd = stringResource(R.string.guide_end_unknown)
             val noDescription = stringResource(R.string.guide_detail_no_description)
-            val content = "${entry.title}\n${guideDate(slot.from, zone)} · $zoneName · ${guideOffset(slot.from, zone)}\n\n" +
+            val content = "${shownName(entry.title)}\n${guideDate(slot.from, zone)} · $zoneName · ${guideOffset(slot.from, zone)}\n\n" +
                 (if (slot.programmes.isEmpty()) stringResource(R.string.guide_detail_no_programme)
                 else slot.programmes.joinToString("\n\n") { "${it.title}\n${programmeTime(it, zone, unknownEnd)}\n${it.description.ifBlank { noDescription }}" }) + note
             RemoteTextReader(content, Modifier.weight(1f, fill = false).focusRequester(focus).focusProperties { down = play }, "guide-detail-reader")

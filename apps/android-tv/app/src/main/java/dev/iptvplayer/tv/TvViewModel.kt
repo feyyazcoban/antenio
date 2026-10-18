@@ -964,6 +964,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             mutable.update { it.copy(librarySorts = it.librarySorts + (kind to sort), focusedId = null) }
         }
     }
+    /** The activity came back in another language (LocaleController): A–Z orders are sorted again away from the main thread. */
+    fun languageChanged() = prepareLibraryOrders()
     /** Sorts a newly published catalogue for the saved choices before Library asks for it. */
     private fun prepareLibraryOrders() {
         val s = state.value

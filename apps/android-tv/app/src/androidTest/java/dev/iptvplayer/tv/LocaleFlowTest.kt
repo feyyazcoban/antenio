@@ -3,6 +3,7 @@ package dev.iptvplayer.tv
 import android.content.res.Resources
 import android.view.KeyEvent
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -73,6 +74,17 @@ class LocaleFlowTest {
         waitForFocus(first)
     }
 
+    /** The languages the text of the node [tag] is marked as written in, in order. */
+    private fun spokenIn(tag: String) = ui.onNodeWithTag(tag).fetchSemanticsNode().config[SemanticsProperties.Text]
+        .flatMap { text -> text.spanStyles.mapNotNull { it.item.localeList?.firstOrNull()?.language } }
+
+    /** Back closes Settings; focus is on the menu's Settings item [nav] again, as the panel was opened from it. */
+    private fun closeToMenu(nav: String) {
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5_000) { ui.onAllNodesWithTag("settings-panel").fetchSemanticsNodes().isEmpty() }
+        ui.waitUntil(5_000) { ui.onAllNodes(hasTestTag("nav:$nav") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
+    }
+
     /** Picks [option] in Dil / Language from its row; Settings comes back on the row in the language [tag]. */
     private fun choose(option: AppLanguage, tag: String) {
         row("Dil / Language").assertIsFocused()
@@ -81,6 +93,11 @@ class LocaleFlowTest {
         listOf("Sistem dili / System language", "Türkçe", "English").forEachIndexed { index, label ->
             ui.onNodeWithTag("settings-option:$index").assertTextContains(label)
         }
+        // TalkBack reads each language's name in that language, both halves of the bilingual ones in their own.
+        assertEquals(listOf("tr", "en"), spokenIn("settings-option:0"))
+        assertEquals(listOf("tr"), spokenIn("settings-option:1"))
+        assertEquals(listOf("en"), spokenIn("settings-option:2"))
+        assertEquals(listOf("tr", "en"), spokenIn("settings-title"))
         // The options follow AppLanguage's order, and the chosen one has focus first.
         val from = LocaleController.choice(ui.activity).ordinal
         ui.onNodeWithTag("settings-option:$from").assertIsFocused()
@@ -118,9 +135,8 @@ class LocaleFlowTest {
         // Dates follow the app's language, not the TV's.
         ui.onNodeWithText("Son güncelleme: ${updatedTime(updated)}").assertExists()
         assertTrue(updatedTime(updated), updatedTime(updated).contains(Regex("Eki|Kas|Ara|Oca|Şub|Mar|Nis|May|Haz|Tem|Ağu|Eyl")))
-        // The screen behind came back in Turkish with the same state.
-        key(KeyEvent.KEYCODE_BACK)
-        ui.waitUntil(5_000) { ui.onAllNodesWithTag("settings-panel").fetchSemanticsNodes().isEmpty() }
+        // The screen behind came back in Turkish with the same state, and Back returns to the menu's Ayarlar.
+        closeToMenu("Ayarlar")
         ui.onNodeWithTag("nav:Ana Sayfa").assertExists()
         ui.onNodeWithTag("nav:Canlı TV").assertExists()
         assertEquals(1, model.state.value.sources.size)
@@ -136,8 +152,7 @@ class LocaleFlowTest {
         assertEquals(AppLanguage.SYSTEM, LocaleController.choice(ui.activity))
         ui.waitUntil(5_000) { ui.onAllNodes(hasText("Sistem dili / System language") and hasClickAction()).fetchSemanticsNodes().isNotEmpty() }
         ui.onNodeWithTag("settings-title").assertTextEquals("Settings")
-        key(KeyEvent.KEYCODE_BACK)
-        ui.waitUntil(5_000) { ui.onAllNodesWithTag("settings-panel").fetchSemanticsNodes().isEmpty() }
+        closeToMenu("Settings")
         ui.onNodeWithTag("nav:Home").assertExists()
     }
 }

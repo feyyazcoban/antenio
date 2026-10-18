@@ -70,6 +70,12 @@ import kotlinx.coroutines.delay
     settings: () -> Unit, content: @Composable () -> Unit) {
     val defaults = remember { List(7) { FocusRequester() } }
     val contentFocus = remember { FocusRequester() }
+    // Ayarlar, for the panel a new language brought back over this screen to give focus back to (PilotApp).
+    val settingsOpener = LocalSettingsOpener.current
+    DisposableEffect(settingsOpener, defaults) {
+        settingsOpener.focus = defaults[6]
+        onDispose { if (settingsOpener.focus === defaults[6]) settingsOpener.focus = null }
+    }
     // Requester index: 0 Ana Sayfa, 1 Canlı TV, 2 Filmler, 3 Diziler, 4 Favoriler, 5 Ara, 6 Ayarlar.
     val libraryIndex = if (s.onlyFavorites) 4 else when (s.kind) {
         MediaKind.LIVE -> 1; MediaKind.MOVIE -> 2; MediaKind.SERIES -> 3; else -> 0 }
@@ -446,7 +452,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
             var watchFocused by remember { mutableStateOf(false) }
             var detailsFocused by remember { mutableStateOf(false) }
             LaunchedEffect(watchFocused, detailsFocused) { actionFocused = watchFocused || detailsFocused }
-            val place = stringResource(R.string.hero_slide, entry.title, (current + 1).toString(), slides.size.toString())
+            val place = stringResource(R.string.hero_slide, shownName(entry.title), (current + 1).toString(), slides.size.toString())
             Row(Modifier.padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 // Left on İzle shows the previous slide; on the first it goes on to the menu. Both keys read the index
                 // itself, not this frame's copy, so two presses before the next frame turn two slides.
@@ -485,7 +491,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                 .then(if (android.os.Build.VERSION.SDK_INT >= 31) Modifier.blur(24.dp) else Modifier), contentScale = ContentScale.Crop)
             Box(Modifier.fillMaxSize().background(Ink.Background.copy(alpha = if (android.os.Build.VERSION.SDK_INT >= 31) .35f else .55f)))
             Box(Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(top = if (largeText) 64.dp else 44.dp, bottom = 34.dp, end = 56.dp)) {
-                Artwork(slide.sourceId, slide.artwork, slide.title, Modifier.fillMaxHeight().aspectRatio(2f / 3)
+                Artwork(slide.sourceId, slide.artwork, rememberShownName(slide.title), Modifier.fillMaxHeight().aspectRatio(2f / 3)
                     .shadow(24.dp, RoundedCornerShape(TvLayout.CardRadius)).clip(RoundedCornerShape(TvLayout.CardRadius)).testTag("home-hero-poster"))
             }
         }
@@ -539,6 +545,7 @@ internal fun runtimeText(seconds: Long): String {
     reserveEpisode: Boolean = false, locked: Boolean = false, longClick: (() -> Unit)? = null, open: () -> Unit) {
     val live = entry.kind == MediaKind.LIVE
     val shown = rememberShownTitle(entry.title, entry.year)
+    val spoken = rememberShownName(entry.title)
     val lockedState = stringResource(R.string.lock_state)
     // The row's own 24 dp gutter: a focused card stops on the heading edge instead of 7 dp from the screen,
     // which left a strip of the previous card with cut text at the other edge.
@@ -546,7 +553,7 @@ internal fun runtimeText(seconds: Long): String {
     if (record != null) {
         // A finished latest episode: the card offers the series' next episode instead of a position.
         val next = record.kind == MediaKind.EPISODE && record.progress.completed
-        val description = stringResource(R.string.continue_description, entry.title)
+        val description = stringResource(R.string.continue_description, spoken)
         val episode = if (record.kind == MediaKind.EPISODE) stringResource(if (next) R.string.continue_episode_watched else R.string.continue_episode,
             record.season.toString(), record.episode.toString()) else null
         val shortEpisode = stringResource(if (next) R.string.continue_episode_short_watched else R.string.continue_episode_short,
@@ -592,7 +599,7 @@ internal fun runtimeText(seconds: Long): String {
         }
         return
     }
-    val description = if (section == "continue") stringResource(R.string.continue_description, entry.title) else entry.title
+    val description = if (section == "continue") stringResource(R.string.continue_description, spoken) else spoken
     Column(Modifier.width(if (live) TvLayout.LiveWidth else TvLayout.PosterWidth).then(visibility.container).testTag("tile:$section:${entry.id}"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Card(onClick = open, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth().aspectRatio(if (live) 16f / 9 else 2f / 3)
             .semantics { contentDescription = description; if (locked) stateDescription = lockedState; testTag = "$section:${entry.id}" },

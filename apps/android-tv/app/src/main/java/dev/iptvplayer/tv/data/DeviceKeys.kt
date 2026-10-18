@@ -94,12 +94,14 @@ internal object DeviceKeys {
     val audioLanguage = DeviceKey("audioLanguage", KeyScope.DEVICE, reset = false, BackupClass.SETTINGS)
     val subtitleLanguage = DeviceKey("subtitleLanguage", KeyScope.DEVICE, reset = false, BackupClass.SETTINGS)
     val subtitlesOff = DeviceKey("subtitlesOff", KeyScope.DEVICE, reset = false, BackupClass.SETTINGS)
-    /** The app's language on Android 12 and older ("" follows the TV); Android 13 keeps the choice itself. */
+    /** The app's language ("" follows the TV) on every Android version; Android 13 and later also keep it themselves. */
     val appLanguage = DeviceKey("appLanguage", KeyScope.DEVICE, reset = false, BackupClass.SETTINGS)
+    /** That this TV's Android 13 or later took over [appLanguage] once; another TV starts its own handover. */
+    val appLanguageHandedOver = DeviceKey("appLanguageHandedOver", KeyScope.DEVICE, reset = false, BackupClass.NONE)
 
     val all = listOf(sources, legacySource, legacyProgress, progress, favorites, history, reducedMotion, startupSound,
         guideZone, librarySort, hiddenCategories, hideAdultCategories, autoNextEpisode, audioLanguage, subtitleLanguage,
-        subtitlesOff, appLanguage)
+        subtitlesOff, appLanguage, appLanguageHandedOver)
 
     /** The entry a stored [key] falls under; null for a key no NEXTV build wrote. */
     fun find(key: String): DeviceKey? = all.firstOrNull { it.matches(key) }

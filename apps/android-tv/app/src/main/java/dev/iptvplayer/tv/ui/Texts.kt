@@ -40,3 +40,9 @@ internal fun shownTitle(title: String, year: String, resources: Resources): Disp
 /** [title] as the provider gave it; one it left unnamed in the app's language. */
 @Composable @ReadOnlyComposable
 internal fun shownName(title: String): String = UnnamedTitle.text(title)?.resolve() ?: title
+
+/** [shownName], worked out once per title: what TalkBack reads for a card in a long list. */
+@Composable internal fun rememberShownName(title: String): String {
+    val resources = LocalResources.current
+    return remember(title, resources) { UnnamedTitle.text(title)?.resolve(resources) ?: title }
+}

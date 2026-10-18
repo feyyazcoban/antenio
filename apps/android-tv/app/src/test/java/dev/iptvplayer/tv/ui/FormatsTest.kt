@@ -36,6 +36,8 @@ class FormatsTest {
             unknownEnd = "?", turkish))
     }
 
+    // The JVM has no Android date patterns, so these are the fallbacks; on a TV each region writes its own order, as
+    // LocaleFormatsTest checks there ("Sunday, Oct 18" in American English).
     @Test fun englishPutsTheWeekdayFirstAndFollowsTheTvsClock() {
         assertEquals("20:30", guideTime(evening, istanbul, english))
         assertEquals("Sunday 18 Oct", guideDate(evening, istanbul, english))

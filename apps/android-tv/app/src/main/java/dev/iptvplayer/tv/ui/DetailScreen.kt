@@ -110,7 +110,7 @@ private class SeasonShelf(start: Int) {
         Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Ink.Background.copy(alpha = .98f),
             .30f to Ink.Background.copy(alpha = .96f), .48f to Ink.Background.copy(alpha = .9f), .7f to Ink.Background.copy(alpha = .45f), 1f to Ink.Background.copy(alpha = .28f))))
         Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Transparent, .55f to Color.Transparent, 1f to Ink.Background)))
-        if (!series && !entry.hasBackdrop && entry.artwork != null) Artwork(entry.sourceId, entry.artwork, entry.title,
+        if (!series && !entry.hasBackdrop && entry.artwork != null) Artwork(entry.sourceId, entry.artwork, shownName(entry.title),
             Modifier.align(Alignment.CenterEnd).padding(end = TvLayout.Gutter).width(180.dp).aspectRatio(2f / 3)
                 .clip(RoundedCornerShape(TvLayout.CardRadius)).testTag("detail-poster-fallback"))
         // While scrolled, the line cut under the fixed Geri row fades out instead of resting half visible.
@@ -208,7 +208,7 @@ private class SeasonShelf(start: Int) {
         val close = remember { FocusRequester() }
         fun dismissDescription() { description = false; restoreDescription = true }
         SourceDialog(stringResource(R.string.detail_description), reader, ::dismissDescription, width = 600.dp) {
-            RemoteTextReader(entry.title + "\n\n" + entry.description,
+            RemoteTextReader(shownName(entry.title) + "\n\n" + entry.description,
                 Modifier.weight(1f, fill = false).focusRequester(reader).focusProperties { down = close }, "detail-description-reader")
             Action(stringResource(R.string.action_back), Modifier.focusRequester(close).focusProperties { up = reader }.testTag("detail-description-back"), onClick = ::dismissDescription)
         }

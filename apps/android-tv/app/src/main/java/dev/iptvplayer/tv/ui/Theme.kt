@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -95,12 +96,13 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
 
 /**
  * [check] is for full-width list rows: their selection is a trailing check like the other list rows,
- * not the centred chip marker that would land in the middle of a start-aligned label.
+ * not the centred chip marker that would land in the middle of a start-aligned label. [labelText] is [label] with spans
+ * of its own, such as the language each part is read out in.
  */
 @Composable fun Action(label: String, modifier: Modifier = Modifier, selected: Boolean? = null,
     enabled: Boolean = true, primary: Boolean = false, icon: String? = null, compact: Boolean = false,
     labelOverflow: TextOverflow = TextOverflow.Ellipsis, outlined: Boolean = false, check: Boolean = false,
-    iconFilled: Boolean = false, onClick: () -> Unit) {
+    iconFilled: Boolean = false, labelText: AnnotatedString? = null, onClick: () -> Unit) {
     val height = actionHeight(compact)
     // The TV Button stays focusable while disabled. The D-pad must not enter a disabled action;
     // one that becomes disabled while focused keeps focus, so focus never jumps or disappears.
@@ -125,8 +127,7 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
         if (check) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (icon != null) LineIcon(icon, contentColor, filled = iconFilled)
-            Text(label, Modifier.weight(1f), color = contentColor, fontFamily = Roboto, fontSize = if (compact) 13.sp else 14.sp, lineHeight = if (compact) 17.sp else 19.sp,
-                fontWeight = FontWeight.Medium, maxLines = 1, overflow = labelOverflow)
+            ActionLabel(label, labelText, contentColor, compact, labelOverflow, Modifier.weight(1f))
             if (selected == true) Text("✓", Modifier.clearAndSetSemantics { }, color = if (contentColor == Ink.OnMint) Ink.OnMint else Ink.Mint,
                 fontFamily = Roboto, fontSize = 16.sp, lineHeight = 16.sp)
         } else Row(Modifier.drawWithContent {
@@ -140,10 +141,20 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
             }
         }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (icon != null) LineIcon(icon, contentColor, filled = iconFilled)
-            if (label.isNotEmpty()) Text(label, color = contentColor, fontFamily = Roboto, fontSize = if (compact) 13.sp else 14.sp, lineHeight = if (compact) 17.sp else 19.sp,
-                fontWeight = FontWeight.Medium, maxLines = 1, overflow = labelOverflow)
+            if (label.isNotEmpty()) ActionLabel(label, labelText, contentColor, compact, labelOverflow)
         }
     }
+}
+
+/** An [Action]'s label: [labelText] with its spans where it is given, else the plain [label]. */
+@Composable private fun ActionLabel(label: String, labelText: AnnotatedString?, color: Color, compact: Boolean, overflow: TextOverflow,
+    modifier: Modifier = Modifier) {
+    val size = if (compact) 13.sp else 14.sp
+    val line = if (compact) 17.sp else 19.sp
+    if (labelText != null) Text(labelText, modifier, color = color, fontFamily = Roboto, fontSize = size, lineHeight = line,
+        fontWeight = FontWeight.Medium, maxLines = 1, overflow = overflow)
+    else Text(label, modifier, color = color, fontFamily = Roboto, fontSize = size, lineHeight = line,
+        fontWeight = FontWeight.Medium, maxLines = 1, overflow = overflow)
 }
 
 @Composable fun EntryField(label: String, value: String, onChange: (String) -> Unit,

@@ -199,15 +199,17 @@ fun librarySorted(entries: List<MediaEntry>, sort: LibrarySort, locale: Locale):
  * and sorting tens of thousands of titles again on every return would hold up its first frame.
  */
 class LibraryOrderCache {
-    private class Kept(val catalog: Catalog, val sort: LibrarySort, val locale: Locale, val items: List<MediaEntry>)
+    private class Kept(val catalog: Catalog, val sort: LibrarySort, val alphabet: String?, val items: List<MediaEntry>)
     private val kept = HashMap<MediaKind, Kept>()
 
     /** The section's titles as Library lists them (no adult titles, dividers last), in [sort] order for [locale]. */
     fun sorted(catalog: Catalog, kind: MediaKind, sort: LibrarySort, locale: Locale): List<MediaEntry> {
-        synchronized(this) { kept[kind]?.takeIf { it.catalog === catalog && it.sort == sort && it.locale == locale }?.let { return it.items } }
+        // Only A–Z follows the language, by its alphabet: another language or the TV's clock keeps the other orders.
+        val alphabet = locale.language.takeIf { sort == LibrarySort.TITLE }
+        synchronized(this) { kept[kind]?.takeIf { it.catalog === catalog && it.sort == sort && it.alphabet == alphabet }?.let { return it.items } }
         // Sorted outside the lock, so a read on the main thread never waits for a sort running elsewhere.
         val items = librarySorted(catalogDisplayOrder(catalog.items.filter { it.kind == kind && !it.adult }), sort, locale)
-        synchronized(this) { kept[kind] = Kept(catalog, sort, locale, items) }
+        synchronized(this) { kept[kind] = Kept(catalog, sort, alphabet, items) }
         return items
     }
 }

@@ -41,8 +41,9 @@ class MainActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: Context) { super.attachBaseContext(LocaleController.wrap(newBase)) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Before the first frame: dates, numbers and title orders follow the language the texts resolved to.
-        LocaleController.update(this)
+        // Before the first frame: dates, numbers and title orders follow the language the texts resolved to. The model
+        // outlives a new language, so it sorts Library's A–Z again for its alphabet before Library asks.
+        if (LocaleController.update(this)) model.languageChanged()
         if (savedInstanceState == null) startupSound.prepare()
         opening = savedInstanceState == null && (application as TvApplication).claimOpening()
         WindowCompat.setDecorFitsSystemWindows(window, false)

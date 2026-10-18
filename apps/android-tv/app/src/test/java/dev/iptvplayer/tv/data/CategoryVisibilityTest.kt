@@ -24,7 +24,10 @@ class CategoryVisibilityTest {
             "Per adulti", "Film per Adulti", "Erotico", "Sesso", "VM18", // Italian
             "Voor volwassenen", "Yetişkinlere Özel", "YETİŞKİNLER", // Dutch, Turkish
             "Lil Kibar Faqat", "للكبار فقط", "+18 للكبار", "أفلام سكس", "إباحي", // Arabic, in Latin letters and its own script
-            "Adult", "ADULTS 18+", "Hentai", "PORNOS", "XXX | VIP", "18 +").forEach {
+            "أفلام إباحية", "الإباحية", "إباحيه", "للبالغين فقط", // Arabic, feminine, with the article, "for adults only"
+            "Filmy dla dorosłych", "DLA DOROSŁYCH", "Dorośli", "Erotyka", "Seks", // Polish
+            "Для взрослых", "ВЗРОСЛЫЕ", "Эротика", "Порно HD", "Для дорослих", "Еротика", // Russian, Ukrainian
+            "Adult", "ADULTS 18+", "Hentai", "PORNOS", "XXX | VIP", "18 +", "成人XXX").forEach {
             assertTrue(it, CategoryVisibility.looksAdult(it))
         }
     }
@@ -32,7 +35,8 @@ class CategoryVisibilityTest {
     @Test fun ordinaryWordsThatContainAnAdultWordStayVisible() {
         listOf("Middlesex", "Sexta-feira Santa", "Sextou", "Sexto Sentido", "Adult Swim", "ADULT SWIM", "Young Adult", "Young Adults",
             "Erwachsenenbildung", "Adulterio", "Adultère", "Pornic", "Kibar Feyzo", "Saxony", "Sachsen", "XXL Comedy",
-            "Esporte", "Sport 18", "FR | Séries", "Volwassen worden", "18 Kasım", "Erotomania", "ساكسونيا", "كبار السن").forEach {
+            "Esporte", "Sport 18", "FR | Séries", "Volwassen worden", "18 Kasım", "Erotomania", "ساكسونيا", "كبار السن",
+            "Seksmisja", "Dorosłość", "Seksi Hayat", "Взрослая жизнь", "Сексология", "Классика", "Ex Libris", "Wessex").forEach {
             assertFalse(it, CategoryVisibility.looksAdult(it))
         }
     }

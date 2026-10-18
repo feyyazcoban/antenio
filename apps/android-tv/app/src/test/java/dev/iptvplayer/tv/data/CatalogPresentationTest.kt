@@ -37,6 +37,11 @@ class CatalogPresentationTest {
         val catalog = Catalog(listOf(tea, friday))
         assertEquals(listOf(friday, tea), cache.sorted(catalog, MediaKind.MOVIE, LibrarySort.TITLE, turkish))
         assertEquals(listOf(tea, friday), cache.sorted(catalog, MediaKind.MOVIE, LibrarySort.TITLE, Locale.ENGLISH))
+        // The TV's 12-hour clock or region is no new alphabet, and only A–Z follows the language: nothing is sorted again.
+        val kept = cache.sorted(catalog, MediaKind.MOVIE, LibrarySort.TITLE, Locale.forLanguageTag("en-US-u-hc-h12"))
+        assertSame(kept, cache.sorted(catalog, MediaKind.MOVIE, LibrarySort.TITLE, Locale.forLanguageTag("en-GB-u-hc-h23")))
+        val added = cache.sorted(catalog, MediaKind.MOVIE, LibrarySort.ADDED, turkish)
+        assertSame(added, cache.sorted(catalog, MediaKind.MOVIE, LibrarySort.ADDED, Locale.ENGLISH))
     }
 
     @Test fun decorativeEdgesAreHintsButInfoAndInternalPunctuationAreOrdinaryContent() {

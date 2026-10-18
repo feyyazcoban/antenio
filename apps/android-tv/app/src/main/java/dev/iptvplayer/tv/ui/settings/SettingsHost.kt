@@ -24,6 +24,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -130,7 +131,9 @@ private class PagePlace {
                 .testTag("settings-panel")) {
                 Row(Modifier.fillMaxWidth().padding(start = 28.dp, end = 28.dp, top = 24.dp, bottom = 18.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(page?.title?.resolve() ?: choice?.title.orEmpty(), Modifier.weight(1f).testTag("settings-title"), color = Ink.Text,
+                    // A ChoicePage keeps its row's label, spans and all (the language TalkBack reads it in).
+                    val heading = page?.title?.resolve()?.let(::AnnotatedString) ?: choice?.let { it.titleText ?: AnnotatedString(it.title) }
+                    Text(heading ?: AnnotatedString(""), Modifier.weight(1f).testTag("settings-title"), color = Ink.Text,
                         fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 24.sp, lineHeight = 30.sp)
                     Action(stringResource(if (atRoot) R.string.action_close else R.string.action_back),
                         Modifier.focusRequester(headerAction).testTag("settings-close")) { back() }

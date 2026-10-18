@@ -82,6 +82,14 @@ import androidx.compose.ui.input.key.type
     val state by model.state.collectAsStateWithLifecycle()
     // Kept over a configuration change: a new language recreates the activity and Settings opens again (LocaleController).
     var settings by rememberSaveable { mutableStateOf(false) }
+    // Such a panel opens over a screen that took focus as it composed again: closing it gives focus back to the menu's
+    // Ayarlar, which opened it, as closing any other panel does.
+    var restored by remember { mutableStateOf(settings) }
+    val settingsOpener = remember { SettingsOpener() }
+    var menuReturn by remember { mutableStateOf<FocusRequester?>(null) }
+    val windowInfo = LocalWindowInfo.current
+    LaunchedEffect(settings) { if (!settings) restored = false }
+    LaunchedEffect(menuReturn) { menuReturn?.let { requester -> refocusAfterDialog(windowInfo) { requester }; menuReturn = null } }
     var exitAsk by remember { mutableStateOf(false) }
     val overlays = remember { AppOverlays() }
     val savedScreens = rememberSaveableStateHolder()
@@ -133,7 +141,7 @@ import androidx.compose.ui.input.key.type
         handler
     }
     CompositionLocalProvider(LocalReducedMotion provides state.reducedMotion, LocalBringIntoViewSpec provides bringIntoView,
-        LocalAppOverlays provides overlays) {
+        LocalAppOverlays provides overlays, LocalSettingsOpener provides settingsOpener) {
         Box(Modifier.fillMaxSize().background(Ink.Background).onPreviewKeyEvent { event -> escapeAsBack(event) }) {
             when (screen) {
                 // "Açılışta PIN iste", or a protection record that cannot be read (pin.md §3.9): the route waits under it.
@@ -160,7 +168,10 @@ import androidx.compose.ui.input.key.type
             }
             // Nothing opens over the lock screen; its own pad is part of it.
             if (screen != Route.LOCKED) {
-                if (settings) Settings(state, model) { settings = false; model.closeSettings() }
+                if (settings) Settings(state, model) {
+                    if (restored) menuReturn = settingsOpener.focus
+                    settings = false; model.closeSettings()
+                }
                 AppOverlayHost(overlays, state, model)
                 state.accessNotice?.let { notice -> AccessNote(notice.resolve()) { model.accessNoticeShown() } }
             }
@@ -302,12 +313,13 @@ internal class EvenColumns(private val count: Int) : GridCells {
     val visibility = rememberCardVisibility()
     val shown = rememberShownTitle(entry.title, entry.year)
     val name = (if (favorite) "★ " else "") + shown.name
+    val spoken = rememberShownName(entry.title)
     val lockedState = stringResource(R.string.lock_state)
     val lockedChannel = stringResource(R.string.lock_channel)
     Column(visibility.container.onSizeChanged { onMeasured(it.height) }.testTag("tile:library:${entry.id}")) {
         Card(onClick = click, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth()
             .then(if (compact) Modifier.heightIn(min = compactMin) else if (live) Modifier.heightIn(min = 126.dp) else Modifier.aspectRatio(2f / 3))
-            .semantics { contentDescription = entry.title; if (locked) stateDescription = lockedState },
+            .semantics { contentDescription = spoken; if (locked) stateDescription = lockedState },
             shape = CardDefaults.shape(shape = RoundedCornerShape(radius)),
             colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
             scale = CardDefaults.scale(focusedScale = 1f),
@@ -404,6 +416,11 @@ internal sealed interface AppOverlay {
 
 /** The app's [AppOverlays]; a screen composed on its own (a layout test) gets one that nothing shows. */
 internal val LocalAppOverlays = staticCompositionLocalOf { AppOverlays() }
+
+/** The focus of the side menu's Ayarlar item on screen (Navigation), which opens Settings; null without a menu. */
+internal class SettingsOpener { var focus: FocusRequester? = null }
+
+internal val LocalSettingsOpener = staticCompositionLocalOf { SettingsOpener() }
 
 /**
  * Opens [AppOverlay]s for the calling screen, which owns them: one closes when the screen leaves. Focus goes back to

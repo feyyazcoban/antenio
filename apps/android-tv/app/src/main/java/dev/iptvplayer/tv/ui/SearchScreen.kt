@@ -263,10 +263,11 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
     viewportHeight: Dp, locked: Boolean, modifier: Modifier, open: () -> Unit) {
     val visibility = rememberCardVisibility(horizontalPadding = TvLayout.Gutter, contextAbove = contextAbove, viewportHeight = viewportHeight)
     val shown = rememberShownTitle(entry.title, entry.year)
+    val spoken = rememberShownName(entry.title)
     val lockedState = stringResource(R.string.lock_state)
     Box(Modifier.width(width).then(visibility.container).testTag("tile:search:${entry.id}")) {
         Card(onClick = open, modifier = modifier.fillMaxWidth().heightIn(min = minHeight).then(visibility.focus)
-            .semantics { contentDescription = entry.title; if (locked) stateDescription = lockedState; testTag = "search:${entry.id}" },
+            .semantics { contentDescription = spoken; if (locked) stateDescription = lockedState; testTag = "search:${entry.id}" },
             shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
             colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
             scale = CardDefaults.scale(focusedScale = 1f),

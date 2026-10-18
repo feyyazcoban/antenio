@@ -11,6 +11,11 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.intl.LocaleList
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import dev.iptvplayer.tv.AppLanguage
 import dev.iptvplayer.tv.BuildConfig
@@ -110,6 +115,15 @@ internal val settingsPageList: List<SettingsPageSpec> = listOf(
 
 internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.associateBy { it.id }
 
+/** [text] with each " / " part marked as written in the language at its place in [languages], which TalkBack reads it in. */
+private fun readIn(text: String, languages: List<String>): AnnotatedString = buildAnnotatedString {
+    text.split(" / ").forEachIndexed { index, part ->
+        if (index > 0) append(" / ")
+        val language = languages.getOrNull(index)
+        if (language == null) append(part) else withStyle(SpanStyle(localeList = LocaleList(language))) { append(part) }
+    }
+}
+
 @Composable private fun SettingsScope.MainList() {
     val openPin = rememberPinOpener()
     ToggleRow("reduced-motion", stringResource(R.string.settings_reduced_motion), stringResource(R.string.settings_reduced_motion_note),
@@ -120,8 +134,13 @@ internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.ass
     val languages = AppLanguage.entries
     // Read again each time the page composes, as it does when its options close.
     val chosen = remember(activity) { activity?.let(LocaleController::choice) ?: AppLanguage.SYSTEM }
-    ChoiceRow("language", stringResource(R.string.settings_language), languages.map { stringResource(it.label) }, languages.indexOf(chosen),
-        section = SectionId.APPEARANCE) { picked -> activity?.let { LocaleController.choose(it, languages[picked]) } }
+    val label = stringResource(R.string.settings_language)
+    val options = languages.map { stringResource(it.label) }
+    // TalkBack reads each language's name in that language, and "Dil / Language" in Turkish, then English.
+    ChoiceRow("language", label, options, languages.indexOf(chosen), section = SectionId.APPEARANCE,
+        labelText = readIn(label, listOf("tr", "en")), optionTexts = options.zip(languages) { option, it -> readIn(option, it.labelLanguages) }) { picked ->
+        activity?.let { LocaleController.choose(it, languages[picked]) }
+    }
     ToggleRow("startup-sound", stringResource(R.string.settings_startup_sound), stringResource(R.string.settings_startup_sound_note),
         s.startupSound, section = SectionId.APPEARANCE) { model.startupSound() }
     Spacer(Modifier.height(6.dp))

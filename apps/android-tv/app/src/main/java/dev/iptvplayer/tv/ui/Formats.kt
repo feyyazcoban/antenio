@@ -1,11 +1,13 @@
 package dev.iptvplayer.tv.ui
 
+import android.text.format.DateFormat
 import dev.iptvplayer.tv.LocaleController
 import dev.iptvplayer.tv.data.MediaEntry
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * The locale of every date, time, duration, number, language name and title order the app shows: the app's language,
@@ -18,11 +20,24 @@ internal val appLocale: Locale get() = LocaleController.locale
 private fun format(time: Long, zone: ZoneId, pattern: String, locale: Locale): String =
     Instant.ofEpochMilli(time).atZone(zone).format(DateTimeFormatter.ofPattern(pattern, locale))
 
+private val patterns = ConcurrentHashMap<Pair<Locale, String>, String>()
+
+/**
+ * The fields of [skeleton] in the order and punctuation of [locale] and its region, as Android writes them: "EEEEdMMM"
+ * reads "d MMM EEEE" in Turkish, "EEEE d MMM" in British and "EEEE, MMM d" in American English. [fallback] where
+ * Android has no patterns: the JVM tests.
+ */
+private fun pattern(locale: Locale, skeleton: String, fallback: String): String =
+    patterns.getOrPut(locale to skeleton) { DateFormat.getBestDateTimePattern(locale, skeleton) ?: fallback }
+
 /** "20:30", or "8:30 PM" on a TV that keeps a 12-hour clock. */
 private fun hours(locale: Locale) = if (locale.getUnicodeLocaleType("hc") == "h12") "h:mm a" else "HH:mm"
 
-/** The day with its weekday in the order of [locale]'s language: "18 Eki Pazar", "Sunday 18 Oct". */
-private fun weekday(locale: Locale) = if (locale.language == "tr") "d MMM EEEE" else "EEEE d MMM"
+/** The day with its weekday: "18 Eki Pazar", "Sunday 18 Oct", "Sunday, Oct 18". */
+private fun weekday(locale: Locale) = pattern(locale, "EEEEdMMM", if (locale.language == "tr") "d MMM EEEE" else "EEEE d MMM")
+
+/** The day: "18 Eki", "18 Oct", "Oct 18". */
+private fun day(locale: Locale) = pattern(locale, "dMMM", "d MMM")
 
 /** "20:30" */
 internal fun guideTime(time: Long, zone: ZoneId, locale: Locale = appLocale): String = format(time, zone, hours(locale), locale)
@@ -31,7 +46,7 @@ internal fun guideTime(time: Long, zone: ZoneId, locale: Locale = appLocale): St
 internal fun guideDate(time: Long, zone: ZoneId, locale: Locale = appLocale): String = format(time, zone, weekday(locale), locale)
 
 /** "19 Eki 01:30": a programme time where its start and end fall on different days. */
-internal fun guideDayTime(time: Long, zone: ZoneId, locale: Locale = appLocale): String = format(time, zone, "d MMM " + hours(locale), locale)
+internal fun guideDayTime(time: Long, zone: ZoneId, locale: Locale = appLocale): String = format(time, zone, day(locale) + " " + hours(locale), locale)
 
 /** "18 Eki Pazar, 20:30" on the guide's clock: when a guide was last downloaded. */
 internal fun guideUpdatedTime(time: Long, zone: ZoneId, locale: Locale = appLocale): String =
@@ -42,7 +57,7 @@ internal fun guideOffset(time: Long, zone: ZoneId): String = "UTC" + Instant.ofE
 
 /** "18 Eki, 20:30" on the TV's clock: when a source or the catalogue was last downloaded. */
 internal fun updatedTime(time: Long, zone: ZoneId = ZoneId.systemDefault(), locale: Locale = appLocale): String =
-    format(time, zone, "d MMM, " + hours(locale), locale)
+    format(time, zone, day(locale) + ", " + hours(locale), locale)
 
 /** A position or length on the player's clock: "4:07", "1:05:09". */
 internal fun clockTime(ms: Long, locale: Locale = appLocale): String {
