@@ -10,7 +10,6 @@ import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -86,8 +85,7 @@ class SourceRepository(private val client: OkHttpClient = client()) {
 
     private suspend fun get(url: String, maxBytes: Int = 32 * 1024 * 1024): String {
         try {
-            val request = Request.Builder().url(url).header("User-Agent", "NEXTV AndroidTV").build()
-            val call = client.newCall(request)
+            val call = client.newCall(SourceHttp.list(url))
             val response = suspendCancellableCoroutine<Response> { continuation ->
                 continuation.invokeOnCancellation { call.cancel() }
                 call.enqueue(object : Callback {

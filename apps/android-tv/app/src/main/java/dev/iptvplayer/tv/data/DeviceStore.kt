@@ -1,6 +1,7 @@
 package dev.iptvplayer.tv.data
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
@@ -11,9 +12,13 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
-/** Source details are encrypted with a non-exportable Android Keystore key. Backups are disabled. */
-class DeviceStore(context: Context) {
-    private val prefs = context.getSharedPreferences("device_state", Context.MODE_PRIVATE)
+/**
+ * Source details are encrypted with a non-exportable Android Keystore key. Backups are disabled. Every preference key
+ * comes from [DeviceKeys], which says what each one belongs to and what removing a source or starting over takes along.
+ */
+class DeviceStore internal constructor(private val prefs: SharedPreferences) {
+    constructor(context: Context) : this(context.getSharedPreferences("device_state", Context.MODE_PRIVATE))
+
     private val alias = "iptv_source_v1"
 
     private fun key(): SecretKey {
@@ -32,7 +37,7 @@ class DeviceStore(context: Context) {
             .toString().toByteArray()
         val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, key()) }
         val encrypted = cipher.doFinal(plain)
-        val saved = prefs.edit().putString("source", Base64.encodeToString(cipher.iv + encrypted, Base64.NO_WRAP)).commit()
+        val saved = prefs.edit().putString(DeviceKeys.legacySource.name, Base64.encodeToString(cipher.iv + encrypted, Base64.NO_WRAP)).commit()
         plain.fill(0)
         if (!saved) throw SourceFailure(FailureReason.SOURCE_NOT_STORED)
     }
@@ -52,7 +57,7 @@ class DeviceStore(context: Context) {
 
     @Synchronized fun loadSource(): SourceConfig? {
         try {
-            val stored = prefs.getString("source", null) ?: return null
+            val stored = prefs.getString(DeviceKeys.legacySource.name, null) ?: return null
             val bytes = Base64.decode(stored, Base64.NO_WRAP)
             require(bytes.size > 28)
             val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply {
@@ -69,17 +74,17 @@ class DeviceStore(context: Context) {
     }
 
     /** Opaque snapshot token; prevents a stale recovery screen from clearing newly repaired accounts. */
-    internal fun recoveryStamp(): String = stableId(listOf("source", "sources_v2").joinToString("\u0000") {
+    internal fun recoveryStamp(): String = stableId(listOf(DeviceKeys.legacySource.name, DeviceKeys.sources.name).joinToString("\u0000") {
         val value = prefs.all[it]
         "$it:${value?.javaClass?.name}:$value"
     })
 
-    val hasSourceRegistry: Boolean get() = prefs.contains("sources_v2")
+    val hasSourceRegistry: Boolean get() = prefs.contains(DeviceKeys.sources.name)
 
     /** An existing registry is authoritative, including when it is unreadable. */
     @Synchronized fun loadSources(): SourceRegistry {
         try {
-            val stored = prefs.getString("sources_v2", null)
+            val stored = prefs.getString(DeviceKeys.sources.name, null)
                 ?: return SourceRegistry(loadSource()?.let(::listOf).orEmpty())
             require(stored.length <= 1_400_000)
             val plain = unseal(Base64.decode(stored, Base64.NO_WRAP), "source-registry-v1")
@@ -87,44 +92,41 @@ class DeviceStore(context: Context) {
         } catch (_: Exception) { throw SourceFailure(FailureReason.STORED_SOURCES_UNAVAILABLE) }
     }
 
-    /** Call inside SourceTransactions. Registry replacement and scoped state cleanup share one preference commit. */
+    /**
+     * Call inside SourceTransactions. Registry replacement and scoped state cleanup share one preference commit: every
+     * SOURCE key in [DeviceKeys] of a source the registry no longer holds goes with it.
+     */
     @Synchronized fun saveSources(registry: SourceRegistry) {
         val accepted = registry.copy(sources = registry.sources.map { it.validated() }).checked()
-        val previous = loadSources()
+        loadSources() // An unreadable registry is never replaced here; only the explicit recovery reset may drop it.
         val legacy = loadSource()
         val retained = accepted.sources.mapTo(HashSet()) { it.id }
-        val removed = previous.sources.map { it.id }.filterNot { it in retained }
         val plain = SourceRegistryCodec.encode(accepted)
         val sealed = try {
             require(plain.size <= 1_000_000)
             seal(plain, "source-registry-v1")
         } finally { plain.fill(0) }
-        val editor = prefs.edit().putString("sources_v2", Base64.encodeToString(sealed, Base64.NO_WRAP)).remove("source")
+        val editor = prefs.edit().putString(DeviceKeys.sources.name, Base64.encodeToString(sealed, Base64.NO_WRAP))
+            .remove(DeviceKeys.legacySource.name)
         // Pre-0.9 progress keys were opaque hashes. There was one source, so their owner is the legacy source.
-        if (legacy != null) prefs.all.keys.filter { it.startsWith("p:") }.forEach { key ->
+        if (legacy != null) prefs.all.keys.filter(DeviceKeys.legacyProgress::matches).forEach { key ->
             if (legacy.id in retained) prefs.getString(key, null)?.let { value ->
-                val target = progressPrefix(legacy.id) + key.removePrefix("p:")
+                val target = DeviceKeys.progress.of(legacy.id) + key.removePrefix(DeviceKeys.legacyProgress.name)
                 if (!prefs.contains(target)) editor.putString(target, value)
             }
             editor.remove(key)
         }
-        removed.forEach { id ->
-            editor.remove("f:$id").remove("history:$id")
-            prefs.all.keys.filter { it.startsWith(progressPrefix(id)) }.forEach { editor.remove(it) }
-        }
+        DeviceKeys.leftBehind(prefs.all.keys, retained).forEach { editor.remove(it) }
         if (!editor.commit()) throw SourceFailure(FailureReason.SOURCES_NOT_STORED)
     }
 
     @Synchronized fun forgetSource(id: String) { saveSources(loadSources().without(id)) }
 
-    private fun progressPrefix(source: String) = "p2:${source.length}:$source:"
-    private fun progressKey(source: String, id: String) = progressPrefix(source) + stableId("$source:$id")
+    private fun progressKey(source: String, id: String) = DeviceKeys.progress.of(source) + stableId("$source:$id")
 
     fun forgetSource() {
-        // Device accessibility and sound preferences survive a source change.
-        val removed = prefs.edit().remove("source").remove("sources_v2").apply {
-            prefs.all.keys.filter { it.startsWith("p:") || it.startsWith("p2:") || it.startsWith("f:") || it.startsWith("history:") }.forEach { remove(it) }
-        }.commit()
+        // Device accessibility and sound preferences survive a source change: only the keys DeviceKeys marks reset go.
+        val removed = prefs.edit().apply { DeviceKeys.cleared(prefs.all.keys).forEach { remove(it) } }.commit()
         if (!removed) throw SourceFailure(FailureReason.SOURCE_NOT_REMOVED)
     }
 
@@ -134,21 +136,22 @@ class DeviceStore(context: Context) {
         forgetSource()
     }
 
-    fun history(source: String): List<WatchRecord> = WatchHistory.decode(prefs.getString("history:$source", null))
+    fun history(source: String): List<WatchRecord> = WatchHistory.decode(prefs.getString(DeviceKeys.history.of(source), null))
     fun history(source: String, records: List<WatchRecord>) {
-        prefs.edit().putString("history:$source", WatchHistory.encode(records)).apply()
+        prefs.edit().putString(DeviceKeys.history.of(source), WatchHistory.encode(records)).apply()
     }
     fun clearHistory(source: String) {
         val ownsLegacyProgress = runCatching { loadSource()?.id == source }.getOrDefault(false)
-        prefs.edit().remove("history:$source").apply {
-            prefs.all.keys.filter { it.startsWith(progressPrefix(source)) || (ownsLegacyProgress && it.startsWith("p:")) }.forEach { remove(it) }
+        prefs.edit().remove(DeviceKeys.history.of(source)).apply {
+            prefs.all.keys.filter { DeviceKeys.progress.owner(it) == source || (ownsLegacyProgress && DeviceKeys.legacyProgress.matches(it)) }
+                .forEach { remove(it) }
         }.apply()
     }
 
     fun progress(source: String, id: String): PlaybackMark? {
         return try {
             val value = prefs.getString(progressKey(source, id), null)
-                ?: if (loadSource()?.id == source) prefs.getString("p:${stableId("$source:$id")}", null) else null
+                ?: if (loadSource()?.id == source) prefs.getString(DeviceKeys.legacyProgress.name + stableId("$source:$id"), null) else null
                 ?: return null
             val json = JSONObject(value)
             PlaybackMark(json.getLong("position"), json.getLong("duration"), json.getLong("time"))
@@ -161,37 +164,37 @@ class DeviceStore(context: Context) {
         prefs.edit().putString(progressKey(source, id), json.toString()).apply()
     }
 
-    fun favorites(source: String): Set<String> = prefs.getStringSet("f:$source", emptySet()).orEmpty().toSet()
-    fun favorites(source: String, ids: Set<String>) { prefs.edit().putStringSet("f:$source", ids.toSet()).apply() }
+    fun favorites(source: String): Set<String> = prefs.getStringSet(DeviceKeys.favorites.of(source), emptySet()).orEmpty().toSet()
+    fun favorites(source: String, ids: Set<String>) { prefs.edit().putStringSet(DeviceKeys.favorites.of(source), ids.toSet()).apply() }
     var reducedMotion: Boolean
-        get() = prefs.getBoolean("reduced", false)
-        set(value) { prefs.edit().putBoolean("reduced", value).apply() }
+        get() = prefs.getBoolean(DeviceKeys.reducedMotion.name, false)
+        set(value) { prefs.edit().putBoolean(DeviceKeys.reducedMotion.name, value).apply() }
     var startupSound: Boolean
-        get() = prefs.getBoolean("startupSound", true)
-        set(value) { prefs.edit().putBoolean("startupSound", value).apply() }
+        get() = prefs.getBoolean(DeviceKeys.startupSound.name, true)
+        set(value) { prefs.edit().putBoolean(DeviceKeys.startupSound.name, value).apply() }
     var guideZoneId: String
-        get() = prefs.getString("guideZoneId", "").orEmpty().takeIf { it.isEmpty() || runCatching { java.time.ZoneId.of(it) }.isSuccess }.orEmpty()
-        set(value) { require(value.isEmpty() || runCatching { java.time.ZoneId.of(value) }.isSuccess); prefs.edit().putString("guideZoneId", value).apply() }
+        get() = prefs.getString(DeviceKeys.guideZone.name, "").orEmpty().takeIf { it.isEmpty() || runCatching { java.time.ZoneId.of(it) }.isSuccess }.orEmpty()
+        set(value) { require(value.isEmpty() || runCatching { java.time.ZoneId.of(value) }.isSuccess); prefs.edit().putString(DeviceKeys.guideZone.name, value).apply() }
     fun librarySort(kind: MediaKind): LibrarySort =
-        prefs.getString("sort:${kind.name}", null)?.let { name -> LibrarySort.entries.firstOrNull { it.name == name } } ?: LibrarySort.DEFAULT
-    fun librarySort(kind: MediaKind, sort: LibrarySort) { prefs.edit().putString("sort:${kind.name}", sort.name).apply() }
+        prefs.getString(DeviceKeys.librarySort.name + kind.name, null)?.let { name -> LibrarySort.entries.firstOrNull { it.name == name } } ?: LibrarySort.DEFAULT
+    fun librarySort(kind: MediaKind, sort: LibrarySort) { prefs.edit().putString(DeviceKeys.librarySort.name + kind.name, sort.name).apply() }
     /** Hidden categories as [CategoryVisibility.key]s (D068); names only, never addresses or accounts. */
     var hiddenCategories: Set<String>
-        get() = prefs.getStringSet("hiddenCategories", emptySet()).orEmpty().toSet()
-        set(value) { prefs.edit().putStringSet("hiddenCategories", value.toSet()).apply() }
+        get() = prefs.getStringSet(DeviceKeys.hiddenCategories.name, emptySet()).orEmpty().toSet()
+        set(value) { prefs.edit().putStringSet(DeviceKeys.hiddenCategories.name, value.toSet()).apply() }
     var hideAdultCategories: Boolean
-        get() = prefs.getBoolean("hideAdultCategories", true)
-        set(value) { prefs.edit().putBoolean("hideAdultCategories", value).apply() }
+        get() = prefs.getBoolean(DeviceKeys.hideAdultCategories.name, true)
+        set(value) { prefs.edit().putBoolean(DeviceKeys.hideAdultCategories.name, value).apply() }
     var autoNextEpisode: Boolean
-        get() = prefs.getBoolean("autoNextEpisode", true)
-        set(value) { prefs.edit().putBoolean("autoNextEpisode", value).apply() }
+        get() = prefs.getBoolean(DeviceKeys.autoNextEpisode.name, true)
+        set(value) { prefs.edit().putBoolean(DeviceKeys.autoNextEpisode.name, value).apply() }
     var audioLanguage: String?
-        get() = prefs.getString("audioLanguage", null)
-        set(value) { prefs.edit().putString("audioLanguage", value).apply() }
+        get() = prefs.getString(DeviceKeys.audioLanguage.name, null)
+        set(value) { prefs.edit().putString(DeviceKeys.audioLanguage.name, value).apply() }
     var subtitleLanguage: String?
-        get() = prefs.getString("subtitleLanguage", null)
-        set(value) { prefs.edit().putString("subtitleLanguage", value).apply() }
+        get() = prefs.getString(DeviceKeys.subtitleLanguage.name, null)
+        set(value) { prefs.edit().putString(DeviceKeys.subtitleLanguage.name, value).apply() }
     var subtitlesOff: Boolean
-        get() = prefs.getBoolean("subtitlesOff", true)
-        set(value) { prefs.edit().putBoolean("subtitlesOff", value).apply() }
+        get() = prefs.getBoolean(DeviceKeys.subtitlesOff.name, true)
+        set(value) { prefs.edit().putBoolean(DeviceKeys.subtitlesOff.name, value).apply() }
 }

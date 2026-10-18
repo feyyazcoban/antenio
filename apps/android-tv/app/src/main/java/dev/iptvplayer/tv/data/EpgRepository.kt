@@ -2,7 +2,6 @@ package dev.iptvplayer.tv.data
 
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.io.FilterInputStream
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
@@ -32,7 +31,7 @@ class EpgRepository(private val client: OkHttpClient = OkHttpClient.Builder().co
 
     internal suspend fun download(url: String, window: GuideWindow, sink: EpgSink,
         dispatcher: CoroutineDispatcher = Dispatchers.IO): EpgParseReport = coroutineScope {
-        val call = client.newCall(Request.Builder().url(url).header("User-Agent", "NEXTV AndroidTV").build())
+        val call = client.newCall(SourceHttp.guide(url))
         // Stays alive through body parsing, unlike a continuation completed as soon as headers arrive.
         val cancellation = launch(Dispatchers.IO, start = CoroutineStart.UNDISPATCHED) {
             try { awaitCancellation() } finally { call.cancel() }

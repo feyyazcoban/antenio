@@ -119,6 +119,32 @@ class SourceRegistryStorageTest {
         assertEquals(9000L,reopened.progress(a.id,"old-outside-history")!!.positionMs)
     }
 
+    @Test fun versionOneRegistryOpensAndTheNextSaveWritesVersionTwo() {
+        val old = JSONObject().put("version", 1).put("filter", b.id).put("sources", org.json.JSONArray().apply {
+            listOf(a, b).forEach { s -> put(JSONObject().put("id", s.id).put("name", s.name).put("type", s.type.name)
+                .put("address", s.address).put("username", s.username).put("password", s.password).put("epgUrl", s.epgUrl)) }
+        }).toString().toByteArray()
+        prefs.edit().putString("sources_v2", Base64.encodeToString(store.seal(old, "source-registry-v1"), Base64.NO_WRAP)).commit()
+        store.favorites(a.id, setOf(item.id))
+        assertEquals(SourceRegistry(listOf(a, b), b.id), DeviceStore(context).loadSources())
+        save(store.loadSources().copy(filterId = null))
+        val plain = store.unseal(Base64.decode(prefs.getString("sources_v2", null), Base64.NO_WRAP), "source-registry-v1")
+        assertEquals(SourceRegistryCodec.VERSION, JSONObject(plain.toString(Charsets.UTF_8)).getInt("version")); plain.fill(0)
+        assertEquals(SourceRegistry(listOf(a, b)), DeviceStore(context).loadSources())
+        assertEquals(setOf(item.id), store.favorites(a.id))
+    }
+
+    @Test fun savingTheRegistryRemovesKeysASourceNoLongerSavedLeftBehind() {
+        save(SourceRegistry(listOf(a)))
+        store.favorites(b.id, setOf(item.id)); store.history(b.id, listOf(WatchRecord(item.id, MediaKind.MOVIE)))
+        store.saveProgress(b.id, item.id, 1000, 10000); store.saveProgress(a.id, item.id, 2000, 10000)
+        store.reducedMotion = true
+        save(store.loadSources())
+        assertTrue(store.favorites(b.id).isEmpty()); assertTrue(store.history(b.id).isEmpty()); assertNull(store.progress(b.id, item.id))
+        assertEquals(2000L, store.progress(a.id, item.id)!!.positionMs); assertTrue(store.reducedMotion)
+        store.reducedMotion = false
+    }
+
     @Test fun newerNamespacedProgressWinsOverAnOldLegacyCopy() {
         store.saveSource(a)
         prefs.edit().putString("p:"+stableId("${a.id}:${item.id}"),

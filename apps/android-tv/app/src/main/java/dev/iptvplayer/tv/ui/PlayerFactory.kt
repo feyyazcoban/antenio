@@ -12,11 +12,11 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
-import dev.iptvplayer.tv.BuildConfig
 import dev.iptvplayer.tv.PlaybackMode
 import dev.iptvplayer.tv.PlayingMedia
 import dev.iptvplayer.tv.data.DeviceStore
 import dev.iptvplayer.tv.data.MediaEntry
+import dev.iptvplayer.tv.data.SourceHttp
 
 /**
  * One stream to open (gap plan T4): its address, the headers and User-Agent it is asked with, where it starts and how
@@ -29,11 +29,9 @@ internal data class PlaybackRequest(val entry: MediaEntry, val url: String, val 
 
 /** Builds the player and what it opens; PlayerScreen keeps the order of the calls (one stream at a time). */
 internal object PlayerFactory {
-    /** The streams' User-Agent (D066). The list and guide downloads still send their own until S07. */
-    val userAgent = "NEXTV/${BuildConfig.VERSION_NAME} AndroidTV"
-
-    /** [media] as the player opens it: the entry's own headers (an M3U line can carry them) and [userAgent]. */
-    fun request(media: PlayingMedia) = PlaybackRequest(media.entry, media.url, media.entry.headers, userAgent, media.startMs, media.mode)
+    /** [media] as the player opens it, with the headers and User-Agent [SourceHttp] gives a stream. */
+    fun request(media: PlayingMedia) = PlaybackRequest(media.entry, media.url, SourceHttp.streamHeaders(media.entry),
+        SourceHttp.streamAgent, media.startMs, media.mode)
 
     /** Media3's default renderers, with audio focus, a pause when headphones go, and the remembered track languages. */
     fun create(context: Context, store: DeviceStore): ExoPlayer = ExoPlayer.Builder(context).build().apply {

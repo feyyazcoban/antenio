@@ -16,6 +16,10 @@
 
 Kaynak listesi `sources_v2` preference içinde mevcut Android Keystore anahtarıyla AES-GCM ve `source-registry-v1` bağlamına bağlı şifrelenir. İlk okumada registry yoksa eski `source` okunur; registry varsa bozuk içerik eski hesaba sessizce düşmez. Şema/ID/filtre/adres doğrulaması vardır. Kaydetme listesi en fazla 1 MB düz veri kabul eder; bu güvenlik/depoma bütçesidir, UI kaynak sayısı taahhüdü değildir.
 
+Kayıt JSON'u S07'den beri sürüm 2'dir: sürüm 1'in bütün alanları aynı kalır, sonraki adımlar kaynak başına isteğe bağlı `limits`, `connection` ve `guides` nesnelerini sürüm artırmadan ekler. Okuma sürüm 1 ve 2'yi kabul eder, bilmediği anahtarı atlar; sürüm 1 kayıt bir sonraki kaydetmede sürüm 2 yazılır. Bilinmeyen alan, onu bilmeyen yapı kaydettiğinde düşer. S07 öncesi yapılar yalnız sürüm 1'i okur: TV'ye eski yapı geri kurulursa kurtarma ekranı açılır, kayıt izleyici sıfırlamayı onaylayana kadar korunur.
+
+Preference anahtarlarının tek listesi `DeviceKeys`'tir: her anahtar veya önek için kapsam (DEVICE/SOURCE), sıfırlamada silinip silinmediği ve yedek sınıfı (NONE/SETTINGS/PERSONAL). `saveSources` registry'de olmayan her kaynağın SOURCE anahtarlarını aynı commit'te siler, yarıda kalmış bir kaldırmanın bıraktıkları dahil; `forgetSource()` yalnız sıfırlamada silinen anahtarları kaldırır.
+
 İlk liste yazımı, şifreli yeni registry'yi ve eski tek kaynak anahtarının kaldırılmasını aynı preference commit'inde yapar. İşlemler `SourceTransactions.shared` içinde çağrılmalıdır. Ayrı DeviceStore örnekleri için instance kilidi tek başına yeterli değildir. UI uygulamau, güncellemeden hemen önce registry'yi bu kilidin içinde tekrar okuyup değiştirmelidir; eski ViewModel anlık kaydı yeni kaynağı silemez.
 
 ## İlerleme ve eski kayıt geçişi
