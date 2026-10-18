@@ -36,6 +36,7 @@ data class SourceConfig(
             it.toHttpUrlOrNull()?.takeIf { value -> value.username.isEmpty() && value.password.isEmpty() }
                 ?: throw SourceFailure(FailureReason.GUIDE_ADDRESS_INVALID)
         }
+        // The setup form names an empty field in the app's language (source_unnamed); this is for a record without one.
         return copy(name = name.trim().ifEmpty { "Kaynağım" }, address =
             if (type == SourceType.XTREAM) xtreamBase(url).toString() else url.toString(),
             username = username.trim(), epgUrl = guide?.toString().orEmpty())

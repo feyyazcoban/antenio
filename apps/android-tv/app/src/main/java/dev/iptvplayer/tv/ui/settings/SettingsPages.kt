@@ -1,17 +1,21 @@
 package dev.iptvplayer.tv.ui.settings
 
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.iptvplayer.tv.AppLanguage
 import dev.iptvplayer.tv.BuildConfig
 import dev.iptvplayer.tv.CatalogOperation
+import dev.iptvplayer.tv.LocaleController
 import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.TvState
 import dev.iptvplayer.tv.data.AdminReason
@@ -110,6 +114,14 @@ internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.ass
     val openPin = rememberPinOpener()
     ToggleRow("reduced-motion", stringResource(R.string.settings_reduced_motion), stringResource(R.string.settings_reduced_motion_note),
         s.reducedMotion, section = SectionId.APPEARANCE) { model.reducedMotion() }
+    // Named in both languages and each language in itself, so it is found whatever language is on screen (S13). A new
+    // language recreates the activity; the panel comes back on this row (Settings).
+    val activity = LocalActivity.current
+    val languages = AppLanguage.entries
+    // Read again each time the page composes, as it does when its options close.
+    val chosen = remember(activity) { activity?.let(LocaleController::choice) ?: AppLanguage.SYSTEM }
+    ChoiceRow("language", stringResource(R.string.settings_language), languages.map { stringResource(it.label) }, languages.indexOf(chosen),
+        section = SectionId.APPEARANCE) { picked -> activity?.let { LocaleController.choose(it, languages[picked]) } }
     ToggleRow("startup-sound", stringResource(R.string.settings_startup_sound), stringResource(R.string.settings_startup_sound_note),
         s.startupSound, section = SectionId.APPEARANCE) { model.startupSound() }
     Spacer(Modifier.height(6.dp))

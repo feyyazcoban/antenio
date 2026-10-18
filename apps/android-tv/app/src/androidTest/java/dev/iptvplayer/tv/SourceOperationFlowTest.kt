@@ -21,7 +21,8 @@ import java.util.concurrent.TimeUnit
 /** Destructive synthetic fixtures: never run on a user's TV. */
 @RunWith(AndroidJUnit4::class)
 class SourceOperationFlowTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private lateinit var model: TvViewModel
     private lateinit var server: MockWebServer
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

@@ -180,7 +180,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     private var searchGeneration = 0
     private var librarySearchJob: Job? = null
     private var librarySearchGeneration = 0
-    private val guides = GuideController(viewModelScope, epgStore, store, catalogStore, { guideZone() })
+    private val guides = GuideController(viewModelScope, epgStore, store, catalogStore, { guideZone() }, { LocaleController.guideLanguages })
     private val parental = ParentalController(viewModelScope,
         ParentalGuard(ProtectionStore(application), AndroidPinClock(application.contentResolver)), SystemClock::elapsedRealtime,
         unlocked = ::unlocked, released = ::released,
@@ -500,15 +500,18 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun draft(value: SourceDraft) { mutable.update { it.copy(draft = value, error = null) } }
-    /** [defaultName] is what an untouched name field saves; the setup screen passes the app's default source name. */
-    fun connectDraft(defaultName: String = "") {
+    /**
+     * [defaultName] is what an untouched name field saves and [unnamed] what one left empty saves; the setup screen
+     * passes both in the app's language.
+     */
+    fun connectDraft(defaultName: String = "", unnamed: String = "") {
         if (state.value.route != Route.SETUP) return
         if (state.value.sourceTask != SourceTask.IDLE && state.value.sourceTask != SourceTask.IMPORTING) return
         // A form that added or edited a source opened with the PIN that guards them (pin.md §3.8); without it, it goes.
         if (state.value.sources.isNotEmpty() && !parental.state.value.mayManageSources) { leaveSources(); return }
         val draft = state.value.draft
         try {
-            val source = SourceConfig(name = draft.name ?: defaultName, type = draft.type, address = draft.address,
+            val source = SourceConfig(name = draft.name?.ifBlank { unnamed } ?: defaultName, type = draft.type, address = draft.address,
                 username = draft.username, password = draft.password, epgUrl = draft.epgUrl).validated().let { value ->
                 state.value.editingSourceId?.let { value.copy(id = it) } ?: value
             }

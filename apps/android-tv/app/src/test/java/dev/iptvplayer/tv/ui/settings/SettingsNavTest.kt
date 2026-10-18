@@ -84,6 +84,17 @@ class SettingsNavTest {
         assertEquals(SettingsNav.Entry(main), nav.top)
     }
 
+    @Test fun aNewLanguageBringsTheMainPageBackOnTheRowItWasLeftOn() {
+        val nav = SettingsNav(main)
+        assertNull(nav.rootFocus)
+        // Dil / Language opens its options; picking one recreates the activity with that ChoicePage still on top.
+        nav.open(SettingsRoute.Choice("language"), "language")
+        assertEquals("language", nav.rootFocus)
+        val again = SettingsNav(main, nav.rootFocus)
+        assertEquals(SettingsNav.Entry(main, "language"), again.top)
+        assertFalse(again.back())
+    }
+
     @Test fun focusReturnsToARowStillOnThePageOrFallsBackToItsStart() {
         val rows = PageRows()
         assertNull(rows.entry(null))

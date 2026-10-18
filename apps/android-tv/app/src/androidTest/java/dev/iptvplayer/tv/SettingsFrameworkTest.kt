@@ -19,7 +19,8 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class SettingsFrameworkTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private lateinit var model: TvViewModel
     private lateinit var server: MockWebServer
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()

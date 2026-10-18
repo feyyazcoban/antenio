@@ -20,7 +20,8 @@ import org.junit.runner.RunWith
 /** Real, already-reviewed artwork over local fixture APIs. Never contacts a provider. Emulator only. */
 @RunWith(AndroidJUnit4::class)
 class VisualPreviewTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private lateinit var server: MockWebServer
     private lateinit var model: TvViewModel
     @Volatile private lateinit var fixture: JSONObject
@@ -341,7 +342,7 @@ class VisualPreviewTest {
         click("Ayarlar")
         ui.onNode(hasText("Hareketi azalt") and hasClickAction()).assertIsFocused()
         shot("feedback-settings")
-        repeat(3) { instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle() }
+        repeat(4) { instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle() }
         val refresh = ui.onNode(hasText("Kataloğu yenile") and hasClickAction())
         refresh.assertIsFocused()
         ui.onNode(hasText("Kütüphanen güncellendi.") and hasAnyAncestor(hasTestTag("settings-panel"))).assertIsDisplayed()

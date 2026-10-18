@@ -21,7 +21,8 @@ import org.junit.runner.RunWith
 /** Isolated synthetic catalog. Never run state-clearing tests on a user's television. */
 @RunWith(AndroidJUnit4::class)
 class SearchNavigationTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private lateinit var model: TvViewModel
     private lateinit var server: MockWebServer
     @Volatile private var removedId: String? = null
@@ -647,7 +648,7 @@ class SearchNavigationTest {
         assertEquals(!original, model.state.value.reducedMotion)
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         assertEquals(original, model.state.value.reducedMotion)
-        repeat(11) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
+        repeat(12) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
         ui.onNode(hasText("Uygulama hakkında") and hasClickAction()).assertIsFocused()
         ui.onNodeWithTag("settings-title").assertIsDisplayed()
         ui.onNodeWithTag("settings-close").assertIsDisplayed()
@@ -693,7 +694,7 @@ class SearchNavigationTest {
     @Test fun settingsRefreshKeepsFocusAndIgnoresRepeatedConfirmation() {
         click("Ayarlar")
         ui.onNode(hasText("Hareketi azalt") and hasClickAction()).assertIsFocused()
-        repeat(3) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
+        repeat(4) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
         val row = ui.onNode(hasText("Kataloğu yenile") and hasClickAction())
         row.assertFocusedOrSay()
         val before = server.requestCount
@@ -712,13 +713,13 @@ class SearchNavigationTest {
     @Test fun settingsSectionStaysFixedDuringRemoteTraversal() {
         click("Ayarlar")
         ui.waitUntil(5_000) { ui.onAllNodes(hasText("Hareketi azalt") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
-        val rows = listOf("Hareketi azalt", "Açılış sesi", "Kaynakları yönet", "Kataloğu yenile",
+        val rows = listOf("Hareketi azalt", "Dil / Language", "Açılış sesi", "Kaynakları yönet", "Kataloğu yenile",
             "Kaynağı düzenle", "Kaynağı kaldır", "Yetişkin kategorilerini gizle", "Kategorileri yönet", "Ebeveyn denetimi",
             "Otomatik sonraki bölüm", "İzleme geçmişini temizle", "Uygulama hakkında")
         val label = ui.onNodeWithTag("settings-section")
         val initial = label.getUnclippedBoundsInRoot()
         fun check(index: Int) {
-            val expected = when (index) { 0, 1 -> "Görünüm ve ses"; in 2..5 -> "Kaynaklar"; in 6..8 -> "İçerik"; else -> "İzleme ve uygulama" }
+            val expected = when (index) { in 0..2 -> "Görünüm ve ses"; in 3..6 -> "Kaynaklar"; in 7..9 -> "İçerik"; else -> "İzleme ve uygulama" }
             label.assertTextEquals(expected).assertIsDisplayed()
             val current = label.getUnclippedBoundsInRoot()
             assertEquals(initial.top, current.top)
@@ -733,7 +734,7 @@ class SearchNavigationTest {
         check(0); shot("section-appearance")
         for (index in 1..rows.lastIndex) {
             key(KeyEvent.KEYCODE_DPAD_DOWN); check(index)
-            if (index == 3) shot("section-sources")
+            if (index == 4) shot("section-sources")
         }
         shot("section-playback")
         key(KeyEvent.KEYCODE_DPAD_CENTER)
@@ -747,7 +748,7 @@ class SearchNavigationTest {
         val expected = model.state.value.catalog
         click("Ayarlar")
         ui.onNode(hasText("Hareketi azalt") and hasClickAction()).assertIsFocused()
-        repeat(3) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
+        repeat(4) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
         val row = ui.onNode(hasText("Kataloğu yenile") and hasClickAction())
         row.assertFocusedOrSay()
         failAuth = true

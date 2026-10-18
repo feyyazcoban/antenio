@@ -1,6 +1,7 @@
 package dev.iptvplayer.tv
 
 import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -36,8 +37,12 @@ class MainActivity : ComponentActivity() {
     private val model: TvViewModel by viewModels()
     private val startupSound by lazy { StartupSound(this) }
     private var opening by mutableStateOf(false)
+    // Android 12 and older: the language chosen in Settings (LocaleController); Android 13 applies it on its own.
+    override fun attachBaseContext(newBase: Context) { super.attachBaseContext(LocaleController.wrap(newBase)) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Before the first frame: dates, numbers and title orders follow the language the texts resolved to.
+        LocaleController.update(this)
         if (savedInstanceState == null) startupSound.prepare()
         opening = savedInstanceState == null && (application as TvApplication).claimOpening()
         WindowCompat.setDecorFitsSystemWindows(window, false)

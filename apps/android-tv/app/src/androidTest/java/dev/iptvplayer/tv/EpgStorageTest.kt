@@ -1,6 +1,7 @@
 package dev.iptvplayer.tv
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.iptvplayer.tv.data.*
@@ -32,10 +33,11 @@ class EpgStorageTest {
     }
     @After fun after() { if (::store.isInitialized) store.clear() }
     private fun fixture(name: String) = InstrumentationRegistry.getInstrumentation().context.assets.open("epg/$name.xml")
+    /** The fixture as a Turkish app on an English TV reads it. */
     private fun save(p: EpgPlan = plan, name: String = "europe", updated: Long = 1234) {
         store.stage(p, window).use { stage ->
-            val report = fixture(name).use { XmltvParser().parse(it, window, stage.sink(0)) }
-            stage.seal(updated, listOf(report)); assertTrue(store.publish(stage))
+            val report = fixture(name).use { XmltvParser(listOf("tr", "en")).parse(it, window, stage.sink(0)) }
+            stage.seal(updated, listOf(report), listOf("tr", "en")); assertTrue(store.publish(stage))
         }
     }
     private fun fill(stage: EpgStore.Stage, title: String = "Replacement") {
@@ -47,13 +49,23 @@ class EpgStorageTest {
     @Test fun androidParserAndIndexedSnapshotPreserveDstUnicodeAndUnknownEndAfterReopen() {
         save()
         val reopened = EpgStore(context)
-        assertEquals(EpgSnapshotInfo(1234, window, 3, 3, 0, 0), reopened.info(plan))
+        assertEquals(EpgSnapshotInfo(1234, window, 3, 3, 0, 0, listOf("tr", "en")), reopened.info(plan))
         val result = reopened.query(plan, channel, window)!!
         assertEquals(EpgMatchKind.ID, result.match.kind); assertEquals(3, result.programmes.size)
         assertEquals("İlk haber & gündem", result.programmes.first().title)
         assertEquals(3_600_000L, result.programmes[1].start - result.programmes[0].start)
         assertNull(result.programmes.last().end)
         assertTrue(File(context.cacheDir, "guide-staging").listFiles().orEmpty().isEmpty())
+    }
+    @Test fun aGuideSavedBeforeTheAppSpokeEnglishReadsAsTurkishAndStaysUsable() {
+        save()
+        // The snapshot table as 0.14.44 wrote it, without the languages its titles were picked in.
+        SQLiteDatabase.openDatabase(File(context.filesDir, "guides/${plan.owner}-${plan.binding}.db").path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
+            db.execSQL("CREATE TABLE before_s13 AS SELECT updated, from_time, until_time, channels, programmes, invalid, outside FROM snapshot")
+            db.execSQL("DROP TABLE snapshot"); db.execSQL("ALTER TABLE before_s13 RENAME TO snapshot")
+        }
+        assertEquals(EpgSnapshotInfo(1234, window, 3, 3, 0, 0, listOf("tr")), store.info(plan))
+        assertEquals("İlk haber & gündem", store.query(plan, channel, window)!!.programmes.first().title)
     }
     @Test fun matchingIsExactConservativeAndSourceScoped() {
         save()

@@ -20,7 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger
 /** Emulator-only network failures. No provider, account or parallel real stream. */
 @RunWith(AndroidJUnit4::class)
 class PlaybackRecoveryFlowTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private lateinit var server: MockWebServer
     private lateinit var model: TvViewModel
     private val firstRequests = AtomicInteger()

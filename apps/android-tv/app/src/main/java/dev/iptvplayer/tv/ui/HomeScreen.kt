@@ -495,7 +495,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
 /** A slide's title, its rating, year, kind, runtime and language, and its plot, as wide as the picture leaves room for. */
 @Composable private fun HeroText(slide: MediaEntry, largeText: Boolean, modifier: Modifier = Modifier, tagged: Boolean = false) {
     val width = if (largeText) .64f else if (slide.hasBackdrop) .5f else .52f
-    val shown = remember(slide.title, slide.year) { displayTitle(slide.title, slide.year) }
+    val shown = rememberShownTitle(slide.title, slide.year)
     fun Modifier.tag(tag: String) = if (tagged) testTag(tag) else this
     Column(modifier.fillMaxWidth(width), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(shown.name, Modifier.tag("hero-title"), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
@@ -538,7 +538,7 @@ internal fun runtimeText(seconds: Long): String {
 @Composable private fun HomeCard(entry: MediaEntry, record: WatchRecord?, sourceName: String?, modifier: Modifier, section: String, headingContext: Dp, viewportHeight: Dp,
     reserveEpisode: Boolean = false, locked: Boolean = false, longClick: (() -> Unit)? = null, open: () -> Unit) {
     val live = entry.kind == MediaKind.LIVE
-    val shown = remember(entry.title, entry.year) { displayTitle(entry.title, entry.year) }
+    val shown = rememberShownTitle(entry.title, entry.year)
     val lockedState = stringResource(R.string.lock_state)
     // The row's own 24 dp gutter: a focused card stops on the heading edge instead of 7 dp from the screen,
     // which left a strip of the previous card with cut text at the other edge.

@@ -15,6 +15,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }
+    // English (values/, en-US in res/resources.properties) and Turkish (values-tr/): Android 13 and later list them for
+    // the app's own language (LocaleController).
+    androidResources { generateLocaleConfig = true }
+    // Settings picks a language the TV may not speak, so a Play bundle keeps every language in the base APK.
+    bundle { language { enableSplit = false } }
     buildTypes {
         // en-XA (longer, accented text) and ar-XB (right to left) for layout checks on the emulator; never in release.
         debug { isPseudoLocalesEnabled = true }

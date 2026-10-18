@@ -16,7 +16,8 @@ import org.junit.runner.RunWith
 /** Synthetic accounts and a generated video only; never put real provider details in this APK. */
 @RunWith(AndroidJUnit4::class)
 class PilotFlowTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private lateinit var server: MockWebServer
     private lateinit var model: TvViewModel
 

@@ -8,10 +8,14 @@ import java.io.*
 import java.nio.charset.CodingErrorAction
 import javax.xml.parsers.SAXParserFactory
 
-/** Streamed XMLTV normalisation. Nothing outside the requested window is retained. */
-class XmltvParser(private val language: String = "tr") {
+/**
+ * Streamed XMLTV normalisation. Nothing outside the requested window is retained. Of a programme's titles, descriptions
+ * and categories in several languages, the one in the first of [languages] wins (the app's, then the TV's: gap plan
+ * S13), then one without a language, then the first in the feed.
+ */
+class XmltvParser(private val languages: List<String> = emptyList()) {
     fun parse(input: InputStream, window: GuideWindow, sink: EpgSink, checkpoint: () -> Unit = {}): EpgParseReport {
-        val handler = Handler(window, sink, checkpoint, language)
+        val handler = Handler(window, sink, checkpoint, languages)
         val reader = SAXParserFactory.newInstance().apply { isNamespaceAware = true }.newSAXParser().xmlReader
         // External declarations are removed by SafeProlog before SAX sees them. The resolver is a second barrier.
         listOf("http://xml.org/sax/features/external-general-entities", "http://xml.org/sax/features/external-parameter-entities",
@@ -30,7 +34,7 @@ class XmltvParser(private val language: String = "tr") {
         return handler.report()
     }
 
-    private class Handler(val window: GuideWindow, val sink: EpgSink, val checkpoint: () -> Unit, val language: String) : DefaultHandler() {
+    private class Handler(val window: GuideWindow, val sink: EpgSink, val checkpoint: () -> Unit, val languages: List<String>) : DefaultHandler() {
         var rootSeen = false
         var depth = 0
         var channels = 0; var programmes = 0; var invalid = 0; var outside = 0; var seen = 0
@@ -69,7 +73,8 @@ class XmltvParser(private val language: String = "tr") {
                     (parent == "programme" && localName in listOf("title", "desc", "category")))) {
                 field = localName; text.setLength(0)
                 val lang = a.getValue("lang").orEmpty().substringBefore('-').substringBefore('_')
-                rank = when { lang.equals(language, true) -> 2; lang.isEmpty() -> 1; else -> 0 }
+                val preferred = languages.indexOfFirst { it.equals(lang, true) }
+                rank = when { lang.isEmpty() -> 1; preferred >= 0 -> languages.size + 1 - preferred; else -> 0 }
             }
         }
         override fun characters(ch: CharArray, offset: Int, length: Int) {

@@ -15,7 +15,8 @@ import java.io.File
 /** Opt-in, private device-only input. Excluded from the shipping APK. See README. */
 @RunWith(AndroidJUnit4::class)
 class ProviderSmokeTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
 
     @Test fun privateProviderCatalogAndSequentialPlayback() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()

@@ -1,9 +1,28 @@
 package dev.iptvplayer.tv.data
 
+import dev.iptvplayer.tv.R
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.Reader
+
+/**
+ * The names the parsers give a title the provider left unnamed. Catalogue snapshots keep them as they were written,
+ * in Turkish, so the parsers go on writing these words; [text] is how the screens show them, in the app's language.
+ */
+object UnnamedTitle {
+    fun xtream(id: String) = "İsimsiz içerik $id"
+    fun m3u(line: Int) = "İçerik $line"
+    fun episode(number: Int) = "$number. bölüm"
+
+    private val forms = listOf(Regex("İsimsiz içerik (.+)") to R.string.title_unnamed,
+        Regex("İçerik (\\d+)") to R.string.title_unnamed_entry, Regex("(\\d+)\\. bölüm") to R.string.episode_unnamed)
+
+    /** [title] in the app's language when a parser named it; null for the provider's own name. */
+    fun text(title: String): UiText? = forms.firstNotNullOfOrNull { (form, text) ->
+        form.matchEntire(title)?.let { UiText.Res(text, listOf(it.groupValues[1])) }
+    }
+}
 
 object CatalogParser {
     fun categories(json: String): Map<String, String> = objects(JSONArray(json))
@@ -15,7 +34,7 @@ object CatalogParser {
             val id = row.optString(key).takeUnless { it.isBlank() || it == "null" } ?: return@mapNotNull null
             MediaEntry(
                 id = "${kind.name.lowercase()}:$id", providerId = id, kind = kind,
-                title = row.optString("name").ifBlank { "İsimsiz içerik $id" },
+                title = row.optString("name").ifBlank { UnnamedTitle.xtream(id) },
                 category = categories[row.optString("category_id")] ?: CategoryFilter.OTHER,
                 categoryId = row.optString("category_id").takeUnless { it == "null" }.orEmpty().trim(),
                 artwork = httpArtwork(row.optString(if (kind == MediaKind.SERIES) "cover" else "stream_icon")),
@@ -61,7 +80,7 @@ object CatalogParser {
                 val detail = row.optJSONObject("info") ?: JSONObject()
                 results += MediaEntry(
                     id = "episode:$id", providerId = id, kind = MediaKind.EPISODE,
-                    title = row.optString("title").ifBlank { "${index + 1}. bölüm" },
+                    title = row.optString("title").ifBlank { UnnamedTitle.episode(index + 1) },
                     category = series.title, artwork = httpArtwork(detail.optString("movie_image")) ?: show.backdrop ?: show.artwork,
                     categoryId = series.categoryId, parentLocalId = series.localId ?: series.id,
                     description = detail.optString("plot"),
@@ -165,7 +184,7 @@ object M3uParser {
                     else -> {
                         val uri = base.resolve(line)?.takeIf { it.scheme == "http" || it.scheme == "https" }
                         if (uri == null) { invalid++; return@forEachIndexed }
-                        val name = title.ifBlank { attrs["tvg-name"].orEmpty() }.ifBlank { "İçerik ${number + 1}" }
+                        val name = title.ifBlank { attrs["tvg-name"].orEmpty() }.ifBlank { UnnamedTitle.m3u(number + 1) }
                         val tag = findEpisodeTag(name)
                         val paths = uri.pathSegments
                         val kind = when {

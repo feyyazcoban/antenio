@@ -57,6 +57,7 @@ class DeviceKeysTest {
         MediaKind.entries.forEach { store.librarySort(it, LibrarySort.TITLE) }
         store.hiddenCategories = setOf(CategoryVisibility.key(MediaKind.LIVE, "Haber")); store.hideAdultCategories = false
         store.autoNextEpisode = false; store.audioLanguage = "tr"; store.subtitleLanguage = "en"; store.subtitlesOff = false
+        store.appLanguage = "tr"
         return memory to store
     }
 

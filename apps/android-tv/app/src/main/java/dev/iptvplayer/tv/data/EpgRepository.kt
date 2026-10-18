@@ -12,16 +12,17 @@ class EpgRepository(private val client: OkHttpClient = OkHttpClient.Builder().co
     .readTimeout(30, TimeUnit.SECONDS).callTimeout(180, TimeUnit.SECONDS).followSslRedirects(false).build()) {
 
     /** Reads feeds sequentially. A failed or cancelled feed never replaces the last complete guide.
-     * accept is checked inside the shared source transaction; UI must validate its current source binding there. */
+     * accept is checked inside the shared source transaction; UI must validate its current source binding there.
+     * Titles are picked in [languages] (XmltvParser), which the saved guide records. */
     suspend fun refresh(plan: EpgPlan, store: EpgStore, window: GuideWindow, accept: () -> Boolean,
-        updatedAt: () -> Long = System::currentTimeMillis): Boolean =
+        updatedAt: () -> Long = System::currentTimeMillis, languages: List<String> = emptyList()): Boolean =
         Executors.newSingleThreadExecutor { task -> Thread(task, "GuideWriter") }.asCoroutineDispatcher().use { writer -> withContext(writer) {
         // SQLite transaction state belongs to one physical thread, including seal/rollback after suspension.
         try {
             store.stage(plan, window).use { stage ->
-                val reports = plan.urls.mapIndexed { index, url -> download(url, window, stage.sink(index), writer) }
+                val reports = plan.urls.mapIndexed { index, url -> download(url, window, stage.sink(index), writer, languages) }
                 ensureActive()
-                stage.seal(updatedAt(), reports)
+                stage.seal(updatedAt(), reports, languages)
                 SourceTransactions.shared.write { accept() && store.publish(stage) }
             }
         } catch (e: CancellationException) { throw e }
@@ -30,7 +31,7 @@ class EpgRepository(private val client: OkHttpClient = OkHttpClient.Builder().co
     } }
 
     internal suspend fun download(url: String, window: GuideWindow, sink: EpgSink,
-        dispatcher: CoroutineDispatcher = Dispatchers.IO): EpgParseReport = coroutineScope {
+        dispatcher: CoroutineDispatcher = Dispatchers.IO, languages: List<String> = emptyList()): EpgParseReport = coroutineScope {
         val call = client.newCall(SourceHttp.guide(url))
         // Stays alive through body parsing, unlike a continuation completed as soon as headers arrive.
         val cancellation = launch(Dispatchers.IO, start = CoroutineStart.UNDISPATCHED) {
@@ -54,7 +55,7 @@ class EpgRepository(private val client: OkHttpClient = OkHttpClient.Builder().co
                     raw.reset()
                     val decoded = bounded(if (gzip) GZIPInputStream(raw) else raw)
                     val context = currentCoroutineContext()
-                    XmltvParser().parse(decoded, window, sink) { context.ensureActive() }
+                    XmltvParser(languages).parse(decoded, window, sink) { context.ensureActive() }
                 }
             }
         } catch (e: CancellationException) { throw e }

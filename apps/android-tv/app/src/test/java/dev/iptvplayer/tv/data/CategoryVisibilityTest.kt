@@ -16,6 +16,27 @@ class CategoryVisibilityTest {
         }
     }
 
+    @Test fun adultNamesAreRecognisedInTheLanguagesProvidersWriteThemIn() {
+        listOf("DE: Für Erwachsene", "ERWACHSENE", "Filme für Erwachsene", "Erotik", "Porno DE", // German
+            "ADULTOS", "Cine adulto", "Para Adultos +18", "Erótico", "Sexo", // Spanish
+            "Pornô Brasil", "Filmes Adultos", "Eróticos", // Portuguese
+            "Pour adultes", "FR | ADULTE", "Érotique", "Sexe", // French
+            "Per adulti", "Film per Adulti", "Erotico", "Sesso", "VM18", // Italian
+            "Voor volwassenen", "Yetişkinlere Özel", "YETİŞKİNLER", // Dutch, Turkish
+            "Lil Kibar Faqat", "للكبار فقط", "+18 للكبار", "أفلام سكس", "إباحي", // Arabic, in Latin letters and its own script
+            "Adult", "ADULTS 18+", "Hentai", "PORNOS", "XXX | VIP", "18 +").forEach {
+            assertTrue(it, CategoryVisibility.looksAdult(it))
+        }
+    }
+
+    @Test fun ordinaryWordsThatContainAnAdultWordStayVisible() {
+        listOf("Middlesex", "Sexta-feira Santa", "Sextou", "Sexto Sentido", "Adult Swim", "ADULT SWIM", "Young Adult", "Young Adults",
+            "Erwachsenenbildung", "Adulterio", "Adultère", "Pornic", "Kibar Feyzo", "Saxony", "Sachsen", "XXL Comedy",
+            "Esporte", "Sport 18", "FR | Séries", "Volwassen worden", "18 Kasım", "Erotomania", "ساكسونيا", "كبار السن").forEach {
+            assertFalse(it, CategoryVisibility.looksAdult(it))
+        }
+    }
+
     @Test fun aKeyGivesBackItsSectionAndName() {
         assertEquals(MediaKind.LIVE to "Spor | Canlı", CategoryVisibility.row(CategoryVisibility.key(MediaKind.LIVE, "Spor | Canlı")))
         assertEquals(MediaKind.SERIES to "Dram", CategoryVisibility.row(CategoryVisibility.key(MediaKind.EPISODE, "Dram")))

@@ -510,7 +510,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
 @Composable private fun ChannelRow(entry: MediaEntry, number: Int, favorite: Boolean, modifier: Modifier,
     guide: GuideSlice?, now: Long, zone: ZoneId, guideAvailable: Boolean = true, locked: Boolean = false,
     longClick: (() -> Unit)? = null, click: () -> Unit) {
-    val shown = remember(entry.title) { displayTitle(entry.title) }
+    val shown = rememberShownTitle(entry.title)
     val visibility = rememberCardVisibility()
     val current = guide?.takeIf { !locked }?.now(now)
     val next = guide?.takeIf { !locked }?.next(now)

@@ -25,9 +25,9 @@ import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.ParentalStatus
 import dev.iptvplayer.tv.data.SourceConfig
 import dev.iptvplayer.tv.data.UiText
-import dev.iptvplayer.tv.data.displayTitle
 import dev.iptvplayer.tv.ui.Action
 import dev.iptvplayer.tv.ui.rememberPinOpener
+import dev.iptvplayer.tv.ui.rememberShownTitle
 import dev.iptvplayer.tv.ui.shownCategory
 
 internal val parentalPage = SettingsRoute.Page("parental")
@@ -179,7 +179,7 @@ private class LockList(val sources: List<SourceConfig>, val categories: List<Pai
     list.titles.forEach { title ->
         val key = "title:${title.id}"
         val kind = stringResource(when (title.kind) { MediaKind.LIVE -> R.string.kind_live; MediaKind.MOVIE -> R.string.kind_movie_single; else -> R.string.kind_series_single })
-        ActionRow(key, displayTitle(title.title, title.year).name,
+        ActionRow(key, rememberShownTitle(title.title, title.year).name,
             if (s.sources.size > 1) stringResource(R.string.text_pair, kind, s.sourceName(title.sourceId)) else kind, Modifier.testTag("locked-$key"),
             value = lockedState, clickLabel = removeLabel) {
             remove(key) { model.removeTitleLock(title.id) }

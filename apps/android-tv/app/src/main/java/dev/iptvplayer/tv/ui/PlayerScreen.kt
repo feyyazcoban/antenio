@@ -67,7 +67,6 @@ import dev.iptvplayer.tv.TvViewModel
 import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.EpisodeSequence
 import dev.iptvplayer.tv.data.GateResult
-import dev.iptvplayer.tv.data.displayTitle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 
@@ -253,7 +252,7 @@ import kotlinx.coroutines.flow.first
         active = media
         if (quiet) {
             quiet = false; lastInteraction = System.currentTimeMillis()
-            flash(listOfNotNull(model.channelNumber(media.entry)?.toString(), displayTitle(media.entry.title).name).joinToString("  "))
+            flash(listOfNotNull(model.channelNumber(media.entry)?.toString(), shownTitle(media.entry.title, "", resources).name).joinToString("  "))
         } else interact()
         player.trackSelectionParameters = PlayerFactory.rememberedTracks(player.trackSelectionParameters, model.store)
         player.setMediaSource(PlayerFactory.mediaSource(context, request), request.startMs)
@@ -335,7 +334,7 @@ import kotlinx.coroutines.flow.first
             // The controls stand on the scrim, one title line above them; 5 dp of side room keeps the focus ring whole.
             Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(start = TvLayout.Gutter, end = TvLayout.Gutter, bottom = 18.dp)
                 .testTag("player-panel").padding(bottom = 2.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(remember(media.entry.title) { displayTitle(media.entry.title).name }, Modifier.fillMaxWidth().padding(horizontal = 5.dp).testTag("player-title"),
+                Text(rememberShownTitle(media.entry.title).name, Modifier.fillMaxWidth().padding(horizontal = 5.dp).testTag("player-title"),
                     color = Ink.Text, fontSize = 24.sp, lineHeight = 30.sp,
                     fontWeight = FontWeight.Medium, fontFamily = Roboto, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 // Status on the left, the remote's shortcuts on the right.

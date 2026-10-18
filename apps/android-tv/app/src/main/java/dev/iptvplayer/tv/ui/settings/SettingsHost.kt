@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -66,7 +68,9 @@ private class PagePlace {
  * Without a [gate], a guarded page asks for the parental PIN.
  */
 @Composable internal fun Settings(s: TvState, model: TvViewModel, gate: PageGate? = null, dismiss: () -> Unit) {
-    val nav = remember { SettingsNav(mainPage) }
+    // A configuration change keeps only the main page and the row it was left on, so a new language returns to Dil /
+    // Language; a page above it may need its PIN again, and a ChoicePage's options live in its row.
+    val nav = rememberSaveable(saver = Saver<SettingsNav, String>({ it.rootFocus }, { SettingsNav(mainPage, it) })) { SettingsNav(mainPage) }
     var current by remember { mutableStateOf(nav.top) }
     // Each open page keeps its place while a page above it is open, so Back finds the row that opened that page on
     // screen, in a lazy list too. A page that closed starts at its top when it opens again.

@@ -19,7 +19,8 @@ import java.io.File
 /** Diagnostic debug/emulator timings, not a release-device Macrobenchmark or a PRD performance gate. */
 @RunWith(AndroidJUnit4::class)
 class LargeCatalogProbeTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private lateinit var model: TvViewModel
     private val diagnostics = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
     @Before fun setup() { model = resetFixtureSources(ui) }

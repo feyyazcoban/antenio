@@ -262,7 +262,7 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
 @Composable private fun SearchCard(entry: MediaEntry, sourceName: String?, minHeight: Dp, width: Dp, contextAbove: Dp,
     viewportHeight: Dp, locked: Boolean, modifier: Modifier, open: () -> Unit) {
     val visibility = rememberCardVisibility(horizontalPadding = TvLayout.Gutter, contextAbove = contextAbove, viewportHeight = viewportHeight)
-    val shown = remember(entry.title, entry.year) { displayTitle(entry.title, entry.year) }
+    val shown = rememberShownTitle(entry.title, entry.year)
     val lockedState = stringResource(R.string.lock_state)
     Box(Modifier.width(width).then(visibility.container).testTag("tile:search:${entry.id}")) {
         Card(onClick = open, modifier = modifier.fillMaxWidth().heightIn(min = minHeight).then(visibility.focus)

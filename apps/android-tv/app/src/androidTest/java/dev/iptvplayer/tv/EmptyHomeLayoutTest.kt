@@ -19,7 +19,8 @@ import org.junit.*
 import org.junit.Assert.*
 
 class EmptyHomeLayoutTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     @Test fun emptyAndFailedHomeKeepSourcesReachable() {
         val model = resetFixtureSources(ui)
         val state = mutableStateOf(TvState(route = Route.HOME))

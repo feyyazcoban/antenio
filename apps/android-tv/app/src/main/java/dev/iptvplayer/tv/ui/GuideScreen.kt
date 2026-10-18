@@ -30,14 +30,16 @@ import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.*
 import kotlinx.coroutines.delay
 import java.time.*
+import java.util.Locale
 
 /** "20:00 — 21:30", with dates or offsets where they change; [unknownEnd] stands for an end the guide does not give. */
-internal fun programmeTime(programme: EpgProgramme, zone: ZoneId, unknownEnd: String): String {
+internal fun programmeTime(programme: EpgProgramme, zone: ZoneId, unknownEnd: String, locale: Locale = appLocale): String {
     val start = Instant.ofEpochMilli(programme.start).atZone(zone)
     val end = programme.end?.let { Instant.ofEpochMilli(it).atZone(zone) }
     val dates = end != null && start.toLocalDate() != end.toLocalDate()
     val offsets = end != null && start.offset != end.offset
-    fun label(time: Long) = (if (dates) guideDayTime(time, zone) else guideTime(time, zone)) + if (offsets) " (${guideOffset(time, zone)})" else ""
+    fun label(time: Long) = (if (dates) guideDayTime(time, zone, locale) else guideTime(time, zone, locale)) +
+        if (offsets) " (${guideOffset(time, zone)})" else ""
     return label(programme.start) + " — " + (programme.end?.let(::label) ?: unknownEnd)
 }
 
@@ -296,7 +298,7 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                                         .testTag("guide-logo:${entry.id}"), logo = true, logoInset = 2.dp)
                                     Column(Modifier.weight(1f)) {
                                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                            Text(displayTitle(entry.title).name, Modifier.weight(1f, fill = false), color = if (index == selectedIndex) Ink.Text else Ink.Muted,
+                                            Text(rememberShownTitle(entry.title).name, Modifier.weight(1f, fill = false), color = if (index == selectedIndex) Ink.Text else Ink.Muted,
                                                 fontFamily = Roboto, fontSize = 13.sp, maxLines = if (s.sources.size > 1) 1 else 2, lineHeight = 17.sp,
                                                 overflow = TextOverflow.Ellipsis)
                                             if (rowLocked) LockMark()

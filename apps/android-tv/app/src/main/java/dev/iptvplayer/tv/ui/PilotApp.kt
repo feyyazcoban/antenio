@@ -65,7 +65,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import androidx.compose.ui.input.key.Key
@@ -77,7 +80,8 @@ import androidx.compose.ui.input.key.type
 @OptIn(ExperimentalFoundationApi::class)
 @Composable fun PilotApp(model: TvViewModel, opening: Boolean = false, endOpening: () -> Unit = {}) {
     val state by model.state.collectAsStateWithLifecycle()
-    var settings by remember { mutableStateOf(false) }
+    // Kept over a configuration change: a new language recreates the activity and Settings opens again (LocaleController).
+    var settings by rememberSaveable { mutableStateOf(false) }
     var exitAsk by remember { mutableStateOf(false) }
     val overlays = remember { AppOverlays() }
     val savedScreens = rememberSaveableStateHolder()
@@ -94,8 +98,9 @@ import androidx.compose.ui.input.key.type
     BackHandler(screen != Route.RECOVERY && screen != Route.PLAYER && screen != Route.SEARCH && screen != Route.GUIDE &&
         screen != Route.LOCKED && !(screen == Route.SETUP && state.source == null)) { routeBack() }
     LaunchedEffect(screen) { if (screen != Route.HOME) exitAsk = false }
-    // The app left the screen with a PIN verified in Ayarlar, or the TV starts over: Settings closes (pin.md §3.9).
-    LaunchedEffect(state.parental.lockEpoch) { settings = false }
+    // The app left the screen with a PIN verified in Ayarlar, or the TV starts over: Settings closes (pin.md §3.9). Only a
+    // new epoch: the panel a configuration change brought back stays.
+    LaunchedEffect(model) { model.state.map { it.parental.lockEpoch }.distinctUntilChanged().drop(1).collect { settings = false } }
     // Source management opened from Ayarlar, at once or once its PIN was right: the panel closes behind it (pin.md §3.8).
     LaunchedEffect(state.route) {
         if (settings && (state.route == Route.SOURCES || state.route == Route.SETUP || state.route == Route.LOADING)) {
@@ -181,8 +186,9 @@ import androidx.compose.ui.input.key.type
     // Hidden fields (the M3U link, the password, the guide address) can be shown while typing them with the remote (U13).
     var reveal by rememberSaveable { mutableStateOf(false) }
     val density = LocalDensity.current
-    // An untouched name field shows, and saves, the default name in the app's language.
+    // An untouched name field shows, and saves, the default name in the app's language; an emptied one saves its own.
     val defaultName = stringResource(R.string.source_default_name)
+    val unnamed = stringResource(R.string.source_unnamed)
     fun fieldView(view: BringIntoViewRequester) = Modifier.bringIntoViewRequester(view).onSizeChanged { fieldHeights[view] = it.height }
     LaunchedEffect(s.error) {
         val error = s.error ?: return@LaunchedEffect
@@ -258,7 +264,7 @@ import androidx.compose.ui.input.key.type
             }
             s.error?.let { Note(it.resolve(), error = true, modifier = Modifier.testTag("setup-error")) }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Action(stringResource(R.string.setup_connect), Modifier.testTag("setup-connect"), primary = true) { model.connectDraft(defaultName) }
+                Action(stringResource(R.string.setup_connect), Modifier.testTag("setup-connect"), primary = true) { model.connectDraft(defaultName, unnamed) }
                 if (s.source != null) Action(stringResource(R.string.action_cancel)) { model.back() }
                 Action(stringResource(if (reveal) R.string.setup_hide else R.string.setup_show), Modifier.testTag("setup-reveal"), outlined = true,
                     selected = reveal) { reveal = !reveal }
@@ -283,7 +289,7 @@ internal class EvenColumns(private val count: Int) : GridCells {
 
 /**
  * [compact] is the search-result row used while the section search keyboard is open; the same Card keeps focus across
- * modes. Names are shown through [displayTitle] (D065). [guideAvailable] false: the source has no guide, so the card
+ * modes. Names are shown through [rememberShownTitle] (D065). [guideAvailable] false: the source has no guide, so the card
  * does not repeat "Program bilgisi yok". [longClick] opens the quick actions (a held OK). [locked]: opening it asks for
  * the PIN (pin.md §4); the card shows the lock, TalkBack reads "Kilitli", and a channel keeps its programmes to itself.
  */
@@ -294,7 +300,7 @@ internal class EvenColumns(private val count: Int) : GridCells {
     val live = entry.kind == MediaKind.LIVE
     val radius = if (live && !compact) 14.dp else TvLayout.CardRadius
     val visibility = rememberCardVisibility()
-    val shown = remember(entry.title, entry.year) { displayTitle(entry.title, entry.year) }
+    val shown = rememberShownTitle(entry.title, entry.year)
     val name = (if (favorite) "★ " else "") + shown.name
     val lockedState = stringResource(R.string.lock_state)
     val lockedChannel = stringResource(R.string.lock_channel)
@@ -466,7 +472,7 @@ internal fun quickActions(entry: MediaEntry, favorite: Boolean, toggleFavorite: 
     val first = remember { FocusRequester() }
     val gap = 16.dp
     val pitch = with(LocalDensity.current) { (actionHeight() + gap).roundToPx() }
-    SourceDialog(displayTitle(entry.title, entry.year).name, first, dismiss, width = 440.dp) {
+    SourceDialog(rememberShownTitle(entry.title, entry.year).name, first, dismiss, width = 440.dp) {
         // Half a gap above and below the rows, pulled out over the dialog's spacing: at rest each row sits where the
         // dialog's own column put it, and a scrolled window holds whole rows.
         Column(Modifier.weight(1f, fill = false).testTag("quick-actions").layout { measurable, constraints ->

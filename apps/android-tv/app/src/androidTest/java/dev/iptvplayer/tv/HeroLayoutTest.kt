@@ -12,7 +12,8 @@ import org.junit.*
 import org.junit.Assert.*
 
 class HeroLayoutTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     @After fun cleanup() { DeviceStore(ui.activity).reducedMotion = false; resetFixtureSources(ui) }
 
     /** Home with [entries] as the only (local) source's catalog. */

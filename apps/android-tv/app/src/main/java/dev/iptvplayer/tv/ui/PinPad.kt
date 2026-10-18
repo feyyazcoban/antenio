@@ -19,6 +19,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -44,7 +45,6 @@ import dev.iptvplayer.tv.data.PinPrompt
 import dev.iptvplayer.tv.data.PinPurpose
 import dev.iptvplayer.tv.data.PinStep
 import dev.iptvplayer.tv.data.ProtectionRetry
-import dev.iptvplayer.tv.data.displayTitle
 import kotlinx.coroutines.delay
 
 /**
@@ -355,7 +355,7 @@ private fun PinPrompt.message(): String {
     // at large text leaves the boxes and the feedback line in view below it.
     val title = (purpose as? PinPurpose.Unlock)?.title ?: (purpose as? PinPurpose.Release)?.title
     if (title != null) {
-        val name = if ((purpose as? PinPurpose.Release)?.source == true) title else displayTitle(title).name
+        val name = if ((purpose as? PinPurpose.Release)?.source == true) title else shownTitle(title, "", LocalResources.current).name
         return stringResource(if (purpose is PinPurpose.Release) R.string.pin_reason_release else R.string.pin_reason_unlock,
             if (name.length <= UNLOCK_TITLE_MAX) name else name.take(UNLOCK_TITLE_MAX - 1).trimEnd() + "…")
     }

@@ -45,7 +45,7 @@ import dev.iptvplayer.tv.R
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Artwork(entry.sourceId, entry.artwork, "", Modifier.width(112.dp).aspectRatio(16f / 9).clip(RoundedCornerShape(8.dp)))
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(entry.title, color = Ink.Text, fontFamily = Roboto, fontSize = 20.sp, lineHeight = 26.sp,
+                        Text(shownName(entry.title), color = Ink.Text, fontFamily = Roboto, fontSize = 20.sp, lineHeight = 26.sp,
                             fontWeight = FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis)
                         Text(if (entry.episodeOrderKnown) stringResource(R.string.episode_end_number, entry.season.toString(), entry.episode.toString())
                             else stringResource(R.string.episode_end_number_unknown), color = Ink.Muted,

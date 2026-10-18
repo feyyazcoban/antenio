@@ -53,7 +53,7 @@ private class SeasonShelf(start: Int) {
 @Composable internal fun DetailScreen(s: TvState, model: TvViewModel, settings: () -> Unit) {
     val entry = s.selected ?: return
     val series = entry.kind == MediaKind.SERIES
-    val shown = remember(entry.title, entry.year) { displayTitle(entry.title, entry.year) }
+    val shown = rememberShownTitle(entry.title, entry.year)
     val first = remember { FocusRequester() }
     val back = remember { FocusRequester() }
     // The detail of a locked title asks again once the session ended (the app left the screen): the PIN pad opens over
@@ -273,7 +273,7 @@ private class SeasonShelf(start: Int) {
             // The episode's own name, without the show's name and SxxEyy the provider repeats on every card. "E1."
             // only for a number the source states; with no name left, "Bölüm 1" alone.
             val numbered = entry.episodeOrderKnown && entry.episode > 0
-            val name = remember(entry.title, show) { episodeDisplayTitle(entry.title, show) }.ifBlank { null }
+            val name = UnnamedTitle.text(entry.title)?.resolve() ?: remember(entry.title, show) { episodeDisplayTitle(entry.title, show) }.ifBlank { null }
             Row(Modifier.padding(horizontal = 10.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (numbered && name != null) Text(stringResource(R.string.episode_number_short, entry.episode.toString()), color = Ink.Muted, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                     fontSize = 12.sp, lineHeight = 17.sp, maxLines = 1)

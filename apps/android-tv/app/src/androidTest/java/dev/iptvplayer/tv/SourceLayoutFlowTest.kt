@@ -17,7 +17,8 @@ import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class SourceLayoutFlowTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private lateinit var model: TvViewModel
     private lateinit var sources: List<SourceConfig>
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()

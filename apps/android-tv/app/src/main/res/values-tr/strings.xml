@@ -1,0 +1,706 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Turkish, as the app spoke before English became its default language (gap plan S13): the same keys as values/strings.xml. -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Content kinds, library sort orders and the catalogue's own category -->
+    <string name="kind_live">Canlı TV</string>
+    <string name="kind_movies">Filmler</string>
+    <string name="kind_series">Diziler</string>
+    <string name="kind_episodes">Bölümler</string>
+    <string name="sort_default">Varsayılan</string>
+    <string name="sort_added">Son eklenen</string>
+    <string name="sort_title">Ad (A–Z)</string>
+    <string name="sort_year">Yıl</string>
+    <string name="sort_rating">Puan</string>
+    <string name="category_other">Diğer</string>
+
+    <!-- Progress of source operations -->
+    <string name="progress_preparing">Hazırlanıyor…</string>
+    <string name="progress_checking_library">Kayıtlı kütüphanen kontrol ediliyor…</string>
+    <string name="progress_resetting_sources">Bu cihazdaki kaynak kayıtları temizleniyor…</string>
+    <string name="progress_resetting_everything">Bu cihazdaki kaynaklar ve kilitler temizleniyor…</string>
+    <string name="progress_saving_library">Kütüphanen cihazına kaydediliyor…</string>
+    <string name="progress_removing_source">Kaynak kaldırılıyor…</string>
+    <string name="progress_downloading_list">Liste indiriliyor…</string>
+    <string name="progress_arranging_list">Kanallar ve kütüphane düzenleniyor…</string>
+    <string name="progress_checking_account">Hesap doğrulanıyor…</string>
+    <string name="progress_loading_kind">%1$s yükleniyor…</string>
+
+    <!-- Parts of a list that could not be read while the rest opened -->
+    <string name="warning_categories_unavailable">%1$s: kategori adları alınamadı.</string>
+    <string name="warning_kind_unavailable">%1$s yüklenemedi. Kaynağı yenileyerek tekrar deneyebilirsin.</string>
+    <plurals name="warning_invalid_addresses">
+        <item quantity="one">%1$s geçersiz adres atlandı.</item>
+        <item quantity="other">%1$s geçersiz adres atlandı.</item>
+    </plurals>
+    <string name="warning_feeds_limited">Listenin ilk dört yayın rehberi adresi alındı.</string>
+
+    <!-- Library, source and detail notices -->
+    <string name="error_library_unavailable">Kayıtlı kütüphanen açılamadı. Kayıtların korunuyor; yeniden deneyebilirsin.</string>
+    <string name="error_reset_failed">Temizlik tamamlanamadı. Boş alanı kontrol edip tekrar dene.</string>
+    <string name="error_source_not_saved">Kaynak güvenle kaydedilemedi. Tekrar dene.</string>
+    <string name="error_source_busy">Kaynak işlemi tamamlanınca yeniden dene.</string>
+    <string name="error_guide_url_not_saved">Rehber adresi kaydedilemedi.</string>
+    <!-- A guide address saved after the PIN that opened Kaynaklar ended. -->
+    <string name="error_sources_need_pin">Kaynak ayarları PIN istiyor. Kaynakları yeniden açıp PIN\'i gir.</string>
+    <string name="error_episode_missing">İzlediğin bölüm artık bu kaynakta bulunamıyor. Başka bir bölüm seçebilirsin.</string>
+    <string name="error_details_unavailable">Ayrıntılar alınamadı.</string>
+    <string name="notice_library_updated">Kütüphanen güncellendi.</string>
+    <string name="notice_refresh_failed">Liste yenilenemedi. Son kaydedilen kütüphaneni kullanabilirsin.</string>
+    <string name="notice_sources_not_refreshed">Bazı kaynaklar yenilenemedi. Kayıtlı içerikler korunuyor; Kaynaklar’dan ayrıntıları görebilirsin.</string>
+    <string name="notice_filter_not_saved">Kaynak seçimi kaydedilemedi. Tekrar seçebilirsin.</string>
+    <string name="notice_source_removed">Kaynak kaldırıldı.</string>
+    <string name="notice_source_not_removed">Kaynak kaldırılamadı. Tekrar dene.</string>
+    <!-- After "PIN'i unuttum → Her şeyi sıfırla" -->
+    <string name="notice_start_over">Sıfırlandı. Kaynağını yeniden ekleyebilirsin.</string>
+    <string name="notice_start_over_pin_kept">Kaynaklar silindi ama PIN kaydı temizlenemedi. Kaynak ekledikten sonra PIN\'i unuttum ile yeniden deneyebilirsin.</string>
+    <string name="notice_start_over_failed">Sıfırlama tamamlanamadı. PIN korunuyor; tekrar deneyebilirsin.</string>
+
+    <!-- Guide status -->
+    <string name="guide_address_unreadable">Rehber adresi okunamadı. Kaynak ayarlarını kontrol et.</string>
+    <string name="guide_source_changed">Kaynak değişti. Rehberi yeniden açabilirsin.</string>
+    <string name="guide_refresh_failed">Rehber yenilenemedi. Kayıtlı rehber korunuyor.</string>
+    <string name="guide_refresh_cancelled">Rehber yenilemesi iptal edildi.</string>
+
+    <!-- Next episode -->
+    <string name="episode_order_unknown">Bölüm sırası net değil. Sonraki bölümü sen başlat.</string>
+    <string name="episode_gap_possible">Arada eksik bölüm olabilir. Sonraki bölümü sen başlat.</string>
+    <string name="episode_order_from_titles">Bölüm sırası listedeki başlıklardan eşleştirildi.</string>
+
+    <!-- FailureReason: source form and stored records -->
+    <string name="failure_address_invalid">http:// veya https:// ile başlayan geçerli bir adres gir.</string>
+    <string name="failure_address_has_credentials">Adres içinde kullanıcı bilgisi kullanma; hesap alanlarını doldur.</string>
+    <string name="failure_credentials_missing">Kullanıcı adı ve şifre gerekli.</string>
+    <string name="failure_guide_address_invalid">Rehber için geçerli bir http veya https adresi gir.</string>
+    <string name="failure_source_address_invalid">Kaynak adresi geçersiz.</string>
+    <string name="failure_episode_not_chosen">Önce bir bölüm seç.</string>
+    <string name="failure_stream_format_missing">Bu içeriğin yayın biçimi eksik.</string>
+    <string name="failure_stored_sources_unavailable">Kayıtlı kaynaklar açılamadı.</string>
+    <string name="failure_source_not_stored">Kaynak cihazda saklanamadı. Boş alanı kontrol et.</string>
+    <string name="failure_sources_not_stored">Kaynaklar cihazda saklanamadı. Boş alanı kontrol et.</string>
+    <string name="failure_source_not_removed">Kaynak cihazdan kaldırılamadı. Tekrar dene.</string>
+    <string name="failure_connection_already_added">Bu bağlantı zaten ekli. Kaynaklar ekranından düzenleyebilirsin.</string>
+    <string name="failure_connection_added_elsewhere">Bu bağlantı zaten ekli.</string>
+    <string name="failure_source_no_longer_saved">Bu kaynak artık kayıtlı değil. Kaynaklar ekranını yeniden aç.</string>
+    <string name="failure_source_changed">Kaynak değişti; yeniden aç.</string>
+    <string name="failure_source_changed_in_settings">Kaynak değişti. Ayarları yeniden aç.</string>
+    <string name="failure_partial_import">Kaynağın bazı bölümleri alınamadı. Önceki hesap ve kütüphane korunuyor.</string>
+    <string name="failure_partial_refresh">Kaynağın bazı bölümleri yenilenemedi. Mevcut liste korunuyor.</string>
+
+    <!-- FailureReason: provider account and catalogue -->
+    <string name="failure_account_info_missing">Sağlayıcı hesap bilgisi döndürmedi.</string>
+    <string name="failure_account_not_authenticated">Hesap doğrulanamadı. Kullanıcı adı ve şifreyi kontrol et.</string>
+    <string name="failure_account_inactive">Bu hesap aktif görünmüyor. Sağlayıcı bilgilerini kontrol et.</string>
+    <string name="failure_catalog_unavailable">Hesap doğrulandı ancak katalog alınamadı. Tekrar dene.</string>
+    <string name="failure_movie_details_unavailable">Film ayrıntıları alınamadı.</string>
+    <string name="failure_episodes_unavailable">Bölümler alınamadı. Tekrar dene.</string>
+    <string name="failure_response_malformed">Sunucu beklenen biçimde yanıt vermedi.</string>
+    <string name="failure_server_unreachable">Sunucuya ulaşılamadı. Adresi ve internet bağlantısını kontrol et.</string>
+    <string name="failure_access_denied">Kaynağa erişim reddedildi. Hesap bilgilerini kontrol et.</string>
+    <string name="failure_source_not_found">Kaynak adresi bulunamadı.</string>
+    <string name="failure_too_many_requests">Sağlayıcı çok fazla istek aldı. Biraz sonra tekrar dene.</string>
+    <string name="failure_provider_unavailable">Sağlayıcı şu anda yanıt veremiyor. Tekrar dene.</string>
+    <string name="failure_response_empty">Sunucu boş yanıt verdi.</string>
+    <string name="failure_response_too_large">Kaynak yanıtı pilot sürümün boyut sınırını aşıyor.</string>
+    <string name="failure_source_unreadable">Kaynak okunamadı. İnternet bağlantısını ve adresi kontrol et.</string>
+    <string name="failure_list_address_invalid">Liste adresi geçersiz.</string>
+    <string name="failure_list_too_large">Liste bu pilot sürümünün boyut sınırını aşıyor.</string>
+    <string name="failure_list_single_stream">Bu adres bir kanal listesi yerine tek bir HLS yayını içeriyor.</string>
+    <string name="failure_list_not_m3u">Geçerli bir M3U listesi bulunamadı.</string>
+
+    <!-- FailureReason: guide feeds -->
+    <string name="failure_guide_too_many_feeds">En fazla dört rehber adresi kullanılabilir.</string>
+    <string name="failure_guide_feed_invalid">Rehber için geçerli bir http veya https adresi gerekli.</string>
+    <string name="failure_guide_entries_unreadable">Rehberdeki program saatleri veya kanal bilgileri okunamadı.</string>
+    <string name="failure_guide_not_saved">Yayın rehberi kaydedilemedi. Son rehber korunuyor.</string>
+    <string name="failure_guide_access_denied">Yayın rehberine erişim reddedildi. Kaynak bilgilerini kontrol et.</string>
+    <string name="failure_guide_not_found">Yayın rehberi adresi bulunamadı.</string>
+    <string name="failure_guide_too_many_requests">Sağlayıcı yoğun. Yayın rehberini daha sonra yenileyebilirsin.</string>
+    <string name="failure_guide_provider_unavailable">Yayın rehberi şu anda alınamıyor. Son rehber korunuyor.</string>
+    <string name="failure_guide_response_empty">Yayın rehberi yanıtı boş.</string>
+    <string name="failure_guide_response_too_large">Yayın rehberi boyut sınırını aşıyor.</string>
+    <string name="failure_guide_download_failed">Yayın rehberi indirilemedi. Bağlantıyı kontrol et.</string>
+    <string name="failure_guide_external_definition">Rehber dış XML tanımı içeriyor.</string>
+    <string name="failure_guide_not_xmltv">Geçerli bir XMLTV rehberi bulunamadı.</string>
+    <string name="failure_guide_unreadable">Yayın rehberi okunamadı. XMLTV biçimini kontrol et.</string>
+    <string name="failure_guide_too_deep">Rehberin XML yapısı çok derin.</string>
+    <string name="failure_guide_channel_id_too_long">Rehber kanal kimliği çok uzun.</string>
+    <string name="failure_guide_too_many_channels">Rehber çok fazla kanal içeriyor.</string>
+    <string name="failure_guide_too_many_programmes">Rehber çok fazla program içeriyor.</string>
+    <string name="failure_guide_text_too_long">Rehber metni boyut sınırını aşıyor.</string>
+    <string name="failure_guide_encoding_unsupported">Rehber UTF-8 veya UTF-16 olmalı.</string>
+    <string name="failure_guide_too_large">Rehber boyut sınırını aşıyor.</string>
+    <string name="failure_guide_prolog_too_long">Rehber XML başlığı çok uzun.</string>
+    <string name="failure_guide_prolog_missing">Rehber XML başlığı eksik.</string>
+    <string name="failure_guide_internal_definitions">Rehber iç XML tanımları içeriyor.</string>
+    <string name="failure_guide_doctype_unsupported">Rehber XML tanımı desteklenmiyor.</string>
+
+    <!--
+        Screen texts. Counts and numbers go in as text (%1$s), as in the catalogue warnings: Android formats %d with
+        the device's locale. Every case of a sentence is its own string; none is put together from pieces.
+    -->
+
+    <!-- Shared actions, states and labels -->
+    <string name="action_back">Geri</string>
+    <string name="action_close">Kapat</string>
+    <string name="action_cancel">Vazgeç</string>
+    <string name="action_stop">İptal et</string>
+    <string name="action_retry">Tekrar dene</string>
+    <string name="action_clear">Temizle</string>
+    <string name="action_watch">İzle</string>
+    <string name="action_details">Ayrıntılar</string>
+    <string name="action_play">Oynat</string>
+    <string name="action_resume">Devam et</string>
+    <string name="action_replay">Baştan izle</string>
+    <string name="action_save">Kaydet</string>
+    <string name="action_saving">Kaydediliyor…</string>
+    <string name="action_check_sources">Kaynakları kontrol et</string>
+    <string name="favorite_add">Favorilere ekle</string>
+    <string name="favorite_remove">Favorilerden çıkar</string>
+    <string name="manage_sources">Kaynakları yönet</string>
+    <string name="remove_source">Kaynağı kaldır</string>
+    <string name="remove_source_question">Kaynağı kaldır?</string>
+    <string name="refreshing">Yenileniyor…</string>
+    <string name="searching">Aranıyor…</string>
+    <string name="searching_note">Kütüphanendeki başlıklar kontrol ediliyor.</string>
+    <string name="library_preparing">Kütüphanen hazırlanıyor</string>
+    <string name="last_updated">Son güncelleme: %1$s</string>
+    <string name="switch_on">Açık</string>
+    <string name="switch_off">Kapalı</string>
+    <string name="kind_movie_single">Film</string>
+    <string name="kind_series_single">Dizi</string>
+    <!-- Two parts of one line: a label and its state ("Bu bölümde ara · Aranıyor…"), or two counts. -->
+    <string name="text_pair">%1$s · %2$s</string>
+    <plurals name="count_items">
+        <item quantity="one">%1$s içerik</item>
+        <item quantity="other">%1$s içerik</item>
+    </plurals>
+    <plurals name="count_channels">
+        <item quantity="one">%1$s kanal</item>
+        <item quantity="other">%1$s kanal</item>
+    </plurals>
+
+    <!-- Adding a source -->
+    <string name="setup_title">Televizyonun.\nSenin kütüphanen.</string>
+    <string name="setup_tagline">Canlı yayınların, filmlerin ve dizilerin tek yerde.</string>
+    <string name="setup_privacy">Kendi kaynağınla başla. Hesap bilgilerin bu cihazda şifreli saklanır.</string>
+    <string name="setup_heading">Kaynak ekle</string>
+    <string name="setup_m3u">M3U bağlantısı</string>
+    <string name="setup_hint_xtream">Sunucu adresini ve hesap bilgilerini gir.</string>
+    <string name="setup_hint_m3u">Sağlayıcının verdiği liste bağlantısını gir.</string>
+    <string name="setup_name">Kaynak adı</string>
+    <string name="setup_server">Sunucu adresi · http(s)://…</string>
+    <string name="setup_username">Kullanıcı adı</string>
+    <string name="setup_password">Şifre</string>
+    <string name="setup_guide">XMLTV rehber adresi · isteğe bağlı</string>
+    <string name="setup_connect">Kütüphaneyi aç</string>
+    <string name="setup_show">Bilgileri göster</string>
+    <string name="setup_hide">Bilgileri gizle</string>
+    <!-- The name field's first value; once saved it is the viewer's own name for the source. -->
+    <string name="source_default_name">Evim</string>
+    <!-- What a name field left empty saves. -->
+    <string name="source_unnamed">Kaynağım</string>
+
+    <!-- Leaving the app, cards and what is left of a title -->
+    <string name="exit_question">Uygulamadan çıkmak istiyor musunuz?</string>
+    <string name="exit_confirm">Çık</string>
+    <string name="programme_now">Şimdi: %1$s</string>
+    <string name="programme_next">Sonra: %1$s</string>
+    <string name="programme_none">Program bilgisi yok</string>
+    <string name="remaining_soon">Bitmek üzere</string>
+    <string name="remaining_minutes">%1$s dk kaldı</string>
+    <string name="remaining_hours">%1$s sa kaldı</string>
+    <string name="remaining_hours_minutes">%1$s sa %2$s dk kaldı</string>
+    <string name="runtime_minutes">%1$s dk</string>
+    <string name="runtime_hours_minutes">%1$s sa %2$s dk</string>
+
+    <!-- Side menu and Ana Sayfa -->
+    <string name="nav_search">Ara</string>
+    <string name="nav_home">Ana Sayfa</string>
+    <string name="section_favorites">Favoriler</string>
+    <string name="settings_title">Ayarlar</string>
+    <string name="home_continue">İzlemeye devam et</string>
+    <string name="home_recent_channels">Son izlediğin kanallar</string>
+    <string name="home_favorites">Favorilerin</string>
+    <string name="home_live">Canlı yayınlar</string>
+    <string name="home_movies">Film kütüphanen</string>
+    <string name="home_series">Dizi kütüphanen</string>
+    <string name="home_empty_unavailable">İçerikler gösterilemiyor</string>
+    <string name="home_empty_ready">Kütüphanen için yer hazır</string>
+    <string name="home_empty_hidden">Ana sayfada öne çıkarılacak içerik bulunamadı. Tüm kayıtlarını soldaki menüden bölümlere girerek açabilirsin.</string>
+    <string name="home_empty_none">Kaynağında gösterilebilen içerik bulunamadı. Kaynağını kontrol edebilir veya yenileyebilirsin.</string>
+    <string name="home_kicker">SENİN TELEVİZYONUN</string>
+    <string name="home_prompt">Şimdi ne izleyelim?</string>
+    <string name="home_prompt_note">Kanalların ve favorilerin, bıraktığın yerde.</string>
+    <string name="hero_newest">YENİ EKLENEN</string>
+    <string name="hero_library">KÜTÜPHANENDEN</string>
+    <string name="hero_opening">Açılıyor…</string>
+    <!-- TalkBack: the slide's title and its place, "Başlık, 2 / 6". -->
+    <string name="hero_slide">%1$s, %2$s / %3$s</string>
+    <string name="continue_description">Devam et: %1$s</string>
+    <string name="continue_episode">Sezon %1$s, bölüm %2$s</string>
+    <string name="continue_episode_watched">Sezon %1$s, bölüm %2$s izlendi</string>
+    <string name="continue_episode_short">S%1$s · B%2$s</string>
+    <string name="continue_episode_short_watched">S%1$s · B%2$s izlendi</string>
+    <string name="continue_next_episode">Sıradaki bölüm</string>
+
+    <!-- Canlı TV, Filmler, Diziler and Favoriler -->
+    <string name="library_all_favorites">Tüm favoriler</string>
+    <string name="library_all_channels">Tüm kanallar</string>
+    <string name="library_all_movies">Tüm filmler</string>
+    <string name="library_all_series">Tüm diziler</string>
+    <string name="library_history">Geçmiş</string>
+    <string name="library_search_category">Bu kategoride ara</string>
+    <string name="library_search_section">Bu bölümde ara</string>
+    <string name="library_widen_favorites">Tüm favorilerde ara</string>
+    <string name="library_widen_channels">Tüm kanallarda ara</string>
+    <string name="library_widen_movies">Tüm filmlerde ara</string>
+    <string name="library_widen_series">Tüm dizilerde ara</string>
+    <string name="library_no_guide">· Rehber yok</string>
+    <string name="library_guide">Rehber</string>
+    <string name="library_search_query">Arama: %1$s</string>
+    <plurals name="library_results">
+        <item quantity="one">%1$s sonuç</item>
+        <item quantity="other">%1$s sonuç</item>
+    </plurals>
+    <string name="library_empty_favorites">Favorilerin burada görünecek</string>
+    <string name="library_empty_history">İzlediklerin burada görünecek</string>
+    <string name="library_empty_not_in_category">Bu kategoride bulunamadı</string>
+    <string name="library_empty_filtered">Bu filtrelerle içerik bulunamadı</string>
+    <string name="library_empty_section">Bu bölümde içerik yok</string>
+    <string name="library_empty_favorites_note">Bir içeriği ayrıntı ekranından veya oynatıcıdan favorilerine ekle.</string>
+    <string name="library_empty_history_note">İzlemeye başladığın içerikler burada sıralanır.</string>
+    <string name="library_empty_not_in_category_note">“%1$s” %2$s içinde yok. Bölümün tamamında arayabilirsin.</string>
+    <string name="library_empty_filtered_note">Aramayı ve kategori seçimini temizleyerek bu bölümdeki tüm içerikleri görebilirsin.</string>
+    <string name="library_empty_section_note">Seçili kaynakta bu türde gösterilebilen içerik bulunamadı. Kaynaklarını kontrol edebilirsin.</string>
+    <string name="library_clear_filters">Filtreleri temizle</string>
+    <string name="library_explore">İçerikleri keşfet</string>
+    <string name="library_sort">Sırala</string>
+    <string name="library_sort_current">Sırala: %1$s</string>
+    <!-- The next programme's start time and title. -->
+    <string name="library_next_programme">Sonra · %1$s %2$s</string>
+
+    <!-- Ara -->
+    <string name="search_all">Tümü</string>
+    <string name="search_start">Bir başlıkla başla</string>
+    <string name="search_no_match">Eşleşen içerik bulunamadı</string>
+    <string name="search_start_note">Kumandayla yazabilir, ardından sonuçlara geçebilirsin.</string>
+    <string name="search_no_match_kind_note">Daha kısa bir ad dene veya içerik türünden Tümü’nü seç.</string>
+    <string name="search_no_match_note">Daha kısa bir ad dene veya seçili kaynağı kontrol et.</string>
+    <string name="search_hint">Kanal, film veya dizi ara</string>
+
+    <!-- Title details and episodes -->
+    <string name="detail_series_kicker">DİZİ KÜTÜPHANENDEN</string>
+    <string name="detail_movie_kicker">FİLM KÜTÜPHANENDEN</string>
+    <plurals name="detail_seasons">
+        <item quantity="one">%1$s sezon</item>
+        <item quantity="other">%1$s sezon</item>
+    </plurals>
+    <string name="detail_loading">Ayrıntılar yükleniyor…</string>
+    <string name="detail_favorite_add">Favoriye ekle</string>
+    <string name="detail_description">Açıklama</string>
+    <string name="detail_restart">Baştan başlat</string>
+    <string name="detail_no_episodes">Bu dizi için bölüm bulunamadı.</string>
+    <string name="detail_season">Sezon %1$s</string>
+    <string name="episode_in_progress">Devam et</string>
+    <string name="episode_watched">İzlendi</string>
+    <string name="episode_number_short">E%1$s.</string>
+    <string name="episode_number">Bölüm %1$s</string>
+    <!-- Titles the provider left unnamed: the catalogue keeps the name the parser gave them, shown in the app's language. -->
+    <string name="title_unnamed">İsimsiz içerik %1$s</string>
+    <string name="title_unnamed_entry">İçerik %1$s</string>
+    <string name="episode_unnamed">%1$s. bölüm</string>
+
+    <!-- Yayın rehberi -->
+    <string name="guide_title">Yayın rehberi</string>
+    <string name="guide_end_unknown">Bitiş bilinmiyor</string>
+    <string name="guide_loading">Rehber yükleniyor…</string>
+    <string name="guide_unavailable">Rehber alınamadı</string>
+    <string name="guide_no_address">Rehber adresi eklenmemiş</string>
+    <string name="guide_match_ambiguous">Kanal eşleşmesi belirsiz</string>
+    <string name="guide_match_missing_id">Rehberde kanal kimliği bulunamadı</string>
+    <string name="guide_match_none">Kanal rehberde eşleşmedi</string>
+    <string name="guide_no_info">Rehber bilgisi yok</string>
+    <string name="guide_no_programme_now">Bu saatte program bilgisi yok</string>
+    <string name="guide_tv_time">TV saati</string>
+    <string name="guide_unavailable_note">Kaynağında yayın rehberi (XMLTV) adresi yok. Adresi Kaynakları yönet → Bilgiler → Rehber ayarları\'ndan ekleyebilirsin; kanallar rehber olmadan da Canlı TV\'den izlenir.</string>
+    <string name="guide_now">Şimdi</string>
+    <string name="guide_previous_day">‹ Önceki gün</string>
+    <string name="guide_next_day">Sonraki gün ›</string>
+    <string name="guide_zone">Saat dilimi</string>
+    <string name="guide_sources">Kaynaklar</string>
+    <string name="guide_keys">Geri: bu düğmeler · CH+/CH−: sayfa · Rakam: kanal</string>
+    <string name="guide_no_channels">Canlı kanal bulunamadı</string>
+    <string name="guide_no_channels_note">Kaynak seçimini değiştirebilir veya yeni bir kaynak ekleyebilirsin.</string>
+    <string name="guide_open_sources">Kaynakları aç</string>
+    <string name="guide_overlapping_now">Bu saatte çakışan programlar var</string>
+    <string name="guide_overlapping">Çakışan programlar</string>
+    <string name="guide_no_info_short">Bilgi yok</string>
+    <string name="guide_open_programme">Programı aç</string>
+    <string name="guide_programme_detail">Program ayrıntısı</string>
+    <string name="guide_detail_upcoming">Bu program henüz başlamadı. Canlı kanalı izle, şu an yayındaki programı açar.</string>
+    <string name="guide_detail_ended">Bu program için geçmişten izleme desteklenmiyor. Yalnız canlı yayın açılabilir.</string>
+    <string name="guide_detail_live_only">Yalnız canlı yayın açılabilir.</string>
+    <string name="guide_detail_no_programme">Program bilgisi bulunmuyor. Canlı kanal izlenebilir.</string>
+    <string name="guide_detail_no_description">Açıklama bulunmuyor.</string>
+    <string name="guide_watch_live">Canlı kanalı izle</string>
+    <string name="guide_checking">Rehber kontrol ediliyor…</string>
+    <plurals name="guide_programmes">
+        <item quantity="one">%1$s program</item>
+        <item quantity="other">%1$s program</item>
+    </plurals>
+    <string name="guide_stale">Kayıtlı rehber eski olabilir; yenileyebilirsin.</string>
+    <plurals name="guide_invalid">
+        <item quantity="one">%1$s geçersiz kayıt atlandı.</item>
+        <item quantity="other">%1$s geçersiz kayıt atlandı.</item>
+    </plurals>
+    <string name="guide_no_programmes">Sağlayıcı bu dönem için program bilgisi göndermedi.</string>
+    <string name="guide_none_saved">Kayıtlı rehber bulunmuyor.</string>
+    <string name="guide_refreshing">Yenileniyor… Kayıtlı rehber kullanılabilir.</string>
+    <string name="guide_live_without">Rehber bilgisi olmasa da canlı kanallar izlenebilir.</string>
+    <string name="guide_address_title">Rehber adresi</string>
+    <string name="guide_address_field">XMLTV adresi</string>
+    <string name="guide_address_hint">Boş bırak: otomatik rehberi kullan.</string>
+    <string name="guide_origin_custom">Özel rehber adresi kullanılıyor.</string>
+    <string name="guide_origin_account">Hesabının rehber adresi kullanılıyor.</string>
+    <string name="guide_origin_list">M3U listesinin rehber adresi kullanılıyor.</string>
+    <string name="guide_refresh">Rehberi yenile</string>
+    <string name="guide_edit_address">Adresi düzenle</string>
+    <string name="guide_zone_title">Rehber saat dilimi</string>
+    <string name="guide_zone_search">Şehir veya bölge ara</string>
+    <string name="guide_zone_system">TV’nin saat dilimi · %1$s</string>
+    <string name="guide_zone_none">Bu adla saat dilimi bulunamadı.</string>
+
+    <!-- Player -->
+    <string name="player_seek_forward">+%1$s sn</string>
+    <string name="player_seek_back">−%1$s sn</string>
+    <string name="player_no_channel">%1$s numaralı kanal yok</string>
+    <string name="player_opening">Yayın açılıyor…</string>
+    <string name="player_kicker_live">CANLI TV</string>
+    <string name="player_kicker_series">DİZİ</string>
+    <string name="player_kicker_movie">FİLM</string>
+    <string name="player_live">● CANLI</string>
+    <string name="player_ended">Bitti</string>
+    <string name="player_keys_recovering">Geri: yeniden bağlanmayı durdur</string>
+    <string name="player_keys_live">Kontroller kapalıyken Yukarı/Aşağı: kanal · Rakam: kanal no</string>
+    <string name="player_keys_vod">Kontroller kapalıyken Sol/Sağ: sar</string>
+    <string name="player_no_programme">Program bilgisi bulunmuyor</string>
+    <!-- Quoted: the two spaces before the title would otherwise collapse into one. -->
+    <string name="player_next_programme">"Sonra · %1$s  %2$s"</string>
+    <string name="player_pause">Duraklat</string>
+    <string name="player_channel_previous">‹ Kanal</string>
+    <string name="player_channel_next">Kanal ›</string>
+    <string name="player_tracks">Ses / Altyazı</string>
+    <string name="player_favorite_unavailable">Favori için içerik bilgisi bulunamadı</string>
+    <string name="player_series_favorite_add">Diziyi favorilere ekle</string>
+    <string name="player_series_favorite_remove">Diziyi favorilerden çıkar</string>
+    <string name="player_in_favorites">Favorilerde</string>
+    <string name="player_not_in_favorites">Favorilerde değil</string>
+    <string name="player_next_episode">Sonraki bölüm</string>
+    <string name="tracks_title">Ses ve altyazı</string>
+    <string name="tracks_audio">Ses dili</string>
+    <string name="tracks_subtitles">Altyazı</string>
+    <string name="tracks_off">Kapalı</string>
+    <string name="tracks_no_subtitles">Bu yayında gömülü altyazı bulunamadı.</string>
+    <string name="tracks_no_audio">Ses parçası bulunamadı; yayın henüz açılmamış olabilir.</string>
+    <string name="tracks_unsupported">Bu cihaz desteklemiyor</string>
+    <string name="tracks_note">Yalnızca bu yayında bulunan dil ve altyazılar listelenir.</string>
+    <string name="tracks_selected">Seçili</string>
+    <string name="tracks_not_selected">Seçili değil</string>
+    <string name="tracks_full_description">Tam açıklama</string>
+    <string name="tracks_description_title">Parça açıklaması</string>
+    <string name="tracks_audio_fallback">Ses</string>
+    <string name="tracks_mono">mono</string>
+    <string name="tracks_stereo">stereo</string>
+    <plurals name="tracks_channels">
+        <item quantity="one">%1$s kanal</item>
+        <item quantity="other">%1$s kanal</item>
+    </plurals>
+
+    <!-- Playback problems and reconnecting -->
+    <string name="playback_secure_failed">Sunucuyla güvenli bağlantı kurulamadı. Kaynak adresini kontrol et.</string>
+    <string name="playback_access_denied">Bu yayına erişim verilmedi. Hesap bilgilerini ve aboneliğini kontrol et.</string>
+    <string name="playback_gone">Bu yayın artık bulunamıyor. Kataloğu yenileyebilir veya başka bir içerik seçebilirsin.</string>
+    <string name="playback_limit_reached">Sağlayıcının bağlantı sınırına ulaşıldı. Biraz bekleyip tekrar dene.</string>
+    <string name="playback_provider_unavailable">Sağlayıcı şu anda yanıt vermiyor. Biraz sonra tekrar dene.</string>
+    <string name="playback_refused">Sağlayıcı yayını açmadı. Kaynak erişimini kontrol et.</string>
+    <string name="playback_unreachable">Yayına bağlanılamadı. İnternet bağlantısını kontrol et.</string>
+    <string name="playback_behind_live">Canlı yayınla bağlantı koptu. Yeniden bağlanmayı dene.</string>
+    <string name="playback_unsupported">Bu cihaz yayının görüntü veya ses biçimini çözemiyor.</string>
+    <string name="playback_unreadable">Yayının biçimi okunamadı. Başka bir içerik deneyebilirsin.</string>
+    <string name="playback_failed">Yayın oynatılamadı. Tekrar dene veya başka bir içerik seç.</string>
+    <string name="playback_timeout">Yayın bağlantısı zamanında kurulamadı. Tekrar deneyebilirsin.</string>
+    <string name="playback_cancelled">Yeniden bağlanma durduruldu. Hazır olduğunda tekrar deneyebilirsin.</string>
+    <string name="playback_paused">Yayına bağlanma duraklatıldı. Devam etmek için tekrar dene.</string>
+    <!-- Seconds to the next attempt, then the attempt out of two. -->
+    <string name="playback_retry_wait">Bağlantı kesildi · %1$s sn sonra yeniden denenecek (%2$s/2)</string>
+    <string name="playback_retrying">Yeniden bağlanılıyor… (%1$s/2)</string>
+
+    <!-- The end of an episode -->
+    <string name="episode_end_done">BÖLÜM TAMAMLANDI</string>
+    <string name="episode_end_next">SONRAKİ BÖLÜM</string>
+    <string name="episode_end_number">%1$s. sezon · %2$s. bölüm</string>
+    <string name="episode_end_number_unknown">Bölüm numarası belirtilmemiş</string>
+    <plurals name="episode_end_countdown">
+        <item quantity="one">%1$s saniye sonra başlayacak</item>
+        <item quantity="other">%1$s saniye sonra başlayacak</item>
+    </plurals>
+    <string name="episode_end_none">Bu kaynakta açılabilecek başka bölüm bulunamadı. Bölüm listesine dönebilir veya yeniden izleyebilirsin.</string>
+    <string name="episode_end_ready">Hazır olduğunda sonraki bölümü başlatabilirsin.</string>
+    <string name="episode_end_stay">Bu bölümde kal</string>
+    <string name="episode_end_play_now">Şimdi oynat</string>
+    <string name="episode_end_episodes">Bölümlere dön</string>
+    <string name="episode_end_back">Geri: bu bölümde kal</string>
+    <string name="episode_auto_paused">Otomatik geçiş duraklatıldı.</string>
+    <string name="episode_auto_off">Otomatik geçiş kapalı.</string>
+    <string name="episode_next_needs_pin">Sonraki bölüm PIN istiyor. Başlatmak için Şimdi oynat\'a bas.</string>
+    <string name="episode_next_unavailable">Sonraki bölüm artık açılamıyor. Bölüm listesinden yeniden seçebilirsin.</string>
+    <string name="episode_list_changed">Bölüm listesi değişti. Devam etmek için listeden bir bölüm seç.</string>
+
+    <!-- Ayarlar -->
+    <string name="settings_section_appearance">Görünüm ve ses</string>
+    <string name="settings_section_sources">Kaynaklar</string>
+    <string name="settings_section_content">İçerik</string>
+    <string name="settings_section_watching">İzleme ve uygulama</string>
+    <string name="settings_clear_history_question">Geçmişi temizle?</string>
+    <string name="settings_about">Uygulama hakkında</string>
+    <string name="settings_categories">Kategoriler</string>
+    <string name="settings_reduced_motion">Hareketi azalt</string>
+    <string name="settings_reduced_motion_note">Vitrin geçişlerini, açılış animasyonunu ve menü kaymasını kapatır.</string>
+    <string name="settings_startup_sound">Açılış sesi</string>
+    <string name="settings_startup_sound_note">Uygulama açılırken kısa bir ses çalar.</string>
+    <plurals name="settings_sources">
+        <item quantity="one">%1$s kaynak</item>
+        <item quantity="other">%1$s kaynak</item>
+    </plurals>
+    <plurals name="settings_visible_items">
+        <item quantity="one">%1$s görünür içerik</item>
+        <item quantity="other">%1$s görünür içerik</item>
+    </plurals>
+    <string name="settings_manage_sources_note">Ekle, düzenle, yenile veya kaldır.</string>
+    <string name="settings_refresh">Kataloğu yenile</string>
+    <string name="settings_refreshing">Yenileniyor… Kütüphanen kullanılabilir.</string>
+    <string name="settings_refresh_note">Yeni kanalları, filmleri ve dizileri getirir.</string>
+    <string name="settings_edit_source">Kaynağı düzenle</string>
+    <string name="settings_edit_source_note">Bağlantı ve hesap bilgilerini değiştir.</string>
+    <string name="settings_remove_source_note">Bu kaynağı ve cihazdaki kayıtlarını kaldır.</string>
+    <string name="settings_hide_adult">Yetişkin kategorilerini gizle</string>
+    <string name="settings_hide_adult_note">Adında XXX, Adult, +18, Yetişkin gibi ifadeler geçen kategoriler hiçbir yerde görünmez.</string>
+    <string name="settings_hide_adult_note_pin">Adında XXX, Adult, +18, Yetişkin gibi ifadeler geçen kategoriler hiçbir yerde görünmez. Kapatmak PIN ister.</string>
+    <string name="settings_manage_categories">Kategorileri yönet</string>
+    <string name="settings_manage_categories_note">Canlı TV, film ve dizi kategorilerini göster, kilitle veya gizle.</string>
+    <plurals name="settings_manage_categories_hidden">
+        <item quantity="one">%1$s kategori gizli. Canlı TV, film ve dizi kategorilerini göster, kilitle veya gizle.</item>
+        <item quantity="other">%1$s kategori gizli. Canlı TV, film ve dizi kategorilerini göster, kilitle veya gizle.</item>
+    </plurals>
+    <string name="settings_auto_next">Otomatik sonraki bölüm</string>
+    <string name="settings_auto_next_note">Bölüm bitince 10 saniye sonra devam eder. Geri sayımı iptal edebilirsin.</string>
+    <string name="settings_watch_history">İzleme geçmişini temizle</string>
+    <string name="settings_watch_history_note">Tüm kaynaklardaki izleme konumlarını siler; favorilerini korur.</string>
+    <string name="settings_about_note">Sürüm ve cihaz bilgileri.</string>
+    <string name="settings_remove_confirm">%1$s kaynağı, bu kaynağın favorileri ve izleme geçmişi bu cihazdan silinecek.</string>
+    <string name="settings_clear_history_confirm">Tüm kaynaklardaki son kanallar ve izleme konumları bu cihazdan kaldırılacak. Favorilerin korunacak.</string>
+    <string name="settings_clear_history">Geçmişi temizle</string>
+    <string name="settings_categories_note">Gizlediğin kategoriler ana sayfada, kütüphanede, aramada ve rehberde görünmez. Kilitlediğin kategoriler görünür kalır; içindekiler PIN ile açılır. Kaynağın değişmez.</string>
+    <plurals name="settings_kind_categories">
+        <item quantity="one">%1$s kategori</item>
+        <item quantity="other">%1$s kategori</item>
+    </plurals>
+    <!-- The section's categories, then how many of them are hidden. -->
+    <plurals name="settings_kind_categories_hidden">
+        <item quantity="one">%1$s kategori · %2$s gizli</item>
+        <item quantity="other">%1$s kategori · %2$s gizli</item>
+    </plurals>
+    <!-- How many of the section's categories are locked, after their count and the hidden ones. -->
+    <string name="settings_kind_categories_locked">%1$s kilitli</string>
+    <string name="settings_no_categories">Bu bölümde kategori yok.</string>
+    <plurals name="settings_category_items_adult">
+        <item quantity="one">%1$s içerik · Yetişkin filtresi gizliyor</item>
+        <item quantity="other">%1$s içerik · Yetişkin filtresi gizliyor</item>
+    </plurals>
+    <string name="settings_version">Sürüm %1$s</string>
+    <string name="settings_about_library">Kütüphane</string>
+    <!-- %1$s and %2$s are the protocol names (M3U, Xtream Codes). -->
+    <string name="settings_about_library_note">Uygulama içerik sağlamaz. Kendi %1$s veya %2$s kaynağını ekleyerek izleyebilirsin.</string>
+    <string name="settings_about_storage_note">Kaynağın ve katalog önbelleğin bu cihazda şifreli saklanır.</string>
+    <string name="settings_about_release">Bu sürümde</string>
+    <string name="settings_about_release_note">Canlı TV, film, dizi, arama, favori, izlemeye devam et ve yayın rehberi kullanılabilir. Rehber bilgisi kaynağın desteğine bağlıdır. Ebeveyn PIN\'i ile kategori, kanal, film, dizi ve kaynak kilitlenebilir; PIN yetişkin filtresini, kategori ve kaynak ayarlarını, istenirse uygulamanın açılışını da korur ve yalnız bu cihazda şifreli saklanır. Sağlayıcının yetişkin işaretli içerikleri hiç gösterilmez; adı yetişkin içerik bildiren kategoriler Ayarlar\'dan kapatılır.</string>
+    <string name="settings_scroll_up">↑ Yukarı</string>
+    <string name="settings_scroll_more">↓ Daha fazla</string>
+    <!-- A stepper row's buttons: − and + read by TalkBack, and back to the default value. -->
+    <string name="settings_decrease">Azalt</string>
+    <string name="settings_increase">Artır</string>
+    <string name="settings_reset">Sıfırla</string>
+    <!-- What TalkBack reads for a stepper button: the setting's name, then the button (Azalt, Artır, Sıfırla). -->
+    <string name="settings_stepper_button">%1$s, %2$s</string>
+
+    <!-- Ebeveyn denetimi (Ayarlar → İçerik). Neutral words only: the filter is shown or hidden, never promoted. -->
+    <string name="parental_title">Ebeveyn denetimi</string>
+    <string name="parental_row_off">PIN oluştur; kategori, kanal, içerik ve kaynakları kilitle, yetişkin filtresini koru.</string>
+    <string name="parental_row_on">PIN açık. Kilitli içerikler, yetişkin filtresi ve kategori ayarları PIN ister.</string>
+    <!-- The row with "Kaynak yönetimi PIN istesin" on, as it is by default. -->
+    <string name="parental_row_on_sources">PIN açık. Kilitli içerikler, yetişkin filtresi, kategori ve kaynak ayarları PIN ister.</string>
+    <string name="parental_row_unavailable">Ebeveyn denetimi kaydı açılamadı. PIN\'i unuttuysan bu cihazı sıfırlayabilirsin.</string>
+    <string name="parental_note">PIN; kilitli kategori, kanal ve kaynakları açarken, yetişkin filtresini kapatırken, kategori ayarlarını ve bu sayfayı açarken istenir; aşağıdaki seçeneklerle kaynak ayarlarında ve açılışta da istenir. Kilitli kanallar CH+/CH− ile atlanır; numarasıyla ya da listeden PIN ile açılır. PIN yalnız bu cihazda şifreli saklanır.</string>
+    <string name="parental_sources_need_pin">Kaynak yönetimi PIN istesin</string>
+    <string name="parental_sources_need_pin_note">Kaynakları açmak, eklemek, düzenlemek ve kaldırmak PIN ister; kaynak bilgileri ve şifreler de korunur.</string>
+    <string name="parental_launch_needs_pin">Açılışta PIN iste</string>
+    <string name="parental_launch_needs_pin_note">NEXTV açılırken ve arka plandan dönerken PIN ister.</string>
+    <string name="parental_create">PIN oluştur</string>
+    <string name="parental_create_note">4 haneli bir PIN seç. Kolay tahmin edilen PIN\'ler kabul edilmez.</string>
+    <string name="parental_off_note">Yetişkin kategorileri PIN olmadan da gizli kalır.</string>
+    <string name="parental_change">PIN\'i değiştir</string>
+    <string name="parental_change_note">Yeni bir 4 haneli PIN seç.</string>
+    <string name="parental_relock">Açılan kilitleri kapat</string>
+    <string name="parental_relock_note">Bu oturumda PIN ile açtığın içerikler yeniden kilitlenir.</string>
+    <string name="parental_remove">PIN\'i kaldır</string>
+    <string name="parental_remove_note">Bütün kilitler kalkar; yetişkin filtresi, kategori ve kaynak ayarları artık PIN istemez.</string>
+    <string name="parental_remove_question">PIN kaldırılsın mı?</string>
+    <string name="parental_remove_confirm">Bütün kategori, kanal, içerik ve kaynak kilitleri kaldırılır. Gizlediğin kategoriler gizli kalır; yetişkin filtresi değişmez.</string>
+    <string name="parental_created">PIN oluşturuldu. Kilitler, yetişkin filtresi, kategori ve kaynak ayarları artık bu PIN\'i ister.</string>
+    <string name="parental_changed">PIN değiştirildi.</string>
+    <string name="parental_removed">PIN kaldırıldı.</string>
+    <string name="parental_not_removed">PIN kaldırılamadı. Tekrar dene.</string>
+    <string name="parental_offer_title">Önce PIN oluşturmak ister misin?</string>
+    <string name="parental_offer_note">PIN olmadan bu ayarı kumandası olan herkes geri açabilir.</string>
+    <string name="parental_offer_without">PIN olmadan kapat</string>
+    <string name="parental_locked">Kilitli içerikler</string>
+    <plurals name="parental_locked_count">
+        <item quantity="one">%1$s kilit</item>
+        <item quantity="other">%1$s kilit</item>
+    </plurals>
+    <string name="parental_locked_none">Kilitli kanal veya içerik yok.</string>
+    <string name="parental_locked_empty">Kilitli kanal veya içerik yok. Bir kartta OK\'yi basılı tutup Kilitle\'yi seçebilirsin.</string>
+    <string name="parental_locked_note">Bir satırda OK\'ye basınca o kilit kalkar.</string>
+    <string name="parental_locked_sources">Kaynaklar</string>
+    <string name="parental_locked_categories">Kategoriler</string>
+    <string name="parental_locked_titles">Kanallar ve içerikler</string>
+    <string name="parental_locked_source_note">Bu kaynaktaki bütün kanallar, filmler ve diziler PIN ister.</string>
+
+    <!-- Content locks (pin.md §3.4–3.5, §4): badges, the quick menu, Kategorileri yönet. -->
+    <!-- TalkBack's state of a locked card or row; also the chip of a locked row in Kategorileri yönet and Kilitli içerikler. -->
+    <string name="lock_state">Kilitli</string>
+    <!-- A locked category in the library's column, as TalkBack reads it; %1$s is its name. -->
+    <string name="lock_named">%1$s, kilitli</string>
+    <!-- Instead of a locked channel's programmes, in the guide and the channel lists. -->
+    <string name="lock_channel">Kilitli kanal</string>
+    <string name="lock_add">Kilitle</string>
+    <string name="lock_remove">Kilidi kaldır</string>
+    <string name="lock_limit">Kilit sınırına ulaşıldı. Bazı kilitleri kaldır.</string>
+    <string name="lock_not_saved">Ayar kaydedilemedi. Tekrar dene.</string>
+    <string name="lock_category_unavailable">Sağlayıcı bu kategoriye kimlik vermiyor, bu yüzden kilitlenemiyor. İçindeki kanalları ve içerikleri kendi kartlarından kilitleyebilirsin.</string>
+    <!-- Kategorileri yönet: a row's choices, and the chip that shows the chosen one. -->
+    <string name="category_access_show">Göster</string>
+    <string name="category_access_lock">Kilitle · PIN ister</string>
+    <string name="category_access_lock_first">Kilitle · önce PIN oluştur</string>
+    <string name="category_access_hide">Gizle</string>
+    <string name="category_state_shown">Açık</string>
+    <string name="category_state_hidden">Gizli</string>
+
+    <!-- The PIN pad -->
+    <string name="pin_title_create">PIN oluştur</string>
+    <string name="pin_title_change">Yeni PIN</string>
+    <string name="pin_title_confirm">PIN\'i tekrar gir</string>
+    <string name="pin_title_verify">PIN gir</string>
+    <string name="pin_message_create">Kumandanın rakam tuşlarıyla ya da ekrandaki tuşlarla 4 haneli bir PIN gir.</string>
+    <string name="pin_message_change">Yeni 4 haneli PIN\'i gir.</string>
+    <string name="pin_message_confirm">Aynı 4 haneyi bir kez daha gir.</string>
+    <string name="pin_reason_show_adult">Yetişkin kategorilerini göstermek için PIN gir.</string>
+    <string name="pin_reason_categories">Kategori ayarlarını açmak için PIN gir.</string>
+    <string name="pin_reason_parental">Ebeveyn denetimi ayarlarını açmak için PIN gir.</string>
+    <string name="pin_reason_sources">Kaynak ayarlarını açmak için PIN gir.</string>
+    <string name="pin_reason_launch">Devam etmek için PIN gir.</string>
+    <!-- A locked title; %1$s is its name. -->
+    <string name="pin_reason_unlock">“%1$s” kilitli. Açmak için PIN gir.</string>
+    <!-- Kilidi kaldır in a title's quick menu; %1$s is its name. -->
+    <string name="pin_reason_release">“%1$s” kilidini kaldırmak için PIN gir.</string>
+    <!-- TalkBack for the masked digits: how many of the four are in, never which. -->
+    <string name="pin_entered">%1$s / %2$s rakam girildi</string>
+    <string name="pin_delete">Sil</string>
+    <string name="pin_delete_description">Son rakamı sil</string>
+    <string name="pin_checking">Kontrol ediliyor…</string>
+    <string name="pin_wrong">PIN yanlış. Tekrar dene.</string>
+    <string name="pin_wrong_last">PIN yanlış. Bir yanlış deneme daha 30 saniye bekletir.</string>
+    <!-- %1$s is the time left, "0:30". -->
+    <string name="pin_wait">Çok fazla yanlış deneme. %1$s sonra tekrar dene.</string>
+    <!-- Read once by TalkBack when the wait starts; the countdown on screen is not read. -->
+    <plurals name="pin_wait_spoken">
+        <item quantity="one">Çok fazla yanlış deneme. %1$s saniye sonra tekrar deneyebilirsin.</item>
+        <item quantity="other">Çok fazla yanlış deneme. %1$s saniye sonra tekrar deneyebilirsin.</item>
+    </plurals>
+    <string name="pin_unavailable">PIN şu an kontrol edilemiyor. Tekrar dene.</string>
+    <string name="pin_easy">Bu PIN kolay tahmin edilir. Farklı bir PIN seç.</string>
+    <string name="pin_mismatch">PIN\'ler eşleşmedi. Yeni PIN\'i baştan gir.</string>
+    <string name="pin_not_saved">PIN kaydedilemedi. Boş alanı kontrol edip tekrar dene.</string>
+    <string name="pin_forgot">PIN\'i unuttum</string>
+    <string name="pin_forgot_question">PIN\'i unuttun mu?</string>
+    <string name="pin_forgot_note">PIN yalnız bu cihazda şifreli saklanır ve hiçbir sunucuya gönderilmez; bu yüzden geri getirilemez. Sıfırlamak için bu cihazdaki kaynaklar, favoriler, izleme geçmişi ve PIN silinir; yetişkin filtresi açık kalır. Kaynak bilgilerini yeniden girmen gerekir.</string>
+    <string name="pin_forgot_reset">Her şeyi sıfırla</string>
+    <!-- The corner note after a PIN for a locked title, or a title whose lock cannot be read. -->
+    <string name="access_gone">Bu içerik artık bulunamıyor.</string>
+    <string name="access_unresolved">Bu içeriğin kilit bilgisi doğrulanamadı. Kataloğu yenileyip tekrar dene.</string>
+
+    <!-- The lock screen (pin.md §3.9): "Açılışta PIN iste", or a protection record that cannot be read. -->
+    <string name="app_lock_title">NEXTV kilitli</string>
+    <string name="app_lock_unavailable_title">Ebeveyn denetimi kaydı açılamadı</string>
+    <string name="app_lock_unavailable_note">Kilitli içerikleri korumak için uygulama kapalı tutuluyor. Kayıt onarılamazsa bu cihazdaki kaynakları ve kilitleri sıfırlayıp yeniden kurabilirsin.</string>
+    <string name="app_lock_retry">Yeniden dene</string>
+    <string name="app_lock_retry_failed">Kayıt yine açılamadı. Biraz sonra yeniden dene ya da cihazı sıfırla.</string>
+    <string name="app_lock_reset">Sıfırla…</string>
+    <string name="app_lock_reset_question">Bu cihaz sıfırlansın mı?</string>
+
+    <!-- Kaynakların -->
+    <string name="sources_title">Kaynakların</string>
+    <plurals name="sources_summary">
+        <item quantity="one">%1$s kaynak · Hesapların bu cihazda şifreli saklanır.</item>
+        <item quantity="other">%1$s kaynak · Hesapların bu cihazda şifreli saklanır.</item>
+    </plurals>
+    <string name="sources_add">Kaynak ekle</string>
+    <!-- The source's place in the list, then its kind (Xtream Codes or M3U). -->
+    <string name="sources_number">Kaynak %1$s · %2$s</string>
+    <string name="sources_not_downloaded">Henüz indirilmedi</string>
+    <string name="sources_refreshing">Yenileniyor… Kayıtlı içerikler kullanılabilir.</string>
+    <string name="sources_info">Bilgiler</string>
+    <string name="sources_refresh">Yenile</string>
+    <string name="sources_edit">Düzenle</string>
+    <string name="sources_remove">Kaldır</string>
+    <string name="sources_info_title">Kaynak bilgileri</string>
+    <string name="sources_guide_settings">Rehber ayarları</string>
+    <!-- In a source's Bilgiler, with a PIN set (pin.md §3.8). -->
+    <string name="source_lock_add">Kaynağı kilitle</string>
+    <string name="source_lock_remove">Kaynağın kilidini kaldır</string>
+    <string name="sources_remove_note">Bu kaynağın listesi, favorileri ve geçmişi silinecek. Diğer kaynaklar korunacak.</string>
+    <string name="sources_full_name">Tam ad:\n%1$s</string>
+
+    <!-- A library that could not be opened -->
+    <string name="recovery_title">Kütüphanen açılamadı</string>
+    <string name="recovery_fallback">Kayıtlı kaynaklar okunamadı. Yeniden deneyebilirsin.</string>
+    <string name="recovery_retry">Yeniden dene</string>
+    <string name="recovery_reset_note">Sorun devam ederse bu cihazdaki kaynakları sıfırlayıp hesaplarını yeniden ekleyebilirsin. Bunun için bağlantı veya hesap bilgilerin gerekecek.</string>
+    <string name="recovery_reset">Kaynakları sıfırla…</string>
+    <string name="recovery_reset_question">Kaynakları sıfırla?</string>
+    <string name="recovery_reset_accounts">Bu cihazdaki tüm kaynak hesapları ve listeler silinecek.</string>
+    <string name="recovery_reset_personal">Afiş önbelleği, favoriler ve izleme geçmişi de silinecek. İşlem geri alınamaz.</string>
+    <string name="recovery_reset_credentials">Kaynaklarını yeniden eklemek için bağlantı veya hesap bilgilerin gerekir.</string>
+    <string name="recovery_reset_kept">Sağlayıcı hesabın ve aboneliğin etkilenmez. Ses, hareket ve dil tercihlerin korunur.</string>
+    <string name="recovery_reset_confirm">Tüm kaynakları sıfırla</string>
+
+    <!-- Source operations and the launch cover -->
+    <string name="loading_resetting">Kaynakların sıfırlanıyor</string>
+    <string name="loading_removing">Kaynağın kaldırılıyor</string>
+    <string name="loading_saving">Kütüphanen kaydediliyor</string>
+    <string name="loading_importing_note">Büyük listelerin yüklenmesi biraz zaman alabilir.</string>
+    <string name="loading_resetting_note">İşlem tamamlanınca kaynaklarını yeniden ekleyebilirsin.</string>
+    <string name="loading_removing_note">Bu kaynağın cihazdaki listesi, favorileri ve izleme kayıtları temizleniyor.</string>
+    <string name="loading_restoring_note">Bu cihazdaki kaynakların ve listelerin açılıyor.</string>
+    <string name="loading_saving_note">Kayıt tamamlanınca kütüphanen açılacak.</string>
+    <string name="loading_cancel">İptal</string>
+    <!-- The cover's own label, with three full stops as in the handoff. -->
+    <string name="launch_preparing" tools:ignore="TypographyEllipsis">Hazırlanıyor...</string>
+
+    <!-- Scrolling text readers -->
+    <string name="reader_whole">Metnin tamamı görünüyor</string>
+    <string name="reader_start">Metnin başı</string>
+    <string name="reader_end">Metnin sonu</string>
+    <string name="reader_scrolling">Metin kaydırılıyor</string>
+    <string name="reader_keys">↑↓ Metni kaydır</string>
+</resources>

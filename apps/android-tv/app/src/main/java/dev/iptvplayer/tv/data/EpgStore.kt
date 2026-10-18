@@ -7,8 +7,9 @@ import java.io.Closeable
 import java.io.File
 import java.util.UUID
 
+/** [languages]: the order its titles were picked in (XmltvParser); a new app or TV language makes the guide stale. */
 data class EpgSnapshotInfo(val updatedAt: Long, val window: GuideWindow, val channels: Int,
-    val programmes: Int, val invalid: Int, val outsideWindow: Int)
+    val programmes: Int, val invalid: Int, val outsideWindow: Int, val languages: List<String> = emptyList())
 
 /** App-private indexed guide metadata, without feed/stream URLs or account credentials.
  * Network parsing writes an isolated staging database; only a closed, complete file is published.
@@ -51,9 +52,15 @@ class EpgStore(context: Context) {
     }
 
     fun info(plan: EpgPlan): EpgSnapshotInfo? = read(plan) { db ->
-        db.rawQuery("SELECT updated, from_time, until_time, channels, programmes, invalid, outside FROM snapshot", null).use { c ->
-            if (!c.moveToFirst()) null else EpgSnapshotInfo(c.getLong(0), GuideWindow(c.getLong(1), c.getLong(2)),
-                c.getInt(3), c.getInt(4), c.getInt(5), c.getInt(6))
+        db.rawQuery("SELECT * FROM snapshot", null).use { c ->
+            if (!c.moveToFirst()) return@use null
+            fun long(column: String) = c.getLong(c.getColumnIndexOrThrow(column))
+            fun int(column: String) = c.getInt(c.getColumnIndexOrThrow(column))
+            // A guide saved before the app spoke English has no languages column; its titles were picked in Turkish.
+            val languages = c.getColumnIndex("languages")
+                .let { if (it < 0) listOf("tr") else c.getString(it).orEmpty().split(',').filter(String::isNotEmpty) }
+            EpgSnapshotInfo(long("updated"), GuideWindow(long("from_time"), long("until_time")), int("channels"),
+                int("programmes"), int("invalid"), int("outside"), languages)
         }
     }
 
@@ -142,7 +149,7 @@ class EpgStore(context: Context) {
                 db.execSQL("""CREATE TABLE programmes (feed INTEGER NOT NULL, channel TEXT NOT NULL, start INTEGER NOT NULL,
                     stop INTEGER NOT NULL, title TEXT NOT NULL, description TEXT NOT NULL, category TEXT NOT NULL,
                     PRIMARY KEY(feed,channel,start,stop,title))""".trimIndent())
-                db.execSQL("CREATE TABLE snapshot (updated INTEGER, from_time INTEGER, until_time INTEGER, channels INTEGER, programmes INTEGER, invalid INTEGER, outside INTEGER)")
+                db.execSQL("CREATE TABLE snapshot (updated INTEGER, from_time INTEGER, until_time INTEGER, channels INTEGER, programmes INTEGER, invalid INTEGER, outside INTEGER, languages TEXT)")
                 db.beginTransaction()
             } catch (e: Exception) { db.close(); throw e }
         }
@@ -166,14 +173,15 @@ class EpgStore(context: Context) {
                 }
             }
         }
-        fun seal(updatedAt: Long, reports: List<EpgParseReport>) {
+        fun seal(updatedAt: Long, reports: List<EpgParseReport>, languages: List<String> = emptyList()) {
             checkWriter()
             check(!sealed && !closed && reports.size == plan.urls.size)
             if (reports.sumOf { it.programmes } == 0 && reports.sumOf { it.invalid } > 0)
                 throw SourceFailure(FailureReason.GUIDE_ENTRIES_UNREADABLE)
             fun count(table: String) = db.rawQuery("SELECT COUNT(*) FROM $table", null).use { it.moveToFirst(); it.getInt(0) }
-            db.execSQL("INSERT INTO snapshot VALUES(?,?,?,?,?,?,?)", arrayOf<Any>(updatedAt, window.from, window.until,
-                count("channels"), count("programmes"), reports.sumOf { it.invalid }, reports.sumOf { it.outsideWindow }))
+            db.execSQL("INSERT INTO snapshot VALUES(?,?,?,?,?,?,?,?)", arrayOf<Any>(updatedAt, window.from, window.until,
+                count("channels"), count("programmes"), reports.sumOf { it.invalid }, reports.sumOf { it.outsideWindow },
+                languages.joinToString(",")))
             db.setTransactionSuccessful(); db.endTransaction()
             db.close()
             sealed = true

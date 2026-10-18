@@ -13,7 +13,8 @@ class XmltvParserTest {
         override fun programme(value: EpgProgramme) { programmes += value }
     }
     private fun parse(xml: String, sink: Sink = Sink()) = XmltvParser().parse(xml.byteInputStream(), window, sink)
-    private fun fixture(name: String, sink: Sink) = javaClass.getResourceAsStream("/epg/$name.xml")!!.use { XmltvParser().parse(it, window, sink) }
+    /** The fixtures as a Turkish app reads them. */
+    private fun fixture(name: String, sink: Sink) = javaClass.getResourceAsStream("/epg/$name.xml")!!.use { XmltvParser(listOf("tr")).parse(it, window, sink) }
 
     @Test fun europeanFixtureKeepsUnicodePreferredLanguageAndDstInstants() {
         val sink = Sink(); val report = fixture("europe", sink)
@@ -27,6 +28,24 @@ class XmltvParserTest {
         assertEquals(first.end, second.start)
         assertEquals(LocalTime.of(2, 30), Instant.ofEpochMilli(first.start).atZone(ZoneId.of("Europe/Berlin")).toLocalTime())
         assertEquals(LocalTime.of(2, 30), Instant.ofEpochMilli(second.start).atZone(ZoneId.of("Europe/Berlin")).toLocalTime())
+    }
+    @Test fun titlesFollowTheAppsLanguageThenTheTvsThenAnUntaggedOneThenTheFirstGiven() {
+        fun programme(xml: String, vararg languages: String) = Sink().also {
+            XmltvParser(languages.toList()).parse("<tv><programme channel='c' start='20261025010000' stop='20261025020000'>$xml</programme></tv>"
+                .byteInputStream(), window, it)
+        }.programmes.single()
+        val both = "<title lang='en'>News</title><title lang='tr-TR'>Haber</title><title>Untagged</title>"
+        assertEquals("Haber", programme(both, "tr", "en").title)
+        assertEquals("News", programme(both, "en", "tr").title)
+        val others = "<title lang='de'>Nachrichten</title><title>Haberler</title><title lang='fr'>Infos</title>" +
+            "<desc lang='fr'>Français</desc><desc lang='de'>Deutsch</desc>"
+        // An English app on a German TV, then on a TV whose language the guide does not have.
+        assertEquals("Nachrichten", programme(others, "en", "de").title)
+        assertEquals("Deutsch", programme(others, "en", "de").description)
+        assertEquals("Haberler", programme(others, "en").title)
+        assertEquals("Français", programme(others, "en").description)
+        // Neither language nor an untagged title: the first one the guide gives.
+        assertEquals("Nachrichten", programme("<title lang='de'>Nachrichten</title><title lang='fr'>Infos</title>", "en", "tr").title)
     }
     @Test fun americanFixtureAllowsNoChannelDeclarationsAndMinutePrecisionUtc() {
         val sink = Sink(); assertEquals(EpgParseReport(0, 3, 0, 0), fixture("america", sink))

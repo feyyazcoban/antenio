@@ -214,4 +214,8 @@ class DeviceStore internal constructor(private val prefs: SharedPreferences) {
     var subtitlesOff: Boolean
         get() = prefs.getBoolean(DeviceKeys.subtitlesOff.name, true)
         set(value) { prefs.edit().putBoolean(DeviceKeys.subtitlesOff.name, value).apply() }
+    /** The language tag chosen in Settings on Android 12 and older, "" for the TV's (LocaleController). */
+    var appLanguage: String
+        get() = prefs.getString(DeviceKeys.appLanguage.name, "").orEmpty()
+        set(value) { prefs.edit().putString(DeviceKeys.appLanguage.name, value).apply() }
 }

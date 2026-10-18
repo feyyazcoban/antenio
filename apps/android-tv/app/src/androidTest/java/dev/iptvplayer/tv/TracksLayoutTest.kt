@@ -19,7 +19,8 @@ import org.junit.*
 
 /** Metadata-only panel stress cases; no provider or media requests. Dedicated emulator only. */
 class TracksLayoutTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private var player: ExoPlayer? = null
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
     private var dismissed = false

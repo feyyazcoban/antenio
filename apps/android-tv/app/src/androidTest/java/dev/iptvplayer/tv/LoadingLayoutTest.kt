@@ -35,7 +35,8 @@ import org.junit.*
 import org.junit.Assert.*
 
 class LoadingLayoutTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     /** D069: the cover that opens saved sources says it is working, in a readable size, with or without motion. */
     @Test fun restoringCoverShowsProgressAndALabel() {
         val reduced = mutableStateOf(false)

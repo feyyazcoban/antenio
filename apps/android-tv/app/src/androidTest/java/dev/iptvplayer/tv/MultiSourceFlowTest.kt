@@ -19,7 +19,8 @@ import org.junit.runner.RunWith
 /** Two independent local providers intentionally reuse IDs and titles. Emulator only. */
 @RunWith(AndroidJUnit4::class)
 class MultiSourceFlowTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     private lateinit var model: TvViewModel
     private lateinit var a: MockWebServer
     private lateinit var b: MockWebServer

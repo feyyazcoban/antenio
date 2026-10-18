@@ -13,10 +13,13 @@ data class GuideStatus(val configured: Boolean = false, val initialized: Boolean
     val info: EpgSnapshotInfo? = null, val error: UiText? = null)
 data class GuideState(val statuses: Map<String, GuideStatus> = emptyMap(), val revision: Int = 0)
 
-/** Main-thread orchestration; cache/network work is IO. Scope is owned by the ViewModel. */
+/**
+ * Main-thread orchestration; cache/network work is IO. Scope is owned by the ViewModel. [languages] is the order guide
+ * titles are picked in, the app's language and then the TV's (LocaleController.guideLanguages).
+ */
 internal class GuideController(private val scope: CoroutineScope, private val store: EpgStore,
     private val device: DeviceStore, private val catalogs: CatalogStore, private val zone: () -> ZoneId,
-    private val repository: EpgRepository = EpgRepository()) {
+    private val languages: () -> List<String> = { emptyList() }, private val repository: EpgRepository = EpgRepository()) {
     private class Owner(val source: SourceConfig, val plan: EpgPlan?, val error: UiText? = null)
     private var owners = emptyMap<String, Owner>()
     private val jobs = mutableMapOf<String, Job>()
@@ -80,7 +83,7 @@ internal class GuideController(private val scope: CoroutineScope, private val st
                         current = current.copy(refreshing = true, error = null)
                         update(id, current)
                         val accepted = network.withLock {
-                            repository.refresh(plan, store, GuideWindow.around(Instant.now(), zone()), accept = {
+                            repository.refresh(plan, store, GuideWindow.around(Instant.now(), zone()), languages = languages(), accept = {
                                 // Also protects against a different model editing the persisted source/feed during download.
                                 val saved = device.loadSources().sources.firstOrNull { it.id == id }
                                 saved == owner.source && (saved.type != SourceType.M3U || saved.epgUrl.isNotEmpty() ||
@@ -119,11 +122,12 @@ internal class GuideController(private val scope: CoroutineScope, private val st
         }
     }
 
+    /** Old, outside the window, or read for titles in another language than the app and the TV now speak. */
     private fun stale(info: EpgSnapshotInfo?): Boolean {
         val now = System.currentTimeMillis()
         val wanted = GuideWindow.around(Instant.ofEpochMilli(now), zone())
         return info == null || info.updatedAt < now - 6 * 60 * 60_000L || info.updatedAt > now + 5 * 60_000 ||
-            info.window.from > wanted.from || info.window.until < wanted.until
+            info.window.from > wanted.from || info.window.until < wanted.until || info.languages != languages()
     }
     private fun update(id: String, value: GuideStatus?) {
         val old = mutable.value

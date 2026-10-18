@@ -16,7 +16,8 @@ import kotlinx.coroutines.runBlocking
 
 /** Emulator-only encrypted fixtures, restored through the actual app and removed after the test. */
 class ContinueCardLayoutTest {
-    @get:Rule val ui = createAndroidComposeRule<MainActivity>()
+    @get:Rule(order = 0) val turkish = TurkishLocaleRule()
+    @get:Rule(order = 1) val ui = createAndroidComposeRule<MainActivity>()
     @After fun cleanup() { resetFixtureSources(ui) }
     @Test fun longEpisodeAndSourceKeepResumeTimeReadableAcrossShelf() {
         var model = resetFixtureSources(ui)
