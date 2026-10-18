@@ -55,7 +55,8 @@ private val keyGap = 10.dp
  * The PIN pad (pin.md §3.1–3.2, §4): four digits from the remote's number keys or the pad on screen, masked as dots.
  * The fourth digit hands the PIN to the model, which checks or keeps it; until then the digits live in a CharArray
  * only, wiped when handed over and when the pad closes. While the PIN is checked, and during a wait after too many
- * wrong tries, the keys take nothing and Vazgeç stays. Back steps from the repeat to the first step, else closes.
+ * wrong tries, the keys take nothing and Vazgeç stays; while a new PIN is saved Vazgeç and Back wait for it, as it would
+ * land anyway. Back steps from the repeat to the first step, else closes.
  */
 @Composable internal fun PinDialog(prompt: PinPrompt, model: TvViewModel) {
     val digits = remember { CharArray(PinFormat.LENGTH) }
@@ -102,12 +103,13 @@ private val keyGap = 10.dp
         }, horizontalArrangement = Arrangement.spacedBy(24.dp)) {
             // A large font scrolls this column; the keys keep their size beside it.
             Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Note(prompt.message())
+                // A new step ("Aynı 4 haneyi bir kez daha gir.") is read as it comes, not only the boxes emptying.
+                Note(prompt.message(), modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
                 PinBoxes(if (checking) PinFormat.LENGTH else count)
                 PinFeedback(prompt)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Action(stringResource(R.string.action_cancel), (if (startOnCancel) Modifier.focusRequester(first) else Modifier)
-                        .focusRequester(cancel).testTag("pin-cancel"), outlined = true) { model.cancelPin() }
+                        .focusRequester(cancel).testTag("pin-cancel"), enabled = !prompt.saving, outlined = true) { model.cancelPin() }
                     if (prompt.canForget) Action(stringResource(R.string.pin_forgot), Modifier.focusRequester(forget).testTag("pin-forgot"),
                         enabled = !checking, outlined = true) { askedForget = true; forgetting = true }
                 }
@@ -137,30 +139,32 @@ private val keyGap = 10.dp
     }
 }
 
-/** One line kept for what the pad has to say: the check under way, the wait, or why the last PIN was not taken. */
+/**
+ * One line kept for what the pad has to say: the check under way, the wait, or why the last PIN was not taken. It is
+ * the same node in every phase, so TalkBack hears each new message as a change of its live region.
+ */
 @Composable private fun PinFeedback(prompt: PinPrompt) {
     val waiting = prompt.phase as? PinPhase.Waiting
-    val line = Modifier.testTag("pin-feedback")
-    when {
-        prompt.phase == PinPhase.Checking -> Row(line.semantics { liveRegion = LiveRegionMode.Polite },
-            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            LoadingArc()
-            Text(stringResource(R.string.pin_checking), color = Ink.Text, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 19.sp)
-        }
+    val checking = prompt.phase == PinPhase.Checking
+    val (shown, spoken) = when {
+        checking -> stringResource(R.string.pin_checking).let { it to it }
         waiting != null -> {
             var left by remember(waiting) { mutableLongStateOf(waiting.untilMs - SystemClock.elapsedRealtime()) }
             LaunchedEffect(waiting) { while (left > 0) { delay(250); left = waiting.untilMs - SystemClock.elapsedRealtime() } }
             val seconds = (left.coerceAtLeast(0) + 999) / 1000
             // Read once as the wait starts; the countdown itself is not read every second.
             val total = ((waiting.totalMs + 999) / 1000).toInt()
-            val spoken = pluralStringResource(R.plurals.pin_wait_spoken, total, total.toString())
-            Text(stringResource(R.string.pin_wait, clockTime(seconds * 1000)), line.clearAndSetSemantics {
-                contentDescription = spoken; liveRegion = LiveRegionMode.Assertive }, color = Ink.Error, fontFamily = Roboto,
-                fontSize = 13.sp, lineHeight = 19.sp)
+            stringResource(R.string.pin_wait, clockTime(seconds * 1000)) to
+                pluralStringResource(R.plurals.pin_wait_spoken, total, total.toString())
         }
+        else -> prompt.feedback?.resolve().orEmpty().let { it to it }
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        if (checking) LoadingArc()
         // The error is said in words, never by colour alone; an empty line keeps its place.
-        else -> Text(prompt.feedback?.resolve().orEmpty(), line.semantics { liveRegion = LiveRegionMode.Assertive },
-            color = Ink.Error, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 19.sp, minLines = 1)
+        Text(shown, Modifier.testTag("pin-feedback").clearAndSetSemantics {
+            contentDescription = spoken; liveRegion = if (checking) LiveRegionMode.Polite else LiveRegionMode.Assertive },
+            color = if (checking) Ink.Text else Ink.Error, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 19.sp, minLines = 1)
     }
 }
 

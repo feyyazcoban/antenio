@@ -1,6 +1,8 @@
 package dev.iptvplayer.tv.data
 
+import androidx.annotation.StringRes
 import dev.iptvplayer.tv.R
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -42,6 +44,18 @@ data class PinPrompt(val id: Int, val purpose: PinPurpose, val step: PinStep, va
     val feedback: UiText? = null, val then: AdminFollowUp? = null) {
     /** "PIN'i unuttum" belongs to a check; a parent making a PIN knows it. */
     val canForget: Boolean get() = step == PinStep.VERIFY
+    /** A new PIN is being saved. It cannot be called back, so Vazgeç and Back wait until the pad closes with it. */
+    val saving: Boolean get() = step == PinStep.CONFIRM && phase == PinPhase.Checking
+}
+
+/** How "PIN'i unuttum → Her şeyi sıfırla" ended, and what the screen it ends on says ([notice]). */
+enum class StartOver(@StringRes val notice: Int, val needsAttention: Boolean) {
+    /** The sources and the PIN record are gone. */
+    DONE(R.string.notice_start_over, false),
+    /** The sources are gone but the PIN record stayed; the same reset finishes it later. */
+    PIN_KEPT(R.string.notice_start_over_pin_kept, true),
+    /** Not every source could be removed: the PIN stays, and the library opens with what is left. */
+    FAILED(R.string.notice_start_over_failed, true),
 }
 
 /**
@@ -61,6 +75,7 @@ data class ParentalUi(val status: ParentalStatus = ParentalStatus.LOADING, val a
  * which does the slow and durable work. Main thread. A new PIN is asked twice and kept in memory only between the two
  * steps. A verified PIN grants Ayarlar until the panel closes or the app leaves the screen. A result that arrives after
  * the pad closed only updates the status: Vazgeç never grants anything, and a try it cut short stays charged (D048).
+ * Vazgeç does not cut a new PIN's save short, as the PIN would change all the same without the parent knowing.
  */
 internal class ParentalController(private val scope: CoroutineScope, private val guard: ParentalGuard,
     private val elapsed: () -> Long, private val followUp: (AdminFollowUp) -> Unit) {
@@ -152,8 +167,14 @@ internal class ParentalController(private val scope: CoroutineScope, private val
         } else cancel()
     }
 
-    /** Vazgeç: the pad closes and grants nothing. A check or save under way finishes for the record only. */
-    fun cancel() {
+    /**
+     * Vazgeç: the pad closes and grants nothing; a check under way finishes for the record only. A new PIN being saved
+     * would land all the same, so the pad stays until it has, and then says so.
+     */
+    fun cancel() { if (state.value.prompt?.saving != true) close() }
+
+    /** The pad's opener left the screen: it closes even while a new PIN is saved, which then lands without a grant. */
+    fun close() {
         forgetFirst(); waitJob?.cancel()
         mutable.update { it.copy(prompt = null) }
     }
@@ -184,14 +205,16 @@ internal class ParentalController(private val scope: CoroutineScope, private val
     }
 
     /**
-     * "Her şeyi sıfırla" removes the record once the sources are gone (pin.md §3.11); false when it could not be, and
-     * the same call finishes it later.
+     * "PIN'i unuttum → Her şeyi sıfırla" (pin.md §3.11), once [relock] closed the pad: [clear] removes the sources and
+     * what hangs on them, and only once it has, the PIN record goes. A reset cut short never leaves the sources without
+     * their PIN; run again, it finishes what is left.
      */
-    suspend fun reset(): Boolean {
+    suspend fun startOver(clear: suspend () -> Unit): StartOver {
+        try { clear() } catch (e: CancellationException) { throw e } catch (_: Exception) { return StartOver.FAILED }
         val removed = guard.reset()
         revision = null
         refresh()
-        return removed
+        return if (removed) StartOver.DONE else StartOver.PIN_KEPT
     }
 
     private fun open(purpose: PinPurpose, step: PinStep, then: AdminFollowUp?): Int {

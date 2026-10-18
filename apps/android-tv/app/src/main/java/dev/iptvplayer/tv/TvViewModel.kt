@@ -170,7 +170,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         return current
     }
 
-    fun restore(atLaunch: Boolean = false) {
+    /** [notice]: what led here (a start-over that failed), kept through the refresh this may start. */
+    fun restore(atLaunch: Boolean = false, notice: CatalogNotice? = null) {
         if (state.value.sourceTask in setOf(SourceTask.SAVING, SourceTask.REMOVING, SourceTask.RESETTING)) return
         val token = ++generation
         loadJob?.cancel()
@@ -192,11 +193,11 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 registry = saved; snapshots.clear(); snapshots.putAll(cached)
                 publishLibrary()
                 mutable.update { it.copy(route = if (saved.sources.isEmpty()) Route.SETUP else Route.HOME,
-                    sourceTask = SourceTask.IDLE, recoveryCanReset = false) }
+                    sourceTask = SourceTask.IDLE, recoveryCanReset = false, catalogNotice = notice ?: it.catalogNotice) }
                 // The screens no longer offer a source selector (D060): an older saved choice must not keep hiding sources.
                 if (saved.filterId != null) sourceFilter(null)
                 val stale = saved.sources.filter { (cached[it.id]?.updatedAt ?: 0) < System.currentTimeMillis() - 6 * 60 * 60 * 1000L }
-                if (stale.isNotEmpty()) refreshSources(stale, token)
+                if (stale.isNotEmpty()) refreshSources(stale, token, keep = notice)
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) {
                 if (generation == token) {
@@ -259,8 +260,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * "PIN'i unuttum → Her şeyi sıfırla" (pin.md §3.11), from the PIN pad. No server keeps the PIN, so this TV starts
      * over: the sources, their lists and guides, favourites, history and progress go and the adult filter is turned back
-     * on, and only then the PIN record, so a reset cut short never leaves the sources without their PIN. Run again, it
-     * finishes what is left. Setup opens.
+     * on; ParentalController.startOver removes the PIN record only after that. Setup opens, or, when not every source
+     * could be removed, the library with what is left.
      */
     fun forgotPinReset() {
         if (parental.state.value.prompt?.canForget != true || state.value.sourceTask != SourceTask.IDLE) return
@@ -273,8 +274,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         mutable.update { it.copy(route = Route.LOADING, sourceTask = SourceTask.RESETTING, restoringAtLaunch = false,
             playing = null, refreshing = false, progressLabel = UiText.Res(R.string.progress_resetting_everything)) }
         loadJob = viewModelScope.launch {
-            try {
-                previousJob?.join()
+            previousJob?.join()
+            val result = parental.startOver {
                 transactions.write {
                     artwork.clear()
                     catalogStore.clear()
@@ -282,19 +283,14 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                     store.startOver()
                 }
                 registry = SourceRegistry(); snapshots.clear()
-                val unlocked = parental.reset()
-                currentCoroutineContext().ensureActive()
-                if (generation != token) return@launch
-                mutable.value = startedOver(if (unlocked) CatalogNotice(UiText.Res(R.string.notice_start_over), CatalogOperation.START_OVER)
-                    else CatalogNotice(UiText.Res(R.string.notice_start_over_pin_kept), CatalogOperation.START_OVER, needsAttention = true))
-            } catch (e: CancellationException) { throw e }
-            catch (_: Exception) {
-                // Not every source could be removed: the PIN stays, and the library opens with what is left.
-                if (generation == token) {
-                    mutable.update { it.copy(sourceTask = SourceTask.IDLE, catalogNotice = CatalogNotice(
-                        UiText.Res(R.string.notice_start_over_failed), CatalogOperation.START_OVER, needsAttention = true)) }
-                    restore()
-                }
+            }
+            currentCoroutineContext().ensureActive()
+            if (generation != token) return@launch
+            val notice = CatalogNotice(UiText.Res(result.notice), CatalogOperation.START_OVER, result.needsAttention)
+            if (result != StartOver.FAILED) mutable.value = startedOver(notice)
+            else {
+                mutable.update { it.copy(sourceTask = SourceTask.IDLE) }
+                restore(notice = notice)
             }
         }
     }
@@ -427,8 +423,9 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         loadJob = viewModelScope.launch { refreshSources(sources, token) }
     }
 
-    private suspend fun refreshSources(sources: List<SourceConfig>, token: Int) {
-        mutable.update { it.copy(refreshing = true, catalogNotice = null) }
+    /** [keep]: a notice that outranks how the refresh went, shown throughout (a start-over that failed and led here). */
+    private suspend fun refreshSources(sources: List<SourceConfig>, token: Int, keep: CatalogNotice? = null) {
+        mutable.update { it.copy(refreshing = true, catalogNotice = keep) }
         for (source in sources) {
             if (generation != token) return
             status(source.id) { it.copy(refreshing = true, notices = emptyList(), failed = false) }
@@ -460,7 +457,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         if (generation == token) mutable.update { it.copy(refreshing = false,
-            catalogNotice = if (sources.any { source -> it.sourceStatus[source.id]?.failed == true })
+            catalogNotice = keep ?: if (sources.any { source -> it.sourceStatus[source.id]?.failed == true })
                 CatalogNotice(UiText.Res(R.string.notice_sources_not_refreshed), CatalogOperation.REFRESH, needsAttention = true)
             else CatalogNotice(UiText.Res(R.string.notice_library_updated), CatalogOperation.REFRESH)) }
     }
@@ -647,6 +644,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     fun submitPin(pin: CharArray) = parental.submit(pin)
     fun pinBack() = parental.back()
     fun cancelPin() = parental.cancel()
+    /** The PIN pad's opener left the screen: the pad closes even while a new PIN is saved, and grants nothing. */
+    fun closePin() = parental.close()
     /** The Settings panel closed: what a PIN verified there allowed ends with it. */
     fun closeSettings() = parental.closeSettings()
     private fun storedSorts(): Map<MediaKind, LibrarySort> = listOf(MediaKind.MOVIE, MediaKind.SERIES).associateWith(store::librarySort)

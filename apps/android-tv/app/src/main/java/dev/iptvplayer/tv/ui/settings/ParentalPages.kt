@@ -67,10 +67,15 @@ internal val parentalPageList: List<SettingsPageSpec> = listOf(
 
 /**
  * Without a PIN: make one. With one (verified to get here): change it or remove it. What the last change did reads at
- * the top; focus then rests on the page's first row, as the row that opened the pad may be gone.
+ * the top; focus then rests on the page's first row, as the row that opened the pad may be gone. A PIN this visit did
+ * not verify or make (one saved after its pad was closed from elsewhere) sends the page back to its row, rather than
+ * offer rows that would refuse.
  */
 @Composable private fun SettingsScope.ParentalControl() {
     val openPin = rememberPinOpener()
+    val locked = s.parental.status == ParentalStatus.ON && !s.parental.adminUnlocked
+    LaunchedEffect(locked) { if (locked) back() }
+    if (locked) return
     s.parental.notice?.let { NoteRow(it.resolve()) }
     when (s.parental.status) {
         ParentalStatus.ON -> {
@@ -124,7 +129,8 @@ internal val parentalPageList: List<SettingsPageSpec> = listOf(
         .testTag("offer-create-pin")) {
         if (model.createPin(then = AdminFollowUp.SHOW_ADULT)) openPin { rowEntry("create-pin") }
     }
+    // Should a PIN guard the filter after all, this asks for it, as the main page's row does.
     Action(stringResource(R.string.parental_offer_without), Modifier.focusRequester(rowFocus("without-pin"))
-        .testTag("offer-without-pin")) { model.setHideAdult(false) }
+        .testTag("offer-without-pin")) { if (model.setHideAdult(false)) openPin { rowEntry("without-pin") } }
     Action(stringResource(R.string.action_cancel), Modifier.focusRequester(rowFocus("cancel"))) { back() }
 }

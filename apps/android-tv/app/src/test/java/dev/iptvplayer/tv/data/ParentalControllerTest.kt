@@ -219,12 +219,63 @@ class ParentalControllerTest {
         parental.relock()
         assertNull(parental.state.value.prompt); assertEquals(1, parental.state.value.lockEpoch)
         storage.failReset = true
-        assertFalse(parental.reset())
+        assertEquals(StartOver.PIN_KEPT, parental.startOver { })
         assertEquals(ParentalStatus.UNAVAILABLE, parental.state.value.status)
         storage.failReset = false
-        assertTrue(parental.reset())
+        assertEquals(StartOver.DONE, parental.startOver { })
         assertEquals(ParentalStatus.OFF, parental.state.value.status)
         assertTrue(parental.state.value.mayLoosen)
+    }
+
+    @Test fun startingOverRemovesTheRecordOnlyOnceTheSourcesAreGone() = runTest {
+        val storage = Storage(stored())
+        val parental = controller(storage)
+        parental.refresh()
+        // Sources that could not all be removed keep their PIN.
+        assertEquals(StartOver.FAILED, parental.startOver { error("synthetic source failure") })
+        assertNotNull(storage.record); assertEquals(ParentalStatus.ON, parental.state.value.status)
+        // The record goes after the sources, never before; one that stays is told.
+        var cleared = false
+        storage.failReset = true
+        assertEquals(StartOver.PIN_KEPT, parental.startOver { assertNotNull(storage.record); cleared = true })
+        assertTrue(cleared); assertNotNull(storage.record)
+        storage.failReset = false
+        assertEquals(StartOver.DONE, parental.startOver { assertNotNull(storage.record) })
+        assertNull(storage.record); assertEquals(ParentalStatus.OFF, parental.state.value.status)
+
+        assertEquals(R.string.notice_start_over, StartOver.DONE.notice); assertFalse(StartOver.DONE.needsAttention)
+        assertEquals(R.string.notice_start_over_pin_kept, StartOver.PIN_KEPT.notice); assertTrue(StartOver.PIN_KEPT.needsAttention)
+        assertEquals(R.string.notice_start_over_failed, StartOver.FAILED.notice); assertTrue(StartOver.FAILED.needsAttention)
+    }
+
+    @Test fun aNewPinBeingSavedIsNotCalledBack() = runTest {
+        val storage = Storage(null)
+        val parental = controller(storage)
+        parental.refresh()
+        parental.createPin(then = AdminFollowUp.SHOW_ADULT)
+        parental.submit(pin("2580")); parental.submit(pin("2580"))
+        assertTrue(parental.prompt.saving)
+        // Vazgeç and Back wait: the PIN lands all the same, and the parent learns it did.
+        parental.cancel(); parental.back()
+        assertTrue(parental.prompt.saving)
+        advanceUntilIdle()
+        var state = parental.state.value
+        assertNull(state.prompt); assertEquals(ParentalStatus.ON, state.status); assertTrue(state.adminUnlocked)
+        assertEquals(UiText.Res(R.string.parental_created), state.notice)
+        assertEquals(listOf(AdminFollowUp.SHOW_ADULT), followUps)
+
+        // A pad its opener took along closes at once; the PIN it saved grants nothing and runs nothing.
+        followUps.clear()
+        val other = controller(Storage(null))
+        other.refresh()
+        other.createPin(then = AdminFollowUp.SHOW_ADULT)
+        other.submit(pin("2580")); other.submit(pin("2580"))
+        other.close()
+        assertNull(other.state.value.prompt)
+        advanceUntilIdle()
+        state = other.state.value
+        assertEquals(ParentalStatus.ON, state.status); assertFalse(state.adminUnlocked); assertNull(state.notice)
+        assertEquals(emptyList<AdminFollowUp>(), followUps)
     }
 
     private companion object {

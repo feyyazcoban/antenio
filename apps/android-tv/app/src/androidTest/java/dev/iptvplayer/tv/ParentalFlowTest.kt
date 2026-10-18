@@ -74,7 +74,8 @@ class ParentalFlowTest {
     private fun focused(tag: String) = ui.onAllNodes(hasTestTag(tag) and isFocused()).fetchSemanticsNodes().isNotEmpty()
     private fun padShown() = ui.onAllNodesWithTag("pin-pad").fetchSemanticsNodes().isNotEmpty()
     private fun padTitle(text: String) = ui.onNode(hasText(text) and hasAnyAncestor(hasTestTag("source-dialog"))).assertExists()
-    private fun feedback(text: String) = ui.onNodeWithTag("pin-feedback").assertTextEquals(text)
+    /** The pad's feedback line, as TalkBack reads it: one node whose description follows each message. */
+    private fun feedback(text: String) = ui.onNodeWithTag("pin-feedback").assertContentDescriptionEquals(text)
     /** A PIN check or save: seconds of KDF on an emulator. */
     private fun waitFor(condition: () -> Boolean) = ui.waitUntil(60_000, condition)
 

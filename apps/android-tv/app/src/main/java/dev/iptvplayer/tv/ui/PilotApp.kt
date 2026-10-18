@@ -192,11 +192,11 @@ import androidx.compose.ui.input.key.type
             Text(stringResource(R.string.setup_title), color = Ink.Text, fontFamily = Roboto,
                 fontSize = if (largeText) 24.sp else 34.sp, lineHeight = if (largeText) 30.sp else 40.sp)
             if (!largeText) Note(stringResource(R.string.setup_tagline))
-            Note(stringResource(R.string.setup_privacy))
-            // How "PIN'i unuttum → Her şeyi sıfırla" ended, until a source is added.
-            s.catalogNotice?.takeIf { it.operation == CatalogOperation.START_OVER }?.let {
-                Note(it.message.resolve(), error = it.needsAttention, modifier = Modifier.testTag("setup-notice"))
-            }
+            // How "PIN'i unuttum → Her şeyi sıfırla" ended, until a source is added. This column does not scroll, so at a
+            // large font the notice takes the privacy note's place and its last lines (what to do next) stay in view.
+            val startOver = s.catalogNotice?.takeIf { it.operation == CatalogOperation.START_OVER }
+            if (!largeText || startOver == null) Note(stringResource(R.string.setup_privacy))
+            startOver?.let { Note(it.message.resolve(), error = it.needsAttention, modifier = Modifier.testTag("setup-notice")) }
         }
         Column(Modifier.weight(1.4f).fillMaxHeight()
             .background(Ink.Container, RoundedCornerShape(24.dp)).padding(24.dp),
@@ -394,9 +394,10 @@ internal val LocalAppOverlays = staticCompositionLocalOf { AppOverlays() }
             }
         }
     } }
-    // A PIN pad whose opener left the screen asks nothing more.
+    // A PIN pad whose opener left the screen asks nothing more, nor does a prompt that no opener showed: a prompt never
+    // waits unseen in the model.
     val pinShown = overlays.shown?.overlay == AppOverlay.Pin
-    LaunchedEffect(pinShown) { if (!pinShown && model.state.value.parental.prompt != null) model.cancelPin() }
+    LaunchedEffect(pinShown, s.parental.prompt?.id) { if (!pinShown && model.state.value.parental.prompt != null) model.closePin() }
     val returning = overlays.returning
     LaunchedEffect(returning) { returning?.let { refocusAfterDialog(it.window, it.returnFocus); overlays.returned(it) } }
 }
