@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**18 Ekim · TV-010 / D088:** Vitrin→ilk raf hareketi kart görünür olduğunda yarıda iptal edilmez; görsel ön yüklemesi odak değişiminden ayrıdır. [Raf geçişi](HOME_SHELF_FRAMING.md), [vitrin](HOME_HERO.md).
+
 **18 Ekim · TV-050 / D087:** Oynatıcı simgeleri gerçek düğme merkezine hizalanır; odak etiketleri ortak satırda, zaman çubuğundan ve halkadan ayrı ölçülmüş alanda. [Oynatıcı sözleşmesi](PLAYER_PRESENTATION.md).
 
 **18 Ekim · TV-010 / D086:** Dizi rafında yıl, başlığın gerçek son satırının 4 dp altında; tek satırlık ad için boş ikinci satır ayrılmaz. Büyük afiş/ad boyutları korunur. [Raf sözleşmesi](HOME_SHELVES.md).

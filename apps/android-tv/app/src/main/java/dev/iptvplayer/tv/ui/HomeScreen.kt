@@ -406,13 +406,19 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
     val entry = detail(slides[current])
     // Every slide's details at once (at most six small requests per session), so each slide opens on its wide picture.
     LaunchedEffect(slides) { slides.forEach(ensure) }
-    if (many) LaunchedEffect(current, slides, motion, actionFocused) {
-        // Fetch the next slide's picture now, so the fade does not reveal an empty frame. Disk only, kept small.
+    if (many) {
         val next = detail(slides[(current + 1) % slides.size])
-        (if (next.hasBackdrop) next.backdrop else next.artwork)?.let { url ->
-            SingletonImageLoader.get(context).enqueue(ImageRequest.Builder(context).data(SourceArtwork(next.sourceId, url))
-                .memoryCachePolicy(CachePolicy.DISABLED).size(coil3.size.Size(960, 540)).build())
+        val nextArtwork = if (next.hasBackdrop) next.backdrop else next.artwork
+        // Fetch the next slide's picture now, so the fade does not reveal an empty frame. Disk only, kept small.
+        // Focus only resets the carousel timer; leaving for a shelf must not decode this image again.
+        LaunchedEffect(next.sourceId, nextArtwork) {
+            nextArtwork?.let { url ->
+                SingletonImageLoader.get(context).enqueue(ImageRequest.Builder(context).data(SourceArtwork(next.sourceId, url))
+                    .memoryCachePolicy(CachePolicy.DISABLED).size(coil3.size.Size(960, 540)).build())
+            }
         }
+    }
+    if (many) LaunchedEffect(current, slides, motion, actionFocused) {
         // 8 s (D063); 15 s while an action has focus, so the text being read does not change so soon.
         if (motion && !spoken) {
             delay(if (actionFocused) 15_000 else 8_000)

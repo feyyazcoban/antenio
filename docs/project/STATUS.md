@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.58 · Aşağı geçişte hareket kesintisi · 18 Ekim 2026
+
+Kullanıcının “Hala kasarak iniyor aşağıya” bildirimi üzerine D078 mesafesine ek olarak hareketin sürekliliği düzeltildi (D088). Kart görünür hâle geldiğinde devam eden görünürlük işi artık iptal edilmez; gerçek odak/viewport değişimi iptal edebilir. Vitrinden çıkarken sıradaki görsel yeniden ön yüklenmez.
+
+Yeni gerçek scroll regresyonu eski APK'da 1 iptal ve ortada 2 hareketsiz kare yakaladı. Finalde 0 iptal; aynı 154 px hedefe kesintisiz ilerleme ve viewport küçülünce 27 dp payın korunması geçti. Ana sayfa gereken/gerçek mesafe 86,5/86,5 dp. 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558/betik üzerinden normal ölçekte 9/9 ekran testi; bağımsız incelemede açık bulgu yok. [QA](native-home-scroll-58-qa.json), [görsel](../../design/reviews/LATEST.md). Font matrisi yok; bu ölçüm fiziksel kare süresi iddiası değildir.
+
+0.14.58-design-preview / kod 72 TV'ye install -r ile kuruldu; firstInstallTime korundu ve kurulu APK hash eşleşti. Son güncelleme 2026-10-18 21:48:10; SHA-256 b997029526dfe3cc59ec0c1a3dc705d0171f7b0017fd94cf6a00db8ddbe4fe0a. TV uygulaması/gerçek yayın açılmadı. 5556 .51/kod65'te kapalı; 5558/Gradle kapalı. Sırada S15a; sonraki paket en az .59/kod73. Fiziksel akıcılık ve Figma kabulü açık.
+
 ## 0.14.57 · Oynatıcı ikonları ve etiket hizaları · 18 Ekim 2026
 
 Fotoğrafla bildirilen yukarı kayan ikonlar ve sıkışık odak etiketi düzeltildi (D087). Düğme içeriği gerçek boyutu doldurup merkezlenir; etiketlerin alt çizgisi ortak, zaman çubuğuyla en az 8 dp ve dış odak halkasıyla en az 6 dp aralık vardır. Düğme boyutları ve oynatma/sarma/panel davranışı korunur.

@@ -1,5 +1,19 @@
 # Son devir notu
 
+## Codex · Kaydırma sürekliliği / 0.14.58 · 18 Ekim 2026
+
+Kullanıcı “Hala kasarak iniyor aşağıya” dedi. CardVisibility'nin LaunchedEffect anahtarındaki clipped, ilk kart bütünüyle görünür olurken true→false değişip 27 dp alt pay tamamlanmadan işi iptal ediyordu. focused/context/viewport/frameShelf/edge anahtarları korunur; size/clipped, snapshotFlow + sıralı collect içinde işlenir. Sürmekte olan istek tamamlanınca görünürlük tekrar değerlendirilir; odak değişimi eski işi iptal eder. viewportHeight=0 kullanan bileşenlerin resize düzeltmesi korunur. Hero ön yükleme işi kaynak/görsel kimliğine ayrıldı; actionFocused artık yalnız 15/8 saniyelik zamanlayıcıyı yeniler.
+
+Değişenler: CardVisibility.kt, HomeScreen.kt, build.gradle.kts; yeni CardVisibilityMotionTest.kt; D088, HOME_HERO/HOME_SHELF_FRAMING/SCREENS, BACKLOG/STEPS, STATUS/HANDOFF; [QA](native-home-scroll-58-qa.json), LATEST.md ve home-scroll-0.14.58/continue.png. Figma/manifest değişmedi. hero_review ve player_review salt okunur kök neden incelemesi yaptı; hero_review nihai kaynak/test diff'ini onayladı, açık somut bulgu yok.
+
+Kontroller: Yeni test değişmemiş eski üretim APK'sında FAILED (1 iptal). Test-only BringIntoViewModifierNode gözlemcisi büyük kart+pay isteğini framework'ün küçük odak isteğinden ayırır; gerçek verticalScroll ve manuel Compose saati kullanılır. Eski offsets: …90,112,127,127,127,130…; final: …90,112,127,137,143,148…; ikisi de 154 px'e varır. Finalde 0 iptal, 2 tamamlanan istek (ikincisi yerleşme sonrası no-op kontrol); monoton hareket, tam alt pay ve viewport küçülmesi geçti. Bu fiziksel FPS/kare süresi değildir. D078 gerçek ana sayfa mesafesi 86,5 dp gerekli/86,5 dp gerçekleşen olarak aynı.
+
+354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest geçti. Yalnız 5558/tools/run-device-tests.sh --no-build normal ölçekte 9/9: CardVisibilityMotionTest (1), ContinueCardLayoutTest (1), HeroLayoutTest (2), VisualPreviewTest'in homePostersAndContinueRemainVisibleWithRemote, remoteVerticalShelvesKeepTheirHeadingAndFullCardTogether, searchCardsUseAvailableWidthAndStayVisibleWithRemote, detailDescriptionAndWideEpisodesStayReadableWithRemote, providerDividersRemainReachableAndPosterOnlyContentKeepsItsShape yöntemleri. Font matrisi yok. Devam rafı hedef görüntüsü incelendi. Ham kayıtlar work/home-scroll-qa; kaynak/API sürümü 1.11.2 resmî kaynak jar'larından doğrulandı, bağımlılık güncellenmedi.
+
+Teslim: releases/NEXTV_TV_Design_Preview_0.14.58.apk + sha256, kod72; R8/release, debuggable değil, aynı imza. SHA-256 b997029526dfe3cc59ec0c1a3dc705d0171f7b0017fd94cf6a00db8ddbe4fe0a. TV .57→58 install -r; firstInstallTime 2026-10-13 23:50:03 aynı, lastUpdateTime 2026-10-18 21:48:10; kurulu APK çekilip hash eşleştirildi. TV uygulaması/gerçek yayın açılmadı. 5556 açılmadı, .51/kod65'te; 5558/Gradle kapalı; 5554'e dokunulmadı.
+
+Tam sonraki adım: kullanıcının fiziksel akıcılık geri bildirimi yeni işin önceliğini belirler; açık plan ana checkout/main üzerinden STEPS S15a ve gap/overlay.md. Sonraki teslim en az .59/kod73. Fiziksel kare süreleri/TalkBack, Figma, İngilizce ve satış/fiyat kararları açık. Kullanıcı “yayına hazırla” demeden font matrisi koşma.
+
 ## Codex · Oynatıcı hizalama düzeltmesi / 0.14.57 · 18 Ekim 2026
 
 Kullanıcı TV fotoğrafıyla ikon, düğme hizası ve sıkışıklık bildirdi. PlayerControlButton iç Row gerçek denetim alanını doldurmuyordu; ana ikon 12 dp yukarıdaydı. fillMaxSize ve iki eksende merkezleme bunu giderir. 24 sp sabit etiket alanı yerine aynı TextStyle ile ölçülen yükseklik +8 dp iç boşluk +11 dp düğme payı +8 dp zaman çubuğu payı kullanılır. 64/52/44 dp düğmelerde etiket alt kenarı ortak; SVG yolları, boyutlar, odak dili ve playback davranışı aynı.

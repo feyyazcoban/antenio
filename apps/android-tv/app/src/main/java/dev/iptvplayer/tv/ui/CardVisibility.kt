@@ -30,15 +30,21 @@ internal data class CardVisibility(val container: Modifier, val focus: Modifier)
     val bottom = with(LocalDensity.current) { 27.dp.toPx() }
     val context = with(LocalDensity.current) { contextAbove.toPx() }
     val viewport = with(LocalDensity.current) { viewportHeight.toPx() }
-    LaunchedEffect(focused, clipped, context, viewport, frameShelf) {
+    LaunchedEffect(focused, context, viewport, frameShelf, edge) {
         if (focused) {
-            withFrameNanos { }
-            val canFrameShelf = context > 0 && size.height + top + context + bottom <= viewport
-            val requestedTop = if (canFrameShelf) top + context else top
-            // A viewport-sized rectangle anchors a fitting shelf heading and the whole tile.
-            // Oversized accessibility content falls back to keeping the tile itself visible.
-            val requestedBottom = if (canFrameShelf && frameShelf) viewport - requestedTop else size.height + bottom
-            request.bringIntoView(Rect(-edge, -requestedTop, size.width + edge, requestedBottom))
+            // Becoming visible is an outcome of this scroll, not a new destination. In particular,
+            // the card becomes unclipped before its bottom safety margin has finished moving.
+            // Collect sequentially: a resize is rechecked after the current request, without
+            // cancelling and restarting its motion. A new focus/viewport still cancels promptly.
+            snapshotFlow { size to clipped }.collect { (measured, _) ->
+                withFrameNanos { }
+                val canFrameShelf = context > 0 && measured.height + top + context + bottom <= viewport
+                val requestedTop = if (canFrameShelf) top + context else top
+                // A viewport-sized rectangle anchors a fitting shelf heading and the whole tile.
+                // Oversized accessibility content falls back to keeping the tile itself visible.
+                val requestedBottom = if (canFrameShelf && frameShelf) viewport - requestedTop else measured.height + bottom
+                request.bringIntoView(Rect(-edge, -requestedTop, measured.width + edge, requestedBottom))
+            }
         }
     }
     return CardVisibility(Modifier.bringIntoViewRequester(request).onGloballyPositioned { coordinates ->

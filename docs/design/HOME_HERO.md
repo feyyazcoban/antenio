@@ -1,5 +1,7 @@
 # Ana sayfa üst alanı
 
+**18 Ekim 2026 · 0.14.58 / D088:** Sonraki slayt görselinin ön yüklemesi yalnız kaynak/görsel kimliği değişince başlar. İzle'ye odak girip çıkması yalnız otomatik slayt zamanlayıcısını yeniler; aynı görseli yeniden çözmez. 15/8 saniye, TalkBack, Hareketi azalt, sağ/sol slayt ve tek İzle davranışı aynı.
+
 **18 Ekim 2026 · 0.14.52 / D082:** Vitrin üst etiketi 13→12 sp; Medium/mint/1,6 sp harf aralığı/tek satır aynı. Ortak YENİ EKLENEN ve KÜTÜPHANENDEN etiketi için geçerli; içerik başlığı ve açıklama ölçüleri değişmez.
 
 **18 Ekim 2026 · 0.14.51 / D081:** Vitrin açıklaması normal ölçekte en fazla iki satır ve taşma sonu üç nokta. Büyük yazıdaki mevcut tek satır sınırı korunur. Hem gizli slayt ölçümü hem görünür metin aynı HeroText ile uygulanır; 420 dp yükseklik ve tek İzle değişmez.

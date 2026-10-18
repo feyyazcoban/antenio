@@ -1,5 +1,11 @@
 # Güncel görsel inceleme
 
+## 0.14.58 · Aşağı kaydırma sürekliliği
+
+D088: Kartın görünür hâle gelmesi devam eden kaydırmayı iptal etmez; vitrin ön yüklemesi odak değişiminde tekrarlanmaz. Yeni gerçek scroll testinde eski 1 iptal → 0 iptal; ara konum kayıtları [QA](../../docs/project/native-home-scroll-58-qa.json)'da. Fiziksel TV kare süresi ölçülmedi. Aşağıdaki normal ölçekte sentetik görsel, geçişin hedef yerleşimini gösterir.
+
+![Aşağı sonrası devam rafı ve tam kart](home-scroll-0.14.58/continue.png)
+
 ## 0.14.57 · Oynatıcı ikon ve etiket hizaları
 
 D087: ikonlar gerçek düğme merkezinde; odak etiketleri ortak alt çizgide, zaman çubuğu ve halkadan ayrı. Normal ölçekte sentetik yerel video; fiziksel kabul açık. İlk eksik dönüş karesi kanıt sayılmadı; kaynak/APK değişmeden ayrı tekrarda tam kare alındı. [QA](../../docs/project/native-player-layout-57-qa.json).

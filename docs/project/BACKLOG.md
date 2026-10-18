@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-013/019/020 · 0.14.58 / D088: devam eden aşağı kaydırmanın görünürlük değişimiyle iptal edilmesi ve vitrinden ayrılırken aynı görselin yeniden ön yüklenmesi düzeltildi. Önceki son-konum testi hareket kesintisini kaçırıyordu; yeni gerçek scroll regresyonu iptali ölçer. Fiziksel akıcılık kabulü açık; genel işi done yapmaz.
+
 BKL-020/031 · 0.14.57 / D087: kullanıcının player fotoğrafındaki ikon merkezi ve sıkışık odak etiketi sorunları düzeltildi; gerçek merkez/ayrım ölçümleri mevcut ekran testlerine eklendi. Teslim/kanıt STATUS/HANDOFF'ta; genel fiziksel/görsel kabul açık.
 
 BKL-019/020 · 0.14.56 / D086: dizi adı ile yıl arasındaki boş ikinci satır kaldırıldı, aralık 4 dp. Teslim/kanıt STATUS/HANDOFF'ta; genel görsel kabul açık.
