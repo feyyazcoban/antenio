@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.59 · Splash girişinin görünür kalması · 18 Ekim 2026
+
+Kullanıcının “Splash screen donuyor animasyonu göremiyorum” bildirimi için iki yol düzeltildi (D089): Home/ikinci kapak giriş sırasında oluşturulmaz; logo yerleştikten ve kaynaklar açıldıktan sonra içerik opak kapak altında hazırlanır. Tek başına launcher tuş bırakması artık animasyonu iptal etmez. İlk yeni yön/OK/Enter/Back/Esc basışı yalnız atlar; aynı basışın tekrar/bırakması tüketilir, ses/medya tuşları normal iletilir. Süreç başına bir kez ve Hareketi azalt/D069 davranışı korunur.
+
+Yeni Home testi değişmemiş .58 üretim kaynaklı debug APK'da başarısız, finalde başarılı. 357 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558 ve betikle normal ölçekte 7/7 ekran testi. Logo piksel sayımları 0→7332→16187→16399; ara kareler gözle incelendi. İki bağımsız inceleme; RestrictedApi riski public Window.Callback ile giderildi. [QA](native-splash-59-qa.json), [görseller](../../design/reviews/LATEST.md). Fiziksel TV kare süresi/soğuk ilk kare ve ses eşzamanlaması ölçülmedi; Home hazırlık maliyeti kaldırılmadı, girişin sonrasına taşındı. Font matrisi yok.
+
+0.14.59-design-preview / kod73 TV'ye install -r ile kuruldu; firstInstallTime korundu, kurulu APK hash eşleşti. Güncelleme 2026-10-18 22:08:48; SHA-256 eddbff0231167ea4857ae8e6e51ac37dac46797151d205b48b67cb9958f2cc64. TV uygulaması/gerçek yayın açılmadı. 5556 .51/kod65'te kapalı; 5558/Gradle kapalı. Sonraki paket en az .60/kod74. Kullanıcının fiziksel geri bildirimi öncelikli; açık planda S15a sırada.
+
 ## 0.14.58 · Aşağı geçişte hareket kesintisi · 18 Ekim 2026
 
 Kullanıcının “Hala kasarak iniyor aşağıya” bildirimi üzerine D078 mesafesine ek olarak hareketin sürekliliği düzeltildi (D088). Kart görünür hâle geldiğinde devam eden görünürlük işi artık iptal edilmez; gerçek odak/viewport değişimi iptal edebilir. Vitrinden çıkarken sıradaki görsel yeniden ön yüklenmez.

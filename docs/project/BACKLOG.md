@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-022 · 0.14.59 / D089: giriş sırasında Home/ikinci kapak oluşturma ertelendi; yeni basış ile tek başına bırakma ayrıldı. İlk gezinme basışı yalnız atlar; aynı basışın tekrarı/bırakması yeni ekrana sızmaz. Fiziksel akıcılık/ses kabulü açık; BKL-022 review kalır. Kanıt/teslim STATUS ve HANDOFF'ta.
+
 BKL-013/019/020 · 0.14.58 / D088: devam eden aşağı kaydırmanın görünürlük değişimiyle iptal edilmesi ve vitrinden ayrılırken aynı görselin yeniden ön yüklenmesi düzeltildi. Önceki son-konum testi hareket kesintisini kaçırıyordu; yeni gerçek scroll regresyonu iptali ölçer. Fiziksel akıcılık kabulü açık; genel işi done yapmaz.
 
 BKL-020/031 · 0.14.57 / D087: kullanıcının player fotoğrafındaki ikon merkezi ve sıkışık odak etiketi sorunları düzeltildi; gerçek merkez/ayrım ölçümleri mevcut ekran testlerine eklendi. Teslim/kanıt STATUS/HANDOFF'ta; genel fiziksel/görsel kabul açık.

@@ -85,7 +85,7 @@ Liste başlıkları, ayırıcı gibi görünen kanal adları ve kaynak kategori 
 
 TV-010 native ana sayfa, devam/son kanal/favori satırları ve doğru bölüme dönüş eklendi. TV-070 geçmiş temizleme onaylıdır, favorileri korur. Native görünüm kullanıcı tarafından prototipten farklı bulundu; hizalama, ölçüler, tipografi ve bileşen geometrisi prototiple karşılaştırılarak düzeltilmelidir. Tam görsel onay verilmedi.
 
-TV-001–004 için [telefonla kurulum önerisi](../product/ONBOARDING.md): QR, kısa kod, süre dolumu/yenileme, telefon formu, TV onayı ve aktarım sonucu; henüz native uygulanmadı. Splash ve özgün açılış sesi istendi; ekran geçişi veya kaynak yenilemesinde tekrar oynatılmamalı.
+TV-001–004 için [telefonla kurulum önerisi](../product/ONBOARDING.md): QR, kısa kod, süre dolumu/yenileme, telefon formu, TV onayı ve aktarım sonucu; henüz native uygulanmadı. Splash ve özgün açılış sesi istendi; ekran geçişi veya kaynak yenilemesinde tekrar oynatılmamalı. D089: giriş sırasında içerik oluşturulmaz; kaynaklar hazır ve logo hareketi bitmişken içerik opak kapak altında hazırlanır, sonra açılır. İlk yeni yön/OK/Enter/Back/Esc basışı yalnız atlar; tekrar/bırakması tüketilir, sonraki basışlar normaldir. Tek başına launcher tuş bırakması animasyonu kapatmaz. Hareketi azalt ve D069 sabit kapak korunur.
 
 ## Ses ve altyazı
 

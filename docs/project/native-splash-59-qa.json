@@ -1,0 +1,120 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.59-design-preview",
+  "versionCode": 73,
+  "request": "Splash screen donuyor animasyonu göremiyorum",
+  "implementation": {
+    "entrance": "Do not compose the underlying route/overlays until the entrance has settled and RESTORING is finished. Prepare beneath the opaque finished logo, wait two frame boundaries, then fade.",
+    "input": "Only new DOWN skips; orphan UP does not. Navigation/OK/Enter/Back/Esc skip consumes its repeats and matching UP; other keys retain normal dispatch. Public Window.Callback delegates to the original callback.",
+    "preserved": [
+      "once per process",
+      "reduced motion and system-animation opt-out",
+      "same-process static restoring cover",
+      "source restore on IO/Default",
+      "startup sound preference/lifecycle"
+    ]
+  },
+  "baseline": {
+    "test": "VisualPreviewTest#launchEntranceFinishesBeforeHomeIsComposed",
+    "result": "FAILED as expected on unchanged .58 production source",
+    "failure": "home-content was already composed during the entrance",
+    "rawLog": "work/splash-qa/baseline-instrumentation.log"
+  },
+  "checks": {
+    "unit": {
+      "tests": 357,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "newOpeningInputTests": 3
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 37
+    },
+    "debugAndAndroidTestBuild": "passed",
+    "device": {
+      "serial": "emulator-5558",
+      "runner": "tools/run-device-tests.sh --no-build",
+      "fontScale": "unchanged normal",
+      "passed": 7,
+      "failed": 0,
+      "tests": [
+        "LaunchAnimationTest (2)",
+        "VisualPreviewTest#launchEntranceFinishesBeforeHomeIsComposed",
+        "LoadingLayoutTest#restoringCoverShowsProgressAndALabel",
+        "LoadingLayoutTest#everySourceOperationFitsAndImportCanBeCancelled",
+        "PilotFlowTest#cachedCatalogOpensWithoutRequestsAndFailedRefreshKeepsLibrary",
+        "PilotFlowTest#devicePreferencesSurviveSourceRemovalAndActivityRecreation"
+      ]
+    },
+    "logoBrightPixelCounts": [
+      0,
+      7332,
+      16187,
+      16399
+    ],
+    "pixelCountMeaning": "Centre logo only at controlled animation-clock stages; no wall-clock FPS claim.",
+    "frameReview": [
+      "mark appears before wordmark",
+      "wordmark completes left to right",
+      "loading spinner/label appears while restoring"
+    ],
+    "buildNote": "Initial combined full build was cancelled during memory pressure before completion. Final checks rerun with no parallel projects and two workers; release separately with one worker.",
+    "releaseBuild": "passed, standalone no-parallel/one-worker",
+    "apk": {
+      "debuggable": false,
+      "r8": true,
+      "signerSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065",
+      "archive": "releases/NEXTV_TV_Design_Preview_0.14.59.apk",
+      "sha256": "eddbff0231167ea4857ae8e6e51ac37dac46797151d205b48b67cb9958f2cc64"
+    },
+    "projectCheck": "passed"
+  },
+  "independentReview": {
+    "agents": [
+      "hero_review",
+      "player_review"
+    ],
+    "resolved": "RestrictedApi Activity override replaced with public Window.Callback delegation. Input behavior change recorded in D089. No outstanding concrete source finding."
+  },
+  "limitations": [
+    "Physical TV frame times and exact freeze trigger not measured",
+    "Home preparation cost is deferred, not eliminated",
+    "The controlled clock test does not measure cold-process first-frame latency",
+    "Helper input tests are not a physical remote launch test",
+    "Startup sound synchronisation and physical acceptance remain open",
+    "No font scale 1.5/2.0 matrix"
+  ],
+  "references": [
+    "https://developer.android.com/develop/ui/compose/performance/bestpractices",
+    "https://developer.android.com/develop/ui/compose/testing/synchronization"
+  ],
+  "rawEvidence": "work/splash-qa",
+  "delivery": {
+    "device": "physical 65U95A TV",
+    "before": {
+      "versionCode": "72",
+      "versionName": "0.14.58-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-18 21:48:10"
+    },
+    "after": {
+      "versionCode": "73",
+      "versionName": "0.14.59-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-18 22:08:48"
+    },
+    "sha256": "eddbff0231167ea4857ae8e6e51ac37dac46797151d205b48b67cb9958f2cc64",
+    "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+    "realPlaybackStarted": false,
+    "appLaunchedOnTv": false
+  },
+  "endState": {
+    "testEmulator": "stopped",
+    "gradle": "stopped",
+    "5556": "not opened, still .51/code65",
+    "5554": "untouched",
+    "tvAppLaunched": false
+  }
+}

@@ -1,5 +1,13 @@
 # Güncel görsel inceleme
 
+## 0.14.59 · Splash girişinin görünür kalması
+
+D089: Home hazırlığı girişten sonra opak kapak altında başlar; tek başına tuş bırakma giriş animasyonunu iptal etmez. Normal ölçekte kontrollü Compose saatiyle ara kareler. Bunlar fiziksel TV kare süresi ölçümü değildir. [QA](../../docs/project/native-splash-59-qa.json).
+
+[İlk siyah kare](splash-0.14.59/before.png) · [İşaret](splash-0.14.59/mark.png) · [Harfler yerleşirken](splash-0.14.59/letters.png)
+
+![Logo tamamlandı, kaynakların açılmasını bekliyor](splash-0.14.59/complete.png)
+
 ## 0.14.58 · Aşağı kaydırma sürekliliği
 
 D088: Kartın görünür hâle gelmesi devam eden kaydırmayı iptal etmez; vitrin ön yüklemesi odak değişiminde tekrarlanmaz. Yeni gerçek scroll testinde eski 1 iptal → 0 iptal; ara konum kayıtları [QA](../../docs/project/native-home-scroll-58-qa.json)'da. Fiziksel TV kare süresi ölçülmedi. Aşağıdaki normal ölçekte sentetik görsel, geçişin hedef yerleşimini gösterir.

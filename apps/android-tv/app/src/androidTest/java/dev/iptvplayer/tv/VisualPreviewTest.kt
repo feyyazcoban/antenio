@@ -2,6 +2,8 @@ package dev.iptvplayer.tv
 
 import android.graphics.Bitmap
 import android.view.KeyEvent
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -83,6 +85,35 @@ class VisualPreviewTest {
             directory.resolve("$name.png").outputStream().use { image.compress(Bitmap.CompressFormat.PNG, 100, it) }
             image.recycle()
         }
+    }
+    /** Startup must not build a ready library under the moving logo on the same UI thread. */
+    @Test fun launchEntranceFinishesBeforeHomeIsComposed() {
+        val opening = mutableStateOf(true)
+        ui.mainClock.autoAdvance = false
+        try {
+            ui.runOnUiThread { ui.activity.setContent { dev.iptvplayer.tv.ui.PilotTheme {
+                dev.iptvplayer.tv.ui.PilotApp(model, opening.value) { opening.value = false }
+            } } }
+            ui.mainClock.advanceTimeBy(160)
+            ui.waitForIdle()
+            ui.onNodeWithTag("home-content").assertDoesNotExist()
+            ui.mainClock.advanceTimeBy(2400)
+            ui.waitForIdle()
+            ui.onNodeWithTag("home-content").assertDoesNotExist()
+            ui.mainClock.advanceTimeBy(1200)
+            ui.waitForIdle()
+            ui.onNodeWithTag("home-content").assertIsDisplayed()
+            Assert.assertFalse("The ready Home is revealed after the entrance", opening.value)
+            ui.onNodeWithTag("hero-watch").assertIsFocused()
+            // A skip opens the same gate immediately, without waiting for the rest of the three-second entrance.
+            ui.runOnIdle { opening.value = true }
+            ui.mainClock.advanceTimeBy(400); ui.waitForIdle()
+            ui.onNodeWithTag("home-content").assertDoesNotExist()
+            ui.runOnIdle { opening.value = false }
+            ui.mainClock.advanceTimeBy(200); ui.waitForIdle()
+            ui.onNodeWithTag("home-content").assertIsDisplayed()
+            ui.onNodeWithTag("hero-watch").assertIsFocused()
+        } finally { ui.mainClock.autoAdvance = true }
     }
     @Test fun captureGoogleTvRevision() {
         shot("soft-home")

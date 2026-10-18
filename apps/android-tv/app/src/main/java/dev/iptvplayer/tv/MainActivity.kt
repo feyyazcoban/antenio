@@ -3,6 +3,8 @@ package dev.iptvplayer.tv
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
+import android.view.KeyEvent
+import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -37,6 +39,7 @@ class MainActivity : ComponentActivity() {
     private val model: TvViewModel by viewModels()
     private val startupSound by lazy { StartupSound(this) }
     private var opening by mutableStateOf(false)
+    private val openingInput = OpeningInput()
     // Android 12 and older: the language chosen in Settings (LocaleController); Android 13 applies it on its own.
     override fun attachBaseContext(newBase: Context) { super.attachBaseContext(LocaleController.wrap(newBase)) }
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +49,19 @@ class MainActivity : ComponentActivity() {
         if (LocaleController.update(this)) model.languageChanged()
         if (savedInstanceState == null) startupSound.prepare()
         opening = savedInstanceState == null && (application as TvApplication).claimOpening()
+        // Use the public window callback: ComponentActivity's own key-dispatch override is library-restricted.
+        // A skip press/repeat/release cannot activate the newly composed screen. Other keys dispatch normally;
+        // an orphan UP from the launcher cannot skip the entrance.
+        val callback = window.callback
+        window.callback = object : Window.Callback by callback {
+            override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+                if (openingInput.consume(event.keyCode, event.action, opening) {
+                    opening = false
+                    startupSound.stop()
+                }) return true
+                return callback.dispatchKeyEvent(event)
+            }
+        }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, window.decorView).apply {
             hide(WindowInsetsCompat.Type.systemBars())
@@ -53,15 +69,9 @@ class MainActivity : ComponentActivity() {
         }
         setContent { PilotTheme { PilotApp(model, opening) { opening = false } } }
     }
-    // Any remote key ends the launch splash and its chime at once, and still reaches the screen. Caught here because
-    // while sources are restored nothing in Compose holds focus, so a key would never reach a Compose key handler.
-    override fun onUserInteraction() {
-        super.onUserInteraction()
-        if (opening) { opening = false; startupSound.stop() }
-    }
     override fun onStart() { super.onStart(); startupSound.start(); model.appStarted() }
     // A configuration change (a keyboard plugged in, another language) recreates the activity while the viewer stays:
     // nothing locks again, and a source form being filled in stays open.
-    override fun onStop() { startupSound.stop(); if (!isChangingConfigurations) model.appStopped(); super.onStop() }
+    override fun onStop() { openingInput.clear(); startupSound.stop(); if (!isChangingConfigurations) model.appStopped(); super.onStop() }
     override fun onDestroy() { startupSound.stop(); super.onDestroy() }
 }

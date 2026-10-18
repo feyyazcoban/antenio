@@ -80,6 +80,9 @@ import androidx.compose.ui.input.key.type
 @OptIn(ExperimentalFoundationApi::class)
 @Composable fun PilotApp(model: TvViewModel, opening: Boolean = false, endOpening: () -> Unit = {}) {
     val state by model.state.collectAsStateWithLifecycle()
+    // No first Home layout (or a second RestoringCover) competes with the entrance on the UI thread. A key skips
+    // this gate immediately; otherwise LaunchCover opens it with the finished logo still covering the screen.
+    var contentPrepared by remember(opening) { mutableStateOf(!opening) }
     // Kept over a configuration change: a new language recreates the activity and Settings opens again (LocaleController).
     var settings by rememberSaveable { mutableStateOf(false) }
     // Such a panel opens over a screen that took focus as it composed again: closing it gives focus back to the menu's
@@ -143,41 +146,44 @@ import androidx.compose.ui.input.key.type
     CompositionLocalProvider(LocalReducedMotion provides state.reducedMotion, LocalBringIntoViewSpec provides bringIntoView,
         LocalAppOverlays provides overlays, LocalSettingsOpener provides settingsOpener) {
         Box(Modifier.fillMaxSize().background(Ink.Background).onPreviewKeyEvent { event -> escapeAsBack(event) }) {
-            when (screen) {
-                // "Açılışta PIN iste", or a protection record that cannot be read (pin.md §3.9): the route waits under it.
-                Route.LOCKED -> AppLockScreen(state, model)
-                Route.RECOVERY -> SourceRecoveryScreen(state, model)
-                Route.SOURCES -> SourcesScreen(state, model)
-                Route.SETUP -> Setup(state, model)
-                // Opening the app on saved sources shows the NEXTV cover, never the operation card (D069). Imports, saves,
-                // removals and a Yeniden dene or reset from the recovery screen keep the card, so no brand flash cuts in.
-                Route.LOADING -> if (state.sourceTask == SourceTask.RESTORING && state.restoringAtLaunch) RestoringCover()
-                    else LoadingScreen(state) { model.cancelImport() }
-                Route.HOME -> savedScreens.SaveableStateProvider("home:${state.sourceFilterId}:${state.sources.map { it.id }}") {
-                    key(state.sourceFilterId) { HomeScreen(state, model) { settings = true } }
+            if (contentPrepared) {
+                when (screen) {
+                    // "Açılışta PIN iste", or a protection record that cannot be read (pin.md §3.9): the route waits under it.
+                    Route.LOCKED -> AppLockScreen(state, model)
+                    Route.RECOVERY -> SourceRecoveryScreen(state, model)
+                    Route.SOURCES -> SourcesScreen(state, model)
+                    Route.SETUP -> Setup(state, model)
+                    // Opening the app on saved sources shows the NEXTV cover, never the operation card (D069). Imports, saves,
+                    // removals and a Yeniden dene or reset from the recovery screen keep the card, so no brand flash cuts in.
+                    Route.LOADING -> if (state.sourceTask == SourceTask.RESTORING && state.restoringAtLaunch) RestoringCover()
+                        else LoadingScreen(state) { model.cancelImport() }
+                    Route.HOME -> savedScreens.SaveableStateProvider("home:${state.sourceFilterId}:${state.sources.map { it.id }}") {
+                        key(state.sourceFilterId) { HomeScreen(state, model) { settings = true } }
+                    }
+                    Route.LIBRARY -> savedScreens.SaveableStateProvider("library:${state.sourceFilterId}:${state.kind}:${state.onlyFavorites}") {
+                        key(state.kind, state.onlyFavorites, state.sourceFilterId) { Library(state, model, routeBack) { settings = true } }
+                    }
+                    Route.SEARCH -> savedScreens.SaveableStateProvider("search") { SearchScreen(state, model, routeBack) { settings = true } }
+                    Route.GUIDE -> savedScreens.SaveableStateProvider("guide:${state.sourceFilterId}") {
+                        key(state.sourceFilterId) { GuideScreen(state, model, routeBack) { settings = true } }
+                    }
+                    Route.DETAIL -> DetailScreen(state, model) { settings = true }
+                    Route.PLAYER -> state.playing?.let { PlayerScreen(it, model, routeBack) }
                 }
-                Route.LIBRARY -> savedScreens.SaveableStateProvider("library:${state.sourceFilterId}:${state.kind}:${state.onlyFavorites}") {
-                    key(state.kind, state.onlyFavorites, state.sourceFilterId) { Library(state, model, routeBack) { settings = true } }
+                // Nothing opens over the lock screen; its own pad is part of it.
+                if (screen != Route.LOCKED) {
+                    if (settings) Settings(state, model) {
+                        if (restored) menuReturn = settingsOpener.focus
+                        settings = false; model.closeSettings()
+                    }
+                    AppOverlayHost(overlays, state, model)
+                    state.accessNotice?.let { notice -> AccessNote(notice.resolve()) { model.accessNoticeShown() } }
                 }
-                Route.SEARCH -> savedScreens.SaveableStateProvider("search") { SearchScreen(state, model, routeBack) { settings = true } }
-                Route.GUIDE -> savedScreens.SaveableStateProvider("guide:${state.sourceFilterId}") {
-                    key(state.sourceFilterId) { GuideScreen(state, model, routeBack) { settings = true } }
-                }
-                Route.DETAIL -> DetailScreen(state, model) { settings = true }
-                Route.PLAYER -> state.playing?.let { PlayerScreen(it, model, routeBack) }
+                if (exitAsk && screen == Route.HOME) ExitDialog { exitAsk = false }
             }
-            // Nothing opens over the lock screen; its own pad is part of it.
-            if (screen != Route.LOCKED) {
-                if (settings) Settings(state, model) {
-                    if (restored) menuReturn = settingsOpener.focus
-                    settings = false; model.closeSettings()
-                }
-                AppOverlayHost(overlays, state, model)
-                state.accessNotice?.let { notice -> AccessNote(notice.resolve()) { model.accessNoticeShown() } }
-            }
-            if (exitAsk && screen == Route.HOME) ExitDialog { exitAsk = false }
             if (opening) LaunchCover(state.reducedMotion,
-                loading = state.route == Route.LOADING && state.sourceTask == SourceTask.RESTORING, finish = endOpening)
+                loading = state.route == Route.LOADING && state.sourceTask == SourceTask.RESTORING,
+                prepareContent = { contentPrepared = true }, finish = endOpening)
         }
     }
 }

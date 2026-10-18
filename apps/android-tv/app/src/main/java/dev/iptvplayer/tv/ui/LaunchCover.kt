@@ -37,15 +37,17 @@ import kotlin.math.abs
  * NEXTV splash over the content (D062): a black stage, two mint corner glows, the folded play mark popping on the
  * startup chime's hit and the pixel "NEXTV" wordmark cascading in. Laid out on the 1920×1080 handoff, scaled to the
  * screen. It stays at least [MinShowMs]; while saved sources are still restored it holds with a spinner and
- * "Hazırlanıyor...", then fades into the content. Any remote key removes it at once (PilotApp). Reduced motion or
+ * "Hazırlanıyor...", then fades into the content. A new remote press removes it at once (MainActivity). Reduced motion or
  * disabled system animations skip the entrance: the finished logo stays, still, only while sources are restored (D069).
  */
-@Composable internal fun LaunchCover(reducedMotion: Boolean, loading: Boolean, finish: () -> Unit) {
+@Composable internal fun LaunchCover(reducedMotion: Boolean, loading: Boolean,
+    prepareContent: () -> Unit = {}, finish: () -> Unit) {
     val still = remember { reducedMotion || !android.animation.ValueAnimator.areAnimatorsEnabled() }
     // One linear master clock; every item eases its own window of it via segment() so the cascade stays in lockstep.
     val intro = remember { Animatable(if (still) 1f else 0f) }
     val alpha = remember { Animatable(1f) }
     val done by rememberUpdatedState(finish)
+    val prepare by rememberUpdatedState(prepareContent)
     val busy by rememberUpdatedState(loading)
     // Still: the spinner shows at once, beside the finished logo.
     var holding by remember { mutableStateOf(still) }
@@ -54,12 +56,18 @@ import kotlin.math.abs
     val spinnerStill = LocalReducedMotion.current || !android.animation.ValueAnimator.areAnimatorsEnabled()
     LaunchedEffect(Unit) {
         withFrameNanos { }
-        if (still) { snapshotFlow { busy }.first { !it }; done(); return@LaunchedEffect }
-        intro.animateTo(1f, tween(EntranceMs, easing = LinearEasing))
-        delay((MinShowMs - EntranceMs).toLong())
+        if (!still) {
+            intro.animateTo(1f, tween(EntranceMs, easing = LinearEasing))
+            delay((MinShowMs - EntranceMs).toLong())
+        }
         holding = true
         snapshotFlow { busy }.first { !it }
-        alpha.animateTo(0f, tween(220))
+        // Home's first composition/measure can be expensive for a large library. Let it happen only after the logo
+        // has landed, under the opaque cover. Give the new tree a frame before starting the reveal animation.
+        prepare()
+        withFrameNanos { }
+        withFrameNanos { }
+        if (!still) alpha.animateTo(0f, tween(220))
         done()
     }
     // Idle breath of the glows and the mark once everything has landed; read only while drawing.
