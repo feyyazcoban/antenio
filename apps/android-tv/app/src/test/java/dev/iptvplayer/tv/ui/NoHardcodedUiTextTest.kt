@@ -23,20 +23,32 @@ class NoHardcodedUiTextTest {
     )
 
     /**
-     * Literals that read as Turkish but never reach the screen as text, each with its reason: icon names, keys kept on
-     * the device, provider data. An entry no source uses any more fails the test, so the list stays exact.
+     * Literals that read as Turkish but never reach the screen as text, each with the calls it may stand in and its
+     * reason: icon names, keys kept on the device, provider data. The same word in any other call is still a text. An
+     * entry or a call no source uses any more fails the test, so the list stays exact.
      */
-    private val allowed = mapOf(
-        "film" to "LineIcon name (DesignSystem.iconPaths)",
+    private class Allowed(val text: String, val within: Set<String>, val reason: String)
+
+    private val allowed = listOf(
+        Allowed("film", setOf("LineIcon", "iconPaths"), "icon name: LineIcon draws it from DesignSystem.iconPaths"),
     )
 
-    private class Literal(val file: String, val line: Int, val text: String, val testTag: Boolean)
+    /**
+     * [call] is the function whose arguments hold the literal, `LineIcon` in `LineIcon(if (a) "tv" else "film")`, or
+     * the property a collection of literals is kept in, `iconPaths` in `val iconPaths = mapOf("film" to ...)`.
+     */
+    private class Literal(val file: String, val line: Int, val text: String, val testTag: Boolean, val call: String?)
 
     private val testTagCall = Regex("testTag\\s*[(=]\\s*$")
+    private val collectionCall = Regex("va[lr]\\s+(\\w+)[^=()]*=\\s*(?:mapOf|listOf|setOf)\\s*$")
+    private val namedCall = Regex("(\\w+)\\s*$")
 
     /** The string literals of Kotlin [source], comments skipped; a template's own literals are listed as well. */
     private fun literals(source: String, file: String): List<Literal> {
         val found = mutableListOf<Literal>()
+        val calls = mutableListOf<String?>()
+        fun callAt(open: Int) = source.substring(maxOf(0, open - 80), open)
+            .let { before -> (collectionCall.find(before) ?: namedCall.find(before))?.groupValues?.get(1) }
         fun closingBrace(open: Int): Int {
             var depth = 0
             for (k in open until source.length) {
@@ -67,9 +79,11 @@ class NoHardcodedUiTextTest {
                             else -> text.append(source[j++])
                         }
                         found += Literal(file, source.substring(0, i).count { it == '\n' } + 1, text.toString(),
-                            testTagCall.containsMatchIn(source.substring(maxOf(0, i - 40), i)))
+                            testTagCall.containsMatchIn(source.substring(maxOf(0, i - 40), i)), calls.lastOrNull())
                         i = j + quote.length
                     }
+                    source[i] == '(' -> { calls += callAt(i); i++ }
+                    source[i] == ')' -> { calls.removeLastOrNull(); i++ }
                     else -> i++
                 }
             }
@@ -81,7 +95,9 @@ class NoHardcodedUiTextTest {
     private fun looksTurkish(text: String) = turkishLetters.containsMatchIn(text) ||
         Regex("\\p{L}+").findAll(text).any { it.value.lowercase(Locale.ROOT) in turkishWords }
 
-    private fun offenders(literals: List<Literal>) = literals.filter { !it.testTag && it.text !in allowed && looksTurkish(it.text) }
+    private fun isAllowed(literal: Literal) = allowed.any { it.text == literal.text && literal.call in it.within }
+
+    private fun offenders(literals: List<Literal>) = literals.filter { !it.testTag && !isAllowed(it) && looksTurkish(it.text) }
 
     @Test fun screensAndTheViewModelHoldNoTurkishText() {
         val root = File("src/main/java/dev/iptvplayer/tv")
@@ -91,7 +107,9 @@ class NoHardcodedUiTextTest {
         val offenders = offenders(found)
         assertTrue(offenders.joinToString("\n", "Move these texts to res/values/strings.xml:\n") { "${it.file}:${it.line} \"${it.text}\"" },
             offenders.isEmpty())
-        assertEquals("allowed but no longer used", emptySet<String>(), allowed.keys - found.map { it.text }.toSet())
+        val used = found.map { it.text to it.call }.toSet()
+        assertEquals("allowed but no longer used", emptyList<String>(),
+            allowed.flatMap { entry -> entry.within.filter { entry.text to it !in used }.map { "\"${entry.text}\" in $it" } })
     }
 
     @Test fun theScanReadsCodeButNotCommentsOrTestTags() {
@@ -103,11 +121,16 @@ class NoHardcodedUiTextTest {
             Text("${'$'}{if (live) "Kanal" else "TV"} · ${'$'}count")
             Note("Geçersiz adres")
             Modifier.testTag("kanal-listesi")
-            LineIcon("film")
+            LineIcon(if (live) "tv" else "film", Ink.Mint)
+            private val iconPaths = mapOf("film" to "M3 3h18")
+            Text("film")
             Text(stringResource(R.string.sources_title))
         """.trimIndent()
         val literals = literals(source, "Sample.kt")
-        assertEquals(listOf("Kaynak ekle", "Kanal", "TV", "  ·  ", "Geçersiz adres", "kanal-listesi", "film"), literals.map { it.text })
-        assertEquals(listOf("Kaynak ekle" to 4, "Kanal" to 5, "Geçersiz adres" to 6), offenders(literals).map { it.text to it.line })
+        assertEquals(listOf("Kaynak ekle", "Kanal", "TV", "  ·  ", "Geçersiz adres", "kanal-listesi", "tv", "film", "film", "M3 3h18", "film"),
+            literals.map { it.text })
+        // An icon name is allowed where an icon is named, and the same word is a text everywhere else.
+        assertEquals(listOf("LineIcon", "iconPaths", "Text"), literals.filter { it.text == "film" }.map { it.call })
+        assertEquals(listOf("Kaynak ekle" to 4, "Kanal" to 5, "Geçersiz adres" to 6, "film" to 10), offenders(literals).map { it.text to it.line })
     }
 }

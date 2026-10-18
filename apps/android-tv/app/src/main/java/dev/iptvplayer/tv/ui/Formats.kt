@@ -26,6 +26,9 @@ internal fun guideDate(time: Long, zone: ZoneId, locale: Locale = appLocale): St
 /** "19 Eki 01:30": a programme time where its start and end fall on different days. */
 internal fun guideDayTime(time: Long, zone: ZoneId, locale: Locale = appLocale): String = format(time, zone, "d MMM HH:mm", locale)
 
+/** "18 Eki Pazar, 20:30" on the guide's clock: when a guide was last downloaded. */
+internal fun guideUpdatedTime(time: Long, zone: ZoneId, locale: Locale = appLocale): String = format(time, zone, "d MMM EEEE, HH:mm", locale)
+
 /** "UTC+03:00", the same in every language. */
 internal fun guideOffset(time: Long, zone: ZoneId): String = "UTC" + Instant.ofEpochMilli(time).atZone(zone).offset.id.let { if (it == "Z") "+00:00" else it }
 

@@ -26,7 +26,7 @@ internal fun guideStatusText(status: GuideStatus?, zone: ZoneId, header: Boolean
     return buildString {
         if (!status.configured) append(stringResource(R.string.guide_no_address)) else if (header) append(stringResource(R.string.guide_title))
         status.info?.let { info ->
-            append("\n" + stringResource(R.string.last_updated, "${guideDate(info.updatedAt, zone)}, ${guideTime(info.updatedAt, zone)}"))
+            append("\n" + stringResource(R.string.last_updated, guideUpdatedTime(info.updatedAt, zone)))
             append("\n" + stringResource(R.string.text_pair, pluralStringResource(R.plurals.guide_programmes, info.programmes, info.programmes.toString()),
                 pluralStringResource(R.plurals.count_channels, info.channels, info.channels.toString())))
             if (info.updatedAt < System.currentTimeMillis() - 6 * 3_600_000L) append("\n" + stringResource(R.string.guide_stale))
