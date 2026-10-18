@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import re
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 required = [
@@ -13,7 +14,16 @@ required = [
     "design/tokens/figma-variables.snapshot.json",
 ]
 errors = [f"Missing: {name}" for name in required if not (ROOT / name).is_file()]
-for file in ROOT.rglob("*.md"):
+# Check this checkout, including new documents, without descending into ignored worktrees,
+# build outputs or private local data. Git's own ignore rules are the source of truth.
+documents = subprocess.run(
+    ["git", "-C", str(ROOT), "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "*.md"],
+    check=True, capture_output=True,
+).stdout.decode("utf-8").split("\0")
+for name in sorted(set(filter(None, documents))):
+    file = ROOT / name
+    if not file.is_file():  # A tracked deletion in the working tree is not a document to read.
+        continue
     text = file.read_text(encoding="utf-8")
     for target in re.findall(r"\]\(([^)]+)\)", text):
         if "://" in target or target.startswith("#"):

@@ -15,9 +15,9 @@ Claude Code girişi [CLAUDE.md](CLAUDE.md) aynı sözleşmeye yönlendirir. Sohb
 
 ## Güncel durum
 
-Son önizleme **0.14.29**: Teslim artık release derlemesi (akıcılık), Canlı TV/Filmler/Diziler TiviMate mantığında kategori sütunuyla, menüde Google yuvarlak simgeleri. [Tasarım](docs/design/FLUID_TIVIMATE_29.md), [QA](docs/project/native-fluid-29-qa.json). Önceki: [sol menü ve Ara 0.14.28](docs/design/SIDE_NAV_SEARCH_28.md), [yazarken arama 0.14.27](docs/design/SEARCH_TYPING_27.md), [UI onarımı 0.14.26](docs/design/UI_REPAIR_26.md). Fiziksel TV 0.14.29 (16 Ekim gecesi kullanıcının izniyle, veri silinmeden kuruldu). APK/SHA-256 releases içinde. PIN yönetimi henüz kullanıcıya açık değil.
+Son TV tesliminin sürümü, kurulum doğrulaması ve açık kontroller [STATUS](docs/project/STATUS.md) dosyasının en üst kaydındadır. APK/SHA-256 arşivi `releases` içindedir. TV teslimleri küçültülmüş release derlemesidir; kurulu kaynak ve tercihleri koruyarak güncellenir.
 
-[Ortak erişim kararı](docs/architecture/ACCESS_DECISIONS.md) kaynakta hazır ve testli; uygulamaya henüz bağlanmadı. [PIN doğrulayıcı temeli](docs/architecture/PIN_CREDENTIAL.md) de testli; [deneme bütçesi mantığı](docs/architecture/PIN_ATTEMPTS.md) da testli. [Şifreli depo](docs/architecture/PROTECTION_STORE.md) da testli; Android saat adaptörü, doğrulama kontrolcüsü ve UI entegrasyonu sırada. Fiziksel performans/codec, Figma ve kullanıcı görsel kabulü açık. Ayrıntılar STATUS/HANDOFF'tadır.
+[Ortak erişim kararı](docs/architecture/ACCESS_DECISIONS.md), [PIN doğrulayıcı](docs/architecture/PIN_CREDENTIAL.md), [deneme bütçesi](docs/architecture/PIN_ATTEMPTS.md) ve [şifreli depo](docs/architecture/PROTECTION_STORE.md) native arayüze bağlıdır. İki dil, ebeveyn denetimi, kaynak/açılış koruması ve oynatıcı ayarları uygulandı. Kalan işler [gap adımları](docs/design/gap/STEPS.md) ve [BACKLOG](docs/project/BACKLOG.md) içinde; tam devralma noktası [HANDOFF](docs/project/HANDOFF.md). Fiziksel performans/codec, Figma ve kullanıcı görsel kabulü açık.
 
 [Son görsel değişiklikleri karşılaştır](design/reviews/LATEST.md).
 

@@ -6,7 +6,7 @@ Bu klasör tek proje köküdür. Codex, Claude Code, Cursor veya başka bir ara�
 
 1. Proje kökünü aç; [AGENTS.md](../../AGENTS.md) ortak sözleşmesini oku.
 2. [STATUS](STATUS.md) ve [HANDOFF](HANDOFF.md) dosyalarının en üstündeki güncel kaydı oku. Alt bölümler tarihçedir; eski bir “sonraki adım” güncel kaydı geçersiz kılmaz.
-3. `git status --short` ile mevcut değişiklikleri incele. Henüz ilk commit yok; untracked dosyalar proje çalışmalarını içerir. Bunları gereksiz çıktı sayıp silme.
+3. `git status --short` ile mevcut değişiklikleri incele. Untracked dosyalar yeni proje çalışmalarını içerebilir; bunları gereksiz çıktı sayıp silme. İç içe veya eski worktree'leri güncel checkout ile karıştırma.
 4. [BACKLOG](BACKLOG.md) ve ilgili ürün/tasarım sözleşmesinden tek iş seç. Öncelik yeni özellik değil görsel kalite.
 5. İş sonunda değişiklikleri, gerçekten çalıştırılmış kontrolleri ve tam sonraki adımı STATUS/HANDOFF'a yaz. Başarısız testleri saklama veya tamamlandı sayma.
 
