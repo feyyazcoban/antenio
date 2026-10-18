@@ -1,5 +1,9 @@
 # Son devir notu
 
+## 0.14.44 · TV teslimi · 18 Ekim 2026
+
+TV'de 0.14.44 (a0f1908 + sürüm 58) kurulu, SHA eşleşti, veri korundu. Dalda versionCode hâlâ 57: TV'ye giden bir sonraki derlemeden önce 58'in üstüne çıkarılmalı (aksi hâlde sürüm düşürme hatası). Teslim releases/NEXTV_TV_Design_Preview_0.14.44.apk, SHA-256 186bc0f74a62468bf6ac8d5f7550736cbb1fb08ec3eeffc216581dda2df6ce32. Arka planda gap iş akışı S11–S13'te; ardından Faz D (S14–S17) ve Faz E (S18–S29) hazır. 5556 kapalı (bellek), 5558 test emülatörü açık.
+
 ## 0.14.43 · TV teslimi · 18 Ekim 2026
 
 Değişen: app/build.gradle.kts (versionCode 57, 0.14.43-design-preview); ui/HomeScreen.kt (`Hero`: `hero-watch` İzle + `hero-details` Ayrıntılar, `starting`, `watch`; slayt dönüşü satır uçlarında), TvViewModel.kt (`watch(entry)`, `TvState.heroStarting`), ui/DesignSystem.kt ("info" ikonu); testler HeroLayoutTest, PilotFlowTest, VisualPreviewTest, ContinueCardLayoutTest; DECISIONS D071. Teslim releases/NEXTV_TV_Design_Preview_0.14.43.apk, SHA-256 954ed138e22140288d57e73a7c9bed85932c9a297b25aaca03d0daffc3742a92. TV'de 0.14.43 kurulu, SHA eşleşti, veri korundu.
