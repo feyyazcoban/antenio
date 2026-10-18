@@ -18,7 +18,15 @@ enum class ParentalStatus { LOADING, OFF, ON, UNAVAILABLE }
 enum class AdminReason { SHOW_ADULT, CATEGORIES, PARENTAL }
 
 /** What a PIN verified or made on the pad then does in the model. Opening a page stays with the Settings panel. */
-enum class AdminFollowUp { SHOW_ADULT }
+sealed interface AdminFollowUp {
+    /** The adult filter goes off. */
+    data object ShowAdult : AdminFollowUp
+    /** The category row [name] of [kind] locks: Kilitle in Kategorileri yönet on a TV that had no PIN yet (pin.md §3.4). */
+    data class LockCategory(val kind: MediaKind, val name: String) : AdminFollowUp
+}
+
+/** How a lock change from the screens ended (pin.md §5, §9): saved, refused at the record's 1024 rules, or not saved. */
+enum class LockEdit { SAVED, LIMIT, NOT_SAVED }
 
 /**
  * What the pad is for: the first PIN, a new one for the PIN set, the PIN checked before [Verify.reason], or the PIN that
@@ -33,6 +41,11 @@ sealed interface PinPurpose {
      * [title] is the name the pad shows. It grants nothing in Ayarlar.
      */
     data class Unlock(val target: AccessTarget, val id: String, val title: String) : PinPurpose
+    /**
+     * Kilidi kaldır in a title's quick menu (pin.md §3.5): once the PIN is right the lock of its own on [id] goes;
+     * [title] is the name the pad shows. It grants nothing else, neither the title nor Ayarlar.
+     */
+    data class Release(val id: String, val title: String) : PinPurpose
 }
 
 /** A new PIN, the same PIN again, or the PIN to check. */
@@ -84,13 +97,15 @@ data class ParentalUi(val status: ParentalStatus = ParentalStatus.LOADING, val a
  * screens and ParentalGuard, which does the slow and durable work. Main thread. A new PIN is asked twice and kept in
  * memory only between the two steps. A verified PIN grants Ayarlar until the panel closes or the app leaves the screen;
  * a PIN typed for a locked title hands its purpose to [unlocked], and the model opens that title's locks for the
- * session ([grant]). A result that arrives after the pad closed only updates the status: Vazgeç never grants anything,
- * and a try it cut short stays charged (D048). Vazgeç does not cut a new PIN's save short, as the PIN would change all
- * the same without the parent knowing. [policyChanged] runs when the lock rules read from the record change.
+ * session ([grant]); one typed to remove a title's lock hands it to [released] with the policy revision it saw, for
+ * [editLocks]. A result that arrives after the pad closed only updates the status: Vazgeç never grants anything, and a
+ * try it cut short stays charged (D048). Vazgeç does not cut a new PIN's save short, as the PIN would change all the
+ * same without the parent knowing. [policyChanged] runs when the lock rules read from the record change.
  */
 internal class ParentalController(private val scope: CoroutineScope, private val guard: ParentalGuard,
     private val elapsed: () -> Long, private val unlocked: (PinPurpose.Unlock) -> Unit = {},
-    private val policyChanged: () -> Unit = {}, private val followUp: (AdminFollowUp) -> Unit) {
+    private val released: (PinPurpose.Release, Long) -> Unit = { _, _ -> }, private val policyChanged: () -> Unit = {},
+    private val followUp: (AdminFollowUp) -> Unit) {
     private val mutable = MutableStateFlow(ParentalUi())
     val state = mutable.asStateFlow()
     private var prompts = 0
@@ -152,6 +167,9 @@ internal class ParentalController(private val scope: CoroutineScope, private val
     /** Opens the pad for a locked title; [purpose] goes back to the model once the PIN is right. */
     fun unlock(purpose: PinPurpose.Unlock) { ask(purpose, null) }
 
+    /** Opens the pad to remove a title's lock; [purpose] goes back to the model once the PIN is right. */
+    fun release(purpose: PinPurpose.Release) { ask(purpose, null) }
+
     /** Opens [scopes] for the session: the locks on the title a PIN was just typed for. */
     fun grant(scopes: Set<AccessScope>) {
         session.grant(scopes)
@@ -191,6 +209,41 @@ internal class ParentalController(private val scope: CoroutineScope, private val
             }
         }
     }
+
+    /**
+     * Adds the lock rules [add] and removes those on [remove] (Kilitle and Kilidi kaldır, Kategorileri yönet, Kilitli
+     * içerikler; pin.md §3.4–3.5). Adding tightens and asks for nothing. Removing loosens: it needs the PIN verified in
+     * this Settings visit, or [verified], the revision a PIN typed for this removal saw; a hide on the same scope stays.
+     * A tightening that another change overtook (a publish adding a row's identity) is made again on the record as it
+     * is then; a removal only over this controller's own changes, which keep the verified revision current.
+     */
+    suspend fun editLocks(add: List<AccessRule> = emptyList(), remove: Set<AccessScope> = emptySet(), verified: Long? = null): LockEdit {
+        fun expected(): Long? = if (remove.isEmpty()) policy?.revision else verified ?: revision?.takeIf { state.value.adminUnlocked }
+        fun edited(rules: List<AccessRule>): List<AccessRule> {
+            val kept = rules.mapNotNull { rule -> if (rule.scope !in remove) rule else rule.takeIf { it.hidden }?.copy(pinRequired = false) }
+            return kept + add.filter { rule -> kept.none { it.scope == rule.scope } }.distinctBy { it.scope }
+        }
+        var used = expected() ?: return LockEdit.NOT_SAVED
+        var change = guard.edit(used) { it.copy(rules = edited(it.rules)) }
+        if (change == ParentalGuard.Change.Stale) {
+            if (remove.isEmpty()) refresh()
+            val again = expected()
+            if (again != null && again != used) { used = again; change = guard.edit(used) { it.copy(rules = edited(it.rules)) } }
+        }
+        return when (change) {
+            is ParentalGuard.Change.Saved -> {
+                if (revision == used) revision = change.snapshot.policyRevision
+                learn(change.snapshot.policy())
+                LockEdit.SAVED
+            }
+            ParentalGuard.Change.LimitReached -> LockEdit.LIMIT
+            ParentalGuard.Change.Stale -> { refresh(); LockEdit.NOT_SAVED }
+            else -> LockEdit.NOT_SAVED
+        }
+    }
+
+    /** Says [notice] on the Settings page open, as the last change made there; the panel closing forgets it. */
+    fun tell(notice: UiText) { mutable.update { it.copy(notice = notice) } }
 
     /** True when the pad opened for the first PIN, [then] to follow once it is saved; false while a PIN may be set. */
     fun createPin(then: AdminFollowUp? = null): Boolean {
@@ -371,10 +424,11 @@ internal class ParentalController(private val scope: CoroutineScope, private val
                 learn(result.snapshot.policy())
                 val open = isOpen(prompt)
                 val purpose = prompt.purpose
-                if (purpose is PinPurpose.Unlock) {
-                    // A title's PIN opens that title's locks, not Ayarlar.
+                if (purpose is PinPurpose.Unlock || purpose is PinPurpose.Release) {
+                    // A title's PIN opens that title's locks, or removes its own, never Ayarlar.
                     mutable.update { it.copy(status = ParentalStatus.ON, prompt = if (open) null else it.prompt) }
-                    if (open) unlocked(purpose)
+                    if (open && purpose is PinPurpose.Unlock) unlocked(purpose)
+                    if (open && purpose is PinPurpose.Release) released(purpose, result.snapshot.policyRevision)
                     return
                 }
                 revision = result.snapshot.policyRevision

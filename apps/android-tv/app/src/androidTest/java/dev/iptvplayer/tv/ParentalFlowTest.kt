@@ -5,6 +5,7 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.iptvplayer.tv.data.*
@@ -13,14 +14,21 @@ import org.junit.*
 import org.junit.Assert.*
 import org.junit.Assume.assumeTrue
 import org.junit.runner.RunWith
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 /**
  * Ebeveyn denetimi with the remote (S09, pin.md §3.1–3.3, §3.10–3.11): a PIN made with the pad's keys and the number
  * keys, changed and removed; the adult filter and Kategorileri yönet behind it; five wrong PINs and the wait; PIN'i
  * unuttum. The content locks (S10, §3.6–3.7): a locked film asks on opening, a locked category's channels are passed by
- * CH+ and ask when typed by number, and leaving the screen locks again. Each PIN check or save runs the real KDF, so
- * the waits are long. Removes this app's protection record before and after each test: a dedicated test emulator only,
- * never a TV or an emulator holding a real source. Synthetic sources and PINs.
+ * CH+ and ask when typed by number, and leaving the screen locks again. The lock screens (S11, §3.4–3.5, §3.9, §4):
+ * Göster / Kilitle / Gizle in Kategorileri yönet, the marks and hidden programmes in the library, guide and Ara, Kilitle
+ * and Kilidi kaldır in the quick menu, Kilitli içerikler, the 1024-rule limit, and a locked title leaving the player
+ * as the app stops. Each PIN check or save runs the real KDF, so the waits are long. Removes this app's protection
+ * record before and after each test: a dedicated test emulator only, never a TV or an emulator holding a real source.
+ * Synthetic sources and PINs.
  */
 @RunWith(AndroidJUnit4::class)
 class ParentalFlowTest {
@@ -38,12 +46,16 @@ class ParentalFlowTest {
         server = MockWebServer()
         server.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
+                // The source's guide: a locked channel must keep its programme to itself.
+                if (request.requestUrl!!.encodedPath.endsWith("xmltv.php"))
+                    return MockResponse().addHeader("Content-Type", "application/xml").setBody(guide())
                 val body = when (request.requestUrl!!.queryParameter("action")) {
                     null -> """{"user_info":{"auth":1,"status":"Active"}}"""
                     "get_live_categories" -> """[{"category_id":"1","category_name":"Genel"},{"category_id":"2","category_name":"Spor"}]"""
                     "get_vod_categories", "get_series_categories" -> """[{"category_id":"1","category_name":"Genel"}]"""
-                    "get_live_streams" -> """[{"stream_id":1,"name":"Deneme kanalı","category_id":"1"},
-                        {"stream_id":2,"name":"Spor kanalı","category_id":"2"},{"stream_id":3,"name":"Haber kanalı","category_id":"1"}]"""
+                    "get_live_streams" -> """[{"stream_id":1,"name":"Deneme kanalı","category_id":"1","epg_channel_id":"genel"},
+                        {"stream_id":2,"name":"Spor kanalı","category_id":"2","epg_channel_id":"spor"},
+                        {"stream_id":3,"name":"Haber kanalı","category_id":"1","epg_channel_id":"haber"}]"""
                     "get_vod_streams" -> """[{"stream_id":2,"name":"Deneme filmi","category_id":"1","container_extension":"mp4"}]"""
                     "get_series" -> """[{"series_id":4,"name":"Deneme dizisi","category_id":"1"}]"""
                     else -> "[]"
@@ -69,6 +81,17 @@ class ParentalFlowTest {
             ProtectionStore(context).reset()
             server.shutdown()
         }
+    }
+
+    /** One programme on each channel now. */
+    private fun guide(): String {
+        val now = System.currentTimeMillis()
+        fun time(at: Long) = Instant.ofEpochMilli(at).atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("uuuuMMddHHmmss xx", Locale.ROOT))
+        val channels = listOf("genel" to "Genel program", "spor" to "Spor programı", "haber" to "Haber programı")
+        return "<tv>" + channels.joinToString("") { (id, _) -> "<channel id='$id'><display-name>$id</display-name></channel>" } +
+            channels.joinToString("") { (id, title) ->
+                "<programme channel='$id' start='${time(now - 3_600_000)}' stop='${time(now + 3_600_000)}'><title>$title</title></programme>"
+            } + "</tv>"
     }
 
     private val parental get() = model.state.value.parental
@@ -108,10 +131,7 @@ class ParentalFlowTest {
         ui.runOnUiThread { model.closeSettings() }
     }
 
-    /**
-     * Puts [rules] in the protection record beside the PIN, as Kilitle will from the screens (S11), and opens the
-     * library again, which reads them first.
-     */
+    /** Puts [rules] in the protection record beside the PIN and opens the library again, which reads them first. */
     private fun lock(vararg rules: AccessRule) {
         val store = ProtectionStore(context)
         val current = (store.read() as ProtectionRead.Ready).snapshot
@@ -122,7 +142,19 @@ class ParentalFlowTest {
     }
     private fun entry(id: String) = model.state.value.allCatalog.items.single { it.id == id }
     private fun card(id: String) = ui.onNode(hasClickAction() and hasAnyAncestor(hasTestTag("tile:library:$id")))
+    private fun cardShown(id: String) = ui.onAllNodes(hasClickAction() and hasAnyAncestor(hasTestTag("tile:library:$id"))).fetchSemanticsNodes().isNotEmpty()
     private val playingId get() = model.state.value.playing?.entry?.id
+    /** TalkBack's state of a locked card, row or category (pin.md §4). */
+    private val readsLocked = SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Kilitli")
+    private fun state(text: String) = SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, text)
+    private fun shown(text: String) = ui.onAllNodes(hasText(text, substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+
+    /** Opens the quick menu with a held OK on [id]'s card, focus on its first row. */
+    private fun quickMenu(id: String) {
+        card(id).performSemanticsAction(SemanticsActions.RequestFocus)
+        card(id).performSemanticsAction(SemanticsActions.OnLongClick)
+        ui.waitUntil(5_000) { focused("quick-favorite") }
+    }
 
     @Test fun aPinIsMadeChangedAndRemovedWithTheRemote() {
         openSettings()
@@ -174,7 +206,9 @@ class ParentalFlowTest {
         ui.waitUntil(5_000) { !padShown() && focused("parental-change") }
         ui.onNodeWithText("PIN değiştirildi.").assertExists()
 
-        // Removing it asks first, Vazgeç focused.
+        // Removing it asks first, Vazgeç focused; Kilitli içerikler sits between, with nothing locked yet.
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.onNode(hasTestTag("parental-locked") and hasText("Kilitli kanal veya içerik yok.")).assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_DOWN)
         ui.onNodeWithTag("parental-remove").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_CENTER)
@@ -359,6 +393,201 @@ class ParentalFlowTest {
         ui.waitUntil(5_000) { playingId == news }
         key(KeyEvent.KEYCODE_CHANNEL_DOWN)
         ui.waitUntil(5_000) { playingId == sport }
+        ui.runOnUiThread { model.back() }
+    }
+
+    @Test fun kategorileriYonetLocksARowWhoseChannelsShowTheLockAndKeepTheirProgrammesUntilThePin() {
+        makePin()
+        val source = model.state.value.sources.single().id
+        val (first, sport) = listOf("live:1", "live:2").map { model.fixtureKey(it) }
+        openSettings()
+        row("Kategorileri yönet").performSemanticsAction(SemanticsActions.RequestFocus)
+        openPad()
+        digits("2580")
+        waitFor { parental.prompt == null }
+        ui.waitUntil(5_000) { !padShown() && focused("category-kind:LIVE") }
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        title("Canlı TV")
+        // Each row says how it stands; OK offers Göster, Kilitle and Gizle, the current one first and checked.
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.onNodeWithTag("category-choice:1").assertIsFocused().assert(state("Açık"))
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        title("Spor")
+        ui.onNodeWithTag("settings-option:0").assertIsFocused().assertIsSelected()
+        ui.onNode(hasTestTag("settings-option:1") and hasText("Kilitle · PIN ister")).assertExists()
+        key(KeyEvent.KEYCODE_DPAD_DOWN); key(KeyEvent.KEYCODE_DPAD_CENTER)
+        title("Canlı TV")
+        ui.waitUntil(10_000) { model.state.value.locks.categories == setOf(CategoryVisibility.key(MediaKind.LIVE, "Spor")) }
+        ui.onNodeWithTag("category-choice:1").assertIsFocused().assert(readsLocked)
+        assertTrue((ProtectionStore(context).read() as ProtectionRead.Ready).snapshot.rules.contains(
+            AccessRule(AccessScope.Category(source, MediaKind.LIVE, AccessCategory.ProviderId("2")), pinRequired = true)))
+        assertEquals(setOf(sport), model.state.value.locks.ids)
+        key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK)
+        ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
+
+        // Canlı TV: the row and its category read "Kilitli"; its programme stays hidden, the others' show.
+        ui.runOnUiThread { model.showKind(MediaKind.LIVE) }
+        ui.waitUntil(20_000) { cardShown(sport) && shown("Genel program") }
+        card(sport).assert(readsLocked)
+        ui.onNode(hasText("Kilitli kanal") and hasAnyAncestor(hasTestTag("tile:library:$sport"))).assertExists()
+        card(first).assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
+        ui.onNodeWithTag("category:Spor").assert(readsLocked)
+        assertFalse(shown("Spor programı"))
+        // The guide: one "Kilitli kanal" cell across the locked row.
+        ui.runOnUiThread { model.guide() }
+        ui.waitUntil(10_000) { ui.onAllNodesWithTag("guide-row:$sport").fetchSemanticsNodes().isNotEmpty() && shown("Genel program") }
+        ui.onNode(hasText("Kilitli kanal") and hasAnyAncestor(hasTestTag("guide-row:$sport"))).assertExists()
+        assertFalse(shown("Spor programı"))
+        // Ara: the locked result reads "Kilitli" too.
+        ui.runOnUiThread { model.search(); model.searchQuery("kanal") }
+        ui.waitUntil(10_000) { ui.onAllNodesWithTag("search:$sport").fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithTag("search:$sport").assert(readsLocked)
+        ui.onNodeWithTag("search:$first").assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
+
+        // The PIN opens it for the session: no mark and its programme, until the app leaves the screen.
+        ui.runOnUiThread { model.showKind(MediaKind.LIVE) }
+        ui.waitUntil(5_000) { cardShown(sport) }
+        card(sport).performSemanticsAction(SemanticsActions.RequestFocus)
+        openPad()
+        digits("2580")
+        waitFor { model.state.value.route == Route.PLAYER && playingId == sport }
+        ui.waitUntil(5_000) { !padShown() && ui.activity.hasWindowFocus() }
+        ui.runOnUiThread { model.back() }
+        ui.waitUntil(10_000) { cardShown(sport) && shown("Spor programı") }
+        card(sport).assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
+        ui.runOnUiThread { model.appStopped() }
+        ui.waitUntil(5_000) { !shown("Spor programı") }
+        card(sport).assert(readsLocked)
+
+        // Göster removes the row's lock, with the PIN verified for Kategorileri yönet.
+        openSettings()
+        row("Kategorileri yönet").performSemanticsAction(SemanticsActions.RequestFocus)
+        openPad()
+        digits("2580")
+        waitFor { parental.prompt == null }
+        ui.waitUntil(5_000) { !padShown() && focused("category-kind:LIVE") }
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        title("Spor")
+        ui.onNodeWithTag("settings-option:1").assertIsFocused().assertIsSelected()
+        key(KeyEvent.KEYCODE_DPAD_UP); key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10_000) { model.state.value.locks.categories.isEmpty() }
+        ui.onNodeWithTag("category-choice:1").assertIsFocused().assert(state("Açık"))
+        assertTrue((ProtectionStore(context).read() as ProtectionRead.Ready).snapshot.rules.isEmpty())
+        assertTrue(model.state.value.locks.ids.isEmpty())
+    }
+
+    @Test fun theQuickMenuLocksATitleAndKilidiKaldirAsksForThePin() {
+        makePin()
+        val film = model.fixtureKey("movie:2")
+        ui.runOnUiThread { model.showKind(MediaKind.MOVIE) }
+        ui.waitUntil(5_000) { cardShown(film) }
+        // Kilitle: at once, without the PIN; focus goes back to the card, which reads "Kilitli".
+        quickMenu(film)
+        key(KeyEvent.KEYCODE_DPAD_DOWN); key(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.onNodeWithTag("quick-lock").assertIsFocused().assertTextEquals("Kilitle")
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10_000) { film in model.state.value.locks.contents && film in model.state.value.locks.ids }
+        ui.waitUntil(5_000) { ui.onAllNodes(isFocused() and hasAnyAncestor(hasTestTag("tile:library:$film"))).fetchSemanticsNodes().isNotEmpty() }
+        card(film).assert(readsLocked)
+        assertFalse(padShown())
+        // Kilidi kaldır asks for the PIN; Back keeps the lock and focus on the card.
+        quickMenu(film)
+        key(KeyEvent.KEYCODE_DPAD_DOWN); key(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.onNodeWithTag("quick-lock").assertIsFocused().assertTextEquals("Kilidi kaldır")
+        openPad()
+        ui.onNodeWithText("“Deneme filmi” kilidini kaldırmak için PIN gir.").assertExists()
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5_000) { !padShown() }
+        ui.waitUntil(5_000) { ui.onAllNodes(isFocused() and hasAnyAncestor(hasTestTag("tile:library:$film"))).fetchSemanticsNodes().isNotEmpty() }
+        assertTrue(film in model.state.value.locks.contents)
+        // The right PIN removes that lock and opens nothing else.
+        quickMenu(film)
+        key(KeyEvent.KEYCODE_DPAD_DOWN); key(KeyEvent.KEYCODE_DPAD_DOWN)
+        openPad()
+        digits("2580")
+        waitFor { film !in model.state.value.locks.contents }
+        assertTrue(model.state.value.locks.ids.isEmpty())
+        assertFalse(parental.adminUnlocked); assertEquals(0, parental.sessionGrants)
+        assertEquals(Route.LIBRARY, model.state.value.route)
+        ui.waitUntil(5_000) { !padShown() }
+        card(film).assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
+
+        // With the record full, Kilitle says so in the corner (pin.md §5).
+        val source = model.state.value.sources.single().id
+        lock(*Array(1024) { AccessRule(AccessScope.Content(ContentRef(source, "movie:${it + 100}")), pinRequired = true) })
+        ui.runOnUiThread { model.showKind(MediaKind.MOVIE) }
+        ui.waitUntil(5_000) { cardShown(film) }
+        quickMenu(film)
+        key(KeyEvent.KEYCODE_DPAD_DOWN); key(KeyEvent.KEYCODE_DPAD_DOWN)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10_000) { ui.onAllNodesWithTag("access-note").fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithTag("access-note").assertTextEquals("Kilit sınırına ulaşıldı. Bazı kilitleri kaldır.")
+        assertFalse(film in model.state.value.locks.contents)
+    }
+
+    @Test fun kilitliIceriklerListsTheLocksAndOkRemovesThem() {
+        makePin()
+        val source = model.state.value.sources.single().id
+        val film = model.fixtureKey("movie:2")
+        lock(AccessRule(AccessScope.Category(source, MediaKind.LIVE, AccessCategory.ProviderId("2")), pinRequired = true),
+            AccessRule(AccessScope.Content(ContentRef(source, "movie:2")), pinRequired = true))
+        openSettings()
+        row("Ebeveyn denetimi").performSemanticsAction(SemanticsActions.RequestFocus)
+        openPad()
+        digits("2580")
+        waitFor { parental.prompt == null }
+        ui.waitUntil(5_000) { !padShown() && focused("parental-change") }
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.onNodeWithTag("parental-locked").assertIsFocused()
+        ui.onNode(hasTestTag("parental-locked") and hasText("2 kilit")).assertExists()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        title("Kilitli içerikler")
+        // Under their headings: the category row, then the title; OK removes a lock and focus moves on.
+        val category = "locked-category:LIVE:Spor"
+        ui.onNodeWithTag(category).assertIsFocused()
+        ui.onNode(hasTestTag("locked-title:$film") and hasText("Deneme filmi")).assertExists()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10_000) { model.state.value.locks.categories.isEmpty() }
+        ui.onNodeWithTag("locked-title:$film").assertIsFocused()
+        ui.onAllNodesWithTag(category).assertCountEquals(0)
+        // With the last one gone the page leaves, focus back on its row.
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10_000) { model.state.value.locks.contents.isEmpty() }
+        title("Ebeveyn denetimi")
+        ui.waitUntil(5_000) { focused("parental-locked") }
+        ui.onNode(hasTestTag("parental-locked") and hasText("Kilitli kanal veya içerik yok.")).assertExists()
+        assertTrue((ProtectionStore(context).read() as ProtectionRead.Ready).snapshot.rules.isEmpty())
+    }
+
+    @Test fun aLockedTitleInThePlayerLeavesItWhenTheAppLeavesTheScreen() {
+        makePin()
+        val source = model.state.value.sources.single().id
+        val (first, sport) = listOf("live:1", "live:2").map { model.fixtureKey(it) }
+        lock(AccessRule(AccessScope.Content(ContentRef(source, "live:2")), pinRequired = true))
+        ui.runOnUiThread { model.showKind(MediaKind.LIVE) }
+        ui.waitUntil(5_000) { cardShown(sport) }
+        card(sport).performSemanticsAction(SemanticsActions.RequestFocus)
+        openPad()
+        digits("2580")
+        waitFor { model.state.value.route == Route.PLAYER && playingId == sport }
+        ui.waitUntil(5_000) { !padShown() && ui.activity.hasWindowFocus() }
+        // Home, standby or another app: back on screen the library shows, and the channel asks again.
+        ui.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
+        assertEquals(Route.LIBRARY, model.state.value.route)
+        assertEquals(0, parental.sessionGrants)
+        ui.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+        ui.waitUntil(5_000) { cardShown(sport) }
+        card(sport).assert(readsLocked)
+        ui.runOnUiThread { assertTrue(model.open(entry(sport))) }
+        assertEquals(Route.LIBRARY, model.state.value.route)
+        // A channel without a lock plays on.
+        ui.runOnUiThread { assertFalse(model.open(entry(first))) }
+        ui.waitUntil(5_000) { model.state.value.route == Route.PLAYER && playingId == first }
+        ui.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
+        assertEquals(Route.PLAYER, model.state.value.route)
+        ui.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
         ui.runOnUiThread { model.back() }
     }
 

@@ -2,6 +2,9 @@ package dev.iptvplayer.tv.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -27,6 +30,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.vector.PathParser
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
@@ -94,6 +98,7 @@ private val iconPaths = mapOf(
     "search" to "M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm5 12 6 6",
     "guide" to "M3 4h18v16H3ZM3 9h18M3 14h18M8 4v16M15 9v5",
     "info" to "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18ZM12 11v5.5M12 7.6v.2",
+    "lock" to "M6 11h12v10H6ZM8 11V8a4 4 0 0 1 8 0v3",
 )
 
 @Composable fun LineIcon(name: String, color: Color, modifier: Modifier = Modifier, filled: Boolean = false) {
@@ -103,6 +108,22 @@ private val iconPaths = mapOf(
             drawPath(path, color, style = if (filled) Fill else Stroke(1.6f, cap = StrokeCap.Round, join = StrokeJoin.Round))
         }
     }
+}
+
+/**
+ * A locked title's mark on a poster or a logo (pin.md §4): the lock in a small dark pill, as the rating badge is drawn.
+ * The card says "Kilitli" itself as its state, so the mark is silent.
+ */
+@Composable internal fun LockBadge(modifier: Modifier = Modifier) {
+    Box(modifier.background(Ink.Background.copy(alpha = .82f), RoundedCornerShape(6.dp))
+        .padding(horizontal = 5.dp, vertical = 3.dp).clearAndSetSemantics { }) {
+        LineIcon("lock", Ink.Text, Modifier.size(14.dp))
+    }
+}
+
+/** The lock beside a locked name in a row or a list (pin.md §4), silent as [LockBadge] is. */
+@Composable internal fun LockMark(modifier: Modifier = Modifier, color: Color = Ink.Muted) {
+    LineIcon("lock", color, modifier.size(14.dp).clearAndSetSemantics { })
 }
 
 /**

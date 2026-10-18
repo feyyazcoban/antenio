@@ -2,6 +2,7 @@ package dev.iptvplayer.tv.ui
 
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.WindowInfo
+import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.MediaEntry
 import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.inSource
@@ -47,6 +48,24 @@ class AppOverlaysTest {
         overlays.show(next)
         assertSame(next, overlays.shown)
         assertNull(overlays.returning)
+    }
+
+    @Test fun withAPinTheQuickActionsOfferTheTitlesOwnLock() {
+        var closed = 0
+        val toggled = mutableListOf<Boolean>()
+        fun actions(locked: Boolean?) = quickActions(movie, favorite = false, toggleFavorite = {}, open = {}, close = { closed++ },
+            locked = locked) { toggled += it }
+        // Without a PIN there is no lock to offer.
+        assertEquals(listOf("favorite", "open"), actions(null).map { it.key })
+        val lock = actions(false).last()
+        assertEquals("lock", lock.key); assertEquals(R.string.lock_add, lock.label); assertEquals("lock", lock.icon)
+        lock.run()
+        assertEquals(listOf(true), toggled); assertEquals(1, closed)
+        // Its own lock can be removed; the PIN pad then takes the closed menu's place.
+        val unlock = actions(true).last()
+        assertEquals(R.string.lock_remove, unlock.label)
+        unlock.run()
+        assertEquals(listOf(true, false), toggled); assertEquals(2, closed)
     }
 
     @Test fun anOpenerThatLeavesTheScreenTakesItsOverlayAndFocusReturnAlong() {

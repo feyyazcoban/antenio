@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,7 +48,8 @@ import java.time.ZoneId
 internal const val FavoritesCategory = "@favorites"
 internal const val HistoryCategory = "@history"
 
-private data class SectionCategory(val key: String, val label: String)
+/** A row of the category column; [locked]: a locked category row (pin.md §4), listed, its titles opened with the PIN. */
+private data class SectionCategory(val key: String, val label: String, val locked: Boolean = false)
 
 /** Focus memory kept out of Compose state: moving through cards must not recompose the screen. */
 private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
@@ -84,9 +86,12 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     val historyLabel = stringResource(R.string.library_history)
     val allLabel = stringResource(if (s.onlyFavorites) R.string.library_all_favorites else when (s.kind) {
         MediaKind.LIVE -> R.string.library_all_channels; MediaKind.MOVIE -> R.string.library_all_movies; else -> R.string.library_all_series })
-    fun provider(name: String) = SectionCategory(name, if (name == CategoryFilter.OTHER) other else name)
+    // Favoriler mixes the sections, so a name locked in any of them shows the lock there.
+    fun provider(name: String) = SectionCategory(name, if (name == CategoryFilter.OTHER) other else name,
+        (if (s.onlyFavorites) listOf(MediaKind.LIVE, MediaKind.MOVIE, MediaKind.SERIES) else listOf(s.kind))
+            .any { CategoryVisibility.key(it, name) in s.locks.categories })
     val categories = remember(itemsOfKind, s.onlyFavorites, s.favoriteIds, s.category, s.kind, s.catalog.categoryOrder, other,
-        favoritesLabel, historyLabel, allLabel) {
+        favoritesLabel, historyLabel, allLabel, s.locks.categories) {
         if (s.onlyFavorites) {
             // Favoriler offers only its own categories; keep the active one if its last favourite was just removed.
             val pool = itemsOfKind.filter { it.id in s.favoriteIds }
@@ -206,7 +211,10 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     val now = guideClock()
     val zone = remember(s.guideZoneId) { runCatching { if (s.guideZoneId.isEmpty()) ZoneId.systemDefault() else ZoneId.of(s.guideZoneId) }.getOrDefault(ZoneId.systemDefault()) }
     val visible by remember { derivedStateOf { grid.layoutInfo.visibleItemsInfo.map { it.index } } }
-    val liveEntries = remember(filtered, visible, headerCount) { visible.mapNotNull { filtered.getOrNull(it - headerCount) }.filter { it.kind == MediaKind.LIVE } }
+    // A locked channel's programmes are not even read until a PIN opens it (pin.md §4).
+    val liveEntries = remember(filtered, visible, headerCount, s.locks) {
+        visible.mapNotNull { filtered.getOrNull(it - headerCount) }.filter { it.kind == MediaKind.LIVE && !s.locks.asksPin(it.id) }
+    }
     val programmes = guideRows(liveEntries, GuideWindow(now, now + 12 * 3_600_000L), s, model)
     fun focusContent(): Boolean = if (filtered.isEmpty()) try { emptyFocus.requestFocus() } catch (_: IllegalStateException) { false }
         else memory.focus(filtered.firstOrNull { it.id == memory.lastId }?.id ?: filtered.firstOrNull()?.id) || memory.focusVisible(grid)
@@ -331,12 +339,13 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                             memory.lastId = entry.id; memory.lastIndex = index; gridActive = true
                             position.intValue = index + 1
                         } }
+                        val locked = s.locks.asksPin(entry.id)
                         if (entry.kind == MediaKind.LIVE && !typing && live)
                             ChannelRow(entry, numbers[entry.id] ?: 0, entry.id in s.favoriteIds, card, programmes[entry.id], now, zone,
-                                guideAvailable = entry.sourceId in guided, longClick = { quick(entry) }) { open(entry) }
+                                guideAvailable = entry.sourceId in guided, locked = locked, longClick = { quick(entry) }) { open(entry) }
                         else MediaCard(entry, entry.id in s.favoriteIds, if (s.sources.size > 1) s.sourceName(entry.sourceId) else null,
                             card, programmes[entry.id], now, compact = typing, compactMin = compactMin,
-                            guideAvailable = entry.sourceId in guided, longClick = { quick(entry) }) { open(entry) }
+                            guideAvailable = entry.sourceId in guided, locked = locked, longClick = { quick(entry) }) { open(entry) }
                     }
                 }
             }
@@ -424,11 +433,13 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
 
 /**
  * The category column. Moving through it does not change the list; OK on a category shows it (D060).
- * Every remote entry lands on the selected category.
+ * Every remote entry lands on the selected category. A locked category shows the lock after its name and reads
+ * "Kilitli"; choosing it asks for nothing, its titles ask on opening (pin.md §4).
  */
 @Composable private fun CategoryColumn(categories: List<SectionCategory>, current: String, modifier: Modifier,
     selectedFocus: FocusRequester, select: (String) -> Unit) {
     val selectedIndex = categories.indexOfFirst { it.key == current }.coerceAtLeast(0)
+    val lockedState = stringResource(R.string.lock_state)
     val list = rememberLazyListState(initialFirstVisibleItemIndex = (selectedIndex - 3).coerceAtLeast(0))
     LazyColumn(modifier.width(196.dp).fillMaxHeight()
         .focusProperties { onEnter = { if (requestedFocusDirection != FocusDirection.Enter) try { selectedFocus.requestFocus() } catch (_: IllegalStateException) { } } }
@@ -442,7 +453,8 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                 modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp)
                     .then(if (isSelected) Modifier.focusRequester(selectedFocus) else Modifier)
                     .onFocusChanged { focused = it.isFocused }
-                    .semantics { selected = isSelected; contentDescription = category.label }.testTag("category:${category.key}"),
+                    .semantics { selected = isSelected; contentDescription = category.label; if (category.locked) stateDescription = lockedState }
+                    .testTag("category:${category.key}"),
                 shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
                 colors = ClickableSurfaceDefaults.colors(containerColor = if (isSelected) Ink.Selected else Color.Transparent,
                     contentColor = Ink.Text, focusedContainerColor = Ink.Mint, focusedContentColor = Ink.OnMint),
@@ -459,7 +471,8 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (tag.isNotEmpty()) Text(tag, Modifier.padding(start = 8.dp), color = if (focused) LocalContentColor.current else Ink.Muted,
                         fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1)
-                    if (isSelected && !focused) Box(Modifier.size(6.dp).background(Ink.Mint, RoundedCornerShape(50)))
+                    if (category.locked) LockMark(Modifier.padding(start = 8.dp), color = if (focused) LocalContentColor.current else Ink.Muted)
+                    if (isSelected && !focused) Box(Modifier.padding(start = if (category.locked) 6.dp else 0.dp).size(6.dp).background(Ink.Mint, RoundedCornerShape(50)))
                 }
             }
         }
@@ -488,16 +501,21 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     }
 }
 
-/** A numbered channel row: logo, name, the programme on now with its progress, and the next one. */
+/**
+ * A numbered channel row: logo, name, the programme on now with its progress, and the next one. A [locked] channel shows
+ * the lock beside its name and "Kilitli kanal" in place of its programmes until a PIN opens it (pin.md §4).
+ */
 @Composable private fun ChannelRow(entry: MediaEntry, number: Int, favorite: Boolean, modifier: Modifier,
-    guide: GuideSlice?, now: Long, zone: ZoneId, guideAvailable: Boolean = true, longClick: (() -> Unit)? = null, click: () -> Unit) {
+    guide: GuideSlice?, now: Long, zone: ZoneId, guideAvailable: Boolean = true, locked: Boolean = false,
+    longClick: (() -> Unit)? = null, click: () -> Unit) {
     val shown = remember(entry.title) { displayTitle(entry.title) }
     val visibility = rememberCardVisibility()
-    val current = guide?.now(now)
-    val next = guide?.next(now)
+    val current = guide?.takeIf { !locked }?.now(now)
+    val next = guide?.takeIf { !locked }?.next(now)
+    val lockedState = stringResource(R.string.lock_state)
     Box(Modifier.fillMaxWidth().then(visibility.container).testTag("tile:library:${entry.id}")) {
         Surface(onClick = click, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth().heightIn(min = 48.dp)
-            .semantics { contentDescription = entry.title },
+            .semantics { contentDescription = entry.title; if (locked) stateDescription = lockedState },
             shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
             colors = ClickableSurfaceDefaults.colors(containerColor = Ink.Container, contentColor = Ink.Text,
                 focusedContainerColor = Ink.High, focusedContentColor = Ink.Text),
@@ -508,11 +526,15 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                 Text(if (number > 0) "$number" else "", Modifier.width(36.dp), color = Ink.Muted, fontFamily = Roboto,
                     fontSize = 14.sp, maxLines = 1)
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(56.dp).height(32.dp), true, logoInset = 0.dp)
-                Text((if (favorite) "★ " else "") + shown.name, Modifier.weight(.42f), color = Ink.Text, fontFamily = Roboto,
-                    fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Row(Modifier.weight(.42f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text((if (favorite) "★ " else "") + shown.name, Modifier.weight(1f, fill = false), color = Ink.Text, fontFamily = Roboto,
+                        fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (locked) LockMark()
+                }
                 Column(Modifier.weight(.58f), verticalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterVertically)) {
                     // Without a guide the column names the channel's category instead of "Program bilgisi yok" on every row.
-                    Text(current?.title ?: if (guideAvailable) stringResource(R.string.programme_none) else shownCategory(entry.category).first,
+                    Text(current?.title ?: if (locked) stringResource(R.string.lock_channel)
+                        else if (guideAvailable) stringResource(R.string.programme_none) else shownCategory(entry.category).first,
                         color = if (current != null) Ink.Text else Ink.Muted, fontFamily = Roboto,
                         fontSize = 14.sp, lineHeight = 19.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (current != null) Progress(current, now)

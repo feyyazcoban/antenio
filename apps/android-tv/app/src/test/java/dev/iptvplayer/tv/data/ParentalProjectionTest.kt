@@ -144,6 +144,31 @@ class ParentalProjectionTest {
         assertEquals(0, project(Catalog(listOf(listSport.copy(category = ""))), lock(sportsId)).locks.unresolved)
     }
 
+    @Test fun eachLockedTitleIsGroupedByWhatOpensItAndAPinOpensOnlyWhatItCovers() {
+        val weather = channel("8", "Haber", "20")
+        val catalog = Catalog(listOf(news, sport, movie, listSport, listNews, weather))
+        val listGroup = AccessScope.Category("b", MediaKind.LIVE, AccessCategory.M3uName("Spor"))
+        val view = project(catalog, lock(sportsId), lock(content(movie)), lock(content(news)), lock(AccessScope.Source("b")))
+        // The list's "Spor" asks for its source's lock and for the row's lock, which its new rule carries.
+        assertEquals(mapOf(setOf(sportsId) to setOf(sport.id), setOf(content(movie)) to setOf(movie.id),
+            setOf(content(news)) to setOf(news.id), setOf(AccessScope.Source("b"), listGroup) to setOf(listSport.id),
+            setOf(AccessScope.Source("b")) to setOf(listNews.id)), view.groups)
+        // The titles locked on their own, by identity, for the quick menu and Kilitli içerikler.
+        assertEquals(setOf(movie.id, news.id), view.locks.contents)
+        // A PIN opens what covers every lock of a title, as the gate decides it.
+        assertEquals(setOf(sport.id), ParentalProjection.opened(view.groups, setOf(sportsId)))
+        assertEquals(setOf(listNews.id), ParentalProjection.opened(view.groups, setOf(AccessScope.Source("b"))))
+        assertEquals(setOf(listSport.id, listNews.id), ParentalProjection.opened(view.groups, setOf(AccessScope.Source("b"), listGroup)))
+        assertTrue(ParentalProjection.opened(view.groups, emptySet()).isEmpty())
+        // What a PIN opened reads as unlocked on screen and is still locked for the hero and the shelves.
+        val locks = view.locks.copy(open = ParentalProjection.opened(view.groups, setOf(sportsId)))
+        assertFalse(locks.asksPin(sport.id)); assertTrue(locks.locked(sport.id))
+        assertTrue(locks.asksPin(movie.id) && locks.asksPin(listSport.id))
+        assertFalse(locks.asksPin(weather.id) || locks.locked(weather.id))
+        // Unread locks ask for everything, whatever a PIN opened before.
+        assertTrue(ParentalLocks(unknown = true, open = setOf(sport.id)).asksPin(sport.id))
+    }
+
     @Test fun adultTitlesAreLeftAsTheyAre() {
         val adult = channel("9", "Spor", "10").copy(adult = true)
         val view = project(Catalog(listOf(sport, adult)), lock(sportsId))

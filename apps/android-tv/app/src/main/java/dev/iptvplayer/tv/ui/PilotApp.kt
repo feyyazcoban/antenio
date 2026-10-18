@@ -47,6 +47,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -271,20 +272,24 @@ internal class EvenColumns(private val count: Int) : GridCells {
 /**
  * [compact] is the search-result row used while the section search keyboard is open; the same Card keeps focus across
  * modes. Names are shown through [displayTitle] (D065). [guideAvailable] false: the source has no guide, so the card
- * does not repeat "Program bilgisi yok". [longClick] opens the quick actions (a held OK).
+ * does not repeat "Program bilgisi yok". [longClick] opens the quick actions (a held OK). [locked]: opening it asks for
+ * the PIN (pin.md §4); the card shows the lock, TalkBack reads "Kilitli", and a channel keeps its programmes to itself.
  */
 @Composable internal fun MediaCard(entry: MediaEntry, favorite: Boolean, sourceName: String?, modifier: Modifier = Modifier,
     guide: GuideSlice? = null, now: Long = 0, onMeasured: (Int) -> Unit = {}, compact: Boolean = false,
-    compactMin: androidx.compose.ui.unit.Dp = 132.dp, guideAvailable: Boolean = true, longClick: (() -> Unit)? = null, click: () -> Unit) {
+    compactMin: androidx.compose.ui.unit.Dp = 132.dp, guideAvailable: Boolean = true, locked: Boolean = false,
+    longClick: (() -> Unit)? = null, click: () -> Unit) {
     val live = entry.kind == MediaKind.LIVE
     val radius = if (live && !compact) 14.dp else TvLayout.CardRadius
     val visibility = rememberCardVisibility()
     val shown = remember(entry.title, entry.year) { displayTitle(entry.title, entry.year) }
     val name = (if (favorite) "★ " else "") + shown.name
+    val lockedState = stringResource(R.string.lock_state)
+    val lockedChannel = stringResource(R.string.lock_channel)
     Column(visibility.container.onSizeChanged { onMeasured(it.height) }.testTag("tile:library:${entry.id}")) {
         Card(onClick = click, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth()
             .then(if (compact) Modifier.heightIn(min = compactMin) else if (live) Modifier.heightIn(min = 126.dp) else Modifier.aspectRatio(2f / 3))
-            .semantics { contentDescription = entry.title },
+            .semantics { contentDescription = entry.title; if (locked) stateDescription = lockedState },
             shape = CardDefaults.shape(shape = RoundedCornerShape(radius)),
             colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
             scale = CardDefaults.scale(focusedScale = 1f),
@@ -297,20 +302,28 @@ internal class EvenColumns(private val count: Int) : GridCells {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     Text(name, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                         fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(if (live) guide?.now(now)?.let { stringResource(R.string.programme_now, it.title) } ?: shownCategory(entry.category).first
-                        else listOf(stringResource(entry.kind.label), shown.year, shown.tag).filter { it.isNotBlank() }.joinToString(" · "),
-                        color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        if (locked) LockMark(color = Ink.Mint)
+                        Text(if (live && locked) lockedChannel
+                            else if (live) guide?.now(now)?.let { stringResource(R.string.programme_now, it.title) } ?: shownCategory(entry.category).first
+                            else listOf(stringResource(entry.kind.label), shown.year, shown.tag).filter { it.isNotBlank() }.joinToString(" · "),
+                            color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
                     sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
             } else if (live) Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(130.dp).height(40.dp), true, logoInset = 0.dp)
-                Text(name, color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp,
-                    lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(name, Modifier.weight(1f, fill = false), color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp,
+                        lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (locked) LockMark()
+                }
                 Text(shownCategory(entry.category).first, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             } else Box(Modifier.fillMaxSize()) {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.fillMaxSize(), showFallbackTitle = false)
                 entry.ratingText?.let { RatingBadge(it, Modifier.align(Alignment.TopStart).padding(7.dp)) }
+                if (locked) LockBadge(Modifier.align(Alignment.TopEnd).padding(7.dp))
             }
         }
         if (compact) return@Column
@@ -326,10 +339,11 @@ internal class EvenColumns(private val count: Int) : GridCells {
             overflow = TextOverflow.Ellipsis)
         if (live) sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
         if (live) {
-            Text(guide?.now(now)?.let { stringResource(R.string.programme_now, it.title) }
+            // A locked channel's programmes are not shown until a PIN opens it (pin.md §4); the lines keep their height.
+            Text(if (locked) lockedChannel else guide?.now(now)?.let { stringResource(R.string.programme_now, it.title) }
                 ?: if (guideAvailable) stringResource(R.string.programme_none) else "", color = Ink.Muted, fontFamily = Roboto,
                 fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(guide?.next(now)?.let { stringResource(R.string.programme_next, it.title) }.orEmpty(), color = Ink.Muted, fontFamily = Roboto,
+            Text(guide?.next(now)?.takeIf { !locked }?.let { stringResource(R.string.programme_next, it.title) }.orEmpty(), color = Ink.Muted, fontFamily = Roboto,
                 fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
@@ -389,11 +403,16 @@ internal val LocalAppOverlays = staticCompositionLocalOf { AppOverlays() }
 @Composable private fun AppOverlayHost(overlays: AppOverlays, s: TvState, model: TvViewModel) {
     overlays.shown?.let { opened -> key(opened) {
         when (val overlay = opened.overlay) {
-            // A locked title's PIN pad takes the menu's place for the same card, focus going back to it.
-            is AppOverlay.Quick -> QuickActions(overlay.entry, quickActions(overlay.entry, overlay.entry.id in s.favoriteIds,
-                toggleFavorite = { model.toggleFavorite(overlay.entry) }, open = {
-                    if (model.open(overlay.entry)) overlays.show(AppOverlays.Opened(AppOverlay.Pin, opened.owner, opened.window, opened.returnFocus))
-                }, close = overlays::close), overlays::close)
+            // A locked title's PIN pad takes the menu's place for the same card, focus going back to it, as does the pad
+            // for Kilidi kaldır. Kilitle and Kilidi kaldır are offered with a PIN set, for the title's own lock.
+            is AppOverlay.Quick -> {
+                fun pin() = overlays.show(AppOverlays.Opened(AppOverlay.Pin, opened.owner, opened.window, opened.returnFocus))
+                val target = remember(overlay.entry) { model.favoriteTarget(overlay.entry) }
+                QuickActions(overlay.entry, quickActions(overlay.entry, overlay.entry.id in s.favoriteIds,
+                    toggleFavorite = { model.toggleFavorite(overlay.entry) }, open = { if (model.open(overlay.entry)) pin() },
+                    close = overlays::close, locked = target?.takeIf { s.parental.status == ParentalStatus.ON }?.let { it.id in s.locks.contents },
+                    toggleLock = { lock -> if (model.setTitleLock(overlay.entry, lock)) pin() }), overlays::close)
+            }
             // The prompt ended in the model (a PIN taken, Vazgeç, Back): the window closes and focus goes back.
             AppOverlay.Pin -> s.parental.prompt.let { prompt ->
                 if (prompt != null) PinDialog(prompt, model) else LaunchedEffect(Unit) { overlays.close() }
@@ -410,16 +429,22 @@ internal val LocalAppOverlays = staticCompositionLocalOf { AppOverlays() }
 
 /**
  * A row of the quick actions: [key] names it for tests ("quick-$key"); [run] does what it says and closes the menu,
- * before or after as the action needs. Later steps add rows (Kilitle, Yeniden adlandır, Taşı, Gizle …).
+ * before or after as the action needs. Later steps add rows (Yeniden adlandır, Taşı, Gizle …).
  */
 internal data class QuickAction(val key: String, @StringRes val label: Int, val icon: String? = null,
     val iconFilled: Boolean = false, val run: () -> Unit)
 
-/** Held OK on a card (U8): add or remove the favourite, or open the title, without going through its detail or player. */
-internal fun quickActions(entry: MediaEntry, favorite: Boolean, toggleFavorite: () -> Unit, open: () -> Unit, close: () -> Unit) = listOf(
+/**
+ * Held OK on a card (U8): add or remove the favourite, or open the title, without going through its detail or player.
+ * [locked], with a PIN set, offers the title's own lock (pin.md §3.5): Kilitle when it has none, else Kilidi kaldır;
+ * [toggleLock] gets what to do, and its PIN pad takes the menu's place.
+ */
+internal fun quickActions(entry: MediaEntry, favorite: Boolean, toggleFavorite: () -> Unit, open: () -> Unit, close: () -> Unit,
+    locked: Boolean? = null, toggleLock: (Boolean) -> Unit = {}) = listOfNotNull(
     QuickAction("favorite", if (favorite) R.string.favorite_remove else R.string.favorite_add, "star", iconFilled = favorite) { toggleFavorite(); close() },
     QuickAction("open", if (entry.kind == MediaKind.LIVE) R.string.action_watch else R.string.action_details,
-        if (entry.kind == MediaKind.LIVE) "play" else null) { close(); open() })
+        if (entry.kind == MediaKind.LIVE) "play" else null) { close(); open() },
+    locked?.let { own -> QuickAction("lock", if (own) R.string.lock_remove else R.string.lock_add, "lock") { close(); toggleLock(!own) } })
 
 /**
  * The quick actions for [entry], then Vazgeç. A list longer than the window (large text) scrolls by whole rows (D053),

@@ -1,5 +1,7 @@
 package dev.iptvplayer.tv.data
 
+import dev.iptvplayer.tv.CategoryAccess
+import dev.iptvplayer.tv.TvState
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -13,6 +15,24 @@ class CategoryVisibilityTest {
         listOf("TURK SPOR", "Essex Dramas", "Sussex", "TR/FILM ~ YERLI 2018", "Kids 18 Ay", "Adultswim Classics").forEach {
             assertFalse(it, CategoryVisibility.looksAdult(it))
         }
+    }
+
+    @Test fun aKeyGivesBackItsSectionAndName() {
+        assertEquals(MediaKind.LIVE to "Spor | Canlı", CategoryVisibility.row(CategoryVisibility.key(MediaKind.LIVE, "Spor | Canlı")))
+        assertEquals(MediaKind.SERIES to "Dram", CategoryVisibility.row(CategoryVisibility.key(MediaKind.EPISODE, "Dram")))
+        assertNull(CategoryVisibility.row("Spor"))
+        assertNull(CategoryVisibility.row("RADIO|Spor"))
+    }
+
+    @Test fun kategorileriYonetShowsARowShownLockedOrHiddenAndHidingWins() {
+        val sport = CategoryVisibility.key(MediaKind.LIVE, "Spor")
+        val drama = CategoryVisibility.key(MediaKind.SERIES, "Dram")
+        val state = TvState(hiddenCategories = setOf(drama), locks = ParentalLocks(categories = setOf(sport, drama)))
+        assertEquals(CategoryAccess.LOCKED, state.categoryAccess(MediaKind.LIVE, "Spor"))
+        // A row hidden while locked keeps its lock under the hide.
+        assertEquals(CategoryAccess.HIDDEN, state.categoryAccess(MediaKind.SERIES, "Dram"))
+        // By section: the film category of the same name is its own row.
+        assertEquals(CategoryAccess.SHOWN, state.categoryAccess(MediaKind.MOVIE, "Spor"))
     }
 
     @Test fun hiddenCategoriesLeaveTheCatalogAndChoicesKeepEveryCategory() {

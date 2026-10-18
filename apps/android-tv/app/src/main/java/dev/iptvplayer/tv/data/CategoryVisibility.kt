@@ -28,6 +28,13 @@ object CategoryVisibility {
     private fun section(kind: MediaKind) = if (kind == MediaKind.EPISODE) MediaKind.SERIES else kind
     fun key(kind: MediaKind, category: String) = "${section(kind).name}|$category"
 
+    /** The section and the category name a [key] was made of; null for one this app did not make. */
+    fun row(key: String): Pair<MediaKind, String>? {
+        val bar = key.indexOf('|')
+        val kind = MediaKind.entries.firstOrNull { it.name == key.substring(0, bar.coerceAtLeast(0)) } ?: return null
+        return kind to key.substring(bar + 1)
+    }
+
     /** [catalog] without the titles of hidden categories; the same instance when nothing is hidden. */
     fun apply(catalog: Catalog, hidden: Set<String>, hideAdult: Boolean): Catalog {
         if (hidden.isEmpty() && !hideAdult) return catalog

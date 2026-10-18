@@ -32,12 +32,14 @@ class ParentalControllerTest {
     private val clock = Clock(PinClock(1, 1_000))
     private val followUps = mutableListOf<AdminFollowUp>()
     private val unlocks = mutableListOf<PinPurpose.Unlock>()
+    private val releases = mutableListOf<Pair<PinPurpose.Release, Long>>()
     private var policyChanges = 0
 
     private fun TestScope.controller(storage: Storage): ParentalController {
         val dispatcher = StandardTestDispatcher(testScheduler)
         return ParentalController(this, ParentalGuard(storage, clock, dispatcher, dispatcher), { testScheduler.currentTime },
-            unlocked = { unlocks += it }, policyChanged = { policyChanges++ }) { followUps += it }
+            unlocked = { unlocks += it }, released = { purpose, revision -> releases += purpose to revision },
+            policyChanged = { policyChanges++ }) { followUps += it }
     }
 
     private fun stored(attempts: PinAttempts = PinAttempts.clear(PinClock(1, 1_000)), rules: List<AccessRule> = emptyList()) =
@@ -57,7 +59,7 @@ class ParentalControllerTest {
         assertFalse(parental.requestAdmin(AdminReason.SHOW_ADULT))
         assertFalse(parental.changePin())
 
-        assertTrue(parental.createPin(then = AdminFollowUp.SHOW_ADULT))
+        assertTrue(parental.createPin(then = AdminFollowUp.ShowAdult))
         assertEquals(PinPurpose.Create, parental.prompt.purpose); assertEquals(PinStep.NEW, parental.prompt.step)
         assertFalse(parental.prompt.canForget)
         val easy = pin("1234")
@@ -86,7 +88,7 @@ class ParentalControllerTest {
         val state = parental.state.value
         assertEquals(ParentalStatus.ON, state.status); assertTrue(state.adminUnlocked); assertNull(state.prompt)
         assertEquals(UiText.Res(R.string.parental_created), state.notice)
-        assertEquals(listOf(AdminFollowUp.SHOW_ADULT), followUps)
+        assertEquals(listOf(AdminFollowUp.ShowAdult), followUps)
         assertEquals(0L, storage.record!!.policyRevision)
         assertFalse(parental.createPin())
     }
@@ -144,7 +146,7 @@ class ParentalControllerTest {
         assertEquals(ParentalStatus.ON, parental.state.value.status)
         assertFalse(parental.createPin())
         // Vazgeç while the PIN is checked: the right PIN grants nothing.
-        parental.requestAdmin(AdminReason.SHOW_ADULT, AdminFollowUp.SHOW_ADULT)
+        parental.requestAdmin(AdminReason.SHOW_ADULT, AdminFollowUp.ShowAdult)
         runCurrent()
         parental.submit(pin("2580"))
         parental.cancel()
@@ -152,13 +154,13 @@ class ParentalControllerTest {
         assertNull(parental.state.value.prompt); assertFalse(parental.state.value.adminUnlocked)
         assertEquals(emptyList<AdminFollowUp>(), followUps)
 
-        parental.requestAdmin(AdminReason.SHOW_ADULT, AdminFollowUp.SHOW_ADULT)
+        parental.requestAdmin(AdminReason.SHOW_ADULT, AdminFollowUp.ShowAdult)
         runCurrent()
         parental.submit(pin("2580"))
         advanceUntilIdle()
         assertNull(parental.state.value.prompt); assertTrue(parental.state.value.adminUnlocked)
         assertTrue(parental.state.value.mayLoosen)
-        assertEquals(listOf(AdminFollowUp.SHOW_ADULT), followUps)
+        assertEquals(listOf(AdminFollowUp.ShowAdult), followUps)
         // Verified in this visit: nothing more is asked until the panel closes.
         assertFalse(parental.requestAdmin(AdminReason.CATEGORIES))
         parental.closeSettings()
@@ -308,6 +310,91 @@ class ParentalControllerTest {
         assertEquals(emptyList<AccessRule>(), parental.gatePolicy!!.rules)
     }
 
+    @Test fun locksAreAddedFreelyAndRemovedOnlyWithThePinVerifiedInAyarlar() = runTest {
+        fun locked(scope: AccessScope) = AccessRule(scope, pinRequired = true)
+        val film = AccessScope.Content(ContentRef("a", "movie:1"))
+        val sports = AccessScope.Category("a", MediaKind.LIVE, AccessCategory.ProviderId("10"))
+        val storage = Storage(stored())
+        val parental = controller(storage)
+        parental.refresh()
+        val changes = policyChanges
+        parental.grant(setOf(sports))
+        // Kilitle: a tightening, saved without the PIN; the session keeps what it opened.
+        assertEquals(LockEdit.SAVED, parental.editLocks(add = listOf(locked(film))))
+        assertEquals(listOf(locked(film)), storage.record!!.rules); assertEquals(4L, storage.record!!.policyRevision)
+        assertEquals(storage.record!!.rules, parental.policy!!.rules); assertEquals(changes + 1, policyChanges)
+        assertEquals(setOf<AccessScope>(sports), parental.grants)
+        // A lock it already has changes nothing.
+        assertEquals(LockEdit.SAVED, parental.editLocks(add = listOf(locked(film))))
+        assertEquals(4L, storage.record!!.policyRevision)
+        // Removing loosens: refused without the PIN.
+        assertEquals(LockEdit.NOT_SAVED, parental.editLocks(remove = setOf(film)))
+        assertEquals(listOf(locked(film)), storage.record!!.rules)
+
+        parental.requestAdmin(AdminReason.CATEGORIES)
+        runCurrent()
+        parental.submit(pin("2580"))
+        advanceUntilIdle()
+        assertTrue(parental.state.value.adminUnlocked)
+        // A tightening in the same visit leaves the PIN good for the removal after it.
+        assertEquals(LockEdit.SAVED, parental.editLocks(add = listOf(locked(sports))))
+        assertEquals(LockEdit.SAVED, parental.editLocks(remove = setOf(film, sports)))
+        assertTrue(storage.record!!.rules.isEmpty()); assertEquals(6L, storage.record!!.policyRevision)
+        // A lock removed ends what PINs opened.
+        assertTrue(parental.grants.isEmpty())
+        // A hide on the same scope is not a lock: it stays.
+        storage.record = ProtectionSnapshot(storage.record!!.generation + 1, 6, credential, storage.record!!.attempts,
+            listOf(AccessRule(film, hidden = true, pinRequired = true)))
+        parental.refresh()
+        assertEquals(LockEdit.SAVED, parental.editLocks(remove = setOf(film)))
+        assertEquals(listOf(AccessRule(film, hidden = true)), storage.record!!.rules)
+        // The record holds 1024 rules at most; the parent is told to remove some (pin.md §5).
+        val full = List(1024) { locked(AccessScope.Content(ContentRef("a", "movie:${it + 10}"))) }
+        storage.record = ProtectionSnapshot(storage.record!!.generation + 1, 9, credential, storage.record!!.attempts, full)
+        parental.refresh()
+        assertEquals(LockEdit.LIMIT, parental.editLocks(add = listOf(locked(film))))
+        assertEquals(full, storage.record!!.rules)
+        // A write that fails saves nothing.
+        storage.failWrites = true
+        assertEquals(LockEdit.NOT_SAVED, parental.editLocks(remove = setOf(full.first().scope)))
+        assertEquals(full, storage.record!!.rules)
+    }
+
+    @Test fun aLockAddedOverAChangeMadeElsewhereIsMadeOnTheRecordAsItIsThen() = runTest {
+        val film = AccessRule(AccessScope.Content(ContentRef("a", "movie:1")), pinRequired = true)
+        val other = AccessRule(AccessScope.Content(ContentRef("a", "movie:2")), pinRequired = true)
+        val storage = Storage(stored())
+        val parental = controller(storage)
+        parental.refresh()
+        // Another model saved a lock since this one read the record.
+        storage.record = ProtectionSnapshot(storage.record!!.generation + 1, 5, credential, storage.record!!.attempts, listOf(other))
+        assertEquals(LockEdit.SAVED, parental.editLocks(add = listOf(film)))
+        assertEquals(listOf(other, film), storage.record!!.rules); assertEquals(6L, storage.record!!.policyRevision)
+        assertEquals(storage.record!!.rules, parental.policy!!.rules)
+    }
+
+    @Test fun kilidiKaldirsPinRemovesThatLockAndGrantsNothingElse() = runTest {
+        val film = AccessRule(AccessScope.Content(ContentRef("a", "movie:1")), pinRequired = true)
+        val storage = Storage(stored(rules = listOf(film)))
+        val parental = controller(storage)
+        parental.refresh()
+        val purpose = PinPurpose.Release("1:amovie:1", "Film")
+        parental.release(purpose)
+        runCurrent()
+        assertEquals(purpose, parental.prompt.purpose); assertEquals(PinStep.VERIFY, parental.prompt.step)
+        parental.submit(pin("2580"))
+        advanceUntilIdle()
+        assertNull(parental.state.value.prompt)
+        // The model hears the revision the PIN saw, and removes the lock with it.
+        assertEquals(listOf(purpose to 3L), releases)
+        assertFalse(parental.state.value.adminUnlocked); assertTrue(unlocks.isEmpty()); assertTrue(followUps.isEmpty())
+        // On a policy that changed since, nothing is removed.
+        assertEquals(LockEdit.NOT_SAVED, parental.editLocks(remove = setOf(film.scope), verified = 2))
+        assertEquals(listOf(film), storage.record!!.rules)
+        assertEquals(LockEdit.SAVED, parental.editLocks(remove = setOf(film.scope), verified = 3))
+        assertTrue(storage.record!!.rules.isEmpty())
+    }
+
     @Test fun anUnreadableRecordAllowsNothingAndStartingOverRemovesIt() = runTest {
         val storage = Storage(stored()).apply { unavailable = true }
         val parental = controller(storage)
@@ -360,7 +447,7 @@ class ParentalControllerTest {
         val storage = Storage(null)
         val parental = controller(storage)
         parental.refresh()
-        parental.createPin(then = AdminFollowUp.SHOW_ADULT)
+        parental.createPin(then = AdminFollowUp.ShowAdult)
         parental.submit(pin("2580")); parental.submit(pin("2580"))
         assertTrue(parental.prompt.saving)
         // Vazgeç and Back wait: the PIN lands all the same, and the parent learns it did.
@@ -370,13 +457,13 @@ class ParentalControllerTest {
         var state = parental.state.value
         assertNull(state.prompt); assertEquals(ParentalStatus.ON, state.status); assertTrue(state.adminUnlocked)
         assertEquals(UiText.Res(R.string.parental_created), state.notice)
-        assertEquals(listOf(AdminFollowUp.SHOW_ADULT), followUps)
+        assertEquals(listOf(AdminFollowUp.ShowAdult), followUps)
 
         // A pad its opener took along closes at once; the PIN it saved grants nothing and runs nothing.
         followUps.clear()
         val other = controller(Storage(null))
         other.refresh()
-        other.createPin(then = AdminFollowUp.SHOW_ADULT)
+        other.createPin(then = AdminFollowUp.ShowAdult)
         other.submit(pin("2580")); other.submit(pin("2580"))
         other.close()
         assertNull(other.state.value.prompt)

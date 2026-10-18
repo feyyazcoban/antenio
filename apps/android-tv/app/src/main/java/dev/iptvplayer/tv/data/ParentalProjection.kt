@@ -5,21 +5,28 @@ package dev.iptvplayer.tv.data
  * series that ask for the PIN. [categories]: the locked category rows, as CategoryVisibility.key names them in Ayarlar.
  * [sources]: the locked sources. [unresolved]: titles of an older list left out because their category identity is
  * missing while a category rule of their source needs it; a refresh brings them back. [unknown]: the rules are not
- * read, or cannot be, so every title asks for the PIN (D049) and none is promoted or fetched before it.
+ * read, or cannot be, so every title asks for the PIN (D049) and none is promoted or fetched before it. [contents]: the
+ * titles with a lock of their own (Kilitle in the quick menu), by identity, listed in the library or not. [open]: the
+ * locked titles whose every lock a PIN opened in this session; they read as unlocked until the app leaves the screen.
  */
 data class ParentalLocks(val ids: Set<String> = emptySet(), val categories: Set<String> = emptySet(),
-    val sources: Set<String> = emptySet(), val unresolved: Int = 0, val unknown: Boolean = false) {
-    /** Whether the title [id] asks for the PIN before it opens. */
+    val sources: Set<String> = emptySet(), val unresolved: Int = 0, val unknown: Boolean = false,
+    val contents: Set<String> = emptySet(), val open: Set<String> = emptySet()) {
+    /** Whether a lock rule locks the title [id], whatever PINs opened: it is never promoted nor fetched on its own. */
     fun locked(id: String): Boolean = unknown || id in ids
+
+    /** Whether opening [id] asks for the PIN now: the screens mark it and keep its programmes to themselves. */
+    fun asksPin(id: String): Boolean = unknown || id in ids && id !in open
 }
 
 /**
  * [catalog]: the library to publish. [missing]: the rules a locked category row needs for identities it gained; they
  * lock in [locks] already. [rows]: each locked row with the rules its lock rests on, for the next publish
- * ([ParentalProjection.project]); unlocking a row removes these as well as the rules of its identities.
+ * ([ParentalProjection.project]); unlocking a row removes these as well as the rules of its identities. [groups]: the
+ * locked titles by the scopes a PIN must open for each ([ParentalProjection.opened]).
  */
 internal data class ParentalView(val catalog: Catalog, val locks: ParentalLocks, val missing: List<AccessRule>,
-    val rows: Map<String, Set<AccessScope.Category>> = emptyMap())
+    val rows: Map<String, Set<AccessScope.Category>> = emptyMap(), val groups: Map<Set<AccessScope>, Set<String>> = emptyMap())
 
 /**
  * The lock rules over the library (pin.md §5): which titles a rule locks, and the category rows of Ayarlar behind the
@@ -58,12 +65,15 @@ internal object ParentalProjection {
         val effective = if (missing.isEmpty()) policy else AccessPolicy(policy.rules + missing, policy.revision)
         val byId = sources.associateBy { it.id }
         val locked = HashSet<String>()
+        // Few distinct sets: one per locked category, title or source, so a PIN's grants map onto titles quickly.
+        val groups = HashMap<Set<AccessScope>, MutableSet<String>>()
         var unresolved = 0
         val items = visible.items.filter { entry ->
             // An adult title is out of every screen whatever its rules say.
             if (entry.adult) return@filter true
-            when (effective.decide(byId[entry.sourceId], entry)) {
-                AccessDecision.REQUIRE_PIN -> { locked += entry.id; true }
+            val verdict = effective.evaluate(byId[entry.sourceId], entry)
+            when (verdict.decision) {
+                AccessDecision.REQUIRE_PIN -> { locked += entry.id; groups.getOrPut(verdict.pinScopes) { HashSet() } += entry.id; true }
                 AccessDecision.UNRESOLVED -> { unresolved++; false }
                 AccessDecision.HIDDEN -> false
                 AccessDecision.ALLOW, AccessDecision.DENIED -> true
@@ -71,8 +81,17 @@ internal object ParentalProjection {
         }
         val catalog = if (items.size == visible.items.size) visible else visible.copy(items = items)
         return ParentalView(catalog, ParentalLocks(locked, lockedRows.keys.toSet(),
-            pinned.mapNotNullTo(HashSet()) { (it.scope as? AccessScope.Source)?.sourceId }, unresolved), missing, lockedRows)
+            pinned.mapNotNullTo(HashSet()) { (it.scope as? AccessScope.Source)?.sourceId }, unresolved,
+            contents = pinned.mapNotNullTo(LinkedHashSet()) { (it.scope as? AccessScope.Content)?.ref?.key }),
+            missing, lockedRows, groups)
     }
+
+    /**
+     * The titles of [groups] ([ParentalView.groups]) whose every lock [grants] opened: what PINs opened in the session
+     * (ParentalSession), as the gate would decide it.
+     */
+    fun opened(groups: Map<Set<AccessScope>, Set<String>>, grants: Set<AccessScope>): Set<String> =
+        if (grants.isEmpty()) emptySet() else groups.entries.filter { grants.containsAll(it.key) }.flatMapTo(HashSet()) { it.value }
 
     /** The identities of the category row [name] of [kind] in every source of [catalog], for a lock set from Ayarlar. */
     fun categoryScopes(sources: List<SourceConfig>, catalog: Catalog, kind: MediaKind, name: String): Set<AccessScope.Category> =

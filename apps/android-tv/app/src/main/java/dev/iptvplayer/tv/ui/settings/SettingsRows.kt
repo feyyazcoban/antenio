@@ -105,10 +105,14 @@ internal class SettingsScope(
         SettingRow(label, description, Modifier.row(rowFocus(key), section).then(modifier), checked = checked, onClick = onClick)
     }
 
-    /** A row that acts on OK. [busy] reads as working; [attention] shows the description as a warning. */
+    /**
+     * A row that acts on OK. [busy] reads as working; [attention] shows the description as a warning. [value] stands at
+     * the end as a switch's state does, read as the row's state ("Kilitli").
+     */
     @Composable fun ActionRow(key: String, label: String, description: String, modifier: Modifier = Modifier,
-        section: SectionId? = null, busy: Boolean = false, attention: Boolean = false, onClick: () -> Unit) {
-        SettingRow(label, description, Modifier.row(rowFocus(key), section).then(modifier), busy = busy, attention = attention, onClick = onClick)
+        section: SectionId? = null, busy: Boolean = false, attention: Boolean = false, value: String? = null, onClick: () -> Unit) {
+        SettingRow(label, description, Modifier.row(rowFocus(key), section).then(modifier), value = value, busy = busy,
+            attention = attention, onClick = onClick)
     }
 
     /** A row that opens [route]; Back returns to it. */
@@ -117,10 +121,13 @@ internal class SettingsScope(
         ActionRow(key, label, description, modifier, section) { open(route, key) }
     }
 
-    /** One of [options], the chosen one as its description; OK opens them as a ChoicePage and Back returns here. */
+    /**
+     * One of [options], the chosen one as its description; OK opens them as a ChoicePage and Back returns here. With a
+     * [description] of its own, the row shows the choice as [value] at its end (Açık, Kilitli, Gizli).
+     */
     @Composable fun ChoiceRow(key: String, label: String, options: List<String>, selected: Int, modifier: Modifier = Modifier,
-        section: SectionId? = null, choose: (Int) -> Unit) {
-        ActionRow(key, label, options.getOrElse(selected) { "" }, modifier, section) {
+        section: SectionId? = null, description: String? = null, value: String? = null, choose: (Int) -> Unit) {
+        ActionRow(key, label, description ?: options.getOrElse(selected) { "" }, modifier, section, value = value) {
             showChoice(key, ChoiceSpec(label, options, selected, choose))
         }
     }
@@ -206,8 +213,9 @@ internal class SettingsScope(
     return edge
 }
 
+/** A switch when [checked] is given, its state at the end; else a row that shows [value] there, if any. */
 @Composable private fun SettingRow(label: String, description: String, modifier: Modifier = Modifier,
-    checked: Boolean? = null, busy: Boolean = false, attention: Boolean = false, onClick: () -> Unit) {
+    checked: Boolean? = null, value: String? = null, busy: Boolean = false, attention: Boolean = false, onClick: () -> Unit) {
     val edge = rememberFocusEdge()
     val focused = edge.focused
     val state = stringResource(if (checked == true) R.string.switch_on else R.string.switch_off)
@@ -216,7 +224,7 @@ internal class SettingsScope(
             role = Role.Switch
             toggleableState = if (checked) ToggleableState.On else ToggleableState.Off
             stateDescription = state
-        }
+        } else if (value != null) stateDescription = value
         if (busy) progressBarRangeInfo = ProgressBarRangeInfo.Indeterminate
     }, shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
         colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
@@ -233,6 +241,8 @@ internal class SettingsScope(
                 Modifier.background(if (checked && !focused) Ink.Selected else Ink.Background, RoundedCornerShape(50))
                     .padding(horizontal = 10.dp, vertical = 6.dp).clearAndSetSemantics { },
                 color = if (checked) Ink.Mint else Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
+            else if (value != null) Text(value, Modifier.background(Ink.Background, RoundedCornerShape(50))
+                .padding(horizontal = 10.dp, vertical = 6.dp).clearAndSetSemantics { }, color = Ink.Text, fontFamily = Roboto, fontSize = 12.sp)
         }
     }
 }

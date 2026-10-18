@@ -180,7 +180,7 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
                             contentPadding = PaddingValues(horizontal = TvLayout.Gutter, vertical = 4.dp)) {
                             items(row.entries, key = { it.id }) { entry ->
                                 SearchCard(entry, s.sourceName(entry.sourceId).takeIf { s.sources.size > 1 }, cardMin, cardWidth,
-                                    headingHeight + 10.dp, viewportHeight, Modifier
+                                    headingHeight + 10.dp, viewportHeight, s.locks.asksPin(entry.id), Modifier
                                     .then(if (target?.id == entry.id) Modifier.focusRequester(resultFocus) else Modifier)
                                     .onFocusChanged { if (it.isFocused) {
                                         resultsActive = true; returnToResults = true; lastIndex = s.searchResults.indexOf(entry); model.searchFocus(entry.id)
@@ -258,13 +258,15 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
         })
 }
 
+/** A result: artwork, name, kind and source. A [locked] one shows the lock and TalkBack reads "Kilitli" (pin.md §4). */
 @Composable private fun SearchCard(entry: MediaEntry, sourceName: String?, minHeight: Dp, width: Dp, contextAbove: Dp,
-    viewportHeight: Dp, modifier: Modifier, open: () -> Unit) {
+    viewportHeight: Dp, locked: Boolean, modifier: Modifier, open: () -> Unit) {
     val visibility = rememberCardVisibility(horizontalPadding = TvLayout.Gutter, contextAbove = contextAbove, viewportHeight = viewportHeight)
     val shown = remember(entry.title, entry.year) { displayTitle(entry.title, entry.year) }
+    val lockedState = stringResource(R.string.lock_state)
     Box(Modifier.width(width).then(visibility.container).testTag("tile:search:${entry.id}")) {
         Card(onClick = open, modifier = modifier.fillMaxWidth().heightIn(min = minHeight).then(visibility.focus)
-            .semantics { contentDescription = entry.title; testTag = "search:${entry.id}" },
+            .semantics { contentDescription = entry.title; if (locked) stateDescription = lockedState; testTag = "search:${entry.id}" },
             shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
             colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
             scale = CardDefaults.scale(focusedScale = 1f),
@@ -276,9 +278,12 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     Text(shown.name, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
                         fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(listOf(stringResource(when (entry.kind) { MediaKind.LIVE -> R.string.kind_live; MediaKind.MOVIE -> R.string.kind_movie_single; else -> R.string.kind_series_single }), shown.year, shown.tag)
-                        .filter { it.isNotBlank() }.joinToString(" · "), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        if (locked) LockMark(color = Ink.Mint)
+                        Text(listOf(stringResource(when (entry.kind) { MediaKind.LIVE -> R.string.kind_live; MediaKind.MOVIE -> R.string.kind_movie_single; else -> R.string.kind_series_single }), shown.year, shown.tag)
+                            .filter { it.isNotBlank() }.joinToString(" · "), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
                     sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
             }

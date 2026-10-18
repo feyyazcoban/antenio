@@ -92,8 +92,10 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
     val channel = channels.getOrNull(selectedIndex)
     val list = rememberLazyListState(initialFirstVisibleItemIndex = selectedIndex)
     val visible by remember { derivedStateOf { list.layoutInfo.visibleItemsInfo.map { it.index } } }
-    val requested = remember(channels, visible, selectedIndex) {
+    // A locked channel's programmes are not read until a PIN opens it: its row is one "Kilitli kanal" cell (pin.md §4).
+    val requested = remember(channels, visible, selectedIndex, s.locks) {
         (visible + (selectedIndex - 2..selectedIndex + 2)).distinct().sorted().mapNotNull { channels.getOrNull(it) }
+            .filterNot { s.locks.asksPin(it.id) }
     }
     val rows = guideRows(requested, dayWindow, s, model)
     val allSlots = remember(rows, dayWindow) { rows.mapValues { guideSlots(it.value.programmes, dayWindow) } }
@@ -125,7 +127,8 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
     fun open(entry: MediaEntry, slot: GuideSlot) {
         select(entry.id, (model.state.value.guideAnchor ?: anchor).takeIf(slot::contains) ?: slot.from)
         val programme = slot.programme
-        if (programme?.isOnAt(System.currentTimeMillis()) == true) watch(entry)
+        // A locked channel shows no programme detail: OK asks for its PIN and opens it live.
+        if (model.state.value.locks.asksPin(entry.id) || programme?.isOnAt(System.currentTimeMillis()) == true) watch(entry)
         else detail = entry to slot
     }
     // Typed channel numbers ("12"), shown in the corner and opened 1.2 s after the last digit.
@@ -214,7 +217,8 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                     }
                 }
                 // What the removed bottom panel said (D067): the cell's programme, or why there is none.
-                val selectedText = selectedSlot?.programme?.title ?: stringResource(if ((selectedSlot?.programmes?.size ?: 0) > 1) R.string.guide_overlapping_now
+                val selectedText = if (channel != null && s.locks.asksPin(channel.id)) stringResource(R.string.lock_channel)
+                    else selectedSlot?.programme?.title ?: stringResource(if ((selectedSlot?.programmes?.size ?: 0) > 1) R.string.guide_overlapping_now
                     else guideEmptyText(channel?.let { s.guideStatus[it.sourceId] }, channel?.let { rows[it.id] }))
                 val openLabel = stringResource(R.string.guide_open_programme)
                 val detailLabel = stringResource(R.string.guide_programme_detail)
@@ -275,6 +279,7 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                     val listHeight = with(density) { (fit * pitchPx - gapPx + 2 * padPx).toDp() }
                     LazyColumn(Modifier.height(listHeight), state = list, verticalArrangement = Arrangement.spacedBy(4.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
                         itemsIndexed(channels, key = { _, entry -> entry.id }) { index, entry ->
+                            val rowLocked = s.locks.asksPin(entry.id)
                             val rowSlots = allSlots[entry.id] ?: emptySlots
                             Row(Modifier.fillMaxWidth().height(rowHeight).testTag("guide-row:${entry.id}"), verticalAlignment = Alignment.CenterVertically) {
                                 Row(Modifier.width(channelWidth).fillMaxHeight().padding(end = 12.dp), verticalAlignment = Alignment.CenterVertically,
@@ -284,8 +289,12 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                                     Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(60.dp).height(if (density.fontScale >= 1.5f) 44.dp else 36.dp)
                                         .testTag("guide-logo:${entry.id}"), logo = true, logoInset = 2.dp)
                                     Column(Modifier.weight(1f)) {
-                                        Text(displayTitle(entry.title).name, color = if (index == selectedIndex) Ink.Text else Ink.Muted, fontFamily = Roboto,
-                                            fontSize = 13.sp, maxLines = if (s.sources.size > 1) 1 else 2, lineHeight = 17.sp, overflow = TextOverflow.Ellipsis)
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            Text(displayTitle(entry.title).name, Modifier.weight(1f, fill = false), color = if (index == selectedIndex) Ink.Text else Ink.Muted,
+                                                fontFamily = Roboto, fontSize = 13.sp, maxLines = if (s.sources.size > 1) 1 else 2, lineHeight = 17.sp,
+                                                overflow = TextOverflow.Ellipsis)
+                                            if (rowLocked) LockMark()
+                                        }
                                         if (s.sources.size > 1) Text(s.sourceName(entry.sourceId), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp,
                                             lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     }
@@ -298,7 +307,8 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                                         val offset = width * ((start - viewport.from).toFloat() / duration)
                                         val cellWidth = (width * ((end - start).toFloat() / duration) - 3.dp).coerceAtLeast(3.dp)
                                         val chosen = index == selectedIndex && slot.contains(anchor)
-                                        val title = slot.programme?.title ?: stringResource(if (slot.programmes.size > 1) R.string.guide_overlapping
+                                        val title = if (rowLocked) stringResource(R.string.lock_channel)
+                                            else slot.programme?.title ?: stringResource(if (slot.programmes.size > 1) R.string.guide_overlapping
                                             else if (rows[entry.id]?.match?.kind in listOf(EpgMatchKind.ID, EpgMatchKind.NAME)) R.string.guide_no_info_short
                                             else guideEmptyText(s.guideStatus[entry.sourceId], rows[entry.id]))
                                         Box(Modifier.offset(x = offset).width(cellWidth).fillMaxHeight()

@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.iptvplayer.tv.BuildConfig
 import dev.iptvplayer.tv.CatalogOperation
+import dev.iptvplayer.tv.CategoryAccess
 import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.AdminReason
 import dev.iptvplayer.tv.data.CategoryVisibility
@@ -174,39 +175,55 @@ internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.ass
     NoteRow(stringResource(R.string.settings_about_release_note))
 }
 
-/** Canlı TV, Filmler and Diziler, each with its count of categories and of those turned off. */
+/** Canlı TV, Filmler and Diziler, each with its count of categories and of those hidden or locked. */
 @Composable private fun SettingsScope.CategoryKinds() {
     NoteRow(stringResource(R.string.settings_categories_note))
     categoryKinds.forEach { kind ->
         val list = s.categoryChoices[kind].orEmpty()
         val off = list.count { CategoryVisibility.key(kind, it.name) in s.hiddenCategories || s.hideAdultCategories && it.adult }
-        PageRow("category-kind:${kind.name}", stringResource(kind.label), if (off > 0)
-            pluralStringResource(R.plurals.settings_kind_categories_hidden, list.size, list.size.toString(), off.toString())
-            else pluralStringResource(R.plurals.settings_kind_categories, list.size, list.size.toString()),
+        val locked = list.count { CategoryVisibility.key(kind, it.name) in s.locks.categories }
+        val counts = if (off > 0) pluralStringResource(R.plurals.settings_kind_categories_hidden, list.size, list.size.toString(), off.toString())
+            else pluralStringResource(R.plurals.settings_kind_categories, list.size, list.size.toString())
+        PageRow("category-kind:${kind.name}", stringResource(kind.label), if (locked > 0)
+            stringResource(R.string.text_pair, counts, stringResource(R.string.settings_kind_categories_locked, locked.toString())) else counts,
             categoryListPage(kind), modifier = Modifier.testTag("category-kind:${kind.name}"))
     }
 }
 
 /**
- * One section's categories as switches (Açık = shown), in the provider's order. Adult-looking ones stay off while the
- * adult filter is on, and say so. A lazy list: a provider can have hundreds of categories.
+ * One section's categories in the provider's order, each Açık, Kilitli or Gizli at its end; OK offers Göster, Kilitle
+ * and Gizle as a ChoicePage (pin.md §3.4). Kilitle on a TV without a PIN makes one first. Adult-looking ones stay hidden
+ * while the adult filter is on, and say so; they offer nothing. What the last change could not do reads above the list.
+ * A lazy list: a provider can have hundreds of categories.
  */
 @Composable private fun SettingsScope.CategoryList(kind: MediaKind) {
     val choices = s.categoryChoices[kind].orEmpty()
     if (choices.isEmpty()) {
         NoteRow(stringResource(R.string.settings_no_categories), modifier = Modifier.padding(28.dp)); return
     }
+    val openPin = rememberPinOpener()
+    val options = listOf(stringResource(R.string.category_access_show), stringResource(if (s.parental.status == ParentalStatus.OFF)
+        R.string.category_access_lock_first else R.string.category_access_lock), stringResource(R.string.category_access_hide))
+    // In CategoryAccess order, as the options are.
+    val states = listOf(R.string.category_state_shown, R.string.lock_state, R.string.category_state_hidden).map { stringResource(it) }
     LazyColumn(Modifier.fillMaxSize().testTag("settings-categories"), state = listState,
         contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 18.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        s.parental.notice?.let { notice -> item(key = "notice") { NoteRow(notice.resolve(), modifier = Modifier.testTag("settings-notice")) } }
         items(choices.size, key = { choices[it].name }) { index ->
             val choice = choices[index]
-            val byAdult = s.hideAdultCategories && choice.adult
-            val visible = !byAdult && CategoryVisibility.key(kind, choice.name) !in s.hiddenCategories
+            val key = "category:${choice.name}"
             val (label, tag) = shownCategory(choice.name)
-            ToggleRow("category:${choice.name}", label + if (tag.isNotEmpty()) " · $tag" else "",
-                pluralStringResource(if (byAdult) R.plurals.settings_category_items_adult else R.plurals.count_items, choice.count, choice.count.toString()),
-                visible, modifier = Modifier.testTag("category-choice:$index")) {
-                if (!byAdult) model.categoryVisible(kind, choice.name, !visible)
+            val name = label + if (tag.isNotEmpty()) " · $tag" else ""
+            if (s.hideAdultCategories && choice.adult) ActionRow(key, name,
+                pluralStringResource(R.plurals.settings_category_items_adult, choice.count, choice.count.toString()),
+                Modifier.testTag("category-choice:$index"), value = states[CategoryAccess.HIDDEN.ordinal]) { }
+            else {
+                val access = s.categoryAccess(kind, choice.name)
+                ChoiceRow(key, name, options, access.ordinal, Modifier.testTag("category-choice:$index"),
+                    description = pluralStringResource(R.plurals.count_items, choice.count, choice.count.toString()),
+                    value = states[access.ordinal]) { picked ->
+                    if (model.setCategoryAccess(kind, choice.name, CategoryAccess.entries[picked])) openPin { rowEntry(key) }
+                }
             }
         }
     }

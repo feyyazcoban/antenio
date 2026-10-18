@@ -42,6 +42,8 @@ data class SourceStatus(val count: Int = 0, val updatedAt: Long = 0, val refresh
  */
 enum class CatalogOperation { REFRESH, SOURCE_REMOVAL, SOURCE_FILTER, START_OVER }
 data class CatalogNotice(val message: UiText, val operation: CatalogOperation, val needsAttention: Boolean = false)
+/** A category row in Kategorileri yönet (pin.md §3.4): shown, locked (listed, its titles open with the PIN) or hidden. */
+enum class CategoryAccess { SHOWN, LOCKED, HIDDEN }
 /** Its texts are [UiText]s: the state holds no ready sentences; the screens resolve them in the app's language. */
 data class TvState(
     val route: Route = Route.LOADING,
@@ -107,15 +109,27 @@ data class TvState(
     val librarySorts: Map<MediaKind, LibrarySort> = emptyMap(),
     /** The parental PIN, the PIN pad on screen and what a PIN verified in Ayarlar allows (pin.md §7). */
     val parental: ParentalUi = ParentalUi(),
-    /** What the lock rules make of the published library: the titles, category rows and sources that ask for the PIN. */
+    /**
+     * What the lock rules make of the published library: the titles, category rows and sources that ask for the PIN,
+     * the titles locked on their own, and those PINs opened in this session.
+     */
     val locks: ParentalLocks = ParentalLocks(),
-    /** What the access gate has to say in the corner: a title gone by the time its PIN was typed, a lock it cannot read. */
+    /**
+     * What the access gate has to say in the corner: a title gone by the time its PIN was typed, a lock it cannot read,
+     * a lock from the quick menu that was not saved.
+     */
     val accessNotice: UiText? = null,
     val revision: Int = 0
 ) {
     // Display/default selection only. Playback and personal data must use sourceFor(entry).
     val source: SourceConfig? get() = sources.firstOrNull { it.id == sourceFilterId } ?: sources.firstOrNull()
     fun sourceFor(entry: MediaEntry): SourceConfig? = sources.firstOrNull { it.id == entry.sourceId }
+    /** How Kategorileri yönet shows the category row [name] of [kind]; a hidden row keeps a lock it had under it. */
+    fun categoryAccess(kind: MediaKind, name: String): CategoryAccess = when (CategoryVisibility.key(kind, name)) {
+        in hiddenCategories -> CategoryAccess.HIDDEN
+        in locks.categories -> CategoryAccess.LOCKED
+        else -> CategoryAccess.SHOWN
+    }
     fun sourceName(id: String): String {
         val source = sources.firstOrNull { it.id == id } ?: return ""
         return if (sources.count { it.name == source.name } > 1) "${source.name} · ${sources.indexOf(source) + 1}" else source.name
@@ -147,17 +161,23 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     private val guides = GuideController(viewModelScope, epgStore, store, catalogStore, { guideZone() })
     private val parental = ParentalController(viewModelScope,
         ParentalGuard(ProtectionStore(application), AndroidPinClock(application.contentResolver)), SystemClock::elapsedRealtime,
-        unlocked = ::unlocked,
+        unlocked = ::unlocked, released = ::released,
         // New lock rules change what the library shows locked; a restore or an import publishes it on its own.
         policyChanged = { if (state.value.sourceTask == SourceTask.IDLE) viewModelScope.launch { publishLibrary() } }) { followUp ->
-        when (followUp) { AdminFollowUp.SHOW_ADULT -> setHideAdult(false) }
+        when (followUp) {
+            AdminFollowUp.ShowAdult -> setHideAdult(false)
+            is AdminFollowUp.LockCategory -> setCategoryAccess(followUp.kind, followUp.name, CategoryAccess.LOCKED)
+        }
     }
     /** The locked category rows of the last publish and the rules each rests on; a renumbered row follows them. */
     private var lockedRows: Map<String, Set<AccessScope.Category>> = emptyMap()
+    /** The locked titles of the last publish by the scopes a PIN opens for each (ParentalView.groups). */
+    private var lockGroups: Map<Set<AccessScope>, Set<String>> = emptyMap()
 
     init {
         viewModelScope.launch { guides.state.collect { value -> mutable.update { it.copy(guideStatus = value.statuses, guideRevision = value.revision) } } }
-        viewModelScope.launch { parental.state.collect { value -> mutable.update { it.copy(parental = value) } } }
+        // A PIN typed for a locked title, or the session ending, changes which titles the screens mark as locked.
+        viewModelScope.launch { parental.state.collect { value -> mutable.update { it.copy(parental = value, locks = opened(it.locks)) } } }
         // The restore reads the PIN and its locks first.
         restore(atLaunch = true)
     }
@@ -165,11 +185,18 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     /**
      * NEXTV came on screen (MainActivity.onStart) or left it (onStop: Home, another app, standby). What may live only
      * while the viewer sees the app hangs here as it arrives (gap plan T3, T6): what PINs opened locks again, a PIN
-     * verified in Ayarlar ends and an open PIN pad closes, Settings with them. The foreground timer and a local transfer
-     * join later.
+     * verified in Ayarlar ends and an open PIN pad closes, Settings with them, and a locked title in the player leaves it
+     * as Back would (its progress is already saved), so it does not play on behind the TV's standby or come back without
+     * its PIN (pin.md §3.9). The foreground timer and a local transfer join later.
      */
     fun appStarted() { }
-    fun appStopped() { parental.stopped() }
+    fun appStopped() {
+        parental.stopped()
+        val s = state.value
+        val playing = s.playing?.entry?.takeIf { s.route == Route.PLAYER } ?: return
+        val target = AccessTarget.Play(playing.id)
+        if (AccessGate.find(target, gateSnapshot(target))?.opens == false) back()
+    }
 
     /** Migration is serialized with accepted writes from a previous ViewModel. */
     private fun readRegistry(): SourceRegistry {
@@ -330,6 +357,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 CategoryVisibility.choices(combined)
         }
         lockedRows = view.rows
+        lockGroups = view.groups
         // Before the library goes out, so the gate already reads the rules being added.
         parental.addLocks(view.missing)
         val all = view.catalog
@@ -339,7 +367,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         mutable.update { old ->
             val filter = registry.filterId?.takeIf { id -> saved.sources.any { it.id == id } }
             val catalog = filtered(all, filter)
-            old.copy(sources = saved.sources, sourceFilterId = filter, allCatalog = all, catalog = catalog, locks = view.locks,
+            old.copy(sources = saved.sources, sourceFilterId = filter, allCatalog = all, catalog = catalog, locks = opened(view.locks),
                 hiddenCategories = hidden, hideAdultCategories = hideAdult, categoryChoices = choices,
                 favoriteIds = favorites, history = history,
                 searchSourceId = old.searchSourceId?.takeIf { id -> saved.sources.any { it.id == id } },
@@ -636,24 +664,112 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     fun reducedMotion() { store.reducedMotion = !state.value.reducedMotion; mutable.update { it.copy(reducedMotion = store.reducedMotion) } }
     fun startupSound() { store.startupSound = !state.value.startupSound; mutable.update { it.copy(startupSound = store.startupSound) } }
     /**
-     * Shows or hides one category (D068); the library is published again without reloading any source. Showing one
-     * loosens a protection: with a PIN set, only once it was verified in this Settings visit.
+     * Göster, Kilitle or Gizle for a category row of Kategorileri yönet (pin.md §3.4), by section and name across every
+     * source as hiding works (D068); the library is published again without reloading any source. Hiding and locking
+     * tighten and ask for nothing. Showing a hidden or locked row loosens, as does a hidden row coming back locked: with
+     * a PIN set, only once it was verified in this Settings visit, and what PINs opened locks again. A locked row that is
+     * hidden keeps its rules, which Göster removes; a lock is saved before its hidden row comes back, so the row never
+     * shows unlocked. Kilitle on a TV without a PIN opens the pad for a first one and locks the row once it is saved:
+     * true says the pad opened.
      */
-    fun categoryVisible(kind: MediaKind, category: String, visible: Boolean) {
-        if (visible && !parental.state.value.mayLoosen) return
-        // A loosening locks again what PINs opened (pin.md §2).
-        if (visible) parental.relockContent()
-        val key = CategoryVisibility.key(kind, category)
-        store.hiddenCategories = if (visible) store.hiddenCategories - key else store.hiddenCategories + key
-        mutable.update { it.copy(hiddenCategories = store.hiddenCategories) }
-        viewModelScope.launch { publishLibrary() }
+    fun setCategoryAccess(kind: MediaKind, name: String, access: CategoryAccess): Boolean {
+        val current = state.value.categoryAccess(kind, name)
+        val status = parental.state.value.status
+        if (access == current) return false
+        if (access == CategoryAccess.LOCKED && status == ParentalStatus.OFF) return parental.createPin(AdminFollowUp.LockCategory(kind, name))
+        if ((current == CategoryAccess.HIDDEN || access == CategoryAccess.SHOWN) && !parental.state.value.mayLoosen) return false
+        if (access == CategoryAccess.LOCKED && status != ParentalStatus.ON) return false
+        val key = CategoryVisibility.key(kind, name)
+        fun hide(hidden: Boolean) {
+            // A loosening locks again what PINs opened (pin.md §2).
+            if (!hidden) parental.relockContent()
+            store.hiddenCategories = if (hidden) store.hiddenCategories + key else store.hiddenCategories - key
+            mutable.update { it.copy(hiddenCategories = store.hiddenCategories) }
+            viewModelScope.launch { publishLibrary() }
+        }
+        if (access == CategoryAccess.HIDDEN) { hide(true); return false }
+        viewModelScope.launch {
+            val scopes = rowScopes(kind, name)
+            val saved = when {
+                // An Xtream row of titles the provider filed under no category ID has no identity a rule can name.
+                access == CategoryAccess.LOCKED && scopes.isEmpty() -> { parental.tell(UiText.Res(R.string.lock_category_unavailable)); false }
+                access == CategoryAccess.LOCKED -> changeLocks(add = scopes.map { AccessRule(it, pinRequired = true) }, inSettings = true)
+                parental.policy?.rules.orEmpty().any { it.pinRequired && it.scope in scopes } -> changeLocks(remove = scopes, inSettings = true)
+                else -> true
+            }
+            if (saved && current == CategoryAccess.HIDDEN) hide(false)
+        }
+        return false
+    }
+
+    /**
+     * The identities of a category row in every source's list, hidden or not, and the rules its lock rested on at the
+     * last publish (a row the provider renumbered).
+     */
+    private suspend fun rowScopes(kind: MediaKind, name: String): Set<AccessScope> {
+        val sources = registry.sources
+        val raw = snapshots.mapValues { it.value.catalog }
+        val before = lockedRows[CategoryVisibility.key(kind, name)].orEmpty()
+        return withContext(Dispatchers.Default) {
+            ParentalProjection.categoryScopes(sources, SourceLibrary.combine(sources, raw), kind, name)
+        } + before
+    }
+
+    /**
+     * Kilitle and Kilidi kaldır in a title's quick menu, with a PIN set (pin.md §3.5). The lock goes on the library title
+     * the card stands for, as a favourite does (an episode's series). Locking tightens and is done at once; removing
+     * the lock asks for the PIN first, and true says the pad opened.
+     */
+    fun setTitleLock(entry: MediaEntry, locked: Boolean): Boolean {
+        if (parental.state.value.status != ParentalStatus.ON) return false
+        val target = favoriteTarget(entry) ?: return false
+        val ref = ContentRef.parse(target.id) ?: return false
+        if (!locked) { parental.release(PinPurpose.Release(target.id, target.title)); return true }
+        viewModelScope.launch { changeLocks(add = listOf(AccessRule(AccessScope.Content(ref), pinRequired = true)), inSettings = false) }
+        return false
+    }
+
+    /** Kilitli içerikler (pin.md §3.5): a title's own lock goes, with the PIN verified in this Settings visit. */
+    fun removeTitleLock(id: String) { ContentRef.parse(id)?.let { removeLock(AccessScope.Content(it)) } }
+    /** Kilitli içerikler: a source's lock goes, with the PIN verified in this Settings visit. */
+    fun removeSourceLock(id: String) { if (id.isNotBlank()) removeLock(AccessScope.Source(id)) }
+    private fun removeLock(scope: AccessScope) {
+        if (parental.state.value.status != ParentalStatus.ON || !parental.state.value.adminUnlocked) return
+        viewModelScope.launch { changeLocks(remove = setOf(scope), inSettings = true) }
+    }
+
+    /** The PIN typed for Kilidi kaldır was right: the title's own lock goes, on the policy that PIN saw. */
+    private fun released(pending: PinPurpose.Release, revision: Long) {
+        val ref = ContentRef.parse(pending.id) ?: return
+        viewModelScope.launch { changeLocks(remove = setOf(AccessScope.Content(ref)), verified = revision, inSettings = false) }
+    }
+
+    /**
+     * Makes a lock change (ParentalController.editLocks) and says why one was not made: in Ayarlar on its page, elsewhere
+     * in the corner. True once saved; the library is then published again with it.
+     */
+    private suspend fun changeLocks(add: List<AccessRule> = emptyList(), remove: Set<AccessScope> = emptySet(),
+        verified: Long? = null, inSettings: Boolean): Boolean {
+        val failure = when (parental.editLocks(add, remove, verified)) {
+            LockEdit.SAVED -> return true
+            LockEdit.LIMIT -> UiText.Res(R.string.lock_limit)
+            LockEdit.NOT_SAVED -> UiText.Res(R.string.lock_not_saved)
+        }
+        if (inSettings) parental.tell(failure) else notice(failure)
+        return false
+    }
+
+    /** [locks] with what PINs opened in this session ([ParentalLocks.open]); nothing while the locks cannot be read. */
+    private fun opened(locks: ParentalLocks): ParentalLocks {
+        val open = if (locks.unknown) emptySet() else ParentalProjection.opened(lockGroups, parental.grants)
+        return if (open == locks.open) locks else locks.copy(open = open)
     }
     /**
      * Turns the adult-name filter on or off (D068). Off loosens a protection: while a PIN guards it and was not verified
      * in this Settings visit, the PIN pad opens instead and true says so; the filter goes off once the PIN is right.
      */
     fun setHideAdult(hide: Boolean): Boolean {
-        if (!hide && !parental.state.value.mayLoosen) return parental.requestAdmin(AdminReason.SHOW_ADULT, AdminFollowUp.SHOW_ADULT)
+        if (!hide && !parental.state.value.mayLoosen) return parental.requestAdmin(AdminReason.SHOW_ADULT, AdminFollowUp.ShowAdult)
         if (!hide) parental.relockContent()
         store.hideAdultCategories = hide
         mutable.update { it.copy(hideAdultCategories = hide) }

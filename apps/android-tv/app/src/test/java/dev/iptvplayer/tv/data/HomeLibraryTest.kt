@@ -104,6 +104,18 @@ class HomeLibraryTest {
         assertEquals(listOf("lockedShow"), unknown.favorites.map { it.id })
     }
 
+    @Test fun aTitleAPinOpenedForTheSessionIsStillNotPromoted() {
+        fun titled(id: String, kind: MediaKind, added: Long = 0) =
+            MediaEntry(id, id, kind, "Title $id", artwork = "http://img/$id.jpg", backdrop = "http://img/$id-wide.jpg", addedAt = added)
+        val catalog = Catalog(listOf(titled("film", MediaKind.MOVIE, 100), titled("night", MediaKind.MOVIE, 900),
+            titled("sport", MediaKind.LIVE)))
+        // The PIN opened them until the app leaves the screen; the hero and the shelves stay as they were.
+        val home = homeLibrary(catalog, emptyList(), emptySet(), ParentalLocks(setOf("night", "sport"), open = setOf("night", "sport")))
+        assertEquals(listOf("film"), home.newest.map { it.id })
+        assertEquals(listOf("film"), home.movies.map { it.id })
+        assertTrue(home.channels.isEmpty())
+    }
+
     @Test fun aListWithoutDatesHasNoNewestSlidesAndKeepsTheFeaturedTitle() {
         val catalog = Catalog(listOf(MediaEntry("m", "m", MediaKind.MOVIE, "Movie", artwork = "http://img/m.jpg")))
         val home = homeLibrary(catalog, emptyList(), emptySet())

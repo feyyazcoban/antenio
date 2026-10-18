@@ -330,7 +330,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                                 Modifier.then(if (key == target) Modifier.focusRequester(focus) else Modifier)
                                     .focusRequester(own)
                                     .onFocusChanged { if (it.isFocused) { model.homeFocus(key); lastFocus.requester = own } }, row.key, headingHeight + 10.dp, viewportHeight, reserveEpisode,
-                                longClick = { overlay(AppOverlay.Quick(entry)) { lastFocus.requester } }) {
+                                locked = s.locks.asksPin(entry.id), longClick = { overlay(AppOverlay.Quick(entry)) { lastFocus.requester } }) {
                                 model.homeFocus(key)
                                 if (model.open(entry, continuing?.record)) openPin { own }
                             }
@@ -526,10 +526,16 @@ internal fun runtimeText(seconds: Long): String {
     }
 }
 
+/**
+ * A shelf's card: a continue card with what is left of [record], or a poster or channel logo. [locked]: opening it asks
+ * for the PIN (pin.md §4), so it shows the lock and TalkBack reads "Kilitli"; the hero and the automatic shelves never
+ * hold such a title (homeLibrary).
+ */
 @Composable private fun HomeCard(entry: MediaEntry, record: WatchRecord?, sourceName: String?, modifier: Modifier, section: String, headingContext: Dp, viewportHeight: Dp,
-    reserveEpisode: Boolean = false, longClick: (() -> Unit)? = null, open: () -> Unit) {
+    reserveEpisode: Boolean = false, locked: Boolean = false, longClick: (() -> Unit)? = null, open: () -> Unit) {
     val live = entry.kind == MediaKind.LIVE
     val shown = remember(entry.title, entry.year) { displayTitle(entry.title, entry.year) }
+    val lockedState = stringResource(R.string.lock_state)
     // The row's own 24 dp gutter: a focused card stops on the heading edge instead of 7 dp from the screen,
     // which left a strip of the previous card with cut text at the other edge.
     val visibility = rememberCardVisibility(horizontalPadding = TvLayout.Gutter, contextAbove = headingContext, viewportHeight = viewportHeight)
@@ -546,7 +552,7 @@ internal fun runtimeText(seconds: Long): String {
             Card(onClick = open, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth()
                 .semantics {
                     contentDescription = description
-                    stateDescription = listOfNotNull(sourceName, episode, position).joinToString(". ")
+                    stateDescription = listOfNotNull(lockedState.takeIf { locked }, sourceName, episode, position).joinToString(". ")
                     testTag = "$section:${entry.id}"
                 },
                 shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
@@ -557,6 +563,8 @@ internal fun runtimeText(seconds: Long): String {
                     Box(Modifier.matchParentSize()) {
                         Box(Modifier.width(76.dp).fillMaxHeight().background(Ink.High), contentAlignment = Alignment.Center) {
                             Artwork(entry.sourceId, entry.artwork ?: entry.backdrop, entry.title, Modifier.fillMaxSize(), showFallbackTitle = false)
+                            // On the picture: the title beside it runs to the card's edge.
+                            if (locked) LockBadge(Modifier.align(Alignment.TopStart).padding(6.dp))
                         }
                     }
                     Column(Modifier.fillMaxWidth().padding(start = 90.dp, end = 14.dp, top = 14.dp, bottom = 17.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -583,16 +591,18 @@ internal fun runtimeText(seconds: Long): String {
     val description = if (section == "continue") stringResource(R.string.continue_description, entry.title) else entry.title
     Column(Modifier.width(if (live) TvLayout.LiveWidth else TvLayout.PosterWidth).then(visibility.container).testTag("tile:$section:${entry.id}"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Card(onClick = open, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth().aspectRatio(if (live) 16f / 9 else 2f / 3)
-            .semantics { contentDescription = description; testTag = "$section:${entry.id}" },
+            .semantics { contentDescription = description; if (locked) stateDescription = lockedState; testTag = "$section:${entry.id}" },
             scale = CardDefaults.scale(focusedScale = 1f),
             shape = CardDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
             colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
             border = CardDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
             if (live) Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(130.dp).height(40.dp), true, logoInset = 0.dp)
+                if (locked) LockBadge(Modifier.align(Alignment.TopEnd).padding(7.dp))
             } else Box(Modifier.fillMaxSize()) {
                 Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.fillMaxSize(), showFallbackTitle = false)
                 entry.ratingText?.let { RatingBadge(it, Modifier.align(Alignment.TopStart).padding(7.dp)) }
+                if (locked) LockBadge(Modifier.align(Alignment.TopEnd).padding(7.dp))
             }
         }
         Text(shown.name, color = Ink.Text, fontFamily = Roboto, fontSize = 14.sp, minLines = if (live) 1 else 2, maxLines = 2, lineHeight = 19.sp, overflow = TextOverflow.Ellipsis)

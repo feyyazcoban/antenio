@@ -11,22 +11,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.iptvplayer.tv.CategoryAccess
 import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.TvState
 import dev.iptvplayer.tv.TvViewModel
 import dev.iptvplayer.tv.data.AdminFollowUp
 import dev.iptvplayer.tv.data.AdminReason
+import dev.iptvplayer.tv.data.CategoryVisibility
+import dev.iptvplayer.tv.data.MediaEntry
+import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.ParentalStatus
+import dev.iptvplayer.tv.data.SourceConfig
 import dev.iptvplayer.tv.data.UiText
+import dev.iptvplayer.tv.data.displayTitle
 import dev.iptvplayer.tv.ui.Action
 import dev.iptvplayer.tv.ui.rememberPinOpener
 import dev.iptvplayer.tv.ui.resolve
+import dev.iptvplayer.tv.ui.shownCategory
 
 internal val parentalPage = SettingsRoute.Page("parental")
 internal val adultPinOfferPage = SettingsRoute.Page("adult-pin-offer")
 private val removePinPage = SettingsRoute.Page("parental-remove")
+private val lockedPage = SettingsRoute.Page("parental-locked")
 
 /**
  * Ebeveyn denetimi and the pages around it (pin.md §3.1–3.3, §3.10, §4). The page itself asks for the PIN while one
@@ -37,6 +46,9 @@ internal val parentalPageList: List<SettingsPageSpec> = listOf(
         PageGuard.Pin(AdminReason.PARENTAL)) { ParentalControl() },
     SettingsPageSpec(removePinPage.id, UiText.Res(R.string.parental_remove_question), SectionId.CONTENT, body = PageBody.SHORT_LIST) {
         RemovePin()
+    },
+    SettingsPageSpec(lockedPage.id, UiText.Res(R.string.parental_locked), SectionId.CONTENT, PageGuard.Pin(AdminReason.PARENTAL)) {
+        LockedContent()
     },
     SettingsPageSpec(adultPinOfferPage.id, UiText.Res(R.string.parental_offer_title), SectionId.CONTENT, body = PageBody.SHORT_LIST) {
         AdultPinOffer()
@@ -66,10 +78,11 @@ internal val parentalPageList: List<SettingsPageSpec> = listOf(
 }
 
 /**
- * Without a PIN: make one. With one (verified to get here): change it, lock again what PINs opened in this session
- * ("Açılan kilitleri kapat"), or remove it. What the last change did reads at the top; focus then rests on the page's
- * first row, as the row that opened the pad may be gone. A PIN this visit did not verify or make (one saved after its
- * pad was closed from elsewhere) sends the page back to its row, rather than offer rows that would refuse.
+ * Without a PIN: make one. With one (verified to get here): change it, see and remove the locks (Kilitli içerikler),
+ * lock again what PINs opened in this session ("Açılan kilitleri kapat"), or remove it. What the last change did reads
+ * at the top; focus then rests on the page's first row, as the row that opened the pad may be gone. A PIN this visit
+ * did not verify or make (one saved after its pad was closed from elsewhere) sends the page back to its row, rather
+ * than offer rows that would refuse.
  */
 @Composable private fun SettingsScope.ParentalControl() {
     val openPin = rememberPinOpener()
@@ -82,6 +95,10 @@ internal val parentalPageList: List<SettingsPageSpec> = listOf(
             NoteRow(stringResource(R.string.parental_note))
             ActionRow("change-pin", stringResource(R.string.parental_change), stringResource(R.string.parental_change_note),
                 Modifier.testTag("parental-change")) { if (model.changePin()) openPin { rowEntry("change-pin") } }
+            val locks = rememberLockList().size
+            PageRow("locked", stringResource(R.string.parental_locked), if (locks > 0)
+                pluralStringResource(R.plurals.parental_locked_count, locks, locks.toString()) else stringResource(R.string.parental_locked_none),
+                lockedPage, Modifier.testTag("parental-locked"))
             // Only while PINs opened locked titles in this session; focus moves up as the row leaves.
             if (s.parental.sessionGrants > 0) ActionRow("relock", stringResource(R.string.parental_relock),
                 stringResource(R.string.parental_relock_note), Modifier.testTag("parental-relock")) {
@@ -97,6 +114,68 @@ internal val parentalPageList: List<SettingsPageSpec> = listOf(
             ActionRow("create-pin", stringResource(R.string.parental_create), stringResource(R.string.parental_create_note),
                 Modifier.testTag("parental-create")) { if (model.createPin()) openPin { rowEntry("create-pin") } }
             NoteRow(stringResource(R.string.parental_off_note))
+        }
+    }
+}
+
+/** What Kilitli içerikler lists: locked sources, category rows (section and name) and titles locked on their own. */
+private class LockList(val sources: List<SourceConfig>, val categories: List<Pair<MediaKind, String>>, val titles: List<MediaEntry>) {
+    val size: Int get() = sources.size + categories.size + titles.size
+}
+
+/**
+ * The locks of the published library. A title locked on its own is listed while the library holds it: one a refresh
+ * dropped or a hidden category holds keeps its lock, out of sight, until it is shown again.
+ */
+@Composable private fun SettingsScope.rememberLockList(): LockList = remember(s.locks, s.sources, s.allCatalog) {
+    LockList(s.sources.filter { it.id in s.locks.sources }, s.locks.categories.mapNotNull(CategoryVisibility::row),
+        if (s.locks.contents.isEmpty()) emptyList() else s.allCatalog.items.filter { it.id in s.locks.contents })
+}
+
+/**
+ * Kilitli içerikler (pin.md §3.5): the sources, category rows and titles that ask for the PIN, under their headings.
+ * OK on a row removes its lock with the PIN verified to get here: a category row is shown again. Focus moves to the
+ * next row first, and with the last lock gone the page leaves for Ebeveyn denetimi. What a removal could not do reads
+ * at the top.
+ */
+@Composable private fun SettingsScope.LockedContent() {
+    val locked = s.parental.status != ParentalStatus.ON || !s.parental.adminUnlocked
+    LaunchedEffect(locked) { if (locked) back() }
+    if (locked) return
+    val list = rememberLockList()
+    s.parental.notice?.let { NoteRow(it.resolve(), modifier = Modifier.testTag("settings-notice")) }
+    if (list.size == 0) { NoteRow(stringResource(R.string.parental_locked_empty)); return }
+    NoteRow(stringResource(R.string.parental_locked_note))
+    val keys = list.sources.map { "source:${it.id}" } + list.categories.map { (kind, name) -> "category:${kind.name}:$name" } +
+        list.titles.map { "title:${it.id}" }
+    fun remove(key: String, action: () -> Unit) {
+        val index = keys.indexOf(key)
+        val next = keys.getOrNull(index + 1) ?: keys.getOrNull(index - 1)
+        if (next == null) back() else rowEntry(next)?.requestFocus()
+        action()
+    }
+    if (list.sources.isNotEmpty()) SettingsLabel(stringResource(R.string.parental_locked_sources))
+    list.sources.forEach { source ->
+        val key = "source:${source.id}"
+        ActionRow(key, s.sourceName(source.id), stringResource(R.string.parental_locked_source_note), Modifier.testTag("locked-$key")) {
+            remove(key) { model.removeSourceLock(source.id) }
+        }
+    }
+    if (list.categories.isNotEmpty()) SettingsLabel(stringResource(R.string.parental_locked_categories))
+    list.categories.forEach { (kind, name) ->
+        val key = "category:${kind.name}:$name"
+        val (label, tag) = shownCategory(name)
+        ActionRow(key, label + if (tag.isNotEmpty()) " · $tag" else "", stringResource(kind.label), Modifier.testTag("locked-$key")) {
+            remove(key) { model.setCategoryAccess(kind, name, CategoryAccess.SHOWN) }
+        }
+    }
+    if (list.titles.isNotEmpty()) SettingsLabel(stringResource(R.string.parental_locked_titles))
+    list.titles.forEach { title ->
+        val key = "title:${title.id}"
+        val kind = stringResource(when (title.kind) { MediaKind.LIVE -> R.string.kind_live; MediaKind.MOVIE -> R.string.kind_movie_single; else -> R.string.kind_series_single })
+        ActionRow(key, displayTitle(title.title, title.year).name,
+            if (s.sources.size > 1) stringResource(R.string.text_pair, kind, s.sourceName(title.sourceId)) else kind, Modifier.testTag("locked-$key")) {
+            remove(key) { model.removeTitleLock(title.id) }
         }
     }
 }
@@ -132,7 +211,7 @@ internal val parentalPageList: List<SettingsPageSpec> = listOf(
     Spacer(Modifier.height(12.dp))
     Action(stringResource(R.string.parental_create), Modifier.focusRequester(rowFocus("create-pin", start = true))
         .testTag("offer-create-pin")) {
-        if (model.createPin(then = AdminFollowUp.SHOW_ADULT)) openPin { rowEntry("create-pin") }
+        if (model.createPin(then = AdminFollowUp.ShowAdult)) openPin { rowEntry("create-pin") }
     }
     // Should a PIN guard the filter after all, this asks for it, as the main page's row does.
     Action(stringResource(R.string.parental_offer_without), Modifier.focusRequester(rowFocus("without-pin"))

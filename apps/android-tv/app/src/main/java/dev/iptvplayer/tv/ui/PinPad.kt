@@ -226,9 +226,10 @@ private fun PinPrompt.title(): String = stringResource(when (step) {
 private fun PinPrompt.message(): String {
     // A locked title is named as its card shows it (D065), cut short so that a long name at large text leaves the boxes
     // and the feedback line in view below it.
-    (purpose as? PinPurpose.Unlock)?.let { unlock ->
-        val name = displayTitle(unlock.title).name
-        return stringResource(R.string.pin_reason_unlock,
+    val title = (purpose as? PinPurpose.Unlock)?.title ?: (purpose as? PinPurpose.Release)?.title
+    if (title != null) {
+        val name = displayTitle(title).name
+        return stringResource(if (purpose is PinPurpose.Release) R.string.pin_reason_release else R.string.pin_reason_unlock,
             if (name.length <= UNLOCK_TITLE_MAX) name else name.take(UNLOCK_TITLE_MAX - 1).trimEnd() + "…")
     }
     return stringResource(when (step) {
