@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-019/020 · 0.14.50 / D080: kullanıcının vitrini aşağı büyütme isteğiyle minimum yükseklik 372→420 dp. Tek İzle, ilk raf önizlemesi ve kısa aşağı geçişi korunur. Teslim/kanıt STATUS/HANDOFF'ta; genel görsel kabul açık.
+
 BKL-019/020 · 0.14.49 / D079: kullanıcı isteğiyle vitrinde tek İzle düğmesi; sağ/sol slayt, menüye dönüş ve D078 kısa aşağı geçişi korunur. Doğrulama ve teslim STATUS/HANDOFF'ta; genel görsel/Figma/fiziksel kabul açık.
 
 BKL-019/020 · 0.14.48 / D078: kullanıcının vitrinden ilk devam kartına geçişte takılma bildirimi için gereksiz üst hizalama kaldırıldı. Normal ölçekte önce/sonra ve raf/odak kontrolleri; teslim ve kalan fiziksel kabul STATUS/HANDOFF'ta. Genel tasarım kabulü done yapılmadı.

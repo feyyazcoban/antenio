@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**18 Ekim · TV-010 / D080:** Vitrin minimum yüksekliği 420 dp (önce 372); aşağıya 48 dp uzatıldı. Yatay ölçüler/yazı boyutları aynı, ilk raf başlığı ve kart önizlemesi altta kalır. D079 tek İzle ve D078 minimum kaydırma korunur.
+
 **18 Ekim · TV-010 / D079:** Vitrinde yalnız İzle bulunur. İlk odak/menüden dönüş bu düğmeye; OK oynatır/devam eder, Sağ/Sol slaytı değiştirir, ilk slaytta Sol menüyü açar, tek slaytta Sağ odakta kalır. Ayrıntılar düğmesi kaldırıldı; ayrıntılar raf/kütüphane kartlarından açılır. Aşağı geçişte D078 korunur.
 
 **18 Ekim · TV-010 / D078:** Vitrin varsa ilk raf, Aşağı ile odaklandığında yalnız başlık ve kartı görünür kılacak mesafe kadar kayar; ekranın üstüne zorla taşınmaz. Alt raflarda başlık hizalama korunur. [Raf sözleşmesi](HOME_SHELF_FRAMING.md).

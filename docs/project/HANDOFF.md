@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · Daha uzun vitrin / 0.14.50 · 18 Ekim 2026
+
+Kullanıcının “Vitrini biraz daha büyütebiliriz aşağı doğru” isteği D080 ile uygulandı. DesignSystem.kt / TvLayout.HeroHeight 372→420 dp; yalnız minimum yükseklik ve açıklaması değişti. HomeScreen alt hizalı metin/İzle ve görsel alanı aşağı uzar. D079 tek düğme ve D078 minimum kaydırma aynı. Normal 960×540 dp ekranda ilk raf başlığı ve kart önizlemesi görünür; Aşağı sonrası devam kartı tam görünür. Gereken/gerçek kaydırma 86,5 dp (yüksekliğe eklenen 48 dp kadar artış).
+
+Değişenler: DesignSystem.kt, build.gradle.kts; DECISIONS/D080, HOME_HERO/SCREENS, BACKLOG/STEPS, STATUS/HANDOFF, [QA](native-hero-taller-50-qa.json), design/reviews/LATEST.md ve hero-taller-0.14.50 altındaki hero.png/continue.png. Figma/manifest değişmedi. hero_review salt okunur bağımsız incelemede işlev sorunu bulmadı; eski “two thirds” açıklaması düzeltildi. Yeni test yazılmadı, mevcut ilgili kontroller koşuldu.
+
+Kontroller: 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558 / tools/run-device-tests.sh --no-build üzerinden HeroLayoutTest (2), ContinueCardLayoutTest (1), toplam 3/3. İki normal ölçekte sentetik görüntü incelendi. Yazı boyutu matrisi yapılmadı. Ham kayıtlar work/hero-taller-qa. Proje bağlantı/ekran/değişken kontrolü ve git diff --check geçti.
+
+Teslim: releases/NEXTV_TV_Design_Preview_0.14.50.apk + sha256, kod 64, aynı imza/release/R8. SHA-256 26ad22181ef0c7512a8c2608b7a88d0325abdea0be7c3058d8d0f5e7bdcf1b2a. 5556 .49→50 install -r, Evim görünür/çökme kaydı yok/çalışan uygulama; firstInstallTime 2026-10-14 08:57:19. TV .49→50 install -r; firstInstallTime 2026-10-13 23:50:03 değişmedi; lastUpdateTime 2026-10-18 20:52:28. İki kurulu APK çekilip hash eşleştirildi. TV uygulaması/gerçek yayın açılmadı. 5556/5558 ve Gradle kapalı; 5554'e dokunulmadı.
+
+Tam sonraki adım: ana checkout/main üzerinden STEPS S15a ve gap/overlay.md. Sonraki teslim en az 0.14.51/kod 65. Fiziksel görsel/akıcılık/TalkBack, Figma, İngilizce ve satış/fiyat kararları açık. Kullanıcı “yayına hazırla” demeden font matrisi koşma.
+
 ## Codex · Tek vitrin düğmesi / 0.14.49 · 18 Ekim 2026
 
 Kullanıcının “Vitrinde tek buton bırakalım” isteği D079 ile uygulandı. HomeScreen Hero'da tek İzle var; Ayrıntılar ve kullanılmayan open callback'i kaldırıldı. Sağ/Sol doğrudan slayt değiştirir; tek slaytta Sağ yerinde, ilk slaytta Sol menüye; menüden Sağ İzle'ye. watch(shown()), PIN dönüşü, otomatik slayt/TalkBack/Hareketi azalt davranışı korunur. D078 kısa aşağı geçişi İzle'den de 38,5 dp gereksinim/38,5 dp gerçek hareketle doğrulandı.

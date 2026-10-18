@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.50 · Vitrin aşağı uzatıldı · 18 Ekim 2026
+
+Kullanıcı isteğiyle vitrin minimum yüksekliği 372→420 dp (+48 dp, yaklaşık %13) oldu (D080). Yazı boyutları ve yatay ölçüler aynı; ilk raf başlığı/kart önizlemesi görünür. Tek İzle ve D078 korunur; devam kartına gereken/gerçek kaydırma 86,5 dp.
+
+Bağımsız salt okunur incelemede işlev bulgusu yok; eski oranı anlatan kod açıklaması güncellendi. 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Mevcut HeroLayoutTest ve ContinueCardLayoutTest normal ölçekte yalnız 5558/betik ile 3/3 geçti; iki sentetik ekran incelendi. Font matrisi yapılmadı. [QA](native-hero-taller-50-qa.json), [görseller](../../design/reviews/LATEST.md).
+
+0.14.50-design-preview / kod 64, 5556 ve TV'ye install -r ile kuruldu; ilk kurulum tarihleri ve kurulu APK hash eşitliği doğrulandı. 5556'da Evim görünür, uygulama çalışıyor, çökme kaydı yok. TV güncellemesi 20:52:28; SHA-256 26ad22181ef0c7512a8c2608b7a88d0325abdea0be7c3058d8d0f5e7bdcf1b2a. TV'de uygulama/gerçek yayın açılmadı. Emülatörler/Gradle kapalı. Fiziksel/Figma kabulü açık; sırada S15a, sonraki paket en az 0.14.51/kod 65.
+
 ## 0.14.49 · Vitrinde tek İzle düğmesi · 18 Ekim 2026
 
 Kullanıcı isteğiyle vitrindeki Ayrıntılar kaldırıldı (D079); yalnız İzle kaldı. Sağ/Sol slaytı değiştirir, ilk slaytta Sol menüyü açar, menüden Sağ İzle'ye döner. Tek slaytta Sağ odağı korur. İzle'nin mevcut oynatma/PIN davranışı ve D078 kısa aşağı kaydırması değişmedi.

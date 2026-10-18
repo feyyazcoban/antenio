@@ -1,0 +1,77 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.50-design-preview",
+  "versionCode": 64,
+  "decision": "D080",
+  "change": "Hero minimum height 372 to 420 dp; single Watch and minimum first-shelf scroll retained. No font changes.",
+  "review": "Read-only hero_review: no functional issue; stale two-thirds code comment corrected.",
+  "tests": {
+    "build": "release/debug/androidTest successful",
+    "unit": {
+      "tests": 354,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 37
+    },
+    "instrumentation": "3/3, emulator-5558 only via tools/run-device-tests.sh --no-build: HeroLayoutTest (2), ContinueCardLayoutTest (1), normal font only; existing tests unchanged",
+    "firstShelfScroll": "Needed=86.5 dp, moved=86.5 dp; increased only by the extra 48 dp hero height"
+  },
+  "delivery": {
+    "designEmulator": {
+      "device": "emulator-5556",
+      "before": {
+        "versionCode": "63",
+        "versionName": "0.14.49-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:46:18"
+      },
+      "after": {
+        "versionCode": "64",
+        "versionName": "0.14.50-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:52:07"
+      },
+      "sha256": "26ad22181ef0c7512a8c2608b7a88d0325abdea0be7c3058d8d0f5e7bdcf1b2a",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "evimVisible": true,
+      "appRunning": true,
+      "crashRecordForApp": false
+    },
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "63",
+        "versionName": "0.14.49-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 20:46:40"
+      },
+      "after": {
+        "versionCode": "64",
+        "versionName": "0.14.50-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 20:52:28"
+      },
+      "sha256": "26ad22181ef0c7512a8c2608b7a88d0325abdea0be7c3058d8d0f5e7bdcf1b2a",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "emulatorsAfter": "5556 and 5558 stopped; 5554 untouched; Gradle daemon stopped"
+  },
+  "limitations": [
+    "No font-size matrix per user instruction",
+    "Figma unchanged",
+    "Physical visual acceptance remains open"
+  ],
+  "sha256": "26ad22181ef0c7512a8c2608b7a88d0325abdea0be7c3058d8d0f5e7bdcf1b2a",
+  "images": [
+    "design/reviews/hero-taller-0.14.50/hero.png",
+    "design/reviews/hero-taller-0.14.50/continue.png"
+  ],
+  "logs": "work/hero-taller-qa/device.log, device-full.log, measurement.log (ignored)"
+}

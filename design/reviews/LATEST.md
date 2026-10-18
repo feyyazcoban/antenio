@@ -1,5 +1,13 @@
 # Güncel görsel inceleme
 
+## 0.14.50 · Aşağı doğru daha büyük vitrin
+
+D080: minimum yükseklik 372→420 dp (+48 dp, yaklaşık %13). Yazılar aynı boyutta; ilk raf başlığı/kart önizlemesi görünür. D079 tek İzle ve D078 yalnız gereken kaydırma korunur. Normal ölçekte sentetik kapaksız katalog. [QA](../../docs/project/native-hero-taller-50-qa.json).
+
+![420 dp vitrin](hero-taller-0.14.50/hero.png)
+
+![Aşağı geçişte görünür devam kartı](hero-taller-0.14.50/continue.png)
+
 ## 0.14.49 · Vitrinde tek düğme
 
 D079: yalnız İzle; sağ/sol slayt, ilk slaytta sola menü, menüden sağa İzle. D078 kısa aşağı geçişi korunur. Normal ölçekte sentetik kapaksız katalog; yazı boyutu matrisi yapılmadı. [QA](../../docs/project/native-hero-single-49-qa.json).
