@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.62-design-preview",
+  "versionCode": 76,
+  "decision": "D092",
+  "request": "Player time values align to outer edges; MOVIE above title; remove source and move error to a separate top notice.",
+  "change": "Elapsed label Start, remaining End within unchanged measured columns; VOD kind above title, source removed from shared info block. Persistent non-focusable recovery/failure notice separate from metadata. Retry/Back/scrub geometry preserved.",
+  "review": "Read-only player_review final diff: duplicate local fixture URL found and fixed with ?source=second before androidTest compilation; no remaining concrete finding.",
+  "tests": {
+    "jvm": {
+      "tests": 357,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 37
+    },
+    "build": "release/debug/androidTest successful, 6m57s, 1 worker/1536 MB/in-process Kotlin",
+    "device": "5558 only via tools/run-device-tests.sh --no-build; PlayerControlsLayoutTest 5/5; recovery long-title + malformed + player visual 3/3",
+    "visual": "Normal-scale movie/live/scrub/recovering/failed/ready screenshots inspected. Elapsed glyph starts at left gutter, remaining ends at right; badge above title; source absent; notice clears after ready."
+  },
+  "rawEvidence": "work/player-info-qa",
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "75",
+        "versionName": "0.14.61-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 22:53:32"
+      },
+      "after": {
+        "versionCode": "76",
+        "versionName": "0.14.62-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 23:09:49"
+      },
+      "sha256": "ca2f3d6b78e4f5edc1dc5bfd5c62ffc9e394d2995a33822a8affa974122d0e50",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "design": {
+      "device": "emulator-5556",
+      "before": {
+        "versionCode": "75",
+        "versionName": "0.14.61-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 15:46:01"
+      },
+      "after": {
+        "versionCode": "76",
+        "versionName": "0.14.62-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 16:03:05"
+      },
+      "sha256": "ca2f3d6b78e4f5edc1dc5bfd5c62ffc9e394d2995a33822a8affa974122d0e50",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "evimVisible": true,
+      "appRunning": true,
+      "crashRecordForApp": false
+    }
+  },
+  "limitations": [
+    "Normal scale only; font matrix deferred by user",
+    "Figma unchanged; physical visual acceptance open",
+    "Glyph alignment checked visually, not proven by label-box bounds"
+  ]
+}

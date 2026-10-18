@@ -1,5 +1,11 @@
 # Oynatıcı paneli
 
+## 0.14.62 · Tür, süre ve hata yerleşimi · D092
+
+Kullanıcı ekran görüntüsüyle istedi: film/dizi tür etiketi başlığın 6 dp üstünde; kaynak adı alt bilgi bloğunda gösterilmez. Yıl, bölüm, süre ve bitiş bilgisi kendi metadata satırında kalır. Geçen süre sabit ölçülen kutunun soluna, kalan süre sağ kutunun sağına yaslanır; çubuk ve sarma balonunun geometri hesabı korunur. Canlı kanal/logo/CANLI ve Peek davranışı aynı.
+
+Hata ve yeniden bağlanma mesajı ekranın üstünde ortalanan, en fazla 640 dp genişliğinde koyu ayrı bildirimdir. Dış boşluk 24 dp, köşe 12 dp, iç boşluk 16×12 dp; hata ikon/metinle, yeniden bağlanma sabit akışa bağlı yükleme işaretiyle ayrılır. Mesaj bütünüyle sarılır, zaman aşımıyla kaybolmaz; düzeldiğinde veya medya değişince mevcut recovery durumuyla kalkar. Kontroller/video üzerinde görünür; panel/PIN üzerinde yinelenmez ve görünürken geçici notu bastırır. Polite canlı bölge odağı almaz. Tekrar dene/Durdur ve Back akışı değişmez. Bu kayıt D072'nin tür/meta/kaynak ve hata satırı yerleşimini değiştirir; normal kontroller ve font matrisi sınırı korunur.
+
 ## Güncel düzeltme · 0.14.57 · D087
 
 Fiziksel TV fotoğrafındaki hizalama sorunu düğme içeriğinin gerçek denetim boyutunu doldurmamasından kaynaklanıyordu. Oynatma, sarma ve yardımcı eylemlerin simge/metin grubu artık bütün düğme içinde ortalanır. 64/52/44 dp düğmelerin merkezleri aynı satırdadır; SVG yollarına telafi kaydırması uygulanmaz.

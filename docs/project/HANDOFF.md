@@ -1,5 +1,15 @@
 # Son devir notu
 
+## Codex · Oynatıcı bilgi düzeni / 0.14.62 · 18 Ekim 2026
+
+PlayerControls.kt: elapsed Start/remaining End, ölçülen labelWidth/scrub geometrisi aynı; VOD türü başlığın6dp üstünde, source parametresi kaldırıldı. PlayerScreen.kt: recovery/failure üst ortada max640dp koyu ayrı bildirim, polite live region, fokus yok; panel/PIN üzerinde gizli, geçici notla çakışmaz; metadata sadece normal bilgi. Retry/Back/Peek/canlı korunur. PlayerControlsLayoutTest ve PlaybackRecoveryFlowTest mevcut senaryoları güçlendi; ikinci sentetik kaynak URL'si ?source=second ile ayırt edildi (inceleme bulgusu).
+
+player_review salt okunur nihai inceleme açık bulgusuz. 357 JVM (1skip/0hata), lint0/37; release/debug/androidTest6m57s, tek worker/1536MB, 5556 açık. Gradle durdurulup5558 başlatıldı. Yalnız tools/run-device-tests.sh --no-build: PlayerControlsLayoutTest5/5, recovery longTitle/malformed+VisualPreview player3/3. Normal movie/live/scrub/failed/recovering/ready ekranları gözle incelendi; yazı glyph hizası testbounds iddiasından ayrı doğrulandı. Font matrisi yok. QA native-player-info-62-qa.json, ham work/player-info-qa, görseller design/reviews/player-info-0.14.62. D092/PLAYER_PRESENTATION/SCREENS/gap/player-controls/BACKLOG/STEPS güncel; Figma yok.
+
+Release kod76/.62 APK+sha arşivlendi, aynı sertifika/debug kapalı/R8. SHA-256 ca2f3d6b78e4f5edc1dc5bfd5c62ffc9e394d2995a33822a8affa974122d0e50. TV install-r, firstInstallTime2026-10-13 23:50:03 aynı, lastUpdate23:09:49, pull edilenAPKhash eşit; TVapp/yayın açılmadı. 5556 install-r, firstInstallTime2026-10-14 08:57:19 aynı, Evim/appRunningtrue/crashfalse. 5556 görünür açık kalsın; 5558/Gradle kapalı.
+
+Tam sonraki adım .63/kod77: kullanıcının yeni nav/kategori kayma geçişleri, PIN (scroll içi5dp pay, ortalı rakam/ikon geri sil), settings LazyList scrollbar yanlış ScrollState'e bağlı, sol kategori adları13sp/dile duyarlı gösterim. Salt okunur hero_review/player_review/scrollbar_review incelemeleri mevcut. Hareket testi normal-motion'u fixture içinde açıkça seçmeli; resetFixtureSources bunu sıfırlamaz. Kategori 4↔5 endpoint geometri korunurken hızlı ters yön/fokus/sağ arama görünürlüğü kontrol edilmeli. TR ASCII YERLI gibi kayıplı adlar locale ile güvenle düzelmez; belirsiz tokenları koru. Önceki kayıttaki listeleme caption, hero iki-scroll ve cold splash bulguları hâlâ açık. Ardından S15a. Kullanıcı 'yayına hazırla' demeden font matrisi yok.
+
 ## Codex · Son kanal yeniden tasarımı / 0.14.61 ve kullanıcı testi · 18 Ekim 2026
 
 D091, D084'ün dağınık bulunan dikey kartını kompakt yatay düzene çevirdi. HomeScreen recent dalı: 272 dp genişlik, minimum 100 dp yükseklik, padding16/gap16; solda 80×56 logo, sağda gerçek 1–2 satırlık başlık ve 4 dp altında kaynak. Gradient/boş başlık satırı yok. Kilit mevcut LockMark ile ad yanında. Ortak odak, erişim/PIN çağrı yolu, kaynak semantiği ve geçmiş sırası korunur. HomeScreen.kt, DesignSystem.kt, build.gradle.kts; D091, HOME_SHELVES/SCREENS/BACKLOG/STEPS, bu kayıtlar, QA ve LATEST değişti. Figma/manifest yok.

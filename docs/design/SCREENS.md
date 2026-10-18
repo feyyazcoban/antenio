@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**18 Ekim · TV-050/051 / D092:** VOD tür etiketi başlığın üstünde, kaynak adı kaldırıldı; geçen süre sola, kalan süre sağa yaslı. Hata/yeniden bağlanma metadata yerine üstte ayrı kalıcı bildirim; retry/Back odağı korunur. [Oynatıcı](PLAYER_PRESENTATION.md).
+
 **18 Ekim · TV-010 / D091:** Son izlenen kanallar kompakt yatay kart: solda logo, sağda kanal adı ve yakın kaynak satırı. 272 dp genişlik, en az 100 dp yükseklik, tek düz yüzey; kısa adda boş ikinci satır yok. D084 yerleşimini değiştirir. [Raf sözleşmesi](HOME_SHELVES.md).
 
 **18 Ekim · D090:** Ortak İzle/Oynat eylemlerinin simgesi her zaman dolu, Material Symbols Rounded play_arrow FILL 1. D083'ün odakta dolu/odak dışında çizgi kuralının yerine geçer. 16 dp kutu, düğme ölçüleri, odak renk/çerçevesi ve favori yıldızının seçili doluluğu korunur.

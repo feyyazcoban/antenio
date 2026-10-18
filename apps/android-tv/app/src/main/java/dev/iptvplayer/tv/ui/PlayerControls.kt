@@ -50,7 +50,7 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
 
 /** One bottom block shared by the full controls, a channel band and the hidden-seek preview. */
 @Composable internal fun PlayerInfoBlock(kind: PlayerInfoKind, entry: MediaEntry, info: PlayerInfoModel,
-    number: Int?, source: String?, schedule: GuideSlice?, zone: ZoneId, clock: PlaybackClock,
+    number: Int?, schedule: GuideSlice?, zone: ZoneId, clock: PlaybackClock,
     scrub: ScrubHolder, speed: Float, playing: Boolean, status: String?, failed: Boolean,
     opening: Boolean, scrubFocus: FocusRequester, returnFocus: () -> Unit, toggle: () -> Unit,
     modifier: Modifier = Modifier, peekDelta: Long? = null, onScrubFocusChanged: (Boolean) -> Unit = {},
@@ -59,6 +59,13 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
     val large = LocalDensity.current.fontScale >= 1.3f
     Column(modifier.semantics { isTraversalGroup = true }) {
         if (kind != PlayerInfoKind.Peek) {
+            if (!live) {
+                Text(stringResource(if (entry.kind == MediaKind.EPISODE) R.string.player_kicker_series else R.string.player_kicker_movie),
+                    Modifier.testTag("player-kind").border(1.dp, Ink.Outline.copy(alpha = .6f), RoundedCornerShape(4.dp))
+                        .padding(horizontal = 7.dp, vertical = 1.dp),
+                    color = Ink.Text, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium)
+                Spacer(Modifier.height(6.dp))
+            }
             Row(Modifier.fillMaxWidth().semantics(mergeDescendants = true) {}, verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (live) {
@@ -75,7 +82,7 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
                 PlayerWallClock(clock)
             }
             Spacer(Modifier.height(4.dp))
-            PlayerMeta(entry, info, source, schedule, zone, clock, speed, playing, status, failed, opening)
+            PlayerMeta(entry, info, schedule, zone, clock, speed, playing, status, opening)
             Spacer(Modifier.height(12.dp))
         }
         if (live) ProgrammeBar(schedule, zone, clock) else PlayerScrubBar(clock, scrub, scrubFocus,
@@ -106,8 +113,8 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
     }
 }
 
-@Composable private fun PlayerMeta(entry: MediaEntry, info: PlayerInfoModel, source: String?, schedule: GuideSlice?,
-    zone: ZoneId, clock: PlaybackClock, speed: Float, playing: Boolean, status: String?, failed: Boolean, opening: Boolean) {
+@Composable private fun PlayerMeta(entry: MediaEntry, info: PlayerInfoModel, schedule: GuideSlice?,
+    zone: ZoneId, clock: PlaybackClock, speed: Float, playing: Boolean, status: String?, opening: Boolean) {
     val density = LocalDensity.current
     val end by remember(clock, speed, playing) { derivedStateOf {
         PlayerInfoModel.endMinute(clock.now, clock.position, clock.duration, speed, playing)
@@ -125,20 +132,15 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
         total.takeIf { it > 0 }?.let { runtimeText(it / 1000) }, end?.let { stringResource(R.string.player_ends_at, guideTime(it, ZoneId.systemDefault())) })
         .joinToString(" · ")
     val nextLabel = next?.let { stringResource(R.string.player_next_programme, guideTime(it.start, zone), it.title) }
-    Column {
+    Column(Modifier.testTag("player-metadata")) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (!live) Text(stringResource(if (entry.kind == MediaKind.EPISODE) R.string.player_kicker_series else R.string.player_kicker_movie),
-                Modifier.border(1.dp, Ink.Outline.copy(alpha = .6f), RoundedCornerShape(4.dp)).padding(horizontal = 7.dp, vertical = 1.dp),
-                color = Ink.Text, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium)
             if (opening) LoadingArc()
             Text(status ?: body, Modifier.weight(1f).then(if (live) Modifier.testTag("player-current-programme") else Modifier),
-                color = if (failed) Ink.Error else if (live || status != null) Ink.Text else Ink.Muted,
-                fontFamily = Roboto, fontSize = 15.sp, lineHeight = 20.sp, maxLines = if (density.fontScale >= 1.3f || failed) 2 else 1,
+                color = if (live || status != null) Ink.Text else Ink.Muted,
+                fontFamily = Roboto, fontSize = 15.sp, lineHeight = 20.sp, maxLines = if (density.fontScale >= 1.3f) 2 else 1,
                 overflow = TextOverflow.Ellipsis)
             if (live && status == null && nextLabel != null && density.fontScale < 1.3f) Text(nextLabel, Modifier.widthIn(max = 280.dp),
                 color = Ink.Muted, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            if (density.fontScale < 1.3f && source != null) Text(source, Modifier.widthIn(max = 200.dp),
-                color = Ink.Muted, fontFamily = Roboto, fontSize = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         if (live && status == null && nextLabel != null && density.fontScale >= 1.3f && density.fontScale < 2f) Text(
             nextLabel,
@@ -165,10 +167,11 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
     }
 }
 
-@Composable private fun TimeLabel(value: String, modifier: Modifier = Modifier, muted: Boolean = false) {
+@Composable private fun TimeLabel(value: String, modifier: Modifier = Modifier, muted: Boolean = false,
+    align: TextAlign = TextAlign.End) {
     Text(value, modifier, color = if (muted) Ink.Muted else Ink.Text, fontFamily = Roboto, fontSize = 20.sp,
         lineHeight = 26.sp, fontWeight = if (muted) FontWeight.Normal else FontWeight.Medium, maxLines = 1,
-        textAlign = TextAlign.End, style = TextStyle(fontFeatureSettings = "tnum"))
+        textAlign = align, style = TextStyle(fontFeatureSettings = "tnum"))
 }
 
 @Composable internal fun PlayerScrubBar(clock: PlaybackClock, scrub: ScrubHolder, requester: FocusRequester,
@@ -188,9 +191,9 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
     val labelWidth = with(density) { measurer.measure(AnnotatedString(if (duration >= 3_600_000) "−0:00:00" else "−00:00"),
         TextStyle(fontFamily = Roboto, fontSize = 20.sp, fontFeatureSettings = "tnum")).size.width.toDp() }
     val state = stringResource(R.string.player_position_total, spokenPlayerTime(position), spokenPlayerTime(duration))
-    Box(Modifier.fillMaxWidth().height(height)) {
+    Box(Modifier.fillMaxWidth().height(height).testTag("player-time-row")) {
         Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            TimeLabel(clockTime(position), Modifier.width(labelWidth).clearAndSetSemantics {})
+            TimeLabel(clockTime(position), Modifier.width(labelWidth).clearAndSetSemantics { testTag = "player-time-elapsed" }, align = TextAlign.Start)
             Box(Modifier.weight(1f).fillMaxHeight().testTag("player-scrub").focusRequester(requester)
                 .onFocusChanged { value ->
                     if (focused && !value.isFocused) scrub.commit()
@@ -241,7 +244,8 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
                         }
                     }
                 })
-            TimeLabel(if (duration > 0) "−${clockTime((duration - position).coerceAtLeast(0))}" else "—", Modifier.width(labelWidth).clearAndSetSemantics {}, muted = true)
+            TimeLabel(if (duration > 0) "−${clockTime((duration - position).coerceAtLeast(0))}" else "—",
+                Modifier.width(labelWidth).clearAndSetSemantics { testTag = "player-time-remaining" }, muted = true)
         }
         if (focused || target != null || peek) {
             val value = target ?: position

@@ -361,7 +361,24 @@ import kotlinx.coroutines.flow.first
             view.subtitleView?.let { PlayerFactory.subtitles(it, screenState.playback.subtitle) }
         }, onRelease = { it.player = null })
         Box(Modifier.fillMaxSize().focusRequester(canvas).focusable(layer == PlayerLayer.Video))
-        note?.takeIf { !controlsShown || audioNote }?.let { (text, detail) ->
+        val problemText = when {
+            recoveryState.recovering -> recoveryState.message.resolve()
+            failure != null -> failure.resolve()
+            else -> null
+        }
+        val showProblem = problemText != null && (controlsShown || top() == PlayerLayer.Video) && screenState.parental.prompt == null
+        // Persistent playback failures take priority over transient corner notes without taking remote focus.
+        if (showProblem) Row(Modifier.align(Alignment.TopCenter).padding(top = 24.dp, start = TvLayout.Gutter, end = TvLayout.Gutter)
+            .widthIn(max = 640.dp).background(Ink.Background.copy(alpha = .96f), RoundedCornerShape(12.dp))
+            .border(1.dp, (if (recoveryState.recovering) Ink.Outline else Ink.Error).copy(alpha = .35f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite }.testTag("player-problem"),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (recoveryState.recovering) LoadingArc(color = Ink.Muted) else LineIcon("info", Ink.Error, Modifier.size(20.dp))
+            Text(problemText.orEmpty(), color = if (recoveryState.recovering) Ink.Text else Ink.Error,
+                fontFamily = Roboto, fontSize = 16.sp, lineHeight = 22.sp)
+        }
+        note?.takeIf { !showProblem && (!controlsShown || audioNote) }?.let { (text, detail) ->
             Column(Modifier.align(Alignment.TopEnd).padding(top = 22.dp, end = TvLayout.Gutter).widthIn(max = 420.dp)
                 .background(Ink.Background.copy(alpha = panelAlpha), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp, vertical = 10.dp)
                 .semantics { liveRegion = LiveRegionMode.Polite }.testTag("player-note"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -382,8 +399,6 @@ import kotlinx.coroutines.flow.first
         val info = remember(media.entry, favoriteTarget, resources) { PlayerInfoModel.from(media.entry,
             favoriteTarget?.takeIf { it.kind == MediaKind.SERIES }).let { it.copy(title = shownTitle(it.title, it.year, resources).name) } }
         val statusText = when {
-            recoveryState.recovering -> recoveryState.message.resolve()
-            failure != null -> failure.resolve()
             opening -> stringResource(R.string.player_opening)
             status == Player.STATE_ENDED -> stringResource(R.string.player_ended)
             else -> null
@@ -406,7 +421,7 @@ import kotlinx.coroutines.flow.first
                         (if (largeText) .343f else .367f) to Color.Black.copy(alpha = .62f),
                         (if (largeText) .657f else .667f) to Color.Black.copy(alpha = .86f), 1f to Color.Black.copy(alpha = .94f))))
                 PlayerInfoBlock(PlayerInfoKind.Full, media.entry, info, model.channelNumber(media.entry),
-                    screenState.sourceName(media.entry.sourceId).takeIf { screenState.sources.size > 1 }, schedule, model.guideZone(),
+                    schedule, model.guideZone(),
                     clock, scrub, speed, playing, statusText, failure != null || recoveryState.recovering, opening, scrubFocus,
                     returnFocus = { if (!runCatching { lastControl[0].requestFocus() }.getOrDefault(false)) first.requestFocus() }, toggle = ::primaryAction,
                     modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(horizontal = TvLayout.Gutter, vertical = 24.dp)
@@ -464,7 +479,7 @@ import kotlinx.coroutines.flow.first
         if (peek && layer == PlayerLayer.Video && !live) {
             Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(150.dp)
                 .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = .6f)))))
-            PlayerInfoBlock(PlayerInfoKind.Peek, media.entry, info, null, null, null, model.guideZone(), clock, scrub, speed,
+            PlayerInfoBlock(PlayerInfoKind.Peek, media.entry, info, null, null, model.guideZone(), clock, scrub, speed,
                 playing, null, false, false, scrubFocus, {}, {}, Modifier.align(Alignment.BottomCenter).fillMaxWidth()
                     .padding(horizontal = TvLayout.Gutter, vertical = 24.dp).testTag("player-peek"), peekDelta = peekDelta)
         }

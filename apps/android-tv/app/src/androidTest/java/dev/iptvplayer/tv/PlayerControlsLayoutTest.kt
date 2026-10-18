@@ -21,7 +21,7 @@ import org.junit.Assert.*
 import org.junit.runner.RunWith
 import java.util.concurrent.atomic.AtomicInteger
 
-/** Synthetic source only. Run at 1.0/1.5/2.0 through tools/run-device-tests.sh on 5558. */
+/** Synthetic source only. Run through tools/run-device-tests.sh on 5558; font matrix deferred until store preparation. */
 @RunWith(AndroidJUnit4::class)
 class PlayerControlsLayoutTest {
     @get:Rule(order = 0) val turkish = TurkishLocaleRule()
@@ -100,6 +100,10 @@ class PlayerControlsLayoutTest {
         centeredSymbol("player-primary") // Playing: Pause.
         key(KeyEvent.KEYCODE_MEDIA_PAUSE)
         listOf("player-panel", "player-title", "player-controls", "player-clock").forEach { inScreen(it) }
+        assertTrue("Content kind sits above the title", bounds("player-kind").bottom < bounds("player-title").top)
+        // These assert the outer edges; the actual glyph alignment is inspected in the saved screenshots.
+        assertEquals(bounds("player-time-row").left.value, bounds("player-time-elapsed").left.value, 1f)
+        assertEquals(bounds("player-time-row").right.value, bounds("player-time-remaining").right.value, 1f)
         assertTrue(bounds("player-title").bottom < bounds("player-scrub").top)
         assertTrue(bounds("player-scrub").bottom < bounds("player-controls").top)
         assertTrue(bounds("player-tracks").left - bounds("player-seek-forward").right >= 32.dp)

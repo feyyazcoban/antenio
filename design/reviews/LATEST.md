@@ -1,5 +1,13 @@
 # Güncel görsel inceleme
 
+## 0.14.62 · Oynatıcı bilgi düzeni
+
+D092: süreler dış kenarlarda, tür başlığın üzerinde, kaynak adı kaldırıldı; hata ayrı üst bildirimde. Normal ölçek/sentetik kaynaklar. [QA](../../docs/project/native-player-info-62-qa.json).
+
+![Oynatıcı](player-info-0.14.62/movie-1.0.png)
+
+![Hata bildirimi](player-info-0.14.62/long-failed.png)
+
 ## 0.14.61 · Kompakt son kanal kartları
 
 D091: tek düz yüzeyde solda logo, sağda yakın kanal adı/kaynak. Uzun ad iki satıra kadar; logosuz kanal ortak yer tutucu. Normal ölçekte sentetik kaynaklar. [QA](../../docs/project/native-recent-channel-redesign-61-qa.json).

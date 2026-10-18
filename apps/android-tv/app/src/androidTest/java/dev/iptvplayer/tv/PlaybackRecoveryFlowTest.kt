@@ -72,7 +72,13 @@ class PlaybackRecoveryFlowTest {
     }
 
     @After fun cleanup() {
-        if (::model.isInitialized) ui.runOnUiThread { model.back(); model.removeSource() }
+        if (::model.isInitialized) {
+            ui.runOnUiThread { if (model.state.value.route == Route.PLAYER) model.back() }
+            for (id in model.state.value.sources.map { it.id }) {
+                ui.runOnUiThread { model.removeSource(id) }
+                ui.waitUntil(10_000) { model.state.value.sourceTask == SourceTask.IDLE }
+            }
+        }
         if (::server.isInitialized) server.shutdown()
     }
 
@@ -101,6 +107,13 @@ class PlaybackRecoveryFlowTest {
         firstTitle = "İstanbul’dan dünyaya uzanan çok uzun bir yolculuk: unutulmaz hikâyeler ve beklenmedik karşılaşmalar"
         ui.runOnUiThread { model.refresh() }
         ui.waitUntil(10_000) { !model.state.value.refreshing && model.state.value.catalog.items.first().title == firstTitle }
+        // Multiple sources used to add the provider name to the player's metadata row.
+        ui.runOnUiThread {
+            model.addSource()
+            model.draft(SourceDraft("İkinci yerel kaynak", SourceType.M3U, server.url("/list.m3u?source=second").toString()))
+            model.connectDraft()
+        }
+        ui.waitUntil(10_000) { model.state.value.route == Route.HOME && model.state.value.sources.size == 2 && model.state.value.sourceTask == SourceTask.IDLE }
         ui.runOnUiThread { model.play(model.state.value.catalog.items.first()) }
         fun assertPanelFits() {
             val panel = ui.onNodeWithTag("player-panel").getUnclippedBoundsInRoot()
@@ -111,13 +124,24 @@ class PlaybackRecoveryFlowTest {
                 panel.top >= viewport.top && panel.bottom <= viewport.bottom)
             assertTrue("Title must precede visible actions", title.top >= panel.top && title.bottom < controls.top && controls.bottom <= panel.bottom)
             ui.onNode(isFocused() and hasAnyAncestor(hasTestTag("player-controls"))).assertExists()
+            val kind = ui.onNodeWithTag("player-kind", true).getUnclippedBoundsInRoot()
+            assertTrue("Kind is above the title", kind.bottom < title.top)
+            model.state.value.sources.forEach { ui.onAllNodesWithText(it.name).assertCountEquals(0) }
         }
-        waiting(); assertPanelFits(); shot("long-recovering")
+        fun assertProblemAbovePanel() {
+            val problem = ui.onNodeWithTag("player-problem").assertIsDisplayed().getUnclippedBoundsInRoot()
+            val panel = ui.onNodeWithTag("player-panel").getUnclippedBoundsInRoot()
+            assertTrue("Persistent problem is separate from the bottom metadata", problem.bottom < panel.top)
+            val message = ui.onNodeWithTag("player-problem").fetchSemanticsNode()
+                .config[androidx.compose.ui.semantics.SemanticsProperties.Text].joinToString { it.text }
+            ui.onAllNodes(hasText(message, substring = true) and hasAnyAncestor(hasTestTag("player-metadata")), true).assertCountEquals(0)
+        }
+        waiting(); assertPanelFits(); assertProblemAbovePanel(); shot("long-recovering")
         ui.waitUntil(12_000) { exists("Tekrar dene") }
         ui.onNodeWithTag("player-primary").assertIsFocused()
-        assertPanelFits(); shot("long-failed")
+        assertPanelFits(); assertProblemAbovePanel(); shot("long-failed")
         mode = "success"; click("Tekrar dene"); ready(); click("Duraklat")
-        assertPanelFits(); shot("long-ready")
+        assertPanelFits(); ui.onNodeWithTag("player-problem").assertDoesNotExist(); shot("long-ready")
         back(); back()
         assertEquals(Route.HOME, model.state.value.route)
     }

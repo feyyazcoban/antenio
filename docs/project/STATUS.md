@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.62 · Oynatıcı bilgi hiyerarşisi · 18 Ekim 2026
+
+D092: geçen/kalan süre dış kenarlarda, film/dizi türü başlığın üstünde; kaynak adı kaldırıldı. Hata/yeniden bağlanma üstte kalıcı ayrı bildirim; yeniden deneme sonrası kaybolur. Bağımsız inceleme tamam; 357 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. 5558/betik normal ölçekte 5/5 + 3/3; görseller incelendi. [QA](native-player-info-62-qa.json).
+
+Kod76/.62 TV ve 5556'ya install -r kuruldu, firstInstallTime ve kurulu APK hash eşitliği doğrulandı. SHA-256 ca2f3d6b78e4f5edc1dc5bfd5c62ffc9e394d2995a33822a8affa974122d0e50. TV saati 23:09:49; uygulama/yayın açılmadı. 5556 Evim görünür, kullanıcı testi için açık. 5558/Gradle kapalı.
+
+Aktif kullanıcı geri bildirimleri: kategori→afiş ve ana menü kayma geçişleri; PIN Cancel kesilmesi/sayı hizası/Delete ikonu; kategori yönetimindeki scrollbar; sol kategori adlarını biraz küçültüp dil güvenli title case. Bunlar .63'te ele alınacak. Önceki listeleme afiş başlık/yıl, iki scroll hissi ve soğuk splash donması da açık; genel S15a bunlardan sonra. Font matrisi mağaza hazırlığına ertelendi.
+
 ## 0.14.61 · Kompakt son kanal kartları · 18 Ekim 2026
 
 Kullanıcı D084 kartlarını dağınık buldu. Son kanallar tek düz yatay kartta: solda 80×56 dp logo, sağda kanal adı ve yakın kaynak; 272 dp genişlik/minimum 100 dp yükseklik, boş ikinci başlık satırı yok (D091). Bağımsız incelemede somut bulgu yok. 357 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. İlk birleşik ekran turunda emülatör son testte koptu; ayrı tekrarlar 1/1 + 3/3 geçti. Normal görseller incelendi, font matrisi yok. [QA](native-recent-channel-redesign-61-qa.json), [görseller](../../design/reviews/LATEST.md).
