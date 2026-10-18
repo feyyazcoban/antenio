@@ -387,6 +387,7 @@
     <string name="player_kicker_movie">MOVIE</string>
     <string name="player_live">● LIVE</string>
     <string name="player_ended">Ended</string>
+    <string name="player_audio_unplayable">This stream\'s audio can\'t play with this setting. In Settings > Player, try setting Audio output to Automatic.</string>
     <string name="player_keys_recovering">Back: stop reconnecting</string>
     <string name="player_keys_live">With controls hidden, Up/Down: channel · Number: channel no.</string>
     <string name="player_keys_vod">With controls hidden, Left/Right: seek</string>

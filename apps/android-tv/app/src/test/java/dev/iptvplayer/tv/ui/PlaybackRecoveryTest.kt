@@ -3,9 +3,15 @@
 
 package dev.iptvplayer.tv.ui
 
+import androidx.media3.common.C
+import androidx.media3.common.Format
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.TrackGroup
+import androidx.media3.common.Tracks
 import dev.iptvplayer.tv.R
+import dev.iptvplayer.tv.data.AudioOutput
 import dev.iptvplayer.tv.data.UiText
 import kotlinx.coroutines.test.*
 import org.junit.Assert.*
@@ -40,21 +46,39 @@ class PlaybackRecoveryTest {
         assertEquals(UiText.Res(R.string.playback_secure_failed), r.state.value.failure); r.close()
     }
 
-    @Test fun decoderAndAudioOutputFailuresPointToThePlayerSettings() = runTest {
-        // A decoder that cannot open the stream, or a sound system that refuses its audio, names Ayarlar > Oynatıcı.
+    @Test fun decoderFailuresPointToThePlayerSettings() = runTest {
+        // A decoder that cannot open the stream names Ayarlar > Oynatıcı.
         val hinted = listOf(PlaybackException.ERROR_CODE_DECODER_INIT_FAILED, PlaybackException.ERROR_CODE_DECODING_FAILED,
-            PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES, PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED,
-            PlaybackException.ERROR_CODE_AUDIO_TRACK_INIT_FAILED, PlaybackException.ERROR_CODE_AUDIO_TRACK_WRITE_FAILED)
+            PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES, PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED)
         for (code in hinted) assertEquals(code.toString(), PlaybackProblem(R.string.playback_decoder_failed),
             playbackProblem(PlaybackException("http://kaynak.test/live/user/pass/1.ts", null, code)))
-        // A stream that cannot be read is no matter of decoders.
+        // A stream that cannot be read is no matter of decoders, nor an audio track that fails, as one does while the
+        // sound system is busy or its output changes: those say to try again, as before.
         assertEquals(R.string.playback_unreadable, playbackProblem(PlaybackException("secret", null,
             PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED)).message)
+        for (code in listOf(PlaybackException.ERROR_CODE_AUDIO_TRACK_INIT_FAILED, PlaybackException.ERROR_CODE_AUDIO_TRACK_WRITE_FAILED))
+            assertEquals(code.toString(), PlaybackProblem(R.string.playback_failed), playbackProblem(PlaybackException("secret", null, code)))
         // Changing a setting is the way out: nothing retries on its own, and nothing from the error reaches the screen.
         val f = FakePlayer(); val r = PlaybackRecovery(f.player, this) { testScheduler.currentTime }
         r.onPlayerError(PlaybackException("http://kaynak.test/live/user/pass/1.ts", null, PlaybackException.ERROR_CODE_DECODER_INIT_FAILED))
         advanceTimeBy(30_000); runCurrent(); assertEquals(0, f.prepares)
         assertEquals(UiText.Res(R.string.playback_decoder_failed), r.state.value.failure); r.close()
+    }
+
+    @Test fun onlyAudioThatCannotPlayWhileDecodedOnTheDeviceAsksForOtomatik() {
+        fun group(mime: String, support: Int) =
+            Tracks.Group(TrackGroup(Format.Builder().setSampleMimeType(mime).build()), false, intArrayOf(support), booleanArrayOf(false))
+        val video = group(MimeTypes.VIDEO_H264, C.FORMAT_HANDLED)
+        val ac3 = group(MimeTypes.AUDIO_AC3, C.FORMAT_UNSUPPORTED_SUBTYPE)
+        // An AC-3 stream the device has no decoder for: silent with Cihazda çöz, sent as it is with Otomatik.
+        val silent = Tracks(listOf(video, ac3))
+        assertTrue(unplayableAudio(silent, AudioOutput.PCM))
+        assertFalse(unplayableAudio(silent, AudioOutput.AUTO))
+        // One track that plays is enough, even one beyond what the device declares; a stream without audio is not silent.
+        assertFalse(unplayableAudio(Tracks(listOf(video, ac3, group(MimeTypes.AUDIO_AAC, C.FORMAT_HANDLED))), AudioOutput.PCM))
+        assertFalse(unplayableAudio(Tracks(listOf(video, group(MimeTypes.AUDIO_E_AC3, C.FORMAT_EXCEEDS_CAPABILITIES))), AudioOutput.PCM))
+        assertFalse(unplayableAudio(Tracks(listOf(video)), AudioOutput.PCM))
+        assertFalse(unplayableAudio(Tracks.EMPTY, AudioOutput.PCM))
     }
 
     @Test fun manualRetryResetsBudgetPreservesVodAndLiveRejoinsWindow() = runTest {

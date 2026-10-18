@@ -7,10 +7,12 @@ import androidx.annotation.StringRes
 import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.Tracks
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
 import dev.iptvplayer.tv.R
+import dev.iptvplayer.tv.data.AudioOutput
 import dev.iptvplayer.tv.data.UiText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -47,14 +49,12 @@ internal fun playbackProblem(error: PlaybackException): PlaybackProblem {
         PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
         PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT -> PlaybackProblem(R.string.playback_unreachable, true)
         PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW -> PlaybackProblem(R.string.playback_behind_live, true)
-        // A decoder that cannot open the stream, or a sound system that refuses its audio: Ayarlar > Oynatıcı offers the
-        // software decoders and decoding the audio on the device (playback.md §6.6).
+        // A decoder that cannot open the stream: Ayarlar > Oynatıcı offers the software decoders and decoding the audio on
+        // the device (playback.md §6.6). An audio track that fails is no matter of the format, so it stays a plain failure.
         PlaybackException.ERROR_CODE_DECODER_INIT_FAILED,
         PlaybackException.ERROR_CODE_DECODING_FAILED,
         PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES,
-        PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED,
-        PlaybackException.ERROR_CODE_AUDIO_TRACK_INIT_FAILED,
-        PlaybackException.ERROR_CODE_AUDIO_TRACK_WRITE_FAILED -> PlaybackProblem(R.string.playback_decoder_failed)
+        PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED -> PlaybackProblem(R.string.playback_decoder_failed)
         PlaybackException.ERROR_CODE_PARSING_CONTAINER_MALFORMED,
         PlaybackException.ERROR_CODE_PARSING_MANIFEST_MALFORMED,
         PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED,
@@ -63,6 +63,13 @@ internal fun playbackProblem(error: PlaybackException): PlaybackProblem {
         else -> PlaybackProblem(R.string.playback_failed)
     }
 }
+
+/**
+ * A stream with audio, none of which can play while Ses çıkışı is Cihazda çöz: the device has no decoder for its Dolby
+ * or DTS, so the picture plays without sound and no error comes (playback.md §6.6). Otomatik may send it as it is.
+ */
+internal fun unplayableAudio(tracks: Tracks, output: AudioOutput): Boolean =
+    output == AudioOutput.PCM && tracks.containsType(C.TRACK_TYPE_AUDIO) && !tracks.isTypeSupported(C.TRACK_TYPE_AUDIO, true)
 
 internal data class RecoveryState(val failure: UiText? = null, val attempt: Int = 0, val seconds: Int? = null) {
     val recovering get() = attempt > 0

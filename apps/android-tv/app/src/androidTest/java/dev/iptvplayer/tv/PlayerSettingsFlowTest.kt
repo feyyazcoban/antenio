@@ -8,6 +8,7 @@ import android.view.KeyEvent
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.media3.common.C
@@ -80,23 +81,26 @@ class PlayerSettingsFlowTest {
     private fun controlsShown() = ui.onAllNodesWithTag("player-panel").fetchSemanticsNodes().isNotEmpty()
     private fun playing() = ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty()
 
-    /** Ayarlar → Oynatıcı, focus on its first row. */
-    private fun openPlayerSettings() {
-        ui.onNodeWithTag("nav:Ayarlar").performSemanticsAction(SemanticsActions.RequestFocus)
+    /** Ayarlar → Oynatıcı, focus on its first row; the menu item, the sections and the rows by their Turkish names unless given. */
+    private fun openPlayerSettings(settings: String = "Ayarlar", firstSection: String = "Genel ve dil", player: String = "Oynatıcı",
+        firstRow: String = "Otomatik sonraki bölüm") {
+        ui.onNodeWithTag("nav:$settings").performSemanticsAction(SemanticsActions.RequestFocus)
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         // A platform Dialog acquires window focus independently of Compose's idle clock.
-        ui.waitUntil(5_000) { ui.onAllNodes(hasText("Genel ve dil") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
-        row("Oynatıcı").performSemanticsAction(SemanticsActions.RequestFocus)
+        ui.waitUntil(5_000) { ui.onAllNodes(hasText(firstSection) and isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        row(player).performSemanticsAction(SemanticsActions.RequestFocus)
         key(KeyEvent.KEYCODE_DPAD_CENTER)
-        title("Oynatıcı")
-        row("Otomatik sonraki bölüm").assertIsFocused()
+        title(player)
+        row(firstRow).assertIsFocused()
     }
 
     /** The focused row lies wholly inside the panel's viewport, whatever the font scale. */
     private fun assertFocusedRowReadable() {
-        val focused = ui.onNode(isFocused() and hasAnyAncestor(hasTestTag("settings-panel"))).getUnclippedBoundsInRoot()
+        val node = ui.onNode(isFocused() and hasAnyAncestor(hasTestTag("settings-panel")))
+        val focused = node.getUnclippedBoundsInRoot()
         val viewport = ui.onNodeWithTag("settings-viewport").getUnclippedBoundsInRoot()
-        assertTrue("Focused setting must stay readable: $focused / $viewport", focused.top >= viewport.top && focused.bottom <= viewport.bottom)
+        val text = node.fetchSemanticsNode().config.getOrNull(SemanticsProperties.Text)?.joinToString(" | ")
+        assertTrue("Focused setting must stay readable: $text $focused / $viewport", focused.top >= viewport.top && focused.bottom <= viewport.bottom)
     }
 
     private fun shot(name: String) {
@@ -155,6 +159,44 @@ class PlayerSettingsFlowTest {
         row("Oynatıcı").assertIsFocused()
         key(KeyEvent.KEYCODE_BACK)
         ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
+    }
+
+    /**
+     * Every Oynatıcı row stays whole in view with its longest value, in Turkish and then in English, whose names run
+     * longer, at the device's font scale (run at 1.0, 1.5 and 2.0): a long value goes under the row's text instead of
+     * squeezing it into a column taller than the screen.
+     */
+    @Test fun everyRowStaysWholeWithItsLongestValueInBothLanguages() {
+        // Yalnız kesintisiz and Yarı saydam are the defaults already.
+        ui.runOnUiThread {
+            model.playback { it.copy(buffer = BufferPreset.MAX, decoder = DecoderMode.SOFTWARE_FIRST, audioOutput = AudioOutput.PCM,
+                osdTimeout = OsdTimeout.NEVER) }
+        }
+        // Otomatik sonraki bölüm down to Tünelli oynatma, over the note between them.
+        fun walk(name: String) {
+            repeat(9) { step ->
+                if (step > 0) key(KeyEvent.KEYCODE_DPAD_DOWN)
+                assertFocusedRowReadable()
+            }
+            ui.onNodeWithTag("player-setting:tunneling").assertIsFocused()
+            shot(name)
+        }
+        openPlayerSettings()
+        ui.onNodeWithTag("player-setting:osd-timeout").assert(state("Hiçbir zaman"))
+        walk("rows-tr")
+        key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5_000) { ui.onAllNodesWithTag("settings-panel").fetchSemanticsNodes().isEmpty() }
+        // The activity comes back in English (LocaleController); TurkishLocaleRule gives the TV's language back after.
+        val before = ui.activity
+        ui.runOnUiThread { LocaleController.choose(ui.activity, AppLanguage.ENGLISH) }
+        ui.waitUntil(15_000) {
+            runCatching { ui.activity !== before && LocaleController.locale.language == "en" }.getOrDefault(false)
+        }
+        ui.waitUntil(10_000) { ui.onAllNodesWithTag("nav:Settings").fetchSemanticsNodes().isNotEmpty() }
+        openPlayerSettings("Settings", "General and language", "Player", "Autoplay next episode")
+        ui.onNodeWithTag("player-setting:frame-rate").assert(state("Only when seamless"))
+        ui.onNodeWithTag("player-setting:audio-output").assert(state("Decode on device"))
+        walk("rows-en")
     }
 
     @Test fun subtitlesHaveAPageOfTheirOwnAndChoosingALookUsesNextvsSetting() {

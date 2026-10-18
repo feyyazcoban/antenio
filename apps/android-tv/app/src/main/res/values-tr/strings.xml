@@ -380,6 +380,7 @@
     <string name="player_kicker_movie">FİLM</string>
     <string name="player_live">● CANLI</string>
     <string name="player_ended">Bitti</string>
+    <string name="player_audio_unplayable">Bu yayının sesi bu ayarla çalınamıyor. Ayarlar > Oynatıcı\'da Ses çıkışını Otomatik yapmayı dene.</string>
     <string name="player_keys_recovering">Geri: yeniden bağlanmayı durdur</string>
     <string name="player_keys_live">Kontroller kapalıyken Yukarı/Aşağı: kanal · Rakam: kanal no</string>
     <string name="player_keys_vod">Kontroller kapalıyken Sol/Sağ: sar</string>

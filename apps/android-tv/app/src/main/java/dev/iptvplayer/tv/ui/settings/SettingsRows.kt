@@ -7,12 +7,12 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -21,6 +21,7 @@ import androidx.compose.ui.semantics.*
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -251,9 +252,8 @@ internal class SettingsScope(
         colors = CardDefaults.colors(containerColor = Ink.Container, focusedContainerColor = Ink.High),
         scale = CardDefaults.scale(focusedScale = 1f),
         border = CardDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
-        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        ChipBeside(Modifier.fillMaxWidth().padding(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text(labelText ?: AnnotatedString(label), color = Ink.Text, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 19.sp)
                 Text(descriptionText ?: AnnotatedString(description), color = if (attention) Ink.Error else Ink.Muted, fontFamily = Roboto,
                     fontSize = 12.sp, lineHeight = 17.sp)
@@ -265,6 +265,39 @@ internal class SettingsScope(
                 color = if (checked) Ink.Mint else Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
             else if (value != null) Text(value, Modifier.background(Ink.Background, RoundedCornerShape(50))
                 .padding(horizontal = 10.dp, vertical = 6.dp).clearAndSetSemantics { }, color = Ink.Text, fontFamily = Roboto, fontSize = 12.sp)
+        }
+    }
+}
+
+/**
+ * A row's text, then the chip at its end, if any: centred beside the text, or under it where beside would make the row
+ * taller, as a long value does at a large font scale ("Hiçbir zaman" at 2.0). The label and its description never
+ * squeeze into a narrow column taller than the screen, and at the usual sizes the chip stays at the end.
+ */
+@Composable private fun ChipBeside(modifier: Modifier, content: @Composable () -> Unit) {
+    Layout(content, modifier) { measurables, constraints ->
+        val gap = 12.dp.roundToPx()
+        val width = constraints.maxWidth
+        fun text(wide: Int) = measurables[0].measure(Constraints(wide, wide, 0, constraints.maxHeight))
+        val chip = measurables.getOrNull(1)?.measure(Constraints(maxWidth = width))
+        val besideWidth = (width - (chip?.width ?: 0) - gap).coerceAtLeast(0)
+        if (chip == null) {
+            val text = text(width)
+            layout(width, text.height) { text.place(0, 0) }
+        } else if (maxOf(measurables[0].minIntrinsicHeight(besideWidth), chip.height) <=
+            measurables[0].minIntrinsicHeight(width) + gap + chip.height) {
+            val text = text(besideWidth)
+            val height = maxOf(text.height, chip.height)
+            layout(width, height) {
+                text.place(0, (height - text.height) / 2)
+                chip.place(width - chip.width, (height - chip.height) / 2)
+            }
+        } else {
+            val text = text(width)
+            layout(width, text.height + gap + chip.height) {
+                text.place(0, 0)
+                chip.place(0, text.height + gap)
+            }
         }
     }
 }
