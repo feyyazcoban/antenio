@@ -133,4 +133,20 @@ class CatalogPresentationTest {
         assertEquals("NETFLIX" to "DE", displayCategory("DE/SERIE ~ NETFLIX"))
         assertEquals("TURK SPOR" to "", displayCategory("TURK SPOR"))
     }
+    @Test fun onlyCountryAndLanguageCodesAreTakenOffTheFront() {
+        assertEquals(DisplayTitle("Kurtlar Vadisi", "", "TR"), displayTitle("TR: Kurtlar Vadisi"))
+        assertEquals(DisplayTitle("Tatort", "", "DE"), displayTitle("DE: Tatort"))
+        assertEquals(DisplayTitle("Das Erste HD", "", "DE"), displayTitle("DE | Das Erste HD"))
+        assertEquals(DisplayTitle("BBC One HD", "", "UK"), displayTitle("UK: BBC One HD"))
+        assertEquals(DisplayTitle("The Crown", "", "ENG"), displayTitle("ENG: The Crown"))
+        // Short capitals that are part of the name stay, and so do quality marks.
+        assertEquals(DisplayTitle("CSI: Vegas", "", ""), displayTitle("CSI: Vegas"))
+        assertEquals(DisplayTitle("NCIS: Origins", "", ""), displayTitle("NCIS: Origins"))
+        assertEquals(DisplayTitle("FBI: Most Wanted", "", ""), displayTitle("FBI: Most Wanted"))
+        assertEquals(DisplayTitle("BBC: Earth", "", ""), displayTitle("BBC: Earth"))
+        assertEquals(DisplayTitle("CSI: Miami", "2002", ""), displayTitle("CSI: Miami (2002)"))
+        assertEquals(DisplayTitle("VIP: Sinema 1", "", ""), displayTitle("VIP: Sinema 1"))
+        assertEquals("ACTION" to "UK", displayCategory("UK/MOVIES ~ ACTION"))
+        assertEquals("VIP/FILM ~ AKSIYON" to "", displayCategory("VIP/FILM ~ AKSIYON"))
+    }
 }

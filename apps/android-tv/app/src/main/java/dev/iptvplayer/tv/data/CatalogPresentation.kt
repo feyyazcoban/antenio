@@ -30,6 +30,21 @@ fun catalogDisplayOrder(entries: List<MediaEntry>): List<MediaEntry> {
  */
 data class DisplayTitle(val name: String, val year: String, val tag: String)
 
+/**
+ * The country and language codes a leading "TR: " or "TR/FILM ~" may carry: ISO 3166-1 and ISO 639 codes providers
+ * use, plus UK, ARB and LAT (Britain, Arabic, Latin America). Any other short capitals before a colon belong to the
+ * name ("CSI: Vegas", "FBI: Most Wanted"), and so do quality marks (D065). A code missing here only leaves the
+ * provider's title as it is.
+ */
+private val providerTags = setOf(
+    "AE", "AL", "AR", "AT", "AU", "AZ", "BA", "BE", "BG", "BR", "CA", "CH", "CN", "CY", "CZ", "DE", "DK", "EG", "EN",
+    "ES", "FA", "FI", "FR", "GB", "GR", "HR", "HU", "IE", "IL", "IN", "IQ", "IR", "IT", "JP", "KR", "KU", "LB", "MA",
+    "MK", "MX", "NL", "NO", "PH", "PK", "PL", "PT", "RO", "RS", "RU", "SA", "SE", "SI", "SK", "TH", "TR", "UA", "UK",
+    "US", "ZA",
+    "ALB", "ARA", "ARB", "AUS", "AUT", "AZE", "BEL", "BIH", "BRA", "BUL", "CAN", "CRO", "CZE", "DEN", "DEU", "ENG",
+    "ESP", "FIN", "FRA", "GBR", "GER", "GRE", "HUN", "IND", "IRN", "ITA", "KUR", "LAT", "MEX", "NED", "NLD", "NOR",
+    "PAK", "POL", "POR", "PRT", "ROM", "ROU", "RUS", "SPA", "SRB", "SUI", "SVK", "SWE", "TUR", "UKR", "USA"
+)
 private val countryPrefix = Regex("^\\s*([A-Z]{2,3})\\s*[:|]\\s*(?=\\S)")
 private val yearAndLanguage = Regex("\\s*\\(((?:19|20)\\d{2})\\)\\s+([A-Z]{2})\\s*$")
 private val trailingYear = Regex("\\s*(?:\\(((?:19|20)\\d{2})\\)|[-–]\\s*((?:19|20)\\d{2}))\\s*$")
@@ -37,7 +52,8 @@ private val trailingYear = Regex("\\s*(?:\\(((?:19|20)\\d{2})\\)|[-–]\\s*((?:1
 fun displayTitle(title: String, year: String = ""): DisplayTitle {
     var rest = title.trim()
     var tag = ""
-    countryPrefix.find(rest)?.let { tag = it.groupValues[1]; rest = rest.substring(it.range.last + 1) }
+    countryPrefix.find(rest)?.takeIf { it.groupValues[1] in providerTags }
+        ?.let { tag = it.groupValues[1]; rest = rest.substring(it.range.last + 1) }
     var found = ""
     yearAndLanguage.find(rest)?.let { found = it.groupValues[1]; tag = it.groupValues[2]; rest = rest.substring(0, it.range.first) }
         ?: trailingYear.find(rest)?.let { found = it.groupValues[1].ifEmpty { it.groupValues[2] }; rest = rest.substring(0, it.range.first) }
@@ -50,7 +66,8 @@ private val categoryPrefix = Regex("^\\s*([A-Z]{2,3})\\s*/\\s*[^~]*~\\s*(\\S.*)$
 
 /** "TR/FILM ~ YERLI 2023" as "YERLI 2023" with the tag "TR"; other category names unchanged. */
 fun displayCategory(category: String): Pair<String, String> =
-    categoryPrefix.find(category)?.let { it.groupValues[2].trim() to it.groupValues[1] } ?: (category to "")
+    categoryPrefix.find(category)?.takeIf { it.groupValues[1] in providerTags }
+        ?.let { it.groupValues[2].trim() to it.groupValues[1] } ?: (category to "")
 
 private val episodeTagText = Regex("(?i)(?<![\\p{L}\\p{N}])(?:S\\d{1,3}\\s*E\\d{1,4}|\\d{1,3}x\\d{1,4})(?![\\p{L}\\p{N}])")
 private val leadingYear = Regex("^\\s*\\(\\d{4}\\)")
