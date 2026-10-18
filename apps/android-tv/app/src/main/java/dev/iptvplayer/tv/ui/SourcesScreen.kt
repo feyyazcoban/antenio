@@ -38,8 +38,14 @@ import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.*
 import kotlinx.coroutines.flow.first
 
+/**
+ * Kaynakların. While a PIN guards source management the PIN that opened this screen holds for what is done here (pin.md
+ * §3.8); the pad still opens if it ended meanwhile. With a PIN set, a source's Bilgiler locks the whole source.
+ */
 @Composable internal fun SourcesScreen(s: TvState, model: TvViewModel) {
     val first = remember { FocusRequester() }
+    val openPin = rememberPinOpener()
+    val addFocus = remember { FocusRequester() }
     val target = s.sourceManagerFocus.takeIf { key -> key == "add-source" || s.sources.any { key == "edit-source:${it.id}" || key == "remove-source:${it.id}" } } ?: "add-source"
     val targetIndex = s.sources.indexOfFirst { target.endsWith(":${it.id}") }.coerceAtLeast(0)
     val list = rememberLazyListState(initialFirstVisibleItemIndex = targetIndex)
@@ -59,7 +65,9 @@ import kotlinx.coroutines.flow.first
                 Heading(stringResource(R.string.sources_title), Modifier.testTag("sources-title"))
                 Note(pluralStringResource(R.plurals.sources_summary, s.sources.size, s.sources.size.toString()))
             }
-            Action(stringResource(R.string.sources_add), focus("add-source").testTag("add-source"), primary = true) { model.addSource() }
+            Action(stringResource(R.string.sources_add), focus("add-source").focusRequester(addFocus).testTag("add-source"), primary = true) {
+                if (model.addSource()) openPin { addFocus }
+            }
             Action(stringResource(R.string.action_back)) { model.back() }
         }
         s.catalogNotice?.let { Note(it.message.resolve(), error = it.needsAttention) }
@@ -84,9 +92,12 @@ import kotlinx.coroutines.flow.first
                     .padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Text(sourceNumber(s, source), Modifier.weight(1f),
+                        Text(sourceNumber(s, source), Modifier.weight(1f, fill = false),
                             color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 17.sp,
                             maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        // A locked source (Bilgiler says what it locks).
+                        if (source.id in s.locks.sources) Box(Modifier.testTag("source-locked:${source.id}")) { LockMark(color = Ink.Mint) }
+                        Spacer(Modifier.weight(1f))
                         Text(pluralStringResource(R.plurals.count_items, status.count, status.count.toString()), color = Ink.Muted, fontFamily = Roboto,
                             fontSize = 12.sp, lineHeight = 17.sp, maxLines = 1)
                     }
@@ -103,7 +114,10 @@ import kotlinx.coroutines.flow.first
                             .then(if (firstVisibleSource == source.id) Modifier.focusRequester(listEntry) else Modifier)
                             .then(if (info?.id == source.id) Modifier.focusRequester(dialogOpener) else Modifier)) { info = source }
                         Action(stringResource(R.string.sources_refresh), Modifier.testTag("refresh-source:${source.id}")) { model.refresh(source.id) }
-                        Action(stringResource(R.string.sources_edit), focus("edit-source:${source.id}").testTag("edit-source:${source.id}")) { model.editSource(source.id) }
+                        val edit = remember { FocusRequester() }
+                        Action(stringResource(R.string.sources_edit), focus("edit-source:${source.id}").focusRequester(edit).testTag("edit-source:${source.id}")) {
+                            if (model.editSource(source.id)) openPin { edit }
+                        }
                         Action(stringResource(R.string.sources_remove), focus("remove-source:${source.id}").testTag("remove-source:${source.id}")
                             .then(if (removal?.id == source.id) Modifier.focusRequester(dialogOpener) else Modifier)) { removal = source }
                     }
@@ -119,11 +133,23 @@ import kotlinx.coroutines.flow.first
         fun dismiss() { dialogOpener.requestFocus(); info = null }
         SourceDialog(stringResource(R.string.sources_info_title), reader, ::dismiss, hidden = guideOptions) {
             val status = s.sourceStatus[source.id] ?: SourceStatus()
+            val locked = source.id in s.locks.sources
             RemoteTextReader("${s.sourceName(source.id)}\n\n${sourceNumber(s, source)}\n" +
                 pluralStringResource(R.plurals.count_items, status.count, status.count.toString()) +
+                (if (locked) "\n" + stringResource(R.string.parental_locked_source_note) else "") +
                 (if (status.notices.isNotEmpty()) "\n\n${status.notices.resolve()}" else "") + "\n\n" + guideStatusText(s.guideStatus[source.id], model.guideZone()),
                 Modifier.weight(1f, fill = false).focusRequester(reader).focusProperties { down = guideOpener }, "source-info-reader")
             Action(stringResource(R.string.sources_guide_settings), Modifier.focusRequester(guideOpener).focusProperties { up = reader }.testTag("source-guide-settings")) { guideOptions = true }
+            // With a PIN set, the whole source locks at once; its lock goes with the PIN that opened Kaynaklar, or asks
+            // for it over this window (pin.md §3.8). Not a fifth button on the card: it would not fit at large text.
+            if (s.parental.status == ParentalStatus.ON) {
+                val openLockPin = rememberPinOpener()
+                val lockFocus = remember { FocusRequester() }
+                Action(stringResource(if (locked) R.string.source_lock_remove else R.string.source_lock_add),
+                    Modifier.focusRequester(lockFocus).testTag("source-lock"), icon = "lock") {
+                    if (model.setSourceLock(source.id, !locked)) openLockPin { lockFocus }
+                }
+            }
             Action(stringResource(R.string.action_close), Modifier.testTag("close-source-info")) { dismiss() }
         }
         if (guideOptions) GuideSourceDialog(source, s, model) { guideOptions = false; guideOpener.requestFocus() }
@@ -138,7 +164,10 @@ import kotlinx.coroutines.flow.first
                 Modifier.weight(1f, fill = false).focusRequester(reader), "source-removal-reader")
             Column(Modifier.padding(vertical = 5.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Action(stringResource(R.string.action_cancel), Modifier.focusRequester(cancel).focusProperties { up = reader }.testTag("cancel-source-removal")) { dismiss() }
-                Action(stringResource(R.string.remove_source), Modifier.testTag("confirm-source-removal")) { removal = null; model.removeSource(source.id) }
+                Action(stringResource(R.string.remove_source), Modifier.testTag("confirm-source-removal")) {
+                    removal = null
+                    if (model.removeSource(source.id)) openPin { listEntry }
+                }
             }
         }
     }

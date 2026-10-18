@@ -123,6 +123,9 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
     fun select(id: String?, time: Long) { model.guideCursor(id, time.coerceIn(retention.from, retention.until - 1)) }
     // A locked channel asks for the PIN over the guide; focus goes back to the grid (pin.md §3.6).
     val openPin = rememberPinOpener()
+    // Kaynakları yönet asks for the PIN that guards the sources first (pin.md §3.8); focus comes back to its button.
+    val sourcesFocus = remember { FocusRequester() }
+    val openSourcesFocus = remember { FocusRequester() }
     fun watch(entry: MediaEntry) { if (model.open(entry)) openPin { gridFocus } }
     fun open(entry: MediaEntry, slot: GuideSlot) {
         select(entry.id, (model.state.value.guideAnchor ?: anchor).takeIf(slot::contains) ?: slot.from)
@@ -181,7 +184,9 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                 Text(stringResource(R.string.guide_unavailable_note), Modifier.widthIn(max = 640.dp), color = Ink.Muted, fontFamily = Roboto,
                     fontSize = 15.sp, lineHeight = 22.sp)
                 Spacer(Modifier.height(18.dp))
-                Action(stringResource(R.string.manage_sources), Modifier.focusRequester(emptyFocus).testTag("guide-manage-sources"), primary = true) { model.manageSources() }
+                Action(stringResource(R.string.manage_sources), Modifier.focusRequester(emptyFocus).testTag("guide-manage-sources"), primary = true) {
+                    if (model.manageSources()) openPin { emptyFocus }
+                }
             } else LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(4.dp)) {
                 item { Action(stringResource(R.string.guide_now), Modifier.focusRequester(nowFocus).focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-now"), compact = true) { select(channel?.id, now); if (channels.isNotEmpty()) gridFocus.requestFocus() } }
                 item { Action(stringResource(R.string.guide_previous_day), Modifier.focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-day-previous"), compact = true,
@@ -189,7 +194,8 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                 item { Action(stringResource(R.string.guide_next_day), Modifier.focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-day-next"), compact = true,
                     enabled = dayWindow.until < retention.until) { select(channel?.id, Instant.ofEpochMilli(anchor).atZone(zone).plusDays(1).toInstant().toEpochMilli()) } }
                 item { Action(stringResource(R.string.guide_zone), Modifier.focusRequester(zoneFocus).focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }.testTag("guide-zone"), compact = true) { zones = true } }
-                item { Action(stringResource(R.string.guide_sources), Modifier.focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }, compact = true) { model.manageSources() } }
+                item { Action(stringResource(R.string.guide_sources), Modifier.focusRequester(sourcesFocus).focusProperties { down = if (channels.isEmpty()) FocusRequester.Default else gridFocus }
+                    .testTag("guide-sources"), compact = true) { if (model.manageSources()) openPin { sourcesFocus } } }
                 // The remote's shortcuts, where the bottom panel used to name them.
                 item { Box(Modifier.height(actionHeight(compact = true)).padding(start = 12.dp), contentAlignment = Alignment.CenterStart) {
                     Text(stringResource(R.string.guide_keys), color = Ink.Muted, fontFamily = Roboto,
@@ -200,7 +206,7 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                     Heading(stringResource(R.string.guide_no_channels))
                     Note(stringResource(R.string.guide_no_channels_note))
-                    Action(stringResource(R.string.guide_open_sources)) { model.manageSources() }
+                    Action(stringResource(R.string.guide_open_sources), Modifier.focusRequester(openSourcesFocus)) { if (model.manageSources()) openPin { openSourcesFocus } }
                 }
             } else {
                 // The subtitle already names the offset; repeat it per hour only across a DST change.

@@ -84,6 +84,7 @@ private fun categoryListPage(kind: MediaKind) = SettingsRoute.Page("category-lis
 /** Every page of the panel by id. A ChoicePage is not among them: its ChoiceRow carries the options. */
 internal val settingsPageList: List<SettingsPageSpec> = listOf(
     SettingsPageSpec(mainPage.id, UiText.Res(R.string.settings_title), section = null) { MainList() },
+    // Kaldır asks for the PIN that guards the sources (pin.md §3.8), over this page.
     SettingsPageSpec(removeSourcePage.id, UiText.Res(R.string.remove_source_question), SectionId.SOURCES, body = PageBody.SHORT_LIST) {
         Confirmation(stringResource(R.string.settings_remove_confirm, s.source?.name.orEmpty()), stringResource(R.string.remove_source)) {
             model.removeSource()
@@ -91,7 +92,7 @@ internal val settingsPageList: List<SettingsPageSpec> = listOf(
     },
     SettingsPageSpec(clearHistoryPage.id, UiText.Res(R.string.settings_clear_history_question), SectionId.WATCHING, body = PageBody.SHORT_LIST) {
         Confirmation(stringResource(R.string.settings_clear_history_confirm), stringResource(R.string.settings_clear_history)) {
-            model.clearHistory()
+            model.clearHistory(); false
         }
     },
     SettingsPageSpec(aboutPage.id, UiText.Res(R.string.settings_about), SectionId.WATCHING, body = PageBody.READING) { About() },
@@ -106,6 +107,7 @@ internal val settingsPageList: List<SettingsPageSpec> = listOf(
 internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.associateBy { it.id }
 
 @Composable private fun SettingsScope.MainList() {
+    val openPin = rememberPinOpener()
     ToggleRow("reduced-motion", stringResource(R.string.settings_reduced_motion), stringResource(R.string.settings_reduced_motion_note),
         s.reducedMotion, section = SectionId.APPEARANCE) { model.reducedMotion() }
     ToggleRow("startup-sound", stringResource(R.string.settings_startup_sound), stringResource(R.string.settings_startup_sound_note),
@@ -113,8 +115,9 @@ internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.ass
     Spacer(Modifier.height(6.dp))
     NoteRow(stringResource(R.string.text_pair, pluralStringResource(R.plurals.settings_sources, s.sources.size, s.sources.size.toString()),
         pluralStringResource(R.plurals.settings_visible_items, visibleItems, visibleItems.toString())))
+    // Source management asks for its PIN over the panel first (pin.md §3.8); the panel closes once the sources open.
     ActionRow("manage-sources", stringResource(R.string.manage_sources), stringResource(R.string.settings_manage_sources_note), section = SectionId.SOURCES) {
-        dismiss(); model.manageSources()
+        if (model.manageSources()) openPin { rowEntry("manage-sources") } else dismiss()
     }
     val refreshNotice = s.catalogNotice?.takeIf { it.operation == CatalogOperation.REFRESH }
     // The timestamp captions the refresh row: 4 dp more above, 8 dp below (clear of the focus ring).
@@ -127,13 +130,12 @@ internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.ass
     }
     s.catalogNotice?.takeIf { it.operation != CatalogOperation.REFRESH }?.let { NoteRow(it.message.resolve(), error = it.needsAttention) }
     if (s.sources.size == 1) ActionRow("edit-source", stringResource(R.string.settings_edit_source), stringResource(R.string.settings_edit_source_note),
-        section = SectionId.SOURCES) { dismiss(); model.editSource() }
+        section = SectionId.SOURCES) { if (model.editSource()) openPin { rowEntry("edit-source") } else dismiss() }
     if (s.sources.size == 1) PageRow("remove-source", stringResource(R.string.remove_source), stringResource(R.string.settings_remove_source_note),
         removeSourcePage, section = SectionId.SOURCES)
     Spacer(Modifier.height(6.dp))
     // D068: what the screens show. Turning it on is free; off asks for the PIN while one is set, and without one first
     // offers to make one (pin.md §3.3).
-    val openPin = rememberPinOpener()
     ToggleRow("hide-adult", stringResource(R.string.settings_hide_adult), stringResource(if (s.parental.guarded)
         R.string.settings_hide_adult_note_pin else R.string.settings_hide_adult_note),
         s.hideAdultCategories, section = SectionId.CONTENT) {
@@ -145,7 +147,7 @@ internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.ass
         pluralStringResource(R.plurals.settings_manage_categories_hidden, hiddenCount, hiddenCount.toString())
         else stringResource(R.string.settings_manage_categories_note), categoriesPage, section = SectionId.CONTENT)
     PageRow("parental", stringResource(R.string.parental_title), stringResource(when (s.parental.status) {
-        ParentalStatus.ON -> R.string.parental_row_on
+        ParentalStatus.ON -> if (s.parental.sourcesNeedPin) R.string.parental_row_on_sources else R.string.parental_row_on
         ParentalStatus.UNAVAILABLE -> R.string.parental_row_unavailable
         else -> R.string.parental_row_off
     }), parentalPage, section = SectionId.CONTENT)
@@ -157,14 +159,17 @@ internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.ass
     PageRow("about", stringResource(R.string.settings_about), stringResource(R.string.settings_about_note), aboutPage, section = SectionId.WATCHING)
 }
 
-/** Vazgeç first, so a repeated OK never confirms; confirming closes the panel. */
-@Composable private fun SettingsScope.Confirmation(note: String, confirm: String, action: () -> Unit) {
+/**
+ * Vazgeç first, so a repeated OK never confirms; confirming closes the panel. An [action] that opened the PIN pad first
+ * says true: the page stays under the pad, and the panel closes once the action runs.
+ */
+@Composable private fun SettingsScope.Confirmation(note: String, confirm: String, action: () -> Boolean) {
+    val openPin = rememberPinOpener()
     NoteRow(note)
     Spacer(Modifier.height(12.dp))
     Action(stringResource(R.string.action_cancel), Modifier.focusRequester(rowFocus("cancel"))) { back() }
-    Action(confirm, Modifier.focusRequester(rowFocus("confirm"))) {
-        action()
-        dismiss()
+    Action(confirm, Modifier.focusRequester(rowFocus("confirm")).testTag("settings-confirm")) {
+        if (action()) openPin { rowEntry("confirm") } else dismiss()
     }
 }
 

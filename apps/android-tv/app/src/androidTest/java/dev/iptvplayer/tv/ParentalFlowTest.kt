@@ -7,6 +7,7 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.iptvplayer.tv.data.*
@@ -28,9 +29,12 @@ import java.util.Locale
  * Göster / Kilitle / Gizle in Kategorileri yönet (Kilitle making a first PIN, a locked row hidden and shown again), the
  * marks and hidden programmes in the library, guide and Ara, Kilitle and Kilidi kaldır in the quick menu, Kilitli
  * içerikler, the 1024-rule limit, and, as the app stops, a locked title leaving the player and its programme detail
- * leaving the guide. Each PIN check or save runs the real KDF, so the waits are long. Removes this app's protection
- * record before and after each test: a dedicated test emulator only, never a TV or an emulator holding a real source.
- * Synthetic sources and PINs.
+ * leaving the guide. Source and launch protection (S12, §3.8–3.9): Kaynakları yönet, Kaynağı düzenle and Kaynağı kaldır
+ * asking for the PIN from Ayarlar and the guide and the PIN holding in Kaynaklar, a whole source locked from its
+ * Bilgiler, "Açılışta PIN iste" on return over the player and at launch, and the lock screen of a record that cannot be
+ * read. Each PIN check or save runs the real KDF, so the waits are long. Removes this app's protection record before and
+ * after each test: a dedicated test emulator only, never a TV or an emulator holding a real source. Synthetic sources
+ * and PINs.
  */
 @RunWith(AndroidJUnit4::class)
 class ParentalFlowTest {
@@ -78,9 +82,14 @@ class ParentalFlowTest {
     }
 
     @After fun cleanup() {
-        if (::model.isInitialized) ui.runOnUiThread { model.removeSource() }
         if (::server.isInitialized) {
+            // The PIN goes first: while it guards the sources, removing one would ask for it.
             ProtectionStore(context).reset()
+            if (::model.isInitialized) {
+                ui.runOnUiThread { model.retryProtection() }
+                ui.waitUntil(5_000) { parental.status == ParentalStatus.OFF }
+                ui.runOnUiThread { model.removeSource() }
+            }
             server.shutdown()
         }
     }
@@ -133,12 +142,15 @@ class ParentalFlowTest {
         ui.runOnUiThread { model.closeSettings() }
     }
 
-    /** Puts [rules] in the protection record beside the PIN and opens the library again, which reads them first. */
-    private fun lock(vararg rules: AccessRule) {
+    /**
+     * Puts [rules] in the protection record beside the PIN, and [options] in place of its own, and opens the library
+     * again, which reads them first.
+     */
+    private fun lock(vararg rules: AccessRule, options: ProtectionOptions? = null) {
         val store = ProtectionStore(context)
         val current = (store.read() as ProtectionRead.Ready).snapshot
         store.write(ProtectionSnapshot(current.generation + 1, current.policyRevision + 1, current.credential, current.attempts,
-            current.rules + rules, current.options), current.generation)
+            current.rules + rules, options ?: current.options), current.generation)
         ui.runOnUiThread { model.restore() }
         ui.waitUntil(20_000) { model.state.value.route == Route.HOME && model.state.value.sourceTask == SourceTask.IDLE }
     }
@@ -153,6 +165,30 @@ class ParentalFlowTest {
     private val okRemovesTheLock = SemanticsMatcher("OK reads Kilidi kaldır") { it.config.getOrNull(SemanticsActions.OnClick)?.label == "Kilidi kaldır" }
     private fun rules() = (ProtectionStore(context).read() as ProtectionRead.Ready).snapshot.rules
     private fun shown(text: String) = ui.onAllNodes(hasText(text, substring = true), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+
+    private fun lockShown() = ui.onAllNodesWithTag("app-lock").fetchSemanticsNodes().isNotEmpty()
+    private fun rowFocused(label: String) = ui.onAllNodes(hasText(label) and hasClickAction() and isFocused() and
+        hasAnyAncestor(hasTestTag("settings-panel"))).fetchSemanticsNodes().isNotEmpty()
+
+    /** Kaynaklar through Ayarlar → Kaynakları yönet, with the PIN that guards them. */
+    private fun openSourcesWithPin() {
+        openSettings()
+        row("Kaynakları yönet").performSemanticsAction(SemanticsActions.RequestFocus)
+        openPad()
+        digits("2580")
+        waitFor { model.state.value.route == Route.SOURCES }
+        ui.waitUntil(5_000) { !padShown() && focused("add-source") }
+    }
+
+    /** Ebeveyn denetimi with the PIN, focus on its first row. */
+    private fun openParentalPage() {
+        openSettings()
+        row("Ebeveyn denetimi").performSemanticsAction(SemanticsActions.RequestFocus)
+        openPad()
+        digits("2580")
+        waitFor { parental.prompt == null }
+        ui.waitUntil(5_000) { !padShown() && focused("parental-change") }
+    }
 
     /** Opens the quick menu with a held OK on [id]'s card, focus on its first row. */
     private fun quickMenu(id: String) {
@@ -211,9 +247,14 @@ class ParentalFlowTest {
         ui.waitUntil(5_000) { !padShown() && focused("parental-change") }
         ui.onNodeWithText("PIN değiştirildi.").assertExists()
 
-        // Removing it asks first, Vazgeç focused; Kilitli içerikler sits between, with nothing locked yet.
+        // Removing it asks first, Vazgeç focused; Kilitli içerikler sits between, with nothing locked yet, then the two
+        // options: source management asks by default, the app's opening does not.
         key(KeyEvent.KEYCODE_DPAD_DOWN)
         ui.onNode(hasTestTag("parental-locked") and hasText("Kilitli kanal veya içerik yok.")).assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.onNodeWithTag("parental-sources-need-pin").assertIsFocused().assertIsOn()
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.onNodeWithTag("parental-launch-needs-pin").assertIsFocused().assertIsOff()
         key(KeyEvent.KEYCODE_DPAD_DOWN)
         ui.onNodeWithTag("parental-remove").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_CENTER)
@@ -754,6 +795,222 @@ class ParentalFlowTest {
         assertTrue(model.state.value.sources.isEmpty())
         assertTrue(model.state.value.hideAdultCategories)
         ui.onNodeWithTag("setup-notice").assertTextEquals("Sıfırlandı. Kaynağını yeniden ekleyebilirsin.")
+        assertEquals(ProtectionRead.Unconfigured, ProtectionStore(context).read())
+    }
+
+    @Test fun sourceManagementAsksForThePinWhereverItOpensAndThePinHoldsInKaynaklar() {
+        makePin()
+        val source = model.state.value.sources.single().id
+        // Ayarlar → Kaynakları yönet: the pad over the panel; Back opens nothing, and focus is back on the row.
+        openSettings()
+        row("Kaynakları yönet").performSemanticsAction(SemanticsActions.RequestFocus)
+        openPad()
+        padTitle("PIN gir")
+        ui.onNodeWithText("Kaynak ayarlarını açmak için PIN gir.").assertExists()
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5_000) { !padShown() && rowFocused("Kaynakları yönet") }
+        assertEquals(Route.HOME, model.state.value.route)
+        // The right PIN opens Kaynaklar, the panel closing behind it; it opens nothing else in Ayarlar.
+        openPad()
+        digits("2580")
+        waitFor { model.state.value.route == Route.SOURCES }
+        ui.waitUntil(5_000) { !padShown() && ui.onAllNodesWithTag("settings-panel").fetchSemanticsNodes().isEmpty() }
+        assertTrue(parental.sourcesUnlocked); assertFalse(parental.adminUnlocked)
+        // Within Kaynaklar the PIN holds: Düzenle opens the form without asking.
+        ui.waitUntil(5_000) { focused("add-source") }
+        ui.onNodeWithTag("edit-source:$source").performSemanticsAction(SemanticsActions.RequestFocus)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(5_000) { model.state.value.route == Route.SETUP }
+        assertFalse(padShown())
+        ui.runOnUiThread { model.back() }
+        assertEquals(Route.SOURCES, model.state.value.route)
+        // Leaving Kaynaklar ends it: the guide's Kaynaklar asks again, and Back leaves the guide as it was.
+        ui.runOnUiThread { model.back() }
+        assertEquals(Route.HOME, model.state.value.route); assertFalse(parental.sourcesUnlocked)
+        ui.runOnUiThread { model.guide() }
+        ui.waitUntil(10_000) { ui.onAllNodesWithTag("guide-sources").fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithTag("guide-sources").performSemanticsAction(SemanticsActions.RequestFocus)
+        openPad()
+        ui.onNodeWithText("Kaynak ayarlarını açmak için PIN gir.").assertExists()
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5_000) { !padShown() && focused("guide-sources") }
+        assertEquals(Route.GUIDE, model.state.value.route)
+        ui.runOnUiThread { model.home() }
+        // Kaynağı düzenle and Kaynağı kaldır in Ayarlar ask as well; Back keeps the source as it is.
+        openSettings()
+        row("Kaynağı düzenle").performSemanticsAction(SemanticsActions.RequestFocus)
+        openPad()
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5_000) { !padShown() && rowFocused("Kaynağı düzenle") }
+        assertEquals(Route.HOME, model.state.value.route)
+        row("Kaynağı kaldır").performSemanticsAction(SemanticsActions.RequestFocus)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        title("Kaynağı kaldır?")
+        ui.onNodeWithTag("settings-confirm").performSemanticsAction(SemanticsActions.RequestFocus)
+        openPad()
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5_000) { !padShown() && focused("settings-confirm") }
+        assertEquals(listOf(source), model.state.value.sources.map { it.id }); assertEquals(Route.HOME, model.state.value.route)
+        key(KeyEvent.KEYCODE_BACK)
+        title("Ayarlar")
+        key(KeyEvent.KEYCODE_BACK)
+        ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
+        // "Kaynak yönetimi PIN istesin" off (with the PIN verified for Ebeveyn denetimi): Kaynaklar opens at once.
+        openParentalPage()
+        ui.onNodeWithTag("parental-sources-need-pin").assertIsOn().performSemanticsAction(SemanticsActions.RequestFocus)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10_000) { !parental.sourcesNeedPin }
+        ui.onNodeWithTag("parental-sources-need-pin").assertIsFocused().assertIsOff()
+        assertFalse((ProtectionStore(context).read() as ProtectionRead.Ready).snapshot.options.sourcesNeedPin)
+        key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK)
+        ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
+        ui.runOnUiThread { assertFalse(model.manageSources()) }
+        assertEquals(Route.SOURCES, model.state.value.route)
+        ui.runOnUiThread { model.back() }
+    }
+
+    @Test fun bilgilerLocksTheWholeSourceAndItsLockGoesWithThePinThatOpenedKaynaklar() {
+        makePin()
+        val source = model.state.value.sources.single().id
+        val (film, channel) = listOf("movie:2", "live:1").map { model.fixtureKey(it) }
+        val rule = AccessRule(AccessScope.Source(source), pinRequired = true)
+        fun openInfo() {
+            ui.onNodeWithTag("info-source:$source").performSemanticsAction(SemanticsActions.RequestFocus)
+            key(KeyEvent.KEYCODE_DPAD_CENTER)
+            ui.waitUntil(5_000) { ui.onAllNodesWithTag("source-lock").fetchSemanticsNodes().isNotEmpty() }
+            ui.onNodeWithTag("source-lock").performSemanticsAction(SemanticsActions.RequestFocus)
+        }
+        // Kaynağı kilitle: at once, without the PIN; every channel, film and series of the source asks for it then.
+        openSourcesWithPin()
+        openInfo()
+        ui.onNodeWithTag("source-lock").assertTextEquals("Kaynağı kilitle")
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10_000) { source in model.state.value.locks.sources }
+        assertTrue(model.state.value.locks.ids.containsAll(listOf(film, channel)))
+        assertTrue(rules().contains(rule))
+        assertFalse(padShown())
+        ui.onNodeWithTag("source-lock").assertTextEquals("Kaynağın kilidini kaldır")
+        ui.onNode(hasText("Bu kaynaktaki bütün kanallar, filmler ve diziler PIN ister.", substring = true) and
+            hasAnyAncestor(hasTestTag("source-info-reader"))).assertExists()
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5_000) { ui.onAllNodesWithTag("source-lock").fetchSemanticsNodes().isEmpty() }
+        ui.onNodeWithTag("source-locked:$source", useUnmergedTree = true).assertExists()
+        ui.runOnUiThread { model.back() }
+        ui.runOnUiThread { assertTrue(model.open(entry(film))); assertTrue(model.open(entry(channel))) }
+        assertEquals(Route.HOME, model.state.value.route)
+        // Kaynağın kilidini kaldır with the PIN that opened Kaynaklar: nothing more is asked.
+        openSourcesWithPin()
+        openInfo()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10_000) { source !in model.state.value.locks.sources }
+        assertFalse(padShown()); assertFalse(rules().contains(rule))
+        assertTrue(model.state.value.locks.ids.isEmpty())
+        key(KeyEvent.KEYCODE_BACK)
+        ui.runOnUiThread { model.back() }
+
+        // With "Kaynak yönetimi PIN istesin" off Kaynaklar opens at once, and removing the lock asks for the PIN over
+        // Bilgiler, focus going back to it.
+        lock(rule, options = ProtectionOptions(sourcesNeedPin = false))
+        ui.runOnUiThread { assertFalse(model.manageSources()) }
+        ui.waitUntil(5_000) { focused("add-source") }
+        openInfo()
+        ui.onNodeWithTag("source-lock").assertTextEquals("Kaynağın kilidini kaldır")
+        openPad()
+        ui.onNodeWithText("“Deneme kütüphanesi” kilidini kaldırmak için PIN gir.").assertExists()
+        digits("2580")
+        waitFor { source !in model.state.value.locks.sources }
+        ui.waitUntil(5_000) { !padShown() && focused("source-lock") }
+        ui.onNodeWithTag("source-lock").assertTextEquals("Kaynağı kilitle")
+        assertFalse(parental.sourcesUnlocked); assertFalse(parental.adminUnlocked)
+        key(KeyEvent.KEYCODE_BACK)
+        ui.runOnUiThread { model.back() }
+    }
+
+    @Test fun theLaunchPinLocksTheAppOnReturnAndAtLaunchAndThePlayerWaitsUnderIt() {
+        makePin()
+        val channel = model.fixtureKey("live:1")
+        // Ebeveyn denetimi → Açılışta PIN iste: on, without asking more.
+        openParentalPage()
+        ui.onNodeWithTag("parental-launch-needs-pin").assertIsOff().performSemanticsAction(SemanticsActions.RequestFocus)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10_000) { parental.launchNeedsPin }
+        ui.onNodeWithTag("parental-launch-needs-pin").assertIsOn()
+        assertTrue((ProtectionStore(context).read() as ProtectionRead.Ready).snapshot.options.launchNeedsPin)
+        key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK)
+        ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
+        assertFalse(parental.appLocked)
+        // A channel plays; Home, standby or another app: back on screen the lock screen covers the player.
+        ui.runOnUiThread { model.showKind(MediaKind.LIVE); assertFalse(model.open(entry(channel))) }
+        ui.waitUntil(5_000) { model.state.value.route == Route.PLAYER && playingId == channel }
+        ui.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
+        assertTrue(parental.appLocked)
+        assertEquals(Route.LOCKED, model.state.value.screen); assertEquals(Route.PLAYER, model.state.value.route)
+        ui.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+        ui.waitUntil(5_000) { lockShown() && focused("pin-key:1") }
+        ui.onNodeWithTag("app-lock-title").assertTextEquals("NEXTV kilitli")
+        ui.onNodeWithText("Devam etmek için PIN gir.").assertExists()
+        assertTrue(ui.onAllNodesWithTag("player-panel").fetchSemanticsNodes().isEmpty())
+        // Nothing opens behind it.
+        ui.runOnUiThread { assertFalse(model.open(entry(channel))) }
+        assertEquals(Route.PLAYER, model.state.value.route)
+        // A wrong PIN keeps it; the right one brings the channel back, and opens nothing in Ayarlar.
+        digits("1111")
+        waitFor { parental.prompt?.feedback != null }
+        feedback("PIN yanlış. Tekrar dene.")
+        assertTrue(parental.appLocked)
+        digits("2580")
+        waitFor { !parental.appLocked }
+        ui.waitUntil(5_000) { !lockShown() && ui.onAllNodesWithTag("player-panel").fetchSemanticsNodes().isNotEmpty() }
+        assertEquals(channel, playingId); assertFalse(parental.adminUnlocked)
+        ui.runOnUiThread { model.back() }
+        // Opening the app: the lock screen once the sources are open.
+        ui.runOnUiThread { ui.activity.viewModelStore.clear() }
+        ui.activityRule.scenario.recreate()
+        ui.runOnUiThread { model = ViewModelProvider(ui.activity)[TvViewModel::class.java] }
+        ui.waitUntil(20_000) { model.state.value.route == Route.HOME && model.state.value.sourceTask == SourceTask.IDLE }
+        assertTrue(parental.appLocked)
+        ui.waitUntil(5_000) { lockShown() && focused("pin-key:1") }
+        assertTrue(ui.onAllNodesWithTag("home-content").fetchSemanticsNodes().isEmpty())
+        digits("2580")
+        waitFor { !parental.appLocked }
+        ui.waitUntil(5_000) { !lockShown() && ui.onAllNodesWithTag("home-content").fetchSemanticsNodes().isNotEmpty() }
+    }
+
+    @Test fun anUnreadableRecordLocksTheAppUntilItReadsAgainOrTheTvStartsOver() {
+        makePin()
+        val film = model.fixtureKey("movie:2")
+        // The record's file gone while its key stays: it cannot be read, and is never taken for no PIN (D049).
+        assertTrue(ProtectionStore(context).file.delete())
+        ui.runOnUiThread { model.restore() }
+        ui.waitUntil(20_000) { model.state.value.route == Route.HOME && model.state.value.sourceTask == SourceTask.IDLE }
+        assertEquals(ParentalStatus.UNAVAILABLE, parental.status); assertTrue(parental.appLocked)
+        ui.waitUntil(5_000) { lockShown() && focused("app-lock-retry") }
+        ui.onNodeWithTag("app-lock-title").assertTextEquals("Ebeveyn denetimi kaydı açılamadı")
+        assertTrue(ui.onAllNodesWithTag("pin-key:1").fetchSemanticsNodes().isEmpty())
+        ui.runOnUiThread { assertFalse(model.open(entry(film))) }
+        assertEquals(Route.HOME, model.state.value.route)
+        // Yeniden dene while it still cannot be read: still locked.
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        Thread.sleep(1_000); ui.waitForIdle()
+        assertTrue(parental.appLocked); assertTrue(lockShown())
+        // Sıfırla…: Vazgeç first and back on it; then the TV starts over.
+        key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag("app-lock-reset").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(5_000) { focused("pin-forgot-cancel") }
+        padTitle("Bu cihaz sıfırlansın mı?")
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(5_000) { focused("app-lock-reset") }
+        assertEquals(1, model.state.value.sources.size)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(5_000) { focused("pin-forgot-cancel") }
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.onNodeWithTag("pin-forgot-reset").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        waitFor { model.state.value.route == Route.SETUP && parental.status == ParentalStatus.OFF }
+        assertFalse(parental.appLocked)
+        ui.waitUntil(5_000) { !lockShown() }
+        assertTrue(model.state.value.sources.isEmpty())
         assertEquals(ProtectionRead.Unconfigured, ProtectionStore(context).read())
     }
 }

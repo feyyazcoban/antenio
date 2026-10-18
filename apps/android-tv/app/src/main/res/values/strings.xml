@@ -40,6 +40,8 @@
     <string name="error_source_not_saved">Kaynak güvenle kaydedilemedi. Tekrar dene.</string>
     <string name="error_source_busy">Kaynak işlemi tamamlanınca yeniden dene.</string>
     <string name="error_guide_url_not_saved">Rehber adresi kaydedilemedi.</string>
+    <!-- A guide address saved after the PIN that opened Kaynaklar ended. -->
+    <string name="error_sources_need_pin">Kaynak ayarları PIN istiyor. Kaynakları yeniden açıp PIN\'i gir.</string>
     <string name="error_episode_missing">İzlediğin bölüm artık bu kaynakta bulunamıyor. Başka bir bölüm seçebilirsin.</string>
     <string name="error_details_unavailable">Ayrıntılar alınamadı.</string>
     <string name="notice_library_updated">Kütüphanen güncellendi.</string>
@@ -518,7 +520,7 @@
     <string name="settings_about_library_note">Uygulama içerik sağlamaz. Kendi %1$s veya %2$s kaynağını ekleyerek izleyebilirsin.</string>
     <string name="settings_about_storage_note">Kaynağın ve katalog önbelleğin bu cihazda şifreli saklanır.</string>
     <string name="settings_about_release">Bu sürümde</string>
-    <string name="settings_about_release_note">Canlı TV, film, dizi, arama, favori, izlemeye devam et ve yayın rehberi kullanılabilir. Rehber bilgisi kaynağın desteğine bağlıdır. Ebeveyn PIN\'i ile kategori, kanal, film ve dizi kilitlenebilir; PIN yetişkin filtresini ve kategori ayarlarını da korur ve yalnız bu cihazda şifreli saklanır. Sağlayıcının yetişkin işaretli içerikleri hiç gösterilmez; adı yetişkin içerik bildiren kategoriler Ayarlar\'dan kapatılır.</string>
+    <string name="settings_about_release_note">Canlı TV, film, dizi, arama, favori, izlemeye devam et ve yayın rehberi kullanılabilir. Rehber bilgisi kaynağın desteğine bağlıdır. Ebeveyn PIN\'i ile kategori, kanal, film, dizi ve kaynak kilitlenebilir; PIN yetişkin filtresini, kategori ve kaynak ayarlarını, istenirse uygulamanın açılışını da korur ve yalnız bu cihazda şifreli saklanır. Sağlayıcının yetişkin işaretli içerikleri hiç gösterilmez; adı yetişkin içerik bildiren kategoriler Ayarlar\'dan kapatılır.</string>
     <string name="settings_scroll_up">↑ Yukarı</string>
     <string name="settings_scroll_more">↓ Daha fazla</string>
     <!-- A stepper row's buttons: − and + read by TalkBack, and back to the default value. -->
@@ -530,10 +532,16 @@
 
     <!-- Ebeveyn denetimi (Ayarlar → İçerik). Neutral words only: the filter is shown or hidden, never promoted. -->
     <string name="parental_title">Ebeveyn denetimi</string>
-    <string name="parental_row_off">PIN oluştur; kategori, kanal ve içerikleri kilitle, yetişkin filtresini koru.</string>
+    <string name="parental_row_off">PIN oluştur; kategori, kanal, içerik ve kaynakları kilitle, yetişkin filtresini koru.</string>
     <string name="parental_row_on">PIN açık. Kilitli içerikler, yetişkin filtresi ve kategori ayarları PIN ister.</string>
+    <!-- The row with "Kaynak yönetimi PIN istesin" on, as it is by default. -->
+    <string name="parental_row_on_sources">PIN açık. Kilitli içerikler, yetişkin filtresi, kategori ve kaynak ayarları PIN ister.</string>
     <string name="parental_row_unavailable">Ebeveyn denetimi kaydı açılamadı. PIN\'i unuttuysan bu cihazı sıfırlayabilirsin.</string>
-    <string name="parental_note">PIN; kilitli kategori ve kanalları açarken, yetişkin filtresini kapatırken, kategori ayarlarını ve bu sayfayı açarken istenir. Kilitli kanallar CH+/CH− ile atlanır; numarasıyla ya da listeden PIN ile açılır. PIN yalnız bu cihazda şifreli saklanır.</string>
+    <string name="parental_note">PIN; kilitli kategori, kanal ve kaynakları açarken, yetişkin filtresini kapatırken, kategori ayarlarını ve bu sayfayı açarken istenir; aşağıdaki seçeneklerle kaynak ayarlarında ve açılışta da istenir. Kilitli kanallar CH+/CH− ile atlanır; numarasıyla ya da listeden PIN ile açılır. PIN yalnız bu cihazda şifreli saklanır.</string>
+    <string name="parental_sources_need_pin">Kaynak yönetimi PIN istesin</string>
+    <string name="parental_sources_need_pin_note">Kaynakları açmak, eklemek, düzenlemek ve kaldırmak PIN ister; kaynak bilgileri ve şifreler de korunur.</string>
+    <string name="parental_launch_needs_pin">Açılışta PIN iste</string>
+    <string name="parental_launch_needs_pin_note">NEXTV açılırken ve arka plandan dönerken PIN ister.</string>
     <string name="parental_create">PIN oluştur</string>
     <string name="parental_create_note">4 haneli bir PIN seç. Kolay tahmin edilen PIN\'ler kabul edilmez.</string>
     <string name="parental_off_note">Yetişkin kategorileri PIN olmadan da gizli kalır.</string>
@@ -542,10 +550,10 @@
     <string name="parental_relock">Açılan kilitleri kapat</string>
     <string name="parental_relock_note">Bu oturumda PIN ile açtığın içerikler yeniden kilitlenir.</string>
     <string name="parental_remove">PIN\'i kaldır</string>
-    <string name="parental_remove_note">Bütün kilitler kalkar; yetişkin filtresi ve kategori ayarları artık PIN istemez.</string>
+    <string name="parental_remove_note">Bütün kilitler kalkar; yetişkin filtresi, kategori ve kaynak ayarları artık PIN istemez.</string>
     <string name="parental_remove_question">PIN kaldırılsın mı?</string>
-    <string name="parental_remove_confirm">Bütün kategori, kanal ve içerik kilitleri kaldırılır. Gizlediğin kategoriler gizli kalır; yetişkin filtresi değişmez.</string>
-    <string name="parental_created">PIN oluşturuldu. Kilitler, yetişkin filtresi ve kategori ayarları artık bu PIN\'i ister.</string>
+    <string name="parental_remove_confirm">Bütün kategori, kanal, içerik ve kaynak kilitleri kaldırılır. Gizlediğin kategoriler gizli kalır; yetişkin filtresi değişmez.</string>
+    <string name="parental_created">PIN oluşturuldu. Kilitler, yetişkin filtresi, kategori ve kaynak ayarları artık bu PIN\'i ister.</string>
     <string name="parental_changed">PIN değiştirildi.</string>
     <string name="parental_removed">PIN kaldırıldı.</string>
     <string name="parental_not_removed">PIN kaldırılamadı. Tekrar dene.</string>
@@ -596,6 +604,8 @@
     <string name="pin_reason_show_adult">Yetişkin kategorilerini göstermek için PIN gir.</string>
     <string name="pin_reason_categories">Kategori ayarlarını açmak için PIN gir.</string>
     <string name="pin_reason_parental">Ebeveyn denetimi ayarlarını açmak için PIN gir.</string>
+    <string name="pin_reason_sources">Kaynak ayarlarını açmak için PIN gir.</string>
+    <string name="pin_reason_launch">Devam etmek için PIN gir.</string>
     <!-- A locked title; %1$s is its name. -->
     <string name="pin_reason_unlock">“%1$s” kilitli. Açmak için PIN gir.</string>
     <!-- Kilidi kaldır in a title's quick menu; %1$s is its name. -->
@@ -626,6 +636,14 @@
     <string name="access_gone">Bu içerik artık bulunamıyor.</string>
     <string name="access_unresolved">Bu içeriğin kilit bilgisi doğrulanamadı. Kataloğu yenileyip tekrar dene.</string>
 
+    <!-- The lock screen (pin.md §3.9): "Açılışta PIN iste", or a protection record that cannot be read. -->
+    <string name="app_lock_title">NEXTV kilitli</string>
+    <string name="app_lock_unavailable_title">Ebeveyn denetimi kaydı açılamadı</string>
+    <string name="app_lock_unavailable_note">Kilitli içerikleri korumak için uygulama kapalı tutuluyor. Kayıt onarılamazsa bu cihazdaki kaynakları ve kilitleri sıfırlayıp yeniden kurabilirsin.</string>
+    <string name="app_lock_retry">Yeniden dene</string>
+    <string name="app_lock_reset">Sıfırla…</string>
+    <string name="app_lock_reset_question">Bu cihaz sıfırlansın mı?</string>
+
     <!-- Kaynakların -->
     <string name="sources_title">Kaynakların</string>
     <plurals name="sources_summary">
@@ -643,6 +661,9 @@
     <string name="sources_remove">Kaldır</string>
     <string name="sources_info_title">Kaynak bilgileri</string>
     <string name="sources_guide_settings">Rehber ayarları</string>
+    <!-- In a source's Bilgiler, with a PIN set (pin.md §3.8). -->
+    <string name="source_lock_add">Kaynağı kilitle</string>
+    <string name="source_lock_remove">Kaynağın kilidini kaldır</string>
     <string name="sources_remove_note">Bu kaynağın listesi, favorileri ve geçmişi silinecek. Diğer kaynaklar korunacak.</string>
     <string name="sources_full_name">Tam ad:\n%1$s</string>
 

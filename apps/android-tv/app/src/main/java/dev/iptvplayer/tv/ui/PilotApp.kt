@@ -89,12 +89,19 @@ import androidx.compose.ui.input.key.type
     // here too. Back on Home asks before leaving the app instead of closing it at once.
     val routeBack = remember(model) { { if (model.state.value.route == Route.HOME) exitAsk = true else model.back() } }
     // One handler for the routes without their own. It stays enabled while the question opens, so a quick
-    // second Back cannot reach the system before the dialog has window focus.
-    BackHandler(state.route != Route.RECOVERY && state.route != Route.PLAYER && state.route != Route.SEARCH && state.route != Route.GUIDE &&
-        !(state.route == Route.SETUP && state.source == null)) { routeBack() }
-    LaunchedEffect(state.route) { if (state.route != Route.HOME) exitAsk = false }
+    // second Back cannot reach the system before the dialog has window focus. The lock screen has its own.
+    val screen = state.screen
+    BackHandler(screen != Route.RECOVERY && screen != Route.PLAYER && screen != Route.SEARCH && screen != Route.GUIDE &&
+        screen != Route.LOCKED && !(screen == Route.SETUP && state.source == null)) { routeBack() }
+    LaunchedEffect(screen) { if (screen != Route.HOME) exitAsk = false }
     // The app left the screen with a PIN verified in Ayarlar, or the TV starts over: Settings closes (pin.md §3.9).
     LaunchedEffect(state.parental.lockEpoch) { settings = false }
+    // Source management opened from Ayarlar, at once or once its PIN was right: the panel closes behind it (pin.md §3.8).
+    LaunchedEffect(state.route) {
+        if (settings && (state.route == Route.SOURCES || state.route == Route.SETUP || state.route == Route.LOADING)) {
+            settings = false; model.closeSettings()
+        }
+    }
     // A computer keyboard's Esc (the emulator, a USB keyboard) is the remote's Back. Compose would otherwise take it
     // as "leave the focused group". On release it goes back into this window as a Back press, so the platform routes
     // it as it routes the remote's: an open keyboard closes first, otherwise the BackHandlers act. A TV keyboard
@@ -123,7 +130,9 @@ import androidx.compose.ui.input.key.type
     CompositionLocalProvider(LocalReducedMotion provides state.reducedMotion, LocalBringIntoViewSpec provides bringIntoView,
         LocalAppOverlays provides overlays) {
         Box(Modifier.fillMaxSize().background(Ink.Background).onPreviewKeyEvent { event -> escapeAsBack(event) }) {
-            when (state.route) {
+            when (screen) {
+                // "Açılışta PIN iste", or a protection record that cannot be read (pin.md §3.9): the route waits under it.
+                Route.LOCKED -> AppLockScreen(state, model)
                 Route.RECOVERY -> SourceRecoveryScreen(state, model)
                 Route.SOURCES -> SourcesScreen(state, model)
                 Route.SETUP -> Setup(state, model)
@@ -144,10 +153,13 @@ import androidx.compose.ui.input.key.type
                 Route.DETAIL -> DetailScreen(state, model) { settings = true }
                 Route.PLAYER -> state.playing?.let { PlayerScreen(it, model, routeBack) }
             }
-            if (settings) Settings(state, model) { settings = false; model.closeSettings() }
-            AppOverlayHost(overlays, state, model)
-            state.accessNotice?.let { notice -> AccessNote(notice.resolve()) { model.accessNoticeShown() } }
-            if (exitAsk && state.route == Route.HOME) ExitDialog { exitAsk = false }
+            // Nothing opens over the lock screen; its own pad is part of it.
+            if (screen != Route.LOCKED) {
+                if (settings) Settings(state, model) { settings = false; model.closeSettings() }
+                AppOverlayHost(overlays, state, model)
+                state.accessNotice?.let { notice -> AccessNote(notice.resolve()) { model.accessNoticeShown() } }
+            }
+            if (exitAsk && screen == Route.HOME) ExitDialog { exitAsk = false }
             if (opening) LaunchCover(state.reducedMotion,
                 loading = state.route == Route.LOADING && state.sourceTask == SourceTask.RESTORING, finish = endOpening)
         }

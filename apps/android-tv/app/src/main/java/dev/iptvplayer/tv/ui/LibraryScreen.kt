@@ -324,7 +324,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                                     widen -> { widened = true; model.category(CategoryFilter.ALL) }
                                     hasFilter -> { model.query(""); model.category(CategoryFilter.ALL); selectedCategoryFocus.requestFocus() }
                                     s.onlyFavorites -> model.home()
-                                    else -> model.manageSources()
+                                    else -> if (model.manageSources()) openPin { emptyFocus }
                                 }
                             }
                         }

@@ -3,7 +3,17 @@ package dev.iptvplayer.tv
 import android.graphics.Bitmap
 import android.view.KeyEvent
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.lifecycle.ViewModelProvider
+import dev.iptvplayer.tv.data.ParentalStatus
+import dev.iptvplayer.tv.data.ParentalUi
+import dev.iptvplayer.tv.data.PinPrompt
+import dev.iptvplayer.tv.data.PinPurpose
+import dev.iptvplayer.tv.data.PinStep
+import dev.iptvplayer.tv.ui.AppLockScreen
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -66,6 +76,49 @@ class LoadingLayoutTest {
             InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot().let { bitmap ->
                 dir.resolve("${task.name.lowercase()}.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG,100,it) }; bitmap.recycle()
             }
+        }
+    }
+
+    /**
+     * S12 (pin.md §3.9, §4): the lock screen keeps its title, digits, keys and PIN'i unuttum inside the 960×540 screen at
+     * 1.0, 1.5 and 2.0 text, focus starting on 1, and so does its notice of a record that cannot be read, with Yeniden
+     * dene and Sıfırla…. Synthetic states; nothing is checked or reset.
+     */
+    @Test fun theLockScreenKeepsItsKeysAndActionsInViewAtEveryTextSize() {
+        lateinit var model: TvViewModel
+        ui.runOnUiThread { model = ViewModelProvider(ui.activity)[TvViewModel::class.java] }
+        val pad = TvState(parental = ParentalUi(ParentalStatus.ON, prompt = PinPrompt(1, PinPurpose.Launch, PinStep.VERIFY), appLocked = true))
+        val unreadable = TvState(parental = ParentalUi(ParentalStatus.UNAVAILABLE, appLocked = true))
+        val state = mutableStateOf(pad)
+        val scale = mutableFloatStateOf(1f)
+        ui.runOnUiThread { ui.activity.setContent { PilotTheme {
+            val density = LocalDensity.current.density
+            CompositionLocalProvider(LocalDensity provides Density(density, scale.floatValue)) { AppLockScreen(state.value, model) }
+        } } }
+        fun fits(tag: String, what: String) {
+            val root = ui.onRoot().getUnclippedBoundsInRoot()
+            val bounds = ui.onNodeWithTag(tag).getUnclippedBoundsInRoot()
+            assertTrue("$what: $tag must fit", bounds.top >= root.top && bounds.bottom <= root.bottom && bounds.left >= root.left && bounds.right <= root.right)
+        }
+        fun shot(name: String) {
+            ui.waitForIdle(); Thread.sleep(600); ui.waitForIdle()
+            val dir = ui.activity.filesDir.resolve("loading-preview").apply { mkdirs() }
+            InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot().let { bitmap ->
+                dir.resolve("$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }; bitmap.recycle()
+            }
+        }
+        for (fontScale in listOf(1f, 1.5f, 2f)) {
+            val name = fontScale.toString().replace('.', '_')
+            ui.runOnUiThread { scale.floatValue = fontScale; state.value = pad }
+            ui.waitUntil(5_000) { ui.onAllNodes(hasTestTag("pin-key:1") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
+            for (tag in listOf("app-lock-title", "pin-boxes", "pin-feedback", "pin-key:1", "pin-key:0", "pin-key:delete", "pin-forgot")) fits(tag, "pad $fontScale")
+            ui.onNodeWithTag("pin-boxes").assertContentDescriptionEquals("0 / 4 rakam girildi")
+            shot("app-lock-$name")
+            ui.runOnUiThread { state.value = unreadable }
+            ui.waitUntil(5_000) { ui.onAllNodes(hasTestTag("app-lock-retry") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
+            for (tag in listOf("app-lock-title", "app-lock-retry", "app-lock-reset")) fits(tag, "unreadable $fontScale")
+            ui.onAllNodesWithTag("pin-key:1").assertCountEquals(0)
+            shot("app-lock-unreadable-$name")
         }
     }
 }

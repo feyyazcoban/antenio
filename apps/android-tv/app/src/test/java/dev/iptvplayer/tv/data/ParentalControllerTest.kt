@@ -400,7 +400,10 @@ class ParentalControllerTest {
         val parental = controller(storage)
         parental.refresh()
         assertEquals(ParentalStatus.UNAVAILABLE, parental.state.value.status)
-        assertFalse(parental.state.value.mayLoosen)
+        // The lock screen comes up, without a pad: no PIN can be checked (fail closed, D049).
+        assertTrue(parental.state.value.appLocked); assertNull(parental.state.value.prompt)
+        assertEquals(1, parental.state.value.lockEpoch)
+        assertFalse(parental.state.value.mayLoosen); assertFalse(parental.state.value.mayManageSources)
         assertFalse(parental.createPin())
         assertTrue(parental.requestAdmin(AdminReason.SHOW_ADULT))
         runCurrent()
@@ -410,16 +413,168 @@ class ParentalControllerTest {
         assertEquals(PinPhase.Entry, parental.prompt.phase); assertTrue(parental.prompt.canForget)
         assertFalse(parental.state.value.adminUnlocked)
 
-        // PIN'i unuttum: the TV starts over, the pad closes and Settings with it, then the record goes.
+        // PIN'i unuttum, or Sıfırla… on the lock screen: the TV starts over, the pad closes and Settings with it, then
+        // the record goes.
         parental.relock()
-        assertNull(parental.state.value.prompt); assertEquals(1, parental.state.value.lockEpoch)
+        assertNull(parental.state.value.prompt); assertEquals(2, parental.state.value.lockEpoch)
         storage.failReset = true
         assertEquals(StartOver.PIN_KEPT, parental.startOver { })
-        assertEquals(ParentalStatus.UNAVAILABLE, parental.state.value.status)
+        assertEquals(ParentalStatus.UNAVAILABLE, parental.state.value.status); assertTrue(parental.state.value.appLocked)
         storage.failReset = false
         assertEquals(StartOver.DONE, parental.startOver { })
         assertEquals(ParentalStatus.OFF, parental.state.value.status)
-        assertTrue(parental.state.value.mayLoosen)
+        assertTrue(parental.state.value.mayLoosen); assertFalse(parental.state.value.appLocked)
+    }
+
+    @Test fun anUnreadableRecordKeepsTheAppLockedUntilItReadsAgain() = runTest {
+        val storage = Storage(stored()).apply { unavailable = true }
+        val parental = controller(storage)
+        parental.refresh()
+        assertTrue(parental.state.value.appLocked)
+        // Yeniden dene while it still cannot be read: still locked.
+        parental.refresh()
+        assertTrue(parental.state.value.appLocked)
+        // Read again without "Açılışta PIN iste": the app opens.
+        storage.unavailable = false
+        parental.refresh()
+        assertFalse(parental.state.value.appLocked); assertNull(parental.state.value.prompt)
+        // With it, the lock screen stays and its pad asks.
+        storage.unavailable = true
+        parental.refresh()
+        assertTrue(parental.state.value.appLocked)
+        storage.record = ProtectionSnapshot(5, 4, credential, storage.record!!.attempts, emptyList(), ProtectionOptions(launchNeedsPin = true))
+        storage.unavailable = false
+        parental.refresh()
+        runCurrent()
+        val state = parental.state.value
+        assertTrue(state.appLocked); assertEquals(PinPurpose.Launch, state.prompt?.purpose); assertTrue(state.launchNeedsPin)
+    }
+
+    @Test fun theLaunchPinLocksTheAppAsItOpensAndOnReturnAndItsPinOpensOnlyTheApp() = runTest {
+        val storage = Storage(ProtectionSnapshot(4, 3, credential, PinAttempts.clear(PinClock(1, 1_000)), emptyList(),
+            ProtectionOptions(launchNeedsPin = true)))
+        val parental = controller(storage)
+        // Read again (a restore), the app stays as it is; opening it locks it.
+        parental.refresh()
+        assertFalse(parental.state.value.appLocked)
+        parental.refresh(launching = true)
+        runCurrent()
+        var state = parental.state.value
+        assertTrue(state.appLocked); assertEquals(PinPurpose.Launch, state.prompt?.purpose); assertTrue(state.prompt!!.canForget)
+        // What closes a pad's window does not close the lock screen's.
+        parental.close(); parental.cancel(); parental.back()
+        assertEquals(PinPurpose.Launch, parental.state.value.prompt?.purpose)
+        parental.submit(pin("1111"))
+        advanceUntilIdle()
+        assertEquals(UiText.Res(R.string.pin_wrong), parental.prompt.feedback); assertTrue(parental.state.value.appLocked)
+        parental.submit(pin("2580"))
+        advanceUntilIdle()
+        // The right PIN opens the app and grants nothing else.
+        state = parental.state.value
+        assertFalse(state.appLocked); assertNull(state.prompt)
+        assertFalse(state.adminUnlocked); assertFalse(state.sourcesUnlocked); assertFalse(state.mayLoosen)
+        assertTrue(followUps.isEmpty()); assertTrue(unlocks.isEmpty())
+        // The app leaving the screen locks it again, Settings closing with it.
+        val epoch = state.lockEpoch
+        parental.stopped()
+        runCurrent()
+        state = parental.state.value
+        assertTrue(state.appLocked); assertEquals(PinPurpose.Launch, state.prompt?.purpose); assertEquals(epoch + 1, state.lockEpoch)
+    }
+
+    @Test fun sourceManagementAsksForThePinOnceForTheSourcesScreens() = runTest {
+        val sourceLock = AccessRule(AccessScope.Source("a"), pinRequired = true)
+        val storage = Storage(stored(rules = listOf(sourceLock)))
+        val parental = controller(storage)
+        parental.refresh()
+        assertTrue(parental.state.value.sourcesGuarded); assertFalse(parental.state.value.mayManageSources)
+        // Vazgeç grants nothing and runs nothing.
+        assertTrue(parental.requestSources(AdminFollowUp.OpenSources))
+        runCurrent()
+        assertEquals(PinPurpose.Verify(AdminReason.SOURCES), parental.prompt.purpose)
+        parental.cancel()
+        assertNull(parental.state.value.prompt)
+        assertTrue(parental.requestSources(AdminFollowUp.EditSource("a")))
+        runCurrent()
+        parental.submit(pin("2580"))
+        advanceUntilIdle()
+        // The right PIN opens the sources' screens and runs what asked; it is not a PIN verified in Ayarlar.
+        var state = parental.state.value
+        assertNull(state.prompt); assertTrue(state.sourcesUnlocked); assertTrue(state.mayManageSources)
+        assertFalse(state.adminUnlocked); assertFalse(state.mayLoosen)
+        assertEquals(listOf<AdminFollowUp>(AdminFollowUp.EditSource("a")), followUps)
+        assertFalse(parental.requestSources(AdminFollowUp.OpenSources))
+        // Within them, a source's lock goes with that PIN (Kaynağın kilidini kaldır).
+        assertEquals(LockEdit.SAVED, parental.editLocks(remove = setOf(sourceLock.scope)))
+        assertTrue(storage.record!!.rules.isEmpty())
+        // Leaving them ends it.
+        parental.leftSources()
+        assertTrue(parental.requestSources(AdminFollowUp.OpenSources))
+        parental.cancel()
+
+        // A PIN verified in Ayarlar carries over, and the panel closing behind the sources keeps it.
+        parental.requestAdmin(AdminReason.PARENTAL)
+        runCurrent()
+        parental.submit(pin("2580"))
+        advanceUntilIdle()
+        assertFalse(parental.requestSources(AdminFollowUp.OpenSources))
+        parental.closeSettings()
+        state = parental.state.value
+        assertTrue(state.sourcesUnlocked); assertFalse(state.adminUnlocked)
+        // The app leaving the screen ends it, and the sources ask again.
+        val epoch = state.lockEpoch
+        parental.stopped()
+        assertFalse(parental.state.value.sourcesUnlocked); assertEquals(epoch + 1, parental.state.value.lockEpoch)
+        assertTrue(parental.requestSources(AdminFollowUp.OpenSources))
+    }
+
+    @Test fun withSourceManagementOffASourcesLockStillGoesOnlyWithThePin() = runTest {
+        val sourceLock = AccessRule(AccessScope.Source("a"), pinRequired = true)
+        val storage = Storage(ProtectionSnapshot(4, 3, credential, PinAttempts.clear(PinClock(1, 1_000)), listOf(sourceLock),
+            ProtectionOptions(sourcesNeedPin = false)))
+        val parental = controller(storage)
+        parental.refresh()
+        assertFalse(parental.state.value.sourcesGuarded); assertFalse(parental.state.value.sourcesNeedPin)
+        assertFalse(parental.requestSources(AdminFollowUp.OpenSources))
+        assertNull(parental.state.value.prompt); assertFalse(parental.state.value.sourcesUnlocked)
+        // Removing a source's lock loosens: without a PIN for it nothing is removed; the pad's PIN removes it.
+        assertEquals(LockEdit.NOT_SAVED, parental.editLocks(remove = setOf(sourceLock.scope)))
+        val purpose = PinPurpose.Release("a", "Kaynak", source = true)
+        parental.release(purpose)
+        runCurrent()
+        parental.submit(pin("2580"))
+        advanceUntilIdle()
+        assertEquals(listOf(purpose to 3L), releases)
+        assertFalse(parental.state.value.sourcesUnlocked); assertFalse(parental.state.value.adminUnlocked)
+        assertEquals(LockEdit.SAVED, parental.editLocks(remove = setOf(sourceLock.scope), verified = 3))
+        assertTrue(storage.record!!.rules.isEmpty())
+    }
+
+    @Test fun theOptionsTightenFreelyAndLoosenOnlyWithThePinVerifiedInAyarlar() = runTest {
+        val storage = Storage(stored())
+        val parental = controller(storage)
+        parental.refresh()
+        assertTrue(parental.state.value.sourcesNeedPin); assertFalse(parental.state.value.launchNeedsPin)
+        // On: at once, without the PIN; the revision grows with it.
+        assertEquals(LockEdit.SAVED, parental.editOptions { it.copy(launchNeedsPin = true) })
+        assertEquals(ProtectionOptions(sourcesNeedPin = true, launchNeedsPin = true), storage.record!!.options)
+        assertEquals(4L, storage.record!!.policyRevision); assertTrue(parental.state.value.launchNeedsPin)
+        // Off: only with the PIN verified in this Settings visit.
+        assertEquals(LockEdit.NOT_SAVED, parental.editOptions { it.copy(sourcesNeedPin = false) })
+        assertTrue(storage.record!!.options.sourcesNeedPin)
+        parental.requestAdmin(AdminReason.PARENTAL)
+        runCurrent()
+        parental.submit(pin("2580"))
+        advanceUntilIdle()
+        assertEquals(LockEdit.SAVED, parental.editOptions { it.copy(sourcesNeedPin = false) })
+        assertEquals(LockEdit.SAVED, parental.editOptions { it.copy(launchNeedsPin = false) })
+        assertEquals(ProtectionOptions(sourcesNeedPin = false, launchNeedsPin = false), storage.record!!.options)
+        assertEquals(6L, storage.record!!.policyRevision)
+        assertFalse(parental.state.value.sourcesGuarded); assertTrue(parental.state.value.mayManageSources)
+        // The panel closed, on is still free.
+        parental.closeSettings()
+        assertEquals(LockEdit.SAVED, parental.editOptions { it.copy(sourcesNeedPin = true) })
+        assertTrue(parental.state.value.sourcesGuarded)
     }
 
     @Test fun startingOverRemovesTheRecordOnlyOnceTheSourcesAreGone() = runTest {

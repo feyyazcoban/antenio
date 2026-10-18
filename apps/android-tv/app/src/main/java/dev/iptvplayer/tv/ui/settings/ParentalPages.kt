@@ -76,7 +76,8 @@ internal val parentalPageList: List<SettingsPageSpec> = listOf(
 
 /**
  * Without a PIN: make one. With one (verified to get here): change it, see and remove the locks (Kilitli içerikler),
- * lock again what PINs opened in this session ("Açılan kilitleri kapat"), or remove it. What the last change did reads
+ * choose whether source management and the app's opening ask for it (pin.md §3.8–3.9), lock again what PINs opened in
+ * this session ("Açılan kilitleri kapat"), or remove it. What the last change did reads
  * above the rows (SettingsPageSpec.notice); focus then rests on the page's first row, as the row that opened the pad may
  * be gone. A PIN this visit did not verify or make (one saved after its pad was closed from elsewhere) sends the page
  * back to its row, rather than offer rows that would refuse.
@@ -95,6 +96,13 @@ internal val parentalPageList: List<SettingsPageSpec> = listOf(
             PageRow("locked", stringResource(R.string.parental_locked), if (locks > 0)
                 pluralStringResource(R.plurals.parental_locked_count, locks, locks.toString()) else stringResource(R.string.parental_locked_none),
                 lockedPage, Modifier.testTag("parental-locked"))
+            // On tightens; off loosens, with the PIN verified to get here. Source management asks by default.
+            ToggleRow("sources-need-pin", stringResource(R.string.parental_sources_need_pin),
+                stringResource(R.string.parental_sources_need_pin_note), s.parental.sourcesNeedPin,
+                Modifier.testTag("parental-sources-need-pin")) { model.setSourcesNeedPin(!s.parental.sourcesNeedPin) }
+            ToggleRow("launch-needs-pin", stringResource(R.string.parental_launch_needs_pin),
+                stringResource(R.string.parental_launch_needs_pin_note), s.parental.launchNeedsPin,
+                Modifier.testTag("parental-launch-needs-pin")) { model.setLaunchNeedsPin(!s.parental.launchNeedsPin) }
             // Only while PINs opened locked titles in this session; focus moves up as the row leaves.
             if (s.parental.sessionGrants > 0) ActionRow("relock", stringResource(R.string.parental_relock),
                 stringResource(R.string.parental_relock_note), Modifier.testTag("parental-relock")) {
@@ -103,8 +111,7 @@ internal val parentalPageList: List<SettingsPageSpec> = listOf(
             PageRow("remove-pin", stringResource(R.string.parental_remove), stringResource(R.string.parental_remove_note),
                 removePinPage, Modifier.testTag("parental-remove"))
         }
-        // A removal stopped halfway: the guard of this page then asks for a PIN that cannot be checked, and the pad
-        // offers PIN'i unuttum.
+        // A record that cannot be read puts the lock screen up (pin.md §3.9), so this shows only for the moment before.
         ParentalStatus.UNAVAILABLE -> NoteRow(stringResource(R.string.parental_row_unavailable), error = true)
         else -> {
             ActionRow("create-pin", stringResource(R.string.parental_create), stringResource(R.string.parental_create_note),

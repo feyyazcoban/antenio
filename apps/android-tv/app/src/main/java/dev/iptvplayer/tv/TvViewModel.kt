@@ -21,7 +21,13 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
-enum class Route { SETUP, LOADING, HOME, LIBRARY, GUIDE, SEARCH, DETAIL, PLAYER, SOURCES, RECOVERY }
+/**
+ * LOCKED is the lock screen (pin.md §3.9). It is only ever [TvState.screen], never [TvState.route]: it covers the route,
+ * which goes on underneath (a restore finishing, the player waiting), so nothing that sets a route can uncover it.
+ */
+enum class Route { SETUP, LOADING, HOME, LIBRARY, GUIDE, SEARCH, DETAIL, PLAYER, SOURCES, RECOVERY, LOCKED }
+/** Kaynaklar, the setup form and the operation card over them: the sources' screens a PIN opens (pin.md §3.8). */
+private val sourceRoutes = setOf(Route.SOURCES, Route.SETUP, Route.LOADING)
 enum class SourceTask { RESTORING, IMPORTING, SAVING, REMOVING, RESETTING, IDLE }
 /** The source form; a null [name] is the untouched default name, which the setup screen shows in the app's language. */
 data class SourceDraft(val name: String? = null, val type: SourceType = SourceType.XTREAM,
@@ -107,7 +113,10 @@ data class TvState(
     val autoNextEpisode: Boolean = true,
     /** The Sırala choice of the film and series lists, kept on the device. */
     val librarySorts: Map<MediaKind, LibrarySort> = emptyMap(),
-    /** The parental PIN, the PIN pad on screen and what a PIN verified in Ayarlar allows (pin.md §7). */
+    /**
+     * The parental PIN, the PIN pad on screen, what a PIN verified in Ayarlar or for the sources allows, and the lock
+     * screen (pin.md §7).
+     */
     val parental: ParentalUi = ParentalUi(),
     /**
      * What the lock rules make of the published library: the titles, category rows and sources that ask for the PIN,
@@ -121,6 +130,11 @@ data class TvState(
     val accessNotice: UiText? = null,
     val revision: Int = 0
 ) {
+    /**
+     * What is on screen: the [route], or the lock screen over it while the app is locked, once the sources are open. The
+     * recovery screen stays, as it can only remove them.
+     */
+    val screen: Route get() = if (parental.appLocked && route != Route.LOADING && route != Route.RECOVERY) Route.LOCKED else route
     // Display/default selection only. Playback and personal data must use sourceFor(entry).
     val source: SourceConfig? get() = sources.firstOrNull { it.id == sourceFilterId } ?: sources.firstOrNull()
     fun sourceFor(entry: MediaEntry): SourceConfig? = sources.firstOrNull { it.id == entry.sourceId }
@@ -167,6 +181,11 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         when (followUp) {
             AdminFollowUp.ShowAdult -> setHideAdult(false)
             is AdminFollowUp.LockCategory -> setCategoryAccess(followUp.kind, followUp.name, CategoryAccess.LOCKED)
+            // The PIN for the sources was just right: what asked for it goes on, on the state as it is now.
+            AdminFollowUp.OpenSources -> openSources()
+            AdminFollowUp.AddSource -> if (state.value.sourceTask == SourceTask.IDLE) newSource()
+            is AdminFollowUp.EditSource -> editable(followUp.id)?.let(::edit)
+            is AdminFollowUp.RemoveSource -> removable(followUp.id)?.let(::remove)
         }
     }
     /** The locked category rows of the last publish and the rules each rests on; a renumbered row follows them. */
@@ -183,8 +202,10 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch { guides.state.collect { value -> mutable.update { it.copy(guideStatus = value.statuses, guideRevision = value.revision) } } }
-        // A PIN typed for a locked title, or the session ending, changes which titles the screens mark as locked.
-        viewModelScope.launch { parental.state.collect { value -> mutable.update { it.copy(parental = value, locks = opened(it.locks)) } } }
+        // A PIN typed for a locked title, or the session ending, changes which titles the screens mark as locked. The
+        // lock screen giving way brings back the player it covered, which starts a film where it stopped.
+        viewModelScope.launch { parental.state.collect { value -> mutable.update { old -> old.copy(parental = value,
+            locks = opened(old.locks), playing = if (old.parental.appLocked && !value.appLocked) old.playing?.let(::resumed) else old.playing) } } }
         // The restore reads the PIN and its locks first.
         restore(atLaunch = true)
     }
@@ -194,11 +215,14 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
      * while the viewer sees the app hangs here as it arrives (gap plan T3, T6): what PINs opened locks again, a PIN
      * verified in Ayarlar ends and an open PIN pad closes, Settings with them, and a locked title in the player leaves it
      * as Back would (its progress is already saved), so it does not play on behind the TV's standby or come back without
-     * its PIN (pin.md §3.9). The foreground timer and a local transfer join later.
+     * its PIN (pin.md §3.9). The sources' screens are left too while a PIN guards them, as they show a source's details
+     * and password (§3.8). With "Açılışta PIN iste" the lock screen is up on return; the player it covers stays the
+     * route, and starts again once the PIN is right. The foreground timer and a local transfer join later.
      */
     fun appStarted() { }
     fun appStopped() {
         parental.stopped()
+        if (parental.state.value.sourcesGuarded) leaveSources()
         val s = state.value
         val playing = s.playing?.entry?.takeIf { s.route == Route.PLAYER } ?: return
         val target = AccessTarget.Play(playing.id)
@@ -206,6 +230,40 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         // (pin.md §0, failures fall on the closed side).
         if (AccessGate.find(target, gateSnapshot(target))?.opens != true) back()
     }
+
+    /**
+     * Leaves the sources' screens as Back would: Kaynaklar, and the setup form with its draft forgotten, an import under
+     * way cancelled. The first setup of a TV without sources stays, as it has nothing to protect.
+     */
+    private fun leaveSources() {
+        if (state.value.sources.isEmpty()) return
+        if (state.value.route == Route.LOADING && state.value.sourceTask == SourceTask.IMPORTING) cancelImport()
+        when (state.value.route) {
+            Route.SOURCES -> mutable.update { it.copy(route = it.sourcesReturn) }
+            Route.SETUP -> mutable.update { it.copy(route = if (it.setupReturn == Route.SOURCES) it.sourcesReturn else it.setupReturn,
+                draft = SourceDraft(), editingSourceId = null, error = null) }
+            else -> Unit
+        }
+    }
+
+    /** After a route change: outside the sources' screens, what a PIN opened there ends. */
+    private fun sourcesLeft() { if (state.value.route !in sourceRoutes) parental.leftSources() }
+
+    /**
+     * True when source management waits for the PIN (pin.md §3.8): the pad opened, and [then] runs once it is right. A
+     * grant the sources' screens kept is dropped first when they were left, so one left over never opens them again.
+     */
+    private fun asksForSources(then: AdminFollowUp): Boolean { sourcesLeft(); return parental.requestSources(then) }
+
+    /** The film or episode [media] from where the player last saved it, for the player that comes back after the lock screen. */
+    private fun resumed(media: PlayingMedia): PlayingMedia {
+        if (media.mode == PlaybackMode.LIVE) return media
+        val source = state.value.sourceFor(media.entry) ?: return media
+        return store.progress(source.id, media.entry.withoutSource().id)?.let { media.copy(startMs = it.resumeMs) } ?: media
+    }
+
+    /** Yeniden dene on the lock screen of a protection record that could not be read: it is read again. */
+    fun retryProtection() { viewModelScope.launch { parental.refresh() } }
 
     /** Migration is serialized with accepted writes from a previous ViewModel. */
     private fun readRegistry(): SourceRegistry {
@@ -228,8 +286,9 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         loadJob = viewModelScope.launch {
             var observedStamp: String? = null
             try {
-                // The locks before the library: until they are read, the gate opens nothing without the PIN.
-                parental.refresh()
+                // The locks before the library: until they are read, the gate opens nothing without the PIN. Opening the
+                // app, "Açılışta PIN iste" puts the lock screen up, to show once the sources are open.
+                parental.refresh(launching = atLaunch)
                 val (saved, cached) = transactions.write {
                     observedStamp = store.recoveryStamp()
                     val saved = readRegistry()
@@ -243,6 +302,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 publishLibrary()
                 mutable.update { it.copy(route = if (saved.sources.isEmpty()) Route.SETUP else Route.HOME,
                     sourceTask = SourceTask.IDLE, recoveryCanReset = false, catalogNotice = notice ?: it.catalogNotice) }
+                sourcesLeft()
                 // The screens no longer offer a source selector (D060): an older saved choice must not keep hiding sources.
                 if (saved.filterId != null) sourceFilter(null)
                 val stale = saved.sources.filter { (cached[it.id]?.updatedAt ?: 0) < System.currentTimeMillis() - 6 * 60 * 60 * 1000L }
@@ -310,10 +370,12 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
      * "PIN'i unuttum → Her şeyi sıfırla" (pin.md §3.11), from the PIN pad. No server keeps the PIN, so this TV starts
      * over: the sources, their lists and guides, favourites, history and progress go and the adult filter is turned back
      * on; ParentalController.startOver removes the PIN record only after that. Setup opens, or, when not every source
-     * could be removed, the library with what is left.
+     * could be removed, the library with what is left. The lock screen offers it as well, also for a record that cannot
+     * be read (Sıfırla…).
      */
     fun forgotPinReset() {
-        if (parental.state.value.prompt?.canForget != true || state.value.sourceTask != SourceTask.IDLE) return
+        val asked = parental.state.value.let { it.prompt?.canForget == true || it.appLocked }
+        if (!asked || state.value.sourceTask != SourceTask.IDLE) return
         val token = ++generation
         val previousJob = loadJob
         previousJob?.cancel(); detailJob?.cancel(); filterGeneration++; filterJob?.cancel(); resetSearchIndex()
@@ -422,6 +484,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     fun connectDraft(defaultName: String = "") {
         if (state.value.route != Route.SETUP) return
         if (state.value.sourceTask != SourceTask.IDLE && state.value.sourceTask != SourceTask.IMPORTING) return
+        // A form that added or edited a source opened with the PIN that guards them (pin.md §3.8); without it, it goes.
+        if (state.value.sources.isNotEmpty() && !parental.state.value.mayManageSources) { leaveSources(); return }
         val draft = state.value.draft
         try {
             val source = SourceConfig(name = draft.name ?: defaultName, type = draft.type, address = draft.address,
@@ -468,16 +532,26 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 registry = saved; snapshots[source.id] = snapshot
                 publishLibrary()
                 homeFocusKey = null
-                mutable.update { it.copy(route = if (it.setupReturn == Route.SOURCES) Route.SOURCES else Route.HOME,
+                // Back to Kaynaklar while the PIN that opened them still holds (the app did not leave the screen).
+                mutable.update { it.copy(route = when {
+                        it.setupReturn != Route.SOURCES -> Route.HOME
+                        parental.state.value.mayManageSources -> Route.SOURCES
+                        else -> it.sourcesReturn
+                    },
                     sourceTask = SourceTask.IDLE, editingSourceId = null, draft = SourceDraft(), playing = null,
                     selected = null, episodes = emptyList(), focusedId = null,
                     sourceStatus = it.sourceStatus + (source.id to SourceStatus(
                         catalog.items.count { entry -> !entry.adult }, snapshot.updatedAt,
                         notices = catalog.warnings.map { warning -> warning.text }, failed = catalog.warnings.isNotEmpty()))) }
+                sourcesLeft()
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) {
-                if (generation == token) mutable.update { it.copy(route = Route.SETUP, sourceTask = SourceTask.IDLE,
-                    error = (e as? SourceFailure)?.text ?: UiText.Res(R.string.error_source_not_saved)) }
+                if (generation == token) {
+                    mutable.update { it.copy(route = Route.SETUP, sourceTask = SourceTask.IDLE,
+                        error = (e as? SourceFailure)?.text ?: UiText.Res(R.string.error_source_not_saved)) }
+                    // The PIN that opened the form ended meanwhile: the form and the details in it go.
+                    if (!parental.state.value.mayManageSources) leaveSources()
+                }
             }
         }
     }
@@ -568,7 +642,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         updateSearch()
     }
 
-    fun home() { homeFocusKey = null; mutable.update { it.copy(route = Route.HOME) } }
+    fun home() { homeFocusKey = null; mutable.update { it.copy(route = Route.HOME) }; sourcesLeft() }
     /** The last focused Home item. Kept out of [state]: a focus move must not recompose the whole app. */
     var homeFocusKey: String? = null
         private set
@@ -587,6 +661,10 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun guideRows(entries: List<MediaEntry>, window: GuideWindow) = guides.query(entries, window)
     fun clearGuideSaveError() { mutable.update { it.copy(guideSaveError = null) } }
     fun saveGuideUrl(id: String, address: String) {
+        // Only Kaynaklar edits a guide address; while a PIN guards them it is the one that opened them (pin.md §3.8).
+        if (!parental.state.value.mayManageSources) {
+            mutable.update { it.copy(guideSaveError = UiText.Res(R.string.error_sources_need_pin)) }; return
+        }
         if (state.value.sourceTask != SourceTask.IDLE || state.value.refreshing) {
             mutable.update { it.copy(guideSaveError = UiText.Res(R.string.error_source_busy)) }; return
         }
@@ -747,6 +825,27 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         return false
     }
 
+    /**
+     * Kaynağı kilitle and Kaynağın kilidini kaldır in Kaynaklar' Bilgiler, with a PIN set (pin.md §3.8): every channel,
+     * film and series of source [id] then asks for it. Locking is done at once. Removing the lock goes on with the PIN
+     * that opened Kaynaklar; without one (Kaynak yönetimi PIN istesin is off) the pad asks first, and true says it opened.
+     */
+    fun setSourceLock(id: String, locked: Boolean): Boolean {
+        val s = state.value
+        val source = s.sources.firstOrNull { it.id == id } ?: return false
+        if (parental.state.value.status != ParentalStatus.ON) return false
+        val scope = AccessScope.Source(source.id)
+        if (locked) {
+            viewModelScope.launch { changeLocks(add = listOf(AccessRule(scope, pinRequired = true)), inSettings = false) }
+            return false
+        }
+        if (s.route != Route.SOURCES || !parental.state.value.sourcesUnlocked) {
+            parental.release(PinPurpose.Release(source.id, s.sourceName(source.id), source = true)); return true
+        }
+        viewModelScope.launch { changeLocks(remove = setOf(scope), inSettings = false) }
+        return false
+    }
+
     /** Kilitli içerikler (pin.md §3.5): a title's own lock goes, with the PIN verified in this Settings visit. */
     fun removeTitleLock(id: String) { ContentRef.parse(id)?.let { ref -> removeLock { setOf(AccessScope.Content(ref)) } } }
     /** Kilitli içerikler: a source's lock goes, with the PIN verified in this Settings visit. */
@@ -763,10 +862,10 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { changeLocks(remove = scopes(), inSettings = true) }
     }
 
-    /** The PIN typed for Kilidi kaldır was right: the title's own lock goes, on the policy that PIN saw. */
+    /** The PIN typed for Kilidi kaldır was right: the title's or the source's own lock goes, on the policy that PIN saw. */
     private fun released(pending: PinPurpose.Release, revision: Long) {
-        val ref = ContentRef.parse(pending.id) ?: return
-        viewModelScope.launch { changeLocks(remove = setOf(AccessScope.Content(ref)), verified = revision, inSettings = false) }
+        val scope = if (pending.source) AccessScope.Source(pending.id) else ContentRef.parse(pending.id)?.let(AccessScope::Content) ?: return
+        viewModelScope.launch { changeLocks(remove = setOf(scope), verified = revision, inSettings = false) }
     }
 
     /**
@@ -822,6 +921,14 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     fun settingsPageOpened() = parental.tell(null)
     /** "Açılan kilitleri kapat": what PINs opened in this session asks again. */
     fun relockNow() = parental.relockContent()
+    /** "Kaynak yönetimi PIN istesin" on Ebeveyn denetimi (pin.md §3.8); off loosens, with the PIN verified to get there. */
+    fun setSourcesNeedPin(on: Boolean) = editOptions { it.copy(sourcesNeedPin = on) }
+    /** "Açılışta PIN iste" on Ebeveyn denetimi (pin.md §3.9): the lock screen at launch and on return, from the next one. */
+    fun setLaunchNeedsPin(on: Boolean) = editOptions { it.copy(launchNeedsPin = on) }
+    private fun editOptions(change: (ProtectionOptions) -> ProtectionOptions) {
+        parental.tell(null)
+        viewModelScope.launch { if (parental.editOptions(change) != LockEdit.SAVED) parental.tell(UiText.Res(R.string.lock_not_saved)) }
+    }
     /** The corner note was shown. */
     fun accessNoticeShown() { mutable.update { it.copy(accessNotice = null) } }
     private fun storedSorts(): Map<MediaKind, LibrarySort> = listOf(MediaKind.MOVIE, MediaKind.SERIES).associateWith(store::librarySort)
@@ -881,6 +988,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
 
     /** [ask]: false for what runs on its own after an allowed target (a detail's resume): a lock then only stops it. */
     private fun request(target: AccessTarget, ask: Boolean): GateResult {
+        // Behind the lock screen nothing opens (pin.md §3.9); a deep link will meet this first as well.
+        if (parental.state.value.appLocked) return GateResult.Deny
         val snapshot = gateSnapshot(target)
         val finding = AccessGate.find(target, snapshot)
         val result = AccessGate.answer(target, finding)
@@ -1168,34 +1277,59 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             Route.LIBRARY, Route.SEARCH, Route.GUIDE -> home()
             else -> Unit
         }
+        sourcesLeft()
     }
 
-    fun manageSources() {
+    // Source management (pin.md §3.8): while a PIN guards it, each way in asks for the PIN first, and true says the pad
+    // opened; once it is right, the same step runs (the follow-ups above). Within Kaynaklar and the setup form the PIN
+    // that opened them holds.
+    /** Kaynakları yönet: in Ayarlar, the guide, an empty Ana Sayfa or library. */
+    fun manageSources(): Boolean {
+        if (asksForSources(AdminFollowUp.OpenSources)) return true
+        openSources(); return false
+    }
+    private fun openSources() {
         mutable.update { it.copy(route = Route.SOURCES, sourceManagerFocus = "add-source", sourcesReturn = when (it.route) {
             Route.HOME, Route.LIBRARY, Route.SEARCH, Route.GUIDE -> it.route
             else -> Route.HOME
         }) }
     }
-    fun addSource() {
-        if (state.value.sourceTask != SourceTask.IDLE) return
+    fun addSource(): Boolean {
+        if (state.value.sourceTask != SourceTask.IDLE) return false
+        if (asksForSources(AdminFollowUp.AddSource)) return true
+        newSource(); return false
+    }
+    private fun newSource() {
         mutable.update { it.copy(route = Route.SETUP, editingSourceId = null, draft = SourceDraft(), error = null, sourceManagerFocus = "add-source",
             setupReturn = if (it.route == Route.SOURCES) Route.SOURCES else Route.HOME) }
     }
-    fun editSource(sourceId: String? = state.value.source?.id) {
-        if (state.value.sourceTask != SourceTask.IDLE) return
-        val source = state.value.sources.firstOrNull { it.id == sourceId } ?: return
+    fun editSource(sourceId: String? = state.value.source?.id): Boolean {
+        val source = editable(sourceId) ?: return false
+        if (asksForSources(AdminFollowUp.EditSource(source.id))) return true
+        edit(source); return false
+    }
+    private fun editable(id: String?): SourceConfig? =
+        state.value.sources.firstOrNull { it.id == id }?.takeIf { state.value.sourceTask == SourceTask.IDLE }
+    /** The setup form on [source]; its draft holds the source's password, which only the PIN that opened it shows. */
+    private fun edit(source: SourceConfig) {
         mutable.update { it.copy(route = Route.SETUP, editingSourceId = source.id, error = null, sourceManagerFocus = "edit-source:${source.id}",
             setupReturn = if (it.route == Route.SOURCES) Route.SOURCES else Route.HOME,
             draft = SourceDraft(source.name, source.type, source.address, source.username, source.password, source.epgUrl)) }
     }
 
-    fun removeSource(sourceId: String? = state.value.source?.id) {
-        if (state.value.sourceTask == SourceTask.REMOVING) return
-        val previous = state.value
-        val owner = previous.sources.firstOrNull { it.id == sourceId } ?: run {
-            if (previous.sourceTask == SourceTask.IDLE) mutable.update { it.copy(route = Route.SETUP) }
-            return
+    fun removeSource(sourceId: String? = state.value.source?.id): Boolean {
+        if (state.value.sourceTask == SourceTask.REMOVING) return false
+        val owner = removable(sourceId) ?: run {
+            if (state.value.sourceTask == SourceTask.IDLE) mutable.update { it.copy(route = Route.SETUP) }
+            return false
         }
+        if (asksForSources(AdminFollowUp.RemoveSource(owner.id))) return true
+        remove(owner); return false
+    }
+    private fun removable(id: String?): SourceConfig? =
+        state.value.sources.firstOrNull { it.id == id }?.takeIf { state.value.sourceTask != SourceTask.REMOVING }
+    private fun remove(owner: SourceConfig) {
+        val previous = state.value
         val token = ++generation
         val previousJob = loadJob
         previousJob?.cancel(); detailJob?.cancel(); filterGeneration++; filterJob?.cancel()
@@ -1223,23 +1357,32 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 registry = saved; snapshots.remove(owner.id)
                 publishLibrary()
                 homeFocusKey = null
-                mutable.update { it.copy(route = if (saved.sources.isEmpty()) Route.SETUP else
-                    if (previous.route == Route.SOURCES) Route.SOURCES else Route.HOME,
+                mutable.update { it.copy(route = if (saved.sources.isEmpty()) Route.SETUP else afterRemoval(previous),
                     sourceTask = SourceTask.IDLE, editingSourceId = null, draft = SourceDraft(),
                     selected = null, episodes = emptyList(), error = null,
                     sourceManagerFocus = saved.sources.getOrNull(previous.sources.indexOf(owner).coerceAtMost(saved.sources.lastIndex).coerceAtLeast(0))
                         ?.let { source -> "remove-source:${source.id}" } ?: "add-source",
                     catalogNotice = CatalogNotice(UiText.Res(R.string.notice_source_removed), CatalogOperation.SOURCE_REMOVAL)) }
+                sourcesLeft()
             } catch (e: CancellationException) { throw e }
             catch (_: Exception) {
                 guides.synchronize(previous.sources, snapshots)
                 runCatching { transactions.read { artwork.synchronizeSources(store.loadSources().sources.map { it.id }) } }
-                if (generation == token) mutable.value = previous.copy(route = if (previous.route == Route.SOURCES) Route.SOURCES else Route.HOME,
+                // The parental state as it is now, not as the removal began: the app may have been locked meanwhile.
+                if (generation == token) mutable.value = previous.copy(route = afterRemoval(previous),
                     sourceTask = SourceTask.IDLE, playing = null, refreshing = false,
                     sourceStatus = previous.sourceStatus.mapValues { (_, value) -> value.copy(refreshing = false) },
-                    error = UiText.Res(R.string.notice_source_not_removed),
+                    error = UiText.Res(R.string.notice_source_not_removed), parental = parental.state.value, locks = opened(previous.locks),
                     catalogNotice = CatalogNotice(UiText.Res(R.string.notice_source_not_removed), CatalogOperation.SOURCE_REMOVAL, needsAttention = true))
+                sourcesLeft()
             }
         }
+    }
+
+    /** Where a removal from [previous] ends: Kaynaklar while the PIN that opened them holds, else Ana Sayfa or its opener. */
+    private fun afterRemoval(previous: TvState): Route = when {
+        previous.route != Route.SOURCES -> Route.HOME
+        parental.state.value.mayManageSources -> Route.SOURCES
+        else -> previous.sourcesReturn
     }
 }

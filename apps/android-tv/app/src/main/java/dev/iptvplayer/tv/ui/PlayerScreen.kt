@@ -224,11 +224,12 @@ import kotlinx.coroutines.flow.first
                     resumeOnStart = player.playWhenReady && player.playbackState == Player.STATE_READY
                     save(); recovery.background(); episodeEnd.background()
                 }
-                // A locked title left the player as the app stopped (TvViewModel.appStopped): this screen is on its way out
-                // and must not be heard first, before the next frame removes it.
+                // A locked title left the player as the app stopped (TvViewModel.appStopped), or the lock screen came up
+                // over it (pin.md §3.9): this screen is on its way out and must not be heard first, before the next frame
+                // removes it. The player that comes back once the PIN is right starts it again.
                 Lifecycle.Event.ON_START -> {
                     recovery.foreground(); episodeEnd.foreground()
-                    if (resumeOnStart && model.state.value.route == Route.PLAYER) player.play()
+                    if (resumeOnStart && model.state.value.screen == Route.PLAYER) player.play()
                 }
                 else -> Unit
             }

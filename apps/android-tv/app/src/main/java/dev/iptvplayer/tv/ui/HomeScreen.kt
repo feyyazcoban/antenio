@@ -267,7 +267,11 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                 Note(if (s.refreshing) s.progressLabel.resolve() else warning ?: stringResource(if (s.catalog.items.any { !it.adult })
                     R.string.home_empty_hidden else R.string.home_empty_none), error = warning != null && !s.refreshing)
                 Spacer(Modifier.height(16.dp))
-                Action(stringResource(R.string.action_check_sources), Modifier.testTag("home-empty-action"), primary = true) { model.manageSources() }
+                // Kaynakları kontrol et asks for the PIN that guards the sources first (pin.md §3.8).
+                val check = remember { FocusRequester() }
+                Action(stringResource(R.string.action_check_sources), Modifier.focusRequester(check).testTag("home-empty-action"), primary = true) {
+                    if (model.manageSources()) openPin { check }
+                }
             }
         } else LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("home-content")
             .onSizeChanged { viewportHeight = with(density) { it.height.toDp() } }

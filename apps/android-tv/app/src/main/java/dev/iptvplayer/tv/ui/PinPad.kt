@@ -1,6 +1,8 @@
 package dev.iptvplayer.tv.ui
 
 import android.os.SystemClock
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -24,14 +26,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
 import dev.iptvplayer.tv.R
+import dev.iptvplayer.tv.TvState
 import dev.iptvplayer.tv.TvViewModel
 import dev.iptvplayer.tv.data.AdminReason
+import dev.iptvplayer.tv.data.ParentalStatus
 import dev.iptvplayer.tv.data.PinFormat
 import dev.iptvplayer.tv.data.PinPhase
 import dev.iptvplayer.tv.data.PinPrompt
@@ -63,53 +68,29 @@ private const val UNLOCK_TITLE_MAX = 32
  * land anyway. Back steps from the repeat to the first step, else closes.
  */
 @Composable internal fun PinDialog(prompt: PinPrompt, model: TvViewModel) {
-    val digits = remember { CharArray(PinFormat.LENGTH) }
-    var count by remember { mutableIntStateOf(0) }
-    DisposableEffect(Unit) { onDispose { digits.fill('\u0000') } }
+    val pad = rememberPinDigits(model)
     var forgetting by remember { mutableStateOf(false) }
     var askedForget by remember { mutableStateOf(false) }
-    var typed by remember { mutableStateOf(false) }
     val checking = prompt.phase == PinPhase.Checking
     val waiting = prompt.phase as? PinPhase.Waiting
     val takesDigits = !checking && waiting == null && !forgetting
-    fun type(digit: Char) {
-        if (!takesDigits || count >= PinFormat.LENGTH) return
-        typed = true
-        digits[count++] = digit
-        if (count == PinFormat.LENGTH) {
-            val pin = digits.copyOf()
-            digits.fill('\u0000'); count = 0
-            model.submitPin(pin)
-        }
-    }
-    fun erase() { if (takesDigits && count > 0) digits[--count] = '\u0000' }
     val first = remember { FocusRequester() }
     val cancel = remember { FocusRequester() }
     val forget = remember { FocusRequester() }
     // Opening during a wait, focus starts on Vazgeç: the keys take nothing yet.
     val startOnCancel = waiting != null
     // Back from the repeat starts the first step empty.
-    SourceDialog(prompt.title(), first, { digits.fill('\u0000'); count = 0; model.pinBack() }, width = 640.dp, hidden = forgetting) {
+    SourceDialog(prompt.title(), first, { pad.clear(); model.pinBack() }, width = 640.dp, hidden = forgetting) {
         val window = LocalWindowInfo.current
         LaunchedEffect(forgetting) { if (!forgetting && askedForget) refocusAfterDialog(window) { forget } }
         // A wait found just after the pad opened moves focus to Vazgeç too; one a wrong try starts leaves it on the key.
-        LaunchedEffect(waiting != null) { if (waiting != null && !typed) refocusAfterDialog(window) { cancel } }
-        // The number keys type wherever focus is in the pad, as in the player; Delete erases.
-        Row(Modifier.fillMaxWidth().testTag("pin-pad").onPreviewKeyEvent { event ->
-            if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-            val code = event.nativeKeyEvent.keyCode
-            val digit = (PlayerKey.of(code) as? PlayerKey.Digit)?.value
-            when {
-                digit != null -> { type('0' + digit); true }
-                code == android.view.KeyEvent.KEYCODE_DEL -> { erase(); true }
-                else -> false
-            }
-        }, horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+        LaunchedEffect(waiting != null) { if (waiting != null && !pad.typed) refocusAfterDialog(window) { cancel } }
+        Row(Modifier.fillMaxWidth().testTag("pin-pad").pinDigitKeys(pad) { takesDigits }, horizontalArrangement = Arrangement.spacedBy(24.dp)) {
             // A large font scrolls this column; the keys keep their size beside it.
             Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 // A new step ("Aynı 4 haneyi bir kez daha gir.") is read as it comes, not only the boxes emptying.
                 Note(prompt.message(), modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
-                PinBoxes(if (checking) PinFormat.LENGTH else count)
+                PinBoxes(if (checking) PinFormat.LENGTH else pad.count)
                 PinFeedback(prompt)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Action(stringResource(R.string.action_cancel), (if (startOnCancel) Modifier.focusRequester(first) else Modifier)
@@ -118,10 +99,137 @@ private const val UNLOCK_TITLE_MAX = 32
                         enabled = !checking, outlined = true) { askedForget = true; forgetting = true }
                 }
             }
-            PinKeys(takesDigits, if (startOnCancel) null else first, ::type, ::erase)
+            PinKeys(takesDigits, if (startOnCancel) null else first, { if (takesDigits) pad.type(it) }, { if (takesDigits) pad.erase() })
         }
     }
-    if (forgetting) ForgotPinDialog({ forgetting = false }) { model.forgotPinReset() }
+    if (forgetting) ForgotPinDialog(stringResource(R.string.pin_forgot_question), { forgetting = false }) { model.forgotPinReset() }
+}
+
+/**
+ * The lock screen (pin.md §3.9, §4), in every screen's place while the app is locked: the logo, "NEXTV kilitli" and the
+ * digits typed on the left, the keys and PIN'i unuttum on the right; the right PIN opens the app as it was. A protection
+ * record that cannot be read says so instead, with Yeniden dene and Sıfırla…: nothing opens until it reads again or
+ * the TV starts over (D049). Back closes the app.
+ */
+@Composable internal fun AppLockScreen(s: TvState, model: TvViewModel) {
+    val activity = LocalActivity.current
+    BackHandler { activity?.finish() }
+    val unavailable = s.parental.status == ParentalStatus.UNAVAILABLE
+    val prompt = s.parental.prompt?.takeIf { it.purpose == PinPurpose.Launch && !unavailable }
+    // A new prompt (the app left the screen and came back) starts with no digit typed.
+    if (prompt != null) key(prompt.id) { LockPad(prompt, model) } else LockNotice(unavailable, model)
+}
+
+/** The lock screen's pad. The number keys type wherever focus is on the screen, as on the PIN window. */
+@Composable private fun LockPad(prompt: PinPrompt, model: TvViewModel) {
+    val pad = rememberPinDigits(model)
+    var forgetting by remember { mutableStateOf(false) }
+    var askedForget by remember { mutableStateOf(false) }
+    val checking = prompt.phase == PinPhase.Checking
+    val waiting = prompt.phase as? PinPhase.Waiting
+    val takesDigits = !checking && waiting == null && !forgetting
+    val first = remember { FocusRequester() }
+    val forget = remember { FocusRequester() }
+    // Opening during a wait, focus starts on PIN'i unuttum: the keys take nothing yet.
+    val startOnForget = waiting != null
+    val window = LocalWindowInfo.current
+    LaunchedEffect(Unit) { refocusAfterDialog(window) { first } }
+    LaunchedEffect(forgetting) { if (!forgetting && askedForget) refocusAfterDialog(window) { forget } }
+    LaunchedEffect(waiting != null) { if (waiting != null && !pad.typed) refocusAfterDialog(window) { forget } }
+    Row(Modifier.fillMaxSize().background(Ink.Background).testTag("app-lock").pinDigitKeys(pad) { takesDigits }
+        .padding(horizontal = TvLayout.Gutter, vertical = 28.dp),
+        horizontalArrangement = Arrangement.spacedBy(32.dp), verticalAlignment = Alignment.CenterVertically) {
+        // A large font scrolls this column; the keys keep their size beside it.
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            NextvLogo(height = 28.dp)
+            Heading(stringResource(R.string.app_lock_title), Modifier.semantics { heading() }.testTag("app-lock-title"))
+            Note(prompt.message(), modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+            PinBoxes(if (checking) PinFormat.LENGTH else pad.count)
+            PinFeedback(prompt)
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            PinKeys(takesDigits, if (startOnForget) null else first, { if (takesDigits) pad.type(it) }, { if (takesDigits) pad.erase() })
+            Action(stringResource(R.string.pin_forgot), (if (startOnForget) Modifier.focusRequester(first) else Modifier)
+                .focusRequester(forget).testTag("pin-forgot"), enabled = !checking, outlined = true) { askedForget = true; forgetting = true }
+        }
+    }
+    if (forgetting) ForgotPinDialog(stringResource(R.string.pin_forgot_question), { forgetting = false }) { model.forgotPinReset() }
+}
+
+/**
+ * The lock screen without a pad: a record that cannot be read ([unavailable]), with Yeniden dene first, or, for the
+ * moment a new pad takes to open, the heading alone.
+ */
+@Composable private fun LockNotice(unavailable: Boolean, model: TvViewModel) {
+    var resetting by remember { mutableStateOf(false) }
+    var askedReset by remember { mutableStateOf(false) }
+    val retry = remember { FocusRequester() }
+    val reset = remember { FocusRequester() }
+    val window = LocalWindowInfo.current
+    LaunchedEffect(unavailable) { if (unavailable) refocusAfterDialog(window) { retry } }
+    LaunchedEffect(resetting) { if (!resetting && askedReset) refocusAfterDialog(window) { reset } }
+    Column(Modifier.fillMaxSize().background(Ink.Background).testTag("app-lock").verticalScroll(rememberScrollState())
+        .padding(horizontal = TvLayout.Gutter, vertical = 28.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        NextvLogo(height = 28.dp)
+        Heading(stringResource(if (unavailable) R.string.app_lock_unavailable_title else R.string.app_lock_title),
+            Modifier.semantics { heading() }.testTag("app-lock-title"))
+        if (unavailable) {
+            Note(stringResource(R.string.app_lock_unavailable_note), modifier = Modifier.widthIn(max = 640.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Action(stringResource(R.string.app_lock_retry), Modifier.focusRequester(retry).testTag("app-lock-retry"), primary = true) {
+                    model.retryProtection()
+                }
+                Action(stringResource(R.string.app_lock_reset), Modifier.focusRequester(reset).testTag("app-lock-reset"), outlined = true) {
+                    askedReset = true; resetting = true
+                }
+            }
+        }
+    }
+    if (resetting) ForgotPinDialog(stringResource(R.string.app_lock_reset_question), { resetting = false }) { model.forgotPinReset() }
+}
+
+/**
+ * The digits typed on a pad, in a CharArray only: the fourth hands them to the model, and they are wiped then, by Sil
+ * and when the pad leaves the screen. [typed]: a digit came in since the pad opened.
+ */
+@Stable private class PinDigits(private val submit: (CharArray) -> Unit) {
+    private val digits = CharArray(PinFormat.LENGTH)
+    var count by mutableIntStateOf(0)
+        private set
+    var typed by mutableStateOf(false)
+        private set
+
+    fun type(digit: Char) {
+        if (count >= PinFormat.LENGTH) return
+        typed = true
+        digits[count++] = digit
+        if (count == PinFormat.LENGTH) {
+            val pin = digits.copyOf()
+            clear()
+            submit(pin)
+        }
+    }
+
+    fun erase() { if (count > 0) digits[--count] = '\u0000' }
+    fun clear() { digits.fill('\u0000'); count = 0 }
+}
+
+@Composable private fun rememberPinDigits(model: TvViewModel): PinDigits {
+    val pad = remember(model) { PinDigits(model::submitPin) }
+    DisposableEffect(pad) { onDispose { pad.clear() } }
+    return pad
+}
+
+/** The remote's number keys type into [pad] wherever focus is inside, as in the player; Delete erases. */
+private fun Modifier.pinDigitKeys(pad: PinDigits, takesDigits: () -> Boolean) = onPreviewKeyEvent { event ->
+    if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+    val code = event.nativeKeyEvent.keyCode
+    val digit = (PlayerKey.of(code) as? PlayerKey.Digit)?.value
+    when {
+        digit != null -> { if (takesDigits()) pad.type('0' + digit); true }
+        code == android.view.KeyEvent.KEYCODE_DEL -> { if (takesDigits()) pad.erase(); true }
+        else -> false
+    }
 }
 
 /**
@@ -199,13 +307,14 @@ private const val UNLOCK_TITLE_MAX = 32
 }
 
 /**
- * "PIN'i unuttun mu?" (pin.md §3.11): what starting over removes, then Vazgeç first, so a repeated OK never wipes the
- * TV. The text scrolls with the arrows at a large font, as the source removal's does.
+ * "PIN'i unuttun mu?" (pin.md §3.11), or [title] as the lock screen of an unreadable record asks it: what starting over
+ * removes, then Vazgeç first, so a repeated OK never wipes the TV. The text scrolls with the arrows at a large font, as
+ * the source removal's does.
  */
-@Composable private fun ForgotPinDialog(dismiss: () -> Unit, reset: () -> Unit) {
+@Composable private fun ForgotPinDialog(title: String, dismiss: () -> Unit, reset: () -> Unit) {
     val cancel = remember { FocusRequester() }
     val reader = remember { FocusRequester() }
-    SourceDialog(stringResource(R.string.pin_forgot_question), cancel, dismiss) {
+    SourceDialog(title, cancel, dismiss) {
         RemoteTextReader(stringResource(R.string.pin_forgot_note), Modifier.weight(1f, fill = false).focusRequester(reader), "pin-forgot-reader")
         Column(Modifier.padding(vertical = 5.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Action(stringResource(R.string.action_cancel), Modifier.focusRequester(cancel).focusProperties { up = reader }
@@ -224,20 +333,21 @@ private fun PinPrompt.title(): String = stringResource(when (step) {
 
 @Composable @ReadOnlyComposable
 private fun PinPrompt.message(): String {
-    // A locked title is named as its card shows it (D065), cut short so that a long name at large text leaves the boxes
-    // and the feedback line in view below it.
+    // A locked title is named as its card shows it (D065), a source as Kaynaklar shows it, cut short so that a long name
+    // at large text leaves the boxes and the feedback line in view below it.
     val title = (purpose as? PinPurpose.Unlock)?.title ?: (purpose as? PinPurpose.Release)?.title
     if (title != null) {
-        val name = displayTitle(title).name
+        val name = if ((purpose as? PinPurpose.Release)?.source == true) title else displayTitle(title).name
         return stringResource(if (purpose is PinPurpose.Release) R.string.pin_reason_release else R.string.pin_reason_unlock,
             if (name.length <= UNLOCK_TITLE_MAX) name else name.take(UNLOCK_TITLE_MAX - 1).trimEnd() + "…")
     }
     return stringResource(when (step) {
         PinStep.NEW -> if (purpose == PinPurpose.Change) R.string.pin_message_change else R.string.pin_message_create
         PinStep.CONFIRM -> R.string.pin_message_confirm
-        PinStep.VERIFY -> when ((purpose as? PinPurpose.Verify)?.reason) {
+        PinStep.VERIFY -> if (purpose == PinPurpose.Launch) R.string.pin_reason_launch else when ((purpose as? PinPurpose.Verify)?.reason) {
             AdminReason.SHOW_ADULT -> R.string.pin_reason_show_adult
             AdminReason.CATEGORIES -> R.string.pin_reason_categories
+            AdminReason.SOURCES -> R.string.pin_reason_sources
             AdminReason.PARENTAL, null -> R.string.pin_reason_parental
         }
     })
