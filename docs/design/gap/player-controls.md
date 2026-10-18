@@ -1,6 +1,6 @@
 # Oynatıcı kontrolleri: önerilen tasarım (S14b)
 
-18 Ekim 2026 · tasarım iş akışı (üç yön, üç yargıç, birleşim). Öneri, kullanıcı onayı değil. Maketler: [proposal.html](../../../design/reviews/player-controls-2026-10-18/proposal.html), [current.html](../../../design/reviews/player-controls-2026-10-18/current.html).
+18 Ekim 2026 · tasarım iş akışı (üç yön, üç yargıç, birleşim). Kullanıcı önerilen tasarımı ve varsayılan kararları aynı gün "Evet" ile onayladı (D072). Maketler: [proposal.html](../../../design/reviews/player-controls-2026-10-18/proposal.html), [current.html](../../../design/reviews/player-controls-2026-10-18/current.html).
 
 # S14b · Oynatıcı kontrolleri ve sarma çubuğu (Faz D)
 
