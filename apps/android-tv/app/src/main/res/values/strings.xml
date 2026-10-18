@@ -516,6 +516,8 @@
     <string name="settings_decrease">Azalt</string>
     <string name="settings_increase">Artır</string>
     <string name="settings_reset">Sıfırla</string>
+    <!-- What TalkBack reads for a stepper button: the setting's name, then the button (Azalt, Artır, Sıfırla). -->
+    <string name="settings_stepper_button">%1$s, %2$s</string>
 
     <!-- Kaynakların -->
     <string name="sources_title">Kaynakların</string>

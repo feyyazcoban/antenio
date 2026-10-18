@@ -4,7 +4,6 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
@@ -47,7 +46,7 @@ internal enum class PageBody {
     SHORT_LIST,
     /** Text in a frame that takes focus and scrolls with Up and Down; its text starts on the 28 dp edge of the title. */
     READING,
-    /** The page lays out its own lazy list, for lists as long as a provider's categories. */
+    /** The page lays out its own lazy list on [SettingsScope.listState], for lists as long as a provider's categories. */
     LAZY
 }
 
@@ -94,14 +93,13 @@ internal val settingsPageList: List<SettingsPageSpec> = listOf(
 internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.associateBy { it.id }
 
 @Composable private fun SettingsScope.MainList() {
-    val visibleCount = remember(s.catalog) { s.catalog.items.count { !it.adult && it.kind != MediaKind.EPISODE } }
     ToggleRow("reduced-motion", stringResource(R.string.settings_reduced_motion), stringResource(R.string.settings_reduced_motion_note),
         s.reducedMotion, section = SectionId.APPEARANCE) { model.reducedMotion() }
     ToggleRow("startup-sound", stringResource(R.string.settings_startup_sound), stringResource(R.string.settings_startup_sound_note),
         s.startupSound, section = SectionId.APPEARANCE) { model.startupSound() }
     Spacer(Modifier.height(6.dp))
     NoteRow(stringResource(R.string.text_pair, pluralStringResource(R.plurals.settings_sources, s.sources.size, s.sources.size.toString()),
-        pluralStringResource(R.plurals.settings_visible_items, visibleCount, visibleCount.toString())))
+        pluralStringResource(R.plurals.settings_visible_items, visibleItems, visibleItems.toString())))
     ActionRow("manage-sources", stringResource(R.string.manage_sources), stringResource(R.string.settings_manage_sources_note), section = SectionId.SOURCES) {
         dismiss(); model.manageSources()
     }
@@ -182,7 +180,7 @@ internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.ass
     if (choices.isEmpty()) {
         NoteRow(stringResource(R.string.settings_no_categories), modifier = Modifier.padding(28.dp)); return
     }
-    LazyColumn(Modifier.fillMaxSize().testTag("settings-categories"),
+    LazyColumn(Modifier.fillMaxSize().testTag("settings-categories"), state = listState,
         contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 18.dp, bottom = 18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(choices.size, key = { choices[it].name }) { index ->
             val choice = choices[index]

@@ -3,6 +3,7 @@ package dev.iptvplayer.tv.ui.settings
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +29,7 @@ import androidx.tv.material3.Text
 import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.TvState
 import dev.iptvplayer.tv.TvViewModel
+import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.ui.Action
 import dev.iptvplayer.tv.ui.Ink
 import dev.iptvplayer.tv.ui.Roboto
@@ -48,6 +50,12 @@ internal fun interface PageGate {
     }
 }
 
+/** Where a page rests while pages above it are open: its column's scroll, or the list of a [PageBody.LAZY] page. */
+private class PagePlace {
+    val scroll = ScrollState(0)
+    val list = LazyListState()
+}
+
 /**
  * The Settings panel at the right edge: the main page, and the pages its rows open from [settingsPages] stacked above
  * it. Back leaves one page and focus returns to the row that opened it; Back on the main page closes the panel.
@@ -55,6 +63,9 @@ internal fun interface PageGate {
 @Composable internal fun Settings(s: TvState, model: TvViewModel, gate: PageGate = PageGate.Open, dismiss: () -> Unit) {
     val nav = remember { SettingsNav(mainPage) }
     var current by remember { mutableStateOf(nav.top) }
+    // Each open page keeps its place while a page above it is open, so Back finds the row that opened that page on
+    // screen, in a lazy list too. A page that closed starts at its top when it opens again.
+    val places = remember { mutableMapOf<SettingsRoute, PagePlace>() }
     // What the ChoiceRow below offers while its ChoicePage is on top.
     var choice by remember { mutableStateOf<ChoiceSpec?>(null) }
     val rows = remember(current) { PageRows() }
@@ -64,25 +75,30 @@ internal fun interface PageGate {
     val scope = rememberCoroutineScope()
     val readingStep = with(LocalDensity.current) { 56.dp.toPx() }
     val scrollHintThreshold = with(LocalDensity.current) { 20.dp.toPx() }
-    fun back() { if (nav.back()) current = nav.top else dismiss() }
+    // Counted here, not on the main page, which composes again each time Back returns to it.
+    val visibleItems = remember(s.catalog) { s.catalog.items.count { !it.adult && it.kind != MediaKind.EPISODE } }
+    fun back(from: SettingsRoute = nav.top.route) {
+        if (nav.back(from)) { current = nav.top; places.keys.retainAll { nav.isOpen(it) } } else dismiss()
+    }
     fun open(route: SettingsRoute, fromRowKey: String?) {
         val guard = (route as? SettingsRoute.Page)?.let { settingsPages.getValue(it.id).guard } ?: PageGuard.None
         gate.request(guard) { nav.open(route, fromRowKey); current = nav.top }
     }
-    val atRoot = current.route == nav.root
-    val page = (current.route as? SettingsRoute.Page)?.let { settingsPages.getValue(it.id) }
+    val shown = current.route
+    val atRoot = shown == nav.root
+    val page = (shown as? SettingsRoute.Page)?.let { settingsPages.getValue(it.id) }
     val body = page?.body ?: PageBody.LIST
     val reading = body == PageBody.READING
-    val mainScroll = rememberScrollState()
-    val secondaryScroll = key(current) { rememberScrollState() }
-    val scroll = if (atRoot) mainScroll else secondaryScroll
-    val pageScope = SettingsScope(s, model, rows, navigate = ::open,
+    val place = places.getOrPut(shown) { PagePlace() }
+    val scroll = place.scroll
+    // The page's own buttons leave only this page (SettingsNav.back), the Back key and the header action the top one.
+    val pageScope = SettingsScope(s, model, rows, place.list, visibleItems, navigate = ::open,
         showChoice = { rowKey, offered -> choice = offered; open(SettingsRoute.Choice(rowKey), rowKey) },
-        showSection = { activeSection = it }, back = ::back, dismiss = dismiss)
+        showSection = { activeSection = it }, back = { back(from = shown) }, dismiss = dismiss)
     // The row the page starts on or returns to; the header action on a page without rows (Uygulama hakkında).
     fun entry() = rows.entry(current.focusKey) ?: headerAction
 
-    Dialog(onDismissRequest = ::back, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    Dialog(onDismissRequest = { back() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         val windowInfo = LocalWindowInfo.current
         // A key pressed on this page before the window reported its focus has already moved from the entry row.
         var moved by remember(current) { mutableStateOf(false) }
@@ -102,7 +118,7 @@ internal fun interface PageGate {
                     Text(page?.title?.resolve() ?: choice?.title.orEmpty(), Modifier.weight(1f).testTag("settings-title"), color = Ink.Text,
                         fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 24.sp, lineHeight = 30.sp)
                     Action(stringResource(if (atRoot) R.string.action_close else R.string.action_back),
-                        Modifier.focusRequester(headerAction).testTag("settings-close"), onClick = ::back)
+                        Modifier.focusRequester(headerAction).testTag("settings-close")) { back() }
                 }
                 if (atRoot) Text(stringResource(activeSection.label),
                     Modifier.padding(start = 28.dp, end = 28.dp, bottom = 12.dp)
@@ -129,7 +145,7 @@ internal fun interface PageGate {
                     }.focusable() else Modifier)) {
                     if (body == PageBody.LAZY) key(current) { page?.content?.invoke(pageScope) }
                     // Rows cut by the divider or the hint row fade out instead of resting as half a line;
-                    // the focused row keeps a 20 dp edge (SettingRow), so it never sits in the fade.
+                    // the focused row keeps an 18 dp edge (FocusEdge), so it never sits in the fade.
                     // Reading text starts on the 28 dp edge of the title inside its 12 dp frame.
                     if (body != PageBody.LAZY) Column(Modifier.fillMaxSize()
                         .then(if (body == PageBody.LIST || reading) Modifier.scrollEdgeFade(Ink.Background,

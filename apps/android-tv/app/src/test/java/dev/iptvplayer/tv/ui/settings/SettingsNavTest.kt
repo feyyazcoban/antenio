@@ -10,6 +10,7 @@ class SettingsNavTest {
     private val categories = SettingsRoute.Page("categories")
     private val movies = SettingsRoute.Page("category-list:MOVIE")
     private val about = SettingsRoute.Page("about")
+    private val clearHistory = SettingsRoute.Page("clear-history")
 
     @Test fun backOnTheFirstPageLeavesThePanelToClose() {
         val nav = SettingsNav(main)
@@ -50,6 +51,28 @@ class SettingsNavTest {
         assertTrue(nav.back())
         assertEquals(SettingsNav.Entry(main, "about"), nav.top)
         assertFalse(nav.back())
+    }
+
+    @Test fun aRepeatedOkOnAPagesOwnButtonLeavesOnlyThatPage() {
+        val nav = SettingsNav(main)
+        nav.open(clearHistory, "watch-history")
+        assertTrue(nav.back(from = clearHistory))
+        // The second OK reaches Vazgeç before the panel recomposes: the main page stays, and so does the panel.
+        assertTrue(nav.back(from = clearHistory))
+        assertEquals(SettingsNav.Entry(main, "watch-history"), nav.top)
+        // The Back key leaves the top page whatever it is.
+        assertFalse(nav.back())
+    }
+
+    @Test fun thePagesBelowTheTopStayOpenUntilBackLeavesThem() {
+        val nav = SettingsNav(main)
+        nav.open(categories, "manage-categories")
+        nav.open(movies, "category-kind:MOVIE")
+        assertTrue(nav.isOpen(main) && nav.isOpen(categories) && nav.isOpen(movies))
+        nav.back()
+        assertFalse(nav.isOpen(movies))
+        assertTrue(nav.isOpen(categories))
+        assertFalse(nav.isOpen(about))
     }
 
     @Test fun aPageOpenedWithoutARowReturnsToThePageStart() {

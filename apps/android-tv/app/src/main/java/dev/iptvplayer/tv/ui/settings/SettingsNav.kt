@@ -33,10 +33,18 @@ internal class SettingsNav(val root: SettingsRoute) {
         stack += Entry(route, lastOpener[route])
     }
 
-    /** Leaves the top page; false on [root], which the panel closes instead. */
-    fun back(): Boolean {
+    /**
+     * Leaves the top page; false on [root], which the panel closes instead. A page's own button (Vazgeç, a ChoicePage
+     * option) names its page as [from]: a second OK can reach that button before the panel recomposes, and once the
+     * page has closed it leaves nothing more.
+     */
+    fun back(from: SettingsRoute = top.route): Boolean {
+        if (from != top.route) return true
         if (stack.size == 1) return false
         stack.removeAt(stack.lastIndex)
         return true
     }
+
+    /** Whether [route] is on screen or below it, waiting for Back. */
+    fun isOpen(route: SettingsRoute): Boolean = stack.any { it.route == route }
 }

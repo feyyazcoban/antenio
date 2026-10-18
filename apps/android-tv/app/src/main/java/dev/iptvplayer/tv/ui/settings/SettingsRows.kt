@@ -2,6 +2,7 @@ package dev.iptvplayer.tv.ui.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +33,7 @@ import dev.iptvplayer.tv.ui.Note
 import dev.iptvplayer.tv.ui.Roboto
 import dev.iptvplayer.tv.ui.TvLayout
 import dev.iptvplayer.tv.ui.focusRing
+import kotlinx.coroutines.flow.collectLatest
 
 /**
  * The focusable rows of the page on screen by key, in the order they appeared: where the page starts and where focus
@@ -67,10 +69,14 @@ internal class SettingsScope(
     val s: TvState,
     val model: TvViewModel,
     private val rows: PageRows,
+    /** The list of a [PageBody.LAZY] page; it keeps its place while a page above it is open. */
+    val listState: LazyListState,
+    /** The items the library shows, neither adult nor an episode, for the main page's summary. */
+    val visibleItems: Int,
     private val navigate: (route: SettingsRoute, fromRowKey: String?) -> Unit,
     private val showChoice: (rowKey: String, choice: ChoiceSpec) -> Unit,
     private val showSection: (SectionId) -> Unit,
-    /** Leaves this page, as Back does. */
+    /** Leaves this page, as Back does; nothing more once it has left (a repeated OK). */
     val back: () -> Unit,
     /** Closes the panel. */
     val dismiss: () -> Unit
@@ -117,28 +123,35 @@ internal class SettingsScope(
     }
 
     /**
-     * A value changed in steps: [value] as shown ("+30 dk"), − and + beside Sıfırla, which returns to the default.
-     * The row's focus is −, or + while − is off; a button that turns off under focus keeps it (Action).
+     * A value changed in steps: [value] as shown ("+30 dk"), the [decreaseLabel] and [increaseLabel] buttons ("−30 dk")
+     * beside Sıfırla, which returns to the default; the buttons wrap at a large font scale. The row's focus is the
+     * decrease button, or the increase one while that is off; a button that turns off under focus keeps it (Action).
+     * Each button reads with the setting's name and the value, again when the value changes.
      */
     @Composable fun StepperRow(key: String, label: String, value: String, modifier: Modifier = Modifier, section: SectionId? = null,
-        canDecrease: Boolean = true, canIncrease: Boolean = true, isDefault: Boolean = false,
-        decrease: () -> Unit, increase: () -> Unit, reset: () -> Unit) {
+        decreaseLabel: String = "−", increaseLabel: String = "+", canDecrease: Boolean = true, canIncrease: Boolean = true,
+        isDefault: Boolean = false, decrease: () -> Unit, increase: () -> Unit, reset: () -> Unit) {
         val focus = rowFocus(key)
-        val decreaseLabel = stringResource(R.string.settings_decrease)
-        val increaseLabel = stringResource(R.string.settings_increase)
-        Column(modifier.fillMaxWidth().background(Ink.Container, RoundedCornerShape(TvLayout.CardRadius))
+        val edge = rememberFocusEdge()
+        val resetLabel = stringResource(R.string.settings_reset)
+        val decreaseName = stringResource(R.string.settings_stepper_button, label, stringResource(R.string.settings_decrease))
+        val increaseName = stringResource(R.string.settings_stepper_button, label, stringResource(R.string.settings_increase))
+        val resetName = stringResource(R.string.settings_stepper_button, label, resetLabel)
+        fun Modifier.step(name: String) = semantics { contentDescription = name; stateDescription = value }
+        // The whole row comes into view with a button, so its name and value never scroll away from it.
+        Column(modifier.then(edge.modifier).fillMaxWidth().background(Ink.Container, RoundedCornerShape(TvLayout.CardRadius))
             .then(if (section != null) Modifier.onFocusChanged { if (it.hasFocus) showSection(section) } else Modifier)
             .padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text(label, color = Ink.Text, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 19.sp)
                 Text(value, color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 17.sp)
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Action("−", (if (canDecrease) Modifier.focusRequester(focus) else Modifier).semantics { contentDescription = decreaseLabel }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Action(decreaseLabel, (if (canDecrease) Modifier.focusRequester(focus) else Modifier).step(decreaseName)
                     .testTag("$key:decrease"), enabled = canDecrease, compact = true, onClick = decrease)
-                Action("+", (if (canDecrease) Modifier else Modifier.focusRequester(focus)).semantics { contentDescription = increaseLabel }
+                Action(increaseLabel, (if (canDecrease) Modifier else Modifier.focusRequester(focus)).step(increaseName)
                     .testTag("$key:increase"), enabled = canIncrease, compact = true, onClick = increase)
-                Action(stringResource(R.string.settings_reset), Modifier.testTag("$key:reset"), enabled = !isDefault,
+                Action(resetLabel, Modifier.step(resetName).testTag("$key:reset"), enabled = !isDefault,
                     compact = true, outlined = true, onClick = reset)
             }
         }
@@ -152,8 +165,10 @@ internal class SettingsScope(
 /** The options of a ChoiceRow as full-width rows; the chosen one has the ✓ (D053) and takes focus first. */
 @Composable internal fun SettingsScope.ChoicePage(choice: ChoiceSpec) {
     choice.options.forEachIndexed { index, option ->
-        Action(option, Modifier.focusRequester(rowFocus("option:$index", start = index == choice.selected)).fillMaxWidth()
-            .testTag("settings-option:$index"), selected = index == choice.selected, check = true) { choice.choose(index); back() }
+        Action(option, rememberFocusEdge().modifier.focusRequester(rowFocus("option:$index", start = index == choice.selected))
+            .fillMaxWidth().testTag("settings-option:$index"), selected = index == choice.selected, check = true) {
+            choice.choose(index); back()
+        }
     }
 }
 
@@ -163,22 +178,37 @@ internal class SettingsScope(
         fontSize = 12.sp, lineHeight = 17.sp)
 }
 
+/**
+ * Keeps a row holding focus in view with an 18 dp edge: the list's 14 dp edge fade plus the 4 dp focus-ring outset, so
+ * focus never rests in the fade (D053). Never more than the list's 18 dp padding, or the request could not be
+ * satisfied at the first/last row. A row whose size changes under focus (toggling can wrap the description onto
+ * another line at large font scales) comes into view again whole.
+ */
+@Stable private class FocusEdge {
+    val relocation = BringIntoViewRequester()
+    var focused by mutableStateOf(false)
+    var size by mutableStateOf(IntSize.Zero)
+    val modifier: Modifier = Modifier.bringIntoViewRequester(relocation).onSizeChanged { size = it }
+        .onFocusChanged { focused = it.hasFocus }
+}
+
+@Composable private fun rememberFocusEdge(): FocusEdge {
+    val edge = remember { FocusEdge() }
+    val safeEdge = with(LocalDensity.current) { 18.dp.toPx() }
+    LaunchedEffect(edge, safeEdge) {
+        snapshotFlow { if (edge.focused) edge.size else null }.collectLatest { size ->
+            if (size != null) { withFrameNanos { }; edge.relocation.bringIntoView(Rect(0f, -safeEdge, size.width.toFloat(), size.height + safeEdge)) }
+        }
+    }
+    return edge
+}
+
 @Composable private fun SettingRow(label: String, description: String, modifier: Modifier = Modifier,
     checked: Boolean? = null, busy: Boolean = false, attention: Boolean = false, onClick: () -> Unit) {
-    // Toggling can wrap the description onto another line at large font scales.
-    // Keep the entire focused row visible after that size change as well as on initial focus.
-    val relocation = remember { BringIntoViewRequester() }
-    var focused by remember { mutableStateOf(false) }
-    var size by remember { mutableStateOf(IntSize.Zero) }
-    // 14 dp edge fade + 4 dp focus-ring outset; never more than the list's 18 dp padding, or the
-    // request could not be satisfied at the first/last row.
-    val safeEdge = with(LocalDensity.current) { 18.dp.toPx() }
+    val edge = rememberFocusEdge()
+    val focused = edge.focused
     val state = stringResource(if (checked == true) R.string.switch_on else R.string.switch_off)
-    LaunchedEffect(focused, size) {
-        if (focused) { withFrameNanos { }; relocation.bringIntoView(Rect(0f, -safeEdge, size.width.toFloat(), size.height + safeEdge)) }
-    }
-    Card(onClick, modifier.bringIntoViewRequester(relocation).onSizeChanged { size = it }
-        .onFocusChanged { focused = it.isFocused }.fillMaxWidth().heightIn(min = 62.dp).semantics {
+    Card(onClick, modifier.then(edge.modifier).fillMaxWidth().heightIn(min = 62.dp).semantics {
         if (checked != null) {
             role = Role.Switch
             toggleableState = if (checked) ToggleableState.On else ToggleableState.Off
