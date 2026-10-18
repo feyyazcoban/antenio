@@ -480,7 +480,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                         count = snapshot?.catalog?.items?.count { !it.adult && it.kind != MediaKind.EPISODE } ?: 0,
                         updatedAt = snapshot?.updatedAt ?: 0)
                 }, catalogUpdatedAt = snapshots.values.maxOfOrNull { it.updatedAt } ?: 0,
-                category = old.category.takeIf { category -> catalog.items.any { !it.adult &&
+                category = old.category.takeIf { category -> category == ChannelScope.FAVORITES || catalog.items.any { !it.adult &&
                     (if (old.onlyFavorites) it.id in favorites else it.kind == old.kind) && it.category == category } } ?: CategoryFilter.ALL)
         }
         publishedThrough = upTo
@@ -1052,6 +1052,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             channels = when (target) {
                 is AccessTarget.ChannelNumber -> numberedChannels()
                 is AccessTarget.ChannelStep -> zapChannels()
+                is AccessTarget.ChannelPick -> zapChannels()
                 else -> emptyList()
             }, autoNextEpisode = s.autoNextEpisode, policy = parental.gatePolicy, unlocked = parental.grants,
             appLocked = parental.state.value.appLocked, entitlements = entitlements)
@@ -1065,6 +1066,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             // The channel already playing stays as it is.
             is AccessTarget.ChannelNumber -> if (entry.id != state.value.playing?.entry?.id) startPlayback(entry)
             is AccessTarget.ChannelStep -> startPlayback(entry)
+            is AccessTarget.ChannelPick -> if (entry.id != state.value.playing?.entry?.id) startPlayback(entry)
             is AccessTarget.NextEpisode -> startPlayback(entry, restart = true)
         }
     }
@@ -1244,9 +1246,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /** Channel numbers as Canlı TV shows them: the order of "Tüm kanallar". */
-    private fun numberedChannels(): List<MediaEntry> =
-        catalogDisplayOrder(state.value.catalog.items.filter { it.kind == MediaKind.LIVE && !it.adult })
-    fun channelNumber(entry: MediaEntry): Int? = numberedChannels().indexOfFirst { it.id == entry.id }.takeIf { it >= 0 }?.plus(1)
+    private fun numberedChannels(): List<MediaEntry> = liveIndex().numbered
+    fun channelNumber(entry: MediaEntry): Int? = liveIndex().numbers[entry.id]
     /**
      * Plays channel [number] of "Tüm kanallar" (the one playing stays as it is). Deny: there is no such channel.
      * NeedsPin: it is locked, and the PIN pad opened; the channel playing goes on behind it until the PIN is right.
@@ -1255,12 +1256,27 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
 
     /** CH±: the next channel that plays without the PIN; with none, the player stays where it is. */
     fun changeChannel(direction: Int) { request(AccessTarget.ChannelStep(direction)) }
+    fun pickChannel(id: String): GateResult = request(AccessTarget.ChannelPick(id))
     /** The channels CH± steps through: those of the list the player was opened from (a category, Ara's source, all). */
-    private fun zapChannels(): List<MediaEntry> {
+    private fun zapChannels(): List<MediaEntry> = liveIndex().channels
+    private var liveCatalog: Catalog? = null
+    private var liveNumberedCatalog: Catalog? = null
+    private var liveScope: ChannelScope? = null
+    private var liveFavorites: Set<String>? = null
+    private var cachedLiveIndex = LiveIndex(emptyList(), emptyList(), emptyMap())
+    internal fun liveIndex(): LiveIndex {
         val s = state.value
-        val context = if (s.playerReturn == Route.SEARCH) filtered(s.allCatalog, s.searchSourceId) else s.catalog
-        return context.items.filter { it.kind == MediaKind.LIVE && !it.adult &&
-            (s.playerReturn != Route.LIBRARY || s.category == CategoryFilter.ALL || it.category == s.category) }
+        val searching = s.route == Route.PLAYER && s.playerReturn == Route.SEARCH
+        val library = s.route == Route.PLAYER && s.playerReturn == Route.LIBRARY
+        val context = if (searching) s.allCatalog else s.catalog
+        val scope = ChannelScope(sourceId = s.searchSourceId.takeIf { searching },
+            category = s.category.takeIf { library && it != CategoryFilter.ALL && it != ChannelScope.FAVORITES },
+            favoritesOnly = library && (s.onlyFavorites || s.category == ChannelScope.FAVORITES))
+        if (context !== liveCatalog || s.catalog !== liveNumberedCatalog || scope != liveScope || s.favoriteIds != liveFavorites) {
+            cachedLiveIndex = LiveIndex.build(context, scope, s.favoriteIds, numberedCatalog = s.catalog)
+            liveCatalog = context; liveNumberedCatalog = s.catalog; liveScope = scope; liveFavorites = s.favoriteIds
+        }
+        return cachedLiveIndex
     }
 
     fun progress(entry: MediaEntry): PlaybackMark? = state.value.sourceFor(entry)?.let { store.progress(it.id, entry.withoutSource().id) }

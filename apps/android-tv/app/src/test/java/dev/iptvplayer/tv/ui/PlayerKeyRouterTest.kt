@@ -6,6 +6,15 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class PlayerKeyRouterTest {
+    @Test fun channelDrawerKeepsBrowsingKeysAndClosesBeforeRecovery() {
+        for (ctx in listOf(KeyContext(PlaybackMode.LIVE, PlayerLayer.Channels),
+            KeyContext(PlaybackMode.LIVE, PlayerLayer.Channels, recovering = true),
+            KeyContext(PlaybackMode.LIVE, PlayerLayer.Channels, failed = true))) {
+            for (key in listOf(PlayerKey.Up, PlayerKey.Down, PlayerKey.Left, PlayerKey.Right, PlayerKey.Center)) routes(null, key, ctx)
+            for (key in listOf(PlayerKey.ChannelUp, PlayerKey.ChannelDown, PlayerKey.Guide, PlayerKey.Digit(2))) routes(PlayerCommand.Consume, key, ctx)
+            assertEquals(PlayerCommand.CloseChannels, PlayerKeyRouter.back(ctx))
+        }
+    }
     /** The layers the viewer opens; the end card has its own test. */
     private val layers = listOf(PlayerLayer.Video, PlayerLayer.Controls, PlayerLayer.Tracks)
     private val modes = listOf(PlaybackMode.LIVE, PlaybackMode.VOD)

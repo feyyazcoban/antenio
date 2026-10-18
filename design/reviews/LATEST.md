@@ -1,5 +1,15 @@
 # Güncel görsel inceleme
 
+## 0.14.64 · Canlı Kanallar çekmecesi
+
+D094; normal ölçek, sentetik yayın. [QA](../../docs/project/native-channel-drawer-64-qa.json).
+
+![Kanallar düğmesi](live-channel-drawer-0.14.64/live.png)
+
+![Kanal seçimi](live-channel-drawer-0.14.64/channels-drawer.png)
+
+![Yeniden açılma ara karesi](live-channel-drawer-0.14.64/channels-reopening-middle.png)
+
 ## 0.14.63 · Gezinme ve ekran geri bildirimleri
 
 D093; normal ölçek, sentetik kaynaklar. Geçiş ara kareleri, PIN, afiş ve scrollbar yerleşimi. [QA](../../docs/project/native-navigation-feedback-63-qa.json).

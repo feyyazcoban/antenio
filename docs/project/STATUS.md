@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.64 · Canlı Kanallar çekmecesi · 19 Ekim 2026
+
+D094: Play yanındaki ipucu yerine Kanallar düğmesi; soldan kayan hızlı seçim listesi. Aynı player, kaynak/kategori/favori kapsamı, PIN kapısı ve liste odağı korunur. Favoriler yenilenince veya silinince odak geçerli satıra/Kapat'a döner; Geri Kanallar düğmesine döner.
+
+Bağımsız inceleme ve düzeltmeler tamam; 362 JVM (1skip/0hata), lint0/40, release/debug/androidTest başarılı. Yalnız 5558/betik ile 5/5 hedefli test ve sentetik görsel inceleme. [QA](native-channel-drawer-64-qa.json). Font matrisi/fiziksel yayın ölçümü yok.
+
+Kod78/.64 TV ve 5556'ya install-r kuruldu; firstInstallTime ve kurulu APK hash doğrulandı. SHA-256 8c68de5c6711a5d375620afec5288c11d6e41640df781b2205d5712da0e9a8f1. TV app/yayın açılmadı; 5556 çalışır/açık, crash kaydı yok. Evim etiketi tam ekran Home'da görünmediği için UI kontrolü false; veri temizleme yok. 5558/Gradle kapalı. Sıradaki iki-scroll ve gerçek cold splash; genel S15a–c açık.
+
 ## 0.14.63 · Gezinme ve ekran geri bildirimleri · 18 Ekim 2026
 
 D093: kategori ve ana menü kayarak açılır/kapanır; PIN rakamları/geri sil ortalı, Vazgeç halkası tam görünür. Scrollbar gerçek listeyi izler ve sürüklenir. Kategori adları daha küçük ve dile duyarlı; afiş başlığı 16/22 sp, poster boşluğu 12 dp, yıl gerçek başlığın 4 dp altında daha soluk. Player ayarlar çarkı kullanır. Vitrin tüm genişliği, sol menünün arkasını ve viewport yüksekliğini kaplar; FillWidth/TopCenter oranı korur, sinema oranında altta boşluk kalabilir.

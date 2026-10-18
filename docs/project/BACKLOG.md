@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-032 · D094 / 0.14.64 teslim: canlı Kanallar düğmesi ve hızlı seçim çekmecesi; kapsam, PIN, aynı player ve odak akışı 5/5 cihaz testiyle doğrulandı. Genel S15a–c/mini rehber/önceki-son kanal işi açık; QA/teslim STATUS/HANDOFF esas alınır.
+
 BKL-019/020/028/030/031 · 0.14.63 / D093: kategori/ana menü kayma geçişleri; PIN ortalama/geri sil/Cancel payı; ayarlar liste scrollbar bağlantısı ve sürükleme; kategori adı ve afiş caption düzeni; player ayarlar çarkı; ekranı kaplayan oranlı vitrin. Kontroller/teslim STATUS/HANDOFF'ta; genel fiziksel/Figma kabulü açık. BKL-032 Kanallar drawer isteği sıradaki iş; iki scroll ve soğuk splash geri bildirimleri ayrıca açık.
 
 BKL-020/031 · 0.14.62 / D092: kullanıcı isteğiyle süreler dış kenarlara, tür etiketi başlık üstüne; kaynak adı kaldırıldı, hata üst bildirime ayrıldı. Kontrol/teslim durumu STATUS/HANDOFF; genel kullanıcı/Figma kabulü açık.

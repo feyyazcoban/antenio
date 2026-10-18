@@ -15,6 +15,7 @@ internal sealed interface PlayerLayer {
     data object Tracks : PlayerLayer
     data object Options : PlayerLayer
     data object Speed : PlayerLayer
+    data object Channels : PlayerLayer
     data object EpisodeEnd : PlayerLayer
 }
 
@@ -93,6 +94,8 @@ internal sealed interface PlayerCommand {
     data object CloseTracks : PlayerCommand
     data object CloseOptions : PlayerCommand
     data object CloseSpeed : PlayerCommand
+    data object OpenChannels : PlayerCommand
+    data object CloseChannels : PlayerCommand
     /** The end card closes and the controls come up over the episode, as its Bu bölümde kal does. */
     data object CloseEndCard : PlayerCommand
     /** Leaves the player; [stopRecovery] stops a reconnection first. */
@@ -126,6 +129,8 @@ internal object PlayerKeyRouter {
             key == PlayerKey.Play -> when { failed -> PlayerCommand.Retry; recovering -> PlayerCommand.Consume; else -> PlayerCommand.Play }
             key == PlayerKey.Pause -> if (recovering) PlayerCommand.StopRecovery else PlayerCommand.Pause
             (layer == PlayerLayer.Options || layer == PlayerLayer.Speed) -> null
+            layer == PlayerLayer.Channels -> if (key == PlayerKey.ChannelUp || key == PlayerKey.ChannelDown ||
+                key is PlayerKey.Digit || key == PlayerKey.Guide) PlayerCommand.Consume else null
             live && (key == PlayerKey.ChannelUp || key == PlayerKey.ChannelDown) -> PlayerCommand.Zap(if (key == PlayerKey.ChannelUp) 1 else -1)
             live && hidden && healthy && (key == PlayerKey.Up || key == PlayerKey.Down) -> PlayerCommand.Zap(if (key == PlayerKey.Up) 1 else -1)
             live && layer != PlayerLayer.Tracks && key is PlayerKey.Digit -> PlayerCommand.AppendDigit(key.value)
@@ -150,6 +155,7 @@ internal object PlayerKeyRouter {
         ctx.layer == PlayerLayer.Tracks -> PlayerCommand.CloseTracks
         ctx.layer == PlayerLayer.Options -> PlayerCommand.CloseOptions
         ctx.layer == PlayerLayer.Speed -> PlayerCommand.CloseSpeed
+        ctx.layer == PlayerLayer.Channels -> PlayerCommand.CloseChannels
         ctx.recovering -> PlayerCommand.Exit(stopRecovery = true)
         ctx.scrubbing -> PlayerCommand.CancelScrub
         ctx.layer == PlayerLayer.Controls && !ctx.failed -> PlayerCommand.HideControls

@@ -23,6 +23,8 @@ internal object AccessTargets {
                 is AccessTarget.Watch -> title(target.id)?.let(::ResolvedTarget)
                 is AccessTarget.Play -> playable(target.id)
                 is AccessTarget.ChannelNumber -> channels.getOrNull(target.n - 1)?.let { channel(it.id) }?.let(::ResolvedTarget)
+                is AccessTarget.ChannelPick -> if (playerShown && playing?.kind == MediaKind.LIVE && channels.any { it.id == target.id })
+                    channel(target.id)?.let(::ResolvedTarget) else null
                 is AccessTarget.ChannelStep -> if (channels.isEmpty()) null else {
                     // One lookup table for the steps: a locked category can make CH± pass many channels.
                     val published = allCatalog.items.filter { it.kind == MediaKind.LIVE && !it.adult }.associateBy { it.id }

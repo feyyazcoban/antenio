@@ -30,6 +30,7 @@ private val playerSymbols = mapOf(
 )
 
 @Composable internal fun PlayerSymbol(name: String, color: Color, modifier: Modifier = Modifier) {
+    if (name == "channels") { LineIcon("tv", color, modifier); return }
     if (name == "settings") {
         MenuSymbol("settings", filled = false, color = color, modifier = modifier)
         return

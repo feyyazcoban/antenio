@@ -290,7 +290,7 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
         }
         val iconSize = with(density) { maxOf(44.dp, 20.sp.toDp() + 16.dp) }
         val large = density.fontScale >= 2f
-        val clusterSizes = cluster.map { if (it.primary) PlayerControlHeight else if (it.tag == "player-next-episode" && !large)
+        val clusterSizes = cluster.map { if (it.primary) PlayerControlHeight else if (it.tag in listOf("player-next-episode", "player-channels") && !large)
             with(density) { (textWidths.getValue(it.tag)).toDp() } + 62.dp else 52.dp }
         val clusterWidth = clusterSizes.fold(0.dp) { sum, value -> sum + value } + 12.dp * (cluster.size - 1).coerceAtLeast(0)
         val hintParts = hint.split(" · ")
@@ -304,7 +304,7 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
         val chipWidths = chips.map { if (it.tag in plan.labels) with(density) { textWidths.getValue(it.tag).toDp() } + 60.dp else iconSize }
         Layout(content = {
             cluster.forEachIndexed { index, control -> key(control.tag) { PlayerControlButton(control, clusterSizes[index], if (control.primary) PlayerControlHeight else 52.dp,
-                labelled = control.tag == "player-next-episode" && !large, chip = false, scrub, seekable, rememberControl) } }
+                labelled = control.tag in listOf("player-next-episode", "player-channels") && !large, chip = false, scrub, seekable, rememberControl) } }
             chips.forEachIndexed { index, control -> key(control.tag) { PlayerControlButton(control, chipWidths[index], iconSize,
                 labelled = control.tag in plan.labels, chip = true, scrub, seekable, rememberControl) } }
             Text(hintParts.take(plan.hints).joinToString(" · "), Modifier.testTag("player-hint").clearAndSetSemantics {}, color = Ink.Muted,

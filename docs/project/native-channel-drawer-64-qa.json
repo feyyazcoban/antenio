@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-19",
+  "version": "0.14.64-design-preview",
+  "versionCode": 78,
+  "decision": "D094",
+  "change": "Live Channels button replaces tips; sliding same-window drawer, scoped channel selection on the existing player with PIN gate and stable focus.",
+  "review": "Read-only player_review and scrollbar_review; fixed favorites virtual-category reset during refresh, numbering context, stale focus requester and rapid Back/OK reopen. Final review had no concrete finding.",
+  "tests": {
+    "jvm": {
+      "tests": 362,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 40
+    },
+    "build": "Final unit/lint/release/debug/androidTest successful in 5m03s; one worker, heap1536MB, in-process Kotlin.",
+    "device": "Only emulator-5558 via tools/run-device-tests.sh --no-build, 5/5: same player and channel selection, pending digits, rapid reopen, favorites refresh/removal/empty, PIN cancel/unlock, live/movie control regression.",
+    "visual": "Synthetic drawer, reopening intermediate frame and live controls inspected at normal font scale. Selection capture shows opening state; reopening capture shows synthetic video.",
+    "limitations": [
+      "No font-scale matrix, physical TV playback or frame-time measurement.",
+      "PIN fixture checks identity and focus, not uninterrupted decoded video.",
+      "General S15a-c, mini guide and previous/last-channel work remain open."
+    ]
+  },
+  "rawEvidence": "work/live-channel-drawer-qa",
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "77",
+        "versionName": "0.14.63-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 23:52:45"
+      },
+      "after": {
+        "versionCode": "78",
+        "versionName": "0.14.64-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-19 00:15:24"
+      },
+      "sha256": "8c68de5c6711a5d375620afec5288c11d6e41640df781b2205d5712da0e9a8f1",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "design": {
+      "device": "emulator-5556",
+      "before": {
+        "versionCode": "77",
+        "versionName": "0.14.63-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 16:45:58"
+      },
+      "after": {
+        "versionCode": "78",
+        "versionName": "0.14.64-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:08:38"
+      },
+      "sha256": "8c68de5c6711a5d375620afec5288c11d6e41640df781b2205d5712da0e9a8f1",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "evimVisible": false,
+      "appRunning": true,
+      "crashRecordForApp": false
+    }
+  },
+  "sha256": "8c68de5c6711a5d375620afec5288c11d6e41640df781b2205d5712da0e9a8f1",
+  "signatureSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065",
+  "releaseDebuggable": false
+}

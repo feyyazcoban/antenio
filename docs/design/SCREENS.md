@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**19 Ekim · D094 / 0.14.64:** Canlı oynatıcıda Kanallar düğmesi soldan hızlı seçim çekmecesi açar. Mevcut kanal ilk odak; OK seçimden sonra listede kalır, oynayan kanalda OK veya Geri kapatır ve Kanallar'a döner. Aynı player/PIN kapısı; hata/yeniden bağlanmada liste kapanmaz. Ayrıntı DECISIONS D094; genel TV-052/S15 kabulü tamamlanmış değildir.
+
 **18 Ekim · D093 / 0.14.63:** TV-010 vitrini ekran genişliği/yüksekliğine uzanır, oranlı üst hizalı görsel kapalı menü arkasına geçer; ilk raf aşağıdadır. TV-020/030/040 kategori ve menü kayarak açılır/kapanır (240/180 ms, azaltılmış harekette doğrudan). Ortak afiş başlığı 16/22 sp, afiş aralığı 12 dp, yıl gerçek başlığın 4 dp altında daha soluk; kategori adı 13/18 sp ve dil güvenli title case. PIN sayıları/geri sil ortalı, Cancel halkası kesilmez; ayarlar scrollbar gerçek listeyi izler ve sürüklenebilir. Player Seçenekler simgesi ayarlar çarkıdır. [Karar](../decisions/DECISIONS.md).
 
 **18 Ekim · TV-050/051 / D092:** VOD tür etiketi başlığın üstünde, kaynak adı kaldırıldı; geçen süre sola, kalan süre sağa yaslı. Hata/yeniden bağlanma metadata yerine üstte ayrı kalıcı bildirim; retry/Back odağı korunur. [Oynatıcı](PLAYER_PRESENTATION.md).

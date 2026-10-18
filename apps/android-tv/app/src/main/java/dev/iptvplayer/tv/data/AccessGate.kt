@@ -3,7 +3,7 @@ package dev.iptvplayer.tv.data
 /**
  * What the viewer asks to open or play, named by identity only (gap plan T3). The gate finds the title itself in the
  * model's state and never trusts the copy a screen holds, which can be older than a refresh or a hidden category.
- * Later steps add Archive, ChannelPick, Resume (a deep link), Reminder, SettingsPage and SourceManagement.
+ * Later steps add Archive, Resume (a deep link), Reminder, SettingsPage and SourceManagement.
  */
 sealed interface AccessTarget {
     /** A card, row or the hero's Ayrıntılar: a channel plays, a film or series opens its detail; [resume] goes on. */
@@ -19,6 +19,8 @@ sealed interface AccessTarget {
      * plays without asking; a locked one is stepped over (pin.md §3.7).
      */
     data class ChannelStep(val direction: Int) : AccessTarget
+    /** An explicit pick from the live player's current channel list; a locked channel asks for the PIN. */
+    data class ChannelPick(val id: String) : AccessTarget
     /** The episode after [currentId], by hand or when the countdown ends ([automatic]). */
     data class NextEpisode(val sourceId: String, val currentId: String, val nextId: String, val automatic: Boolean) : AccessTarget
 }

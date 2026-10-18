@@ -47,7 +47,7 @@ import kotlinx.coroutines.ensureActive
 import java.time.ZoneId
 
 /** Virtual categories above the provider's own; [CategoryFilter.ALL] stays the model's key for "all of this kind". */
-internal const val FavoritesCategory = "@favorites"
+internal const val FavoritesCategory = ChannelScope.FAVORITES
 internal const val HistoryCategory = "@history"
 
 /** A row of the category column; [locked]: a locked category row (pin.md §4), listed, its titles opened with the PIN. */

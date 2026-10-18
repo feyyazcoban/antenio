@@ -36,7 +36,8 @@ class PlayerControlsLayoutTest {
             override fun dispatch(request: RecordedRequest): MockResponse {
                 if (request.requestUrl!!.encodedPath == "/list.m3u") return MockResponse().setBody(
                     "#EXTM3U\n#EXTINF:-1,Uzak Şehirler: İstanbul’dan dünyaya uzanan unutulmaz yolculuk ve beklenmedik karşılaşmalar\n${server.url("/movie/one.mp4")}\n" +
-                    "#EXTINF:-1,Deneme Haber Kanalı\n${server.url("/live/one.ts")}\n")
+                    "#EXTINF:-1,Deneme Haber Kanalı\n${server.url("/live/one.ts")}\n" +
+                    "#EXTINF:-1,Deneme Spor Kanalı\n${server.url("/live/two.ts")}\n")
                 val start = request.getHeader("Range")?.substringAfter("bytes=")?.substringBefore('-')?.toIntOrNull()?.coerceIn(0, bytes.size) ?: 0
                 return MockResponse().setResponseCode(if (start > 0) 206 else 200)
                     .addHeader("Content-Type", "video/mp4").addHeader("Accept-Ranges", "bytes")
@@ -228,9 +229,71 @@ class PlayerControlsLayoutTest {
         key(KeyEvent.KEYCODE_DPAD_UP); ui.onNodeWithTag("player-primary").assertIsFocused()
         centeredSymbol("player-primary")
         assertTrue(bounds("player-channel-down").left - bounds("player-primary").right >= 32.dp)
-        listOf("player-channel-down", "player-channel-up", "player-tracks", "player-favorite").forEach {
+        listOf("player-channels", "player-channel-down", "player-channel-up", "player-tracks", "player-favorite").forEach {
             key(KeyEvent.KEYCODE_DPAD_RIGHT); ui.onNodeWithTag(it).assertIsFocused(); inScreen(it, ring = true)
-            centeredSymbol(it, iconOnly = it != "player-tracks")
+            centeredSymbol(it, iconOnly = it != "player-tracks" && it != "player-channels")
         }
+    }
+    @Test fun channelDrawerBrowsesWithoutPlayingThenSwitchesOnTheSamePlayerAndReturnsFocus() {
+        open(live = true)
+        val channels = model.state.value.catalog.items.filter { it.kind == MediaKind.LIVE }
+        val original = engine()
+        key(KeyEvent.KEYCODE_DPAD_RIGHT); ui.onNodeWithTag("player-channels").assertIsFocused()
+        // A pending numeric zap must not fire after the viewer opens the drawer.
+        key(KeyEvent.KEYCODE_2)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.onNodeWithTag("player-channel:${channels[0].id}").assertIsFocused()
+        Thread.sleep(1700); ui.waitForIdle()
+        assertEquals(channels[0].id, model.state.value.playing?.entry?.id)
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.onNodeWithTag("player-channel:${channels[1].id}").assertIsFocused()
+        assertEquals(channels[0].id, model.state.value.playing?.entry?.id)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(5_000) { model.state.value.playing?.entry?.id == channels[1].id }
+        ui.onNodeWithTag("player-channel-drawer").assertExists()
+        ui.onNodeWithTag("player-channel:${channels[1].id}").assertIsFocused()
+        ui.runOnIdle { assertSame(original, engine()) }
+        shot("channels-drawer")
+        // Reverse the exit while it is still on screen: the old composition must give focus back to its row.
+        ui.mainClock.autoAdvance = false
+        try {
+            key(KeyEvent.KEYCODE_BACK); ui.mainClock.advanceTimeBy(32); ui.waitForIdle()
+            ui.onNodeWithTag("player-channels").assertIsFocused()
+            key(KeyEvent.KEYCODE_DPAD_CENTER); ui.mainClock.advanceTimeBy(64); ui.waitForIdle()
+            ui.onNodeWithTag("player-channel:${channels[1].id}").assertIsFocused()
+            shot("channels-reopening-middle")
+        } finally { ui.mainClock.autoAdvance = true }
+        ui.waitForIdle()
+        key(KeyEvent.KEYCODE_BACK)
+        ui.onNodeWithTag("player-channel-drawer").assertDoesNotExist()
+        ui.onNodeWithTag("player-channels").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.onNodeWithTag("player-channel:${channels[1].id}").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.onNodeWithTag("player-channels").assertIsFocused()
+    }
+    @Test fun favoriteDrawerSurvivesRefreshAndMovesFocusWhenRowsDisappear() {
+        val channels = model.state.value.catalog.items.filter { it.kind == MediaKind.LIVE }
+        ui.runOnUiThread {
+            channels.forEach(model::toggleFavorite)
+            model.showKind(MediaKind.LIVE); model.category(ChannelScope.FAVORITES); model.open(channels[0])
+        }
+        ui.waitUntil(5_000) { model.state.value.route == Route.PLAYER }
+        ui.waitForIdle()
+        focus("player-channels"); key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.onNodeWithTag("player-channel:${channels[0].id}").assertIsFocused()
+        val updatedAt = model.state.value.catalogUpdatedAt
+        ui.runOnUiThread { model.refresh() }
+        ui.waitUntil(10_000) { !model.state.value.refreshing && model.state.value.catalogUpdatedAt > updatedAt }
+        assertEquals(ChannelScope.FAVORITES, model.state.value.category)
+        ui.onNodeWithTag("player-channel:${channels[0].id}").assertIsFocused()
+        ui.runOnUiThread { model.toggleFavorite(channels[0]) }; ui.waitForIdle()
+        ui.onNodeWithTag("player-channel:${channels[1].id}").assertIsFocused()
+        assertEquals(channels[0].id, model.state.value.playing?.entry?.id)
+        ui.runOnUiThread { model.toggleFavorite(channels[1]) }; ui.waitForIdle()
+        ui.onNodeWithText("Bu listede kanal yok.").assertExists()
+        ui.onNodeWithTag("player-channels-close").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.onNodeWithTag("player-channels").assertIsFocused()
     }
 }

@@ -1,5 +1,15 @@
 # Son devir notu
 
+## Codex · Kanallar çekmecesi / 0.14.64 · 19 Ekim 2026
+
+D094: data/ChannelScope+LiveIndex; AccessTarget.ChannelPick/AccessTargets; TvViewModel scope/cache/gate/favorites normalization; ui/ChannelDrawer, PlayerKeys/Screen/Controls/Symbols, LibraryScreen virtual category; EN/TR strings. JVM AccessGate/ChannelScope/PlayerKeyRouter ve PlayerControlsLayout/ParentalFlow testleri. Salt okunur player_review/scrollbar_review: favorites refresh, numaralama bağlamı, stale requester ve hızlı Back→OK odak sorunları düzeltildi; son inceleme açık bulgusuz. Aynı player nesnesi korunur, yayın seçimi PIN kapısından; panel opacity tercihi ve EOF/hata durumunda açık kalma var. Tüm S15 tamam değildir.
+
+Final full build5m03s;362 JVM/1skip/0hata,lint0/40. Yalnız 5558/tools/run-device-tests.sh --no-build 5/5: same-player channel selection/pending digits/quick reopen/favorites refresh-empty/live+movie geometry/PIN cancel-unlock. Sentetik drawer/reopen ara karesi/live görselleri incelendi. PIN fixture gerçek video sürekliliği kanıtı değil. Font matrisi yok. QA native-channel-drawer-64-qa.json; ham work/live-channel-drawer-qa; design/reviews/live-channel-drawer-0.14.64.
+
+Release kod78/.64 aynı sertifika/debugkapalı/R8. SHA-256 8c68de5c6711a5d375620afec5288c11d6e41640df781b2205d5712da0e9a8f1. TV install-r:firstInstallTime2026-10-13 23:50:03 aynı,update2026-10-19 00:15:24,çekilenAPKhash eşit; app/yayın açılmadı. 5556 install-r:firstInstallTime2026-10-14 08:57:19 aynı,update2026-10-18 17:08:38(snapshot saati);appRunningtrue/crashfalse,Evim etiketigörünmüyor. 5556 kullanıcı için AÇIK; 5558/Gradlekapalı. Son kaynak main'e merge edilecek ve temiz audit checkout eşlenecek.
+
+Tam sonraki .65/kod79: Home iki scroll için ilk otomatik BringIntoView isteğini container tam rect'ine normalize eden public BringIntoViewModifierNode; mevcut geç frame resize isteği aynı geometriyle no-op olmalı. Gerçek LazyColumn>LazyRow>TVCard regresyonunda ilk upstream rect ölçülsün; eskisi küçük odak rect'ini dışladığından sorunu kaçırdı. hero_review planı mevcut. Sonra true cold splash: eager OkHttp/restore publish ana thread yükü ve ilk Activity frame ölçümü (önceki .61 devir ayrıntısı). Kullanıcı mağaza hazırlığı demeden font matrisi yok.
+
 ## Codex · Gezinme ve ekran geri bildirimleri / 0.14.63 · 18 Ekim 2026
 
 D093: HomeScreen/LibraryScreen/PanelMotion; SettingsHost scrollbar; PinPad/Theme/DesignSystem; CatalogPresentation/PilotApp captions; PlayerSymbols/PlayerScreen cog. Kategori geçişi sabit 5 sütunu kaydırır, açıkken 4 görünür (large4/3); başlık/arama/boş durum görünür genişlikte kalır. Ara karede çapraz animateItem hareketi görülünce kaldırıldı. Bağımsız salt okunur hero_review/player_review/scrollbar_review bulguları giderildi: doğal wordmark, Hero payı, scrollbar padding hesabı, Roma sayı regex, dar backdrop Fit yan boşluğu. Final FillWidth/TopCenter, üstten oranlı tam genişlik; dar oranda alt taşma kırpılır.

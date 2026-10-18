@@ -476,6 +476,38 @@ class ParentalFlowTest {
         ui.runOnUiThread { model.back() }
     }
 
+    @Test fun channelDrawerPinCancelRestoresTheRowAndUnlockKeepsTheDrawerOpen() {
+        makePin()
+        val source = model.state.value.sources.single().id
+        val (first, sport) = listOf("live:1", "live:2").map { model.fixtureKey(it) }
+        lock(AccessRule(AccessScope.Category(source, MediaKind.LIVE, AccessCategory.ProviderId("2")), pinRequired = true))
+        ui.runOnUiThread { model.showKind(MediaKind.LIVE); model.open(entry(first)) }
+        ui.waitUntil(5_000) { model.state.value.route == Route.PLAYER && playingId == first }
+        ui.waitForIdle()
+        ui.onNodeWithTag("player-channels").performSemanticsAction(SemanticsActions.RequestFocus)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.onNodeWithTag("player-channel:$first").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.onNodeWithTag("player-channel:$sport").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(5_000) { padShown() }
+        assertEquals(first, playingId)
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5_000) { !padShown() && ui.activity.hasWindowFocus() }
+        ui.onNodeWithTag("player-channel:$sport").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(5_000) { padShown() }
+        digits("2580")
+        waitFor { playingId == sport }
+        ui.waitUntil(5_000) { !padShown() && ui.activity.hasWindowFocus() }
+        ui.onNodeWithTag("player-channel-drawer").assertExists()
+        ui.onNodeWithTag("player-channel:$sport").assertIsFocused()
+        // This fixture has no playable video: failure must keep the drawer open, with an exit back to its button.
+        key(KeyEvent.KEYCODE_BACK)
+        ui.onNodeWithTag("player-channels").assertIsFocused()
+        ui.runOnUiThread { model.back() }
+    }
+
     @Test fun kategorileriYonetLocksARowWhoseChannelsShowTheLockAndKeepTheirProgrammesUntilThePin() {
         makePin()
         val source = model.state.value.sources.single().id

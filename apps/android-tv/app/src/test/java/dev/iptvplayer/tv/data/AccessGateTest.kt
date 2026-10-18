@@ -4,6 +4,21 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class AccessGateTest {
+    @Test fun explicitChannelPickRequiresCurrentScopeAndRevalidatesAfterPin() {
+        val target = AccessTarget.ChannelPick(sport.id)
+        val current = snapshot.copy(playing = news, playerShown = true, channels = listOf(news, sport), policy = locks)
+        assertEquals(GateResult.NeedsPin(target), decide(target, current))
+        assertEquals(setOf(content(sport)), AccessGate.unlockScopes(target, sport.id, current))
+        allows(sport, target, current.copy(unlocked = setOf(content(sport))))
+        denies(target, current.copy(channels = listOf(news)))
+        denies(target, current.copy(allCatalog = raw.copy(items = raw.items - sport)))
+        denies(target, current.copy(sources = listOf(list)))
+        denies(target, current.copy(playerShown = false))
+        denies(target, current.copy(playing = movie))
+        assertNull(AccessGate.unlockScopes(target, sport.id, current.copy(channels = listOf(news))))
+        val canonical = sport.copy(title = "Updated channel")
+        allows(canonical, target, current.copy(policy = AccessPolicy(emptyList()), allCatalog = raw.copy(items = raw.items - sport + canonical)))
+    }
     private val home = SourceConfig("a", "Ev", SourceType.XTREAM, "http://127.0.0.1/", "kullanici", "sifre")
     private val list = SourceConfig("b", "Liste", SourceType.M3U, "http://127.0.0.1/list.m3u")
     private val news = MediaEntry("live:1", "1", MediaKind.LIVE, "Haber", "Haberler", extension = "ts").inSource("a")
