@@ -23,18 +23,15 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.tv.material3.Text
 import dev.iptvplayer.tv.R
 
+/** The card is its own window: [back] and [key] take its Back and remote keys to the player's PlayerKeyRouter. */
 @Composable internal fun EpisodeEndDialog(s: EpisodeEndState, play: () -> Unit, stay: () -> Unit,
-    returnToEpisodes: () -> Unit, replay: () -> Unit) {
+    returnToEpisodes: () -> Unit, replay: () -> Unit, back: () -> Unit, key: (KeyEvent) -> Boolean) {
     val first = remember { FocusRequester() }
-    Dialog(onDismissRequest = stay, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    Dialog(onDismissRequest = back, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Box(Modifier.fillMaxSize().padding(horizontal = 38.dp, vertical = 26.dp), contentAlignment = Alignment.BottomEnd) {
             Column(Modifier.width(480.dp).background(Ink.Container, RoundedCornerShape(16.dp))
                 .border(1.dp, Ink.Divider, RoundedCornerShape(16.dp)).padding(24.dp).testTag("episode-end")
-                .onPreviewKeyEvent { event ->
-                    if (event.type == KeyEventType.KeyDown && event.key in listOf(Key.MediaPause, Key.MediaPlayPause)) {
-                        stay(); true
-                    } else false
-                }, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                .onPreviewKeyEvent(key), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(stringResource(if (s.next == null) R.string.episode_end_done else R.string.episode_end_next), color = Ink.Mint,
                     fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 12.sp, letterSpacing = 1.2.sp)
                 val entry = s.next?.entry ?: s.current

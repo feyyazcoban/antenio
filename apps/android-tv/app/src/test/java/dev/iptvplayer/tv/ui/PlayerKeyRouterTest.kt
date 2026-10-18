@@ -6,14 +6,15 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class PlayerKeyRouterTest {
-    private val layers = listOf(PlayerLayer.Video, PlayerLayer.Controls, PlayerLayer.Tracks, PlayerLayer.EpisodeEnd)
+    /** The layers the viewer opens; the end card has its own test. */
+    private val layers = listOf(PlayerLayer.Video, PlayerLayer.Controls, PlayerLayer.Tracks)
     private val modes = listOf(PlaybackMode.LIVE, PlaybackMode.VOD)
     private val live = KeyContext(PlaybackMode.LIVE, PlayerLayer.Video)
     private val vod = KeyContext(PlaybackMode.VOD, PlayerLayer.Video)
     private val arrows = listOf(PlayerKey.Up, PlayerKey.Down, PlayerKey.Left, PlayerKey.Right)
 
     /** Every layer, mode and connection state, for the keys that mean the same everywhere. */
-    private fun everywhere() = modes.flatMap { mode -> layers.flatMap { layer ->
+    private fun everywhere(layers: List<PlayerLayer> = this.layers) = modes.flatMap { mode -> layers.flatMap { layer ->
         listOf(KeyContext(mode, layer), KeyContext(mode, layer, playing = true), KeyContext(mode, layer, recovering = true),
             KeyContext(mode, layer, failed = true))
     } }
@@ -70,7 +71,7 @@ class PlayerKeyRouterTest {
 
     @Test fun digitsTypeALiveChannelNumberExceptOverTheTracksPanel() {
         for (d in 0..9) {
-            for (layer in listOf(PlayerLayer.Video, PlayerLayer.Controls, PlayerLayer.EpisodeEnd))
+            for (layer in listOf(PlayerLayer.Video, PlayerLayer.Controls))
                 routes(PlayerCommand.AppendDigit(d), PlayerKey.Digit(d), live.copy(layer = layer, failed = true))
             routes(null, PlayerKey.Digit(d), live.copy(layer = PlayerLayer.Tracks))
             for (layer in layers) routes(null, PlayerKey.Digit(d), vod.copy(layer = layer))
@@ -133,9 +134,18 @@ class PlayerKeyRouterTest {
             assertEquals(PlayerCommand.Exit(), back(ctx.copy(layer = PlayerLayer.Controls, failed = true)))
             assertEquals(PlayerCommand.Exit(), back(ctx))
             assertEquals(PlayerCommand.Exit(), back(ctx.copy(failed = true)))
-            // The end card takes its own Back; one that reaches the player hides the controls behind it.
-            assertEquals(PlayerCommand.HideControls, back(ctx.copy(layer = PlayerLayer.EpisodeEnd)))
-            assertEquals(PlayerCommand.Exit(), back(ctx.copy(layer = PlayerLayer.EpisodeEnd, failed = true)))
+        }
+    }
+
+    @Test fun theEndCardClosesOnPauseOrBackAndLeavesTheOtherKeysToItsButtons() {
+        val others = listOf(PlayerKey.Play, PlayerKey.ChannelUp, PlayerKey.ChannelDown, PlayerKey.Center, PlayerKey.Guide,
+            PlayerKey.FastForward, PlayerKey.Rewind, PlayerKey.Digit(1)) + arrows
+        // As Bu bölümde kal, whatever the connection is doing: the card closes and the controls come up.
+        for (ctx in everywhere(listOf(PlayerLayer.EpisodeEnd))) {
+            routes(PlayerCommand.CloseEndCard, PlayerKey.PlayPause, ctx)
+            routes(PlayerCommand.CloseEndCard, PlayerKey.Pause, ctx)
+            assertEquals("Back in $ctx", PlayerCommand.CloseEndCard, PlayerKeyRouter.back(ctx))
+            for (key in others) routes(null, key, ctx.copy(repeat = 12))
         }
     }
 }

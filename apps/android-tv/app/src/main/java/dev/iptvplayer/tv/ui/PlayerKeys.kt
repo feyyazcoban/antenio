@@ -86,6 +86,8 @@ internal sealed interface PlayerCommand {
     data object ShowControls : PlayerCommand
     data object HideControls : PlayerCommand
     data object CloseTracks : PlayerCommand
+    /** The end card closes and the controls come up over the episode, as its Bu bölümde kal does. */
+    data object CloseEndCard : PlayerCommand
     /** Leaves the player; [stopRecovery] stops a reconnection first. */
     data class Exit(val stopRecovery: Boolean = false) : PlayerCommand
 }
@@ -95,7 +97,8 @@ internal sealed interface PlayerCommand {
  * time, Up/Down only with the controls hidden (Up is the next number, as CH+); digits type a Canlı TV number, played
  * [DIGIT_COMMIT_MS] after the last one; the guide key opens the programme guide. Films and episodes: FF jumps 30 s
  * ahead and RW 10 s back; with the controls hidden, Left/Right seek further the longer they are held ([seekStep]).
- * With the controls hidden, OK and the arrows left over bring them up.
+ * With the controls hidden, OK and the arrows left over bring them up. The end card keeps the other keys for its
+ * buttons; Play/Pause and Pause close it.
  */
 internal object PlayerKeyRouter {
     const val DIGIT_COMMIT_MS = 1_500L
@@ -105,6 +108,7 @@ internal object PlayerKeyRouter {
     fun route(key: PlayerKey, ctx: KeyContext): PlayerCommand? = with(ctx) {
         val hidden = layer == PlayerLayer.Video
         when {
+            layer == PlayerLayer.EpisodeEnd -> if (key == PlayerKey.PlayPause || key == PlayerKey.Pause) PlayerCommand.CloseEndCard else null
             key == PlayerKey.PlayPause -> when {
                 recovering -> PlayerCommand.StopRecovery
                 failed -> PlayerCommand.Retry
@@ -127,14 +131,14 @@ internal object PlayerKeyRouter {
     }
 
     /**
-     * Back, one layer a press: the panel closes; a reconnection stops and the player closes; the controls hide; else
-     * the player closes. The panel and the end card are dialogs and take their own Back first; a Back that reaches the
-     * player under the end card hides the controls behind it.
+     * Back, one layer a press: the end card closes; the panel closes; a reconnection stops and the player closes; the
+     * controls hide; else the player closes. The end card and the panel are dialogs; their Back comes here as well.
      */
     fun back(ctx: KeyContext): PlayerCommand = when {
+        ctx.layer == PlayerLayer.EpisodeEnd -> PlayerCommand.CloseEndCard
         ctx.layer == PlayerLayer.Tracks -> PlayerCommand.CloseTracks
         ctx.recovering -> PlayerCommand.Exit(stopRecovery = true)
-        ctx.layer != PlayerLayer.Video && !ctx.failed -> PlayerCommand.HideControls
+        ctx.layer == PlayerLayer.Controls && !ctx.failed -> PlayerCommand.HideControls
         else -> PlayerCommand.Exit()
     }
 

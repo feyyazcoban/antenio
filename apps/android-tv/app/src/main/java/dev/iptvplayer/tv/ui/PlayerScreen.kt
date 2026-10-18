@@ -159,8 +159,17 @@ import kotlinx.coroutines.flow.first
             PlayerCommand.ShowControls -> layer = PlayerLayer.Controls
             PlayerCommand.HideControls -> layer = PlayerLayer.Video
             PlayerCommand.CloseTracks -> { layer = PlayerLayer.Controls; interact() }
+            PlayerCommand.CloseEndCard -> { episodeEnd.dismiss(); interact() }
             is PlayerCommand.Exit -> { if (command.stopRecovery) recovery.cancel(); save(); model.back() }
         }
+    }
+    // PlayerKeyRouter decides; a key it leaves goes on to the focused control. The end card's window sends its keys here.
+    fun onKey(event: KeyEvent): Boolean {
+        if (event.type != KeyEventType.KeyDown) return false
+        lastInteraction = System.currentTimeMillis()
+        val key = PlayerKey.of(event.nativeKeyEvent.keyCode) ?: return false
+        val command = PlayerKeyRouter.route(key, keys(event.nativeKeyEvent.repeatCount)) ?: return false
+        perform(command); return true
     }
     LaunchedEffect(noteAt) { if (note != null) { delay(2_500); note = null } }
     LaunchedEffect(digits) {
@@ -250,15 +259,7 @@ import kotlinx.coroutines.flow.first
         if (model.state.value.route != Route.PLAYER) return@BackHandler back()
         perform(PlayerKeyRouter.back(keys()))
     }
-    Box(Modifier.fillMaxSize().background(Color.Black)
-        .onPreviewKeyEvent { event ->
-            if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-            lastInteraction = System.currentTimeMillis()
-            // PlayerKeyRouter decides; a key it leaves goes on to the focused control.
-            val key = PlayerKey.of(event.nativeKeyEvent.keyCode) ?: return@onPreviewKeyEvent false
-            val command = PlayerKeyRouter.route(key, keys(event.nativeKeyEvent.repeatCount)) ?: return@onPreviewKeyEvent false
-            perform(command); true
-        }) {
+    Box(Modifier.fillMaxSize().background(Color.Black).onPreviewKeyEvent(::onKey)) {
         AndroidView(factory = { PlayerView(it).apply {
             this.player = player; useController = false; keepScreenOn = true
             isFocusable = false; descendantFocusability = android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS
@@ -386,9 +387,10 @@ import kotlinx.coroutines.flow.first
         if (layer == PlayerLayer.Tracks) TracksDialog(tracks, trackParameters, player, model) { perform(PlayerCommand.CloseTracks) }
         endState?.let { end -> EpisodeEndDialog(end,
             play = { episodeEnd.playNow() },
-            stay = { episodeEnd.dismiss(); interact() },
+            stay = { perform(PlayerCommand.CloseEndCard) },
             returnToEpisodes = { episodeEnd.dismiss(); save(); model.back() },
-            replay = { episodeEnd.newMedia(); player.seekTo(0); player.play(); interact() }) }
+            replay = { episodeEnd.newMedia(); player.seekTo(0); player.play(); interact() },
+            back = { perform(PlayerKeyRouter.back(keys())) }, key = ::onKey) }
     }
 }
 
