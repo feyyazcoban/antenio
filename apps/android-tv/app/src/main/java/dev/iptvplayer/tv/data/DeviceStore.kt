@@ -137,6 +137,16 @@ class DeviceStore internal constructor(private val prefs: SharedPreferences) {
         if (!removed) throw SourceFailure(FailureReason.SOURCE_NOT_REMOVED)
     }
 
+    /**
+     * "PIN'i unuttum → Her şeyi sıfırla" (pin.md §3.11), inside SourceTransactions: what starting over removes, and the
+     * adult filter back on, in one commit. The TV's own settings stay, and hidden categories stay hidden.
+     */
+    fun startOver() {
+        val editor = prefs.edit().apply { DeviceKeys.cleared(prefs.all.keys).forEach { remove(it) } }
+            .putBoolean(DeviceKeys.hideAdultCategories.name, true)
+        if (!editor.commit()) throw SourceFailure(FailureReason.SOURCE_NOT_REMOVED)
+    }
+
     /** Explicit unreadable-record recovery only, after all encrypted catalog files are removed. */
     @Synchronized internal fun resetUnreadableSources() {
         KeyStore.getInstance("AndroidKeyStore").apply { load(null); deleteEntry(alias) }

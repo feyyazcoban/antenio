@@ -17,6 +17,7 @@
     <string name="progress_preparing">Hazırlanıyor…</string>
     <string name="progress_checking_library">Kayıtlı kütüphanen kontrol ediliyor…</string>
     <string name="progress_resetting_sources">Bu cihazdaki kaynak kayıtları temizleniyor…</string>
+    <string name="progress_resetting_everything">Bu cihazdaki kaynaklar ve kilitler temizleniyor…</string>
     <string name="progress_saving_library">Kütüphanen cihazına kaydediliyor…</string>
     <string name="progress_removing_source">Kaynak kaldırılıyor…</string>
     <string name="progress_downloading_list">Liste indiriliyor…</string>
@@ -47,6 +48,10 @@
     <string name="notice_filter_not_saved">Kaynak seçimi kaydedilemedi. Tekrar seçebilirsin.</string>
     <string name="notice_source_removed">Kaynak kaldırıldı.</string>
     <string name="notice_source_not_removed">Kaynak kaldırılamadı. Tekrar dene.</string>
+    <!-- After "PIN'i unuttum → Her şeyi sıfırla" -->
+    <string name="notice_start_over">Sıfırlandı. Kaynağını yeniden ekleyebilirsin.</string>
+    <string name="notice_start_over_pin_kept">Kaynaklar silindi ama PIN kaydı temizlenemedi. Kaynak ekledikten sonra PIN\'i unuttum ile yeniden deneyebilirsin.</string>
+    <string name="notice_start_over_failed">Sıfırlama tamamlanamadı. PIN korunuyor; tekrar deneyebilirsin.</string>
 
     <!-- Guide status -->
     <string name="guide_address_unreadable">Rehber adresi okunamadı. Kaynak ayarlarını kontrol et.</string>
@@ -474,6 +479,7 @@
     <string name="settings_remove_source_note">Bu kaynağı ve cihazdaki kayıtlarını kaldır.</string>
     <string name="settings_hide_adult">Yetişkin kategorilerini gizle</string>
     <string name="settings_hide_adult_note">Adında XXX, Adult, +18, Yetişkin gibi ifadeler geçen kategoriler hiçbir yerde görünmez.</string>
+    <string name="settings_hide_adult_note_pin">Adında XXX, Adult, +18, Yetişkin gibi ifadeler geçen kategoriler hiçbir yerde görünmez. Kapatmak PIN ister.</string>
     <string name="settings_manage_categories">Kategorileri yönet</string>
     <string name="settings_manage_categories_note">Canlı TV, film ve dizi kategorilerini aç veya kapat.</string>
     <plurals name="settings_manage_categories_hidden">
@@ -509,7 +515,7 @@
     <string name="settings_about_library_note">Uygulama içerik sağlamaz. Kendi %1$s veya %2$s kaynağını ekleyerek izleyebilirsin.</string>
     <string name="settings_about_storage_note">Kaynağın ve katalog önbelleğin bu cihazda şifreli saklanır.</string>
     <string name="settings_about_release">Bu sürümde</string>
-    <string name="settings_about_release_note">Canlı TV, film, dizi, arama, favori, izlemeye devam et ve yayın rehberi kullanılabilir. Rehber bilgisi kaynağın desteğine bağlıdır. PIN yönetimi henüz yok. Sağlayıcının yetişkin işaretli içerikleri hiç gösterilmez; adı yetişkin içerik bildiren kategoriler Ayarlar\'dan kapatılır.</string>
+    <string name="settings_about_release_note">Canlı TV, film, dizi, arama, favori, izlemeye devam et ve yayın rehberi kullanılabilir. Rehber bilgisi kaynağın desteğine bağlıdır. PIN, yetişkin filtresini ve kategori ayarlarını korur. Sağlayıcının yetişkin işaretli içerikleri hiç gösterilmez; adı yetişkin içerik bildiren kategoriler Ayarlar\'dan kapatılır.</string>
     <string name="settings_scroll_up">↑ Yukarı</string>
     <string name="settings_scroll_more">↓ Daha fazla</string>
     <!-- A stepper row's buttons: − and + read by TalkBack, and back to the default value. -->
@@ -518,6 +524,63 @@
     <string name="settings_reset">Sıfırla</string>
     <!-- What TalkBack reads for a stepper button: the setting's name, then the button (Azalt, Artır, Sıfırla). -->
     <string name="settings_stepper_button">%1$s, %2$s</string>
+
+    <!-- Ebeveyn denetimi (Ayarlar → İçerik). Neutral words only: the filter is shown or hidden, never promoted. -->
+    <string name="parental_title">Ebeveyn denetimi</string>
+    <string name="parental_row_off">PIN oluştur; yetişkin filtresini ve kategori ayarlarını koru.</string>
+    <string name="parental_row_on">PIN açık. Yetişkin filtresi ve kategori ayarları PIN ister.</string>
+    <string name="parental_row_unavailable">Ebeveyn denetimi kaydı açılamadı. PIN\'i unuttuysan bu cihazı sıfırlayabilirsin.</string>
+    <string name="parental_note">PIN; yetişkin filtresini kapatırken, kategori ayarlarını ve bu sayfayı açarken istenir. PIN yalnız bu cihazda şifreli saklanır.</string>
+    <string name="parental_create">PIN oluştur</string>
+    <string name="parental_create_note">4 haneli bir PIN seç. Kolay tahmin edilen PIN\'ler kabul edilmez.</string>
+    <string name="parental_off_note">Yetişkin kategorileri PIN olmadan da gizli kalır.</string>
+    <string name="parental_change">PIN\'i değiştir</string>
+    <string name="parental_change_note">Yeni bir 4 haneli PIN seç.</string>
+    <string name="parental_remove">PIN\'i kaldır</string>
+    <string name="parental_remove_note">Yetişkin filtresi ve kategori ayarları artık PIN istemez.</string>
+    <string name="parental_remove_question">PIN kaldırılsın mı?</string>
+    <string name="parental_remove_confirm">Yetişkin filtresi ve kategori ayarları artık PIN istemez. Gizlediğin kategoriler gizli kalır; yetişkin filtresi değişmez.</string>
+    <string name="parental_created">PIN oluşturuldu. Yetişkin filtresi ve kategori ayarları artık bu PIN\'i ister.</string>
+    <string name="parental_changed">PIN değiştirildi.</string>
+    <string name="parental_removed">PIN kaldırıldı.</string>
+    <string name="parental_not_removed">PIN kaldırılamadı. Tekrar dene.</string>
+    <string name="parental_offer_title">Önce PIN oluşturmak ister misin?</string>
+    <string name="parental_offer_note">PIN olmadan bu ayarı kumandası olan herkes geri açabilir.</string>
+    <string name="parental_offer_without">PIN olmadan kapat</string>
+
+    <!-- The PIN pad -->
+    <string name="pin_title_create">PIN oluştur</string>
+    <string name="pin_title_change">Yeni PIN</string>
+    <string name="pin_title_confirm">PIN\'i tekrar gir</string>
+    <string name="pin_title_verify">PIN gir</string>
+    <string name="pin_message_create">Kumandanın rakam tuşlarıyla ya da ekrandaki tuşlarla 4 haneli bir PIN gir.</string>
+    <string name="pin_message_change">Yeni 4 haneli PIN\'i gir.</string>
+    <string name="pin_message_confirm">Aynı 4 haneyi bir kez daha gir.</string>
+    <string name="pin_reason_show_adult">Yetişkin kategorilerini göstermek için PIN gir.</string>
+    <string name="pin_reason_categories">Kategori ayarlarını açmak için PIN gir.</string>
+    <string name="pin_reason_parental">Ebeveyn denetimi ayarlarını açmak için PIN gir.</string>
+    <!-- TalkBack for the masked digits: how many of the four are in, never which. -->
+    <string name="pin_entered">%1$s / %2$s rakam girildi</string>
+    <string name="pin_delete">Sil</string>
+    <string name="pin_delete_description">Son rakamı sil</string>
+    <string name="pin_checking">Kontrol ediliyor…</string>
+    <string name="pin_wrong">PIN yanlış. Tekrar dene.</string>
+    <string name="pin_wrong_last">PIN yanlış. Bir yanlış deneme daha 30 saniye bekletir.</string>
+    <!-- %1$s is the time left, "0:30". -->
+    <string name="pin_wait">Çok fazla yanlış deneme. %1$s sonra tekrar dene.</string>
+    <!-- Read once by TalkBack when the wait starts; the countdown on screen is not read. -->
+    <plurals name="pin_wait_spoken">
+        <item quantity="one">Çok fazla yanlış deneme. %1$s saniye sonra tekrar deneyebilirsin.</item>
+        <item quantity="other">Çok fazla yanlış deneme. %1$s saniye sonra tekrar deneyebilirsin.</item>
+    </plurals>
+    <string name="pin_unavailable">PIN şu an kontrol edilemiyor. Tekrar dene.</string>
+    <string name="pin_easy">Bu PIN kolay tahmin edilir. Farklı bir PIN seç.</string>
+    <string name="pin_mismatch">PIN\'ler eşleşmedi. Yeni PIN\'i baştan gir.</string>
+    <string name="pin_not_saved">PIN kaydedilemedi. Boş alanı kontrol edip tekrar dene.</string>
+    <string name="pin_forgot">PIN\'i unuttum</string>
+    <string name="pin_forgot_question">PIN\'i unuttun mu?</string>
+    <string name="pin_forgot_note">PIN yalnız bu cihazda şifreli saklanır ve hiçbir sunucuya gönderilmez; bu yüzden geri getirilemez. Sıfırlamak için bu cihazdaki kaynaklar, favoriler, izleme geçmişi ve PIN silinir; yetişkin filtresi açık kalır. Kaynak bilgilerini yeniden girmen gerekir.</string>
+    <string name="pin_forgot_reset">Her şeyi sıfırla</string>
 
     <!-- Kaynakların -->
     <string name="sources_title">Kaynakların</string>

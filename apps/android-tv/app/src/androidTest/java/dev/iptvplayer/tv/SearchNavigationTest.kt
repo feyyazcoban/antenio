@@ -647,7 +647,7 @@ class SearchNavigationTest {
         assertEquals(!original, model.state.value.reducedMotion)
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         assertEquals(original, model.state.value.reducedMotion)
-        repeat(8) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
+        repeat(11) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
         ui.onNode(hasText("Uygulama hakkında") and hasClickAction()).assertIsFocused()
         ui.onNodeWithTag("settings-title").assertIsDisplayed()
         ui.onNodeWithTag("settings-close").assertIsDisplayed()
@@ -661,7 +661,7 @@ class SearchNavigationTest {
         ui.onNodeWithTag("settings-close").assertIsDisplayed()
         key(KeyEvent.KEYCODE_BACK)
         ui.onNode(hasText("Uygulama hakkında") and hasClickAction()).assertIsFocused()
-        repeat(3) { key(KeyEvent.KEYCODE_DPAD_UP) }
+        repeat(6) { key(KeyEvent.KEYCODE_DPAD_UP) }
         ui.onNode(hasText("Kaynağı kaldır") and hasClickAction()).assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.onNodeWithText("Vazgeç").assertIsFocused()
@@ -713,12 +713,12 @@ class SearchNavigationTest {
         click("Ayarlar")
         ui.waitUntil(5_000) { ui.onAllNodes(hasText("Hareketi azalt") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
         val rows = listOf("Hareketi azalt", "Açılış sesi", "Kaynakları yönet", "Kataloğu yenile",
-            "Kaynağı düzenle", "Kaynağı kaldır", "Yetişkin kategorilerini gizle", "Kategorileri yönet",
+            "Kaynağı düzenle", "Kaynağı kaldır", "Yetişkin kategorilerini gizle", "Kategorileri yönet", "Ebeveyn denetimi",
             "Otomatik sonraki bölüm", "İzleme geçmişini temizle", "Uygulama hakkında")
         val label = ui.onNodeWithTag("settings-section")
         val initial = label.getUnclippedBoundsInRoot()
         fun check(index: Int) {
-            val expected = when (index) { 0, 1 -> "Görünüm ve ses"; in 2..5 -> "Kaynaklar"; 6, 7 -> "İçerik"; else -> "İzleme ve uygulama" }
+            val expected = when (index) { 0, 1 -> "Görünüm ve ses"; in 2..5 -> "Kaynaklar"; in 6..8 -> "İçerik"; else -> "İzleme ve uygulama" }
             label.assertTextEquals(expected).assertIsDisplayed()
             val current = label.getUnclippedBoundsInRoot()
             assertEquals(initial.top, current.top)
@@ -731,15 +731,15 @@ class SearchNavigationTest {
             assertTrue("Focused setting must remain fully readable", bounds.top >= viewport.top && bounds.bottom <= viewport.bottom)
         }
         check(0); shot("section-appearance")
-        for (index in 1..8) {
+        for (index in 1..rows.lastIndex) {
             key(KeyEvent.KEYCODE_DPAD_DOWN); check(index)
             if (index == 3) shot("section-sources")
         }
         shot("section-playback")
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.onNodeWithTag("settings-close").assertIsFocused()
-        key(KeyEvent.KEYCODE_BACK); check(8)
-        for (index in 7 downTo 0) { key(KeyEvent.KEYCODE_DPAD_UP); check(index) }
+        key(KeyEvent.KEYCODE_BACK); check(rows.lastIndex)
+        for (index in rows.lastIndex - 1 downTo 0) { key(KeyEvent.KEYCODE_DPAD_UP); check(index) }
         key(KeyEvent.KEYCODE_BACK)
     }
 

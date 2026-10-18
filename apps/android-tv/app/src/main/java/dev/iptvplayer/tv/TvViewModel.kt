@@ -1,6 +1,7 @@
 package dev.iptvplayer.tv
 
 import android.app.Application
+import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.compose.runtime.mutableStateMapOf
@@ -34,8 +35,11 @@ data class PlayingMedia(val entry: MediaEntry, val url: String, val startMs: Lon
 /** [notices] read as one paragraph: the list's warnings, or how its last refresh went. */
 data class SourceStatus(val count: Int = 0, val updatedAt: Long = 0, val refreshing: Boolean = false,
     val notices: List<UiText> = emptyList(), val failed: Boolean = false)
-/** Success belongs beside the operation; actionable failures remain visible in the catalog too. */
-enum class CatalogOperation { REFRESH, SOURCE_REMOVAL, SOURCE_FILTER }
+/**
+ * Success belongs beside the operation; actionable failures remain visible in the catalog too. START_OVER is "PIN'i
+ * unuttum → Her şeyi sıfırla", told on the setup screen it ends on.
+ */
+enum class CatalogOperation { REFRESH, SOURCE_REMOVAL, SOURCE_FILTER, START_OVER }
 data class CatalogNotice(val message: UiText, val operation: CatalogOperation, val needsAttention: Boolean = false)
 /** Its texts are [UiText]s: the state holds no ready sentences; the screens resolve them in the app's language. */
 data class TvState(
@@ -100,6 +104,8 @@ data class TvState(
     val autoNextEpisode: Boolean = true,
     /** The Sırala choice of the film and series lists, kept on the device. */
     val librarySorts: Map<MediaKind, LibrarySort> = emptyMap(),
+    /** The parental PIN, the PIN pad on screen and what a PIN verified in Ayarlar allows (pin.md §7). */
+    val parental: ParentalUi = ParentalUi(),
     val revision: Int = 0
 ) {
     // Display/default selection only. Playback and personal data must use sourceFor(entry).
@@ -134,19 +140,25 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     private var librarySearchJob: Job? = null
     private var librarySearchGeneration = 0
     private val guides = GuideController(viewModelScope, epgStore, store, catalogStore, { guideZone() })
+    private val parental = ParentalController(viewModelScope,
+        ParentalGuard(ProtectionStore(application), AndroidPinClock(application.contentResolver)), SystemClock::elapsedRealtime) { followUp ->
+        when (followUp) { AdminFollowUp.SHOW_ADULT -> setHideAdult(false) }
+    }
 
     init {
         viewModelScope.launch { guides.state.collect { value -> mutable.update { it.copy(guideStatus = value.statuses, guideRevision = value.revision) } } }
+        viewModelScope.launch { parental.state.collect { value -> mutable.update { it.copy(parental = value) } } }
+        viewModelScope.launch { parental.refresh() }
         restore(atLaunch = true)
     }
 
     /**
      * NEXTV came on screen (MainActivity.onStart) or left it (onStop: Home, another app, standby). What may live only
-     * while the viewer sees the app hangs here as it arrives (gap plan T3, T6): unlocks with the PIN end, the foreground
-     * timer pauses, a local transfer closes. Nothing does yet.
+     * while the viewer sees the app hangs here as it arrives (gap plan T3, T6): a PIN verified in Ayarlar ends and an
+     * open PIN pad closes, Settings with them. The foreground timer and a local transfer join later.
      */
     fun appStarted() { }
-    fun appStopped() { }
+    fun appStopped() { parental.stopped() }
 
     /** Migration is serialized with accepted writes from a previous ViewModel. */
     private fun readRegistry(): SourceRegistry {
@@ -229,12 +241,60 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
                 registry = SourceRegistry(); snapshots.clear()
-                mutable.value = TvState(route = Route.SETUP, sourceTask = SourceTask.IDLE,
-                    reducedMotion = store.reducedMotion, startupSound = store.startupSound, autoNextEpisode = store.autoNextEpisode, guideZoneId = store.guideZoneId, librarySorts = storedSorts())
+                mutable.value = startedOver()
             } catch (e: CancellationException) { throw e }
             catch (_: Exception) {
                 if (generation == token) mutable.update { it.copy(route = Route.RECOVERY, sourceTask = SourceTask.IDLE,
                     error = UiText.Res(R.string.error_reset_failed), recoveryCanReset = true) }
+            }
+        }
+    }
+
+    /** A TV without sources, on the setup screen; the TV's own settings and the PIN's status stay. */
+    private fun startedOver(notice: CatalogNotice? = null) = TvState(route = Route.SETUP, sourceTask = SourceTask.IDLE,
+        reducedMotion = store.reducedMotion, startupSound = store.startupSound, autoNextEpisode = store.autoNextEpisode,
+        guideZoneId = store.guideZoneId, librarySorts = storedSorts(), hideAdultCategories = store.hideAdultCategories,
+        parental = parental.state.value, catalogNotice = notice)
+
+    /**
+     * "PIN'i unuttum → Her şeyi sıfırla" (pin.md §3.11), from the PIN pad. No server keeps the PIN, so this TV starts
+     * over: the sources, their lists and guides, favourites, history and progress go and the adult filter is turned back
+     * on, and only then the PIN record, so a reset cut short never leaves the sources without their PIN. Run again, it
+     * finishes what is left. Setup opens.
+     */
+    fun forgotPinReset() {
+        if (parental.state.value.prompt?.canForget != true || state.value.sourceTask != SourceTask.IDLE) return
+        val token = ++generation
+        val previousJob = loadJob
+        previousJob?.cancel(); detailJob?.cancel(); filterGeneration++; filterJob?.cancel(); resetSearchIndex()
+        guides.forget()
+        parental.relock()
+        homeFocusKey = null
+        mutable.update { it.copy(route = Route.LOADING, sourceTask = SourceTask.RESETTING, restoringAtLaunch = false,
+            playing = null, refreshing = false, progressLabel = UiText.Res(R.string.progress_resetting_everything)) }
+        loadJob = viewModelScope.launch {
+            try {
+                previousJob?.join()
+                transactions.write {
+                    artwork.clear()
+                    catalogStore.clear()
+                    epgStore.clear()
+                    store.startOver()
+                }
+                registry = SourceRegistry(); snapshots.clear()
+                val unlocked = parental.reset()
+                currentCoroutineContext().ensureActive()
+                if (generation != token) return@launch
+                mutable.value = startedOver(if (unlocked) CatalogNotice(UiText.Res(R.string.notice_start_over), CatalogOperation.START_OVER)
+                    else CatalogNotice(UiText.Res(R.string.notice_start_over_pin_kept), CatalogOperation.START_OVER, needsAttention = true))
+            } catch (e: CancellationException) { throw e }
+            catch (_: Exception) {
+                // Not every source could be removed: the PIN stays, and the library opens with what is left.
+                if (generation == token) {
+                    mutable.update { it.copy(sourceTask = SourceTask.IDLE, catalogNotice = CatalogNotice(
+                        UiText.Res(R.string.notice_start_over_failed), CatalogOperation.START_OVER, needsAttention = true)) }
+                    restore()
+                }
             }
         }
     }
@@ -552,18 +612,43 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     fun season(value: Int) { mutable.update { it.copy(season = value) } }
     fun reducedMotion() { store.reducedMotion = !state.value.reducedMotion; mutable.update { it.copy(reducedMotion = store.reducedMotion) } }
     fun startupSound() { store.startupSound = !state.value.startupSound; mutable.update { it.copy(startupSound = store.startupSound) } }
-    /** Shows or hides one category (D068); the library is published again without reloading any source. */
+    /**
+     * Shows or hides one category (D068); the library is published again without reloading any source. Showing one
+     * loosens a protection: with a PIN set, only once it was verified in this Settings visit.
+     */
     fun categoryVisible(kind: MediaKind, category: String, visible: Boolean) {
+        if (visible && !parental.state.value.mayLoosen) return
         val key = CategoryVisibility.key(kind, category)
         store.hiddenCategories = if (visible) store.hiddenCategories - key else store.hiddenCategories + key
         mutable.update { it.copy(hiddenCategories = store.hiddenCategories) }
         viewModelScope.launch { publishLibrary() }
     }
-    fun hideAdultCategories() {
-        store.hideAdultCategories = !state.value.hideAdultCategories
-        mutable.update { it.copy(hideAdultCategories = store.hideAdultCategories) }
+    /**
+     * Turns the adult-name filter on or off (D068). Off loosens a protection: while a PIN guards it and was not verified
+     * in this Settings visit, the PIN pad opens instead and true says so; the filter goes off once the PIN is right.
+     */
+    fun setHideAdult(hide: Boolean): Boolean {
+        if (!hide && !parental.state.value.mayLoosen) return parental.requestAdmin(AdminReason.SHOW_ADULT, AdminFollowUp.SHOW_ADULT)
+        store.hideAdultCategories = hide
+        mutable.update { it.copy(hideAdultCategories = hide) }
         viewModelScope.launch { publishLibrary() }
+        return false
     }
+
+    // Parental control (pin.md §3): ParentalController keeps the PIN pad's steps; Ayarlar and the pad call these.
+    /** True when the PIN pad opened before [reason]; false when nothing needs asking (no PIN, or verified in this visit). */
+    fun requestAdmin(reason: AdminReason): Boolean = parental.requestAdmin(reason)
+    /** True when the PIN pad opened for the first PIN; [then] runs once it is saved. */
+    fun createPin(then: AdminFollowUp? = null): Boolean = parental.createPin(then)
+    /** True when the PIN pad opened for a new PIN, which needs the PIN verified in this visit. */
+    fun changePin(): Boolean = parental.changePin()
+    fun removePin() = parental.removePin()
+    /** Four digits from the PIN pad; the model wipes them once used. */
+    fun submitPin(pin: CharArray) = parental.submit(pin)
+    fun pinBack() = parental.back()
+    fun cancelPin() = parental.cancel()
+    /** The Settings panel closed: what a PIN verified there allowed ends with it. */
+    fun closeSettings() = parental.closeSettings()
     private fun storedSorts(): Map<MediaKind, LibrarySort> = listOf(MediaKind.MOVIE, MediaKind.SERIES).associateWith(store::librarySort)
     private val libraryOrders = LibraryOrderCache()
     /** Films or series in a Sırala order; sorted once per catalogue and choice. */

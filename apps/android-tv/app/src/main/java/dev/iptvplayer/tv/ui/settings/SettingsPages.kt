@@ -13,12 +13,15 @@ import androidx.compose.ui.unit.dp
 import dev.iptvplayer.tv.BuildConfig
 import dev.iptvplayer.tv.CatalogOperation
 import dev.iptvplayer.tv.R
+import dev.iptvplayer.tv.data.AdminReason
 import dev.iptvplayer.tv.data.CategoryVisibility
 import dev.iptvplayer.tv.data.Feature
 import dev.iptvplayer.tv.data.MediaKind
+import dev.iptvplayer.tv.data.ParentalStatus
 import dev.iptvplayer.tv.data.UiText
 import dev.iptvplayer.tv.ui.Action
 import dev.iptvplayer.tv.ui.NextvLogo
+import dev.iptvplayer.tv.ui.rememberPinOpener
 import dev.iptvplayer.tv.ui.resolve
 import dev.iptvplayer.tv.ui.shownCategory
 import dev.iptvplayer.tv.ui.updatedTime
@@ -29,11 +32,11 @@ internal enum class SectionId(@StringRes val label: Int) {
     CONTENT(R.string.settings_section_content), WATCHING(R.string.settings_section_watching)
 }
 
-/** What a page asks before it opens; the panel's [PageGate] decides. Every page is open for now. */
+/** What a page asks before it opens; the panel's [PageGate] decides. */
 internal sealed interface PageGuard {
     data object None : PageGuard
-    /** The parental PIN. */
-    data object Pin : PageGuard
+    /** The parental PIN while one is set, asked with [reason]'s sentence; once per Settings visit. */
+    data class Pin(val reason: AdminReason) : PageGuard
     /** NEXTV Plus, for [feature]. */
     data class Plus(val feature: Feature) : PageGuard
 }
@@ -85,10 +88,12 @@ internal val settingsPageList: List<SettingsPageSpec> = listOf(
         }
     },
     SettingsPageSpec(aboutPage.id, UiText.Res(R.string.settings_about), SectionId.WATCHING, body = PageBody.READING) { About() },
-    SettingsPageSpec(categoriesPage.id, UiText.Res(R.string.settings_categories), SectionId.CONTENT, body = PageBody.SHORT_LIST) { CategoryKinds() },
+    // Its lists name the adult categories and can show them again (pin.md §2).
+    SettingsPageSpec(categoriesPage.id, UiText.Res(R.string.settings_categories), SectionId.CONTENT,
+        PageGuard.Pin(AdminReason.CATEGORIES), PageBody.SHORT_LIST) { CategoryKinds() },
 ) + categoryKinds.map { kind ->
     SettingsPageSpec(categoryListPage(kind).id, UiText.Res(kind.label), SectionId.CONTENT, body = PageBody.LAZY) { CategoryList(kind) }
-}
+} + parentalPageList
 
 internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.associateBy { it.id }
 
@@ -118,13 +123,24 @@ internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.ass
     if (s.sources.size == 1) PageRow("remove-source", stringResource(R.string.remove_source), stringResource(R.string.settings_remove_source_note),
         removeSourcePage, section = SectionId.SOURCES)
     Spacer(Modifier.height(6.dp))
-    // D068: what the screens show. A switch anyone can turn back, not a PIN lock.
-    ToggleRow("hide-adult", stringResource(R.string.settings_hide_adult), stringResource(R.string.settings_hide_adult_note),
-        s.hideAdultCategories, section = SectionId.CONTENT) { model.hideAdultCategories() }
+    // D068: what the screens show. Turning it on is free; off asks for the PIN while one is set, and without one first
+    // offers to make one (pin.md §3.3).
+    val openPin = rememberPinOpener()
+    ToggleRow("hide-adult", stringResource(R.string.settings_hide_adult), stringResource(if (s.parental.guarded)
+        R.string.settings_hide_adult_note_pin else R.string.settings_hide_adult_note),
+        s.hideAdultCategories, section = SectionId.CONTENT) {
+        if (s.hideAdultCategories && s.parental.status == ParentalStatus.OFF) open(adultPinOfferPage, "hide-adult")
+        else if (model.setHideAdult(!s.hideAdultCategories)) openPin { rowEntry("hide-adult") }
+    }
     val hiddenCount = s.hiddenCategories.size
     PageRow("manage-categories", stringResource(R.string.settings_manage_categories), if (hiddenCount > 0)
         pluralStringResource(R.plurals.settings_manage_categories_hidden, hiddenCount, hiddenCount.toString())
         else stringResource(R.string.settings_manage_categories_note), categoriesPage, section = SectionId.CONTENT)
+    PageRow("parental", stringResource(R.string.parental_title), stringResource(when (s.parental.status) {
+        ParentalStatus.ON -> R.string.parental_row_on
+        ParentalStatus.UNAVAILABLE -> R.string.parental_row_unavailable
+        else -> R.string.parental_row_off
+    }), parentalPage, section = SectionId.CONTENT)
     Spacer(Modifier.height(6.dp))
     ToggleRow("auto-next", stringResource(R.string.settings_auto_next), stringResource(R.string.settings_auto_next_note),
         s.autoNextEpisode, section = SectionId.WATCHING) { model.autoNextEpisode() }

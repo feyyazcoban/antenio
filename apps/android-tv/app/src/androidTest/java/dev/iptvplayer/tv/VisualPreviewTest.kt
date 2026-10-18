@@ -351,7 +351,7 @@ class VisualPreviewTest {
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.waitUntil(15_000) { !model.state.value.refreshing }
         refresh.assertIsFocused()
-        repeat(5) { instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle() }
+        repeat(8) { instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle() }
         ui.onNode(hasText("Uygulama hakkında") and hasClickAction()).assertIsFocused()
         shot("feedback-settings-bottom")
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)

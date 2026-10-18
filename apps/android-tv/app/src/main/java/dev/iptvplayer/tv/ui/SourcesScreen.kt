@@ -22,6 +22,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.selected
@@ -153,7 +154,7 @@ import kotlinx.coroutines.flow.first
             .background(Ink.Container, RoundedCornerShape(18.dp))
             .focusProperties { onEnter = { initial.requestFocus() } }.focusGroup().padding(28.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Heading(title)
+            Heading(title, Modifier.semantics { heading() })
             if (scrollBody) Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(5.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp), content = content)
             else content()

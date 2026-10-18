@@ -83,6 +83,9 @@ internal class SettingsScope(
 ) {
     fun open(route: SettingsRoute, fromRowKey: String?) = navigate(route, fromRowKey)
 
+    /** Where focus goes back to after a window over the panel (the PIN pad): the row [key], else the page's start. */
+    fun rowEntry(key: String): FocusRequester? = rows.entry(key)
+
     /** The focus of the row [key], for its Modifier.focusRequester; [start] makes it where the page starts. */
     @Composable fun rowFocus(key: String, start: Boolean = false): FocusRequester {
         val requester = remember { FocusRequester() }

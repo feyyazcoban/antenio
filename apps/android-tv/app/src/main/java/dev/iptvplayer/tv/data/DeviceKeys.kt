@@ -8,8 +8,8 @@ enum class BackupClass { NONE, SETTINGS, PERSONAL }
 
 /**
  * One preference in DeviceStore's `device_state`, or a family of keys that start with [name]; [layout] says how the rest
- * of a key reads. [reset] says whether starting over (DeviceStore.forgetSource, later "Her şeyi sıfırla") removes it:
- * the TV's own settings survive a source change. Only a SHARED key has [prune].
+ * of a key reads. [reset] says whether starting over (DeviceStore.forgetSource, and startOver for "Her şeyi sıfırla")
+ * removes it: the TV's own settings survive a source change. Only a SHARED key has [prune].
  */
 internal class DeviceKey(val name: String, val scope: KeyScope, val reset: Boolean, val backup: BackupClass,
     private val layout: Layout = Layout.WHOLE, val prune: ((value: Any, retained: Set<String>) -> Any?)? = null) {

@@ -89,6 +89,8 @@ import androidx.compose.ui.input.key.type
     BackHandler(state.route != Route.RECOVERY && state.route != Route.PLAYER && state.route != Route.SEARCH && state.route != Route.GUIDE &&
         !(state.route == Route.SETUP && state.source == null)) { routeBack() }
     LaunchedEffect(state.route) { if (state.route != Route.HOME) exitAsk = false }
+    // The app left the screen with a PIN verified in Ayarlar, or the TV starts over: Settings closes (pin.md §3.9).
+    LaunchedEffect(state.parental.lockEpoch) { settings = false }
     // A computer keyboard's Esc (the emulator, a USB keyboard) is the remote's Back. Compose would otherwise take it
     // as "leave the focused group". On release it goes back into this window as a Back press, so the platform routes
     // it as it routes the remote's: an open keyboard closes first, otherwise the BackHandlers act. A TV keyboard
@@ -138,7 +140,7 @@ import androidx.compose.ui.input.key.type
                 Route.DETAIL -> DetailScreen(state, model) { settings = true }
                 Route.PLAYER -> state.playing?.let { PlayerScreen(it, model, routeBack) }
             }
-            if (settings) Settings(state, model) { settings = false }
+            if (settings) Settings(state, model) { settings = false; model.closeSettings() }
             AppOverlayHost(overlays, state, model)
             if (exitAsk && state.route == Route.HOME) ExitDialog { exitAsk = false }
             if (opening) LaunchCover(state.reducedMotion,
@@ -191,6 +193,10 @@ import androidx.compose.ui.input.key.type
                 fontSize = if (largeText) 24.sp else 34.sp, lineHeight = if (largeText) 30.sp else 40.sp)
             if (!largeText) Note(stringResource(R.string.setup_tagline))
             Note(stringResource(R.string.setup_privacy))
+            // How "PIN'i unuttum → Her şeyi sıfırla" ended, until a source is added.
+            s.catalogNotice?.takeIf { it.operation == CatalogOperation.START_OVER }?.let {
+                Note(it.message.resolve(), error = it.needsAttention, modifier = Modifier.testTag("setup-notice"))
+            }
         }
         Column(Modifier.weight(1.4f).fillMaxHeight()
             .background(Ink.Container, RoundedCornerShape(24.dp)).padding(24.dp),
@@ -326,12 +332,14 @@ internal class EvenColumns(private val count: Int) : GridCells {
 }
 
 /**
- * A window above every screen and the Settings panel (gap plan T3), one at a time: the quick actions today; the PIN
- * pad, a reminder and the Plus page later. Screens open one through [rememberOverlayOpener]; [PilotApp] shows it.
+ * A window above every screen and the Settings panel (gap plan T3), one at a time: the quick actions and the PIN pad
+ * today; a reminder and the Plus page later. Screens open one through [rememberOverlayOpener]; [PilotApp] shows it.
  */
 internal sealed interface AppOverlay {
     /** Held OK on [entry]'s card (U8). */
     data class Quick(val entry: MediaEntry) : AppOverlay
+    /** The PIN pad for the model's open prompt ([ParentalUi.prompt]), as long as it stays open (rememberPinOpener). */
+    data object Pin : AppOverlay
 }
 
 /**
@@ -380,8 +388,15 @@ internal val LocalAppOverlays = staticCompositionLocalOf { AppOverlays() }
             is AppOverlay.Quick -> QuickActions(overlay.entry, quickActions(overlay.entry, overlay.entry.id in s.favoriteIds,
                 toggleFavorite = { model.toggleFavorite(overlay.entry) }, open = { model.open(overlay.entry) }, close = overlays::close),
                 overlays::close)
+            // The prompt ended in the model (a PIN taken, Vazgeç, Back): the window closes and focus goes back.
+            AppOverlay.Pin -> s.parental.prompt.let { prompt ->
+                if (prompt != null) PinDialog(prompt, model) else LaunchedEffect(Unit) { overlays.close() }
+            }
         }
     } }
+    // A PIN pad whose opener left the screen asks nothing more.
+    val pinShown = overlays.shown?.overlay == AppOverlay.Pin
+    LaunchedEffect(pinShown) { if (!pinShown && model.state.value.parental.prompt != null) model.cancelPin() }
     val returning = overlays.returning
     LaunchedEffect(returning) { returning?.let { refocusAfterDialog(it.window, it.returnFocus); overlays.returned(it) } }
 }

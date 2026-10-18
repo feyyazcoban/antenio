@@ -39,14 +39,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * Decides whether a page with a [PageGuard] opens: [open] runs now, after a question, or not at all. The parental PIN
- * and NEXTV Plus answer here once they exist; until then every page opens.
+ * Decides whether a page with a [PageGuard] opens: [open] runs now, after a question, or not at all. A question asked
+ * in a window over the panel gives focus back to [returnFocus] if the page does not open. The parental PIN answers
+ * here (rememberPinGate); NEXTV Plus joins when sales open, until then a Plus page opens.
  */
 internal fun interface PageGate {
-    fun request(guard: PageGuard, open: () -> Unit)
+    fun request(guard: PageGuard, returnFocus: () -> FocusRequester?, open: () -> Unit)
 
     companion object {
-        val Open = PageGate { _, open -> open() }
+        val Open = PageGate { _, _, open -> open() }
     }
 }
 
@@ -59,8 +60,9 @@ private class PagePlace {
 /**
  * The Settings panel at the right edge: the main page, and the pages its rows open from [settingsPages] stacked above
  * it. Back leaves one page and focus returns to the row that opened it; Back on the main page closes the panel.
+ * Without a [gate], a guarded page asks for the parental PIN.
  */
-@Composable internal fun Settings(s: TvState, model: TvViewModel, gate: PageGate = PageGate.Open, dismiss: () -> Unit) {
+@Composable internal fun Settings(s: TvState, model: TvViewModel, gate: PageGate? = null, dismiss: () -> Unit) {
     val nav = remember { SettingsNav(mainPage) }
     var current by remember { mutableStateOf(nav.top) }
     // Each open page keeps its place while a page above it is open, so Back finds the row that opened that page on
@@ -80,10 +82,6 @@ private class PagePlace {
     fun back(from: SettingsRoute = nav.top.route) {
         if (nav.back(from)) { current = nav.top; places.keys.retainAll { nav.isOpen(it) } } else dismiss()
     }
-    fun open(route: SettingsRoute, fromRowKey: String?) {
-        val guard = (route as? SettingsRoute.Page)?.let { settingsPages.getValue(it.id).guard } ?: PageGuard.None
-        gate.request(guard) { nav.open(route, fromRowKey); current = nav.top }
-    }
     val shown = current.route
     val atRoot = shown == nav.root
     val page = (shown as? SettingsRoute.Page)?.let { settingsPages.getValue(it.id) }
@@ -91,14 +89,20 @@ private class PagePlace {
     val reading = body == PageBody.READING
     val place = places.getOrPut(shown) { PagePlace() }
     val scroll = place.scroll
-    // The page's own buttons leave only this page (SettingsNav.back), the Back key and the header action the top one.
-    val pageScope = SettingsScope(s, model, rows, place.list, visibleItems, navigate = ::open,
-        showChoice = { rowKey, offered -> choice = offered; open(SettingsRoute.Choice(rowKey), rowKey) },
-        showSection = { activeSection = it }, back = { back(from = shown) }, dismiss = dismiss)
-    // The row the page starts on or returns to; the header action on a page without rows (Uygulama hakkında).
-    fun entry() = rows.entry(current.focusKey) ?: headerAction
 
     Dialog(onDismissRequest = { back() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        // Made in the panel's window, so a PIN pad over the panel gives focus back to a row in this window.
+        val pageGate = gate ?: rememberPinGate(s, model)
+        fun open(route: SettingsRoute, fromRowKey: String?) {
+            val guard = (route as? SettingsRoute.Page)?.let { settingsPages.getValue(it.id).guard } ?: PageGuard.None
+            pageGate.request(guard, { rows.entry(fromRowKey) }) { nav.open(route, fromRowKey); current = nav.top }
+        }
+        // The page's own buttons leave only this page (SettingsNav.back), the Back key and the header action the top one.
+        val pageScope = SettingsScope(s, model, rows, place.list, visibleItems, navigate = ::open,
+            showChoice = { rowKey, offered -> choice = offered; open(SettingsRoute.Choice(rowKey), rowKey) },
+            showSection = { activeSection = it }, back = { back(from = shown) }, dismiss = dismiss)
+        // The row the page starts on or returns to; the header action on a page without rows (Uygulama hakkında).
+        fun entry() = rows.entry(current.focusKey) ?: headerAction
         val windowInfo = LocalWindowInfo.current
         // A key pressed on this page before the window reported its focus has already moved from the entry row.
         var moved by remember(current) { mutableStateOf(false) }

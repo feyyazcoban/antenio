@@ -150,4 +150,17 @@ class DeviceKeysTest {
         assertEquals((settings + "unknown").toSet(), memory.values.keys)
         assertTrue(store.reducedMotion); assertFalse(store.startupSound); assertEquals(LibrarySort.TITLE, store.librarySort(MediaKind.MOVIE))
     }
+
+    @Test fun forgettingThePinStartsOverWithTheAdultFilterBackOn() {
+        val (memory, store) = filled()
+        memory.values += mapOf(DeviceKeys.sources.name to "sealed", DeviceKeys.legacyProgress.name + "abc" to "{}")
+        val settings = memory.values.keys.filter { DeviceKeys.find(it)?.reset == false }
+        assertFalse(store.hideAdultCategories)
+        store.startOver()
+        assertEquals(settings.toSet(), memory.values.keys)
+        assertTrue(store.hideAdultCategories)
+        // Hidden categories stay hidden, and the TV's own settings stay.
+        assertEquals(setOf(CategoryVisibility.key(MediaKind.LIVE, "Haber")), store.hiddenCategories)
+        assertTrue(store.reducedMotion); assertEquals("Europe/Istanbul", store.guideZoneId)
+    }
 }
