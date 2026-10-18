@@ -1,5 +1,15 @@
 # Son devir notu
 
+## Codex · Vitrin üst etiketi / 0.14.52 · 18 Ekim 2026
+
+Kullanıcı “Yeni eklenen başlığı biraz daha küçük olsun” dedi. HomeScreen.kt hero-label fontSize 13→12 sp (D082); ortak KÜTÜPHANENDEN fallback'i de aynı stil. Ağırlık/renk/harf aralığı ve diğer metinler aynı. Değişenler: HomeScreen.kt, build.gradle.kts; D082, HOME_HERO/SCREENS, BACKLOG/STEPS, STATUS/HANDOFF; [QA](native-hero-label-52-qa.json), LATEST.md ve hero-label-0.14.52/hero.png. Figma/manifest yok.
+
+hero_review nihai diff'i salt okunur inceledi, bulgu yok. 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558 / tools/run-device-tests.sh --no-build HeroLayoutTest, 2/2. Yeni test yazılmadı. Normal görselde ortak etiketin KÜTÜPHANENDEN görünümü incelendi; YENİ EKLENEN slayt testinde geçer. Font ölçeği matrisi koşulmadı. Ham loglar work/hero-label-qa. Proje kontrolü/git diff --check geçti.
+
+Teslim: releases/NEXTV_TV_Design_Preview_0.14.52.apk + sha256, kod66, aynı imza/release/R8. SHA-256 237186f5ea5c4cce508307feb0b40b41919a7f91a85f38e0944e361c6a5bb86e. TV .51→52 install -r, firstInstallTime 2026-10-13 23:50:03 değişmedi, lastUpdateTime 2026-10-18 21:02:21. Kurulu APK çekilip hash eşleştirildi; TV uygulaması/gerçek yayın açılmadı. **5556 bu tur açılmadı ve .51/kod65'te kaldı**; yalnız tipografi değiştiğinden önceki gerçek kaynak açılış kontrolü tekrarlanmadı. 5558/Gradle kapalı; 5554'e dokunulmadı.
+
+Tam sonraki adım: ana checkout/main üzerinden STEPS S15a ve gap/overlay.md. Sonraki teslim en az 0.14.53/kod67; 5556 yükseltilecekse mevcut sürümü .51/kod65 olarak doğrula. Fiziksel görsel/akıcılık/TalkBack, Figma, İngilizce ve satış/fiyat kararları açık. Kullanıcı “yayına hazırla” demeden font matrisi koşma.
+
 ## Codex · Açıklama iki satır / 0.14.51 · 18 Ekim 2026
 
 Kullanıcının “Açıklama max 2 satır olsun” isteği D081 ile uygulandı. HomeScreen.kt HeroText açıklamasında tek satır kod değişikliği: maxLines if (largeText) 1 else 3 → 1 else 2. Ellipsis, büyük yazıdaki tek satır sınırı, başlık ve ayrıntı ekranı aynı. Ölçüm ve görünür slayt ortak HeroText kullandığı için tutarlı. D078/D079/D080 korunur.

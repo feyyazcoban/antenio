@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.52 · Daha küçük YENİ EKLENEN · 18 Ekim 2026
+
+Kullanıcı isteğiyle vitrin üst etiketi 13→12 sp (D082). Aynı stil KÜTÜPHANENDEN için de geçerli; içerik başlığı, iki satır açıklama, 420 dp yükseklik, tek İzle ve kaydırma aynı.
+
+Bağımsız salt okunur incelemede bulgu yok. 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558/betik üzerinden normal ölçekte mevcut HeroLayoutTest 2/2; görsel incelendi. Yeni test/font ölçeği matrisi yok. [QA](native-hero-label-52-qa.json), [görsel](../../design/reviews/LATEST.md).
+
+0.14.52-design-preview / kod 66 TV'ye install -r ile kuruldu; firstInstallTime aynı, kurulu APK hash eşleşti. Son güncelleme 21:02:21; SHA-256 237186f5ea5c4cce508307feb0b40b41919a7f91a85f38e0944e361c6a5bb86e. TV uygulaması/gerçek yayın açılmadı. 5556 açılmadı, .51/kod65'te; 5558/Gradle kapalı. Sırada S15a; sonraki paket en az .53/kod67. Fiziksel/Figma kabulü açık.
+
 ## 0.14.51 · Vitrin açıklaması iki satır · 18 Ekim 2026
 
 Kullanıcı isteğiyle vitrin açıklaması normal ölçekte üç yerine en fazla iki satır (D081); taşan sonu üç nokta. Büyük yazıdaki mevcut tek satır sınırı, 420 dp vitrin, tek İzle ve odak/kaydırma davranışları korunur. Normal görüntüde uzun açıklamanın iki satırda kesildiği görüldü.

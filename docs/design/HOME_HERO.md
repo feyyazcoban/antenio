@@ -1,5 +1,7 @@
 # Ana sayfa üst alanı
 
+**18 Ekim 2026 · 0.14.52 / D082:** Vitrin üst etiketi 13→12 sp; Medium/mint/1,6 sp harf aralığı/tek satır aynı. Ortak YENİ EKLENEN ve KÜTÜPHANENDEN etiketi için geçerli; içerik başlığı ve açıklama ölçüleri değişmez.
+
 **18 Ekim 2026 · 0.14.51 / D081:** Vitrin açıklaması normal ölçekte en fazla iki satır ve taşma sonu üç nokta. Büyük yazıdaki mevcut tek satır sınırı korunur. Hem gizli slayt ölçümü hem görünür metin aynı HeroText ile uygulanır; 420 dp yükseklik ve tek İzle değişmez.
 
 **18 Ekim 2026 · 0.14.50 / D080:** Vitrin 372→420 dp: aşağıya 48 dp daha geniş görsel alanı. Üst kenar ve metin ölçüleri aynı; alt hizalı metin/İzle aşağı taşınır. Normal 960×540 dp ekranda ilk raf başlığı ve kartların bir kısmı görünür; Aşağı yalnız kartı tamamlayacak kadar kaydırır. D079 tek düğme korunur.

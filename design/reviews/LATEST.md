@@ -1,5 +1,11 @@
 # Güncel görsel inceleme
 
+## 0.14.52 · Daha küçük üst etiket
+
+D082: YENİ EKLENEN / KÜTÜPHANENDEN ortak vitrin etiketi 13→12 sp. Diğer metinler aynı. Normal ölçekte sentetik görsel; font ölçeği matrisi yok. [QA](../../docs/project/native-hero-label-52-qa.json).
+
+![Daha küçük vitrin üst etiketi](hero-label-0.14.52/hero.png)
+
 ## 0.14.51 · Vitrin açıklaması iki satır
 
 D081: normal ölçekte açıklama en fazla iki satır; taşan sonu üç nokta. 420 dp vitrin ve tek İzle korunur. Normal ölçekte sentetik uzun açıklama ekranda incelendi; font matrisi yapılmadı. [QA](../../docs/project/native-hero-description-51-qa.json).

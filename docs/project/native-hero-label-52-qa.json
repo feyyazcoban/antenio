@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.52-design-preview",
+  "versionCode": 66,
+  "decision": "D082",
+  "change": "Hero kicker label fontSize 13 to 12 sp; shared by Newest and From your library. Other typography and behavior unchanged.",
+  "review": "Read-only hero_review confirmed final diff: hero label 13 to 12 sp; no actionable findings.",
+  "tests": {
+    "build": "release/debug/androidTest successful",
+    "unit": {
+      "tests": 354,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 37
+    },
+    "instrumentation": "2/2, emulator-5558 only via tools/run-device-tests.sh --no-build HeroLayoutTest, normal font only; existing tests unchanged",
+    "visual": "Normal screenshot inspected: shared hero kicker smaller and within bounds; two-line description, Watch, shelf preserved. Capture uses library fallback label; Newest label exercised by carousel test."
+  },
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "65",
+        "versionName": "0.14.51-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 20:57:57"
+      },
+      "after": {
+        "versionCode": "66",
+        "versionName": "0.14.52-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 21:02:21"
+      },
+      "sha256": "237186f5ea5c4cce508307feb0b40b41919a7f91a85f38e0944e361c6a5bb86e",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "designEmulator": "5556 stayed off at 0.14.51/code65; no data or upgrade logic changed",
+    "emulatorsAfter": "5558 stopped; 5556/5554 untouched; Gradle daemon stopped"
+  },
+  "limitations": [
+    "No font-scale matrix per user instruction",
+    "Figma unchanged",
+    "Physical visual acceptance remains open"
+  ],
+  "sha256": "237186f5ea5c4cce508307feb0b40b41919a7f91a85f38e0944e361c6a5bb86e",
+  "image": "design/reviews/hero-label-0.14.52/hero.png",
+  "logs": "work/hero-label-qa/device.log, device-full.log (ignored)"
+}

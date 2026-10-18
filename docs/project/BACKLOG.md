@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-019/020 · 0.14.52 / D082: kullanıcı isteğiyle YENİ EKLENEN üst etiketi 13→12 sp; ortak vitrin etiket stili güncellendi. Teslim/kanıt STATUS/HANDOFF'ta; genel kabul açık.
+
 BKL-019/020 · 0.14.51 / D081: kullanıcı isteğiyle vitrin açıklaması en fazla iki satır; taşan metin üç noktayla kesilir. Diğer ölçüler ve odak davranışı aynı. Teslim/kanıt STATUS/HANDOFF'ta; genel kabul açık.
 
 BKL-019/020 · 0.14.50 / D080: kullanıcının vitrini aşağı büyütme isteğiyle minimum yükseklik 372→420 dp. Tek İzle, ilk raf önizlemesi ve kısa aşağı geçişi korunur. Teslim/kanıt STATUS/HANDOFF'ta; genel görsel kabul açık.

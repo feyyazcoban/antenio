@@ -435,7 +435,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
         Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().heightIn(min = heroHeight)
             .padding(start = TvLayout.Gutter, end = TvLayout.Gutter, top = 28.dp, bottom = 22.dp), verticalArrangement = Arrangement.Bottom) {
             Text(stringResource(if (newest) R.string.hero_newest else R.string.hero_library), Modifier.testTag("hero-label"), color = Ink.Mint, fontFamily = Roboto,
-                fontWeight = FontWeight.Medium, fontSize = 13.sp, letterSpacing = 1.6.sp, maxLines = 1)
+                fontWeight = FontWeight.Medium, fontSize = 12.sp, letterSpacing = 1.6.sp, maxLines = 1)
             Spacer(Modifier.height(10.dp))
             // Every slide's text is laid out, unseen, in the same slot: the hero keeps the tallest slide's height,
             // so the shelves below never move as it turns.
