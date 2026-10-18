@@ -1,5 +1,17 @@
 # Proje durumu
 
+## 0.14.47 · Yeni oynatıcı TV'de · 18 Ekim 2026
+
+S14b (D072) native kontrol yenilemesi **46f4743** ile tamamlandı ve main'e fast-forward edildi. Yeni alt bilgi bloğu, simgeli kontroller, odaklanabilir sarma çubuğu (bekleyen hedef/tek uygulama/Geri iptali), gizli sarma önizlemesi ve canlı kanal çipleri var; D077 hız seçimi korundu. Bağımsız incelemedeki çubuk odağına özel OK/Geri ipucu düzeltildi. Önceki 0.14.46 hız ekliyordu; yeni kontrol tasarımı bu 0.14.47 teslimindedir.
+
+**Kullanıcının yeni çalışma talimatı:** yazı boyutu matrisi geliştirme sırasında koşulmayacak; "yayına hazırla" dendiğinde mağaza öncesine bırakılacak. WORKFLOW ve STEPS güncellendi. Bu talimattan önce bitmiş font koşuları tarihsel kanıt olarak korunur.
+
+Kontroller: 354 JVM sonucu (0 hata, 1 atlanan), lint 0 hata/37 uyarı; release/debug/androidTest derlemeleri. İpucu düzeltmesinden önce 57 cihaz kontrolü (24 kontrol/hız, 30 regresyon, 3 büyük yazı hata/canlı durumu) geçti; son düzeltmeden sonra ilgili odak/sarma vakaları toplam 6/6. Normal yazıdaki son çubuk ipucu görsel olarak da doğrulandı. İlk başarısızlıklar ve düzeltmeleri [QA](native-player-controls-47-qa.json) içinde açıkça kayıtlı. Testler yalnız 5558 ve test betiğiyle. `check_project.py` artık yalnız güncel Git dosyalarını tarar (72fc520); 17 ekran/401 değişken doğrulaması ve `git diff --check` geçti.
+
+Teslim: **0.14.47-design-preview / kod 61**, `releases/NEXTV_TV_Design_Preview_0.14.47.apk`. SHA-256 `d67222b483a00570aa1fcb579b8f2e1f7ae4908fbe844a4d2076bf7beb73b37e`. 5556'da 0.14.46 üstüne kurulum, açılış, Evim görünürlüğü ve çökme kaydı olmaması doğrulandı. TV'ye `install -r` saat 20:27'de başarılı; firstInstallTime `2026-10-13 23:50:03` değişmedi, kurulu APK çekilip hash eşleştirildi. TV'de uygulama/gerçek yayın açılmadı. 5556/5558 ve Gradle daemon kapalı; 5554'e dokunulmadı.
+
+Ana checkout/main güncel ve ürün dalı birleşti. Birleşmiş `codex/player-controls-s14b` ve `claude/app-ui-ux-audit-a78e98` dalları kapatıldı; eski geliştirme klasörü güncel kaynakla detached olarak korunur. Sırada **S15a kanal kapsamı/son ve önceki kanal verisi**, sonra S15b–S17. Sonraki teslim en az 0.14.48/kod 62. S14b fiziksel kumanda/ses/TalkBack ve Figma/görsel kabulü; S16'nın ek seçenekleri, İngilizce inceleme ve satış/fiyat kararları açık. BKL-031 in progress kalır.
+
 ## Main birleşmesi ve TV kurulumu · 18 Ekim 2026
 
 Kullanıcının isteğiyle güncel geliştirme dalının 45 commit'i main'e fast-forward ile alındı. Daha önce ff48b68 içinde uygulanıp düzeltilen S14 WIP geçmişi a87db7c ile birleştirildi; PlayerScreen çakışması incelenip test edilmiş 0.14.46 davranışı korundu. Birleşme ağacı 2bc7f54 ile aynı; uygulama ve cihaz testi betiği 7ef216a ile aynı. `wip/s14-review-fixes` birleştiği doğrulandıktan sonra silindi. Merge bekleyen dal kalmadı; ana checkout artık güncel.
