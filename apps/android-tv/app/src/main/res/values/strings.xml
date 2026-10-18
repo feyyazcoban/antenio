@@ -432,7 +432,7 @@
     <string name="playback_refused">The provider did not open the stream. Check your access to the source.</string>
     <string name="playback_unreachable">Could not connect to the stream. Check your internet connection.</string>
     <string name="playback_behind_live">The connection to the live stream was lost. Try reconnecting.</string>
-    <string name="playback_unsupported">This device can\'t decode the video or audio format of the stream.</string>
+    <string name="playback_decoder_failed">This device can\'t decode the video or audio format of the stream. In Settings > Player, you can try another decoder or audio output.</string>
     <string name="playback_unreadable">The format of the stream could not be read. You can try another title.</string>
     <string name="playback_failed">The stream could not be played. Try again or choose another title.</string>
     <string name="playback_timeout">The stream took too long to connect. You can try again.</string>
@@ -464,10 +464,17 @@
     <string name="episode_list_changed">The episode list changed. Choose an episode from the list to continue.</string>
 
     <!-- Settings -->
-    <string name="settings_section_appearance">Appearance and sound</string>
+    <!-- The sections the main page lists, each with what it holds (plan decision 4a-8). -->
+    <string name="settings_section_general">General and language</string>
+    <string name="settings_section_general_note">Language, motion and startup sound.</string>
     <string name="settings_section_sources">Sources</string>
-    <string name="settings_section_content">Content</string>
-    <string name="settings_section_watching">Playback and app</string>
+    <string name="settings_section_content">Content and parental controls</string>
+    <string name="settings_section_content_note">The adult filter, categories and the parental PIN.</string>
+    <string name="settings_section_player">Player</string>
+    <string name="settings_section_player_note">Subtitles, controls, buffer, decoder and audio output.</string>
+    <string name="settings_section_library">Library</string>
+    <string name="settings_section_library_note">Watch history and watch positions.</string>
+    <string name="settings_section_about">About</string>
     <string name="settings_clear_history_question">Clear history?</string>
     <string name="settings_about">About the app</string>
     <string name="settings_categories">Categories</string>
@@ -507,6 +514,69 @@
     <string name="settings_remove_confirm">The source %1$s, its favorites and its watch history will be removed from this device.</string>
     <string name="settings_clear_history_confirm">Recent channels and watch positions in all sources will be removed from this device. Your favorites will be kept.</string>
     <string name="settings_clear_history">Clear history</string>
+
+    <!-- Settings → Player (playback.md §7). The settings change how this app plays a stream, nothing else. -->
+    <string name="settings_subtitles">Subtitle appearance</string>
+    <string name="settings_subtitle_source">Settings in use</string>
+    <string name="settings_subtitle_system">Android setting</string>
+    <string name="settings_subtitle_system_note">Uses Android\'s caption preferences.</string>
+    <string name="settings_subtitle_app">NEXTV setting</string>
+    <string name="settings_subtitle_app_note">Uses the size, background and color below.</string>
+    <string name="settings_subtitle_size">Size</string>
+    <string name="settings_subtitle_small">Small</string>
+    <string name="settings_subtitle_normal">Normal</string>
+    <string name="settings_subtitle_large">Large</string>
+    <string name="settings_subtitle_xlarge">Extra large</string>
+    <string name="settings_subtitle_background">Background</string>
+    <string name="settings_subtitle_background_none">None (shadowed)</string>
+    <string name="settings_subtitle_background_semi">Semi-transparent</string>
+    <string name="settings_subtitle_background_solid">Opaque</string>
+    <string name="settings_subtitle_color">Color</string>
+    <string name="settings_subtitle_white">White</string>
+    <string name="settings_subtitle_yellow">Yellow</string>
+    <string name="settings_subtitle_system_hint">Choosing a size, background or color switches to the NEXTV setting.</string>
+    <string name="settings_subtitle_app_hint">With the NEXTV setting, the stream\'s own subtitle styling isn\'t used.</string>
+    <string name="settings_osd_timeout">Hide controls after</string>
+    <string name="settings_osd_timeout_note">If you don\'t press a key, the player controls hide after this time. They stay while TalkBack is on.</string>
+    <plurals name="settings_osd_seconds">
+        <item quantity="one">%1$s second</item>
+        <item quantity="other">%1$s seconds</item>
+    </plurals>
+    <string name="settings_osd_never">Never</string>
+    <string name="settings_osd_never_note">The controls stay until you press Back.</string>
+    <string name="settings_panel_opacity">Player panels</string>
+    <string name="settings_panel_opacity_note">How much of the picture shows behind the player\'s notes and panels.</string>
+    <string name="settings_panel_opaque">Opaque</string>
+    <string name="settings_panel_opaque_note">The picture doesn\'t show behind them.</string>
+    <string name="settings_panel_translucent">Semi-transparent</string>
+    <string name="settings_panel_translucent_note">A little of the picture shows through.</string>
+    <string name="settings_panel_sheer">Transparent</string>
+    <string name="settings_panel_sheer_note">More of the picture shows through; the text stays readable.</string>
+    <string name="settings_player_next_stream">These settings apply from the next stream you open.</string>
+    <string name="settings_frame_rate">Match frame rate</string>
+    <string name="settings_frame_rate_off">Off</string>
+    <string name="settings_frame_rate_off_note">The screen\'s refresh rate never changes.</string>
+    <string name="settings_frame_rate_seamless">Only when seamless</string>
+    <string name="settings_frame_rate_seamless_note">The screen switches to the stream\'s frame rate when it can without interrupting the picture. Recommended.</string>
+    <string name="settings_buffer">Buffer</string>
+    <string name="settings_buffer_normal">Normal</string>
+    <string name="settings_buffer_normal_note">Streams open fastest.</string>
+    <string name="settings_buffer_large">Large</string>
+    <string name="settings_buffer_large_note">Opens a little slower; rides out short connection drops better.</string>
+    <string name="settings_buffer_max">Extra large</string>
+    <string name="settings_buffer_max_note">Opens a few seconds slower; for weak connections.</string>
+    <string name="settings_decoder">Decoder</string>
+    <string name="settings_decoder_auto">Automatic</string>
+    <string name="settings_decoder_auto_note">Uses the hardware decoder; if it can\'t open the stream, another decoder on the device is tried.</string>
+    <string name="settings_decoder_software">Software first</string>
+    <string name="settings_decoder_software_note">Try this if the picture is corrupted. It may stutter at high resolutions.</string>
+    <string name="settings_audio_output">Audio output</string>
+    <string name="settings_audio_auto">Automatic</string>
+    <string name="settings_audio_auto_note">Dolby and DTS audio is sent as it is when your sound system supports it.</string>
+    <string name="settings_audio_pcm">Decode on device</string>
+    <string name="settings_audio_pcm_note">Try this if there\'s no sound or it cuts out. Formats the device can\'t decode show as unsupported.</string>
+    <string name="settings_tunneling">Tunneled playback (experimental)</string>
+    <string name="settings_tunneling_note">Can improve picture and sound sync on some devices. Turn it off if you have problems.</string>
     <string name="settings_categories_note">Categories you hide don\'t appear on Home, in the library, in Search or in the guide. Categories you lock stay visible; what is inside opens with the PIN. Your source doesn\'t change.</string>
     <plurals name="settings_kind_categories">
         <item quantity="one">%1$s category</item>
@@ -540,15 +610,15 @@
     <!-- What TalkBack reads for a stepper button: the setting's name, then the button (Decrease, Increase, Reset). -->
     <string name="settings_stepper_button">%1$s, %2$s</string>
     <!--
-        Settings → Dil / Language. The same in every language, so it is found whatever language is on screen; each
-        language is named in itself.
+        Settings → General and language → Dil / Language. The same in every language, so it is found whatever language
+        is on screen; each language is named in itself.
     -->
     <string name="settings_language" translatable="false">Dil / Language</string>
     <string name="language_system" translatable="false">Sistem dili / System language</string>
     <string name="language_turkish" translatable="false">Türkçe</string>
     <string name="language_english" translatable="false">English</string>
 
-    <!-- Parental controls (Settings → Content). Neutral words only: the filter is shown or hidden, never promoted. -->
+    <!-- Parental controls (Settings → Content and parental controls). Neutral words only: the filter is shown or hidden, never promoted. -->
     <string name="parental_title">Parental controls</string>
     <string name="parental_row_off">Create a PIN; lock categories, channels, titles and sources, and protect the adult filter.</string>
     <string name="parental_row_on">PIN on. Locked titles, the adult filter and category settings need the PIN.</string>
@@ -696,7 +766,7 @@
     <string name="recovery_reset_accounts">All source accounts and lists on this device will be removed.</string>
     <string name="recovery_reset_personal">The poster cache, favorites and watch history will be removed too. This can\'t be undone.</string>
     <string name="recovery_reset_credentials">To add your sources again, you will need your connection or account details.</string>
-    <string name="recovery_reset_kept">Your provider account and subscription are not affected. Your sound, motion and language preferences are kept.</string>
+    <string name="recovery_reset_kept">Your provider account and subscription are not affected. Your sound, motion, language and player preferences are kept.</string>
     <string name="recovery_reset_confirm">Reset all sources</string>
 
     <!-- Source operations and the launch cover -->

@@ -3,6 +3,7 @@ package dev.iptvplayer.tv
 import android.graphics.Bitmap
 import android.view.KeyEvent
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -14,8 +15,9 @@ import org.junit.Assert.*
 import org.junit.runner.RunWith
 
 /**
- * The Settings page stack (S04): Back leaves one page and focus returns to the row that opened it, at the device's
- * font scale (run at 1.0, 1.5 and 2.0). Isolated synthetic catalog; never run state-clearing tests on a user's television.
+ * The Settings page stack (S04) and its two levels (S14): the main page lists the sections, each a page of its own;
+ * Back leaves one page and focus returns to the row that opened it, at the device's font scale (run at 1.0, 1.5 and
+ * 2.0). Isolated synthetic catalog; never run state-clearing tests on a user's television.
  */
 @RunWith(AndroidJUnit4::class)
 class SettingsFrameworkTest {
@@ -67,7 +69,14 @@ class SettingsFrameworkTest {
         ui.onNodeWithTag("nav:Ayarlar").performSemanticsAction(SemanticsActions.RequestFocus)
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         // A platform Dialog acquires window focus independently of Compose's idle clock.
-        ui.waitUntil(5_000) { ui.onAllNodes(hasText("Hareketi azalt") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(5_000) { ui.onAllNodes(hasText("Genel ve dil") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
+    }
+
+    /** The section [label] from the main page, as OK on its row opens it. */
+    private fun openSection(label: String) {
+        row(label).performSemanticsAction(SemanticsActions.RequestFocus)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        title(label)
     }
 
     /** The focused row lies wholly inside the panel's viewport, whatever the font scale. */
@@ -86,10 +95,48 @@ class SettingsFrameworkTest {
         }
     }
 
+    @Test fun theMainPageListsTheSectionsAndEveryRowIsInOne() {
+        openSettings()
+        title("Ayarlar")
+        ui.onNodeWithTag("settings-title").assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+        // Each section with the rows it took from the one list before (plan decision 4a-8).
+        val sections = listOf(
+            "Genel ve dil" to listOf("Hareketi azalt", "Dil / Language", "Açılış sesi"),
+            "Kaynaklar" to listOf("Kaynakları yönet", "Kataloğu yenile", "Kaynağı düzenle", "Kaynağı kaldır"),
+            "İçerik ve ebeveyn denetimi" to listOf("Yetişkin kategorilerini gizle", "Kategorileri yönet", "Ebeveyn denetimi"),
+            "Oynatıcı" to listOf("Otomatik sonraki bölüm", "Altyazı görünümü", "Kontrollerin kapanma süresi", "Oynatıcı panelleri",
+                "Kare hızı eşleştirme", "Arabellek", "Kod çözücü", "Ses çıkışı", "Tünelli oynatma (deneysel)"),
+            "Kütüphane" to listOf("İzleme geçmişini temizle"))
+        (sections.map { it.first } + "Hakkında").forEachIndexed { index, label ->
+            if (index > 0) key(KeyEvent.KEYCODE_DPAD_DOWN)
+            row(label).assertIsFocused()
+            assertFocusedRowReadable()
+        }
+        shot("sections-$scale")
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        title("Uygulama hakkında")
+        key(KeyEvent.KEYCODE_BACK)
+        row("Hakkında").assertIsFocused()
+        sections.forEach { (section, rows) ->
+            openSection(section)
+            // The section starts on its first row and walks its rows in order with the remote.
+            rows.forEachIndexed { index, label ->
+                if (index > 0) key(KeyEvent.KEYCODE_DPAD_DOWN)
+                row(label).assertIsFocused()
+                assertFocusedRowReadable()
+            }
+            key(KeyEvent.KEYCODE_BACK)
+            title("Ayarlar")
+            row(section).assertIsFocused()
+        }
+        key(KeyEvent.KEYCODE_BACK)
+        ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
+    }
+
     @Test fun backLeavesOnePageAndFocusReturnsToTheRowThatOpenedIt() {
         openSettings()
+        openSection("İçerik ve ebeveyn denetimi")
         row("Kategorileri yönet").performSemanticsAction(SemanticsActions.RequestFocus)
-        ui.onNodeWithTag("settings-section").assertTextEquals("İçerik")
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         title("Kategoriler")
         ui.onNodeWithTag("category-kind:LIVE").assertIsFocused()
@@ -105,14 +152,20 @@ class SettingsFrameworkTest {
         ui.onNodeWithTag("category-kind:MOVIE").assertIsFocused()
         assertFocusedRowReadable()
         key(KeyEvent.KEYCODE_BACK)
-        title("Ayarlar")
+        title("İçerik ve ebeveyn denetimi")
         row("Kategorileri yönet").assertIsFocused()
-        ui.onNodeWithTag("settings-section").assertTextEquals("İçerik")
         assertFocusedRowReadable()
         shot("categories-return-$scale")
         // Opened again in the same visit, Kategoriler starts on the section whose list was open.
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.onNodeWithTag("category-kind:MOVIE").assertIsFocused()
+        key(KeyEvent.KEYCODE_BACK)
+        key(KeyEvent.KEYCODE_BACK)
+        title("Ayarlar")
+        row("İçerik ve ebeveyn denetimi").assertIsFocused()
+        // The section, opened again, starts on the row it was left on.
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        row("Kategorileri yönet").assertIsFocused()
         key(KeyEvent.KEYCODE_BACK)
         key(KeyEvent.KEYCODE_BACK)
         ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
@@ -122,16 +175,19 @@ class SettingsFrameworkTest {
     @Test fun cancellingTheHistoryQuestionReturnsToItsRowAndKeepsHistory() {
         val history = model.state.value.history
         openSettings()
-        row("İzleme geçmişini temizle").performSemanticsAction(SemanticsActions.RequestFocus)
+        openSection("Kütüphane")
+        row("İzleme geçmişini temizle").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         title("Geçmişi temizle?")
         row("Vazgeç").assertIsFocused()
         shot("history-question-$scale")
         key(KeyEvent.KEYCODE_DPAD_CENTER)
-        title("Ayarlar")
+        title("Kütüphane")
         row("İzleme geçmişini temizle").assertIsFocused()
         assertFocusedRowReadable()
         assertEquals(history, model.state.value.history)
+        key(KeyEvent.KEYCODE_BACK)
+        row("Kütüphane").assertIsFocused()
         key(KeyEvent.KEYCODE_BACK)
         ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
     }

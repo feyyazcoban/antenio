@@ -256,6 +256,9 @@ class EpisodeAutoplayFlowTest {
 
     @Test fun autoplaySettingTogglesWithRemoteAndSurvivesRecreation() {
         click("Ayarlar")
+        // The player's section holds it.
+        ui.onNode(hasText("Oynatıcı") and hasClickAction() and hasAnyAncestor(hasTestTag("settings-panel")))
+            .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
         ui.onNode(hasText("Otomatik sonraki bölüm") and hasClickAction()).performScrollTo()
             .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
         key(KeyEvent.KEYCODE_DPAD_CENTER)

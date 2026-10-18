@@ -16,6 +16,8 @@ internal fun resetFixtureSources(ui: AndroidComposeTestRule<ActivityScenarioRule
             forgetSource()
             // A Sırala choice tried by hand on this emulator would reorder the fixtures' sections.
             librarySort(MediaKind.MOVIE, LibrarySort.DEFAULT); librarySort(MediaKind.SERIES, LibrarySort.DEFAULT)
+            // Oynatıcı settings stay with the TV as well; "Hiçbir zaman" left from a run would keep every player's controls up.
+            playback = PlaybackPreferences()
         }
         CatalogStore(ui.activity).clear(); EpgStore(ui.activity).clear()
     } }

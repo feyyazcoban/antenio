@@ -214,6 +214,16 @@ class DeviceStore internal constructor(private val prefs: SharedPreferences) {
     var subtitlesOff: Boolean
         get() = prefs.getBoolean(DeviceKeys.subtitlesOff.name, true)
         set(value) { prefs.edit().putBoolean(DeviceKeys.subtitlesOff.name, value).apply() }
+    /** Settings → Oynatıcı, every field written in one go. */
+    var playback: PlaybackPreferences
+        get() { val stored = prefs.all; return PlaybackPreferencesCodec.decode { stored[DeviceKeys.playback.name + it] } }
+        set(value) {
+            prefs.edit().apply {
+                PlaybackPreferencesCodec.encode(value).forEach { (field, stored) ->
+                    if (stored is Boolean) putBoolean(DeviceKeys.playback.name + field, stored) else putString(DeviceKeys.playback.name + field, stored.toString())
+                }
+            }.apply()
+        }
     /** The language tag chosen in Settings, "" for the TV's (LocaleController). */
     var appLanguage: String
         get() = prefs.getString(DeviceKeys.appLanguage.name, "").orEmpty()

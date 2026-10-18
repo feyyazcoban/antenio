@@ -70,6 +70,9 @@ class PilotFlowTest {
     }
     private fun click(text: String) = ui.onNode((hasText(text) or hasContentDescription(text)) and hasClickAction()).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
     /** Side menu items by tag: section names such as Favoriler also appear in the category column. */
+    /** A section of Ayarlar from its main page. */
+    private fun section(label: String) = ui.onNode(hasText(label) and hasClickAction() and hasAnyAncestor(hasTestTag("settings-panel")))
+        .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
     private fun nav(label: String) = ui.onNodeWithTag("nav:$label").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
     private fun back() { InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK); ui.waitForIdle() }
     private fun ready() {
@@ -156,7 +159,7 @@ class PilotFlowTest {
         ui.onNodeWithText("Kütüphanen için yer hazır").assertExists()
         ui.onNodeWithTag("nav:Ana Sayfa").assertIsFocused()
         ui.onNodeWithTag("nav-label:Ana Sayfa", useUnmergedTree = true).assertExists()
-        click("Ayarlar"); click("Kaynağı kaldır"); click("Kaynağı kaldır")
+        click("Ayarlar"); section("Kaynaklar"); click("Kaynağı kaldır"); click("Kaynağı kaldır")
         ui.waitUntil(10_000) { model.state.value.route == Route.SETUP }
         assertNull(DeviceStore(ui.activity).loadSources().sources.singleOrNull())
     }
@@ -222,7 +225,7 @@ class PilotFlowTest {
         assertTrue(model.state.value.playing!!.startMs >= 10_000)
         back(); back(); back()
         ui.onNodeWithTag("continue:${model.fixtureKey("series:4")}").assertIsFocused()
-        click("Ayarlar")
+        click("Ayarlar"); section("Kütüphane")
         ui.onNodeWithText("İzleme geçmişini temizle").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
         click("Geçmişi temizle")
         ui.waitUntil(5_000) { model.state.value.history.isEmpty() }

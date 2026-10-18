@@ -37,10 +37,14 @@ import dev.iptvplayer.tv.ui.resolve
 import dev.iptvplayer.tv.ui.shownCategory
 import dev.iptvplayer.tv.ui.updatedTime
 
-/** The main page's sections; the one holding focus names itself above the list. */
+/**
+ * The sections the main page lists, each a page of its own (plan decision 4a-8). Rehber, Yedekleme ve ana ekran,
+ * Kayıtlar and NEXTV Plus join once they have settings.
+ */
 internal enum class SectionId(@StringRes val label: Int) {
-    APPEARANCE(R.string.settings_section_appearance), SOURCES(R.string.settings_section_sources),
-    CONTENT(R.string.settings_section_content), WATCHING(R.string.settings_section_watching)
+    GENERAL(R.string.settings_section_general), SOURCES(R.string.settings_section_sources),
+    CONTENT(R.string.settings_section_content), PLAYER(R.string.settings_section_player),
+    LIBRARY(R.string.settings_section_library), ABOUT(R.string.settings_section_about)
 }
 
 /** What a page asks before it opens; the panel's [PageGate] decides. */
@@ -83,6 +87,10 @@ internal data class SettingsPageSpec(
 internal val parentalNotice: (TvState) -> UiText? = { it.parental.notice }
 
 internal val mainPage = SettingsRoute.Page("main")
+private val generalPage = SettingsRoute.Page("general")
+private val sourcesPage = SettingsRoute.Page("sources")
+private val contentPage = SettingsRoute.Page("content")
+private val libraryPage = SettingsRoute.Page("library")
 private val removeSourcePage = SettingsRoute.Page("remove-source")
 private val clearHistoryPage = SettingsRoute.Page("clear-history")
 private val aboutPage = SettingsRoute.Page("about")
@@ -92,26 +100,30 @@ private fun categoryListPage(kind: MediaKind) = SettingsRoute.Page("category-lis
 
 /** Every page of the panel by id. A ChoicePage is not among them: its ChoiceRow carries the options. */
 internal val settingsPageList: List<SettingsPageSpec> = listOf(
-    SettingsPageSpec(mainPage.id, UiText.Res(R.string.settings_title), section = null) { MainList() },
+    SettingsPageSpec(mainPage.id, UiText.Res(R.string.settings_title), section = null) { Sections() },
+    SettingsPageSpec(generalPage.id, UiText.Res(SectionId.GENERAL.label), SectionId.GENERAL) { General() },
+    SettingsPageSpec(sourcesPage.id, UiText.Res(SectionId.SOURCES.label), SectionId.SOURCES) { Sources() },
+    SettingsPageSpec(contentPage.id, UiText.Res(SectionId.CONTENT.label), SectionId.CONTENT) { Content() },
+    SettingsPageSpec(libraryPage.id, UiText.Res(SectionId.LIBRARY.label), SectionId.LIBRARY) { Library() },
     // Kaldır asks for the PIN that guards the sources (pin.md §3.8), over this page.
     SettingsPageSpec(removeSourcePage.id, UiText.Res(R.string.remove_source_question), SectionId.SOURCES, body = PageBody.SHORT_LIST) {
         Confirmation(stringResource(R.string.settings_remove_confirm, s.source?.name.orEmpty()), stringResource(R.string.remove_source)) {
             model.removeSource()
         }
     },
-    SettingsPageSpec(clearHistoryPage.id, UiText.Res(R.string.settings_clear_history_question), SectionId.WATCHING, body = PageBody.SHORT_LIST) {
+    SettingsPageSpec(clearHistoryPage.id, UiText.Res(R.string.settings_clear_history_question), SectionId.LIBRARY, body = PageBody.SHORT_LIST) {
         Confirmation(stringResource(R.string.settings_clear_history_confirm), stringResource(R.string.settings_clear_history)) {
             model.clearHistory(); false
         }
     },
-    SettingsPageSpec(aboutPage.id, UiText.Res(R.string.settings_about), SectionId.WATCHING, body = PageBody.READING) { About() },
+    SettingsPageSpec(aboutPage.id, UiText.Res(R.string.settings_about), SectionId.ABOUT, body = PageBody.READING) { About() },
     // Its lists name the adult categories and can show them again (pin.md §2).
     SettingsPageSpec(categoriesPage.id, UiText.Res(R.string.settings_categories), SectionId.CONTENT,
         PageGuard.Pin(AdminReason.CATEGORIES), PageBody.SHORT_LIST) { CategoryKinds() },
 ) + categoryKinds.map { kind ->
     SettingsPageSpec(categoryListPage(kind).id, UiText.Res(kind.label), SectionId.CONTENT, body = PageBody.LAZY,
         notice = parentalNotice) { CategoryList(kind) }
-} + parentalPageList
+} + parentalPageList + playerPageList
 
 internal val settingsPages: Map<String, SettingsPageSpec> = settingsPageList.associateBy { it.id }
 
@@ -124,10 +136,25 @@ private fun readIn(text: String, languages: List<String>): AnnotatedString = bui
     }
 }
 
-@Composable private fun SettingsScope.MainList() {
-    val openPin = rememberPinOpener()
+/** What the sources hold: their number and the items the library shows. */
+@Composable private fun SettingsScope.sourcesSummary(): String =
+    stringResource(R.string.text_pair, pluralStringResource(R.plurals.settings_sources, s.sources.size, s.sources.size.toString()),
+        pluralStringResource(R.plurals.settings_visible_items, visibleItems, visibleItems.toString()))
+
+/** One row per section, each saying what it holds; Back from a section returns to its row. */
+@Composable private fun SettingsScope.Sections() {
+    PageRow(generalPage.id, stringResource(SectionId.GENERAL.label), stringResource(R.string.settings_section_general_note), generalPage)
+    PageRow(sourcesPage.id, stringResource(SectionId.SOURCES.label), sourcesSummary(), sourcesPage)
+    PageRow(contentPage.id, stringResource(SectionId.CONTENT.label), stringResource(R.string.settings_section_content_note), contentPage)
+    PageRow(playerPage.id, stringResource(SectionId.PLAYER.label), stringResource(R.string.settings_section_player_note), playerPage)
+    PageRow(libraryPage.id, stringResource(SectionId.LIBRARY.label), stringResource(R.string.settings_section_library_note), libraryPage)
+    PageRow(aboutPage.id, stringResource(SectionId.ABOUT.label), stringResource(R.string.settings_about_note), aboutPage)
+}
+
+/** Genel ve dil: motion, the app's language and the startup sound. */
+@Composable private fun SettingsScope.General() {
     ToggleRow("reduced-motion", stringResource(R.string.settings_reduced_motion), stringResource(R.string.settings_reduced_motion_note),
-        s.reducedMotion, section = SectionId.APPEARANCE) { model.reducedMotion() }
+        s.reducedMotion) { model.reducedMotion() }
     // Named in both languages and each language in itself, so it is found whatever language is on screen (S13). A new
     // language recreates the activity; the panel comes back on this row (Settings).
     val activity = LocalActivity.current
@@ -137,17 +164,23 @@ private fun readIn(text: String, languages: List<String>): AnnotatedString = bui
     val label = stringResource(R.string.settings_language)
     val options = languages.map { stringResource(it.label) }
     // TalkBack reads each language's name in that language, and "Dil / Language" in Turkish, then English.
-    ChoiceRow("language", label, options, languages.indexOf(chosen), section = SectionId.APPEARANCE,
-        labelText = readIn(label, listOf("tr", "en")), optionTexts = options.zip(languages) { option, it -> readIn(option, it.labelLanguages) }) { picked ->
+    ChoiceRow("language", label, options, languages.indexOf(chosen), labelText = readIn(label, listOf("tr", "en")),
+        optionTexts = options.zip(languages) { option, it -> readIn(option, it.labelLanguages) }) { picked ->
         activity?.let { LocaleController.choose(it, languages[picked]) }
     }
     ToggleRow("startup-sound", stringResource(R.string.settings_startup_sound), stringResource(R.string.settings_startup_sound_note),
-        s.startupSound, section = SectionId.APPEARANCE) { model.startupSound() }
-    Spacer(Modifier.height(6.dp))
-    NoteRow(stringResource(R.string.text_pair, pluralStringResource(R.plurals.settings_sources, s.sources.size, s.sources.size.toString()),
-        pluralStringResource(R.plurals.settings_visible_items, visibleItems, visibleItems.toString())))
-    // Source management asks for its PIN over the panel first (pin.md §3.8); the panel closes once the sources open.
-    ActionRow("manage-sources", stringResource(R.string.manage_sources), stringResource(R.string.settings_manage_sources_note), section = SectionId.SOURCES) {
+        s.startupSound) { model.startupSound() }
+}
+
+/**
+ * Kaynaklar: what the sources hold, their management, the catalogue refresh and, with a single source, editing and
+ * removing it. Source management asks for its PIN over the panel first (pin.md §3.8); the panel closes once the
+ * sources open.
+ */
+@Composable private fun SettingsScope.Sources() {
+    val openPin = rememberPinOpener()
+    NoteRow(sourcesSummary())
+    ActionRow("manage-sources", stringResource(R.string.manage_sources), stringResource(R.string.settings_manage_sources_note)) {
         if (model.manageSources()) openPin { rowEntry("manage-sources") } else dismiss()
     }
     val refreshNotice = s.catalogNotice?.takeIf { it.operation == CatalogOperation.REFRESH }
@@ -157,37 +190,41 @@ private fun readIn(text: String, languages: List<String>): AnnotatedString = bui
             modifier = Modifier.padding(top = 4.dp))
         ActionRow("refresh", stringResource(R.string.settings_refresh), if (s.refreshing) stringResource(R.string.settings_refreshing)
             else refreshNotice?.message?.resolve() ?: stringResource(R.string.settings_refresh_note),
-            section = SectionId.SOURCES, busy = s.refreshing, attention = refreshNotice?.needsAttention == true) { model.refresh() }
+            busy = s.refreshing, attention = refreshNotice?.needsAttention == true) { model.refresh() }
     }
     s.catalogNotice?.takeIf { it.operation != CatalogOperation.REFRESH }?.let { NoteRow(it.message.resolve(), error = it.needsAttention) }
-    if (s.sources.size == 1) ActionRow("edit-source", stringResource(R.string.settings_edit_source), stringResource(R.string.settings_edit_source_note),
-        section = SectionId.SOURCES) { if (model.editSource()) openPin { rowEntry("edit-source") } else dismiss() }
+    if (s.sources.size == 1) ActionRow("edit-source", stringResource(R.string.settings_edit_source), stringResource(R.string.settings_edit_source_note)) {
+        if (model.editSource()) openPin { rowEntry("edit-source") } else dismiss()
+    }
     if (s.sources.size == 1) PageRow("remove-source", stringResource(R.string.remove_source), stringResource(R.string.settings_remove_source_note),
-        removeSourcePage, section = SectionId.SOURCES)
-    Spacer(Modifier.height(6.dp))
+        removeSourcePage)
+}
+
+/** İçerik ve ebeveyn denetimi: the adult filter, the categories and the parental PIN. */
+@Composable private fun SettingsScope.Content() {
+    val openPin = rememberPinOpener()
     // D068: what the screens show. Turning it on is free; off asks for the PIN while one is set, and without one first
     // offers to make one (pin.md §3.3).
     ToggleRow("hide-adult", stringResource(R.string.settings_hide_adult), stringResource(if (s.parental.guarded)
-        R.string.settings_hide_adult_note_pin else R.string.settings_hide_adult_note),
-        s.hideAdultCategories, section = SectionId.CONTENT) {
+        R.string.settings_hide_adult_note_pin else R.string.settings_hide_adult_note), s.hideAdultCategories) {
         if (s.hideAdultCategories && s.parental.status == ParentalStatus.OFF) open(adultPinOfferPage, "hide-adult")
         else if (model.setHideAdult(!s.hideAdultCategories)) openPin { rowEntry("hide-adult") }
     }
     val hiddenCount = s.hiddenCategories.size
     PageRow("manage-categories", stringResource(R.string.settings_manage_categories), if (hiddenCount > 0)
         pluralStringResource(R.plurals.settings_manage_categories_hidden, hiddenCount, hiddenCount.toString())
-        else stringResource(R.string.settings_manage_categories_note), categoriesPage, section = SectionId.CONTENT)
+        else stringResource(R.string.settings_manage_categories_note), categoriesPage)
     PageRow("parental", stringResource(R.string.parental_title), stringResource(when (s.parental.status) {
         ParentalStatus.ON -> if (s.parental.sourcesNeedPin) R.string.parental_row_on_sources else R.string.parental_row_on
         ParentalStatus.UNAVAILABLE -> R.string.parental_row_unavailable
         else -> R.string.parental_row_off
-    }), parentalPage, section = SectionId.CONTENT)
-    Spacer(Modifier.height(6.dp))
-    ToggleRow("auto-next", stringResource(R.string.settings_auto_next), stringResource(R.string.settings_auto_next_note),
-        s.autoNextEpisode, section = SectionId.WATCHING) { model.autoNextEpisode() }
+    }), parentalPage)
+}
+
+/** Kütüphane: the watch history, cleared after a question. */
+@Composable private fun SettingsScope.Library() {
     PageRow("watch-history", stringResource(R.string.settings_watch_history), stringResource(R.string.settings_watch_history_note),
-        clearHistoryPage, section = SectionId.WATCHING)
-    PageRow("about", stringResource(R.string.settings_about), stringResource(R.string.settings_about_note), aboutPage, section = SectionId.WATCHING)
+        clearHistoryPage)
 }
 
 /**

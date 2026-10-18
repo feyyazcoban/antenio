@@ -128,11 +128,18 @@ class ParentalFlowTest {
     /** A PIN check or save: seconds of KDF on an emulator. */
     private fun waitFor(condition: () -> Boolean) = ui.waitUntil(60_000, condition)
 
-    private fun openSettings() {
+    /** The section of Ayarlar that holds the adult filter, Kategorileri yönet and Ebeveyn denetimi. */
+    private val contentSection = "İçerik ve ebeveyn denetimi"
+
+    /** Ayarlar on its section [section], focus on the section's first row. */
+    private fun openSettings(section: String = contentSection) {
         ui.onNodeWithTag("nav:Ayarlar").performSemanticsAction(SemanticsActions.RequestFocus)
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         // A platform Dialog acquires window focus independently of Compose's idle clock.
-        ui.waitUntil(5_000) { ui.onAllNodes(hasText("Hareketi azalt") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(5_000) { ui.onAllNodes(hasText("Genel ve dil") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        row(section).performSemanticsAction(SemanticsActions.RequestFocus)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        title(section)
     }
 
     /** Opens the pad with OK on the focused row; focus starts on its 1 key. */
@@ -179,9 +186,9 @@ class ParentalFlowTest {
     private fun rowFocused(label: String) = ui.onAllNodes(hasText(label) and hasClickAction() and isFocused() and
         hasAnyAncestor(hasTestTag("settings-panel"))).fetchSemanticsNodes().isNotEmpty()
 
-    /** Kaynaklar through Ayarlar → Kaynakları yönet, with the PIN that guards them. */
+    /** Kaynaklar through Ayarlar → Kaynaklar → Kaynakları yönet, with the PIN that guards them. */
     private fun openSourcesWithPin() {
-        openSettings()
+        openSettings("Kaynaklar")
         row("Kaynakları yönet").performSemanticsAction(SemanticsActions.RequestFocus)
         openPad()
         digits("2580")
@@ -212,7 +219,6 @@ class ParentalFlowTest {
     @Test fun aPinIsMadeChangedAndRemovedWithTheRemote() {
         openSettings()
         row("Ebeveyn denetimi").performSemanticsAction(SemanticsActions.RequestFocus)
-        ui.onNodeWithTag("settings-section").assertTextEquals("İçerik")
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         title("Ebeveyn denetimi")
         row("PIN oluştur").assertIsFocused()
@@ -282,7 +288,7 @@ class ParentalFlowTest {
         assertEquals(ProtectionRead.Unconfigured, ProtectionStore(context).read())
         assertTrue(model.state.value.hideAdultCategories)
         key(KeyEvent.KEYCODE_BACK)
-        title("Ayarlar")
+        title(contentSection)
         row("Ebeveyn denetimi").assertIsFocused()
     }
 
@@ -297,7 +303,7 @@ class ParentalFlowTest {
         key(KeyEvent.KEYCODE_DPAD_DOWN); key(KeyEvent.KEYCODE_DPAD_DOWN)
         row("Vazgeç").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_CENTER)
-        title("Ayarlar")
+        title(contentSection)
         filter.assertIsFocused().assertIsOn()
         // PIN oluştur: the filter goes off once the new PIN is saved.
         key(KeyEvent.KEYCODE_DPAD_CENTER)
@@ -306,7 +312,7 @@ class ParentalFlowTest {
         digits("2580"); digits("2580")
         waitFor { parental.status == ParentalStatus.ON && !model.state.value.hideAdultCategories }
         ui.waitUntil(5_000) { !padShown() }
-        title("Ayarlar")
+        title(contentSection)
         ui.waitUntil(5_000) { ui.onAllNodes(hasText("Yetişkin kategorilerini gizle") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
         filter.assertIsOff()
         // On is free, and off again asks nothing more in the same visit.
@@ -315,7 +321,7 @@ class ParentalFlowTest {
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         assertFalse(model.state.value.hideAdultCategories); assertFalse(padShown())
         key(KeyEvent.KEYCODE_DPAD_CENTER)
-        key(KeyEvent.KEYCODE_BACK)
+        key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK)
         ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
         assertFalse(parental.adminUnlocked)
 
@@ -370,7 +376,7 @@ class ParentalFlowTest {
         // Back grants nothing: the page stays closed and focus is back on its row.
         key(KeyEvent.KEYCODE_BACK)
         ui.waitUntil(5_000) { !padShown() }
-        title("Ayarlar")
+        title(contentSection)
         row("Ebeveyn denetimi").assertIsFocused()
         // Opened again, the pad is still waiting and starts on Vazgeç.
         key(KeyEvent.KEYCODE_DPAD_CENTER)
@@ -480,7 +486,7 @@ class ParentalFlowTest {
         assertTrue((ProtectionStore(context).read() as ProtectionRead.Ready).snapshot.rules.contains(
             AccessRule(AccessScope.Category(source, MediaKind.LIVE, AccessCategory.ProviderId("2")), pinRequired = true)))
         assertEquals(setOf(sport), model.state.value.locks.ids)
-        key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK)
+        repeat(4) { key(KeyEvent.KEYCODE_BACK) }
         ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
 
         // Canlı TV: the row reads "Kilitli" and its category "Spor, kilitli", still selectable as shown or not; its
@@ -723,7 +729,7 @@ class ParentalFlowTest {
         // Kilitli içerikler neither lists nor counts it: the row reads as hidden alone, as it will after a restart.
         assertTrue(model.state.value.locks.categories.isEmpty())
         key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK)
-        title("Ayarlar")
+        title(contentSection)
         row("Ebeveyn denetimi").performSemanticsAction(SemanticsActions.RequestFocus)
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.waitUntil(5_000) { focused("parental-change") }
@@ -813,8 +819,8 @@ class ParentalFlowTest {
     @Test fun sourceManagementAsksForThePinWhereverItOpensAndThePinHoldsInKaynaklar() {
         makePin()
         val source = model.state.value.sources.single().id
-        // Ayarlar → Kaynakları yönet: the pad over the panel; Back opens nothing, and focus is back on the row.
-        openSettings()
+        // Ayarlar → Kaynaklar → Kaynakları yönet: the pad over the panel; Back opens nothing, and focus is back on the row.
+        openSettings("Kaynaklar")
         row("Kaynakları yönet").performSemanticsAction(SemanticsActions.RequestFocus)
         openPad()
         padTitle("PIN gir")
@@ -849,7 +855,7 @@ class ParentalFlowTest {
         assertEquals(Route.GUIDE, model.state.value.route)
         ui.runOnUiThread { model.home() }
         // Kaynağı düzenle and Kaynağı kaldır in Ayarlar ask as well; Back keeps the source as it is.
-        openSettings()
+        openSettings("Kaynaklar")
         row("Kaynağı düzenle").performSemanticsAction(SemanticsActions.RequestFocus)
         openPad()
         key(KeyEvent.KEYCODE_BACK)
@@ -864,6 +870,8 @@ class ParentalFlowTest {
         ui.waitUntil(5_000) { !padShown() && focused("settings-confirm") }
         assertEquals(listOf(source), model.state.value.sources.map { it.id }); assertEquals(Route.HOME, model.state.value.route)
         key(KeyEvent.KEYCODE_BACK)
+        title("Kaynaklar")
+        key(KeyEvent.KEYCODE_BACK)
         title("Ayarlar")
         key(KeyEvent.KEYCODE_BACK)
         ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
@@ -874,7 +882,7 @@ class ParentalFlowTest {
         ui.waitUntil(10_000) { !parental.sourcesNeedPin }
         ui.onNodeWithTag("parental-sources-need-pin").assertIsFocused().assertIsOff()
         assertFalse((ProtectionStore(context).read() as ProtectionRead.Ready).snapshot.options.sourcesNeedPin)
-        key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK)
+        repeat(3) { key(KeyEvent.KEYCODE_BACK) }
         ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
         ui.runOnUiThread { assertFalse(model.manageSources()) }
         assertEquals(Route.SOURCES, model.state.value.route)
@@ -951,7 +959,7 @@ class ParentalFlowTest {
         ui.waitUntil(10_000) { parental.launchNeedsPin }
         ui.onNodeWithTag("parental-launch-needs-pin").assertIsOn()
         assertTrue((ProtectionStore(context).read() as ProtectionRead.Ready).snapshot.options.launchNeedsPin)
-        key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK)
+        repeat(3) { key(KeyEvent.KEYCODE_BACK) }
         ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
         assertFalse(parental.appLocked)
         // A channel plays; Home, standby or another app: back on screen the lock screen covers the player.

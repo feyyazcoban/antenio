@@ -21,8 +21,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -34,6 +37,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -142,6 +146,39 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
         }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (icon != null) LineIcon(icon, contentColor, filled = iconFilled)
             if (label.isNotEmpty()) ActionLabel(label, labelText, contentColor, compact, labelOverflow)
+        }
+    }
+}
+
+/**
+ * One choice in a list of full-width rows, as Ses / Altyazı and the Settings choice pages list them: its [label], a
+ * [description] under it, and the ✓ at the end while it is [selected], which also fills the row (D053). A surface like
+ * the Settings rows: focus fills it Ink.High inside the white ring, without growth (D064). TalkBack reads a radio button,
+ * "Seçili" or "Seçili değil". [labelText] is [label] with spans of its own; the label wraps up to [maxLines], and
+ * [onLabelOverflow] hears whether it ran past them. The description is never cut, so a choice always says why it is off.
+ */
+@Composable internal fun RadioRow(label: String, selected: Boolean, modifier: Modifier = Modifier, description: String? = null,
+    enabled: Boolean = true, labelText: AnnotatedString? = null, maxLines: Int = Int.MAX_VALUE,
+    onLabelOverflow: ((Boolean) -> Unit)? = null, onClick: () -> Unit) {
+    val choice = stringResource(if (selected) R.string.tracks_selected else R.string.tracks_not_selected)
+    Button(onClick = onClick, modifier = modifier.focusProperties { canFocus = enabled }.fillMaxWidth()
+        .semantics { role = Role.RadioButton; this.selected = selected; stateDescription = choice },
+        enabled = enabled, contentPadding = PaddingValues(0.dp), shape = ButtonDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
+        colors = ButtonDefaults.colors(containerColor = if (selected) Ink.Selected else Ink.Container, focusedContainerColor = Ink.High),
+        scale = ButtonDefaults.scale(focusedScale = 1f),
+        border = ButtonDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
+        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(labelText ?: AnnotatedString(label), color = if (enabled) Ink.Text else Ink.Muted,
+                    fontFamily = Roboto, fontSize = 14.sp, lineHeight = 20.sp,
+                    maxLines = maxLines, overflow = TextOverflow.Ellipsis,
+                    onTextLayout = { layout -> onLabelOverflow?.invoke(layout.hasVisualOverflow) })
+                if (description != null) Note(description)
+            }
+            // Always lay out the glyph so rows keep one height when the selection changes.
+            Text("✓", Modifier.width(24.dp).clearAndSetSemantics {}, color = if (selected) Ink.Mint else Color.Transparent,
+                fontFamily = Roboto, fontSize = 16.sp)
         }
     }
 }

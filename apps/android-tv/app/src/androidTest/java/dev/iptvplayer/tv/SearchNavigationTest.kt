@@ -85,6 +85,16 @@ class SearchNavigationTest {
             ?: node.config.getOrNull(SemanticsProperties.ContentDescription)?.joinToString() ?: node.config.getOrNull(SemanticsProperties.TestTag) ?: "?" }
         throw AssertionError("Focused instead: $now (route ${model.state.value.route})", failure)
     }
+    /** Ayarlar → Kaynaklar, focus on its first row, Kaynakları yönet. */
+    private fun openSources() {
+        click("Ayarlar")
+        ui.waitUntil(5_000) { ui.onAllNodes(hasText("Genel ve dil") and hasClickAction() and isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.onNode(hasText("Kaynaklar") and hasClickAction()).assertFocusedOrSay()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.onNodeWithTag("settings-title").assertTextEquals("Kaynaklar")
+        ui.onNode(hasText("Kaynakları yönet") and hasClickAction()).assertFocusedOrSay()
+    }
     private fun searchFinished() = ui.waitUntil(10_000) { !model.state.value.searching }
     private fun imeShown() = android.os.ParcelFileDescriptor.AutoCloseInputStream(
         instrumentation.uiAutomation.executeShellCommand("dumpsys input_method")
@@ -224,14 +234,14 @@ class SearchNavigationTest {
         // A platform Dialog acquires window focus independently of Compose's idle clock.
         try {
             ui.waitUntil(2_000) {
-                ui.onAllNodes(hasText("Hareketi azalt") and hasClickAction() and isFocused()).fetchSemanticsNodes().isNotEmpty()
+                ui.onAllNodes(hasText("Genel ve dil") and hasClickAction() and isFocused()).fetchSemanticsNodes().isNotEmpty()
             }
         } catch (failure: Throwable) {
             shot("settings-focus-failure")
             println(ui.onNodeWithTag("settings-panel").printToString())
             throw failure
         }
-        ui.onNode(hasText("Hareketi azalt") and hasClickAction()).assertIsFocused()
+        ui.onNode(hasText("Genel ve dil") and hasClickAction()).assertIsFocused()
         key(KeyEvent.KEYCODE_BACK)
         ui.onNodeWithTag("nav:Ayarlar").assertIsFocused()
         // The closed dialog's window keeps the system's input focus for a moment after Compose drops it; keys sent
@@ -642,14 +652,19 @@ class SearchNavigationTest {
     @Test fun settingsKeepsHeaderRestoresSubpageFocusAndCancelsRemoval() {
         ui.onNodeWithTag("nav:Ayarlar").performSemanticsAction(SemanticsActions.RequestFocus) { it() }
         key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.onNode(hasText("Genel ve dil") and hasClickAction()).assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.onNode(hasText("Hareketi azalt") and hasClickAction()).assertIsFocused()
         val original = model.state.value.reducedMotion
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         assertEquals(!original, model.state.value.reducedMotion)
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         assertEquals(original, model.state.value.reducedMotion)
-        repeat(12) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
-        ui.onNode(hasText("Uygulama hakkında") and hasClickAction()).assertIsFocused()
+        key(KeyEvent.KEYCODE_BACK)
+        ui.onNode(hasText("Genel ve dil") and hasClickAction()).assertIsFocused()
+        // Genel ve dil, Kaynaklar, İçerik ve ebeveyn denetimi, Oynatıcı, Kütüphane, Hakkında.
+        repeat(5) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
+        ui.onNode(hasText("Hakkında") and hasClickAction()).assertIsFocused()
         ui.onNodeWithTag("settings-title").assertIsDisplayed()
         ui.onNodeWithTag("settings-close").assertIsDisplayed()
         shot("settings-bottom")
@@ -661,14 +676,21 @@ class SearchNavigationTest {
         ui.onNodeWithText("Sağlayıcının yetişkin", substring = true).assertIsDisplayed()
         ui.onNodeWithTag("settings-close").assertIsDisplayed()
         key(KeyEvent.KEYCODE_BACK)
-        ui.onNode(hasText("Uygulama hakkında") and hasClickAction()).assertIsFocused()
-        repeat(6) { key(KeyEvent.KEYCODE_DPAD_UP) }
+        ui.onNode(hasText("Hakkında") and hasClickAction()).assertIsFocused()
+        repeat(4) { key(KeyEvent.KEYCODE_DPAD_UP) }
+        ui.onNode(hasText("Kaynaklar") and hasClickAction()).assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        // Kaynakları yönet, Kataloğu yenile, Kaynağı düzenle, Kaynağı kaldır.
+        ui.onNode(hasText("Kaynakları yönet") and hasClickAction()).assertFocusedOrSay()
+        repeat(3) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
         ui.onNode(hasText("Kaynağı kaldır") and hasClickAction()).assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.onNodeWithText("Vazgeç").assertIsFocused()
         key(KeyEvent.KEYCODE_BACK)
         ui.onNode(hasText("Kaynağı kaldır") and hasClickAction()).assertIsFocused()
         assertNotNull(model.state.value.source)
+        key(KeyEvent.KEYCODE_BACK)
+        ui.onNode(hasText("Kaynaklar") and hasClickAction()).assertIsFocused()
         key(KeyEvent.KEYCODE_BACK)
         ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
         ui.onNodeWithTag("nav:Ayarlar").assertIsFocused()
@@ -692,9 +714,8 @@ class SearchNavigationTest {
     }
 
     @Test fun settingsRefreshKeepsFocusAndIgnoresRepeatedConfirmation() {
-        click("Ayarlar")
-        ui.onNode(hasText("Hareketi azalt") and hasClickAction()).assertIsFocused()
-        repeat(4) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
+        openSources()
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
         val row = ui.onNode(hasText("Kataloğu yenile") and hasClickAction())
         row.assertFocusedOrSay()
         val before = server.requestCount
@@ -710,45 +731,46 @@ class SearchNavigationTest {
         ui.onNodeWithTag("settings-close").assertIsDisplayed()
     }
 
-    @Test fun settingsSectionStaysFixedDuringRemoteTraversal() {
+    @Test fun settingsHeaderStaysFixedDuringRemoteTraversal() {
         click("Ayarlar")
-        ui.waitUntil(5_000) { ui.onAllNodes(hasText("Hareketi azalt") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
-        val rows = listOf("Hareketi azalt", "Dil / Language", "Açılış sesi", "Kaynakları yönet", "Kataloğu yenile",
-            "Kaynağı düzenle", "Kaynağı kaldır", "Yetişkin kategorilerini gizle", "Kategorileri yönet", "Ebeveyn denetimi",
-            "Otomatik sonraki bölüm", "İzleme geçmişini temizle", "Uygulama hakkında")
-        val label = ui.onNodeWithTag("settings-section")
-        val initial = label.getUnclippedBoundsInRoot()
-        fun check(index: Int) {
-            val expected = when (index) { in 0..2 -> "Görünüm ve ses"; in 3..6 -> "Kaynaklar"; in 7..9 -> "İçerik"; else -> "İzleme ve uygulama" }
-            label.assertTextEquals(expected).assertIsDisplayed()
-            val current = label.getUnclippedBoundsInRoot()
+        ui.waitUntil(5_000) { ui.onAllNodes(hasText("Genel ve dil") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        val header = ui.onNodeWithTag("settings-title")
+        val initial = header.getUnclippedBoundsInRoot()
+        // The row [label] has focus, wholly readable, under a header that has not moved and stays out of the list.
+        fun check(label: String) {
+            val current = header.assertIsDisplayed().getUnclippedBoundsInRoot()
             assertEquals(initial.top, current.top)
             assertEquals(initial.bottom, current.bottom)
             val viewport = ui.onNodeWithTag("settings-viewport").getUnclippedBoundsInRoot()
-            assertTrue("Section label must stay outside the scrolling viewport", current.bottom <= viewport.top)
-            val row = ui.onNode(hasText(rows[index]) and hasClickAction())
+            assertTrue("The header must stay outside the scrolling viewport", current.bottom <= viewport.top)
+            val row = ui.onNode(hasText(label) and hasClickAction())
             row.assertIsFocused()
             val bounds = row.getUnclippedBoundsInRoot()
             assertTrue("Focused setting must remain fully readable", bounds.top >= viewport.top && bounds.bottom <= viewport.bottom)
         }
-        check(0); shot("section-appearance")
-        for (index in 1..rows.lastIndex) {
-            key(KeyEvent.KEYCODE_DPAD_DOWN); check(index)
-            if (index == 4) shot("section-sources")
+        fun walk(rows: List<String>, shotAt: Int = -1, name: String = "") {
+            check(rows[0])
+            for (index in 1..rows.lastIndex) { key(KeyEvent.KEYCODE_DPAD_DOWN); check(rows[index]); if (index == shotAt) shot(name) }
+            for (index in rows.lastIndex - 1 downTo 0) { key(KeyEvent.KEYCODE_DPAD_UP); check(rows[index]) }
         }
-        shot("section-playback")
+        val sections = listOf("Genel ve dil", "Kaynaklar", "İçerik ve ebeveyn denetimi", "Oynatıcı", "Kütüphane", "Hakkında")
+        walk(sections, sections.lastIndex, "section-list")
+        // The longest section: the player's settings.
+        repeat(3) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
         key(KeyEvent.KEYCODE_DPAD_CENTER)
-        ui.onNodeWithTag("settings-close").assertIsFocused()
-        key(KeyEvent.KEYCODE_BACK); check(rows.lastIndex)
-        for (index in rows.lastIndex - 1 downTo 0) { key(KeyEvent.KEYCODE_DPAD_UP); check(index) }
+        header.assertTextEquals("Oynatıcı")
+        val player = listOf("Otomatik sonraki bölüm", "Altyazı görünümü", "Kontrollerin kapanma süresi", "Oynatıcı panelleri",
+            "Kare hızı eşleştirme", "Arabellek", "Kod çözücü", "Ses çıkışı", "Tünelli oynatma (deneysel)")
+        walk(player, player.lastIndex, "section-player")
+        key(KeyEvent.KEYCODE_BACK); check("Oynatıcı")
         key(KeyEvent.KEYCODE_BACK)
+        ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
     }
 
     @Test fun failedRefreshRemainsReadableAndCachedContentStaysReachable() {
         val expected = model.state.value.catalog
-        click("Ayarlar")
-        ui.onNode(hasText("Hareketi azalt") and hasClickAction()).assertIsFocused()
-        repeat(4) { key(KeyEvent.KEYCODE_DPAD_DOWN) }
+        openSources()
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
         val row = ui.onNode(hasText("Kataloğu yenile") and hasClickAction())
         row.assertFocusedOrSay()
         failAuth = true
@@ -764,7 +786,8 @@ class SearchNavigationTest {
         val viewport = ui.onNodeWithTag("settings-viewport").getUnclippedBoundsInRoot()
         assertTrue("The full warning row must remain visible", rowBounds.top >= viewport.top && rowBounds.bottom <= viewport.bottom)
         shot("settings-warning")
-        key(KeyEvent.KEYCODE_BACK)
+        key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK)
+        ui.onAllNodesWithTag("settings-panel").assertCountEquals(0)
         ui.onNodeWithText(message).assertExists()
         click("Filmler")
         // A section opens on its category column; Right goes to the first title.

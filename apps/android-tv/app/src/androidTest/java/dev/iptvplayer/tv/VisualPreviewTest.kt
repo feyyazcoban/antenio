@@ -340,9 +340,12 @@ class VisualPreviewTest {
         }
         shot("feedback-movies-return")
         click("Ayarlar")
-        ui.onNode(hasText("Hareketi azalt") and hasClickAction()).assertIsFocused()
+        ui.onNode(hasText("Genel ve dil") and hasClickAction()).assertIsFocused()
         shot("feedback-settings")
-        repeat(4) { instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle() }
+        // Kaynaklar, then Kataloğu yenile below Kaynakları yönet.
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle()
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER); ui.waitForIdle()
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle()
         val refresh = ui.onNode(hasText("Kataloğu yenile") and hasClickAction())
         refresh.assertIsFocused()
         ui.onNode(hasText("Kütüphanen güncellendi.") and hasAnyAncestor(hasTestTag("settings-panel"))).assertIsDisplayed()
@@ -353,8 +356,9 @@ class VisualPreviewTest {
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.waitUntil(15_000) { !model.state.value.refreshing }
         refresh.assertIsFocused()
-        repeat(8) { instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle() }
-        ui.onNode(hasText("Uygulama hakkında") and hasClickAction()).assertIsFocused()
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK); ui.waitForIdle()
+        repeat(4) { instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle() }
+        ui.onNode(hasText("Hakkında") and hasClickAction()).assertIsFocused()
         shot("feedback-settings-bottom")
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.onNodeWithTag("settings-close").assertIsFocused()
@@ -677,7 +681,7 @@ class VisualPreviewTest {
         click("Kapat")
         click("Geri"); click("Ayarlar")
         shot("settings")
-        ui.onNodeWithText("Uygulama hakkında").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
+        ui.onNode(hasText("Hakkında") and hasClickAction()).performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
         shot("about")
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
         shot("settings-bottom")

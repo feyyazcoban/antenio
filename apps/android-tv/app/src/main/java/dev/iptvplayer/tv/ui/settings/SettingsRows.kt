@@ -31,6 +31,7 @@ import dev.iptvplayer.tv.TvViewModel
 import dev.iptvplayer.tv.ui.Action
 import dev.iptvplayer.tv.ui.Ink
 import dev.iptvplayer.tv.ui.Note
+import dev.iptvplayer.tv.ui.RadioRow
 import dev.iptvplayer.tv.ui.Roboto
 import dev.iptvplayer.tv.ui.TvLayout
 import dev.iptvplayer.tv.ui.focusRing
@@ -59,16 +60,17 @@ internal class PageRows {
 }
 
 /**
- * What a ChoiceRow offers, kept by the panel while its ChoicePage is open. [selected] is an index of [options];
- * [titleText] and [optionTexts] are the same texts with spans of their own (ChoiceRow).
+ * What a ChoiceRow offers, kept by the panel while its ChoicePage is open. [selected] is an index of [options], and
+ * [descriptions] says what each one does, where it needs saying; [note] stands above them. [titleText] and [optionTexts]
+ * are the same texts with spans of their own (ChoiceRow).
  */
 internal class ChoiceSpec(val title: String, val options: List<String>, val selected: Int, val choose: (Int) -> Unit,
-    val titleText: AnnotatedString? = null, val optionTexts: List<AnnotatedString>? = null)
+    val titleText: AnnotatedString? = null, val optionTexts: List<AnnotatedString>? = null,
+    val descriptions: List<String?>? = null, val note: String? = null)
 
 /**
  * What a page's content works with: the app's state and model, the rows, and the panel around it. Each row takes a
- * key that stays the same while the page is open; focus returns to it from a page it opened. A row's section is the
- * main list's group it belongs to, named above the list while the row has focus.
+ * key that stays the same while the page is open; focus returns to it from a page it opened.
  */
 internal class SettingsScope(
     val s: TvState,
@@ -76,11 +78,10 @@ internal class SettingsScope(
     private val rows: PageRows,
     /** The list of a [PageBody.LAZY] page; it keeps its place while a page above it is open. */
     val listState: LazyListState,
-    /** The items the library shows, neither adult nor an episode, for the main page's summary. */
+    /** The items the library shows, neither adult nor an episode, for the summary of the sources. */
     val visibleItems: Int,
     private val navigate: (route: SettingsRoute, fromRowKey: String?) -> Unit,
     private val showChoice: (rowKey: String, choice: ChoiceSpec) -> Unit,
-    private val showSection: (SectionId) -> Unit,
     /** Leaves this page, as Back does; nothing more once it has left (a repeated OK). */
     val back: () -> Unit,
     /** Closes the panel. */
@@ -101,13 +102,10 @@ internal class SettingsScope(
         return requester
     }
 
-    private fun Modifier.row(focus: FocusRequester, section: SectionId?): Modifier = focusRequester(focus)
-        .then(if (section != null) Modifier.onFocusChanged { if (it.isFocused) showSection(section) } else Modifier)
-
     /** A switch: Açık or Kapalı at the end, read as a switch by TalkBack. */
     @Composable fun ToggleRow(key: String, label: String, description: String, checked: Boolean, modifier: Modifier = Modifier,
-        section: SectionId? = null, onClick: () -> Unit) {
-        SettingRow(label, description, Modifier.row(rowFocus(key), section).then(modifier), checked = checked, onClick = onClick)
+        onClick: () -> Unit) {
+        SettingRow(label, description, Modifier.focusRequester(rowFocus(key)).then(modifier), checked = checked, onClick = onClick)
     }
 
     /**
@@ -117,29 +115,30 @@ internal class SettingsScope(
      * [descriptionText] are the label and description with spans of their own, such as the language each part is read in.
      */
     @Composable fun ActionRow(key: String, label: String, description: String, modifier: Modifier = Modifier,
-        section: SectionId? = null, busy: Boolean = false, attention: Boolean = false, value: String? = null,
+        busy: Boolean = false, attention: Boolean = false, value: String? = null,
         clickLabel: String? = null, labelText: AnnotatedString? = null, descriptionText: AnnotatedString? = null, onClick: () -> Unit) {
-        SettingRow(label, description, Modifier.row(rowFocus(key), section).then(modifier), value = value, busy = busy,
+        SettingRow(label, description, Modifier.focusRequester(rowFocus(key)).then(modifier), value = value, busy = busy,
             attention = attention, clickLabel = clickLabel, labelText = labelText, descriptionText = descriptionText, onClick = onClick)
     }
 
     /** A row that opens [route]; Back returns to it. */
-    @Composable fun PageRow(key: String, label: String, description: String, route: SettingsRoute, modifier: Modifier = Modifier,
-        section: SectionId? = null) {
-        ActionRow(key, label, description, modifier, section) { open(route, key) }
+    @Composable fun PageRow(key: String, label: String, description: String, route: SettingsRoute, modifier: Modifier = Modifier) {
+        ActionRow(key, label, description, modifier) { open(route, key) }
     }
 
     /**
      * One of [options], the chosen one as its description; OK opens them as a ChoicePage and Back returns here. With a
-     * [description] of its own, the row shows the choice as [value] at its end (Açık, Kilitli, Gizli). [labelText] and
-     * [optionTexts] are the label and options with spans of their own, on the row and its page alike.
+     * [description] of its own, the row shows the choice as [value] at its end (Açık, Kilitli, Gizli). [optionDescriptions]
+     * say on the page what each option does, and [note] stands above them there. [labelText] and [optionTexts] are the
+     * label and options with spans of their own, on the row and its page alike.
      */
     @Composable fun ChoiceRow(key: String, label: String, options: List<String>, selected: Int, modifier: Modifier = Modifier,
-        section: SectionId? = null, description: String? = null, value: String? = null, labelText: AnnotatedString? = null,
-        optionTexts: List<AnnotatedString>? = null, choose: (Int) -> Unit) {
-        ActionRow(key, label, description ?: options.getOrElse(selected) { "" }, modifier, section, value = value, labelText = labelText,
+        description: String? = null, value: String? = null, labelText: AnnotatedString? = null,
+        optionTexts: List<AnnotatedString>? = null, optionDescriptions: List<String?>? = null, note: String? = null,
+        choose: (Int) -> Unit) {
+        ActionRow(key, label, description ?: options.getOrElse(selected) { "" }, modifier, value = value, labelText = labelText,
             descriptionText = optionTexts?.getOrNull(selected)?.takeIf { description == null }) {
-            showChoice(key, ChoiceSpec(label, options, selected, choose, labelText, optionTexts))
+            showChoice(key, ChoiceSpec(label, options, selected, choose, labelText, optionTexts, optionDescriptions, note))
         }
     }
 
@@ -149,7 +148,7 @@ internal class SettingsScope(
      * decrease button, or the increase one while that is off; a button that turns off under focus keeps it (Action).
      * Each button reads with the setting's name and the value, again when the value changes.
      */
-    @Composable fun StepperRow(key: String, label: String, value: String, modifier: Modifier = Modifier, section: SectionId? = null,
+    @Composable fun StepperRow(key: String, label: String, value: String, modifier: Modifier = Modifier,
         decreaseLabel: String = "−", increaseLabel: String = "+", canDecrease: Boolean = true, canIncrease: Boolean = true,
         isDefault: Boolean = false, decrease: () -> Unit, increase: () -> Unit, reset: () -> Unit) {
         val focus = rowFocus(key)
@@ -161,7 +160,6 @@ internal class SettingsScope(
         fun Modifier.step(name: String) = semantics { contentDescription = name; stateDescription = value }
         // The whole row comes into view with a button, so its name and value never scroll away from it.
         Column(modifier.then(edge.modifier).fillMaxWidth().background(Ink.Container, RoundedCornerShape(TvLayout.CardRadius))
-            .then(if (section != null) Modifier.onFocusChanged { if (it.hasFocus) showSection(section) } else Modifier)
             .padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text(label, color = Ink.Text, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 19.sp)
@@ -183,12 +181,16 @@ internal class SettingsScope(
     }
 }
 
-/** The options of a ChoiceRow as full-width rows; the chosen one has the ✓ (D053) and takes focus first. */
+/**
+ * The options of a ChoiceRow as RadioRows, each with what it does where the row says; the chosen one has the ✓ (D053)
+ * and takes focus first. OK chooses and returns to the row; Back returns without a change.
+ */
 @Composable internal fun SettingsScope.ChoicePage(choice: ChoiceSpec) {
+    choice.note?.let { NoteRow(it) }
     choice.options.forEachIndexed { index, option ->
-        Action(option, rememberFocusEdge().modifier.focusRequester(rowFocus("option:$index", start = index == choice.selected))
-            .fillMaxWidth().testTag("settings-option:$index"), selected = index == choice.selected, check = true,
-            labelText = choice.optionTexts?.getOrNull(index)) {
+        RadioRow(option, index == choice.selected, rememberFocusEdge().modifier
+            .focusRequester(rowFocus("option:$index", start = index == choice.selected)).testTag("settings-option:$index"),
+            description = choice.descriptions?.getOrNull(index), labelText = choice.optionTexts?.getOrNull(index)) {
             choice.choose(index); back()
         }
     }

@@ -425,7 +425,7 @@
     <string name="playback_refused">Sağlayıcı yayını açmadı. Kaynak erişimini kontrol et.</string>
     <string name="playback_unreachable">Yayına bağlanılamadı. İnternet bağlantısını kontrol et.</string>
     <string name="playback_behind_live">Canlı yayınla bağlantı koptu. Yeniden bağlanmayı dene.</string>
-    <string name="playback_unsupported">Bu cihaz yayının görüntü veya ses biçimini çözemiyor.</string>
+    <string name="playback_decoder_failed">Bu cihaz yayının görüntü veya ses biçimini çözemiyor. Ayarlar > Oynatıcı\'da kod çözücüyü ya da ses çıkışını değiştirmeyi deneyebilirsin.</string>
     <string name="playback_unreadable">Yayının biçimi okunamadı. Başka bir içerik deneyebilirsin.</string>
     <string name="playback_failed">Yayın oynatılamadı. Tekrar dene veya başka bir içerik seç.</string>
     <string name="playback_timeout">Yayın bağlantısı zamanında kurulamadı. Tekrar deneyebilirsin.</string>
@@ -457,10 +457,17 @@
     <string name="episode_list_changed">Bölüm listesi değişti. Devam etmek için listeden bir bölüm seç.</string>
 
     <!-- Ayarlar -->
-    <string name="settings_section_appearance">Görünüm ve ses</string>
+    <!-- The sections the main page lists, each with what it holds (plan decision 4a-8). -->
+    <string name="settings_section_general">Genel ve dil</string>
+    <string name="settings_section_general_note">Dil, hareket ve açılış sesi.</string>
     <string name="settings_section_sources">Kaynaklar</string>
-    <string name="settings_section_content">İçerik</string>
-    <string name="settings_section_watching">İzleme ve uygulama</string>
+    <string name="settings_section_content">İçerik ve ebeveyn denetimi</string>
+    <string name="settings_section_content_note">Yetişkin filtresi, kategoriler ve ebeveyn PIN\'i.</string>
+    <string name="settings_section_player">Oynatıcı</string>
+    <string name="settings_section_player_note">Altyazı, kontroller, arabellek, kod çözücü ve ses çıkışı.</string>
+    <string name="settings_section_library">Kütüphane</string>
+    <string name="settings_section_library_note">İzleme geçmişi ve izleme konumları.</string>
+    <string name="settings_section_about">Hakkında</string>
     <string name="settings_clear_history_question">Geçmişi temizle?</string>
     <string name="settings_about">Uygulama hakkında</string>
     <string name="settings_categories">Kategoriler</string>
@@ -500,6 +507,69 @@
     <string name="settings_remove_confirm">%1$s kaynağı, bu kaynağın favorileri ve izleme geçmişi bu cihazdan silinecek.</string>
     <string name="settings_clear_history_confirm">Tüm kaynaklardaki son kanallar ve izleme konumları bu cihazdan kaldırılacak. Favorilerin korunacak.</string>
     <string name="settings_clear_history">Geçmişi temizle</string>
+
+    <!-- Ayarlar → Oynatıcı (playback.md §7). The settings change how this app plays a stream, nothing else. -->
+    <string name="settings_subtitles">Altyazı görünümü</string>
+    <string name="settings_subtitle_source">Kullanılan ayar</string>
+    <string name="settings_subtitle_system">Android ayarı</string>
+    <string name="settings_subtitle_system_note">Android\'in altyazı tercihlerini kullanır.</string>
+    <string name="settings_subtitle_app">NEXTV ayarı</string>
+    <string name="settings_subtitle_app_note">Aşağıdaki boyut, zemin ve rengi kullanır.</string>
+    <string name="settings_subtitle_size">Boyut</string>
+    <string name="settings_subtitle_small">Küçük</string>
+    <string name="settings_subtitle_normal">Normal</string>
+    <string name="settings_subtitle_large">Büyük</string>
+    <string name="settings_subtitle_xlarge">Çok büyük</string>
+    <string name="settings_subtitle_background">Zemin</string>
+    <string name="settings_subtitle_background_none">Yok (gölgeli)</string>
+    <string name="settings_subtitle_background_semi">Yarı saydam</string>
+    <string name="settings_subtitle_background_solid">Opak</string>
+    <string name="settings_subtitle_color">Renk</string>
+    <string name="settings_subtitle_white">Beyaz</string>
+    <string name="settings_subtitle_yellow">Sarı</string>
+    <string name="settings_subtitle_system_hint">Boyut, zemin veya renk seçersen NEXTV ayarına geçilir.</string>
+    <string name="settings_subtitle_app_hint">NEXTV ayarında yayının kendi altyazı biçimi kullanılmaz.</string>
+    <string name="settings_osd_timeout">Kontrollerin kapanma süresi</string>
+    <string name="settings_osd_timeout_note">Kumandaya dokunulmazsa oynatıcı kontrolleri bu süre sonunda gizlenir. TalkBack açıkken kendiliğinden gizlenmez.</string>
+    <plurals name="settings_osd_seconds">
+        <item quantity="one">%1$s saniye</item>
+        <item quantity="other">%1$s saniye</item>
+    </plurals>
+    <string name="settings_osd_never">Hiçbir zaman</string>
+    <string name="settings_osd_never_note">Kontroller Geri\'ye basana kadar kalır.</string>
+    <string name="settings_panel_opacity">Oynatıcı panelleri</string>
+    <string name="settings_panel_opacity_note">Oynatıcıdaki not ve panellerin arkasındaki görüntü ne kadar görünsün.</string>
+    <string name="settings_panel_opaque">Opak</string>
+    <string name="settings_panel_opaque_note">Görüntü arkalarından görünmez.</string>
+    <string name="settings_panel_translucent">Yarı saydam</string>
+    <string name="settings_panel_translucent_note">Görüntü hafifçe görünür.</string>
+    <string name="settings_panel_sheer">Saydam</string>
+    <string name="settings_panel_sheer_note">Görüntü daha çok görünür; yazılar okunur kalır.</string>
+    <string name="settings_player_next_stream">Bu ayarlar bir sonraki açtığın yayında geçerli olur.</string>
+    <string name="settings_frame_rate">Kare hızı eşleştirme</string>
+    <string name="settings_frame_rate_off">Kapalı</string>
+    <string name="settings_frame_rate_off_note">Ekranın kare hızı hiç değişmez.</string>
+    <string name="settings_frame_rate_seamless">Yalnız kesintisiz</string>
+    <string name="settings_frame_rate_seamless_note">Ekran görüntüyü kesmeden geçebiliyorsa yayının kare hızına geçer. Önerilen.</string>
+    <string name="settings_buffer">Arabellek</string>
+    <string name="settings_buffer_normal">Normal</string>
+    <string name="settings_buffer_normal_note">Yayın en hızlı açılır.</string>
+    <string name="settings_buffer_large">Geniş</string>
+    <string name="settings_buffer_large_note">Açılış biraz uzar; kısa bağlantı dalgalanmalarına daha dayanıklıdır.</string>
+    <string name="settings_buffer_max">Çok geniş</string>
+    <string name="settings_buffer_max_note">Açılış birkaç saniye uzar; zayıf bağlantılar için.</string>
+    <string name="settings_decoder">Kod çözücü</string>
+    <string name="settings_decoder_auto">Otomatik</string>
+    <string name="settings_decoder_auto_note">Donanım kod çözücüsü kullanılır; açılamazsa cihazdaki başka bir kod çözücü denenir.</string>
+    <string name="settings_decoder_software">Yazılım öncelikli</string>
+    <string name="settings_decoder_software_note">Görüntü bozuluyorsa dene. Yüksek çözünürlükte takılma yapabilir.</string>
+    <string name="settings_audio_output">Ses çıkışı</string>
+    <string name="settings_audio_auto">Otomatik</string>
+    <string name="settings_audio_auto_note">Ses sistemin destekliyorsa Dolby ve DTS sesi olduğu gibi gönderilir.</string>
+    <string name="settings_audio_pcm">Cihazda çöz</string>
+    <string name="settings_audio_pcm_note">Ses gelmiyor ya da kesiliyorsa dene. Cihazın çözemediği biçimler desteklenmiyor görünür.</string>
+    <string name="settings_tunneling">Tünelli oynatma (deneysel)</string>
+    <string name="settings_tunneling_note">Bazı cihazlarda görüntü ve ses uyumunu iyileştirir. Sorun olursa kapat.</string>
     <string name="settings_categories_note">Gizlediğin kategoriler ana sayfada, kütüphanede, aramada ve rehberde görünmez. Kilitlediğin kategoriler görünür kalır; içindekiler PIN ile açılır. Kaynağın değişmez.</string>
     <plurals name="settings_kind_categories">
         <item quantity="one">%1$s kategori</item>
@@ -533,7 +603,7 @@
     <!-- What TalkBack reads for a stepper button: the setting's name, then the button (Azalt, Artır, Sıfırla). -->
     <string name="settings_stepper_button">%1$s, %2$s</string>
 
-    <!-- Ebeveyn denetimi (Ayarlar → İçerik). Neutral words only: the filter is shown or hidden, never promoted. -->
+    <!-- Ebeveyn denetimi (Ayarlar → İçerik ve ebeveyn denetimi). Neutral words only: the filter is shown or hidden, never promoted. -->
     <string name="parental_title">Ebeveyn denetimi</string>
     <string name="parental_row_off">PIN oluştur; kategori, kanal, içerik ve kaynakları kilitle, yetişkin filtresini koru.</string>
     <string name="parental_row_on">PIN açık. Kilitli içerikler, yetişkin filtresi ve kategori ayarları PIN ister.</string>
@@ -681,7 +751,7 @@
     <string name="recovery_reset_accounts">Bu cihazdaki tüm kaynak hesapları ve listeler silinecek.</string>
     <string name="recovery_reset_personal">Afiş önbelleği, favoriler ve izleme geçmişi de silinecek. İşlem geri alınamaz.</string>
     <string name="recovery_reset_credentials">Kaynaklarını yeniden eklemek için bağlantı veya hesap bilgilerin gerekir.</string>
-    <string name="recovery_reset_kept">Sağlayıcı hesabın ve aboneliğin etkilenmez. Ses, hareket ve dil tercihlerin korunur.</string>
+    <string name="recovery_reset_kept">Sağlayıcı hesabın ve aboneliğin etkilenmez. Ses, hareket, dil ve oynatıcı tercihlerin korunur.</string>
     <string name="recovery_reset_confirm">Tüm kaynakları sıfırla</string>
 
     <!-- Source operations and the launch cover -->

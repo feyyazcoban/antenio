@@ -40,6 +40,23 @@ class PlaybackRecoveryTest {
         assertEquals(UiText.Res(R.string.playback_secure_failed), r.state.value.failure); r.close()
     }
 
+    @Test fun decoderAndAudioOutputFailuresPointToThePlayerSettings() = runTest {
+        // A decoder that cannot open the stream, or a sound system that refuses its audio, names Ayarlar > Oynatıcı.
+        val hinted = listOf(PlaybackException.ERROR_CODE_DECODER_INIT_FAILED, PlaybackException.ERROR_CODE_DECODING_FAILED,
+            PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES, PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED,
+            PlaybackException.ERROR_CODE_AUDIO_TRACK_INIT_FAILED, PlaybackException.ERROR_CODE_AUDIO_TRACK_WRITE_FAILED)
+        for (code in hinted) assertEquals(code.toString(), PlaybackProblem(R.string.playback_decoder_failed),
+            playbackProblem(PlaybackException("http://kaynak.test/live/user/pass/1.ts", null, code)))
+        // A stream that cannot be read is no matter of decoders.
+        assertEquals(R.string.playback_unreadable, playbackProblem(PlaybackException("secret", null,
+            PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED)).message)
+        // Changing a setting is the way out: nothing retries on its own, and nothing from the error reaches the screen.
+        val f = FakePlayer(); val r = PlaybackRecovery(f.player, this) { testScheduler.currentTime }
+        r.onPlayerError(PlaybackException("http://kaynak.test/live/user/pass/1.ts", null, PlaybackException.ERROR_CODE_DECODER_INIT_FAILED))
+        advanceTimeBy(30_000); runCurrent(); assertEquals(0, f.prepares)
+        assertEquals(UiText.Res(R.string.playback_decoder_failed), r.state.value.failure); r.close()
+    }
+
     @Test fun manualRetryResetsBudgetPreservesVodAndLiveRejoinsWindow() = runTest {
         val f = FakePlayer(); val r = PlaybackRecovery(f.player, this) { testScheduler.currentTime }
         r.newMedia(false); r.onPlayerError(network()); runCurrent()

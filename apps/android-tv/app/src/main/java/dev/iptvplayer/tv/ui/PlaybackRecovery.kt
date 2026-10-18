@@ -47,10 +47,14 @@ internal fun playbackProblem(error: PlaybackException): PlaybackProblem {
         PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
         PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT -> PlaybackProblem(R.string.playback_unreachable, true)
         PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW -> PlaybackProblem(R.string.playback_behind_live, true)
+        // A decoder that cannot open the stream, or a sound system that refuses its audio: Ayarlar > Oynatıcı offers the
+        // software decoders and decoding the audio on the device (playback.md §6.6).
         PlaybackException.ERROR_CODE_DECODER_INIT_FAILED,
         PlaybackException.ERROR_CODE_DECODING_FAILED,
         PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES,
-        PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED -> PlaybackProblem(R.string.playback_unsupported)
+        PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED,
+        PlaybackException.ERROR_CODE_AUDIO_TRACK_INIT_FAILED,
+        PlaybackException.ERROR_CODE_AUDIO_TRACK_WRITE_FAILED -> PlaybackProblem(R.string.playback_decoder_failed)
         PlaybackException.ERROR_CODE_PARSING_CONTAINER_MALFORMED,
         PlaybackException.ERROR_CODE_PARSING_MANIFEST_MALFORMED,
         PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED,

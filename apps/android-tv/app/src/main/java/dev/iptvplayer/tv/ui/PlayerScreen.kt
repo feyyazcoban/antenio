@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.BringIntoViewSpec
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
+import android.view.accessibility.AccessibilityManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,6 +27,7 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -35,10 +37,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -55,8 +54,6 @@ import androidx.media3.common.*
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.tv.material3.Text
-import androidx.tv.material3.Button
-import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Border
 import androidx.compose.foundation.BorderStroke
 import dev.iptvplayer.tv.PlaybackMode
@@ -67,6 +64,7 @@ import dev.iptvplayer.tv.TvViewModel
 import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.EpisodeSequence
 import dev.iptvplayer.tv.data.GateResult
+import dev.iptvplayer.tv.data.PanelOpacity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 
@@ -89,7 +87,12 @@ import kotlinx.coroutines.flow.first
     val guideEntries = remember(media.entry) { if (media.entry.kind == MediaKind.LIVE) listOf(media.entry) else emptyList() }
     val schedule = guideRows(guideEntries, dev.iptvplayer.tv.data.GuideWindow(guideNow, guideNow + 12 * 3_600_000L), screenState, model)[media.entry.id]
     val currentProgramme = schedule?.now(guideNow)
-    val player = remember { PlayerFactory.create(context, model.store) }
+    // Settings → Oynatıcı as they were when the player opened: Settings opens from the other screens only, so a change
+    // holds from the next stream.
+    val player = remember { PlayerFactory.create(context, model.store, screenState.playback) }
+    val accessibility = remember(context) { context.getSystemService(AccessibilityManager::class.java) }
+    // The notes, the top label and the Ses / Altyazı panel let as much of the picture through as Oynatıcı panelleri says.
+    val panelAlpha = screenState.playback.panelOpacity.alpha
     val scope = rememberCoroutineScope()
     val recovery = remember(player) { PlaybackRecovery(player, scope) }
     val recoveryState by recovery.state.collectAsStateWithLifecycle()
@@ -269,8 +272,9 @@ import kotlinx.coroutines.flow.first
             // The PIN pad over the picture takes the remote's keys: the controls that opened it stay until it closes,
             // and for the usual while after, so focus can go back to them.
             if (model.state.value.parental.prompt != null) lastInteraction = System.currentTimeMillis()
-            if (player.isPlaying && layer == PlayerLayer.Controls && recovery.state.value.failure == null &&
-                !recovery.state.value.recovering && System.currentTimeMillis() - lastInteraction > 8000) layer = PlayerLayer.Video
+            if (ControlsAutoHide.shouldHide(System.currentTimeMillis(), lastInteraction, model.state.value.playback.osdTimeout,
+                    player.isPlaying, top() == PlayerLayer.Controls, recovery.state.value.failure != null, recovery.state.value.recovering,
+                    talkBack = accessibility?.isTouchExplorationEnabled == true)) layer = PlayerLayer.Video
         }
     }
     LaunchedEffect(top()) {
@@ -294,11 +298,13 @@ import kotlinx.coroutines.flow.first
             this.player = player; useController = false; keepScreenOn = true
             isFocusable = false; descendantFocusability = android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS
             setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
-        } }, modifier = Modifier.fillMaxSize(), onRelease = { it.player = null })
+        } }, modifier = Modifier.fillMaxSize(), update = { view ->
+            view.subtitleView?.let { PlayerFactory.subtitles(it, screenState.playback.subtitle) }
+        }, onRelease = { it.player = null })
         Box(Modifier.fillMaxSize().focusRequester(canvas).focusable(layer == PlayerLayer.Video))
         note?.takeIf { !controlsShown }?.let { (text, detail) ->
             Column(Modifier.align(Alignment.TopEnd).padding(top = 22.dp, end = TvLayout.Gutter).widthIn(max = 420.dp)
-                .background(Ink.Background.copy(alpha = .9f), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp, vertical = 10.dp)
+                .background(Ink.Background.copy(alpha = panelAlpha), RoundedCornerShape(12.dp)).padding(horizontal = 16.dp, vertical = 10.dp)
                 .testTag("player-note"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(text, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 18.sp, lineHeight = 24.sp,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -308,7 +314,7 @@ import kotlinx.coroutines.flow.first
         // While the controls are up, their status line reports opening; the centred pill would sit under the panel.
         if (opening && !controlsShown) {
             Row(Modifier.align(Alignment.Center).offset { IntOffset(if (layer == PlayerLayer.Tracks) (-220).dp.roundToPx() else 0, 0) }
-                .background(Ink.Background.copy(alpha = .9f), RoundedCornerShape(12.dp)).padding(20.dp),
+                .background(Ink.Background.copy(alpha = panelAlpha), RoundedCornerShape(12.dp)).padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 LoadingArc()
                 Text(stringResource(R.string.player_opening), color = Ink.Text, fontFamily = Roboto, fontSize = 16.sp)
@@ -321,7 +327,7 @@ import kotlinx.coroutines.flow.first
                 .16f to Color.Transparent, .5f to Color.Transparent, .74f to Color.Black.copy(alpha = .72f), 1f to Color.Black.copy(alpha = .92f))))
             // Its own surface keeps the label readable over bright frames and burned-in video text.
             Row(Modifier.align(Alignment.TopStart).padding(start = TvLayout.Gutter, end = TvLayout.Gutter, top = 22.dp)
-                .background(Ink.Background.copy(alpha = .9f), RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 6.dp),
+                .background(Ink.Background.copy(alpha = panelAlpha), RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 LineIcon(if (live) "tv" else "film", Ink.Mint, Modifier.size(20.dp))
                 Text(stringResource(if (live) R.string.player_kicker_live else if (media.entry.kind == MediaKind.EPISODE) R.string.player_kicker_series
@@ -416,7 +422,9 @@ import kotlinx.coroutines.flow.first
                 }
             }
         }
-        if (layer == PlayerLayer.Tracks) TracksDialog(tracks, trackParameters, player, model) { perform(PlayerCommand.CloseTracks) }
+        if (layer == PlayerLayer.Tracks) TracksDialog(tracks, trackParameters, player, model, screenState.playback.panelOpacity) {
+            perform(PlayerCommand.CloseTracks)
+        }
         endState?.let { end -> EpisodeEndDialog(end,
             play = { episodeEnd.playNow() == NextResult.NEEDS_PIN },
             stay = { perform(PlayerCommand.CloseEndCard) },
@@ -426,8 +434,13 @@ import kotlinx.coroutines.flow.first
     }
 }
 
+/**
+ * The Ses / Altyazı panel at the right edge. [opacity] lets the picture through its body (Oynatıcı panelleri); while it
+ * does, the window behind is not dimmed either, or the picture would show through as a dark grey.
+ */
 @OptIn(ExperimentalFoundationApi::class)
-@Composable internal fun TracksDialog(tracks: Tracks, parameters: TrackSelectionParameters, player: ExoPlayer, model: TvViewModel, dismiss: () -> Unit) {
+@Composable internal fun TracksDialog(tracks: Tracks, parameters: TrackSelectionParameters, player: ExoPlayer, model: TvViewModel,
+    opacity: PanelOpacity = PanelOpacity.OPAQUE, dismiss: () -> Unit) {
     val first = remember { FocusRequester() }
     val focusEdge = with(LocalDensity.current) { 8.dp.toPx() }
     val trackVisibility = remember(focusEdge) { object : BringIntoViewSpec {
@@ -440,13 +453,15 @@ import kotlinx.coroutines.flow.first
     } }
     Dialog(onDismissRequest = dismiss, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
         val window = LocalWindowInfo.current
+        val dialogView = LocalView.current
         LaunchedEffect(Unit) {
             snapshotFlow { window.isWindowFocused }.first { it }
             first.requestFocus()
         }
+        if (opacity.alpha < 1f) SideEffect { (dialogView.parent as? DialogWindowProvider)?.window?.setDimAmount(0f) }
         Box(Modifier.fillMaxSize().focusProperties { onEnter = { first.requestFocus() } }.focusGroup(), contentAlignment = Alignment.CenterEnd) {
         Column(Modifier.width(440.dp).fillMaxHeight()
-            .background(Ink.Background, RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp)).testTag("tracks-panel")) {
+            .background(Ink.Background.copy(alpha = opacity.alpha), RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp)).testTag("tracks-panel")) {
         Row(Modifier.fillMaxWidth().padding(start = 28.dp, end = 28.dp, top = 24.dp, bottom = 18.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(stringResource(R.string.tracks_title), Modifier.weight(1f).testTag("tracks-title"), color = Ink.Text,
@@ -499,7 +514,6 @@ import kotlinx.coroutines.flow.first
     var restore by remember { mutableStateOf(false) }
     val explanation = remember { FocusRequester() }
     val window = LocalWindowInfo.current
-    val choice = stringResource(if (selected) R.string.tracks_selected else R.string.tracks_not_selected)
     LaunchedEffect(reading, restore) {
         if (!reading && restore) {
             snapshotFlow { window.isWindowFocused }.first { it }
@@ -508,27 +522,8 @@ import kotlinx.coroutines.flow.first
         }
     }
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    Button(onClick = onClick, modifier = Modifier.focusProperties { canFocus = enabled }.fillMaxWidth()
-        .semantics { role = Role.RadioButton; this.selected = selected; stateDescription = choice },
-        enabled = enabled, contentPadding = PaddingValues(0.dp), shape = ButtonDefaults.shape(shape = RoundedCornerShape(TvLayout.CardRadius)),
-        colors = ButtonDefaults.colors(containerColor = if (selected) Ink.Selected else Ink.Container, focusedContainerColor = Ink.High),
-        scale = ButtonDefaults.scale(focusedScale = 1f),
-        border = ButtonDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
-        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            // The status line is never ellipsized, so an unavailable track always says why.
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(label, color = if (enabled) Ink.Text else Ink.Muted,
-                    fontFamily = Roboto, fontSize = 14.sp, lineHeight = 20.sp,
-                    maxLines = 5, overflow = TextOverflow.Ellipsis,
-                    onTextLayout = { overflow = it.hasVisualOverflow })
-                if (status != null) Note(status)
-            }
-            // Always lay out the glyph so rows keep one height when the selection changes.
-            Text("✓", Modifier.width(24.dp).clearAndSetSemantics {}, color = if (selected) Ink.Mint else Color.Transparent,
-                fontFamily = Roboto, fontSize = 16.sp)
-        }
-    }
+    // The status line is never ellipsized, so an unavailable track always says why.
+    RadioRow(label, selected, description = status, enabled = enabled, maxLines = 5, onLabelOverflow = { overflow = it }, onClick = onClick)
     if (overflow) Action(stringResource(R.string.tracks_full_description), Modifier.focusRequester(explanation)) { reading = true }
     }
     if (reading) {

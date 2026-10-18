@@ -84,15 +84,33 @@ class SettingsNavTest {
         assertEquals(SettingsNav.Entry(main), nav.top)
     }
 
-    @Test fun aNewLanguageBringsTheMainPageBackOnTheRowItWasLeftOn() {
+    @Test fun aNewLanguageBringsTheSectionBackOnTheRowItWasLeftOn() {
         val nav = SettingsNav(main)
-        assertNull(nav.rootFocus)
+        val general = SettingsRoute.Page("general")
+        assertEquals(listOf(SettingsNav.Entry(main)), nav.kept { true })
         // Dil / Language opens its options; picking one recreates the activity with that ChoicePage still on top.
+        nav.open(general, "general")
         nav.open(SettingsRoute.Choice("language"), "language")
-        assertEquals("language", nav.rootFocus)
-        val again = SettingsNav(main, nav.rootFocus)
-        assertEquals(SettingsNav.Entry(main, "language"), again.top)
+        val kept = nav.kept { it is SettingsRoute.Page }
+        assertEquals(listOf(SettingsNav.Entry(main, "general"), SettingsNav.Entry(general, "language")), kept)
+        val again = SettingsNav(main, kept)
+        assertEquals(SettingsNav.Entry(general, "language"), again.top)
+        assertTrue(again.back())
+        assertEquals(SettingsNav.Entry(main, "general"), again.top)
         assertFalse(again.back())
+    }
+
+    @Test fun aPageThatAsksForSomethingIsNotOpenedAgainByAConfigurationChange() {
+        val nav = SettingsNav(main)
+        val content = SettingsRoute.Page("content")
+        val parental = SettingsRoute.Page("parental")
+        nav.open(content, "content"); nav.open(parental, "parental"); nav.open(SettingsRoute.Page("parental-locked"), "locked")
+        // Ebeveyn denetimi asks for its PIN: it and the pages above it close, and the section returns to its row.
+        val kept = nav.kept { it != parental }
+        assertEquals(listOf(SettingsNav.Entry(main, "content"), SettingsNav.Entry(content, "parental")), kept)
+        assertEquals(SettingsNav.Entry(content, "parental"), SettingsNav(main, kept).top)
+        // What another panel kept is no start for this one.
+        assertEquals(SettingsNav.Entry(main), SettingsNav(main, listOf(SettingsNav.Entry(content))).top)
     }
 
     @Test fun focusReturnsToARowStillOnThePageOrFallsBackToItsStart() {
@@ -121,5 +139,13 @@ class SettingsNavTest {
         assertEquals(ids.distinct(), ids)
         assertTrue(mainPage.id in settingsPages)
         for (kind in listOf(MediaKind.LIVE, MediaKind.MOVIE, MediaKind.SERIES)) assertTrue(kind.name, "category-list:${kind.name}" in settingsPages)
+    }
+
+    @Test fun everySectionHasItsPageAndEveryOtherPageASection() {
+        // The main page lists the sections; each opens a page of its own (plan decision 4a-8).
+        for (section in SectionId.entries) assertTrue(section.name, settingsPageList.any { it.section == section })
+        assertEquals(listOf(mainPage.id), settingsPageList.filter { it.section == null }.map { it.id })
+        assertEquals(PageGuard.None, settingsPages.getValue(playerPage.id).guard)
+        assertEquals(SectionId.PLAYER, settingsPages.getValue("player-subtitles").section)
     }
 }

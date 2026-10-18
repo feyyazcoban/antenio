@@ -17,8 +17,8 @@ import org.junit.runner.RunWith
 
 /**
  * The app's language (S13) on the English test emulator: English by default; Turkish, English and the TV's language
- * again from Settings → Dil / Language. A new language recreates the activity: the screen behind and Settings come back
- * in it, Settings on the language row, and dates follow. Isolated synthetic catalog; never run state-clearing tests on a
+ * again from Settings → General and language → Dil / Language. A new language recreates the activity: the screen behind
+ * and Settings come back in it, Settings on its section's language row, and dates follow. Isolated synthetic catalog; never run state-clearing tests on a
  * user's television.
  */
 @RunWith(AndroidJUnit4::class)
@@ -78,14 +78,17 @@ class LocaleFlowTest {
     private fun spokenIn(tag: String) = ui.onNodeWithTag(tag).fetchSemanticsNode().config[SemanticsProperties.Text]
         .flatMap { text -> text.spanStyles.mapNotNull { it.item.localeList?.firstOrNull()?.language } }
 
-    /** Back closes Settings; focus is on the menu's Settings item [nav] again, as the panel was opened from it. */
+    /**
+     * Back leaves the section, then closes Settings; focus is on the menu's Settings item [nav] again, as the panel was
+     * opened from it.
+     */
     private fun closeToMenu(nav: String) {
-        key(KeyEvent.KEYCODE_BACK)
+        key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK)
         ui.waitUntil(5_000) { ui.onAllNodesWithTag("settings-panel").fetchSemanticsNodes().isEmpty() }
         ui.waitUntil(5_000) { ui.onAllNodes(hasTestTag("nav:$nav") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
     }
 
-    /** Picks [option] in Dil / Language from its row; Settings comes back on the row in the language [tag]. */
+    /** Picks [option] in Dil / Language from its row; Settings comes back on the row, in its section, in the language [tag]. */
     private fun choose(option: AppLanguage, tag: String) {
         row("Dil / Language").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_CENTER)
@@ -119,19 +122,31 @@ class LocaleFlowTest {
         assertEquals("en", LocaleController.locale.language)
         ui.onNodeWithTag("nav:Home").assertExists()
         ui.onNodeWithTag("nav:Live TV").assertExists()
-        openSettings("Settings", "Reduce motion")
+        openSettings("Settings", "General and language")
         ui.onNodeWithTag("settings-title").assertTextEquals("Settings")
-        key(KeyEvent.KEYCODE_DPAD_DOWN)
-        row("Dil / Language").assertIsFocused().assert(hasText("Sistem dili / System language"))
-        ui.onNodeWithTag("settings-section").assertTextEquals("Appearance and sound")
+        // Sources says when the catalogue was last updated.
+        key(KeyEvent.KEYCODE_DPAD_DOWN); key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.onNodeWithTag("settings-title").assertTextEquals("Sources")
         val updated = model.state.value.catalogUpdatedAt
         ui.onNodeWithText("Last updated: ${updatedTime(updated)}").assertExists()
+        key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_DPAD_UP)
+        row("General and language").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        waitForFocus("Reduce motion")
+        ui.onNodeWithTag("settings-title").assertTextEquals("General and language")
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
+        row("Dil / Language").assertIsFocused().assert(hasText("Sistem dili / System language"))
 
         choose(AppLanguage.TURKISH, "tr")
         assertEquals(AppLanguage.TURKISH, LocaleController.choice(ui.activity))
-        ui.onNodeWithTag("settings-title").assertTextEquals("Ayarlar")
+        ui.onNodeWithTag("settings-title").assertTextEquals("Genel ve dil")
         row("Dil / Language").assertIsFocused().assert(hasText("Türkçe"))
-        ui.onNodeWithTag("settings-section").assertTextEquals("Görünüm ve ses")
+        // Back finds the main page under it, in Turkish too, on the section's row.
+        key(KeyEvent.KEYCODE_BACK)
+        ui.onNodeWithTag("settings-title").assertTextEquals("Ayarlar")
+        row("Genel ve dil").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_DOWN); key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.onNodeWithTag("settings-title").assertTextEquals("Kaynaklar")
         // Dates follow the app's language, not the TV's.
         ui.onNodeWithText("Son güncelleme: ${updatedTime(updated)}").assertExists()
         assertTrue(updatedTime(updated), updatedTime(updated).contains(Regex("Eki|Kas|Ara|Oca|Şub|Mar|Nis|May|Haz|Tem|Ağu|Eyl")))
@@ -141,17 +156,19 @@ class LocaleFlowTest {
         ui.onNodeWithTag("nav:Canlı TV").assertExists()
         assertEquals(1, model.state.value.sources.size)
 
-        openSettings("Ayarlar", "Hareketi azalt")
+        openSettings("Ayarlar", "Genel ve dil")
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        waitForFocus("Hareketi azalt")
         key(KeyEvent.KEYCODE_DPAD_DOWN)
         choose(AppLanguage.ENGLISH, "en")
         assertEquals(AppLanguage.ENGLISH, LocaleController.choice(ui.activity))
-        ui.onNodeWithTag("settings-title").assertTextEquals("Settings")
+        ui.onNodeWithTag("settings-title").assertTextEquals("General and language")
         row("Dil / Language").assertIsFocused().assert(hasText("English"))
 
         choose(AppLanguage.SYSTEM, "en")
         assertEquals(AppLanguage.SYSTEM, LocaleController.choice(ui.activity))
         ui.waitUntil(5_000) { ui.onAllNodes(hasText("Sistem dili / System language") and hasClickAction()).fetchSemanticsNodes().isNotEmpty() }
-        ui.onNodeWithTag("settings-title").assertTextEquals("Settings")
+        ui.onNodeWithTag("settings-title").assertTextEquals("General and language")
         closeToMenu("Settings")
         ui.onNodeWithTag("nav:Home").assertExists()
     }

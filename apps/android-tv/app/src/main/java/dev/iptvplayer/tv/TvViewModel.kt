@@ -119,6 +119,8 @@ data class TvState(
     val hideAdultCategories: Boolean = true,
     val categoryChoices: Map<MediaKind, List<CategoryChoice>> = emptyMap(),
     val autoNextEpisode: Boolean = true,
+    /** Settings → Oynatıcı. The player reads it when it is made, so a change holds from the next stream. */
+    val playback: PlaybackPreferences = PlaybackPreferences(),
     /** The Sırala choice of the film and series lists, kept on the device. */
     val librarySorts: Map<MediaKind, LibrarySort> = emptyMap(),
     /**
@@ -166,7 +168,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     private val artwork = (application as TvApplication).artworkCache
     private var recoveryStamp: String? = null
     private val transactions = SourceTransactions.shared
-    private val mutable = MutableStateFlow(TvState(reducedMotion = store.reducedMotion, startupSound = store.startupSound, autoNextEpisode = store.autoNextEpisode, guideZoneId = store.guideZoneId, librarySorts = storedSorts()))
+    private val mutable = MutableStateFlow(TvState(reducedMotion = store.reducedMotion, startupSound = store.startupSound, autoNextEpisode = store.autoNextEpisode, playback = store.playback, guideZoneId = store.guideZoneId, librarySorts = storedSorts()))
     val state = mutable.asStateFlow()
     private var registry = SourceRegistry()
     private val snapshots = LinkedHashMap<String, CatalogSnapshot>()
@@ -383,7 +385,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     /** A TV without sources, on the setup screen; the TV's own settings and the PIN's status stay. */
     private fun startedOver(notice: CatalogNotice? = null) = TvState(route = Route.SETUP, sourceTask = SourceTask.IDLE,
         reducedMotion = store.reducedMotion, startupSound = store.startupSound, autoNextEpisode = store.autoNextEpisode,
-        guideZoneId = store.guideZoneId, librarySorts = storedSorts(), hideAdultCategories = store.hideAdultCategories,
+        playback = store.playback, guideZoneId = store.guideZoneId, librarySorts = storedSorts(), hideAdultCategories = store.hideAdultCategories,
         parental = parental.state.value, catalogNotice = notice)
 
     /**
@@ -973,6 +975,11 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         if (pending.isNotEmpty()) viewModelScope.launch(Dispatchers.Default) { pending.forEach { (kind, sort) -> libraryOrders.sorted(s.catalog, kind, sort, appLocale) } }
     }
     fun autoNextEpisode() { store.autoNextEpisode = !state.value.autoNextEpisode; mutable.update { it.copy(autoNextEpisode = store.autoNextEpisode) } }
+    /** A Settings → Oynatıcı choice, kept on the device; the next player is made with it. */
+    fun playback(change: (PlaybackPreferences) -> PlaybackPreferences) {
+        val next = change(state.value.playback)
+        store.playback = next; mutable.update { it.copy(playback = next) }
+    }
 
     fun favoriteTarget(entry: MediaEntry): MediaEntry? {
         val s = state.value

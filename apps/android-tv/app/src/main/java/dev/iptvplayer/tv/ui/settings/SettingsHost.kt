@@ -64,14 +64,25 @@ private class PagePlace {
 }
 
 /**
- * The Settings panel at the right edge: the main page, and the pages its rows open from [settingsPages] stacked above
- * it. Back leaves one page and focus returns to the row that opened it; Back on the main page closes the panel.
- * Without a [gate], a guarded page asks for the parental PIN.
+ * A configuration change keeps the pages open up to the first that asks for something or is a ChoicePage, each with the
+ * row it was left on, so a new language returns to Genel ve dil on Dil / Language: a guarded page needs its PIN again,
+ * and a ChoicePage's options live in its row. Saved as each page's id, then its row's key ("" for none).
+ */
+private val navSaver = Saver<SettingsNav, ArrayList<String>>(
+    save = { nav ->
+        nav.kept { it is SettingsRoute.Page && settingsPages[it.id]?.guard == PageGuard.None }
+            .flatMapTo(ArrayList()) { listOf((it.route as SettingsRoute.Page).id, it.focusKey.orEmpty()) }
+    },
+    restore = { saved -> SettingsNav(mainPage, saved.chunked(2) { (id, focus) -> SettingsNav.Entry(SettingsRoute.Page(id), focus.ifEmpty { null }) }) }
+)
+
+/**
+ * The Settings panel at the right edge: the main page, which lists the sections, and the pages their rows open from
+ * [settingsPages] stacked above it. Back leaves one page and focus returns to the row that opened it; Back on the main
+ * page closes the panel. Without a [gate], a guarded page asks for the parental PIN.
  */
 @Composable internal fun Settings(s: TvState, model: TvViewModel, gate: PageGate? = null, dismiss: () -> Unit) {
-    // A configuration change keeps only the main page and the row it was left on, so a new language returns to Dil /
-    // Language; a page above it may need its PIN again, and a ChoicePage's options live in its row.
-    val nav = rememberSaveable(saver = Saver<SettingsNav, String>({ it.rootFocus }, { SettingsNav(mainPage, it) })) { SettingsNav(mainPage) }
+    val nav = rememberSaveable(saver = navSaver) { SettingsNav(mainPage) }
     var current by remember { mutableStateOf(nav.top) }
     // Each open page keeps its place while a page above it is open, so Back finds the row that opened that page on
     // screen, in a lazy list too. A page that closed starts at its top when it opens again.
@@ -81,11 +92,10 @@ private class PagePlace {
     val rows = remember(current) { PageRows() }
     val headerAction = remember { FocusRequester() }
     var readingFocused by remember { mutableStateOf(false) }
-    var activeSection by remember { mutableStateOf(SectionId.APPEARANCE) }
     val scope = rememberCoroutineScope()
     val readingStep = with(LocalDensity.current) { 56.dp.toPx() }
     val scrollHintThreshold = with(LocalDensity.current) { 20.dp.toPx() }
-    // Counted here, not on the main page, which composes again each time Back returns to it.
+    // Counted here, not on a page, which composes again each time Back returns to it.
     val visibleItems = remember(s.catalog) { s.catalog.items.count { !it.adult && it.kind != MediaKind.EPISODE } }
     fun back(from: SettingsRoute = nav.top.route) {
         if (nav.back(from)) { current = nav.top; places.keys.retainAll { nav.isOpen(it) } } else dismiss()
@@ -112,7 +122,7 @@ private class PagePlace {
         // The page's own buttons leave only this page (SettingsNav.back), the Back key and the header action the top one.
         val pageScope = SettingsScope(s, model, rows, place.list, visibleItems, navigate = ::open,
             showChoice = { rowKey, offered -> choice = offered; open(SettingsRoute.Choice(rowKey), rowKey) },
-            showSection = { activeSection = it }, back = { back(from = shown) }, dismiss = dismiss)
+            back = { back(from = shown) }, dismiss = dismiss)
         // The row the page starts on or returns to; the header action on a page without rows (Uygulama hakkında).
         fun entry() = rows.entry(current.focusKey) ?: headerAction
         val windowInfo = LocalWindowInfo.current
@@ -132,17 +142,13 @@ private class PagePlace {
                 Row(Modifier.fillMaxWidth().padding(start = 28.dp, end = 28.dp, top = 24.dp, bottom = 18.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     // A ChoicePage keeps its row's label, spans and all (the language TalkBack reads it in).
-                    val heading = page?.title?.resolve()?.let(::AnnotatedString) ?: choice?.let { it.titleText ?: AnnotatedString(it.title) }
-                    Text(heading ?: AnnotatedString(""), Modifier.weight(1f).testTag("settings-title"), color = Ink.Text,
+                    val name = page?.title?.resolve()?.let(::AnnotatedString) ?: choice?.let { it.titleText ?: AnnotatedString(it.title) }
+                    // The page's name, a section's on its own page: TalkBack reads it as the heading of what follows.
+                    Text(name ?: AnnotatedString(""), Modifier.weight(1f).testTag("settings-title").semantics { heading() }, color = Ink.Text,
                         fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 24.sp, lineHeight = 30.sp)
                     Action(stringResource(if (atRoot) R.string.action_close else R.string.action_back),
                         Modifier.focusRequester(headerAction).testTag("settings-close")) { back() }
                 }
-                if (atRoot) Text(stringResource(activeSection.label),
-                    Modifier.padding(start = 28.dp, end = 28.dp, bottom = 12.dp)
-                        .testTag("settings-section").semantics { heading() },
-                    color = Ink.Mint, fontFamily = Roboto, fontWeight = FontWeight.Medium,
-                    fontSize = 12.sp, lineHeight = 17.sp)
                 Box(Modifier.fillMaxWidth().height(1.dp).background(Ink.Divider))
                 // What the last change on this page said, fixed above its rows: in view whichever row has focus, even far
                 // down a long list, and read out as it arrives.
