@@ -34,9 +34,10 @@ TV'ye giden teslimler 0.14.29'dan beri `.\gradlew.bat assembleRelease` çıktıs
 ## Cihaz ayrımı
 
 - Kullanıcı cihazı `emulator-5554`: gerçek kaynak ve 0.13 korunur; test/reset/izinsiz kurulum yapılmaz.
-- Tasarım cihazı `emulator-5556`: önce bağlı cihaz ve AVD kimliği doğrulanır. Sadece ayrılmış cihazda hedefli test çalıştırılır.
+- Tasarım cihazı `emulator-5556` (`nextv_design_api36`): gerçek "Evim" kaynağı ve sentetik Demo kaynağı durur; elle doğrulama ve ekran görüntüsü için. Enstrümantasyon testleri kaynakları sildiği için burada koşulmaz; zorunlu kalırsa önce `adb -s emulator-5556 emu avd snapshot save <ad>`, sonra `snapshot load <ad>` ile geri yüklenir.
+- Test cihazı `emulator-5558` (`nextv_test_api36`, 18 Ekim 2026'da kullanıcının onayıyla kuruldu): boş, 5556 ile aynı ekran (1920×1080, 320 dpi = 960×540 dp, API 36 Android TV, 2 GB RAM). Enstrümantasyon testleri yalnız burada ve yalnız `tools/run-device-tests.sh` ile koşulur; betik seri kimliğini ve AVD adını doğrulamadan hiçbir şey kurmaz. Açmak için (AVD'ler `C:\Users\fyzcb\Documents\Codex\2026-10-13\bi\work\android-design-avds`, SDK aynı klasörün `android-sdk`'sı): `emulator -avd nextv_test_api36 -port 5558 -snapshot clean -no-snapshot-save -no-window -no-audio -gpu swiftshader_indirect` (`ANDROID_AVD_HOME` ve `ANDROID_SDK_ROOT` bu klasörlere). `clean` anlık görüntüsü ilk açılıştan hemen sonraki boş cihazdır. Git'e girmeyen test videosu `app/src/androidTest/assets/episode-end-fixture.mp4` ana checkout'tan kopyalanır.
 - Fiziksel 65U95A: kullanıcının önceki güncelleme isteği kapsamında 16 Ekim'de kullanıcının isteğiyle 0.14.38 (release) kuruldu; güncel sürüm STATUS üzerinden doğrulanır. Bağlı veya açık olduğu varsayılmaz; test/reset yapılmaz, güncelleme kullanıcı isteğiyle gerçekleştirilir.
-- Toplu `connectedAndroidTest` çalıştırma. Her kurulum/test komutunda doğrulanmış seri kimliğini açıkça belirt.
+- Toplu `connectedAndroidTest`, `installDebug` gibi Gradle cihaz görevlerini çalıştırma: bağlı bütün cihazlara (TV ve 5554 dahil) kurarlar. Her kurulum/test komutunda doğrulanmış seri kimliğini açıkça belirt.
 
 ## Dosya yerleşimi
 
