@@ -5,7 +5,9 @@ import android.view.KeyEvent
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
@@ -28,10 +30,11 @@ class LoadingLayoutTest {
             ui.runOnUiThread { reduced.value = still }
             ui.waitUntil(5_000) { ui.onAllNodesWithTag("launch-loading").fetchSemanticsNodes().isNotEmpty() }
             ui.onNodeWithTag("launch-loading").assert(SemanticsMatcher.expectValue(SemanticsProperties.ProgressBarRangeInfo, ProgressBarRangeInfo.Indeterminate))
-            val label = ui.onNodeWithText("Hazırlanıyor...").assertExists().getUnclippedBoundsInRoot()
-            // At least 14 sp (D069). A single line's box is trimmed to the font, so it is shorter than the 18 sp line
-            // height but never shorter than the text size.
-            assertTrue("The label keeps a TV-readable height", label.bottom - label.top >= with(ui.density) { 14.sp.toDp() })
+            // At least 14 sp (D069), read from the laid-out text: a single line's box is trimmed to the font, so its
+            // height does not tell 12 sp from 14 sp.
+            val layouts = mutableListOf<TextLayoutResult>()
+            ui.onNodeWithText("Hazırlanıyor...").assertExists().performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+            assertTrue("The label keeps a TV-readable size", layouts.single().layoutInput.style.fontSize >= 14.sp)
         }
     }
 

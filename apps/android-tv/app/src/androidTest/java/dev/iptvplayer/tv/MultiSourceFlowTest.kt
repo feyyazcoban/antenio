@@ -25,8 +25,9 @@ class MultiSourceFlowTest {
     private lateinit var b: MockWebServer
     @Volatile private var failA = false
     @Volatile private var partialA = false
-    /** Both providers' calls except the slide details Home fetches once per session (D067). */
+    /** Both providers' calls, with film and series details on their own: Home fetches its slides' once per session (D067). */
     private val catalogCalls = java.util.concurrent.atomic.AtomicInteger()
+    private val detailCalls = java.util.concurrent.atomic.AtomicInteger()
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
 
     @Before fun setup() {
@@ -39,7 +40,8 @@ class MultiSourceFlowTest {
         fun server(first: Boolean) = MockWebServer().apply {
             dispatcher = object : Dispatcher() {
                 override fun dispatch(request: RecordedRequest): MockResponse {
-                    if (request.requestUrl!!.queryParameter("action") !in setOf("get_vod_info", "get_series_info")) catalogCalls.incrementAndGet()
+                    if (request.requestUrl!!.queryParameter("action") in setOf("get_vod_info", "get_series_info")) detailCalls.incrementAndGet()
+                    else catalogCalls.incrementAndGet()
                     if (first && failA) return MockResponse().setResponseCode(401)
                     if (first && partialA && request.requestUrl!!.queryParameter("action") == "get_series")
                         return MockResponse().setResponseCode(503)
@@ -131,9 +133,16 @@ class MultiSourceFlowTest {
         assertEquals("aynı film", model.state.value.searchQuery)
         assertEquals(one.id, model.state.value.searchSourceId)
         ui.onNodeWithTag("search:${filmA.id}").assertIsFocused()
-        val requests = catalogCalls.get()
+        val requests = catalogCalls.get(); val details = detailCalls.get()
         reopen()
         assertEquals(requests, catalogCalls.get())
+        // Home's only slide is the featured film (no entry is dated): the new session fetches its details once (D067,
+        // at most 6 requests), and a restored Home does not ask again.
+        ui.waitUntil(10_000) { detailCalls.get() > details }
+        ui.activityRule.scenario.recreate(); ui.waitForIdle()
+        ui.waitUntil(10_000) { ui.onAllNodesWithTag("hero-watch").fetchSemanticsNodes().isNotEmpty() }
+        android.os.SystemClock.sleep(1_000)
+        assertEquals("Slide details are fetched once per session", details + 1, detailCalls.get())
         // No screen offers a source selector, so opening the app shows every source again (D060).
         assertNull(model.state.value.sourceFilterId)
         assertEquals(setOf(one.id, two.id), model.state.value.catalog.items.map { it.sourceId }.toSet())
