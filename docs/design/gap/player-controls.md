@@ -1,5 +1,7 @@
 # Oynatıcı kontrolleri: önerilen tasarım (S14b)
 
+**18 Ekim · D087 native düzeltmesi:** §1'deki sabit 24 sp odak etiketi alanı yerine etiketin ölçülmüş metin yüksekliği +8 dp iç boşluk +11 dp düğme payı +8 dp çubuk payı ayrılır. §2'deki düğmeden 6 dp uzaklık yerine dış halkadan en az 6 dp (düğme kenarından en az 11 dp) bırakılır. Etiketlerin alt kenarı bütün düğme boylarında aynı hizadadır. Düğme içeriği gerçek 64/52/44 dp alanı doldurup iki eksende ortalanır; SVG boyutları/oynatma davranışı korunur. Güncel test ve teslim [HANDOFF](../../project/HANDOFF.md)'tadır.
+
 18 Ekim 2026 · tasarım iş akışı (üç yön, üç yargıç, birleşim). Kullanıcı önerilen tasarımı ve varsayılan kararları aynı gün "Evet" ile onayladı (D072). Maketler: [proposal.html](../../../design/reviews/player-controls-2026-10-18/proposal.html), [current.html](../../../design/reviews/player-controls-2026-10-18/current.html).
 
 # S14b · Oynatıcı kontrolleri ve sarma çubuğu (Faz D)

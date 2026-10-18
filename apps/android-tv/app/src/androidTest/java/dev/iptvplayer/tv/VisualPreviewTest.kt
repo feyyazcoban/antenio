@@ -574,6 +574,12 @@ class VisualPreviewTest {
         Assert.assertTrue("Controls remain inside panel", controls.bottom <= panel.bottom)
         shot("player-panel")
         ui.onNodeWithTag("player-next-episode").assertExists()
+        val nextButton = ui.onNodeWithTag("player-next-episode", true).getUnclippedBoundsInRoot()
+        val nextSymbol = ui.onNodeWithTag("player-next-episode-symbol", true).getUnclippedBoundsInRoot()
+        Assert.assertEquals("Next episode symbol stays centered in its pill", (nextButton.top + nextButton.bottom).value / 2,
+            (nextSymbol.top + nextSymbol.bottom).value / 2, 1f)
+        Assert.assertTrue("Episode action has clear space before the audio controls",
+            ui.onNodeWithTag("player-tracks", true).getUnclippedBoundsInRoot().left - nextButton.right >= 32.dp)
         repeat(3) { instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle() }
         ui.onNodeWithTag("player-tracks").assertIsFocused()
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)

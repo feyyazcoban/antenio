@@ -8,7 +8,7 @@
 - S14 inceleme düzeltmeleri: `c54a9f7` alındı ve tamamlandı. PCM destek uyarısı mevcut `flash` yolundan medya başına bir kez; ses çıkışı hataları genel hata; panellerde açık opaklık; uzun değerlerde alta geçen değer etiketi; gezinme testleri `SectionId` sırasından. 340 JVM testi (1 atlanan), lint 0 hata, release/androidTest derlemesi; 5558'de normal yazıda 16, 1,5 ve 2,0 ölçekte ayrı ayrı 12 ekran testi geçti. AC-3 destek kontrolü saf JVM testinde; gerçek cihazda desteklenmeyen AC-3 akışı/TalkBack doğrulanmadı. Altı bölümlü Ayarlar sınırı D076'da açıkça kayıtlı.
 - Teslim tarihçesi: 0.14.45 (kod 59) S14 düzeltmeleri; 0.14.46 (kod 60) D077 oturumluk film/dizi hızı (0,5×–2×). Kullanıcının son paketi TV'ye veri silmeden kurma talimatı sürer.
 - S14b (D072) native uygulaması 0.14.47 / kod 61'de: alt blok, yeni kontroller, bekleyen sarma ve gizli sarma önizlemesi, büyük yazı düzeni; D077 hızı korunur. Gerçekten koşulan testler ve cihaz teslimi [QA](../../project/native-player-controls-47-qa.json), STATUS/HANDOFF'ta. Bağımsız incelemedeki P3 çubuk odak ipucu düzeltildi. Fiziksel/Figma/görsel kabul açık; BKL-031 done değildir.
-- Sırada: S15a–S17 → Faz E (S18–S29) → Faz F–J (PLAN §2). S15a kanal kapsamı/son ve önceki kanal verisiyle başla. Bir sonraki değişiklik içeren TV paketi en az kod 71 / 0.14.57 olmalı. D077 hız seçimi S16'da korunmalı; canlı yayın normal hızda kalır.
+- Sırada: S15a–S17 → Faz E (S18–S29) → Faz F–J (PLAN §2). S15a kanal kapsamı/son ve önceki kanal verisiyle başla. Bir sonraki değişiklik içeren TV paketi en az kod 72 / 0.14.58 olmalı. D077 hız seçimi S16'da korunmalı; canlı yayın normal hızda kalır.
 
 ## Her adımda yöntem
 

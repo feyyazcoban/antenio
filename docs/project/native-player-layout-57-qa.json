@@ -1,0 +1,82 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.57-design-preview",
+  "versionCode": 71,
+  "decision": "D087",
+  "change": "Player button contents fill their actual 64/52/44dp bounds and center icons/labels. Focus labels share one baseline; measured reserved space clears the time row by 8dp and the outer focus ring by at least 6dp.",
+  "review": "Read-only hero_review and player_review inspected source/tests. Required label existence assertions restored after review. Final movie, seek-back, favorite, live, series and failure screenshots independently approved; no remaining geometry findings.",
+  "tests": {
+    "build": "release/debug/androidTest successful; test APK rebuilt after final required-label assertions",
+    "unit": {
+      "tests": 354,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "Error": 0,
+      "Warning": 37
+    },
+    "regressionBeforeFix": "New center assertion failed on unchanged old production APK: player-primary center expected 484dp, actual 472dp (12dp too high).",
+    "testCompileCorrection": "Initial test-only compile failed because DpRect.center is unavailable. Replaced with edge averages; compile and final device checks passed.",
+    "instrumentation": {
+      "device": "emulator-5558 / nextv_test_api36",
+      "runner": "tools/run-device-tests.sh --no-build",
+      "fontScale": "1.0 only",
+      "passed": 7,
+      "failed": 0,
+      "selection": [
+        "PlayerControlsLayoutTest (5)",
+        "VisualPreviewTest#playerPanelKeepsTitleAndRemoteActionsInsideScreen",
+        "PlaybackRecoveryFlowTest#longTitleRecoveryAndFailureKeepControlsInsideScreen"
+      ],
+      "repeat": "Movie geometry/panel-return test rerun unchanged: 1/1 passed."
+    },
+    "visual": "Inspected centered Play/seek/chips, shared label baseline and clearances, long title, live actions, series next episode, failure Retry, and recovered playback. Raised title remains readable on synthetic color-bar video.",
+    "captureNote": "The first movie return screenshot and recovering screenshot had incomplete overlay content despite passing semantics. Raw frames retained under ignored work/player-layout-qa. Movie test repeated without source/APK changes; complete return frame independently inspected and used as proof. This does not establish a physical-device rendering defect."
+  },
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "70",
+        "versionName": "0.14.56-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 21:26:34"
+      },
+      "after": {
+        "versionCode": "71",
+        "versionName": "0.14.57-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 21:37:17"
+      },
+      "sha256": "5dfb67081992a47b2179f6c33393cabd21ab38c081764bef177b77dbc122fb3b",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "designEmulator": "5556 stayed off at 0.14.51/code65; no data/upgrade changes",
+    "emulatorsAfter": "5558 stopped; 5556/5554 untouched; Gradle daemon stopped",
+    "signatureSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065",
+    "release": "R8 release, not debuggable, same signing certificate"
+  },
+  "limitations": [
+    "No font-scale matrix per user instruction",
+    "Figma unchanged",
+    "Physical TV visual acceptance remains open"
+  ],
+  "sourceInspection": [
+    "https://dl.google.com/dl/android/maven2/androidx/tv/tv-material/1.1.0/tv-material-1.1.0-sources.jar"
+  ],
+  "sha256": "5dfb67081992a47b2179f6c33393cabd21ab38c081764bef177b77dbc122fb3b",
+  "images": [
+    "design/reviews/player-layout-0.14.57/failed.png",
+    "design/reviews/player-layout-0.14.57/live.png",
+    "design/reviews/player-layout-0.14.57/movie.png",
+    "design/reviews/player-layout-0.14.57/player-favorite.png",
+    "design/reviews/player-layout-0.14.57/player-seek-back.png",
+    "design/reviews/player-layout-0.14.57/recovered.png",
+    "design/reviews/player-layout-0.14.57/series.png"
+  ],
+  "logs": "work/player-layout-qa (ignored): build.log, test-final-build.log, before-device-full.log, device-full.log, movie-repeat-full.log, tv-delivery.json"
+}

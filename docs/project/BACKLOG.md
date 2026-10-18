@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-020/031 · 0.14.57 / D087: kullanıcının player fotoğrafındaki ikon merkezi ve sıkışık odak etiketi sorunları düzeltildi; gerçek merkez/ayrım ölçümleri mevcut ekran testlerine eklendi. Teslim/kanıt STATUS/HANDOFF'ta; genel fiziksel/görsel kabul açık.
+
 BKL-019/020 · 0.14.56 / D086: dizi adı ile yıl arasındaki boş ikinci satır kaldırıldı, aralık 4 dp. Teslim/kanıt STATUS/HANDOFF'ta; genel görsel kabul açık.
 
 BKL-019/020 · 0.14.55 / D085: kullanıcının isteğiyle ana sayfa dizi afişleri ve dizi adları büyütüldü. Teslim/kanıt STATUS/HANDOFF'ta; genel görsel kabul açık.

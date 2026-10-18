@@ -1,5 +1,11 @@
 # Oynatıcı paneli
 
+## Güncel düzeltme · 0.14.57 · D087
+
+Fiziksel TV fotoğrafındaki hizalama sorunu düğme içeriğinin gerçek denetim boyutunu doldurmamasından kaynaklanıyordu. Oynatma, sarma ve yardımcı eylemlerin simge/metin grubu artık bütün düğme içinde ortalanır. 64/52/44 dp düğmelerin merkezleri aynı satırdadır; SVG yollarına telafi kaydırması uygulanmaz.
+
+Odak etiketinin yeri aynı metin stiliyle ölçülür: metin yüksekliği +8 dp iç boşluk +11 dp düğme aralığı +8 dp çubuk aralığı. Etiketlerin alt kenarı düğme boyutundan bağımsız ortak hizadadır; dış odak halkasından en az 6 dp uzak kalır. İlk odak, sarma, ses/altyazı, hız, favori ve Geri sırası korunur. Normal ekran kontrolü yapılır; font matrisi mağaza öncesi kullanıcı talebini bekler.
+
 ## 0.14.47 · D072 kontrol bloğu
 
 18 Ekim 2026 · S14b, önceki köşeli paneli tek alt karartma ve ortak bilgi bloğuyla değiştirir. Ayrıntılı sözleşme [player-controls](gap/player-controls.md); aşağıdaki 0.14.3 görselleri tarihçedir.

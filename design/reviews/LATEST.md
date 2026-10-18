@@ -1,5 +1,17 @@
 # Güncel görsel inceleme
 
+## 0.14.57 · Oynatıcı ikon ve etiket hizaları
+
+D087: ikonlar gerçek düğme merkezinde; odak etiketleri ortak alt çizgide, zaman çubuğu ve halkadan ayrı. Normal ölçekte sentetik yerel video; fiziksel kabul açık. İlk eksik dönüş karesi kanıt sayılmadı; kaynak/APK değişmeden ayrı tekrarda tam kare alındı. [QA](../../docs/project/native-player-layout-57-qa.json).
+
+![Geri sarma simgesi ve ayrı etiket](player-layout-0.14.57/player-seek-back.png)
+
+![Seçeneklerden tam oynatıcıya dönüş](player-layout-0.14.57/movie.png)
+
+![Dizi ve sonraki bölüm](player-layout-0.14.57/series.png)
+
+[Canlı yayın](player-layout-0.14.57/live.png) · [Favori](player-layout-0.14.57/player-favorite.png) · [Hata/tekrar dene](player-layout-0.14.57/failed.png) · [Yeniden oynatma](player-layout-0.14.57/recovered.png)
+
 ## 0.14.56 · Başlık ile yıl yakın
 
 D086: dizi adı boş ikinci satır ayırmaz; yıl/kaynak başlığın gerçek son satırını 4 dp aralıkla izler. Normal ölçekte sentetik yerel görsel. [QA](../../docs/project/native-series-spacing-56-qa.json).

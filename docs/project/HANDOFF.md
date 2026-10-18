@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · Oynatıcı hizalama düzeltmesi / 0.14.57 · 18 Ekim 2026
+
+Kullanıcı TV fotoğrafıyla ikon, düğme hizası ve sıkışıklık bildirdi. PlayerControlButton iç Row gerçek denetim alanını doldurmuyordu; ana ikon 12 dp yukarıdaydı. fillMaxSize ve iki eksende merkezleme bunu giderir. 24 sp sabit etiket alanı yerine aynı TextStyle ile ölçülen yükseklik +8 dp iç boşluk +11 dp düğme payı +8 dp zaman çubuğu payı kullanılır. 64/52/44 dp düğmelerde etiket alt kenarı ortak; SVG yolları, boyutlar, odak dili ve playback davranışı aynı.
+
+Değişenler: PlayerControls.kt, build.gradle.kts; PlayerControlsLayoutTest.kt/VisualPreviewTest.kt gerçek simge merkezleri, gerekli etiketlerin varlığı, etiket/çubuk/halka aralığı ve Sonraki bölüm hizası; D087, PLAYER_PRESENTATION/SCREENS/gap-player-controls, BACKLOG/STEPS, STATUS/HANDOFF; [QA](native-player-layout-57-qa.json), LATEST.md ve player-layout-0.14.57 görselleri. Figma/manifest yok. hero_review ve player_review salt okunur bağımsız inceleme yaptı; testte zorunlu etiket kontrolü düzeltildi, nihai kod ve normal görsellerde açık geometri bulgusu yok.
+
+Kontroller: Eski üretim APK'sında yeni merkez testi beklenen 484 / gerçek 472 dp ile başarısız oldu. İlk test derlemesinde mevcut olmayan DpRect.center yerine kenar ortalamaları kullanılarak düzeltildi. Nihai 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest geçti. Yalnız 5558 ve tools/run-device-tests.sh --no-build: PlayerControlsLayoutTest (5), VisualPreviewTest#playerPanelKeepsTitleAndRemoteActionsInsideScreen, PlaybackRecoveryFlowTest#longTitleRecoveryAndFailureKeepControlsInsideScreen, toplam 7/7. İlk movie/recovering yakalamaları eksik katman içerdi; tam kanıt sayılmadı, ham kareler work/player-layout-qa içinde. Movie testi kaynak/APK değişmeden ayrı tekrar 1/1 geçti ve tam dönüş karesi bağımsız incelendi. Film/geri sarma/favori/canlı/dizi/hata/yeniden açılan oynatma görselleri incelendi. Yazı ölçeği matrisi yok.
+
+Teslim: releases/NEXTV_TV_Design_Preview_0.14.57.apk + sha256, kod 71; aynı imza, R8/release, debuggable değil. SHA-256 5dfb67081992a47b2179f6c33393cabd21ab38c081764bef177b77dbc122fb3b. TV .56→57 install -r; firstInstallTime 2026-10-13 23:50:03 korundu, lastUpdateTime 2026-10-18 21:37:17. Kurulu APK çekilip hash eşleştirildi. TV uygulaması/gerçek yayın açılmadı. 5556 açılmadı, .51/kod65'te; 5558/Gradle kapalı, 5554'e dokunulmadı.
+
+Tam sonraki adım: ana checkout/main üzerinden STEPS S15a ve gap/overlay.md. Sonraki teslim en az 0.14.58/kod72. 5556 yükseltilecekse önce .51/kod65 olarak doğrula. Fiziksel görsel/akıcılık/TalkBack, Figma, İngilizce ve satış/fiyat kararları açık. Kullanıcı “yayına hazırla” demeden font matrisi koşma.
+
 ## Codex · Dizi adı–yıl aralığı / 0.14.56 · 18 Ekim 2026
 
 Kullanıcı “Başlık ve tarih birbirinden çok uzak duruyor” dedi. HomeCard metinleri iç Column'da; yalnız seriesShelf için minLines 1 (maxLines 2), başlık–metadata aralığı 4 dp. Önce minLines 2 boş ikinci satır ve 8 dp aralık ayırıyordu. Afiş–başlık 8 dp, 160×240 dp afiş/16 sp başlık aynı. Diğer rafların minLines/aralığı aynı; görünürlük tüm kartı kapsar.

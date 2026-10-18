@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**18 Ekim · TV-050 / D087:** Oynatıcı simgeleri gerçek düğme merkezine hizalanır; odak etiketleri ortak satırda, zaman çubuğundan ve halkadan ayrı ölçülmüş alanda. [Oynatıcı sözleşmesi](PLAYER_PRESENTATION.md).
+
 **18 Ekim · TV-010 / D086:** Dizi rafında yıl, başlığın gerçek son satırının 4 dp altında; tek satırlık ad için boş ikinci satır ayrılmaz. Büyük afiş/ad boyutları korunur. [Raf sözleşmesi](HOME_SHELVES.md).
 
 **18 Ekim · TV-010 / D085:** “Dizi kütüphanen” rafında 160×240 dp afişler ve iki satırlık 16 sp Medium dizi adları. Ortak odak/görünürlük ve ayrıntıdan dönüş aynı. [Raf sözleşmesi](HOME_SHELVES.md).

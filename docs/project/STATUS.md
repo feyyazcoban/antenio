@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.57 · Oynatıcı ikonları ve etiket hizaları · 18 Ekim 2026
+
+Fotoğrafla bildirilen yukarı kayan ikonlar ve sıkışık odak etiketi düzeltildi (D087). Düğme içeriği gerçek boyutu doldurup merkezlenir; etiketlerin alt çizgisi ortak, zaman çubuğuyla en az 8 dp ve dış odak halkasıyla en az 6 dp aralık vardır. Düğme boyutları ve oynatma/sarma/panel davranışı korunur.
+
+Eski üretim APK'sında yeni test ana ikonun 12 dp yukarı kaymasını yakaladı. Düzeltmeden sonra 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558/betik üzerinde normal ölçekte 7/7 ekran testi, panel dönüşü görsel tekrarı 1/1 geçti. İki bağımsız inceleme tamamlandı; beklenen etiketlerin varlık kontrolü inceleme sonrası güçlendirildi. İlk eksik yakalama ve başarılı tekrar [QA](native-player-layout-57-qa.json)'da ayrı kayıtlı. [Görseller](../../design/reviews/LATEST.md). Font matrisi yok.
+
+0.14.57-design-preview / kod 71 TV'ye install -r ile kuruldu; firstInstallTime aynı, kurulu APK hash eşleşti. Son güncelleme 2026-10-18 21:37:17; SHA-256 5dfb67081992a47b2179f6c33393cabd21ab38c081764bef177b77dbc122fb3b. TV uygulaması/gerçek yayın açılmadı. 5556 kapalı, .51/kod65'te; 5558/Gradle kapalı. Sırada S15a; sonraki paket en az .58/kod72. Fiziksel/Figma kabulü açık.
+
 ## 0.14.56 · Dizi adı ile yıl yakın · 18 Ekim 2026
 
 Kullanıcının “Başlık ve tarih birbirinden çok uzak duruyor” geri bildirimi düzeltildi (D086). Dizi rafında başlık boş ikinci satır ayırmaz; yıl/kaynak gerçek başlığı 4 dp aralıkla izler. Uzun adlar en fazla iki satır; .55 afiş/ad boyutları korunur.

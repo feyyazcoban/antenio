@@ -33,6 +33,17 @@ import kotlin.math.*
 
 internal enum class PlayerInfoKind { Full, Zap, Peek }
 
+private val PlayerControlHeight = 64.dp
+private val FocusLabelPadding = 4.dp
+// Six dp clear of the outer focus ring, plus eight dp clear of the time row above.
+private val FocusLabelButtonGap = TvLayout.FocusInset + TvLayout.Focus + 6.dp
+private val FocusLabelStyle = TextStyle(fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, fontWeight = FontWeight.Normal)
+
+@Composable private fun focusLabelSpace(): Dp {
+    val height = rememberTextMeasurer().measure(AnnotatedString("Ag"), FocusLabelStyle, maxLines = 1).size.height
+    return with(LocalDensity.current) { height.toDp() } + FocusLabelPadding * 2 + FocusLabelButtonGap + 8.dp
+}
+
 internal data class PlayerControl(val tag: String, val label: String, val symbol: String, val state: String = "",
     val enabled: Boolean = true, val primary: Boolean = false, val selected: Boolean = false,
     val requester: FocusRequester? = null, val onClick: () -> Unit)
@@ -72,7 +83,7 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
             peek = kind == PlayerInfoKind.Peek, returnFocus = returnFocus, toggle = toggle, peekDelta = peekDelta,
             onFocusChanged = onScrubFocusChanged)
         if (kind == PlayerInfoKind.Full) {
-            Spacer(Modifier.height(with(LocalDensity.current) { 24.sp.toDp() }))
+            Spacer(Modifier.height(focusLabelSpace()))
             controls()
         }
     }
@@ -269,13 +280,13 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
     val density = LocalDensity.current
     val measurer = rememberTextMeasurer()
     val style = TextStyle(fontFamily = Roboto, fontSize = 15.sp, fontWeight = FontWeight.Medium)
-    BoxWithConstraints(Modifier.fillMaxWidth().height(64.dp).testTag("player-controls")) {
+    BoxWithConstraints(Modifier.fillMaxWidth().height(PlayerControlHeight).testTag("player-controls")) {
         val textWidths = remember(chips.map { it.label }, cluster.map { it.label }, density.fontScale, density.density) {
             (cluster + chips).associate { it.tag to measurer.measure(AnnotatedString(it.label), style).size.width }
         }
         val iconSize = with(density) { maxOf(44.dp, 20.sp.toDp() + 16.dp) }
         val large = density.fontScale >= 2f
-        val clusterSizes = cluster.map { if (it.primary) 64.dp else if (it.tag == "player-next-episode" && !large)
+        val clusterSizes = cluster.map { if (it.primary) PlayerControlHeight else if (it.tag == "player-next-episode" && !large)
             with(density) { (textWidths.getValue(it.tag)).toDp() } + 62.dp else 52.dp }
         val clusterWidth = clusterSizes.fold(0.dp) { sum, value -> sum + value } + 12.dp * (cluster.size - 1).coerceAtLeast(0)
         val hintParts = hint.split(" · ")
@@ -288,14 +299,14 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
         }, 8.dp.roundToPx(), 48.dp.roundToPx(), if (density.fontScale >= 1.3f) emptyList() else hintWidths, large) }
         val chipWidths = chips.map { if (it.tag in plan.labels) with(density) { textWidths.getValue(it.tag).toDp() } + 60.dp else iconSize }
         Layout(content = {
-            cluster.forEachIndexed { index, control -> key(control.tag) { PlayerControlButton(control, clusterSizes[index], if (control.primary) 64.dp else 52.dp,
+            cluster.forEachIndexed { index, control -> key(control.tag) { PlayerControlButton(control, clusterSizes[index], if (control.primary) PlayerControlHeight else 52.dp,
                 labelled = control.tag == "player-next-episode" && !large, chip = false, scrub, seekable, rememberControl) } }
             chips.forEachIndexed { index, control -> key(control.tag) { PlayerControlButton(control, chipWidths[index], iconSize,
                 labelled = control.tag in plan.labels, chip = true, scrub, seekable, rememberControl) } }
             Text(hintParts.take(plan.hints).joinToString(" · "), Modifier.testTag("player-hint").clearAndSetSemantics {}, color = Ink.Muted,
                 fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Clip)
         }) { children, constraints ->
-            val clusterPlace = cluster.indices.map { i -> children[i].measure(Constraints.fixed(clusterSizes[i].roundToPx(), if (cluster[i].primary) 64.dp.roundToPx() else 52.dp.roundToPx())) }
+            val clusterPlace = cluster.indices.map { i -> children[i].measure(Constraints.fixed(clusterSizes[i].roundToPx(), if (cluster[i].primary) PlayerControlHeight.roundToPx() else 52.dp.roundToPx())) }
             val chipPlace = chips.indices.map { i -> children[cluster.size + i].measure(Constraints.fixed(chipWidths[i].roundToPx(), iconSize.roundToPx())) }
             val chipsTotal = chipPlace.sumOf { it.width } + 8.dp.roundToPx() * (chips.size - 1).coerceAtLeast(0)
             val leftEnd = clusterPlace.sumOf { it.width } + 12.dp.roundToPx() * (cluster.size - 1).coerceAtLeast(0)
@@ -327,19 +338,25 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
             enabled = control.enabled, shape = ButtonDefaults.shape(RoundedCornerShape(50)),
             colors = FilledControl.colors(if (control.selected) Ink.Selected else Ink.High.copy(alpha = .72f), if (control.primary || control.selected) Ink.Mint else Ink.Text),
             border = FilledControl.border(), scale = FilledControl.scale(), contentPadding = PaddingValues(0.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PlayerSymbol(control.symbol, LocalContentColor.current, Modifier.size(if (control.primary) 32.dp else if (chip) 20.dp else 28.dp))
+            // TV Button's minimum content row is shorter than these circles. Fill the actual
+            // control so the icon and any label share its center, not the minimum row's center.
+            Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+                PlayerSymbol(control.symbol, LocalContentColor.current,
+                    Modifier.size(if (control.primary) 32.dp else if (chip) 20.dp else 28.dp).testTag("${control.tag}-symbol"))
                 if (labelled) Text(control.label, color = LocalContentColor.current, fontFamily = Roboto,
                     fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium, maxLines = 1)
             }
         }
         if (focused && showLabel) Layout(content = {
             Text(name, Modifier.testTag("player-focus-label").clearAndSetSemantics {}
-                .background(Ink.Background.copy(alpha = .94f), RoundedCornerShape(8.dp)).padding(horizontal = 10.dp, vertical = 4.dp),
-                color = Ink.Text, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                .background(Ink.Background.copy(alpha = .94f), RoundedCornerShape(8.dp)).padding(horizontal = 10.dp, vertical = FocusLabelPadding),
+                color = Ink.Text, style = FocusLabelStyle, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }) { children, _ ->
             val label = children.single().measure(Constraints(maxWidth = 360.dp.roundToPx()))
-            layout(0, 0) { label.place(if (chip) width.roundToPx() - label.width else 0, -label.height - 6.dp.roundToPx()) }
+            val rowOffset = (PlayerControlHeight.roundToPx() - height.roundToPx()) / 2
+            layout(0, 0) { label.place(if (chip) width.roundToPx() - label.width else 0,
+                -label.height - FocusLabelButtonGap.roundToPx() - rowOffset) }
         }
     }
 }

@@ -78,6 +78,11 @@ class PlayerControlsLayoutTest {
         assertTrue("$tag must fit: $box / $screen", box.left >= screen.left + pad && box.right <= screen.right - pad &&
             box.top >= screen.top + pad && box.bottom <= screen.bottom - pad)
     }
+    private fun centeredSymbol(tag: String, iconOnly: Boolean = true) {
+        val button = bounds(tag); val symbol = bounds("$tag-symbol")
+        assertEquals("$tag symbol must be vertically centered", (button.top + button.bottom).value / 2, (symbol.top + symbol.bottom).value / 2, 1f)
+        if (iconOnly) assertEquals("$tag symbol must be horizontally centered", (button.left + button.right).value / 2, (symbol.left + symbol.right).value / 2, 1f)
+    }
     private fun shot(name: String) {
         // Compose can be idle before the emulator's renderer presents every overlay layer.
         ui.waitForIdle(); Thread.sleep(350); ui.waitForIdle()
@@ -89,16 +94,34 @@ class PlayerControlsLayoutTest {
     }
     @Test fun movieFocusGeometryAndPanelsReturnToTheirOpeningControl() {
         open()
+        centeredSymbol("player-primary") // Paused: Play.
+        key(KeyEvent.KEYCODE_MEDIA_PLAY)
+        ui.waitUntil(5_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
+        centeredSymbol("player-primary") // Playing: Pause.
+        key(KeyEvent.KEYCODE_MEDIA_PAUSE)
         listOf("player-panel", "player-title", "player-controls", "player-clock").forEach { inScreen(it) }
         assertTrue(bounds("player-title").bottom < bounds("player-scrub").top)
         assertTrue(bounds("player-scrub").bottom < bounds("player-controls").top)
         assertTrue(bounds("player-tracks").left - bounds("player-seek-forward").right >= 32.dp)
         val order = listOf("player-seek-back", "player-primary", "player-seek-forward", "player-tracks", "player-options", "player-favorite")
         focus(order.first())
+        var labelBottom: Float? = null
         order.forEachIndexed { index, tag ->
             if (index > 0) key(KeyEvent.KEYCODE_DPAD_RIGHT)
             ui.onNodeWithTag(tag).assertIsFocused(); inScreen(tag, ring = true)
-            if (tag == "player-seek-back" || tag == "player-favorite") { inScreen("player-focus-label"); shot(tag) }
+            centeredSymbol(tag, iconOnly = tag != "player-tracks")
+            if (tag in listOf("player-seek-back", "player-seek-forward", "player-options", "player-favorite")) {
+                ui.onNodeWithTag("player-focus-label", useUnmergedTree = true).assertExists()
+            }
+            if (ui.onAllNodesWithTag("player-focus-label", true).fetchSemanticsNodes().isNotEmpty()) {
+                val label = bounds("player-focus-label")
+                inScreen("player-focus-label")
+                assertTrue("Focus label must clear the time row", label.top >= bounds("player-scrub").bottom + 8.dp)
+                assertTrue("Focus label must clear the outer focus ring", label.bottom <= bounds(tag).top - 11.dp)
+                labelBottom?.let { assertEquals("Labels share one baseline across button sizes", it, label.bottom.value, 1f) }
+                labelBottom = label.bottom.value
+            }
+            if (tag == "player-seek-back" || tag == "player-favorite") shot(tag)
         }
         key(KeyEvent.KEYCODE_DPAD_RIGHT); ui.onNodeWithTag("player-favorite").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_UP); ui.onNodeWithTag("player-scrub").assertIsFocused(); inScreen("player-scrub-bubble"); shot("scrub")
@@ -199,9 +222,11 @@ class PlayerControlsLayoutTest {
         ui.onNodeWithTag("player-seek-back").assertDoesNotExist(); ui.onNodeWithTag("player-seek-forward").assertDoesNotExist()
         ui.onNodeWithTag("player-scrub").assertDoesNotExist()
         key(KeyEvent.KEYCODE_DPAD_UP); ui.onNodeWithTag("player-primary").assertIsFocused()
+        centeredSymbol("player-primary")
         assertTrue(bounds("player-channel-down").left - bounds("player-primary").right >= 32.dp)
         listOf("player-channel-down", "player-channel-up", "player-tracks", "player-favorite").forEach {
             key(KeyEvent.KEYCODE_DPAD_RIGHT); ui.onNodeWithTag(it).assertIsFocused(); inScreen(it, ring = true)
+            centeredSymbol(it, iconOnly = it != "player-tracks")
         }
     }
 }
