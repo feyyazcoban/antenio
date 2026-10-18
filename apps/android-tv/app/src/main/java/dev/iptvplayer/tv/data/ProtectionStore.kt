@@ -73,10 +73,14 @@ internal class ProtectionStore(context: Context, namespace: String = "primary") 
     /** null expected generation means first setup. Caller must authenticate all later policy edits. */
     override fun write(snapshot: ProtectionSnapshot, expectedGeneration: Long?) = synchronized(lock) {
         val plain = ProtectionCodec.encode(snapshot)
+        var firstSetup = false
         try {
             val current = readLocked()
             when (current) {
-                ProtectionRead.Unconfigured -> check(expectedGeneration == null && snapshot.generation == 0L)
+                ProtectionRead.Unconfigured -> {
+                    check(expectedGeneration == null && snapshot.generation == 0L)
+                    firstSetup = true
+                }
                 is ProtectionRead.Ready -> {
                     val previous = current.snapshot
                     check(expectedGeneration == previous.generation && previous.generation < Long.MAX_VALUE &&
@@ -110,24 +114,30 @@ internal class ProtectionStore(context: Context, namespace: String = "primary") 
                 throw failure
             }
         } catch (_: Exception) {
+            // The key is made before the file. A failed first setup takes both back, or the key alone would read as
+            // Unavailable for good and the first PIN could never be set again. Nothing here existed before this call.
+            if (firstSetup) runCatching { clearLocked() }
             throw IllegalStateException("Protection record could not be saved")
         } finally { plain.fill(0) }
     }
 
     /**
-     * Back to Unconfigured: the files go first, then the key. Stopped halfway, the key without a file reads as
-     * Unavailable, never as a cleared PIN, and the same call finishes the job.
+     * Back to Unconfigured. Stopped halfway, the key without a file reads as Unavailable, never as a cleared PIN, and
+     * the same call finishes the job.
      */
     override fun reset() {
         synchronized(lock) {
-            try {
-                files().forEach { check(it.deleteRecursively()) }
-                val store = keyStore()
-                if (store.containsAlias(alias)) store.deleteEntry(alias)
-            } catch (_: Exception) {
+            try { clearLocked() } catch (_: Exception) {
                 throw IllegalStateException("Protection record could not be reset")
             }
         }
+    }
+
+    /** The files go first, then the key. */
+    private fun clearLocked() {
+        files().forEach { check(it.deleteRecursively()) }
+        val store = keyStore()
+        if (store.containsAlias(alias)) store.deleteEntry(alias)
     }
 
     private companion object { val lock = Any() }

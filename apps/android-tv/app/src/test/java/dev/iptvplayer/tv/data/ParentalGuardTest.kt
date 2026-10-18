@@ -1,6 +1,7 @@
 @file:OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 package dev.iptvplayer.tv.data
 
+import dev.iptvplayer.tv.data.ParentalGuard.Change
 import dev.iptvplayer.tv.data.ParentalGuard.Verify
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.*
@@ -10,7 +11,10 @@ import org.junit.Test
 
 /** Synthetic PINs only. A correct check runs the real 600 000-round KDF, so those are kept few. */
 class ParentalGuardTest {
-    /** Keeps the record as ProtectionStore does: one generation at a time, and a policy change only with a new revision. */
+    /**
+     * Keeps the record as ProtectionStore does: one generation at a time, a policy change only with a new revision, and
+     * nothing left of a failed write, a first one included.
+     */
     private class Storage(var record: ProtectionSnapshot?, private val events: MutableList<String>) : ProtectionStorage {
         var unavailable = false
         var failWrites = false
@@ -75,30 +79,31 @@ class ParentalGuardTest {
     @Test fun aChargeThatCannotBeSavedComparesNothing() = runTest {
         val storage = Storage(stored(), events).apply { failWrites = true }
         val pin = correctPin()
-        assertEquals(Verify.Failed, guard(storage).verify(pin))
+        assertEquals(Verify.Failed(), guard(storage).verify(pin))
         assertEquals(listOf("save 1"), events)
         assertEquals(0, storage.record!!.attempts.charged)
         assertTrue(wiped(pin))
     }
 
     @Test fun aCorrectPinCountsOnlyOnceTheClearedBudgetIsSaved() = runTest {
-        val storage = Storage(stored(PinAttempts(3, 1, 1_000, 0)), events)
+        val storage = Storage(stored(PinAttempts(4, 1, 1_000, 0)), events)
         val clearFails = object : ProtectionStorage by storage {
             override fun write(snapshot: ProtectionSnapshot, expectedGeneration: Long?) {
                 check(snapshot.attempts.charged != 0) { "synthetic write failure" }
                 storage.write(snapshot, expectedGeneration)
             }
         }
-        assertEquals(Verify.Failed, guard(clearFails).verify(correctPin()))
-        assertEquals(listOf("save 4", "kdf"), events)
-        assertEquals(4, storage.record!!.attempts.charged)
+        // The fifth try stays charged, and the failure carries the wait it started.
+        assertEquals(Verify.Failed(30_000), guard(clearFails).verify(correctPin()))
+        assertEquals(listOf("save 5", "kdf"), events)
+        assertEquals(5, storage.record!!.attempts.charged)
 
         events.clear()
-        clock.now = PinClock(1, 9_000)
+        clock.now = PinClock(1, 31_000)
         val result = guard(storage).verify(correctPin())
-        assertEquals(listOf("save 5", "kdf", "save 0"), events)
+        assertEquals(listOf("save 6", "kdf", "save 0"), events)
         assertEquals(Verify.Correct(storage.record!!), result)
-        assertEquals(PinAttempts.clear(PinClock(1, 9_000)), storage.record!!.attempts)
+        assertEquals(PinAttempts.clear(PinClock(1, 31_000)), storage.record!!.attempts)
         assertEquals(3L, storage.record!!.policyRevision)
     }
 
@@ -175,8 +180,13 @@ class ParentalGuardTest {
         val storage = Storage(null, events)
         val guard = guard(storage)
         val options = ProtectionOptions(sourcesNeedPin = false, launchNeedsPin = true)
+        // A first PIN that was not saved leaves none, so "Tekrar dene" can set it.
+        storage.failWrites = true
+        assertEquals(Change.NotSaved, guard.create(correctPin(), options))
+        assertEquals(ProtectionRead.Unconfigured, guard.read())
+        storage.failWrites = false
         val pin = correctPin()
-        val created = guard.create(pin, options)!!
+        val created = (guard.create(pin, options) as Change.Saved).snapshot
         assertTrue(wiped(pin))
         assertSame(created, storage.record)
         assertEquals(0L, created.generation); assertEquals(0L, created.policyRevision)
@@ -185,39 +195,45 @@ class ParentalGuardTest {
 
         events.clear()
         val second = wrongPin()
-        assertNull(guard.create(second))
+        assertEquals(Change.Stale, guard.create(second))
         assertTrue(wiped(second))
         assertEquals(emptyList<String>(), events)
         assertSame(created, storage.record)
         assertTrue(guard.verify(correctPin()) is Verify.Correct)
 
         storage.record = null; storage.unavailable = true
-        assertNull(guard.create(correctPin()))
+        assertEquals(Change.Unavailable, guard.create(correctPin()))
     }
 
     @Test fun pinAndPolicyChangesRaiseTheRevisionAndAStaleRevisionChangesNothing() = runTest {
         val storage = Storage(stored(), events)
         val guard = guard(storage)
         val stale = wrongPin()
-        assertNull(guard.replacePin(stale, expectedRevision = 2))
+        assertEquals(Change.Stale, guard.replacePin(stale, expectedRevision = 2))
         assertTrue(wiped(stale))
         assertEquals(emptyList<String>(), events)
 
-        val replaced = guard.replacePin(wrongPin(), expectedRevision = 3)!!
+        val replaced = (guard.replacePin(wrongPin(), expectedRevision = 3) as Change.Saved).snapshot
         assertEquals(4L, replaced.policyRevision)
         assertFalse(replaced.credential.encode().contentEquals(credential.encode()))
 
         val rule = AccessRule(AccessScope.Content(ContentRef("source-a", "movie:1")), pinRequired = true)
-        val locked = guard.edit(4) { it.copy(rules = it.rules + rule) }!!
+        val locked = (guard.edit(4) { it.copy(rules = it.rules + rule) } as Change.Saved).snapshot
         assertEquals(5L, locked.policyRevision); assertEquals(rule, locked.rules.last())
-        val onLaunch = guard.edit(5) { it.copy(options = it.options.copy(launchNeedsPin = true)) }!!
+        val onLaunch = (guard.edit(5) { it.copy(options = it.options.copy(launchNeedsPin = true)) } as Change.Saved).snapshot
         assertEquals(6L, onLaunch.policyRevision); assertTrue(onLaunch.options.launchNeedsPin)
 
         // Nothing changed, nothing saved.
-        assertSame(onLaunch, guard.edit(6) { it })
-        // Verified before the last change, or past the record's limits (one rule per scope).
-        assertNull(guard.edit(5) { it.copy(rules = emptyList()) })
-        assertNull(guard.edit(6) { it.copy(rules = it.rules + rule) })
+        events.clear()
+        assertEquals(Change.Saved(onLaunch), guard.edit(6) { it })
+        assertEquals(emptyList<String>(), events)
+        // Verified before the last change, past the record's limits (1024 rules, one per scope), or not saved.
+        assertEquals(Change.Stale, guard.edit(5) { it.copy(rules = emptyList()) })
+        val tooMany = List(1025) { AccessRule(AccessScope.Source("source-$it"), pinRequired = true) }
+        assertEquals(Change.LimitReached, guard.edit(6) { it.copy(rules = tooMany) })
+        assertEquals(Change.LimitReached, guard.edit(6) { it.copy(rules = it.rules + rule) })
+        storage.failWrites = true
+        assertEquals(Change.NotSaved, guard.edit(6) { it.copy(rules = emptyList()) })
         assertSame(onLaunch, storage.record)
     }
 
@@ -240,18 +256,20 @@ class ParentalGuardTest {
         val storage = Storage(stored(), events).apply { unavailable = true }
         val guard = guard(storage)
         val pin = correctPin()
-        assertEquals(Verify.Failed, guard.verify(pin))
+        assertEquals(Verify.Failed(), guard.verify(pin))
         assertTrue(wiped(pin))
         assertNull(guard.waitMs())
-        assertNull(guard.edit(3) { it.copy(rules = emptyList()) })
+        assertEquals(Change.Unavailable, guard.edit(3) { it.copy(rules = emptyList()) })
         val replacement = wrongPin()
-        assertNull(guard.replacePin(replacement, 3))
+        assertEquals(Change.Unavailable, guard.replacePin(replacement, 3))
         assertTrue(wiped(replacement))
         assertEquals(emptyList<String>(), events)
 
         val empty = guard(Storage(null, events))
-        assertEquals(Verify.Failed, empty.verify(correctPin()))
+        assertEquals(Verify.Failed(), empty.verify(correctPin()))
         assertNull(empty.waitMs())
+        // A PIN removed since it was verified.
+        assertEquals(Change.Stale, empty.edit(3) { it.copy(rules = emptyList()) })
     }
 
     private companion object {

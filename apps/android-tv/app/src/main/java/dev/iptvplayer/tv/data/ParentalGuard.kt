@@ -29,8 +29,25 @@ internal class ParentalGuard(private val storage: ProtectionStorage, private val
         data class Wrong(val snapshot: ProtectionSnapshot, val charged: Int, val retryAfterMs: Long) : Verify
         /** Too many wrong tries: nothing was charged or compared. */
         data class Wait(val retryAfterMs: Long) : Verify
-        /** No PIN, or the record could not be read or saved: nothing was allowed, and a failed charge compared nothing. */
-        data object Failed : Verify
+        /**
+         * No PIN, or the record could not be read or saved: nothing was allowed, and a failed charge compared nothing.
+         * When only the clear after a correct PIN failed, the try stays charged and [retryAfterMs] is the wait it
+         * started, so the PIN pad can wait at once; otherwise 0.
+         */
+        data class Failed(val retryAfterMs: Long = 0) : Verify
+    }
+
+    /** What [create], [replacePin] and [edit] did; each refusal has its own message (pin.md §5, §9). */
+    sealed interface Change {
+        data class Saved(val snapshot: ProtectionSnapshot) : Change
+        /** Not the record the caller saw: a PIN was set or removed, or the policy changed since it was verified. */
+        data object Stale : Change
+        /** More than 1024 rules, or two for one scope. */
+        data object LimitReached : Change
+        /** The record cannot be read. */
+        data object Unavailable : Change
+        /** The write failed; the record is as it was. */
+        data object NotSaved : Change
     }
 
     suspend fun read(): ProtectionRead = mutex.withLock { load() }
@@ -44,20 +61,24 @@ internal class ParentalGuard(private val storage: ProtectionStorage, private val
     }
 
     /**
-     * The first PIN, on a device without one. Null when a PIN is set, the record is unreadable or it was not saved.
-     * A PIN that is not 4–8 ASCII digits throws, as in PinCredential.create.
+     * The first PIN, on a device without one; Stale when a PIN is set. A PIN that is not 4–8 ASCII digits throws, as in
+     * PinCredential.create.
      */
-    suspend fun create(pin: CharArray, options: ProtectionOptions = ProtectionOptions()): ProtectionSnapshot? = wiping(pin) {
+    suspend fun create(pin: CharArray, options: ProtectionOptions = ProtectionOptions()): Change = wiping(pin) {
         mutex.withLock {
-            if (load() != ProtectionRead.Unconfigured) return@withLock null
+            when (load()) {
+                ProtectionRead.Unconfigured -> Unit
+                ProtectionRead.Unavailable -> return@withLock Change.Unavailable
+                is ProtectionRead.Ready -> return@withLock Change.Stale
+            }
             val credential = withContext(cpu) { PinCredential.create(pin) }
-            save(ProtectionSnapshot(0, 0, credential, PinAttempts.clear(clock.now()), emptyList(), options), null)
+            commit(ProtectionSnapshot(0, 0, credential, PinAttempts.clear(clock.now()), emptyList(), options), null)
         }
     }
 
     suspend fun verify(pin: CharArray): Verify = wiping(pin) {
         mutex.withLock {
-            val snapshot = (load() as? ProtectionRead.Ready)?.snapshot ?: return@withLock Verify.Failed
+            val snapshot = (load() as? ProtectionRead.Ready)?.snapshot ?: return@withLock Verify.Failed()
             val now = clock.now()
             val reservation = snapshot.attempts.reserve(now)
             if (!reservation.mayVerify) {
@@ -66,39 +87,39 @@ internal class ParentalGuard(private val storage: ProtectionStorage, private val
             }
             // No saved charge, no comparison.
             val reserved = save(snapshot.next(attempts = reservation.next), snapshot.generation)
-                ?: return@withLock Verify.Failed
+                ?: return@withLock Verify.Failed()
             if (!withContext(cpu) { reserved.credential.matches(pin) }) {
                 return@withLock Verify.Wrong(reserved, reserved.attempts.charged, reserved.attempts.waitMs(clock.now()))
             }
             save(reserved.next(attempts = PinAttempts.clear(clock.now())), reserved.generation)
-                ?.let { Verify.Correct(it) } ?: Verify.Failed
+                ?.let { Verify.Correct(it) } ?: Verify.Failed(reserved.attempts.waitMs(clock.now()))
         }
     }
 
-    /** A new PIN for the one verified at [expectedRevision]; null when the policy changed since or it was not saved. */
-    suspend fun replacePin(pin: CharArray, expectedRevision: Long): ProtectionSnapshot? = wiping(pin) {
+    /** A new PIN for the one verified at [expectedRevision]. */
+    suspend fun replacePin(pin: CharArray, expectedRevision: Long): Change = wiping(pin) {
         mutex.withLock {
-            val current = current(expectedRevision) ?: return@withLock null
-            val credential = withContext(cpu) { PinCredential.create(pin) }
-            save(current.next(credential = credential, revision = current.policyRevision + 1), current.generation)
+            changing(expectedRevision) { current ->
+                val credential = withContext(cpu) { PinCredential.create(pin) }
+                commit(current.next(credential = credential, revision = current.policyRevision + 1), current.generation)
+            }
         }
     }
 
     /**
      * The rules and options [change] makes of the policy verified at [expectedRevision]. A change raises the revision;
-     * no change saves nothing and returns the record as it is. Null when the policy changed since, the result breaks
-     * the record's limits (1024 rules, one per scope) or it was not saved.
+     * no change saves nothing and gives back the record as it is.
      */
-    suspend fun edit(expectedRevision: Long, change: (ProtectionPolicy) -> ProtectionPolicy): ProtectionSnapshot? =
-        mutex.withLock {
-            val current = current(expectedRevision) ?: return@withLock null
+    suspend fun edit(expectedRevision: Long, change: (ProtectionPolicy) -> ProtectionPolicy): Change = mutex.withLock {
+        changing(expectedRevision) { current ->
             val policy = change(ProtectionPolicy(current.rules, current.options))
-            if (policy.rules == current.rules && policy.options == current.options) return@withLock current
+            if (policy.rules == current.rules && policy.options == current.options) return@changing Change.Saved(current)
             val next = runCatching {
                 current.next(rules = policy.rules, options = policy.options, revision = current.policyRevision + 1)
-            }.getOrNull() ?: return@withLock null
-            save(next, current.generation)
+            }.getOrNull() ?: return@changing Change.LimitReached
+            commit(next, current.generation)
         }
+    }
 
     /** Back to no PIN. False when the record could not be removed; the same call finishes it later. */
     suspend fun reset(): Boolean = mutex.withLock {
@@ -107,12 +128,21 @@ internal class ParentalGuard(private val storage: ProtectionStorage, private val
 
     private suspend fun load(): ProtectionRead = withContext(io) { storage.read() }
 
-    private suspend fun current(expectedRevision: Long): ProtectionSnapshot? =
-        (load() as? ProtectionRead.Ready)?.snapshot?.takeIf { it.policyRevision == expectedRevision }
+    /** [block] on the record verified at [expectedRevision], or why there is none. */
+    private suspend inline fun changing(expectedRevision: Long, block: (ProtectionSnapshot) -> Change): Change =
+        when (val read = load()) {
+            ProtectionRead.Unavailable -> Change.Unavailable
+            ProtectionRead.Unconfigured -> Change.Stale
+            is ProtectionRead.Ready ->
+                if (read.snapshot.policyRevision == expectedRevision) block(read.snapshot) else Change.Stale
+        }
 
     /** [next] once it is on disk; null when the write failed. */
     private suspend fun save(next: ProtectionSnapshot, expectedGeneration: Long?): ProtectionSnapshot? =
         withContext(io) { try { storage.write(next, expectedGeneration); next } catch (_: Exception) { null } }
+
+    private suspend fun commit(next: ProtectionSnapshot, expectedGeneration: Long?): Change =
+        save(next, expectedGeneration)?.let { Change.Saved(it) } ?: Change.NotSaved
 
     /**
      * Saves the fresh wait a reboot or a clock gone back starts, or every look would start it over. A failed save

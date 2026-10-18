@@ -1,5 +1,7 @@
 package dev.iptvplayer.tv
 
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.iptvplayer.tv.data.*
 import java.io.File
@@ -15,7 +17,8 @@ import org.junit.Assert.*
 class ProtectionStoreTest {
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
     private val stores = mutableListOf<ProtectionStore>()
-    private fun fresh() = ProtectionStore(context, "test_" + UUID.randomUUID().toString().replace("-", "")).also(stores::add)
+    private fun fresh(within: Context = context) =
+        ProtectionStore(within, "test_" + UUID.randomUUID().toString().replace("-", "")).also(stores::add)
     private fun snapshot(generation: Long = 0, revision: Long = 0, credential: PinCredential =
         PinCredential.create(CharArray(6) { ('0'.code + it).toChar() })) = ProtectionSnapshot(generation, revision,
         credential, PinAttempts.clear(PinClock(1, 1000)), listOf(AccessRule(AccessScope.Source("synthetic-source"), pinRequired = true)))
@@ -80,6 +83,26 @@ class ProtectionStoreTest {
         }
         store.write(ProtectionSnapshot(1, 1, initial.credential, initial.attempts, initial.rules, sourcesFree), 0)
         assertEquals(sourcesFree, (store.read() as ProtectionRead.Ready).snapshot.options)
+    }
+    @Test fun failedFirstWriteLeavesNoKeySoItCanBeRetried() {
+        // Its own files folder, so making it read-only blocks no other store.
+        val root = File(context.cacheDir, "protection_test_" + UUID.randomUUID().toString().replace("-", ""))
+        val folder = File(root, "protection").apply { check(mkdirs()) }
+        val store = fresh(object : ContextWrapper(context) { override fun getFilesDir() = root })
+        val initial = snapshot()
+        try {
+            // The key is made before the file; a folder that takes no file fails the write after it.
+            check(folder.setWritable(false, false))
+            assertThrows(IllegalStateException::class.java) { store.write(initial, null) }
+            assertFalse(KeyStore.getInstance("AndroidKeyStore").apply { load(null) }.containsAlias(store.alias))
+            assertEquals(ProtectionRead.Unconfigured, store.read())
+            check(folder.setWritable(true, false))
+            store.write(initial, null)
+            assertTrue(store.read() is ProtectionRead.Ready)
+        } finally {
+            folder.setWritable(true, false)
+            root.deleteRecursively()
+        }
     }
     @Test fun resetRemovesRecordAndKeyAndFinishesAHalfDoneReset() {
         val store = fresh(); val initial = snapshot(); store.write(initial, null)
