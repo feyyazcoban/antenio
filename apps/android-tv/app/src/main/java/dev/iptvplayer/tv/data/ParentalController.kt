@@ -14,6 +14,9 @@ import kotlinx.coroutines.launch
 /** Whether this TV has a parental PIN. Until the record is read, and while it cannot be, loosening asks for one. */
 enum class ParentalStatus { LOADING, OFF, ON, UNAVAILABLE }
 
+/** Yeniden dene on the lock screen of a record that cannot be read: not pressed, reading it again, or still unreadable. */
+enum class ProtectionRetry { IDLE, READING, FAILED }
+
 /**
  * Why a setting asks for the PIN (pin.md §9): Ayarlar's pages and the adult filter, and source management wherever it
  * opens (SOURCES); each reason has its sentence on the pad.
@@ -103,12 +106,12 @@ enum class StartOver(@StringRes val notice: Int, val needsAttention: Boolean) {
  * [sessionGrants]: how many lock scopes PINs typed for locked titles opened in this session (ParentalSession).
  * [sourcesNeedPin] and [launchNeedsPin] are the record's options (pin.md §5). [sourcesUnlocked]: a PIN verified for the
  * sources' screens, or carried there from Ayarlar, while they are on. [appLocked]: the lock screen takes every screen's
- * place, for "Açılışta PIN iste" or a record that cannot be read (§3.9).
+ * place, for "Açılışta PIN iste" or a record that cannot be read (§3.9); [retry] is how its Yeniden dene goes.
  */
 data class ParentalUi(val status: ParentalStatus = ParentalStatus.LOADING, val adminUnlocked: Boolean = false,
     val prompt: PinPrompt? = null, val notice: UiText? = null, val lockEpoch: Int = 0, val sessionGrants: Int = 0,
     val sourcesNeedPin: Boolean = true, val launchNeedsPin: Boolean = false, val sourcesUnlocked: Boolean = false,
-    val appLocked: Boolean = false) {
+    val appLocked: Boolean = false, val retry: ProtectionRetry = ProtectionRetry.IDLE) {
     /** Loosening asks for the PIN: one is set, or the record is not read yet or cannot be (fail closed, D049). */
     val guarded: Boolean get() = status != ParentalStatus.OFF
     val mayLoosen: Boolean get() = !guarded || adminUnlocked
@@ -200,6 +203,20 @@ internal class ParentalController(private val scope: CoroutineScope, private val
         }
     }
 
+    /**
+     * Yeniden dene on the lock screen of a record that cannot be read: it is read again, one read at a time, and
+     * [ParentalUi.retry] says when it still cannot be.
+     */
+    fun retry() {
+        if (state.value.retry == ProtectionRetry.READING) return
+        mutable.update { it.copy(retry = ProtectionRetry.READING) }
+        scope.launch {
+            try { refresh() } finally {
+                mutable.update { it.copy(retry = if (it.status == ParentalStatus.UNAVAILABLE) ProtectionRetry.FAILED else ProtectionRetry.IDLE) }
+            }
+        }
+    }
+
     /** True when the PIN pad opened before [reason], [then] to follow; false when nothing needs asking. */
     fun requestAdmin(reason: AdminReason, then: AdminFollowUp? = null): Boolean {
         if (state.value.mayLoosen) return false
@@ -272,14 +289,14 @@ internal class ParentalController(private val scope: CoroutineScope, private val
     /**
      * Adds the lock rules [add] and removes those on [remove] (Kilitle and Kilidi kaldır, Kategorileri yönet, Kilitli
      * içerikler; pin.md §3.4–3.5). Adding tightens and asks for nothing. Removing loosens: it needs the PIN verified in
-     * this Settings visit or for the sources' screens, or [verified], the revision a PIN typed for this removal saw; a
-     * hide on the same scope stays.
+     * this Settings visit, the one that opened the sources' screens for sources' own locks only (Kaynağın kilidini
+     * kaldır, §3.8), or [verified], the revision a PIN typed for this removal saw; a hide on the same scope stays.
      * A tightening that another change overtook (a publish adding a row's identity) is made again on the record as it
      * is then; a removal only over this controller's own changes, which keep the verified revision current.
      */
     suspend fun editLocks(add: List<AccessRule> = emptyList(), remove: Set<AccessScope> = emptySet(), verified: Long? = null): LockEdit {
         fun expected(): Long? = if (remove.isEmpty()) policy?.revision
-            else verified ?: revision?.takeIf { state.value.adminUnlocked || state.value.sourcesUnlocked }
+            else verified ?: revision?.takeIf { state.value.adminUnlocked || state.value.sourcesUnlocked && remove.all { it is AccessScope.Source } }
         fun edited(rules: List<AccessRule>): List<AccessRule> {
             val kept = rules.mapNotNull { rule -> if (rule.scope !in remove) rule else rule.takeIf { it.hidden }?.copy(pinRequired = false) }
             return kept + add.filter { rule -> kept.none { it.scope == rule.scope } }.distinctBy { it.scope }
@@ -444,7 +461,7 @@ internal class ParentalController(private val scope: CoroutineScope, private val
      */
     private fun lockApp() {
         relock()
-        mutable.update { it.copy(appLocked = true) }
+        mutable.update { it.copy(appLocked = true, retry = ProtectionRetry.IDLE) }
         if (state.value.status == ParentalStatus.ON) ask(PinPurpose.Launch, null)
     }
 

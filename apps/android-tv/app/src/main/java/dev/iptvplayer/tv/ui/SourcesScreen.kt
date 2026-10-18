@@ -26,6 +26,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -40,7 +41,8 @@ import kotlinx.coroutines.flow.first
 
 /**
  * Kaynakların. While a PIN guards source management the PIN that opened this screen holds for what is done here (pin.md
- * §3.8); the pad still opens if it ended meanwhile. With a PIN set, a source's Bilgiler locks the whole source.
+ * §3.8); the pad still opens if it ended meanwhile. With a PIN set, a source's Bilgiler locks the whole source, and
+ * TalkBack reads a locked source's Bilgiler as locked, as the card's lock mark is silent.
  */
 @Composable internal fun SourcesScreen(s: TvState, model: TvViewModel) {
     val first = remember { FocusRequester() }
@@ -57,6 +59,7 @@ import kotlinx.coroutines.flow.first
     var guideOptions by remember { mutableStateOf(false) }
     val guideOpener = remember { FocusRequester() }
     val dialogOpener = remember { FocusRequester() }
+    val lockedState = stringResource(R.string.lock_state)
     Column(Modifier.fillMaxSize().padding(horizontal = TvLayout.Gutter, vertical = 28.dp).testTag("sources-screen"),
         verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Row(Modifier.fillMaxWidth().testTag("sources-header")
@@ -111,6 +114,7 @@ import kotlinx.coroutines.flow.first
                         fontFamily = Roboto, fontSize = 12.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Action(stringResource(R.string.sources_info), Modifier.testTag("info-source:${source.id}")
+                            .then(if (source.id in s.locks.sources) Modifier.semantics { stateDescription = lockedState } else Modifier)
                             .then(if (firstVisibleSource == source.id) Modifier.focusRequester(listEntry) else Modifier)
                             .then(if (info?.id == source.id) Modifier.focusRequester(dialogOpener) else Modifier)) { info = source }
                         Action(stringResource(R.string.sources_refresh), Modifier.testTag("refresh-source:${source.id}")) { model.refresh(source.id) }
@@ -131,7 +135,12 @@ import kotlinx.coroutines.flow.first
         val reader = remember { FocusRequester() }
         LaunchedEffect(source.id) { model.ensureGuide(listOf(source.id), download = false) }
         fun dismiss() { dialogOpener.requestFocus(); info = null }
-        SourceDialog(stringResource(R.string.sources_info_title), reader, ::dismiss, hidden = guideOptions) {
+        // With a PIN set, the whole source locks at once; its lock goes with the PIN that opened Kaynaklar, or asks for it
+        // over this window (pin.md §3.8). Not a fifth button on the card: it would not fit at large text. At large text
+        // the window widens and its three actions share rows, so the details keep lines to read above them.
+        val lockable = s.parental.status == ParentalStatus.ON
+        val shared = lockable && LocalDensity.current.fontScale >= 1.5f
+        SourceDialog(stringResource(R.string.sources_info_title), reader, ::dismiss, width = if (shared) 640.dp else 480.dp, hidden = guideOptions) {
             val status = s.sourceStatus[source.id] ?: SourceStatus()
             val locked = source.id in s.locks.sources
             RemoteTextReader("${s.sourceName(source.id)}\n\n${sourceNumber(s, source)}\n" +
@@ -139,18 +148,18 @@ import kotlinx.coroutines.flow.first
                 (if (locked) "\n" + stringResource(R.string.parental_locked_source_note) else "") +
                 (if (status.notices.isNotEmpty()) "\n\n${status.notices.resolve()}" else "") + "\n\n" + guideStatusText(s.guideStatus[source.id], model.guideZone()),
                 Modifier.weight(1f, fill = false).focusRequester(reader).focusProperties { down = guideOpener }, "source-info-reader")
-            Action(stringResource(R.string.sources_guide_settings), Modifier.focusRequester(guideOpener).focusProperties { up = reader }.testTag("source-guide-settings")) { guideOptions = true }
-            // With a PIN set, the whole source locks at once; its lock goes with the PIN that opened Kaynaklar, or asks
-            // for it over this window (pin.md §3.8). Not a fifth button on the card: it would not fit at large text.
-            if (s.parental.status == ParentalStatus.ON) {
-                val openLockPin = rememberPinOpener()
-                val lockFocus = remember { FocusRequester() }
-                Action(stringResource(if (locked) R.string.source_lock_remove else R.string.source_lock_add),
+            val openLockPin = rememberPinOpener()
+            val lockFocus = remember { FocusRequester() }
+            val actions = @Composable {
+                Action(stringResource(R.string.sources_guide_settings), Modifier.focusRequester(guideOpener).focusProperties { up = reader }.testTag("source-guide-settings")) { guideOptions = true }
+                if (lockable) Action(stringResource(if (locked) R.string.source_lock_remove else R.string.source_lock_add),
                     Modifier.focusRequester(lockFocus).testTag("source-lock"), icon = "lock") {
                     if (model.setSourceLock(source.id, !locked)) openLockPin { lockFocus }
                 }
+                Action(stringResource(R.string.action_close), Modifier.testTag("close-source-info")) { dismiss() }
             }
-            Action(stringResource(R.string.action_close), Modifier.testTag("close-source-info")) { dismiss() }
+            if (shared) FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) { actions() }
+            else actions()
         }
         if (guideOptions) GuideSourceDialog(source, s, model) { guideOptions = false; guideOpener.requestFocus() }
     }

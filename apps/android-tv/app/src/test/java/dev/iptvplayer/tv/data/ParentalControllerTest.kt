@@ -430,14 +430,19 @@ class ParentalControllerTest {
         val storage = Storage(stored()).apply { unavailable = true }
         val parental = controller(storage)
         parental.refresh()
-        assertTrue(parental.state.value.appLocked)
-        // Yeniden dene while it still cannot be read: still locked.
-        parental.refresh()
-        assertTrue(parental.state.value.appLocked)
+        assertTrue(parental.state.value.appLocked); assertEquals(ProtectionRetry.IDLE, parental.state.value.retry)
+        // Yeniden dene while it still cannot be read: one read at a time, then still locked, and it says so.
+        parental.retry()
+        assertEquals(ProtectionRetry.READING, parental.state.value.retry)
+        parental.retry()
+        advanceUntilIdle()
+        assertTrue(parental.state.value.appLocked); assertEquals(ProtectionRetry.FAILED, parental.state.value.retry)
         // Read again without "Açılışta PIN iste": the app opens.
         storage.unavailable = false
-        parental.refresh()
+        parental.retry()
+        advanceUntilIdle()
         assertFalse(parental.state.value.appLocked); assertNull(parental.state.value.prompt)
+        assertEquals(ProtectionRetry.IDLE, parental.state.value.retry)
         // With it, the lock screen stays and its pad asks.
         storage.unavailable = true
         parental.refresh()
@@ -484,7 +489,9 @@ class ParentalControllerTest {
 
     @Test fun sourceManagementAsksForThePinOnceForTheSourcesScreens() = runTest {
         val sourceLock = AccessRule(AccessScope.Source("a"), pinRequired = true)
-        val storage = Storage(stored(rules = listOf(sourceLock)))
+        val titleLock = AccessRule(AccessScope.Content(ContentRef("a", "movie:3")), pinRequired = true)
+        val categoryLock = AccessRule(AccessScope.Category("a", MediaKind.LIVE, AccessCategory.ProviderId("2")), pinRequired = true)
+        val storage = Storage(stored(rules = listOf(sourceLock, titleLock, categoryLock)))
         val parental = controller(storage)
         parental.refresh()
         assertTrue(parental.state.value.sourcesGuarded); assertFalse(parental.state.value.mayManageSources)
@@ -504,9 +511,13 @@ class ParentalControllerTest {
         assertFalse(state.adminUnlocked); assertFalse(state.mayLoosen)
         assertEquals(listOf<AdminFollowUp>(AdminFollowUp.EditSource("a")), followUps)
         assertFalse(parental.requestSources(AdminFollowUp.OpenSources))
-        // Within them, a source's lock goes with that PIN (Kaynağın kilidini kaldır).
+        // Within them, a source's lock goes with that PIN (Kaynağın kilidini kaldır); a title's or a category's does not.
+        assertEquals(LockEdit.NOT_SAVED, parental.editLocks(remove = setOf(titleLock.scope)))
+        assertEquals(LockEdit.NOT_SAVED, parental.editLocks(remove = setOf(categoryLock.scope)))
+        assertEquals(LockEdit.NOT_SAVED, parental.editLocks(remove = setOf(sourceLock.scope, titleLock.scope)))
+        assertEquals(listOf(sourceLock, titleLock, categoryLock), storage.record!!.rules)
         assertEquals(LockEdit.SAVED, parental.editLocks(remove = setOf(sourceLock.scope)))
-        assertTrue(storage.record!!.rules.isEmpty())
+        assertEquals(listOf(titleLock, categoryLock), storage.record!!.rules)
         // Leaving them ends it.
         parental.leftSources()
         assertTrue(parental.requestSources(AdminFollowUp.OpenSources))

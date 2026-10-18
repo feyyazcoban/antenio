@@ -47,7 +47,8 @@ sealed interface GateResult {
  * [playerShown] whether the player is the screen. [channels] is the list a channel target counts in: "Tüm kanallar" in
  * number order for [AccessTarget.ChannelNumber], the list the player was opened from for [AccessTarget.ChannelStep],
  * empty otherwise. [policy] is the lock rules, null while the protection record is not read or cannot be: then every
- * title asks for the PIN (D049). [unlocked] is what PINs opened in this session (ParentalSession).
+ * title asks for the PIN (D049). [unlocked] is what PINs opened in this session (ParentalSession). [appLocked]: the lock
+ * screen is up (pin.md §3.9), and nothing opens behind it.
  */
 internal data class GateSnapshot(
     val sources: List<SourceConfig>,
@@ -60,6 +61,7 @@ internal data class GateSnapshot(
     val autoNextEpisode: Boolean = true,
     val policy: AccessPolicy? = AccessPolicy(emptyList()),
     val unlocked: Set<AccessScope> = emptySet(),
+    val appLocked: Boolean = false,
     /** Read by the targets of Plus features as they arrive; [AllFree] until sales open. */
     val entitlements: Entitlements = AllFree
 )
@@ -73,21 +75,25 @@ internal data class GateFinding(val entry: MediaEntry, val verdict: AccessVerdic
 /**
  * The one decision every open and play passes (gap plan T3): AccessTargets finds the target by identity in
  * [GateSnapshot]; it is allowed when the title is still published, not adult, its source still saved and no lock asks
- * for the PIN, or the session opened every lock on it (pin.md §6). Pure, so its rules are tested on the JVM. The NEXTV
- * Plus answer (S37) joins here.
+ * for the PIN, or the session opened every lock on it (pin.md §6), and the lock screen is not up (§3.9). Pure, so its
+ * rules are tested on the JVM. The NEXTV Plus answer (S37) joins here.
  */
 internal object AccessGate {
-    fun decide(target: AccessTarget, snapshot: GateSnapshot): GateResult = answer(target, find(target, snapshot))
+    fun decide(target: AccessTarget, snapshot: GateSnapshot): GateResult = answer(target, find(target, snapshot), snapshot)
 
-    /** The answer [finding], from [find], gives for [target]. */
-    fun answer(target: AccessTarget, finding: GateFinding?): GateResult = when {
-        finding == null -> GateResult.Deny
+    /** The answer [finding], from [find] on [snapshot], gives for [target]; behind the lock screen, none opens. */
+    fun answer(target: AccessTarget, finding: GateFinding?, snapshot: GateSnapshot): GateResult = when {
+        snapshot.appLocked || finding == null -> GateResult.Deny
         finding.opens -> GateResult.Allow(finding.entry)
         finding.verdict.decision == AccessDecision.REQUIRE_PIN -> GateResult.NeedsPin(target)
         else -> GateResult.Deny
     }
 
-    /** What [target] names and what its locks say; null when it names nothing published, adult or without its source. */
+    /**
+     * What [target] names and what its locks say; null when it names nothing published, adult or without its source.
+     * The lock screen leaves this as it is: [answer] refuses everything behind it, and whether the player it covers may
+     * come back once it goes is read here.
+     */
     fun find(target: AccessTarget, snapshot: GateSnapshot): GateFinding? {
         val resolved = AccessTargets.resolve(target, snapshot) { judge(it, snapshot)?.opens == true } ?: return null
         return judge(resolved, snapshot)

@@ -222,6 +222,8 @@ import kotlinx.coroutines.flow.first
             when (event) {
                 Lifecycle.Event.ON_STOP -> {
                     resumeOnStart = player.playWhenReady && player.playbackState == Player.STATE_READY
+                    // Should the lock screen cover this player, the one that comes back after it stands as this one did.
+                    model.playerStopped(paused = !player.playWhenReady)
                     save(); recovery.background(); episodeEnd.background()
                 }
                 // A locked title left the player as the app stopped (TvViewModel.appStopped), or the lock screen came up
@@ -255,7 +257,8 @@ import kotlinx.coroutines.flow.first
         } else interact()
         player.trackSelectionParameters = PlayerFactory.rememberedTracks(player.trackSelectionParameters, model.store)
         player.setMediaSource(PlayerFactory.mediaSource(context, request), request.startMs)
-        player.prepare(); player.play()
+        // A title the viewer had paused before the lock screen covered it comes back paused.
+        player.prepare(); if (!media.paused) player.play()
     }
     LaunchedEffect(player) {
         var ticks = 0

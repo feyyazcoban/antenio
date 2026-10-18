@@ -54,6 +54,8 @@ class MainActivity : ComponentActivity() {
         if (opening) { opening = false; startupSound.stop() }
     }
     override fun onStart() { super.onStart(); startupSound.start(); model.appStarted() }
-    override fun onStop() { startupSound.stop(); model.appStopped(); super.onStop() }
+    // A configuration change (a keyboard plugged in, another language) recreates the activity while the viewer stays:
+    // nothing locks again, and a source form being filled in stays open.
+    override fun onStop() { startupSound.stop(); if (!isChangingConfigurations) model.appStopped(); super.onStop() }
     override fun onDestroy() { startupSound.stop(); super.onDestroy() }
 }

@@ -20,6 +20,7 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 /**
  * Ebeveyn denetimi with the remote (S09, pin.md §3.1–3.3, §3.10–3.11): a PIN made with the pad's keys and the number
@@ -31,8 +32,10 @@ import java.util.Locale
  * içerikler, the 1024-rule limit, and, as the app stops, a locked title leaving the player and its programme detail
  * leaving the guide. Source and launch protection (S12, §3.8–3.9): Kaynakları yönet, Kaynağı düzenle and Kaynağı kaldır
  * asking for the PIN from Ayarlar and the guide and the PIN holding in Kaynaklar, a whole source locked from its
- * Bilgiler, "Açılışta PIN iste" on return over the player and at launch, and the lock screen of a record that cannot be
- * read. Each PIN check or save runs the real KDF, so the waits are long. Removes this app's protection record before and
+ * Bilgiler, the sources' screens and a source form left as the app leaves the screen (an import finishing) and nothing
+ * saved without the PIN, "Açılışta PIN iste" on return over the player and at launch, a film coming back where it
+ * stopped, a configuration change locking nothing, and the lock screen of a record that cannot be read. Each PIN check
+ * or save runs the real KDF, so the waits are long. Removes this app's protection record before and
  * after each test: a dedicated test emulator only, never a TV or an emulator holding a real source. Synthetic sources
  * and PINs.
  */
@@ -55,6 +58,11 @@ class ParentalFlowTest {
                 // The source's guide: a locked channel must keep its programme to itself.
                 if (request.requestUrl!!.encodedPath.endsWith("xmltv.php"))
                     return MockResponse().addHeader("Content-Type", "application/xml").setBody(guide())
+                // A second source whose list answers slowly: its import is still under way as the app leaves the screen.
+                if (request.requestUrl!!.queryParameter("username") == "slow") return list(request).setBodyDelay(1_500, TimeUnit.MILLISECONDS)
+                return list(request)
+            }
+            private fun list(request: RecordedRequest): MockResponse {
                 val body = when (request.requestUrl!!.queryParameter("action")) {
                     null -> """{"user_info":{"auth":1,"status":"Active"}}"""
                     "get_live_categories" -> """[{"category_id":"1","category_name":"Genel"},{"category_id":"2","category_name":"Spor"}]"""
@@ -189,6 +197,9 @@ class ParentalFlowTest {
         waitFor { parental.prompt == null }
         ui.waitUntil(5_000) { !padShown() && focused("parental-change") }
     }
+
+    /** A second synthetic source on the same server, whose list answers slowly. */
+    private fun slowDraft() = SourceDraft("İkinci kütüphane", SourceType.XTREAM, server.url("/").toString(), "slow", "slow")
 
     /** Opens the quick menu with a held OK on [id]'s card, focus on its first row. */
     private fun quickMenu(id: String) {
@@ -895,6 +906,8 @@ class ParentalFlowTest {
         key(KeyEvent.KEYCODE_BACK)
         ui.waitUntil(5_000) { ui.onAllNodesWithTag("source-lock").fetchSemanticsNodes().isEmpty() }
         ui.onNodeWithTag("source-locked:$source", useUnmergedTree = true).assertExists()
+        // The mark is silent; TalkBack hears the lock on the card's Bilgiler, which holds it.
+        ui.onNodeWithTag("info-source:$source").assert(readsLocked)
         ui.runOnUiThread { model.back() }
         ui.runOnUiThread { assertTrue(model.open(entry(film))); assertTrue(model.open(entry(channel))) }
         assertEquals(Route.HOME, model.state.value.route)
@@ -906,6 +919,7 @@ class ParentalFlowTest {
         assertFalse(padShown()); assertFalse(rules().contains(rule))
         assertTrue(model.state.value.locks.ids.isEmpty())
         key(KeyEvent.KEYCODE_BACK)
+        ui.onNodeWithTag("info-source:$source").assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.StateDescription))
         ui.runOnUiThread { model.back() }
 
         // With "Kaynak yönetimi PIN istesin" off Kaynaklar opens at once, and removing the lock asks for the PIN over
@@ -986,12 +1000,15 @@ class ParentalFlowTest {
         assertEquals(ParentalStatus.UNAVAILABLE, parental.status); assertTrue(parental.appLocked)
         ui.waitUntil(5_000) { lockShown() && focused("app-lock-retry") }
         ui.onNodeWithTag("app-lock-title").assertTextEquals("Ebeveyn denetimi kaydı açılamadı")
+        ui.onNodeWithTag("app-lock").assert(SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "Ebeveyn denetimi kaydı açılamadı"))
         assertTrue(ui.onAllNodesWithTag("pin-key:1").fetchSemanticsNodes().isEmpty())
         ui.runOnUiThread { assertFalse(model.open(entry(film))) }
         assertEquals(Route.HOME, model.state.value.route)
-        // Yeniden dene while it still cannot be read: still locked.
+        // Yeniden dene while it still cannot be read: still locked, and it says so, focus staying on it.
         key(KeyEvent.KEYCODE_DPAD_CENTER)
-        Thread.sleep(1_000); ui.waitForIdle()
+        ui.waitUntil(10_000) { parental.retry == ProtectionRetry.FAILED }
+        ui.onNodeWithTag("app-lock-feedback").assertContentDescriptionEquals("Kayıt yine açılamadı. Biraz sonra yeniden dene ya da cihazı sıfırla.")
+        ui.onNodeWithTag("app-lock-retry").assertIsFocused().assertIsEnabled()
         assertTrue(parental.appLocked); assertTrue(lockShown())
         // Sıfırla…: Vazgeç first and back on it; then the TV starts over.
         key(KeyEvent.KEYCODE_DPAD_RIGHT)
@@ -1012,5 +1029,111 @@ class ParentalFlowTest {
         ui.waitUntil(5_000) { !lockShown() }
         assertTrue(model.state.value.sources.isEmpty())
         assertEquals(ProtectionRead.Unconfigured, ProtectionStore(context).read())
+    }
+
+    @Test fun theSourcesScreensCloseAsTheAppLeavesTheScreenAndNothingIsSavedWithoutThePin() {
+        makePin()
+        val source = model.state.value.sources.single().id
+        // Kaynaklar → Düzenle with the PIN; the form holds the source's password and a name being typed.
+        openSourcesWithPin()
+        ui.runOnUiThread { assertFalse(model.editSource(source)); model.draft(model.state.value.draft.copy(name = "Yeni ad")) }
+        assertEquals(Route.SETUP, model.state.value.route); assertEquals("synthetic", model.state.value.draft.password)
+        // Home, standby or another app: the form and its draft go, back to what opened Kaynaklar.
+        ui.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
+        assertEquals(Route.HOME, model.state.value.route)
+        assertEquals(SourceDraft(), model.state.value.draft); assertNull(model.state.value.editingSourceId)
+        assertFalse(parental.sourcesUnlocked)
+        ui.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+        assertEquals(Route.HOME, model.state.value.route)
+        // Without the PIN nothing is saved: a guide address, or a form reached some other way (an unknown source's
+        // removal falls back to setup); the form goes instead.
+        val guide = model.state.value.sources.single().epgUrl
+        ui.runOnUiThread { model.saveGuideUrl(source, "http://127.0.0.1:1/xmltv.xml") }
+        assertEquals(UiText.Res(R.string.error_sources_need_pin), model.state.value.guideSaveError)
+        assertEquals(guide, model.state.value.sources.single().epgUrl)
+        ui.runOnUiThread {
+            model.clearGuideSaveError()
+            assertFalse(model.removeSource("missing"))
+            model.draft(model.state.value.draft.copy(name = "Yeni ad"))
+            model.connectDraft()
+        }
+        assertEquals(Route.HOME, model.state.value.route); assertEquals(SourceDraft(), model.state.value.draft)
+        assertEquals(listOf("Deneme kütüphanesi"), model.state.value.sources.map { it.name })
+        // Düzenle asks again.
+        ui.runOnUiThread { assertTrue(model.editSource(source)) }
+        assertEquals(PinPurpose.Verify(AdminReason.SOURCES), parental.prompt?.purpose)
+        ui.runOnUiThread { model.cancelPin() }
+
+        // An import under way goes on as the app leaves the screen; Vazgeç on return leaves for Ana Sayfa, not the form.
+        val second = slowDraft()
+        openSourcesWithPin()
+        ui.runOnUiThread { assertFalse(model.addSource()); model.draft(second); model.connectDraft() }
+        assertEquals(SourceTask.IMPORTING, model.state.value.sourceTask)
+        ui.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
+        ui.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+        assertEquals(Route.LOADING, model.state.value.route); assertEquals(SourceTask.IMPORTING, model.state.value.sourceTask)
+        ui.runOnUiThread { model.back() }
+        assertEquals(Route.HOME, model.state.value.route); assertEquals(SourceDraft(), model.state.value.draft)
+        assertEquals(1, model.state.value.sources.size)
+        // Let finish, it is saved and ends on Ana Sayfa, as the PIN that opened Kaynaklar ended.
+        openSourcesWithPin()
+        ui.runOnUiThread { assertFalse(model.addSource()); model.draft(second); model.connectDraft() }
+        ui.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
+        ui.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+        ui.waitUntil(30_000) { model.state.value.sourceTask == SourceTask.IDLE }
+        assertEquals(Route.HOME, model.state.value.route); assertEquals(SourceDraft(), model.state.value.draft)
+        assertEquals(listOf("Deneme kütüphanesi", "İkinci kütüphane"), model.state.value.sources.map { it.name })
+        assertFalse(parental.sourcesUnlocked)
+    }
+
+    @Test fun aConfigurationChangeNeitherLocksTheAppNorClosesTheSourceForm() {
+        makePin()
+        lock(options = ProtectionOptions(launchNeedsPin = true))
+        val source = model.state.value.sources.single().id
+        openSourcesWithPin()
+        ui.runOnUiThread { assertFalse(model.editSource(source)); model.draft(model.state.value.draft.copy(name = "Yeni ad")) }
+        // A keyboard plugged in, another language: the activity is made again while the viewer stays.
+        val before = model
+        ui.activityRule.scenario.recreate()
+        ui.runOnUiThread { model = ViewModelProvider(ui.activity)[TvViewModel::class.java] }
+        assertSame(before, model)
+        ui.waitForIdle()
+        assertFalse(parental.appLocked); assertFalse(lockShown())
+        assertEquals(Route.SETUP, model.state.value.route); assertEquals("Yeni ad", model.state.value.draft.name)
+        assertTrue(parental.sourcesUnlocked)
+        // Leaving the screen still does both.
+        ui.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
+        assertTrue(parental.appLocked); assertEquals(Route.HOME, model.state.value.route)
+        assertEquals(SourceDraft(), model.state.value.draft)
+        ui.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+        ui.waitUntil(5_000) { lockShown() && focused("pin-key:1") }
+        digits("2580")
+        waitFor { !parental.appLocked }
+    }
+
+    @Test fun aFilmComesBackAfterTheLockScreenWhereItStoppedAndPausedAsTheViewerLeftIt() {
+        makePin()
+        lock(options = ProtectionOptions(launchNeedsPin = true))
+        val film = model.fixtureKey("movie:2")
+        // Ten minutes into the film, from an earlier viewing.
+        ui.runOnUiThread { model.saveProgress(entry(film), 600_000, 6_000_000) }
+        ui.runOnUiThread { assertFalse(model.play(entry(film))) }
+        ui.waitUntil(5_000) { model.state.value.route == Route.PLAYER && playingId == film }
+        assertEquals(600_000L, model.state.value.playing!!.startMs); assertFalse(model.state.value.playing!!.paused)
+        ui.waitUntil(5_000) { ui.onAllNodes(isFocused() and hasAnyAncestor(hasTestTag("player-panel"))).fetchSemanticsNodes().isNotEmpty() }
+        // The viewer pauses it, then leaves the app.
+        key(KeyEvent.KEYCODE_MEDIA_PAUSE)
+        ui.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
+        assertTrue(parental.appLocked)
+        ui.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+        ui.waitUntil(5_000) { lockShown() && focused("pin-key:1") }
+        ui.onNodeWithTag("app-lock").assert(SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "NEXTV kilitli"))
+        digits("2580")
+        waitFor { !parental.appLocked }
+        // Back where the player saved it as the app left, and paused.
+        val playing = model.state.value.playing!!
+        assertEquals(Route.PLAYER, model.state.value.route); assertEquals(film, playing.entry.id)
+        assertEquals(model.progress(entry(film))!!.positionMs, playing.startMs); assertTrue(playing.paused)
+        ui.runOnUiThread { model.back() }
     }
 }

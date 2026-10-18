@@ -206,6 +206,21 @@ class AccessGateTest {
         denies(AccessTarget.Open(movie.id), unknown.copy(sources = listOf(list)))
     }
 
+    @Test fun behindTheLockScreenNothingOpensWhileWhatATitlesLocksSayIsStillRead() {
+        // "Açılışta PIN iste", or a record that cannot be read (pin.md §3.9): free, locked and opened titles alike.
+        val locked = inSeries.copy(policy = locks, unlocked = setOf(content(movie)), playing = first, playerShown = true,
+            channels = listOf(news, sport), appLocked = true)
+        for (target in listOf(AccessTarget.Open(news.id), AccessTarget.Open(movie.id), AccessTarget.Watch(show.id),
+            AccessTarget.Play(listEpisode.id), AccessTarget.ChannelNumber(1), AccessTarget.ChannelStep(1),
+            AccessTarget.NextEpisode("a", first.id, second.id, automatic = false))) denies(target, locked)
+        // Whether the player it covers may come back once it goes: the free channel and the opened film would, the
+        // locked episode would not.
+        assertTrue(AccessGate.find(AccessTarget.Play(news.id), locked)!!.opens)
+        assertTrue(AccessGate.find(AccessTarget.Play(movie.id), locked)!!.opens)
+        assertFalse(AccessGate.find(AccessTarget.Play(first.id), locked)!!.opens)
+        allows(movie, AccessTarget.Open(movie.id), locked.copy(appLocked = false))
+    }
+
     @Test fun aDetailIsJudgedOnTheLibrarysEntry() {
         // The film's detail lacks the category its list entry has; the category's lock still asks.
         val film = MediaEntry("movie:12", "12", MediaKind.MOVIE, "Film", "Aile", categoryId = "7", extension = "mp4").inSource("a")

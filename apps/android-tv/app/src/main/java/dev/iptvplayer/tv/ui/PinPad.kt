@@ -28,6 +28,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,6 +43,7 @@ import dev.iptvplayer.tv.data.PinPhase
 import dev.iptvplayer.tv.data.PinPrompt
 import dev.iptvplayer.tv.data.PinPurpose
 import dev.iptvplayer.tv.data.PinStep
+import dev.iptvplayer.tv.data.ProtectionRetry
 import dev.iptvplayer.tv.data.displayTitle
 import kotlinx.coroutines.delay
 
@@ -109,7 +111,8 @@ private const val UNLOCK_TITLE_MAX = 32
  * The lock screen (pin.md §3.9, §4), in every screen's place while the app is locked: the logo, "NEXTV kilitli" and the
  * digits typed on the left, the keys and PIN'i unuttum on the right; the right PIN opens the app as it was. A protection
  * record that cannot be read says so instead, with Yeniden dene and Sıfırla…: nothing opens until it reads again or
- * the TV starts over (D049). Back closes the app.
+ * the TV starts over (D049). Back closes the app. TalkBack names the screen as it appears (its pane title), before the
+ * key or button that takes focus.
  */
 @Composable internal fun AppLockScreen(s: TvState, model: TvViewModel) {
     val activity = LocalActivity.current
@@ -117,7 +120,7 @@ private const val UNLOCK_TITLE_MAX = 32
     val unavailable = s.parental.status == ParentalStatus.UNAVAILABLE
     val prompt = s.parental.prompt?.takeIf { it.purpose == PinPurpose.Launch && !unavailable }
     // A new prompt (the app left the screen and came back) starts with no digit typed.
-    if (prompt != null) key(prompt.id) { LockPad(prompt, model) } else LockNotice(unavailable, model)
+    if (prompt != null) key(prompt.id) { LockPad(prompt, model) } else LockNotice(unavailable, s.parental.retry, model)
 }
 
 /** The lock screen's pad. The number keys type wherever focus is on the screen, as on the PIN window. */
@@ -136,13 +139,14 @@ private const val UNLOCK_TITLE_MAX = 32
     LaunchedEffect(Unit) { refocusAfterDialog(window) { first } }
     LaunchedEffect(forgetting) { if (!forgetting && askedForget) refocusAfterDialog(window) { forget } }
     LaunchedEffect(waiting != null) { if (waiting != null && !pad.typed) refocusAfterDialog(window) { forget } }
-    Row(Modifier.fillMaxSize().background(Ink.Background).testTag("app-lock").pinDigitKeys(pad) { takesDigits }
-        .padding(horizontal = TvLayout.Gutter, vertical = 28.dp),
+    val title = stringResource(R.string.app_lock_title)
+    Row(Modifier.fillMaxSize().background(Ink.Background).semantics { paneTitle = title }.testTag("app-lock")
+        .pinDigitKeys(pad) { takesDigits }.padding(horizontal = TvLayout.Gutter, vertical = 28.dp),
         horizontalArrangement = Arrangement.spacedBy(32.dp), verticalAlignment = Alignment.CenterVertically) {
         // A large font scrolls this column; the keys keep their size beside it.
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             NextvLogo(height = 28.dp)
-            Heading(stringResource(R.string.app_lock_title), Modifier.semantics { heading() }.testTag("app-lock-title"))
+            Heading(title, Modifier.semantics { heading() }.testTag("app-lock-title"))
             Note(prompt.message(), modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
             PinBoxes(if (checking) PinFormat.LENGTH else pad.count)
             PinFeedback(prompt)
@@ -158,27 +162,41 @@ private const val UNLOCK_TITLE_MAX = 32
 
 /**
  * The lock screen without a pad: a record that cannot be read ([unavailable]), with Yeniden dene first, or, for the
- * moment a new pad takes to open, the heading alone.
+ * moment a new pad takes to open, the heading alone. [retry] is how Yeniden dene goes: while the record is read again
+ * the button takes nothing, and a record still unreadable says so, read out as it changes, focus staying on the button.
  */
-@Composable private fun LockNotice(unavailable: Boolean, model: TvViewModel) {
+@Composable private fun LockNotice(unavailable: Boolean, retry: ProtectionRetry, model: TvViewModel) {
     var resetting by remember { mutableStateOf(false) }
     var askedReset by remember { mutableStateOf(false) }
-    val retry = remember { FocusRequester() }
+    val retryFocus = remember { FocusRequester() }
     val reset = remember { FocusRequester() }
     val window = LocalWindowInfo.current
-    LaunchedEffect(unavailable) { if (unavailable) refocusAfterDialog(window) { retry } }
+    LaunchedEffect(unavailable) { if (unavailable) refocusAfterDialog(window) { retryFocus } }
     LaunchedEffect(resetting) { if (!resetting && askedReset) refocusAfterDialog(window) { reset } }
-    Column(Modifier.fillMaxSize().background(Ink.Background).testTag("app-lock").verticalScroll(rememberScrollState())
-        .padding(horizontal = TvLayout.Gutter, vertical = 28.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    val title = stringResource(if (unavailable) R.string.app_lock_unavailable_title else R.string.app_lock_title)
+    Column(Modifier.fillMaxSize().background(Ink.Background).semantics { paneTitle = title }.testTag("app-lock")
+        .verticalScroll(rememberScrollState()).padding(horizontal = TvLayout.Gutter, vertical = 28.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)) {
         NextvLogo(height = 28.dp)
-        Heading(stringResource(if (unavailable) R.string.app_lock_unavailable_title else R.string.app_lock_title),
-            Modifier.semantics { heading() }.testTag("app-lock-title"))
+        Heading(title, Modifier.semantics { heading() }.testTag("app-lock-title"))
         if (unavailable) {
+            val reading = retry == ProtectionRetry.READING
             Note(stringResource(R.string.app_lock_unavailable_note), modifier = Modifier.widthIn(max = 640.dp))
+            // One line kept for what Yeniden dene did, as on the PIN pad: the same node, so each change is read.
+            val said = when (retry) {
+                ProtectionRetry.READING -> stringResource(R.string.pin_checking)
+                ProtectionRetry.FAILED -> stringResource(R.string.app_lock_retry_failed)
+                ProtectionRetry.IDLE -> ""
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (reading) LoadingArc()
+                Text(said, Modifier.testTag("app-lock-feedback").clearAndSetSemantics { contentDescription = said; liveRegion = LiveRegionMode.Polite },
+                    color = if (retry == ProtectionRetry.FAILED) Ink.Error else Ink.Text, fontFamily = Roboto, fontSize = 13.sp,
+                    lineHeight = 19.sp, minLines = 1)
+            }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Action(stringResource(R.string.app_lock_retry), Modifier.focusRequester(retry).testTag("app-lock-retry"), primary = true) {
-                    model.retryProtection()
-                }
+                Action(stringResource(R.string.app_lock_retry), Modifier.focusRequester(retryFocus).testTag("app-lock-retry"),
+                    enabled = !reading, primary = true) { model.retryProtection() }
                 Action(stringResource(R.string.app_lock_reset), Modifier.focusRequester(reset).testTag("app-lock-reset"), outlined = true) {
                     askedReset = true; resetting = true
                 }

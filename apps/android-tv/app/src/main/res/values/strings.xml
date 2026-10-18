@@ -641,6 +641,7 @@
     <string name="app_lock_unavailable_title">Ebeveyn denetimi kaydı açılamadı</string>
     <string name="app_lock_unavailable_note">Kilitli içerikleri korumak için uygulama kapalı tutuluyor. Kayıt onarılamazsa bu cihazdaki kaynakları ve kilitleri sıfırlayıp yeniden kurabilirsin.</string>
     <string name="app_lock_retry">Yeniden dene</string>
+    <string name="app_lock_retry_failed">Kayıt yine açılamadı. Biraz sonra yeniden dene ya da cihazı sıfırla.</string>
     <string name="app_lock_reset">Sıfırla…</string>
     <string name="app_lock_reset_question">Bu cihaz sıfırlansın mı?</string>
 
