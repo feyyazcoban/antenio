@@ -267,6 +267,12 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 category = old.category.takeIf { category -> catalog.items.any { !it.adult &&
                     (if (old.onlyFavorites) it.id in favorites else it.kind == old.kind) && it.category == category } } ?: CategoryFilter.ALL)
         }
+        // A detail the gate now refuses (its category hidden from Ayarlar, a refresh dropped the title) closes as Back
+        // would, instead of keeping an Oynat and episodes that do nothing, like a card that is no longer shown.
+        state.value.selected?.takeIf { state.value.route == Route.DETAIL }?.let { detail ->
+            val target = AccessTarget.Open(detail.id)
+            if (AccessGate.decide(target, gateSnapshot(target)) == GateResult.Deny) back()
+        }
         resetSearchIndex()
         // StateFlow may retain the previous, equal Catalog instance on an unchanged refresh.
         // Prepare the published instance so the first query reuses this work.

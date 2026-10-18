@@ -55,6 +55,8 @@ class AccessGateTest {
         // The film's detail was open when its category was hidden in Ayarlar.
         denies(AccessTarget.Play(movie.id), published.copy(selected = movie))
         denies(AccessTarget.Play(first.id), published)
+        // An open detail asks this again when the library is published, and closes (TvViewModel.publishLibrary).
+        denies(AccessTarget.Open(show.id), published.copy(selected = show))
         denies(AccessTarget.ChannelNumber(2), published.copy(channels = listOf(news, sport)))
         allows(news, AccessTarget.ChannelNumber(1), published.copy(channels = listOf(news, sport)))
     }
@@ -77,6 +79,9 @@ class AccessGateTest {
         // An M3U series' episodes come with the list, so they are found without its detail.
         allows(listEpisode, AccessTarget.Play(listEpisode.id))
         denies(AccessTarget.Play(listEpisode.id), snapshot.copy(allCatalog = raw.copy(items = raw.items - listShow)))
+        // The same file listed under a series that is gone as well: the published series' list is used.
+        val listed = raw.copy(m3uEpisodes = mapOf("b:m3u-show:99" to listOf(listEpisode), listShow.id to listOf(listEpisode)))
+        allows(listEpisode, AccessTarget.Play(listEpisode.id), snapshot.copy(allCatalog = listed))
     }
 
     @Test fun theNextEpisodeFollowsThePlayerAndTheCountdownSetting() {

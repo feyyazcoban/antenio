@@ -410,7 +410,7 @@ internal fun quickActions(entry: MediaEntry, favorite: Boolean, toggleFavorite: 
     SourceDialog(displayTitle(entry.title, entry.year).name, first, dismiss, width = 440.dp) {
         // Half a gap above and below the rows, pulled out over the dialog's spacing: at rest each row sits where the
         // dialog's own column put it, and a scrolled window holds whole rows.
-        Column(Modifier.weight(1f, fill = false).layout { measurable, constraints ->
+        Column(Modifier.weight(1f, fill = false).testTag("quick-actions").layout { measurable, constraints ->
                 val room = (gap / 2).roundToPx()
                 val max = if (!constraints.hasBoundedHeight) constraints.maxHeight
                     else ((constraints.maxHeight + 2 * room) / pitch).coerceAtLeast(1) * pitch

@@ -96,8 +96,10 @@ object AccessGate {
         val series = selected?.takeIf { it.kind == MediaKind.SERIES && title(it.id)?.kind == MediaKind.SERIES }
         if (series != null) episodes.firstOrNull { it.id == id && it.kind == MediaKind.EPISODE && it.sourceId == series.sourceId &&
             (it.parentLocalId == null || it.parentLocalId == series.localId) }?.let { return it }
+        // Membership first: the series is looked up only for a list that holds the episode, not for each of the
+        // thousands of series a large M3U list can have.
         return allCatalog.m3uEpisodes.entries.firstOrNull { (parent, list) ->
-            title(parent)?.kind == MediaKind.SERIES && list.any { it.id == id }
+            list.any { it.id == id } && title(parent)?.kind == MediaKind.SERIES
         }?.value?.firstOrNull { it.id == id && it.kind == MediaKind.EPISODE }
     }
 
