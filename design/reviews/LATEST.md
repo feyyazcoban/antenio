@@ -1,5 +1,11 @@
 # Güncel görsel inceleme
 
+## 0.14.56 · Başlık ile yıl yakın
+
+D086: dizi adı boş ikinci satır ayırmaz; yıl/kaynak başlığın gerçek son satırını 4 dp aralıkla izler. Normal ölçekte sentetik yerel görsel. [QA](../../docs/project/native-series-spacing-56-qa.json).
+
+![Dizi adı ve yıl birlikte](series-spacing-0.14.56/series.png)
+
 ## 0.14.55 · Daha büyük dizi rafı
 
 D085: ana sayfa dizi rafında 160×240 dp afiş ve 16 sp Medium dizi adları; iki satır ve 2:3 oran korunur. Normal ölçekte yerel sentetik kaynak görseli. [QA](../../docs/project/native-series-shelf-55-qa.json).

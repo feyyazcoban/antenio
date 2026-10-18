@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · Dizi adı–yıl aralığı / 0.14.56 · 18 Ekim 2026
+
+Kullanıcı “Başlık ve tarih birbirinden çok uzak duruyor” dedi. HomeCard metinleri iç Column'da; yalnız seriesShelf için minLines 1 (maxLines 2), başlık–metadata aralığı 4 dp. Önce minLines 2 boş ikinci satır ve 8 dp aralık ayırıyordu. Afiş–başlık 8 dp, 160×240 dp afiş/16 sp başlık aynı. Diğer rafların minLines/aralığı aynı; görünürlük tüm kartı kapsar.
+
+Değişenler: HomeScreen.kt, build.gradle.kts; D086, HOME_SHELVES/SCREENS, BACKLOG/STEPS, STATUS/HANDOFF; [QA](native-series-spacing-56-qa.json), LATEST.md ve series-spacing-0.14.56/series.png. Figma/manifest yok. hero_review nihai diff'i salt okunur inceledi, bulgu yok.
+
+354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558 / tools/run-device-tests.sh --no-build: VisualPreviewTest#homePostersAndContinueRemainVisibleWithRemote, VisualPreviewTest#remoteVerticalShelvesKeepTheirHeadingAndFullCardTogether, 2/2. Mevcut testler değiştirilmedi. Normal görselde yılın tek satırlık başlığı yakın izlemesi incelendi. Font matrisi yok. Ham loglar work/series-spacing-qa. Proje kontrolü/git diff --check geçti.
+
+Teslim: releases/NEXTV_TV_Design_Preview_0.14.56.apk + sha256, kod70, aynı imza/release/R8. SHA-256 60b1910bf655d0357b6d9636700d75da69dff539042b80ba1bc77216468318bd. TV .55→56 install -r, firstInstallTime 2026-10-13 23:50:03 değişmedi, lastUpdateTime 2026-10-18 21:26:34. Kurulu APK çekilip hash eşleştirildi; TV uygulaması/gerçek yayın açılmadı. **5556 açılmadı ve .51/kod65'te kaldı**. 5558/Gradle kapalı; 5554'e dokunulmadı.
+
+Tam sonraki adım: ana checkout/main üzerinden STEPS S15a ve gap/overlay.md. Sonraki teslim en az 0.14.57/kod71; 5556 yükseltilecekse mevcut sürümü .51/kod65 olarak doğrula. Fiziksel görsel/akıcılık/TalkBack, Figma, İngilizce ve satış/fiyat kararları açık. Kullanıcı “yayına hazırla” demeden font matrisi koşma.
+
 ## Codex · Daha büyük dizi rafı / 0.14.55 · 18 Ekim 2026
 
 Kullanıcı “Dizi kütüphanendeki içerikleri biraz daha büyütüp başlıkları da büyütür müsün” dedi. Ana sayfanın HomeCard section == series && kind == SERIES yolu 160 dp genişlik / 2:3 afiş, 16 sp başlık / 22 sp satır yüksekliği / Medium kullanır. Başlık iki satır, ellipsis; metadataya dokunulmadı. Diğer raflar ve ayrı kütüphane ekranı aynı. Ortak görünürlük, PIN/uzun OK/geri dönüş odağı korunur.

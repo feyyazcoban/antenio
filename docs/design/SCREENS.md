@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**18 Ekim · TV-010 / D086:** Dizi rafında yıl, başlığın gerçek son satırının 4 dp altında; tek satırlık ad için boş ikinci satır ayrılmaz. Büyük afiş/ad boyutları korunur. [Raf sözleşmesi](HOME_SHELVES.md).
+
 **18 Ekim · TV-010 / D085:** “Dizi kütüphanen” rafında 160×240 dp afişler ve iki satırlık 16 sp Medium dizi adları. Ortak odak/görünürlük ve ayrıntıdan dönüş aynı. [Raf sözleşmesi](HOME_SHELVES.md).
 
 **18 Ekim · TV-010 / D084:** Son izlenen kanallarda logo, iki satırlık ad ve kaynak adı 200 dp tek kart içinde; odak halkası bütün kartı sarar. OK/uzun OK, kilit ve odak dönüşü korunur. [Raf sözleşmesi](HOME_SHELVES.md).

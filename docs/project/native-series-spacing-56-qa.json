@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.56-design-preview",
+  "versionCode": 70,
+  "decision": "D086",
+  "change": "Home series titles no longer reserve a blank second line; year/source follows the actual title with 4dp spacing. Poster/title sizes preserved.",
+  "review": "Read-only hero_review reviewed final source diff; no actionable findings. Existing full-tile visibility, other shelf text spacing and focus behavior retained.",
+  "tests": {
+    "build": "release/debug/androidTest successful",
+    "unit": {
+      "tests": 354,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "Error": 0,
+      "Warning": 37
+    },
+    "instrumentation": "2/2 at normal font on emulator-5558 only via tools/run-device-tests.sh --no-build: VisualPreviewTest#homePostersAndContinueRemainVisibleWithRemote, VisualPreviewTest#remoteVerticalShelvesKeepTheirHeadingAndFullCardTogether. Existing tests unchanged.",
+    "visual": "Inspected synthetic series screenshot: year directly follows one-line titles, no reserved blank line; focused poster and all captions remain visible. Long titles retain maxLines=2 in code."
+  },
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "69",
+        "versionName": "0.14.55-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 21:21:38"
+      },
+      "after": {
+        "versionCode": "70",
+        "versionName": "0.14.56-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 21:26:34"
+      },
+      "sha256": "60b1910bf655d0357b6d9636700d75da69dff539042b80ba1bc77216468318bd",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "designEmulator": "5556 stayed off at 0.14.51/code65; no data/upgrade changes",
+    "emulatorsAfter": "5558 stopped; 5556/5554 untouched; Gradle daemon stopped"
+  },
+  "limitations": [
+    "No font-scale matrix per user instruction",
+    "Figma unchanged",
+    "Physical visual acceptance remains open"
+  ],
+  "sha256": "60b1910bf655d0357b6d9636700d75da69dff539042b80ba1bc77216468318bd",
+  "images": [
+    "design/reviews/series-spacing-0.14.56/series.png"
+  ],
+  "logs": "work/series-spacing-qa/build.log, device.log, device-full.log (ignored)"
+}

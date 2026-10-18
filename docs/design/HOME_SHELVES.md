@@ -1,5 +1,9 @@
 # Ana sayfa afiş ve devam rafları
 
+## 18 Ekim 2026 · Dizi adı ve yıl birlikte · D086
+
+Kullanıcının başlık ve yılın uzak durduğu geri bildirimiyle `series` rafında başlık artık boş ikinci satır ayırmaz: minLines 1, maxLines 2. Yıl/kaynak satırı gerçek başlığın 4 dp altında gelir (önce boş satır +8 dp). Afiş–başlık aralığı 8 dp, 160×240 dp afiş ve 16/22 sp Medium başlık korunur. D085'in sabit iki satırlık yer ayırma kısmının yerine geçer. Diğer rafların metin aralıkları aynı kalır. Font ölçeği matrisi mağaza öncesi kullanıcı talebini bekler.
+
 ## 18 Ekim 2026 · Daha büyük dizi rafı · D085
 
 Ana sayfadaki “Dizi kütüphanen” (`series`) rafının afişi 136×204 dp yerine 160×240 dp; 2:3 oran korunur. Dizi adı 14/19 sp yerine 16/22 sp, Medium ağırlıkta ve iki satırlık yer tutar; sığmayan sonu üç nokta. Yıl/kaynak satırı 12 sp kalır. Raf başlığı, 20 dp kart aralığı ve odak halkası mevcut sistemi kullanır. Ortak görünürlük hesabı afiş ve alt metnin tümünü kapsar; OK ayrıntı, basılı OK hızlı menü ve Geri odağı korunur.

@@ -650,13 +650,15 @@ internal fun runtimeText(seconds: Long): String {
                 if (locked) LockBadge(Modifier.align(Alignment.TopEnd).padding(7.dp))
             }
         }
-        Text(shown.name, color = Ink.Text, fontFamily = Roboto,
-            fontSize = if (seriesShelf) 16.sp else 14.sp, fontWeight = if (seriesShelf) FontWeight.Medium else null,
-            minLines = if (live) 1 else 2, maxLines = 2, lineHeight = if (seriesShelf) 22.sp else 19.sp, overflow = TextOverflow.Ellipsis)
-        // As in the library: year, language or country and source on one line of constant height.
-        if (!live) Text(listOf(shown.year, shown.tag, sourceName.orEmpty()).filter { it.isNotBlank() }.joinToString(" · "),
-            Modifier.testTag("home-year:$section:${entry.id}"), color = Ink.Muted,
-            fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        if (live) sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+        Column(verticalArrangement = Arrangement.spacedBy(if (seriesShelf) 4.dp else 8.dp)) {
+            Text(shown.name, color = Ink.Text, fontFamily = Roboto,
+                fontSize = if (seriesShelf) 16.sp else 14.sp, fontWeight = if (seriesShelf) FontWeight.Medium else null,
+                minLines = if (live || seriesShelf) 1 else 2, maxLines = 2, lineHeight = if (seriesShelf) 22.sp else 19.sp, overflow = TextOverflow.Ellipsis)
+            // The year follows the actual series title instead of an empty reserved second line.
+            if (!live) Text(listOf(shown.year, shown.tag, sourceName.orEmpty()).filter { it.isNotBlank() }.joinToString(" · "),
+                Modifier.testTag("home-year:$section:${entry.id}"), color = Ink.Muted,
+                fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (live) sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+        }
     }
 }

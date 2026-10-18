@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.56 · Dizi adı ile yıl yakın · 18 Ekim 2026
+
+Kullanıcının “Başlık ve tarih birbirinden çok uzak duruyor” geri bildirimi düzeltildi (D086). Dizi rafında başlık boş ikinci satır ayırmaz; yıl/kaynak gerçek başlığı 4 dp aralıkla izler. Uzun adlar en fazla iki satır; .55 afiş/ad boyutları korunur.
+
+Bağımsız salt okunur incelemede bulgu yok. 354 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/37 uyarı; release/debug/androidTest başarılı. Yalnız 5558/betik üzerinden normal ölçekte mevcut iki raf testi 2/2. Görselde kısa adların altında yılın yakın konumu doğrulandı. Yeni test/font matrisi yok. [QA](native-series-spacing-56-qa.json), [görsel](../../design/reviews/LATEST.md).
+
+0.14.56-design-preview / kod70 TV'ye install -r ile kuruldu; firstInstallTime aynı, kurulu APK hash eşleşti. Son güncelleme 21:26:34; SHA-256 60b1910bf655d0357b6d9636700d75da69dff539042b80ba1bc77216468318bd. TV uygulaması/gerçek yayın açılmadı. 5556 kapalı, .51/kod65'te; 5558/Gradle kapalı. Sırada S15a; sonraki paket en az .57/kod71. Fiziksel/Figma kabulü açık.
+
 ## 0.14.55 · Daha büyük dizi afişleri ve adları · 18 Ekim 2026
 
 Kullanıcı isteğiyle ana sayfadaki “Dizi kütüphanen” rafı büyütüldü (D085): afiş 136×204→160×240 dp, dizi adı 14/19→16/22 sp Medium. İki satırlık başlık, 2:3 oran ve ortak odak/görünürlük korunur.

@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-019/020 · 0.14.56 / D086: dizi adı ile yıl arasındaki boş ikinci satır kaldırıldı, aralık 4 dp. Teslim/kanıt STATUS/HANDOFF'ta; genel görsel kabul açık.
+
 BKL-019/020 · 0.14.55 / D085: kullanıcının isteğiyle ana sayfa dizi afişleri ve dizi adları büyütüldü. Teslim/kanıt STATUS/HANDOFF'ta; genel görsel kabul açık.
 
 BKL-019/020 · 0.14.54 / D084: son izlenen kanallarda logo/ad/kaynak tek kartta, ortak hizalama ve tüm kartı saran odak. Teslim/kanıt STATUS/HANDOFF'ta; genel görsel kabul açık.
