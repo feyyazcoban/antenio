@@ -789,4 +789,12 @@
     <string name="reader_end">End of the text</string>
     <string name="reader_scrolling">Text is scrolling</string>
     <string name="reader_keys">↑↓ Scroll text</string>
+    <string name="player_options">Options</string>
+    <string name="player_speed">Playback speed</string>
+    <string name="player_speed_normal">%1$s · Normal</string>
+    <string name="player_speed_value">Playback speed · %1$s</string>
+    <string name="player_speed_note">Applies until you leave the player. Live TV stays at normal speed.</string>
+    <string name="player_speed_tunneling">To change speed, turn off Tunneled playback in Settings → Player.</string>
+    <string name="player_speed_unavailable">This audio output or device does not support changing playback speed.</string>
+    <string name="player_ends_at">Ends at %1$s</string>
 </resources>

@@ -774,4 +774,12 @@
     <string name="reader_end">Metnin sonu</string>
     <string name="reader_scrolling">Metin kaydırılıyor</string>
     <string name="reader_keys">↑↓ Metni kaydır</string>
+    <string name="player_options">Seçenekler</string>
+    <string name="player_speed">Oynatma hızı</string>
+    <string name="player_speed_normal">%1$s · Normal</string>
+    <string name="player_speed_value">Oynatma hızı · %1$s</string>
+    <string name="player_speed_note">Oynatıcıdan çıkana kadar geçerlidir. Canlı TV normal hızda kalır.</string>
+    <string name="player_speed_tunneling">Hızı değiştirmek için Ayarlar → Oynatıcı bölümünde Tünelli oynatma seçeneğini kapat.</string>
+    <string name="player_speed_unavailable">Bu ses çıkışı veya cihaz oynatma hızını değiştirmeyi desteklemiyor.</string>
+    <string name="player_ends_at">Bitiş %1$s</string>
 </resources>

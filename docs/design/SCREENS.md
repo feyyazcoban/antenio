@@ -127,3 +127,10 @@ Rehber menüsü eklendi. Son kanal/şimdi ilk imleç; yukarı/aşağı kanal ve 
 TV-020 kartlarında şimdi/sonra, TV-050 program/saat/ilerleme gösterilir. Parlak görüntü üzerinde başlık koyu yüzeyle okunur. Büyük fontta kontroller yatay kaydırılabilir. TV-070 kaynak bilgisinden rehber durumu/yenileme/iptal ve ayrı adres düzenleme açılır; okuma ekranı klavyeyi çağırmaz. Saat dilimi seçimi anı korur, DST ofsetleri gerektiğinde açık gösterilir.
 
 Roboto/Ink/Action bileşenleri korunur; ızgarada odak mint çizgi, seçim ayrı yüzeydir, satırlar büyütülmez. Font ≥1.5 ise pencere iki saat, kanal sütunu176dp/satır90dp; normalde üç saat/150dp/65dp. Uzun adlar kısaltılır, tam ad ve program açıklaması ayrıntıda kumandayla okunur; eylemler sabit kalır. [0.13 QA](../project/native-guide-qa.json) test ölçeklerini ve sınırları kaydeder. Ekran görüntülerindeki logolar gerçek, programlar sentetiktir. Figma çizimleri bu tur güncellenmedi.
+
+
+## TV-051 · Oynatma hızı · 18 Ekim 2026 (D077)
+
+Film ve dizide Seçenekler → Oynatma hızı: 0,5×, 0,75×, 1× (Normal), 1,25×, 1,5×, 1,75×, 2×. İlk odak geçerli hızdadır; beyaz odak halkası ve seçili işareti ayrıdır. Yukarı/Aşağı gezinir; OK uygular ve Seçenekler'deki hız satırına döner. Geri uygulamadan bir düzey çıkar; Seçenekler'den Geri kontrollerdeki Seçenekler düğmesine döner. Sonraki Geri kontrolleri gizler, sonraki oynatıcıdan çıkar. Pencere açılınca OSD kendiliğinden kapanmaz. Değerler RadioRow erişilebilirliğini, saydamlık ise oynatıcı panel tercihini kullanır. Uzun liste büyük yazıda dikey kayar; odaklı seçenek görünür kalır.
+
+Ses perdesi korunur; değer yalnız mevcut oynatıcı oturumunda tutulur. Canlı TV'ye taşınmaz. Hata/toparlanma sırasında Seçenekler kapalıdır. Tünelli oynatma veya motorun komut desteği yoksa hız satırı kapalı, nedeni görünür, ilk odak Geri'dedir. Motordan farklı bir gerçek hız gelirse değer ona göre güncellenir ve uyumsuz ses çıkışı açıklanır. Oynarken bilinen süre üzerinden gösterilen bitiş saati gerçek hızla hesaplanır; duraklatmada/eksik sürede tahmin yoktur. Bu ek, D072/S14b kontrol yenilemesinin yerine geçmez.

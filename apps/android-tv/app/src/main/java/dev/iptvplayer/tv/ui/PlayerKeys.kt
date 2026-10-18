@@ -13,6 +13,8 @@ internal sealed interface PlayerLayer {
     data object Controls : PlayerLayer
     /** The Ses / Altyazı panel. */
     data object Tracks : PlayerLayer
+    data object Options : PlayerLayer
+    data object Speed : PlayerLayer
     data object EpisodeEnd : PlayerLayer
 }
 
@@ -86,6 +88,8 @@ internal sealed interface PlayerCommand {
     data object ShowControls : PlayerCommand
     data object HideControls : PlayerCommand
     data object CloseTracks : PlayerCommand
+    data object CloseOptions : PlayerCommand
+    data object CloseSpeed : PlayerCommand
     /** The end card closes and the controls come up over the episode, as its Bu bölümde kal does. */
     data object CloseEndCard : PlayerCommand
     /** Leaves the player; [stopRecovery] stops a reconnection first. */
@@ -117,6 +121,7 @@ internal object PlayerKeyRouter {
             }
             key == PlayerKey.Play -> when { failed -> PlayerCommand.Retry; recovering -> PlayerCommand.Consume; else -> PlayerCommand.Play }
             key == PlayerKey.Pause -> if (recovering) PlayerCommand.StopRecovery else PlayerCommand.Pause
+            (layer == PlayerLayer.Options || layer == PlayerLayer.Speed) -> null
             live && (key == PlayerKey.ChannelUp || key == PlayerKey.ChannelDown) -> PlayerCommand.Zap(if (key == PlayerKey.ChannelUp) 1 else -1)
             live && hidden && healthy && (key == PlayerKey.Up || key == PlayerKey.Down) -> PlayerCommand.Zap(if (key == PlayerKey.Up) 1 else -1)
             live && layer != PlayerLayer.Tracks && key is PlayerKey.Digit -> PlayerCommand.AppendDigit(key.value)
@@ -137,6 +142,8 @@ internal object PlayerKeyRouter {
     fun back(ctx: KeyContext): PlayerCommand = when {
         ctx.layer == PlayerLayer.EpisodeEnd -> PlayerCommand.CloseEndCard
         ctx.layer == PlayerLayer.Tracks -> PlayerCommand.CloseTracks
+        ctx.layer == PlayerLayer.Options -> PlayerCommand.CloseOptions
+        ctx.layer == PlayerLayer.Speed -> PlayerCommand.CloseSpeed
         ctx.recovering -> PlayerCommand.Exit(stopRecovery = true)
         ctx.layer == PlayerLayer.Controls && !ctx.failed -> PlayerCommand.HideControls
         else -> PlayerCommand.Exit()

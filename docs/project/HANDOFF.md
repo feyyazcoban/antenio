@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · 0.14.46 hız ayarı teslim edildi · 18 Ekim 2026
+
+TV ve 5556'da **0.14.46 / versionCode 60** kurulu. Kullanıcının iki isteği tamam: son sürüm TV'de; film/dizide **Seçenekler → Oynatma hızı** (0,5×, 0,75×, 1×, 1,25×, 1,5×, 1,75×, 2×). 0.14.45 önce S14 teslimi olarak kurulmuştu; 0.14.46 hız ekler. S14b yapılmış sayılmaz. Ana checkout main'deki kaynaklar değişmedi; çalışma hâlâ `.claude/worktrees/app-ui-ux-audit-a78e98` / `claude/app-ui-ux-audit-a78e98` içinde.
+
+Kod: yeni `ui/PlaybackSpeed.kt` (girdi/komut/canlı/tünel kapısı, pitch=1, yerel sayı, bitiş hesabı), `PlayerOptionsDialog.kt` (iki düzey, opaklık, RadioRow, odak halkasını koruyan 8 dp kaydırma payı); `PlayerKeys` Options/Speed katmanları ve Geri komutları; `PlayerScreen` gerçek playbackParameters, oturum davranışı, canlı reset, açıklama ve açan düğmeye odak dönüşü. Yeni `PlaybackSpeedTest`, `PlayerSpeedFlowTest`; EN/TR metinler ve sürüm. D077, PRD PLAY01, SCREENS TV-051, BACKLOG/STEPS güncellendi. Figma/manifest değişmedi.
+
+Kontroller: 344 JVM sonucu (1 atlanan, 0 hata); lint 0 hata/37 uyarı; release/debug/androidTest. Menü eklemesiyle 5 regresyon geçti (PlaybackRecoveryFlowTest iki vaka, EpisodeAutoplayFlowTest iki vaka, VisualPreviewTest.playerPanelKeepsTitleAndRemoteActionsInsideScreen). Yeni testin URL'si UI thread dışında hazırlanarak ilk turdaki NetworkOnMainThreadException giderildi. Görsel kontrolde alt odak halkası kesiliyordu; düzeltilip assert güçlendirildi. Son kod üzerinde hız sınıfı normal/1,5/2,0 yazıda ayrı ayrı 3/3 geçti; final loglar `work/speed-qa` altında. Testler yalnız 5558/betik; font_scale 1.0'a döndü. 5556'da 0.14.45→46 üstüne kurulum, uygulama açılışı, gerçek Evim görünürlüğü, aynı firstInstallTime ve çökme kaydı yokluğu görüldü; gerçek yayın açılmadı. TV install -r başarılı; firstInstallTime aynı `2026-10-13 23:50:03`, çekilen APK hash eşleşti: `b826893b7a9b1fdea69ff06339cbbd94c1778c01c146c5228fcc8208b179d185`. APK ve sha256 iki checkout'un releases arşivinde.
+
+Cihazlar: **5556 ve 5558 kapalı**, gerçek Evim diskte duruyor; Gradle daemon durduruldu (bellek azalmıştı). 5554'e dokunulmadı. TV'de uygulama açılmadı; fiziksel kumanda/ses/TalkBack kabulü hâlâ açık. Hız sessizce kalıcı ayar yazmaz, tüneli kapatmaz veya yeni akış açmaz. Tünel açıkken hız için ayarı kapatma açıklaması vardır; donanım/passthrough gerçek hız sınırları fiziksel cihazda sınanmadı. Yeni bağımsız ajan incelemesi yapılmadı; kod, otomatik test ve ekran görüntüsü incelemesi yapıldı.
+
+**Tam sonraki adım:** `docs/design/gap/STEPS.md` S14b (D072), sonra S15a–S17. Yeni kontrol düzeninde D077 Seçenekler/hız ve odak geri dönüşünü koru; PlayerLayer/KeyRouter tek otorite. Sonraki TV sürümü **en az kod 61 / 0.14.47** olmalı. S14'ün desteklenmeyen AC-3 koşulu saf Tracks testinde; medya başına tek uyarıyı ayrıca FakePlayer/cihazla kapatmak, fiziksel kumanda/TalkBack, İngilizce ve API 26–32 dil kontrolü açık. Satış/fiyat kararlarını onaylanmış sayma. `check_project.py` tarihî release dosyaları worktree'de bulunmadığından bağlantı hatası verir; uygulama hatası değildir.
+
 ## Codex · 0.14.45 TV teslimi ve devam · 18 Ekim 2026
 
 Çalışma yeri `.claude/worktrees/app-ui-ux-audit-a78e98`, dal `claude/app-ui-ux-audit-a78e98`. Kullanıcının “son sürümü yükle” talimatı eski “S14b bitince kur” zamanlamasını öne aldı: S14 + inceleme düzeltmeleri **0.14.45 / kod 59** olarak TV'de; S14b/hız henüz dahil değil. Ana checkout'un kaynakları değişmedi; teslim APK'sı her iki checkout'un `releases` klasöründe. Bir sonraki TV paketi **en az 60 / 0.14.46** olmalı.

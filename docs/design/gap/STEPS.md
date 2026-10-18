@@ -7,7 +7,7 @@
 - Bitti ve yeşil: Faz A (S01–S07), X01, Faz B (S08–S12), T01 (ekran testleri onarımı), Faz C (S13), S14 (`b6157c9`: kontrolleri ve ekran testleri geçti; incelemesi yapıldı, düzeltmeleri yarım).
 - S14 inceleme düzeltmeleri: `c54a9f7` alındı ve tamamlandı. PCM destek uyarısı mevcut `flash` yolundan medya başına bir kez; ses çıkışı hataları genel hata; panellerde açık opaklık; uzun değerlerde alta geçen değer etiketi; gezinme testleri `SectionId` sırasından. 340 JVM testi (1 atlanan), lint 0 hata, release/androidTest derlemesi; 5558'de normal yazıda 16, 1,5 ve 2,0 ölçekte ayrı ayrı 12 ekran testi geçti. AC-3 destek kontrolü saf JVM testinde; gerçek cihazda desteklenmeyen AC-3 akışı/TalkBack doğrulanmadı. Altı bölümlü Ayarlar sınırı D076'da açıkça kayıtlı.
 - Kullanıcının güncel isteği: **son hazır sürümü hemen TV'ye kur**. Bu nedenle 0.14.45 (kod 59), S14 ve inceleme düzeltmelerinin teslimidir; S14b tamamlanmış sayılmaz. Kurulum sonucu STATUS/HANDOFF'ta.
-- Sırada: kullanıcının istediği film/dizi oynatma hızı (0,5×–2×) → S14b (D072) → S15a–S17 → Faz E (S18–S29) → Faz F–J (PLAN §2). Sonraki TV paketi en az kod 60 / 0.14.46 olmalı. Hız seçimi S14b/S16 Seçenekler düzenine taşınmalı; canlı yayın normal hızda kalır.
+- Sırada: S14b (D072) → S15a–S17 → Faz E (S18–S29) → Faz F–J (PLAN §2). Kullanıcının istediği film/dizi hızı D077 olarak uygulandı (0,5×–2×, Seçenekler → Oynatma hızı); 0.14.46 / kod 60 teslimi STATUS/HANDOFF’ta. Bir sonraki TV paketi en az kod 61 / 0.14.47 olmalı. Hız seçimi S14b/S16 Seçenekler düzeninde korunmalı; canlı yayın normal hızda kalır.
 
 ## Her adımda yöntem
 

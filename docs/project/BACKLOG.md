@@ -8,7 +8,7 @@
 | --- | --- | --- | --- |
 | BKL-029 | Metinler ve iki dil · S01–03, S13 | İki dil ve yerel biçimler uygulandı; İngilizce inceleme ve API 26–32 cihaz turu açık | review |
 | BKL-030 | Ortak temeller · S04–07 | Ayar/erişim/oynatıcı/veri temelleri uygulandı; sonraki adımlar aynı API'leri kullanır | review |
-| BKL-031 | Oynatıcı ayarları ve kontroller · S14, S14b, S16, S45–48 | S14 incelemesi; S14b D072, sonra seçenekler ve fiziksel cihaz kapısı | in progress |
+| BKL-031 | Oynatıcı ayarları ve kontroller · S14, S14b, S16, S45–48 | S14 inceleme düzeltmeleri ve D077 oturumluk hız tamam; S14b D072, kalan seçenekler ve fiziksel cihaz kapısı açık | in progress |
 | BKL-032 | Oynatıcıda kanal listesi · S15a–c | S14b sonrası; kapsam, liste, bilgi bandı, önceki/son kanal | planned |
 | BKL-033 | Timeshift · S17, S56–57, S64 | Sağlayıcı penceresi ve akış bütçesi önce; cihaz doğrulaması | planned |
 | BKL-034 | EPG · S19–21, S26–28 | Kaynak şeması, öncelik, kaydırma, elle eşleme ve arama | planned |

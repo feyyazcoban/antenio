@@ -1,5 +1,15 @@
 # Proje durumu
 
+## 0.14.46 · Oynatma hızı ve TV teslimi · 18 Ekim 2026
+
+Kullanıcının hız ayarı isteği D077 ile tamamlandı ve en son sürümü kurma talebi kapsamında TV'ye veriler silinmeden kuruldu. Film/dizide Seçenekler → Oynatma hızı: 0,5×–2× (yedi değer). Ses perdesi 1'de tutulur; hız mevcut oynatıcı oturumu boyunca geçerli, çıkışta normal; canlıya geçince 1×. OK uygular, Geri uygulamadan bir düzey döner ve açan düğmeyi odaklar. Motorun gerçek hızı gösterilir, tahmini bitiş buna göre hesaplanır. Tünelli oynatma açıkken açıklamalı kapalı durum bulunur. S14b'nin kontrol tasarımı yenilemesi hâlâ sırada.
+
+Kontroller: 344 JVM testi (0 hata, 1 atlanan), lint 0 hata/37 uyarı; release/debug/androidTest derlemesi. Kontrol menüsü eklendikten sonra 5 ilgili oynatıcı regresyonu geçti (iki yeniden bağlanma, iki bölüm sonu, mevcut kontrollerin geometrisi). İlk hız testinin kurulumunda ana iş parçacığında DNS hatası düzeltildi. Görsel incelemede alt hız satırının odak halkası kesildiği için kaydırmada 8 dp pay eklendi; test halka payını da denetler. Son kodda 5558'de yalnız `tools/run-device-tests.sh`: normal/1,5/2,0 ölçekte ayrı ayrı 3 hız testi geçti (toplam 9); normal ve 2,0 ekranları gözle de doğrulandı. Hızın gerçek Player parametrelerine uygulanması, pitch, tüm değerler, iptal/geri/odak, canlıya geçiş ve tünel sınırı testli. `git diff --check` temiz.
+
+5556: 0.14.45 üstüne `install -r`, açılış/Evim görünürlüğü, aynı ilk kurulum tarihi ve çökme kaydı olmaması doğrulandı; gerçek yayın açılmadı. TV: 0.14.46 (kod 60), firstInstallTime `2026-10-13 23:50:03` değişmedi. Kurulu APK çekilip SHA-256 karşılaştırıldı: `b826893b7a9b1fdea69ff06339cbbd94c1778c01c146c5228fcc8208b179d185`. Teslim `releases/NEXTV_TV_Design_Preview_0.14.46.apk` + `.sha256`; ana checkout arşivinde de var. TV'de oynatma/kumanda/ses çıkışı denenmedi. 5556 ve 5558 kapalı, Gradle daemon durduruldu; 5554'e dokunulmadı.
+
+Sonraki adım S14b (D072); hız seçimi yeni Seçenekler düzeninde korunmalı. Sonraki teslim en az kod 61 / 0.14.47. Satış/fiyat, İngilizce incelemesi, fiziksel kumanda/TalkBack ve diğer gap adımları açık.
+
 ## 0.14.45 · S14 inceleme düzeltmeleri ve TV teslimi · 18 Ekim 2026
 
 Kullanıcının güncel “televizyona son sürümü yükleyebilir miyiz” isteğiyle S14b beklenmeden son hazır sürüm kuruldu. 0.14.45 (kod 59), S11–S14 ve S14 inceleme düzeltmelerini içerir: PCM destek uyarısı, doğru decoder hata kapsamı, açık panel opaklığı, uzun değerler/büyük yazı düzeni ve bölüm sırasına bağlı gezinme testleri. S14b kontrol yenilemesi ve istenen oynatma hızı henüz bu pakette yok.

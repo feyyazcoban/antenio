@@ -109,6 +109,10 @@ import kotlinx.coroutines.flow.first
     var trackParameters by remember { mutableStateOf(player.trackSelectionParameters) }
     var status by remember { mutableIntStateOf(Player.STATE_IDLE) }
     var playing by remember { mutableStateOf(false) }
+    var speed by remember { mutableFloatStateOf(player.playbackParameters.speed) }
+    var speedRequest by remember { mutableStateOf<Float?>(null) }
+    val optionsFocus = remember { FocusRequester() }
+    var returnToOptions by remember { mutableStateOf(false) }
     var hasPlayed by remember { mutableStateOf(false) }
     var position by remember { mutableLongStateOf(0L) }
     var duration by remember { mutableLongStateOf(0L) }
@@ -183,6 +187,8 @@ import kotlinx.coroutines.flow.first
             PlayerCommand.ShowControls -> layer = PlayerLayer.Controls
             PlayerCommand.HideControls -> layer = PlayerLayer.Video
             PlayerCommand.CloseTracks -> { layer = PlayerLayer.Controls; interact() }
+            PlayerCommand.CloseOptions -> { returnToOptions = true; layer = PlayerLayer.Controls; interact() }
+            PlayerCommand.CloseSpeed -> { layer = PlayerLayer.Options; interact() }
             PlayerCommand.CloseEndCard -> { episodeEnd.dismiss(); interact() }
             is PlayerCommand.Exit -> { if (command.stopRecovery) recovery.cancel(); save(); model.back() }
         }
@@ -230,6 +236,13 @@ import kotlinx.coroutines.flow.first
                     silent = true; flash(resources.getString(R.string.player_audio_unplayable), audio = true)
                 }
             }
+            override fun onPlaybackParametersChanged(parameters: PlaybackParameters) {
+                speed = parameters.speed
+                if (speedRequest?.let { kotlin.math.abs(it - speed) > .001f } == true) {
+                    speedRequest = null
+                    flash(resources.getString(R.string.player_speed_unavailable), audio = true)
+                }
+            }
             override fun onTrackSelectionParametersChanged(parameters: TrackSelectionParameters) { trackParameters = parameters }
         }
         var resumeOnStart = false
@@ -264,7 +277,10 @@ import kotlinx.coroutines.flow.first
         recovery.newMedia(request.mode == PlaybackMode.LIVE)
         episodeEnd.newMedia(); endedUnderPin = false; hasPlayed = false
         tracks = Tracks.EMPTY; silent = false; position = request.startMs; duration = 0
-        if (layer == PlayerLayer.Tracks) layer = PlayerLayer.Controls
+        if (audioNote) { note = null; audioNote = false }
+        speedRequest = null
+        if (request.mode == PlaybackMode.LIVE) player.playbackParameters = PlaybackParameters.DEFAULT
+        if (layer == PlayerLayer.Tracks || layer == PlayerLayer.Options || layer == PlayerLayer.Speed) layer = PlayerLayer.Controls
         active = media
         if (quiet) {
             quiet = false; lastInteraction = System.currentTimeMillis()
@@ -291,7 +307,12 @@ import kotlinx.coroutines.flow.first
         }
     }
     LaunchedEffect(top()) {
-        if (top() == PlayerLayer.Controls || top() == PlayerLayer.Video) { withFrameNanos { }; if (layer == PlayerLayer.Video) canvas.requestFocus() else first.requestFocus() }
+        if (top() == PlayerLayer.Controls || top() == PlayerLayer.Video) {
+            withFrameNanos { }
+            if (layer == PlayerLayer.Video) canvas.requestFocus()
+            else if (returnToOptions && !live) { optionsFocus.requestFocus(); returnToOptions = false }
+            else first.requestFocus()
+        }
     }
     LaunchedEffect(endedUnderPin, screenState.parental.prompt == null) {
         if (endedUnderPin && screenState.parental.prompt == null) { endedUnderPin = false; episodeEnded(needsPin = true) }
@@ -367,7 +388,9 @@ import kotlinx.coroutines.flow.first
                         live -> stringResource(R.string.player_live)
                         opening -> stringResource(R.string.text_pair, clock, stringResource(R.string.player_opening))
                         status == Player.STATE_ENDED -> stringResource(R.string.text_pair, clock, stringResource(R.string.player_ended))
-                        else -> clock
+                        else -> listOfNotNull(clock, if (playing) PlaybackSpeed.remainingMs(position, duration, speed)?.let {
+                            stringResource(R.string.player_ends_at, guideTime(System.currentTimeMillis() + it, java.time.ZoneId.systemDefault()))
+                        } else null).joinToString(" · ")
                     }, Modifier.weight(1f), color = if (failure != null && !recoveryState.recovering) Ink.Error else Ink.Text,
                         fontFamily = Roboto, fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     Text(when {
@@ -413,6 +436,9 @@ import kotlinx.coroutines.flow.first
                         Action(stringResource(R.string.player_seek_forward, "10"), enabled = player.isCurrentMediaItemSeekable) { interact(); player.seekTo((player.currentPosition + 10_000).coerceAtMost(duration.takeIf { it > 0 } ?: Long.MAX_VALUE)) }
                     }
                     Action(stringResource(R.string.player_tracks), icon = "sound", enabled = failure == null && !recoveryState.recovering) { interact(); layer = PlayerLayer.Tracks }
+                    if (!live) Action(stringResource(R.string.player_options), Modifier.focusRequester(optionsFocus)
+                        .testTag("player-options").semantics { stateDescription = PlaybackSpeed.label(speed) },
+                        enabled = failure == null && !recoveryState.recovering) { interact(); layer = PlayerLayer.Options }
                     // The shared star icon at icon size, filled while it is a favourite; the meaning stays in semantics.
                     val favoriteLabel = stringResource(when {
                         favoriteTarget == null -> R.string.player_favorite_unavailable
@@ -438,6 +464,16 @@ import kotlinx.coroutines.flow.first
         if (layer == PlayerLayer.Tracks) TracksDialog(tracks, trackParameters, player, model, screenState.playback.panelOpacity) {
             perform(PlayerCommand.CloseTracks)
         }
+        if (layer == PlayerLayer.Options || layer == PlayerLayer.Speed) PlayerOptionsDialog(
+            picking = layer == PlayerLayer.Speed, speed = speed, opacity = screenState.playback.panelOpacity,
+            enabled = !opened.tunneling && player.isCommandAvailable(Player.COMMAND_SET_SPEED_AND_PITCH),
+            unavailable = stringResource(if (opened.tunneling) R.string.player_speed_tunneling else R.string.player_speed_unavailable),
+            openSpeeds = { interact(); layer = PlayerLayer.Speed },
+            choose = { value ->
+                speedRequest = value
+                if (PlaybackSpeed.apply(player, media.mode, value, opened.tunneling)) perform(PlayerCommand.CloseSpeed)
+                else speedRequest = null
+            }, dismiss = { perform(PlayerKeyRouter.back(keys())) }, key = ::onKey)
         endState?.let { end -> EpisodeEndDialog(end,
             play = { episodeEnd.playNow() == NextResult.NEEDS_PIN },
             stay = { perform(PlayerCommand.CloseEndCard) },

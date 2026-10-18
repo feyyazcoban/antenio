@@ -136,7 +136,7 @@ P0, canlı TV, film ve diziyi kapsayan ilk yayın için zorunlu özellikleri; P1
 | EPG01 | Yayın rehberi | P0 | Şimdi/sonra, zaman ızgarası, program ayrıntısı |
 | LIB01 | Favoriler ve son izlenenler | P0 | Kanal/film/dizi favorileri; son kanallar ve hızlı erişim |
 | FIND01 | Arama | P0 | Kanal, film ve dizi; tür ve kaynak filtreleri |
-| PLAY01 | Oynatıcı | P0 | Oynatma, duruma uygun kontroller, ses ve altyazı |
+| PLAY01 | Oynatıcı | P0 | Oynatma, duruma uygun kontroller, ses ve altyazı; film/dizide 0,5×–2× oturumluk hız seçimi (D077) |
 | PLAY02 | Bağlantı ve hata yönetimi | P0 | Sınırlı yeniden deneme, anlaşılır hata, yeniden başlatma |
 | UX01 | Kumanda ve odak sistemi | P0 | Dört yön, OK, Back, odak geri yükleme |
 | SAFE01 | PIN ve gizleme | P0 | Kategori/kaynak koruması, arama ve geçmişe aynı kurallar |
