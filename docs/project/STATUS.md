@@ -6,7 +6,7 @@ D096: HTTP hazırlığı ilk IO isteğine ertelendi; katalog kaynak sayımları 
 
 362 JVM/1skip/0hata, lint0/40; final full build3m15s. 5558/betik ile baseline3/3, final cold3/3 ve ilişkili7/7; bağımsız inceleme tamam. [QA](native-cold-launch-66-qa.json). Tek debug emülatör örneğinde restore5399→4924ms; ilk2,8snvsyncmaxgap1233→1217ms, belirgin değişim yok. **Splash donması tamamen çözüldü sayılmıyor.** Kontrollü saatle logo/harf ilerleyişi geçti; gerçek açılışın seyrek görselleri sürekli akıcılık kanıtı değil.
 
-Kod80/.66 TV ve5556'ya install-r kuruldu; ilk kurulum zamanı ve kuruluAPKhash aynı. SHA-256 2e59f56a1612e511776916ca6b22376a753200b3ea3fec7a7d8983cdfc28391f. TVapp açılmadı,5556 kullanıcı için açık/çalışır/crash yok. 5558/Gradle kapalı. İlk soğuk kare gecikmesi, fiziksel akıcılık kabulü ve genel S15a–c açık; font matrisi mağaza öncesine ertelendi.
+Kod80/.66 TV ve5556'ya install-r kuruldu; ilk kurulum zamanı ve kuruluAPKhash aynı. SHA-256 2e59f56a1612e511776916ca6b22376a753200b3ea3fec7a7d8983cdfc28391f. TVapp açılmadı,5556 kullanıcı için açık/çalışır/crash yok. 5558/Gradle kapalı. Kod main üzerinde (b936014); tamamlanan dallar silindi, audit checkout eşlendi. İlk soğuk kare gecikmesi, fiziksel akıcılık kabulü ve genel S15a–c açık; font matrisi mağaza öncesine ertelendi.
 
 ## 0.14.65 · İlk kaydırma hedefi · 19 Ekim 2026
 
