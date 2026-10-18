@@ -9,10 +9,10 @@ enum class BackupClass { NONE, SETTINGS, PERSONAL }
 /**
  * One preference in DeviceStore's `device_state`, or a family of keys that start with [name]; [layout] says how the rest
  * of a key reads. [reset] says whether starting over (DeviceStore.forgetSource, later "Her şeyi sıfırla") removes it:
- * the TV's own settings survive a source change.
+ * the TV's own settings survive a source change. Only a SHARED key has [prune].
  */
 internal class DeviceKey(val name: String, val scope: KeyScope, val reset: Boolean, val backup: BackupClass,
-    private val layout: Layout = Layout.WHOLE) {
+    private val layout: Layout = Layout.WHOLE, val prune: ((value: Any, retained: Set<String>) -> Any?)? = null) {
 
     enum class Layout {
         /** The key is [name]. */
@@ -24,12 +24,21 @@ internal class DeviceKey(val name: String, val scope: KeyScope, val reset: Boole
         /** [name], the id's length, the id and an item: `p2:6:source:<hash>`, so `source` and `source:a` never mix. */
         SIZED,
         /** [name] and an item of the one source saved before the registry; nothing in the key names that source. */
-        LEGACY
+        LEGACY,
+        /**
+         * The key is [name] and its value holds entries of several sources, such as one list of reminders. Removing a
+         * source does not take the key whole: [prune] gets the stored String or String set and returns it without the
+         * entries of sources not among `retained`, or null when nothing is left.
+         */
+        SHARED
     }
 
-    init { require((scope == KeyScope.SOURCE) == (layout in setOf(Layout.OWNER, Layout.SIZED, Layout.LEGACY))) }
+    init {
+        require((scope == KeyScope.SOURCE) == (layout in setOf(Layout.OWNER, Layout.SIZED, Layout.LEGACY, Layout.SHARED)))
+        require((layout == Layout.SHARED) == (prune != null))
+    }
 
-    fun matches(key: String) = if (layout == Layout.WHOLE) key == name else key.startsWith(name)
+    fun matches(key: String) = if (layout == Layout.WHOLE || layout == Layout.SHARED) key == name else key.startsWith(name)
 
     /** The key [source] keeps under, or for a SIZED family the start all of its keys share. */
     fun of(source: String): String = when (layout) {
@@ -59,7 +68,8 @@ internal class DeviceKey(val name: String, val scope: KeyScope, val reset: Boole
 
 /**
  * Every preference DeviceStore keeps, with its scope, whether starting over removes it and its backup class (gap plan
- * T5). DeviceStore names no key itself: a new key is added here first, and a SOURCE key then leaves with its source.
+ * T5). DeviceStore names no key itself: a new key is added here first, and a SOURCE key then leaves with its source, or
+ * for a SHARED key, loses that source's entries.
  */
 internal object DeviceKeys {
     /** The encrypted source registry. Sealed with this TV's Keystore key, so a backup carries the decoded sources instead. */
@@ -98,6 +108,19 @@ internal object DeviceKeys {
      */
     fun leftBehind(keys: Collection<String>, retained: Set<String>): List<String> =
         keys.filter { key -> all.firstNotNullOfOrNull { it.owner(key) }?.let { it !in retained } == true }
+
+    /**
+     * Of the stored [values], the SHARED keys holding entries of a source not among [retained], each with what
+     * [DeviceKey.prune] leaves; null removes the key. A value its entry cannot read stays as it is, so saving the
+     * sources never fails on it.
+     */
+    fun pruned(values: Map<String, *>, retained: Set<String>, entries: List<DeviceKey> = all): Map<String, Any?> =
+        entries.mapNotNull { entry ->
+            val prune = entry.prune ?: return@mapNotNull null
+            val value = values[entry.name] ?: return@mapNotNull null
+            val next = runCatching { prune(value, retained) }.getOrDefault(value)
+            if (next == value) null else entry.name to next
+        }.toMap()
 
     /** Of the stored [keys], those starting over removes. */
     fun cleared(keys: Collection<String>): List<String> = keys.filter { find(it)?.reset == true }

@@ -117,6 +117,13 @@ class DeviceStore internal constructor(private val prefs: SharedPreferences) {
             editor.remove(key)
         }
         DeviceKeys.leftBehind(prefs.all.keys, retained).forEach { editor.remove(it) }
+        DeviceKeys.pruned(prefs.all, retained).forEach { (key, value) ->
+            when (value) {
+                null -> editor.remove(key)
+                is String -> editor.putString(key, value)
+                is Set<*> -> editor.putStringSet(key, value.filterIsInstanceTo(HashSet<String>()))
+            }
+        }
         if (!editor.commit()) throw SourceFailure(FailureReason.SOURCES_NOT_STORED)
     }
 

@@ -111,6 +111,26 @@ class DeviceKeysTest {
         assertNull(DeviceKeys.progress.owner("p2:99:source:abc")); assertNull(DeviceKeys.progress.owner("p2:x:source:abc"))
     }
 
+    @Test fun aKeyHoldingSeveralSourcesKeepsTheEntriesOfThoseThatStay() {
+        // One key for all sources, as the planned reminders and library are: their entries go, the key stays.
+        val acks = DeviceKey("acks", KeyScope.SOURCE, reset = true, BackupClass.PERSONAL, DeviceKey.Layout.SHARED) {
+            value, retained -> (value as Set<*>).filterTo(HashSet()) { it in retained }.ifEmpty { null }
+        }
+        val values = mapOf("acks" to setOf("source", "source:a"), DeviceKeys.reducedMotion.name to true)
+        assertEquals(mapOf("acks" to setOf("source")), DeviceKeys.pruned(values, setOf("source"), listOf(acks)))
+        assertEquals(mapOf("acks" to null), DeviceKeys.pruned(values, emptySet(), listOf(acks)))
+        assertEquals(emptyMap<String, Any?>(), DeviceKeys.pruned(values, owners.toSet(), listOf(acks)))
+        // A value the entry cannot read stays, and the whole-key sweep never takes it.
+        assertEquals(emptyMap<String, Any?>(), DeviceKeys.pruned(mapOf("acks" to "unreadable"), emptySet(), listOf(acks)))
+        assertTrue(acks.matches("acks")); assertFalse(acks.matches("acks:source")); assertNull(acks.owner("acks"))
+        // A key of one source names it, and only a SHARED key prunes.
+        assertThrows(IllegalArgumentException::class.java) { DeviceKey("x", KeyScope.SOURCE, reset = true, BackupClass.PERSONAL) }
+        assertThrows(IllegalArgumentException::class.java) {
+            DeviceKey("x", KeyScope.SOURCE, reset = true, BackupClass.PERSONAL, DeviceKey.Layout.SHARED)
+        }
+        assertEquals(emptyMap<String, Any?>(), DeviceKeys.pruned(mapOf(DeviceKeys.favorites.of("source") to setOf("1")), emptySet()))
+    }
+
     @Test fun clearingHistoryTakesOnlyThatSourcesHistoryAndProgress() {
         val (memory, store) = filled()
         store.clearHistory("source")
