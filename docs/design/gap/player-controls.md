@@ -4,14 +4,14 @@
 
 # S14b · Oynatıcı kontrolleri ve sarma çubuğu (Faz D)
 
-**Bu bir öneridir, sahip onayı yok.** Kareler `scratchpad/player-design/proposal.html`, bugünkü hâl `current.html`. 960 × 540 dp tuval kullanıldı; ölçüler tarayıcıda sistem yazı tipiyle alındı. Fiziksel TV'de, emülatörde ve Figma'da doğrulanmadı. Kod değişmedi.
+**D072 ile onaylandı.** Aşağıdaki ölçüler 960 × 540 dp HTML taslağından gelir; native uygulama ve test sonuçlarının güncel kaydı STATUS/HANDOFF'tadır. Fiziksel TV ve Figma kabulü ayrıca izlenir. Maketler bu belgenin başında bağlıdır.
 
 **Taban:** Dengeli'nin iskeleti. Başlık sol altta, tek alt scrim; player-panel / player-title / player-controls geometri testleri geçerli kalır.
 **Eklenenler:**
 - Sinematik'ten: oynatma kümesi, dolgulu çipler, sarma çubuğu ve pencereli canlı görseli.
 - Bilgi bantlı'dan: Canlıya dön eşiği, PlaybackClock, tek bileşenli bilgi bandı ve Material Symbols.
 
-**Onaylanırsa:** DECISIONS'a yeni bir kayıt girer. Bu kayıt D064'ün oynatıcı maddesinin (24 sp başlık, 14 sp durum, sağda ipucu, üst etiket) yerine geçer. SCREENS'te oynatıcı satırı güncellenir.
+**Karar:** D072, D064'ün oynatıcı maddesinin (24 sp başlık, 14 sp durum, sağda ipucu, üst etiket) yerine geçer. D077 oturumluk hız seçimi yeni Seçenekler çipinde korunur.
 
 ## 1. Yerleşim (1,0 yazı)
 
@@ -497,4 +497,5 @@ Cevap gelmezse varsayılan uygulanır.
 6. Pencere yayın sırasında değişebilir (S17). Çubuk odaktayken aranamaz olursa odak korunur, sonra birincile gider.
 7. Basılı OK koruması uygulanmazsa canlıda yanlışlıkla duraklatma olur (S15).
 8. S15 öncesi geçici Kanal −/+ çipleri ve S15'teki Geri ayrımı, overlay.md ile eşitlenmeli.
-9. Doğrulanmayanlar: Compose, emülatör, fiziksel TV, Figma; sahibin görsel kabulü.
+9. Compose uygulaması ve emülatör otomatik kontrolleri 0.14.47 çalışmasında; nihai koşu/teslim sonucu STATUS/HANDOFF'ta. Fiziksel TV okunurluk/kare süresi/kumanda/TalkBack, Figma ve sahibin görsel kabulü açık.
+10. Bağımsız kod incelemesindeki P3 (18 Ekim 2026) düzeltildi: çubuk odaktayken §5'teki OK/Geri ipucu seçilir; çubuktan ayrılınca genel VOD ipucu geri gelir. Büyük yazıda ipucunu gizleme ve ölçerek parça düşürme korunur.

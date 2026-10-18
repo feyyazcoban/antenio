@@ -1,5 +1,20 @@
 # Oynatıcı paneli
 
+## 0.14.47 · D072 kontrol bloğu
+
+18 Ekim 2026 · S14b, önceki köşeli paneli tek alt karartma ve ortak bilgi bloğuyla değiştirir. Ayrıntılı sözleşme [player-controls](gap/player-controls.md); aşağıdaki 0.14.3 görselleri tarihçedir.
+
+- Başlık 28 sp, saat 20 sp; tür, süre/bölüm ve oynarken gerçek hıza göre bitiş zamanı alt satırdadır. Canlıda kanal numarası, logo/harf karşılığı, beyaz CANLI noktası ve varsa şimdi/sonra bilgisi kullanılır.
+- Sol küme 52 / 64 / 52 dp geri sar–oynat/duraklat–ileri sar; sağda Ses / Altyazı, film/dizide Seçenekler ve favori vardır. Canlıdaki geçici Kanal −/+ düğmeleri sağ kümededir. Sonraki bölüm yalnız mevcut bölüm verisi izin verirse görünür.
+- Çubukta Sol/Sağ bekleyen hedefi 10 sn, basılı tutuşta 30 sn/1 dk değiştirir; 1 sn sonra tek sarma uygulanır. OK hemen uygular; Aşağı uygulayıp önceki düğmeye döner. Geri önce hedefi iptal eder, sonra kontrolleri gizler, sonra oynatıcıdan çıkar. Kontroller gizliyken sarma hemen uygulanır ve 2,5 sn süre önizlemesi gösterilir.
+- Kalan süre çubuğun sağındadır. Odak etiketi düğmenin yanında çizilir; D064 halkası ve dolgu kullanılır, odakta büyüme ve yatay kaydırma yoktur. Büyük yazıda etiketler simgeye iner; başlık iki satıra çıkabilir. Hareketi azalt, kontrol geçişini anlık yapar.
+- Altyazı boşluğu gerçek blok yüksekliğinden ölçülür. Konum/saat ayrı durum nesnesindedir; her yarım saniyede bütün kontrol katmanı yeniden kurulmaz. Erişilebilir çubuk ilerleme aralığı, süre açıklaması, ±10 sn eylemleri ve uygulanan hedef için tek duyuru sağlar.
+- D077 hız seçimi korunur; kaynak adresi gösterilmez ve sarma yeni bir oynatma oturumu açmaz. S15 kanal paneli/bilgi bandı ve S16'nın ek seçenekleri bu adımın dışındadır.
+
+Güncel test ve teslim sonuçları [STATUS](../project/STATUS.md) / [HANDOFF](../project/HANDOFF.md) içindedir. Fiziksel kumanda, 3 m okunurluk, ses ve TalkBack kabulü ayrıca yapılmalıdır; Figma değiştirilmedi.
+
+## Önceki: 0.14.3
+
 0.14.3 tasarım önizlemesi, mevcut oynatma davranışını ortak görsel sisteme taşır. Fiziksel TV kurulumu veya Figma eşlemesi değildir.
 
 ## Yerleşim

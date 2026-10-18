@@ -2,14 +2,17 @@
 
 18 Ekim 2026 · Claude oturumu kullanıcının kullanım sınırına takıldığında yazıldı; Codex (ya da başka bir araç) buradan devam eder. Plan ve küme tasarımları: [PLAN.md](PLAN.md) ve bu klasördeki `*.md`. Öneriler kullanıcı kararı değildir; onaylananlar DECISIONS'ta (D069–D072).
 
-## Durum (dal `claude/app-ui-ux-audit-a78e98`)
+## Durum (ana checkout güncel; S14b teslim kaydı STATUS/HANDOFF'ta)
 
 - Bitti ve yeşil: Faz A (S01–S07), X01, Faz B (S08–S12), T01 (ekran testleri onarımı), Faz C (S13), S14 (`b6157c9`: kontrolleri ve ekran testleri geçti; incelemesi yapıldı, düzeltmeleri yarım).
 - S14 inceleme düzeltmeleri: `c54a9f7` alındı ve tamamlandı. PCM destek uyarısı mevcut `flash` yolundan medya başına bir kez; ses çıkışı hataları genel hata; panellerde açık opaklık; uzun değerlerde alta geçen değer etiketi; gezinme testleri `SectionId` sırasından. 340 JVM testi (1 atlanan), lint 0 hata, release/androidTest derlemesi; 5558'de normal yazıda 16, 1,5 ve 2,0 ölçekte ayrı ayrı 12 ekran testi geçti. AC-3 destek kontrolü saf JVM testinde; gerçek cihazda desteklenmeyen AC-3 akışı/TalkBack doğrulanmadı. Altı bölümlü Ayarlar sınırı D076'da açıkça kayıtlı.
-- Kullanıcının güncel isteği: **son hazır sürümü hemen TV'ye kur**. Bu nedenle 0.14.45 (kod 59), S14 ve inceleme düzeltmelerinin teslimidir; S14b tamamlanmış sayılmaz. Kurulum sonucu STATUS/HANDOFF'ta.
-- Sırada: S14b (D072) → S15a–S17 → Faz E (S18–S29) → Faz F–J (PLAN §2). Kullanıcının istediği film/dizi hızı D077 olarak uygulandı (0,5×–2×, Seçenekler → Oynatma hızı); 0.14.46 / kod 60 teslimi STATUS/HANDOFF’ta. Bir sonraki TV paketi en az kod 61 / 0.14.47 olmalı. Hız seçimi S14b/S16 Seçenekler düzeninde korunmalı; canlı yayın normal hızda kalır.
+- Teslim tarihçesi: 0.14.45 (kod 59) S14 düzeltmeleri; 0.14.46 (kod 60) D077 oturumluk film/dizi hızı (0,5×–2×). Kullanıcının son paketi TV'ye veri silmeden kurma talimatı sürer.
+- S14b (D072) native uygulaması 0.14.47 / kod 61'de: alt blok, yeni kontroller, bekleyen sarma ve gizli sarma önizlemesi, büyük yazı düzeni; D077 hızı korunur. Gerçekten koşulan testler ve cihaz teslimi [QA](../../project/native-player-controls-47-qa.json), STATUS/HANDOFF'ta. Bağımsız incelemedeki P3 çubuk odak ipucu düzeltildi. Fiziksel/Figma/görsel kabul açık; BKL-031 done değildir.
+- Sırada: S15a–S17 → Faz E (S18–S29) → Faz F–J (PLAN §2). S15a kanal kapsamı/son ve önceki kanal verisiyle başla. Bir sonraki değişiklik içeren TV paketi en az kod 62 / 0.14.48 olmalı. D077 hız seçimi S16'da korunmalı; canlı yayın normal hızda kalır.
 
 ## Her adımda yöntem
+
+**Güncel kullanıcı istisnası · 18 Ekim 2026:** aşağıdaki görevlerde geçen 1,5 / 2,0 yazı boyutu testleri, kullanıcı "yayına hazırla" dediğinde mağaza öncesine bırakılır. Bu aşamada font matrisi koşma; normal yazıda değişiklikle ilgili anlamlı kontrolleri yap. [WORKFLOW](../../project/WORKFLOW.md) esas alınır.
 
 1. **Uygula:** adımın PLAN.md satırını ve ilgili küme tasarımını okuyun, değişikliği yapın, kontrolleri geçirin, yalnız o adımın dosyalarını commit edin (`<Adım>: <başlık>`).
 2. **Bağımsız inceleme:** değişikliği şu bakışlarla okuyun: (a) doğruluk ve geriye dönük bozulma; (b) PLAN §1 API'sine uygunluk ve mimari (mantık saf sınıflarda, TvViewModel ince); (c) TV kullanımı ve erişilebilirlik (D-pad, Geri bir düzey, D064 odak dili, TalkBack, 1,5/2,0 yazı, Hareketi azalt); (d) PIN/erişim ve oynatma adımlarında güvenlik ve gizlilik (kilitli/gizli/yetişkin içeriğe kapıyı atlayan yol, kimlik bilgisi veya adres sızıntısı, StreamBudget'sız ikinci akış). Yalnız kanıtlı bulgular.
@@ -21,7 +24,7 @@
 cd apps/android-tv && export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr" && ./gradlew --console=plain -q :app:testDebugUnitTest :app:lintDebug :app:assembleRelease :app:assembleDebugAndroidTest
 ```
 
-**Ekran testleri:** yalnız `bash tools/run-device-tests.sh SinifA,SinifB` (ya da `Sinif#metot`). Betik test emülatörünü (`emulator-5558`, AVD `nextv_test_api36`) doğrular ve yalnız orada kurar; başka cihaza dokunmaz. `--font-scale 1.5` seçeneği `wip/s14-review-fixes` dalında. Gradle `installDebug` / `connectedAndroidTest` yasak: TV dahil bağlı bütün cihazlara kurar. Test emülatörünün dili İngilizce; Türkçe metin bekleyen testler S13'teki yerel ayar kuralını kullanır. Cihaz kuralları ve emülatörü açma komutu: [WORKFLOW](../../project/WORKFLOW.md) "Cihaz ayrımı".
+**Ekran testleri:** yalnız `bash tools/run-device-tests.sh SinifA,SinifB` (ya da `Sinif#metot`). Betik test emülatörünü (`emulator-5558`, AVD `nextv_test_api36`) doğrular ve yalnız orada kurar; başka cihaza dokunmaz. `--font-scale 1.5` / `2.0` ve önceden derlenmiş APK'lar için `--no-build` kullanılabilir; font ölçeği koşu sonunda geri gelir. Gradle `installDebug` / `connectedAndroidTest` yasak: TV dahil bağlı bütün cihazlara kurar. Test emülatörünün dili İngilizce; Türkçe metin bekleyen testler S13'teki yerel ayar kuralını kullanır. Cihaz kuralları ve emülatörü açma komutu: [WORKFLOW](../../project/WORKFLOW.md) "Cihaz ayrımı".
 
 **Ürün kuralları (AGENTS.md):** gerçek IPTV adresi, kullanıcı adı, parola ve token commit edilmez; `.private/` açılmaz; korsanlık çağrıştıran ifade kullanılmaz; tek oynatma oturumu (StreamBudget); metinler `values` (İngilizce) ve `values-tr` (Türkçe) dosyalarına yazılır; STATUS, HANDOFF ve DECISIONS her faz sonunda güncellenir.
 

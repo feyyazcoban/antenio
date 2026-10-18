@@ -1,5 +1,7 @@
 # Native TV görünüm sözleşmesi
 
+**Oynatıcı güncellemesi · 18 Ekim 2026:** S14b / D072, önceki köşeli kontrol yüzeyini tek alt karartma, 28 sp başlık, 20 sp saat/süre, 64/52 dp taşıma düğmeleri ve sağa hizalı 44–56 dp çiplerle değiştirir. Odakta büyüme ve yatay kontrol kaydırması kaldırıldı; büyük yazıda etiketler ölçülerek simgelere iner. Yeni odaklanabilir çubuk ve Geri sırası [PLAYER_PRESENTATION](PLAYER_PRESENTATION.md) / [player-controls](gap/player-controls.md) içinde tanımlıdır. Aşağıdaki eski sürüm ölçüleri tarihçedir; D064 odak sözleşmesi ve güncel ekran tanımları önceliklidir.
+
 14 Ekim 2026 · 0.7 pilot. Bu belge mevcut COLOR/MOTION ve SCREENS belgelerini uygulama ölçülerine bağlar. Yeni bir tasarım sistemi değildir. Figma'ya aktarım kota nedeniyle yapılmadı; tam ekran referansı `prototypes/tv-flow` ve daha önce gösterilen prototip görüntüleridir.
 
 ## Ortak yerleşim

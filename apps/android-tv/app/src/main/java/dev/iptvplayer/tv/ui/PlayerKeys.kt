@@ -63,7 +63,7 @@ internal sealed interface PlayerKey {
  * the player's own isPlaying, and [repeat] how often a key held down has repeated (KeyEvent.repeatCount).
  */
 internal data class KeyContext(val mode: PlaybackMode, val layer: PlayerLayer, val recovering: Boolean = false,
-    val failed: Boolean = false, val playing: Boolean = false, val repeat: Int = 0) {
+    val failed: Boolean = false, val playing: Boolean = false, val repeat: Int = 0, val scrubbing: Boolean = false) {
     val live get() = mode == PlaybackMode.LIVE
     /** Neither reconnecting nor stopped by an error. */
     val healthy get() = !recovering && !failed
@@ -85,6 +85,9 @@ internal sealed interface PlayerCommand {
     data class AppendDigit(val digit: Int) : PlayerCommand
     data object OpenGuide : PlayerCommand
     data class Seek(val deltaMs: Long) : PlayerCommand
+    data class ScrubNudge(val deltaMs: Long) : PlayerCommand
+    data class CommitScrub(val thenToggle: Boolean) : PlayerCommand
+    data object CancelScrub : PlayerCommand
     data object ShowControls : PlayerCommand
     data object HideControls : PlayerCommand
     data object CloseTracks : PlayerCommand
@@ -113,6 +116,7 @@ internal object PlayerKeyRouter {
         val hidden = layer == PlayerLayer.Video
         when {
             layer == PlayerLayer.EpisodeEnd -> if (key == PlayerKey.PlayPause || key == PlayerKey.Pause) PlayerCommand.CloseEndCard else null
+            key == PlayerKey.PlayPause && healthy && scrubbing -> PlayerCommand.CommitScrub(true)
             key == PlayerKey.PlayPause -> when {
                 recovering -> PlayerCommand.StopRecovery
                 failed -> PlayerCommand.Retry
@@ -126,6 +130,8 @@ internal object PlayerKeyRouter {
             live && hidden && healthy && (key == PlayerKey.Up || key == PlayerKey.Down) -> PlayerCommand.Zap(if (key == PlayerKey.Up) 1 else -1)
             live && layer != PlayerLayer.Tracks && key is PlayerKey.Digit -> PlayerCommand.AppendDigit(key.value)
             live && key == PlayerKey.Guide -> PlayerCommand.OpenGuide
+            !live && healthy && layer == PlayerLayer.Controls && (key == PlayerKey.FastForward || key == PlayerKey.Rewind) ->
+                PlayerCommand.ScrubNudge(if (key == PlayerKey.FastForward) 30_000 else -10_000)
             !live && healthy && (key == PlayerKey.FastForward || key == PlayerKey.Rewind) ->
                 PlayerCommand.Seek(if (key == PlayerKey.FastForward) 30_000 else -10_000)
             !live && hidden && healthy && (key == PlayerKey.Left || key == PlayerKey.Right) ->
@@ -145,6 +151,7 @@ internal object PlayerKeyRouter {
         ctx.layer == PlayerLayer.Options -> PlayerCommand.CloseOptions
         ctx.layer == PlayerLayer.Speed -> PlayerCommand.CloseSpeed
         ctx.recovering -> PlayerCommand.Exit(stopRecovery = true)
+        ctx.scrubbing -> PlayerCommand.CancelScrub
         ctx.layer == PlayerLayer.Controls && !ctx.failed -> PlayerCommand.HideControls
         else -> PlayerCommand.Exit()
     }

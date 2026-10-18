@@ -96,7 +96,7 @@ class EpisodeAutoplayFlowTest {
         ui.waitUntil(8_000) { exists("Duraklat") }
     }
     private fun click(text: String) = ui.onNode((hasText(text) or hasContentDescription(text)) and hasClickAction()).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
-    private fun exists(text: String) = ui.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+    private fun exists(text: String) = ui.onAllNodes(hasText(text) or hasContentDescription(text)).fetchSemanticsNodes().isNotEmpty()
     private fun end() = ui.waitUntil(10_000) { ui.onAllNodesWithTag("episode-end").fetchSemanticsNodes().isNotEmpty() }
     private fun count(id: String) = requests[id]?.get() ?: 0
     private fun key(code: Int) { instrumentation.sendKeyDownUpSync(code); ui.waitForIdle() }
@@ -127,6 +127,7 @@ class EpisodeAutoplayFlowTest {
         ui.onNode(hasText("Yeni bir başlangıç", substring = true) and hasClickAction()).assertIsFocused()
     }
 
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     @Test fun playingAndPausedEpisodesPreservePositionAcrossBackgroundAndExit() {
         start(index = 1) // The two-minute fixture, not the short automatic-transition fixture.
         val entry = model.state.value.playing!!.entry
@@ -145,6 +146,15 @@ class EpisodeAutoplayFlowTest {
             ready
         }
         ui.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
+        // pause() changes the public state before the playback thread reports its final position.
+        // Drain that command before comparing positions; do not weaken the 150 ms stability limit.
+        lateinit var pauseProcessed: androidx.media3.exoplayer.PlayerMessage
+        instrumentation.runOnMainSync {
+            assertFalse("Background must clear the play intent immediately", player.playWhenReady)
+            val engine = player as androidx.media3.exoplayer.ExoPlayer
+            pauseProcessed = engine.createMessage { _, _ -> }.setLooper(engine.playbackLooper).send()
+        }
+        assertTrue("Playback thread must process pause", pauseProcessed.blockUntilDelivered(5_000))
         var stoppedAt = 0L
         instrumentation.runOnMainSync {
             assertFalse("Background must stop playback", player.isPlaying)
@@ -154,7 +164,7 @@ class EpisodeAutoplayFlowTest {
         val requestsAtStop = count("20")
         SystemClock.sleep(1200)
         instrumentation.runOnMainSync {
-            assertTrue("Background position must not advance", kotlin.math.abs(player.currentPosition - stoppedAt) < 150)
+            assertTrue("Background position must not advance: $stoppedAt -> ${player.currentPosition}", kotlin.math.abs(player.currentPosition - stoppedAt) < 150)
         }
         assertEquals("Buffered fixture must not open another media request in background", requestsAtStop, count("20"))
         ui.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
@@ -183,7 +193,7 @@ class EpisodeAutoplayFlowTest {
         ui.runOnUiThread { model.store.saveProgress(model.state.value.source!!.id, "episode:20", 30_000, 120_000) }
         key(KeyEvent.KEYCODE_BACK)
         ui.onAllNodesWithTag("episode-end").assertCountEquals(0)
-        ui.onNodeWithText("Baştan izle").assertIsFocused()
+        ui.onNodeWithTag("player-primary").assertIsFocused()
         SystemClock.sleep(10_500); assertEquals(0, count("20"))
         click("Sonraki bölüm")
         ui.waitUntil(8_000) { model.state.value.playing?.entry?.providerId == "20" && exists("Duraklat") }

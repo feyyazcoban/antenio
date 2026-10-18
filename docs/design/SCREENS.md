@@ -24,13 +24,17 @@ ID'ler PRD, Figma ve geliştirme görevlerinde ortak kullanılır. İsimler değ
 | TV-040 | Diziler | Son odak / ilk dizi | TV-041 | Önce filtre; sonra gezinme |
 | TV-041 | Dizi sezon ve bölümleri | Devam edilecek bölüm / ilk bölüm | TV-051 | Önce sezon paneli; sonra aynı dizi kartı |
 | TV-050 | Canlı oynatıcı | Kontroller açıldığında temel eylem | Kontrole göre; paneli aç/kapat | Önce panel, sonra kontroller, sonra geldiği ekran |
-| TV-051 | Film ve dizi oynatıcı | Kontroller açıldığında oynat/duraklat | Kontrole göre; destekleniyorsa seek | Panel → kontroller → kaynak detay; ilerleme kaydet |
+| TV-051 | Film ve dizi oynatıcı | Kontroller açıldığında oynat/duraklat | Kontrole göre; çubukta hedefi uygula veya oynat/duraklat | Panel → bekleyen hedefi iptal → kontroller → kaynak detay; ilerleme kaydet |
 | TV-060 | Arama | Arama alanı / dönüşte son sonuç | Kanal oynar; film/dizi detayı açılır | Klavye → sonuç → gezinme |
 | TV-061 | Favoriler | Son seçili tür ve öğe | İçerik türüne göre | Gezinme; tür filtresi korunur |
 | TV-070 | Kaynaklar ve ayarlar | Son ayar / ilk kaynak | İlgili ayarı aç | Alt ayar → ayar listesi → gezinme |
 | TV-071 | PIN | İlk rakam | Doğrula ve engellenmiş işleme dön | İptal; erişim açılmaz |
 
 ## Yön tuşları
+
+**Oynatıcı · D072 / S14b:** Tek alt karartma üzerinde başlık/saat, meta, süre çubuğu ve kontrol satırı bulunur; üst tür hapı ve Kapat düğmesi kalkar. Film/dizide −10 · Oynat/Duraklat · +10, varsa sonraki bölüm, sağda Ses / Altyazı · Seçenekler · Favori. D077 hız menüsü korunur. Canlıda kanal −/+ geçici çipleri oynatma kümesinden ayrıdır; kanal listesi S15'te gelir. Normal canlı çubuğu program ilerlemesidir, sarma komutu değildir.
+
+Satırdan Yukarı aranabilir çubuğa, Aşağı son düğmeye döner; geçersiz hedefte birincil düğme yedektir. Çubukta Sol/Sağ 10 sn, basılı tutmada 30 sn/1 dk hedef değiştirir; video sürer, 1 sn sonra tek seek yapılır. OK ve Aşağı hemen uygular; bekleyen hedefte Geri yalnız iptal eder. Medya oynat/duraklat önce hedefi uygular. Gizliyken sarma hemen uygulanır ve kısa çubuk/balon önizlemesi görünür. Panellerden Geri açan çipe döner. Büyük yazıda etiketler ölçülerek simgeye iner; yatay kaydırma yok. Ayrıntı ve cihaz kabul sınırları [tasarımda](gap/player-controls.md) ve güncel HANDOFF'tadır.
 
 Gezinme çekmecesinde yukarı/aşağı hedefler arasında, sağ içerik bölgesine geçer. İçerikte sol, varsa aynı satırdaki önceki öğeye; ilk öğede kategori/gezinme alanına gider. Dikey geçişte yakın yatay konum korunur. Odak, görünmeyen veya devre dışı hedefe sıçramaz.
 

@@ -145,7 +145,7 @@ class SourceOperationFlowTest {
 
     @Test fun playerDisposalCannotResurrectProgressAfterRemoval() {
         ui.runOnUiThread { model.play(model.state.value.catalog.items.single()) }
-        ui.waitUntil(10_000) { ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(10_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
         ui.runOnUiThread { model.saveProgress(model.state.value.playing!!.entry, 20_000, 120_000) }
         assertTrue(model.state.value.history.isNotEmpty())
         ui.runOnUiThread { model.removeSource() }

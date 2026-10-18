@@ -456,7 +456,7 @@ class VisualPreviewTest {
     @Test fun tracksPanelKeepsHeaderAndSelectionReadable() {
         val movie = model.state.value.catalog.items.first { it.localId == "movie:3" }
         ui.runOnUiThread { model.play(movie) }
-        ui.waitUntil(10_000) { ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(10_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
         click("Duraklat"); click("Ses / Altyazı")
         ui.waitUntil(5_000) { ui.onAllNodes(hasTestTag("tracks-close") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
         ui.onNodeWithTag("tracks-close").assertIsFocused()
@@ -494,7 +494,9 @@ class VisualPreviewTest {
         ui.onNode(hasText("İngilizce · 2", substring = true) and hasClickAction()).assertIsSelected()
         ui.onNode(hasText("İngilizce · 1", substring = true) and hasClickAction()).assertIsSelected()
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
-        click("Kapat")
+        ui.waitForIdle()
+        ui.onNodeWithTag("player-tracks").assertIsFocused()
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK); ui.waitForIdle(); instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK); ui.waitForIdle()
         ui.waitUntil(10_000) { model.state.value.route == Route.HOME }
     }
 
@@ -503,20 +505,21 @@ class VisualPreviewTest {
         ui.onNodeWithContentDescription("Breaking Bad").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
         ui.waitUntil(10_000) { !model.state.value.detailLoading }
         click("Oynat")
-        ui.waitUntil(10_000) { ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(10_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
         // Freeze the local fixture so the control timeout does not influence geometry checks.
         click("Duraklat")
         val panel = ui.onNodeWithTag("player-panel").getUnclippedBoundsInRoot()
-        val title = ui.onNodeWithTag("player-title").getUnclippedBoundsInRoot()
+        val title = ui.onNodeWithTag("player-title", useUnmergedTree = true).getUnclippedBoundsInRoot()
         val controls = ui.onNodeWithTag("player-controls").getUnclippedBoundsInRoot()
         val screen = ui.onRoot().getUnclippedBoundsInRoot()
         Assert.assertTrue("Panel respects the common TV gutter", panel.left.value >= dev.iptvplayer.tv.ui.TvLayout.Gutter.value && panel.right.value <= screen.right.value - dev.iptvplayer.tv.ui.TvLayout.Gutter.value)
         Assert.assertTrue("Panel must fit vertically", panel.top >= screen.top && panel.bottom <= screen.bottom)
         Assert.assertTrue("Title remains above transport controls", title.top >= panel.top && title.bottom < controls.top)
-        Assert.assertTrue("Controls remain inside panel", controls.bottom < panel.bottom)
+        Assert.assertTrue("Controls remain inside panel", controls.bottom <= panel.bottom)
         shot("player-panel")
+        ui.onNodeWithTag("player-next-episode").assertExists()
         repeat(3) { instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle() }
-        ui.onNode(hasText("Ses / Altyazı") and hasClickAction()).assertIsFocused()
+        ui.onNodeWithTag("player-tracks").assertIsFocused()
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)
         shot("player-tracks")
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
@@ -525,12 +528,13 @@ class VisualPreviewTest {
             instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT)
             ui.waitForIdle()
             val focused = ui.onNode(isFocused()).getUnclippedBoundsInRoot()
-            Assert.assertTrue("Every focused action must scroll fully into the panel",
-                focused.left.value >= controls.left.value + 11 && focused.right.value <= controls.right.value - 11 && focused.bottom <= controls.bottom)
+            Assert.assertTrue("Every focused action and its ring must fit without scrolling",
+                focused.left.value >= screen.left.value + 5 && focused.right.value <= screen.right.value - 5 && focused.bottom <= controls.bottom)
         }
-        ui.onNode(hasText("Kapat") and hasClickAction()).assertIsFocused()
+        ui.onNodeWithTag("player-favorite").assertIsFocused()
         shot("player-last-action")
-        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK); ui.waitForIdle()
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
         ui.waitUntil(10_000) { model.state.value.route == Route.DETAIL }
     }
 
@@ -673,12 +677,13 @@ class VisualPreviewTest {
         ui.waitUntil(10_000) { !model.state.value.detailLoading }
         shot("series")
         click("Oynat")
-        ui.waitUntil(10_000) { ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(10_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
         shot("player")
         click("Ses / Altyazı")
         shot("tracks")
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
-        click("Kapat")
+        ui.waitForIdle()
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK); ui.waitForIdle(); instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK); ui.waitForIdle()
         click("Geri"); click("Ayarlar")
         shot("settings")
         ui.onNode(hasText("Hakkında") and hasClickAction()).performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }

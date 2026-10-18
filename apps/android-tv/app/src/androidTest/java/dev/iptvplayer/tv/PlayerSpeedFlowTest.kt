@@ -66,7 +66,7 @@ class PlayerSpeedFlowTest {
             model.playback { it.copy(tunneling = tunneling) }
             model.play(model.state.value.catalog.items.first { it.kind == MediaKind.MOVIE })
         }
-        ui.waitUntil(20_000) { ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(20_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
         key(KeyEvent.KEYCODE_MEDIA_PAUSE)
         ui.onNodeWithTag("player-options").performSemanticsAction(SemanticsActions.RequestFocus)
         key(KeyEvent.KEYCODE_DPAD_CENTER)
@@ -112,7 +112,7 @@ class PlayerSpeedFlowTest {
         }
         key(KeyEvent.KEYCODE_BACK); waitFocus("player-options")
         key(KeyEvent.KEYCODE_MEDIA_PLAY)
-        ui.waitUntil(5_000) { ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(5_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
         ui.runOnIdle { assertEquals(2f, engine().playbackParameters.speed, .001f) }
         key(KeyEvent.KEYCODE_BACK); ui.onNodeWithTag("player-panel").assertDoesNotExist()
         key(KeyEvent.KEYCODE_BACK)
@@ -124,7 +124,7 @@ class PlayerSpeedFlowTest {
         repeat(4) { key(KeyEvent.KEYCODE_DPAD_DOWN) }; key(KeyEvent.KEYCODE_DPAD_CENTER)
         assertSpeed(2f)
         ui.runOnUiThread { model.play(model.state.value.catalog.items.first { it.kind == MediaKind.LIVE }) }
-        ui.waitUntil(15_000) { ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(15_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
         ui.onNodeWithTag("player-options").assertDoesNotExist()
         ui.runOnIdle { assertEquals(1f, engine().playbackParameters.speed, 0f) }
     }

@@ -371,25 +371,17 @@
     <string name="guide_zone_none">Bu adla saat dilimi bulunamadı.</string>
 
     <!-- Player -->
-    <string name="player_seek_forward">+%1$s sn</string>
-    <string name="player_seek_back">−%1$s sn</string>
     <string name="player_no_channel">%1$s numaralı kanal yok</string>
     <string name="player_opening">Yayın açılıyor…</string>
-    <string name="player_kicker_live">CANLI TV</string>
     <string name="player_kicker_series">DİZİ</string>
     <string name="player_kicker_movie">FİLM</string>
-    <string name="player_live">● CANLI</string>
     <string name="player_ended">Bitti</string>
     <string name="player_audio_unplayable">Bu yayının sesi bu ayarla çalınamıyor. Ayarlar > Oynatıcı\'da Ses çıkışını Otomatik yapmayı dene.</string>
     <string name="player_keys_recovering">Geri: yeniden bağlanmayı durdur</string>
-    <string name="player_keys_live">Kontroller kapalıyken Yukarı/Aşağı: kanal · Rakam: kanal no</string>
-    <string name="player_keys_vod">Kontroller kapalıyken Sol/Sağ: sar</string>
     <string name="player_no_programme">Program bilgisi bulunmuyor</string>
     <!-- Quoted: the two spaces before the title would otherwise collapse into one. -->
     <string name="player_next_programme">"Sonra · %1$s  %2$s"</string>
     <string name="player_pause">Duraklat</string>
-    <string name="player_channel_previous">‹ Kanal</string>
-    <string name="player_channel_next">Kanal ›</string>
     <string name="player_tracks">Ses / Altyazı</string>
     <string name="player_favorite_unavailable">Favori için içerik bilgisi bulunamadı</string>
     <string name="player_series_favorite_add">Diziyi favorilere ekle</string>
@@ -782,4 +774,30 @@
     <string name="player_speed_tunneling">Hızı değiştirmek için Ayarlar → Oynatıcı bölümünde Tünelli oynatma seçeneğini kapat.</string>
     <string name="player_speed_unavailable">Bu ses çıkışı veya cihaz oynatma hızını değiştirmeyi desteklemiyor.</string>
     <string name="player_ends_at">Bitiş %1$s</string>
+    <string name="player_live_short">CANLI</string>
+    <string name="player_remaining">%1$s kaldı</string>
+    <string name="player_episode_order">S%1$d B%2$d</string>
+    <string name="player_position">Oynatma konumu</string>
+    <string name="player_position_total">%1$s, toplam %2$s</string>
+    <string name="player_position_applied">%1$s konumuna gidildi</string>
+    <string name="player_seek_back_accessible">10 saniye geri</string>
+    <string name="player_seek_forward_accessible">10 saniye ileri</string>
+    <string name="player_channel_minus">Kanal eksi</string>
+    <string name="player_channel_plus">Kanal artı</string>
+    <string name="player_hint_vod">Gizliyken ◀ ▶ sar · basılı tut: daha hızlı</string>
+    <string name="player_hint_scrub">OK uygula · Geri vazgeç</string>
+    <string name="player_hint_live">Gizliyken ▲▼ kanal · Rakam: kanal no</string>
+    <string name="player_subtitles_off">Altyazı kapalı</string>
+    <plurals name="player_hours">
+        <item quantity="one">%1$s saat</item>
+        <item quantity="other">%1$s saat</item>
+    </plurals>
+    <plurals name="player_minutes">
+        <item quantity="one">%1$s dakika</item>
+        <item quantity="other">%1$s dakika</item>
+    </plurals>
+    <plurals name="player_seconds">
+        <item quantity="one">%1$s saniye</item>
+        <item quantity="other">%1$s saniye</item>
+    </plurals>
 </resources>

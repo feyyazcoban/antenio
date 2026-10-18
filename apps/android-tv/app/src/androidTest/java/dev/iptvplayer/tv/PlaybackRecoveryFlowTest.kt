@@ -82,7 +82,7 @@ class PlaybackRecoveryFlowTest {
         model.play(entry)
     }
     private fun click(text: String) = ui.onNode((hasText(text) or hasContentDescription(text)) and hasClickAction()).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
-    private fun exists(text: String, part: Boolean = false) = ui.onAllNodesWithText(text, substring = part).fetchSemanticsNodes().isNotEmpty()
+    private fun exists(text: String, part: Boolean = false) = ui.onAllNodes(hasText(text, substring = part) or hasContentDescription(text, substring = part)).fetchSemanticsNodes().isNotEmpty()
     private fun waiting() = ui.waitUntil(10_000) { exists("İptal et") }
     private fun ready() = ui.waitUntil(15_000) { exists("Duraklat") }
     private fun back() { instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK); ui.waitForIdle() }
@@ -105,16 +105,16 @@ class PlaybackRecoveryFlowTest {
         fun assertPanelFits() {
             val panel = ui.onNodeWithTag("player-panel").getUnclippedBoundsInRoot()
             val viewport = ui.onRoot().getUnclippedBoundsInRoot()
-            val title = ui.onNodeWithTag("player-title").getUnclippedBoundsInRoot()
+            val title = ui.onNodeWithTag("player-title", useUnmergedTree = true).getUnclippedBoundsInRoot()
             val controls = ui.onNodeWithTag("player-controls").getUnclippedBoundsInRoot()
             assertTrue("Long title and recovery status must not push the panel off screen: $panel / $viewport",
                 panel.top >= viewport.top && panel.bottom <= viewport.bottom)
-            assertTrue("Title must precede visible actions", title.top >= panel.top && title.bottom < controls.top && controls.bottom < panel.bottom)
+            assertTrue("Title must precede visible actions", title.top >= panel.top && title.bottom < controls.top && controls.bottom <= panel.bottom)
             ui.onNode(isFocused() and hasAnyAncestor(hasTestTag("player-controls"))).assertExists()
         }
         waiting(); assertPanelFits(); shot("long-recovering")
         ui.waitUntil(12_000) { exists("Tekrar dene") }
-        ui.onNodeWithText("Tekrar dene").assertIsFocused()
+        ui.onNodeWithTag("player-primary").assertIsFocused()
         assertPanelFits(); shot("long-failed")
         mode = "success"; click("Tekrar dene"); ready(); click("Duraklat")
         assertPanelFits(); shot("long-ready")
@@ -132,7 +132,7 @@ class PlaybackRecoveryFlowTest {
     @Test fun repeatedServerFailureStopsAfterTwoRetriesAndKeepsRetryFocused() {
         mode = "unavailable"; start(); waiting(); shot("waiting")
         ui.waitUntil(12_000) { exists("Tekrar dene") }
-        ui.onNodeWithText("Tekrar dene").assertIsFocused()
+        ui.onNodeWithTag("player-primary").assertIsFocused()
         assertEquals(3, firstRequests.get())
         SystemClock.sleep(1500); assertEquals(3, firstRequests.get()); shot("failed")
     }
@@ -201,7 +201,7 @@ class PlaybackRecoveryFlowTest {
         assertTrue(firstRequests.get() in 2..3)
         // Socket timeout and the overall deadline may finish on either side of the same boundary.
         assertTrue(exists("Yayın bağlantısı zamanında kurulamadı.", true) || exists("Yayına bağlanılamadı.", true))
-        ui.onNodeWithText("Tekrar dene").assertIsFocused()
+        ui.onNodeWithTag("player-primary").assertIsFocused()
     }
 
     @Test fun hlsSegmentFailureRecoversThroughTheSameBudget() {

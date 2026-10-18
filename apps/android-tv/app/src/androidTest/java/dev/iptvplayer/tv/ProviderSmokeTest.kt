@@ -60,9 +60,9 @@ class ProviderSmokeTest {
                     ui.waitUntil(45_000) { !model.state.value.detailLoading }
                     ui.runOnUiThread { model.play(if (kind == MediaKind.SERIES) model.state.value.episodes.first() else model.state.value.selected!!) }
                 }
-                ui.waitUntil(45_000) { ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() ||
+                ui.waitUntil(45_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() ||
                     ui.onAllNodesWithText("Tekrar dene").fetchSemanticsNodes().isNotEmpty() }
-                ui.onNodeWithText("Duraklat").assertExists()
+                ui.onNodeWithContentDescription("Duraklat").assertExists()
                 ui.onNodeWithText("Ses / Altyazı").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
                 ui.onNodeWithText("Ses dili").assertExists()
                 Thread.sleep(2000)

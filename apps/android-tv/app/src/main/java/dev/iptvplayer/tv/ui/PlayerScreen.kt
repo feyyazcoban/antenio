@@ -14,8 +14,13 @@ import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.clip
@@ -75,14 +80,7 @@ import kotlinx.coroutines.flow.first
     val context = LocalContext.current
     // The corner notes are written when a key arrives, outside composition.
     val resources = LocalResources.current
-    val controlEdge = with(LocalDensity.current) { 12.dp.toPx() }
-    val controlVisibility = remember(controlEdge) { object : BringIntoViewSpec {
-        override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float = when {
-            offset < controlEdge -> offset - controlEdge
-            offset + size > containerSize - controlEdge -> offset + size - containerSize + controlEdge
-            else -> 0f
-        }
-    } }
+    val subtitleGapPx = with(LocalDensity.current) { 12.dp.toPx() }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val screenState by model.state.collectAsStateWithLifecycle()
     val guideNow = guideClock()
@@ -112,12 +110,25 @@ import kotlinx.coroutines.flow.first
     var speed by remember { mutableFloatStateOf(player.playbackParameters.speed) }
     var speedRequest by remember { mutableStateOf<Float?>(null) }
     val optionsFocus = remember { FocusRequester() }
-    var returnToOptions by remember { mutableStateOf(false) }
+    val tracksFocus = remember { FocusRequester() }
+    var returnControl by remember { mutableStateOf<FocusRequester?>(null) }
     var hasPlayed by remember { mutableStateOf(false) }
-    var position by remember { mutableLongStateOf(0L) }
-    var duration by remember { mutableLongStateOf(0L) }
+    val clock = remember(player) { PlaybackClock() }
+    fun updateClock() = clock.update(player.currentPosition, player.duration, player.bufferedPosition,
+        model.state.value.playing?.mode != PlaybackMode.LIVE && player.isCurrentMediaItemSeekable && player.isCommandAvailable(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM),
+        System.currentTimeMillis())
+    val scrub = remember(player) { ScrubHolder(scope, clock,
+        canSeek = { player.isCurrentMediaItemSeekable && player.isCommandAvailable(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM) &&
+            !recovery.state.value.recovering && recovery.state.value.failure == null }, seek = { player.seekTo(it) }) }
+    val scrubFocus = remember { FocusRequester() }
+    var scrubFocused by remember { mutableStateOf(false) }
+    var playerView by remember { mutableStateOf<PlayerView?>(null) }
+    var peekAt by remember { mutableLongStateOf(0L) }
+    var peek by remember { mutableStateOf(false) }
+    var peekDelta by remember { mutableLongStateOf(0L) }
     var lastInteraction by remember { mutableLongStateOf(System.currentTimeMillis()) }
     val first = remember { FocusRequester() }
+    val lastControl = remember { arrayOf(first) }
     val canvas = remember { FocusRequester() }
     val nextEpisodeFocus = remember { FocusRequester() }
     // A locked channel typed by number, or a locked series' next episode, asks for the PIN over the picture; what plays
@@ -167,16 +178,15 @@ import kotlinx.coroutines.flow.first
         if (!player.isCurrentMediaItemSeekable) return
         val end = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
         val target = (player.currentPosition + deltaMs).coerceIn(0, end)
-        player.seekTo(target); position = target
-        flash(resources.getString(if (deltaMs < 0) R.string.player_seek_back else R.string.player_seek_forward, (kotlin.math.abs(deltaMs) / 1000).toString()),
-            "${clockTime(target)} / ${if (duration > 0) clockTime(duration) else "—"}")
+        scrub.cancel(); player.seekTo(target); clock.moved(target)
+        if (layer == PlayerLayer.Video) { peek = true; peekDelta = deltaMs; peekAt = System.currentTimeMillis() }
     }
     // The player as PlayerKeyRouter reads it when a key or Back arrives; its commands are carried out here.
-    fun keys(repeat: Int = 0) = KeyContext(media.mode, top(), recoveryState.recovering, failure != null, player.isPlaying, repeat)
+    fun keys(repeat: Int = 0) = KeyContext(media.mode, top(), recoveryState.recovering, failure != null, player.isPlaying, repeat, scrub.target != null)
     fun perform(command: PlayerCommand) {
         when (command) {
-            PlayerCommand.Play -> player.play()
-            PlayerCommand.Pause -> player.pause()
+            PlayerCommand.Play -> { scrub.commit(); player.play() }
+            PlayerCommand.Pause -> { scrub.commit(); player.pause() }
             PlayerCommand.Retry -> recovery.retryManually()
             PlayerCommand.StopRecovery -> recovery.cancel()
             PlayerCommand.Consume -> Unit
@@ -184,10 +194,18 @@ import kotlinx.coroutines.flow.first
             is PlayerCommand.AppendDigit -> { digits = PlayerKeyRouter.appendDigit(digits, command.digit); flash(digits) }
             PlayerCommand.OpenGuide -> model.guide()
             is PlayerCommand.Seek -> seekBy(command.deltaMs)
-            PlayerCommand.ShowControls -> layer = PlayerLayer.Controls
+            is PlayerCommand.ScrubNudge -> { updateClock(); scrub.nudge(command.deltaMs) }
+            is PlayerCommand.CommitScrub -> {
+                // seekTo may enter BUFFERING synchronously; toggle from the state at the key press.
+                val wasPlaying = player.isPlaying
+                scrub.commit()
+                if (command.thenToggle) { if (wasPlaying) player.pause() else player.play() }
+            }
+            PlayerCommand.CancelScrub -> scrub.cancel()
+            PlayerCommand.ShowControls -> { peek = false; layer = PlayerLayer.Controls }
             PlayerCommand.HideControls -> layer = PlayerLayer.Video
-            PlayerCommand.CloseTracks -> { layer = PlayerLayer.Controls; interact() }
-            PlayerCommand.CloseOptions -> { returnToOptions = true; layer = PlayerLayer.Controls; interact() }
+            PlayerCommand.CloseTracks -> { returnControl = tracksFocus; layer = PlayerLayer.Controls; interact() }
+            PlayerCommand.CloseOptions -> { returnControl = optionsFocus; layer = PlayerLayer.Controls; interact() }
             PlayerCommand.CloseSpeed -> { layer = PlayerLayer.Options; interact() }
             PlayerCommand.CloseEndCard -> { episodeEnd.dismiss(); interact() }
             is PlayerCommand.Exit -> { if (command.stopRecovery) recovery.cancel(); save(); model.back() }
@@ -201,6 +219,12 @@ import kotlinx.coroutines.flow.first
         val command = PlayerKeyRouter.route(key, keys(event.nativeKeyEvent.repeatCount)) ?: return false
         perform(command); return true
     }
+    LaunchedEffect(peekAt) { if (peek) { delay(2_500); peek = false } }
+    LaunchedEffect(failure, recoveryState.recovering) { if (failure != null || recoveryState.recovering) scrub.cancel() }
+    LaunchedEffect(controlsShown) { if (!controlsShown) {
+        scrubFocused = false
+        playerView?.subtitleView?.setBottomPaddingFraction(.08f)
+    } }
     LaunchedEffect(noteAt) { if (note != null) { delay(if (audioNote) 8_000 else 2_500); note = null } }
     LaunchedEffect(digits) {
         if (digits.isEmpty()) return@LaunchedEffect
@@ -217,11 +241,12 @@ import kotlinx.coroutines.flow.first
 
     DisposableEffect(player, lifecycle) {
         val listener = object : Player.Listener {
+            override fun onEvents(player: Player, events: Player.Events) { updateClock() }
             override fun onPlaybackStateChanged(playbackState: Int) {
                 status = playbackState
                 if (playbackState == Player.STATE_ENDED) {
                     layer = PlayerLayer.Controls
-                    position = player.currentPosition.coerceAtLeast(0); duration = player.duration.coerceAtLeast(0)
+                    updateClock(); scrub.cancel()
                     save()
                     if (model.state.value.parental.prompt != null) endedUnderPin = true else episodeEnded()
                 }
@@ -252,7 +277,7 @@ import kotlinx.coroutines.flow.first
                     resumeOnStart = player.playWhenReady && player.playbackState == Player.STATE_READY
                     // Should the lock screen cover this player, the one that comes back after it stands as this one did.
                     model.playerStopped(paused = !player.playWhenReady)
-                    save(); recovery.background(); episodeEnd.background()
+                    scrub.cancel(); save(); recovery.background(); episodeEnd.background()
                 }
                 // A locked title left the player as the app stopped (TvViewModel.appStopped), or the lock screen came up
                 // over it (pin.md §3.9): this screen is on its way out and must not be heard first, before the next frame
@@ -266,7 +291,7 @@ import kotlinx.coroutines.flow.first
         }
         player.addListener(listener)
         lifecycle.addObserver(observer)
-        onDispose { save(); recovery.close(); episodeEnd.close(); lifecycle.removeObserver(observer); player.removeListener(listener); player.release() }
+        onDispose { scrub.cancel(); save(); recovery.close(); episodeEnd.close(); lifecycle.removeObserver(observer); player.removeListener(listener); player.release() }
     }
 
     LaunchedEffect(media) {
@@ -276,7 +301,7 @@ import kotlinx.coroutines.flow.first
         player.stop(); player.clearMediaItems()
         recovery.newMedia(request.mode == PlaybackMode.LIVE)
         episodeEnd.newMedia(); endedUnderPin = false; hasPlayed = false
-        tracks = Tracks.EMPTY; silent = false; position = request.startMs; duration = 0
+        tracks = Tracks.EMPTY; silent = false; scrub.reset(); clock.reset(request.startMs); peek = false
         if (audioNote) { note = null; audioNote = false }
         speedRequest = null
         if (request.mode == PlaybackMode.LIVE) player.playbackParameters = PlaybackParameters.DEFAULT
@@ -295,22 +320,21 @@ import kotlinx.coroutines.flow.first
         var ticks = 0
         while (true) {
             delay(500)
-            position = player.currentPosition.coerceAtLeast(0)
-            duration = player.duration.coerceAtLeast(0)
+            updateClock()
             if (++ticks % 10 == 0) save()
             // The PIN pad over the picture takes the remote's keys: the controls that opened it stay until it closes,
             // and for the usual while after, so focus can go back to them.
             if (model.state.value.parental.prompt != null) lastInteraction = System.currentTimeMillis()
             if (ControlsAutoHide.shouldHide(System.currentTimeMillis(), lastInteraction, model.state.value.playback.osdTimeout,
                     player.isPlaying, top() == PlayerLayer.Controls, recovery.state.value.failure != null, recovery.state.value.recovering,
-                    talkBack = accessibility?.isTouchExplorationEnabled == true)) layer = PlayerLayer.Video
+                    talkBack = accessibility?.isTouchExplorationEnabled == true, scrubbing = scrub.target != null)) layer = PlayerLayer.Video
         }
     }
     LaunchedEffect(top()) {
         if (top() == PlayerLayer.Controls || top() == PlayerLayer.Video) {
             withFrameNanos { }
             if (layer == PlayerLayer.Video) canvas.requestFocus()
-            else if (returnToOptions && !live) { optionsFocus.requestFocus(); returnToOptions = false }
+            else if (returnControl != null) { if (!runCatching { returnControl!!.requestFocus() }.getOrDefault(false)) first.requestFocus(); returnControl = null }
             else first.requestFocus()
         }
     }
@@ -329,6 +353,7 @@ import kotlinx.coroutines.flow.first
     }
     Box(Modifier.fillMaxSize().background(Color.Black).onPreviewKeyEvent(::onKey)) {
         AndroidView(factory = { PlayerView(it).apply {
+            playerView = this
             this.player = player; useController = false; keepScreenOn = true
             isFocusable = false; descendantFocusability = android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS
             setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
@@ -354,112 +379,94 @@ import kotlinx.coroutines.flow.first
                 Text(stringResource(R.string.player_opening), color = Ink.Text, fontFamily = Roboto, fontSize = 16.sp)
             }
         }
-        if (controlsShown) {
-            // No panel over the picture: a scrim darkens the bottom, where the controls sit, and a lighter one keeps the
-            // top label readable. The picture stays visible above the controls.
-            Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Black.copy(alpha = .45f),
-                .16f to Color.Transparent, .5f to Color.Transparent, .74f to Color.Black.copy(alpha = .72f), 1f to Color.Black.copy(alpha = .92f))))
-            // Its own surface keeps the label readable over bright frames and burned-in video text.
-            Row(Modifier.align(Alignment.TopStart).padding(start = TvLayout.Gutter, end = TvLayout.Gutter, top = 22.dp)
-                .background(Ink.Background.copy(alpha = panelAlpha), RoundedCornerShape(50)).padding(horizontal = 12.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                LineIcon(if (live) "tv" else "film", Ink.Mint, Modifier.size(20.dp))
-                Text(stringResource(if (live) R.string.player_kicker_live else if (media.entry.kind == MediaKind.EPISODE) R.string.player_kicker_series
-                    else R.string.player_kicker_movie),
-                    color = Ink.Text, fontFamily = Roboto, fontSize = 12.sp, letterSpacing = 1.4.sp)
-                if (screenState.sources.size > 1) Text(screenState.sourceName(media.entry.sourceId),
-                    Modifier.widthIn(max = 360.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            // The controls stand on the scrim, one title line above them; 5 dp of side room keeps the focus ring whole.
-            Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(start = TvLayout.Gutter, end = TvLayout.Gutter, bottom = 18.dp)
-                .testTag("player-panel").padding(bottom = 2.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(rememberShownTitle(media.entry.title).name, Modifier.fillMaxWidth().padding(horizontal = 5.dp).testTag("player-title"),
-                    color = Ink.Text, fontSize = 24.sp, lineHeight = 30.sp,
-                    fontWeight = FontWeight.Medium, fontFamily = Roboto, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                // Status on the left, the remote's shortcuts on the right.
-                Row(Modifier.fillMaxWidth().padding(horizontal = 5.dp), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    val clock = "${clockTime(position)} / ${if (duration > 0) clockTime(duration) else "—"}"
-                    Text(when {
-                        recoveryState.recovering -> recoveryState.message.resolve()
-                        failure != null -> failure.resolve()
-                        opening && live -> stringResource(R.string.player_opening)
-                        live -> stringResource(R.string.player_live)
-                        opening -> stringResource(R.string.text_pair, clock, stringResource(R.string.player_opening))
-                        status == Player.STATE_ENDED -> stringResource(R.string.text_pair, clock, stringResource(R.string.player_ended))
-                        else -> listOfNotNull(clock, if (playing) PlaybackSpeed.remainingMs(position, duration, speed)?.let {
-                            stringResource(R.string.player_ends_at, guideTime(System.currentTimeMillis() + it, java.time.ZoneId.systemDefault()))
-                        } else null).joinToString(" · ")
-                    }, Modifier.weight(1f), color = if (failure != null && !recoveryState.recovering) Ink.Error else Ink.Text,
-                        fontFamily = Roboto, fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Text(when {
-                        recoveryState.recovering -> stringResource(R.string.player_keys_recovering)
-                        failure != null -> ""
-                        live -> stringResource(R.string.player_keys_live)
-                        else -> stringResource(R.string.player_keys_vod)
-                    }, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                if (live && failure == null && !recoveryState.recovering) {
-                    Text(currentProgramme?.let { "${it.title} · ${programmeTime(it, model.guideZone())}" } ?: stringResource(R.string.player_no_programme),
-                        Modifier.padding(horizontal = 5.dp).testTag("player-current-programme"), color = Ink.Text, fontFamily = Roboto,
-                        fontSize = 14.sp, lineHeight = 19.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    schedule?.next(guideNow)?.let { next -> Text(stringResource(R.string.player_next_programme, guideTime(next.start, model.guideZone()), next.title),
-                        Modifier.padding(horizontal = 5.dp), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                    currentProgramme?.end?.let { end -> Box(Modifier.padding(horizontal = 5.dp).fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)).background(Color.White.copy(alpha = .25f))) {
-                        Box(Modifier.fillMaxWidth(((guideNow - currentProgramme.start).toFloat() / (end - currentProgramme.start)).coerceIn(0f, 1f))
-                            .fillMaxHeight().background(Ink.Mint))
-                    } }
-                }
-                // Reserve the VOD progress slot so the controls do not move when the duration arrives.
-                if (!live) Box(Modifier.padding(horizontal = 5.dp).fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp))
-                    .background(if (duration > 0) Color.White.copy(alpha = .25f) else Color.Transparent)) {
-                    if (duration > 0) Box(Modifier.fillMaxWidth((position.toFloat() / duration).coerceIn(0f, 1f)).fillMaxHeight().background(Ink.Mint))
-                }
-                CompositionLocalProvider(LocalBringIntoViewSpec provides controlVisibility) {
-                Row(Modifier.fillMaxWidth().testTag("player-controls").horizontalScroll(rememberScrollState()).padding(horizontal = 5.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Action(stringResource(if (recoveryState.recovering) R.string.action_stop else if (failure != null) R.string.action_retry else if (playing) R.string.player_pause
+        val info = remember(media.entry, favoriteTarget, resources) { PlayerInfoModel.from(media.entry,
+            favoriteTarget?.takeIf { it.kind == MediaKind.SERIES }).let { it.copy(title = shownTitle(it.title, it.year, resources).name) } }
+        val statusText = when {
+            recoveryState.recovering -> recoveryState.message.resolve()
+            failure != null -> failure.resolve()
+            opening -> stringResource(R.string.player_opening)
+            status == Player.STATE_ENDED -> stringResource(R.string.player_ended)
+            else -> null
+        }
+        val largeText = LocalDensity.current.fontScale >= 1.3f
+        val reducedMotion = screenState.reducedMotion
+        fun primaryAction() {
+            val wasPlaying = player.isPlaying
+            interact(); scrub.commit()
+            if (recoveryState.recovering) recovery.cancel()
+            else if (failure != null) recovery.retryManually()
+            else if (wasPlaying) player.pause()
+            else { if (status == Player.STATE_ENDED) { episodeEnd.newMedia(); player.seekTo(0) }; player.play() }
+        }
+        AnimatedVisibility(controlsShown, Modifier.fillMaxSize(),
+            enter = fadeIn(tween(if (reducedMotion) 0 else 120)), exit = fadeOut(tween(if (reducedMotion) 0 else 100))) {
+            Box(Modifier.fillMaxSize()) {
+                Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().fillMaxHeight(if (largeText) .7f else .6f)
+                    .background(Brush.verticalGradient(0f to Color.Transparent,
+                        (if (largeText) .343f else .367f) to Color.Black.copy(alpha = .62f),
+                        (if (largeText) .657f else .667f) to Color.Black.copy(alpha = .86f), 1f to Color.Black.copy(alpha = .94f))))
+                PlayerInfoBlock(PlayerInfoKind.Full, media.entry, info, model.channelNumber(media.entry),
+                    screenState.sourceName(media.entry.sourceId).takeIf { screenState.sources.size > 1 }, schedule, model.guideZone(),
+                    clock, scrub, speed, playing, statusText, failure != null || recoveryState.recovering, opening, scrubFocus,
+                    returnFocus = { if (!runCatching { lastControl[0].requestFocus() }.getOrDefault(false)) first.requestFocus() }, toggle = ::primaryAction,
+                    modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(horizontal = TvLayout.Gutter, vertical = 24.dp)
+                        .testTag("player-panel").onGloballyPositioned { coordinates ->
+                            val view = playerView
+                            if (controlsShown && view != null && view.height > 0) view.subtitleView?.setBottomPaddingFraction(
+                                ((view.height - coordinates.positionInRoot().y + subtitleGapPx) / view.height).coerceIn(.08f, .85f))
+                        }, onScrubFocusChanged = { scrubFocused = it }) {
+                    val healthy = failure == null && !recoveryState.recovering
+                    val canSeek = !live && clock.seekable && healthy && !opening
+                    val primary = PlayerControl("player-primary", stringResource(if (recoveryState.recovering) R.string.action_stop
+                        else if (failure != null) R.string.action_retry else if (playing) R.string.player_pause
                         else if (status == Player.STATE_ENDED) R.string.action_replay else R.string.action_play),
-                        Modifier.focusRequester(first), primary = true) {
-                        interact()
-                        if (recoveryState.recovering) recovery.cancel()
-                        else if (failure != null) recovery.retryManually()
-                        else if (playing) player.pause()
-                        else { if (status == Player.STATE_ENDED) { episodeEnd.newMedia(); player.seekTo(0) }; player.play() }
+                        if (recoveryState.recovering) "stop" else if (failure != null) "refresh" else if (playing) "pause"
+                        else if (status == Player.STATE_ENDED) "replay" else "play_arrow", primary = true, requester = first, onClick = ::primaryAction)
+                    val cluster = buildList {
+                        if (!live && (clock.seekable || opening)) add(PlayerControl("player-seek-back", stringResource(R.string.player_seek_back_accessible),
+                            "replay_10", enabled = canSeek) { interact(); seekBy(-10_000) })
+                        add(primary)
+                        if (!live && (clock.seekable || opening)) add(PlayerControl("player-seek-forward", stringResource(R.string.player_seek_forward_accessible),
+                            "forward_10", enabled = canSeek) { interact(); seekBy(10_000) })
+                        if (nextChoice != null) add(PlayerControl("player-next-episode", stringResource(R.string.player_next_episode), "skip_next",
+                            state = shownTitle(nextChoice.entry.title, "", resources).name, requester = nextEpisodeFocus) {
+                            scrub.cancel(); save()
+                            screenState.sourceFor(media.entry)?.let { source ->
+                                if (model.playNextEpisode(source.id, media.entry.id, nextChoice.entry.id) == NextResult.NEEDS_PIN) openPin { nextEpisodeFocus }
+                            }
+                        })
                     }
-                    if (live) {
-                        Action(stringResource(R.string.player_channel_previous)) { model.changeChannel(-1) }
-                        Action(stringResource(R.string.player_channel_next)) { model.changeChannel(1) }
-                    } else {
-                        Action(stringResource(R.string.player_seek_back, "10"), enabled = player.isCurrentMediaItemSeekable) { interact(); player.seekTo((player.currentPosition - 10_000).coerceAtLeast(0)) }
-                        Action(stringResource(R.string.player_seek_forward, "10"), enabled = player.isCurrentMediaItemSeekable) { interact(); player.seekTo((player.currentPosition + 10_000).coerceAtMost(duration.takeIf { it > 0 } ?: Long.MAX_VALUE)) }
-                    }
-                    Action(stringResource(R.string.player_tracks), icon = "sound", enabled = failure == null && !recoveryState.recovering) { interact(); layer = PlayerLayer.Tracks }
-                    if (!live) Action(stringResource(R.string.player_options), Modifier.focusRequester(optionsFocus)
-                        .testTag("player-options").semantics { stateDescription = PlaybackSpeed.label(speed) },
-                        enabled = failure == null && !recoveryState.recovering) { interact(); layer = PlayerLayer.Options }
-                    // The shared star icon at icon size, filled while it is a favourite; the meaning stays in semantics.
                     val favoriteLabel = stringResource(when {
                         favoriteTarget == null -> R.string.player_favorite_unavailable
                         media.entry.kind == MediaKind.EPISODE -> if (isFavorite) R.string.player_series_favorite_remove else R.string.player_series_favorite_add
                         else -> if (isFavorite) R.string.favorite_remove else R.string.favorite_add
                     })
                     val favoriteState = stringResource(if (isFavorite) R.string.player_in_favorites else R.string.player_not_in_favorites)
-                    Action("", Modifier.testTag("player-favorite").semantics {
-                        contentDescription = favoriteLabel
-                        stateDescription = favoriteState
-                    }, icon = "star", iconFilled = isFavorite, selected = isFavorite, enabled = favoriteTarget != null) { model.toggleFavorite(media.entry); interact() }
-                    if (nextChoice != null) Action(stringResource(R.string.player_next_episode), Modifier.focusRequester(nextEpisodeFocus)) {
-                        save()
-                        screenState.sourceFor(media.entry)?.let { source ->
-                            if (model.playNextEpisode(source.id, media.entry.id, nextChoice.entry.id) == NextResult.NEEDS_PIN) openPin { nextEpisodeFocus }
+                    val chips = buildList {
+                        if (live) {
+                            add(PlayerControl("player-channel-down", stringResource(R.string.player_channel_minus), "keyboard_arrow_down") { model.changeChannel(-1); interact() })
+                            add(PlayerControl("player-channel-up", stringResource(R.string.player_channel_plus), "keyboard_arrow_up") { model.changeChannel(1); interact() })
                         }
+                        add(PlayerControl("player-tracks", stringResource(R.string.player_tracks), "subtitles", state = selectedTrackSummary(tracks, trackParameters), enabled = healthy, requester = tracksFocus) {
+                            scrub.commit(); interact(); layer = PlayerLayer.Tracks
+                        })
+                        if (!live) add(PlayerControl("player-options", stringResource(R.string.player_options), "tune", state = PlaybackSpeed.label(speed),
+                            enabled = healthy, requester = optionsFocus) { scrub.commit(); interact(); layer = PlayerLayer.Options })
+                        add(PlayerControl("player-favorite", favoriteLabel, if (isFavorite) "star_filled" else "star", state = favoriteState,
+                            selected = isFavorite, enabled = favoriteTarget != null) { model.toggleFavorite(media.entry); interact() })
                     }
-                    Action(stringResource(R.string.action_close)) { save(); model.back() }
-                }
+                    PlayerControlRow(cluster, chips, scrubFocus, canSeek, { lastControl[0] = it },
+                        stringResource(if (recoveryState.recovering) R.string.player_keys_recovering else if (live) R.string.player_hint_live
+                            else if (scrubFocused) R.string.player_hint_scrub else R.string.player_hint_vod))
                 }
             }
+        }
+        if (peek && layer == PlayerLayer.Video && !live) {
+            Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(150.dp)
+                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = .6f)))))
+            PlayerInfoBlock(PlayerInfoKind.Peek, media.entry, info, null, null, null, model.guideZone(), clock, scrub, speed,
+                playing, null, false, false, scrubFocus, {}, {}, Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                    .padding(horizontal = TvLayout.Gutter, vertical = 24.dp).testTag("player-peek"), peekDelta = peekDelta)
         }
         if (layer == PlayerLayer.Tracks) TracksDialog(tracks, trackParameters, player, model, screenState.playback.panelOpacity) {
             perform(PlayerCommand.CloseTracks)
@@ -597,4 +604,17 @@ private fun trackLabel(format: Format, number: Int, type: Int): String {
         else -> pluralStringResource(R.plurals.tracks_channels, format.channelCount, format.channelCount.toString())
     } else ""
     return listOf("$language · $number", format.label.orEmpty(), channels).filter { it.isNotBlank() }.distinct().joinToString(" · ")
+}
+
+@Composable private fun selectedTrackSummary(tracks: Tracks, parameters: TrackSelectionParameters): String {
+    fun selectedFormat(type: Int): Format? = tracks.groups.filter { it.type == type }.firstNotNullOfOrNull { group ->
+        (0 until group.length).firstOrNull { group.isTrackSelected(it) }?.let { group.getTrackFormat(it) }
+    }
+    val audio = selectedFormat(C.TRACK_TYPE_AUDIO)
+    val subtitle = selectedFormat(C.TRACK_TYPE_TEXT)?.takeUnless { C.TRACK_TYPE_TEXT in parameters.disabledTrackTypes }
+    val audioLabel = audio?.let { languageName(it.language) ?: stringResource(R.string.tracks_audio_fallback) }
+        ?: stringResource(R.string.tracks_no_audio)
+    val subtitleLabel = subtitle?.let { languageName(it.language) ?: stringResource(R.string.tracks_subtitles) }
+        ?: stringResource(R.string.player_subtitles_off)
+    return "$audioLabel · $subtitleLabel"
 }

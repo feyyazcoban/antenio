@@ -1,0 +1,144 @@
+{
+  "date": "2026-10-18",
+  "version": "0.14.47-design-preview",
+  "versionCode": 61,
+  "status": "delivered to physical TV and design emulator; physical interaction acceptance remains open",
+  "buildType": "release, R8, not debuggable; same signing key for install -r",
+  "sha256": "d67222b483a00570aa1fcb579b8f2e1f7ae4908fbe844a4d2076bf7beb73b37e",
+  "certificateSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065",
+  "decisions": [
+    "D072",
+    "D077"
+  ],
+  "changes": [
+    "One bottom player block: title, clock, provider metadata, progress/remaining time, transport and action chips; Kapat removed",
+    "Pending scrub target: 10/30/60-second key steps, one seek after 1000 ms or OK/Down, Back cancellation before hide/exit; lifecycle/error/media changes cancel pending work",
+    "Hidden seek preview, real playback-speed end time, measured label fitting, decorative focus labels, accessibility progress/actions and localised time announcements",
+    "Live title/number/logo fallback/badge/guide progress and temporary channel chips; D077 VOD speed menu retained",
+    "Capture playback state before pending seek commits for hardware Play/Pause and primary action, because seek synchronously enters buffering"
+  ],
+  "buildCommands": [
+    "gradlew -p apps/android-tv --console=plain -q :app:testDebugUnitTest :app:lintDebug :app:assembleRelease :app:assembleDebug :app:assembleDebugAndroidTest"
+  ],
+  "unit": {
+    "tests": 354,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 37
+  },
+  "deviceRule": "Only emulator-5558 / nextv_test_api36, only tools/run-device-tests.sh --no-build --font-scale; synthetic local fixtures, no real IPTV playback",
+  "finalTargeted": {
+    "tests": 3,
+    "passed": 3,
+    "cases": [
+      "EpisodeAutoplayFlowTest#playingAndPausedEpisodesPreservePositionAcrossBackgroundAndExit",
+      "VisualPreviewTest#tracksPanelKeepsHeaderAndSelectionReadable",
+      "PlayerControlsLayoutTest#mediaSeekCommitsBeforePlayAndHiddenSeekShowsOnlyThePreview"
+    ]
+  },
+  "initialFailuresAndFixes": [
+    "New pending-target test raced playback readiness and Compose automatic test time. Await ready, hold virtual time only across immediate Right/Back cancellation; keep the real 1 s commit assertion.",
+    "Initial regression: 28/30 passed. Visual tracks Back test omitted the dialog close/focus wait formerly supplied by the Kapat selector; wait for returned opener before two player Back presses.",
+    "Episode background test failed once and passed unchanged on repeat. Preserve the immediate playWhenReady=false and <150 ms movement assertions; wait for an ExoPlayer playback-loop message before taking the paused baseline.",
+    "Screenshot capture waits for idle, 350 ms presentation, then idle, because semantic idle can precede emulator rendering."
+  ],
+  "independentReview": {
+    "mode": "read-only production review followed by a scoped four-file correction, reviewed by the primary agent",
+    "blockingFindings": 0,
+    "correctedFinding": "P3: pass scrub focus to the screen and choose a dedicated EN/TR OK apply / Back cancel hint; restore general hint on blur and reset on controls hide. Affected focus/scrub reruns passed; normal-font screenshot inspected."
+  },
+  "notVerified": [
+    "physical TV remote/audio/TalkBack acceptance",
+    "3 m readability and bright/dark-frame contrast",
+    "physical frame timing and usability of 1000 ms commit delay",
+    "Figma/manifest update and owner visual acceptance",
+    "English owner review"
+  ],
+  "outOfScope": [
+    "S15 live channel list, recall, timed band and start-on-last-channel",
+    "S16 aspect ratio/zoom/subtitle quick settings/stream information",
+    "S17 live DVR window and stream budget"
+  ],
+  "officialReferences": [
+    "https://developer.android.com/jetpack/androidx/releases/media3",
+    "https://developer.android.com/jetpack/androidx/releases/tv",
+    "https://developer.android.com/develop/ui/compose/bom/bom-mapping",
+    "https://developer.android.com/reference/androidx/media3/exoplayer/PlayerMessage"
+  ],
+  "logs": "work/s14b-qa (ignored); initial failure logs retained",
+  "reviewImages": "design/reviews/player-controls-2026-10-18/native/",
+  "baselineVerification": {
+    "sha256": "e8166a4f97c4b1d136ffe6e5f64a6b0b20599112114ed73f94a24a171fef4fc7",
+    "changeAfterBaseline": "focused scrub hint only, EN/TR strings and focus callback; no seek/router/playback/track changes",
+    "controlsAndSpeed": {
+      "font1.0": "8/8",
+      "font1.5": "8/8",
+      "font2.0": "8/8"
+    },
+    "regression": "30/30: PlaybackRecoveryFlowTest, TracksLayoutTest, EpisodeAutoplayFlowTest, two VisualPreview player cases, one GuideFlow live case",
+    "largeStateRegression": "3/3 at font2.0: long-title recovery/failure, live guide controls and VOD panel geometry"
+  },
+  "finalAffectedChecks": {
+    "cases": [
+      "PlayerControlsLayoutTest#movieFocusGeometryAndPanelsReturnToTheirOpeningControl",
+      "PlayerControlsLayoutTest#pendingTargetCommitsOnceAndBackCancelsBeforeHidingOrLeaving"
+    ],
+    "font1.0": "2/2",
+    "font1.5": "2/2",
+    "font2.0": "2/2",
+    "visual": "Normal-font focused scrub screenshot inspected: OK apply / Back cancel visible; focus ring, bubble and controls within screen."
+  },
+  "userWorkflowChange": "2026-10-18: do not run font-size matrices during development. Wait for the user to say yayına hazırla before store-release validation. Stop requested during final 2.0 run; runner had completed successfully before force-stop took effect. No further font runs; restored 1.0 and shut down 5558.",
+  "imageBuilds": {
+    "final": "movie-1.0, scrub-1.0, player-favorite-1.0",
+    "baselineBeforeHintOnlyCorrection": "live-1.0, live-2.0, movie-2.0, player-favorite-2.0, peek-1.0"
+  },
+  "delivery": {
+    "designEmulator": {
+      "device": "emulator-5556",
+      "before": {
+        "versionCode": "60",
+        "versionName": "0.14.46-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 15:43:07"
+      },
+      "after": {
+        "versionCode": "61",
+        "versionName": "0.14.47-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-18 17:26:32"
+      },
+      "sha256": "d67222b483a00570aa1fcb579b8f2e1f7ae4908fbe844a4d2076bf7beb73b37e",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "evimVisible": true,
+      "appRunning": true,
+      "crashRecordForApp": false
+    },
+    "physicalTv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "60",
+        "versionName": "0.14.46-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 19:15:09"
+      },
+      "after": {
+        "versionCode": "61",
+        "versionName": "0.14.47-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-18 20:27:00"
+      },
+      "sha256": "d67222b483a00570aa1fcb579b8f2e1f7ae4908fbe844a4d2076bf7beb73b37e",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    }
+  },
+  "deviceState": "5556 and 5558 shut down; Gradle daemon stopped; test font reset to 1.0; 5554 untouched. No TV app launch or real playback.",
+  "projectChecks": "git diff --check and python tools/check_project.py pass; 17 screens, 401 variables, 1 Figma task remains"
+}

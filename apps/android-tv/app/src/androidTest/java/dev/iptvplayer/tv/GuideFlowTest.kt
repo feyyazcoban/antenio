@@ -160,7 +160,7 @@ class GuideFlowTest {
         key(KeyEvent.KEYCODE_BACK)
         ui.onNodeWithTag("guide-grid").assertIsFocused()
         click("guide-now"); key(KeyEvent.KEYCODE_DPAD_CENTER)
-        try { ui.waitUntil(10_000) { streams.get() > 0 && ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() } }
+        try { ui.waitUntil(10_000) { streams.get() > 0 && ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() } }
         catch (e: Throwable) {
             shot("failure-player")
             throw AssertionError("Player readiness: route=${model.state.value.route}, streams=${streams.get()}, guideAnchor=${model.state.value.guideAnchor}", e)
@@ -190,7 +190,7 @@ class GuideFlowTest {
     @Test fun playerBackFollowsTheModelRouteBeforeTheScreenLeaves() {
         val channel = model.state.value.catalog.items.first { it.id == id(0) }
         ui.runOnUiThread { model.open(channel) }
-        ui.waitUntil(10_000) { streams.get() > 0 && ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(10_000) { streams.get() > 0 && ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
         key(KeyEvent.KEYCODE_DPAD_CENTER) // Pause the short fixture so it cannot end and start a recovery.
         // Back hides the controls, the next Back leaves for Home, and one right after it asks there.
         key(KeyEvent.KEYCODE_BACK); assertEquals(Route.PLAYER, model.state.value.route)
@@ -331,19 +331,19 @@ class GuideFlowTest {
         ui.onNodeWithContentDescription(raw.items[12].title).assertIsFocused()
         inside(ui.onNodeWithTag("tile:library:${id(12)}"), ui.onNodeWithTag("library-grid"))
         key(KeyEvent.KEYCODE_DPAD_CENTER)
-        ui.waitUntil(10_000) { ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(10_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
         key(KeyEvent.KEYCODE_DPAD_CENTER) // Pause the short fixture so the controls stay inspectable.
         ui.onNodeWithTag("player-current-programme").assertTextContains(currentTitle[0], substring = true)
         inside(ui.onNodeWithTag("player-panel"), ui.onRoot())
-        inside(ui.onNodeWithTag("player-title"), ui.onNodeWithTag("player-panel"))
+        inside(ui.onNodeWithTag("player-title", useUnmergedTree = true), ui.onNodeWithTag("player-panel"))
         inside(ui.onNodeWithTag("player-current-programme"), ui.onNodeWithTag("player-panel"))
         inside(ui.onNodeWithTag("player-controls"), ui.onNodeWithTag("player-panel"))
         shot("guide-player-$scale")
         repeat(5) { key(KeyEvent.KEYCODE_DPAD_RIGHT) }
-        ui.onNodeWithText("Kapat").assertIsFocused()
-        inside(ui.onNodeWithText("Kapat"), ui.onNodeWithTag("player-controls"))
+        ui.onNodeWithTag("player-favorite").assertIsFocused()
+        inside(ui.onNodeWithTag("player-favorite"), ui.onNodeWithTag("player-controls"))
         shot("guide-player-controls-$scale")
-        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        key(KeyEvent.KEYCODE_BACK); key(KeyEvent.KEYCODE_BACK)
         assertEquals(Route.LIBRARY, model.state.value.route)
         ui.onNodeWithContentDescription(raw.items[12].title).assertIsFocused()
     }

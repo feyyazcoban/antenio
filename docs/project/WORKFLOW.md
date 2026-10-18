@@ -12,6 +12,8 @@ Bu klasör tek proje köküdür. Codex, Claude Code, Cursor veya başka bir ara�
 
 ## Derleme ve kontrol
 
+**Kullanıcı talimatı · 18 Ekim 2026:** geliştirme sırasında yazı boyutu matrisi (1,5 / 2,0) koşulmaz. Kullanıcı "yayına hazırla" dediğinde, mağazaya çıkış öncesi kabul turunda yapılır. Adım tasarımlarındaki büyük yazı gereksinimleri tasarım sözleşmesi olarak kalır; zorunlu geliştirme testi sayılmaz. Normal ölçekte değişiklikle ilgili davranış/odak kontrollerine devam edilir. Önceden tamamlanan font testleri tarihsel kanıttır, tekrar koşma gerekçesi değildir.
+
 Android Studio ile `apps/android-tv` açılır. Projedeki Gradle Wrapper kullanılır; sürümler bu düzenleme sırasında değiştirilmedi. Makinede uygun JDK ve Android SDK bulunmalıdır. SDK yolu Android Studio'nun oluşturduğu, Git dışında kalan `apps/android-tv/local.properties` içindedir. Başka bilgisayarda bu dosyayı yeniden oluştur.
 
 Proje kökünde, Python 3 ile:

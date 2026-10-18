@@ -76,7 +76,7 @@ class PilotFlowTest {
     private fun nav(label: String) = ui.onNodeWithTag("nav:$label").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
     private fun back() { InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK); ui.waitForIdle() }
     private fun ready() {
-        ui.waitUntil(30_000) { ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(30_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
     }
     private fun reopenFromDisk() {
         // Activity recreation alone retains its ViewModel; explicitly discard it to exercise disk restoration.
@@ -100,7 +100,7 @@ class PilotFlowTest {
         ui.onNodeWithText("İngilizce · 1", substring = true).performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
         ui.onNodeWithText("İngilizce · 1", substring = true).assertExists()
         back()
-        click("Kanal ›")
+        click("Kanal artı")
         ui.waitUntil(10_000) { model.state.value.playing?.entry?.title == "İkinci kanal" }
         ready()
         back(); back()
@@ -111,7 +111,7 @@ class PilotFlowTest {
         click("Favoriye ekle")
         click("Oynat")
         ready()
-        click("+10 sn")
+        click("10 saniye ileri")
         ui.waitUntil(10_000) { (model.progress(model.state.value.playing!!.entry)?.positionMs ?: 0) >= 10_000 }
         back(); back()
         ui.onNodeWithText("Devam et", substring = true).assertExists()
@@ -206,7 +206,7 @@ class PilotFlowTest {
         click("Favoriye ekle")
         ui.onNodeWithText("İkinci bölüm").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
         ready()
-        click("+10 sn")
+        click("10 saniye ileri")
         ui.waitUntil(10_000) { model.state.value.history.any { it.id == model.fixtureKey("episode:6") && it.positionMs >= 10_000 } }
         back(); back(); back()
         click("Ana Sayfa")

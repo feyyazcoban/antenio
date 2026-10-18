@@ -98,6 +98,20 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
 @Composable internal fun actionHeight(compact: Boolean = false): Dp =
     maxOf(if (compact) 30.dp else 36.dp, with(LocalDensity.current) { (if (compact) 17.sp else 19.sp).toDp() } + if (compact) 10.dp else 16.dp)
 
+/** D064 filled action family: instant mint focus, outer ring, no focus growth. */
+internal object FilledControl {
+    @Composable fun colors(rest: Color = Ink.High, content: Color = Ink.Text) = ButtonDefaults.colors(
+        containerColor = rest, contentColor = content, focusedContainerColor = Ink.Mint, focusedContentColor = Ink.OnMint,
+        disabledContainerColor = rest.copy(alpha = .38f), disabledContentColor = content.copy(alpha = .38f))
+    @Composable fun border(rest: Color = Color.Transparent) = ButtonDefaults.border(
+        border = Border(BorderStroke(1.dp, rest)),
+        focusedBorder = Border(BorderStroke(TvLayout.Focus, Ink.Text), inset = TvLayout.FocusInset),
+        focusedDisabledBorder = Border(BorderStroke(TvLayout.Focus, Ink.Muted), inset = TvLayout.FocusInset))
+    @Composable fun scale() = ButtonDefaults.scale(focusedScale = 1f)
+}
+
+internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = focusProperties { canFocus = enabled || focused }
+
 /**
  * [check] is for full-width list rows: their selection is a trailing check like the other list rows,
  * not the centred chip marker that would land in the middle of a start-aligned label. [labelText] is [label] with spans
@@ -112,20 +126,18 @@ val LocalReducedMotion = staticCompositionLocalOf { false }
     // one that becomes disabled while focused keeps focus, so focus never jumps or disappears.
     var focused by remember { mutableStateOf(false) }
     Button(onClick = onClick, modifier = modifier.onFocusChanged { focused = it.isFocused }
-        .focusProperties { canFocus = enabled || focused }
+        .enterWhenEnabled(enabled, focused)
         .heightIn(min = height, max = height)
         .then(if (selected != null) Modifier.semantics { this.selected = selected } else Modifier), enabled = enabled,
         shape = ButtonDefaults.shape(shape = RoundedCornerShape(50)),
         // Focus is the one mint fill (D064). A resting primary action is not white, which read as focused next to the
         // real focus; its mint label marks it instead. Outlined edges use the outline role (over 3:1 on the page).
-        colors = ButtonDefaults.colors(containerColor = if (selected == true) Ink.Selected else if (outlined && !primary) Color.Transparent else Ink.High,
-            contentColor = if (primary) Ink.Mint else Ink.Text, focusedContainerColor = Ink.Mint, focusedContentColor = Ink.OnMint),
-        border = ButtonDefaults.border(border = Border(BorderStroke(1.dp, if (outlined && selected != true) Ink.Outline.copy(alpha = .6f) else Color.Transparent)),
-            focusedBorder = Border(BorderStroke(TvLayout.Focus, Ink.Text), inset = 3.dp),
-            focusedDisabledBorder = Border(BorderStroke(TvLayout.Focus, Ink.Muted), inset = 3.dp)),
+        colors = FilledControl.colors(if (selected == true) Ink.Selected else if (outlined && !primary) Color.Transparent else Ink.High,
+            if (primary) Ink.Mint else Ink.Text),
+        border = FilledControl.border(if (outlined && selected != true) Ink.Outline.copy(alpha = .6f) else Color.Transparent),
         // No focus growth anywhere: tv-material animates it in composition (300 ms in, 500 ms out per item),
         // which stutters on TV SoCs. Focus shows instantly through colour and the 2 dp border (D056).
-        scale = ButtonDefaults.scale(focusedScale = 1f),
+        scale = FilledControl.scale(),
         contentPadding = PaddingValues(horizontal = if (compact) 14.dp else 20.dp, vertical = if (compact) 5.dp else 8.dp)) {
         val contentColor = LocalContentColor.current
         if (check) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,

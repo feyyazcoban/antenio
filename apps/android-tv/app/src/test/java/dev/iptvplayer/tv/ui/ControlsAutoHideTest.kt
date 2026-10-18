@@ -37,4 +37,8 @@ class ControlsAutoHideTest {
     @Test fun theyStayWhileTalkBackReadsTheScreen() {
         for (timeout in OsdTimeout.entries) assertFalse(timeout.name, hides(60_000, timeout, talkBack = true))
     }
+    @Test fun pendingSeekKeepsControlsVisible() {
+        assertFalse(ControlsAutoHide.shouldHide(60_000, 0, OsdTimeout.S8, true, true, false, false, false, scrubbing = true))
+    }
+
 }

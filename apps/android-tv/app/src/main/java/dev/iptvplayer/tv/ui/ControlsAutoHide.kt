@@ -10,8 +10,8 @@ import dev.iptvplayer.tv.data.OsdTimeout
  */
 internal object ControlsAutoHide {
     fun shouldHide(nowMs: Long, lastInteractionMs: Long, timeout: OsdTimeout, playing: Boolean, controlsOnTop: Boolean,
-        failed: Boolean, recovering: Boolean, talkBack: Boolean): Boolean {
+        failed: Boolean, recovering: Boolean, talkBack: Boolean, scrubbing: Boolean = false): Boolean {
         val after = timeout.ms ?: return false
-        return playing && controlsOnTop && !failed && !recovering && !talkBack && nowMs - lastInteractionMs > after
+        return playing && controlsOnTop && !failed && !recovering && !talkBack && !scrubbing && nowMs - lastInteractionMs > after
     }
 }

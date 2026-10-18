@@ -211,7 +211,7 @@ class MultiSourceFlowTest {
         assertEquals(setOf(two.id), model.state.value.allCatalog.items.map { it.sourceId }.toSet())
         val film = entry(two, MediaKind.MOVIE)
         ui.runOnUiThread { model.play(film) }
-        ui.waitUntil(20_000) { ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty() }
+        ui.waitUntil(20_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
         assertTrue(model.state.value.playing!!.url.startsWith(b.url("/").toString()))
         back()
         assertEquals(2, model.store.loadSources().sources.size)

@@ -1,5 +1,23 @@
 # Güncel görsel inceleme
 
+18 Ekim 2026 · **0.14.47 · S14b oynatıcı kontrolleri.** Sentetik yerel medya, yalnız 5558 test emülatörü, debug derlemesi. Yeni alt bilgi bloğu, kontrol simgeleri, odak etiketi ve sarma önizlemesi. Cihaz testi sonuçları ve release teslimi [QA](../../docs/project/native-player-controls-47-qa.json) ile [HANDOFF](../../docs/project/HANDOFF.md) içinde; görseller fiziksel TV kabulü değildir. [Davranış ve sınırlar](../../docs/design/PLAYER_PRESENTATION.md).
+
+| Konu | Görüntü |
+| --- | --- |
+| Film, normal yazı; Seçenekler odağı | ![](player-controls-2026-10-18/native/movie-1.0.png) |
+| Çubuk odağı; son derlemede OK/Geri ipucu | ![](player-controls-2026-10-18/native/scrub-1.0.png) |
+| Canlı, normal yazı; geçici kanal çipleri | ![](player-controls-2026-10-18/native/live-1.0.png) |
+| Film, 2 kat yazı; etiketler simgeye düşer | ![](player-controls-2026-10-18/native/movie-2.0.png) |
+| Canlı, 2 kat yazı | ![](player-controls-2026-10-18/native/live-2.0.png) |
+| Favori odağı, 2 kat yazı | ![](player-controls-2026-10-18/native/player-favorite-2.0.png) |
+| Gizli kontrollerde sarma önizlemesi; sentetik medya tamponlama anı | ![](player-controls-2026-10-18/native/peek-1.0.png) |
+
+Fiziksel kumanda/TalkBack, Figma ve kullanıcı görsel kabulü açık. Canlı kanal listesi S15, diğer Seçenekler S16 kapsamındadır.
+
+Normal film/çubuk görselleri son derlemedendir; canlı, sarma önizlemesi ve büyük yazı görselleri yalnız odak ipucu düzeltmesinden önceki 0.14.47 adayındandır. Kullanıcının 18 Ekim talimatıyla bundan sonraki font matrisi mağaza öncesi "yayına hazırla" turuna bırakılır.
+
+## Önceki: 0.14.31
+
 16 Ekim 2026 · **0.14.31 tasarım önizlemesi · Klavye yalnız OK ile açılır.** Metin alanları odak alınca klavye açmaz; odaktaki alanda OK açar, Geri kapatır. Sentetik kaynak, ayrılmış emülatör, normal yazı. [Tasarım ayrıntıları](../../docs/design/KEYBOARD_ON_OK_31.md) · [QA](../../docs/project/native-keyboard-on-ok-31-qa.json) · [APK](../../releases/IPTV_Player_TV_Design_Preview_0.14.31.apk)
 
 | Konu | Görüntü |

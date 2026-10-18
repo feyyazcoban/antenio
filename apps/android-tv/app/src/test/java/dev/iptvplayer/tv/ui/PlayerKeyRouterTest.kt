@@ -90,8 +90,8 @@ class PlayerKeyRouterTest {
     @Test fun fastForwardAndRewindJumpInFilmsWhilePlaybackIsHealthy() {
         for (ctx in everywhere()) {
             val jumps = !ctx.live && ctx.healthy
-            routes(if (jumps) PlayerCommand.Seek(30_000) else null, PlayerKey.FastForward, ctx)
-            routes(if (jumps) PlayerCommand.Seek(-10_000) else null, PlayerKey.Rewind, ctx)
+            routes(if (jumps) (if (ctx.layer == PlayerLayer.Controls) PlayerCommand.ScrubNudge(30_000) else PlayerCommand.Seek(30_000)) else null, PlayerKey.FastForward, ctx)
+            routes(if (jumps) (if (ctx.layer == PlayerLayer.Controls) PlayerCommand.ScrubNudge(-10_000) else PlayerCommand.Seek(-10_000)) else null, PlayerKey.Rewind, ctx)
         }
     }
 
@@ -148,4 +148,14 @@ class PlayerKeyRouterTest {
             for (key in others) routes(null, key, ctx.copy(repeat = 12))
         }
     }
+    @Test fun pendingSeekCommitsBeforeToggleAndBackCancelsBeforeHiding() {
+        val pending = vod.copy(layer = PlayerLayer.Controls, scrubbing = true)
+        routes(PlayerCommand.CommitScrub(true), PlayerKey.PlayPause, pending)
+        assertEquals(PlayerCommand.CancelScrub, PlayerKeyRouter.back(pending))
+        assertEquals(PlayerCommand.HideControls, PlayerKeyRouter.back(pending.copy(scrubbing = false)))
+        assertEquals(PlayerCommand.Exit(true), PlayerKeyRouter.back(pending.copy(recovering = true)))
+        assertEquals(PlayerCommand.CloseTracks, PlayerKeyRouter.back(pending.copy(layer = PlayerLayer.Tracks)))
+        routes(PlayerCommand.StopRecovery, PlayerKey.PlayPause, pending.copy(recovering = true))
+    }
+
 }

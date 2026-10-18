@@ -79,7 +79,7 @@ class PlayerSettingsFlowTest {
     private val radio = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton)
     private val prefs get() = model.state.value.playback
     private fun controlsShown() = ui.onAllNodesWithTag("player-panel").fetchSemanticsNodes().isNotEmpty()
-    private fun playing() = ui.onAllNodesWithText("Duraklat").fetchSemanticsNodes().isNotEmpty()
+    private fun playing() = ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty()
 
     /** Ayarlar → Oynatıcı, focus on its first row; the menu item, the sections and the rows by their Turkish names unless given. */
     private fun openPlayerSettings(settings: String = "Ayarlar", firstSection: String = "Genel ve dil", player: String = "Oynatıcı",
