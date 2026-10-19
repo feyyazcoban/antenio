@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-013/022 · D098 / 0.14.68: splash'in ilk gradient/path hazırlığı görünür girişten önce yapılır, giriş saati/sesi frame commit sonrasına bağlanır. Emülatör release ölçümünde animasyon ortasındaki COMMAND_ISSUE yaklaşık405–416ms→4ms; ilk kare268ms→897ms ve en büyük sonraki vsync boşluğu483ms→600ms. Başlangıç beklemesi ortadan kalkmadı; fiziksel splash/ses kabulü açık, genel işler done değildir. QA native-launch-prime-68-qa.json; S15/S16/S17–S29 bekler.
+
 BKL-019/020 · D097 / 0.14.67: kullanıcının onayladığı vitrin görsel oranı korunarak karartma menü ikonlarının arkasından, ekranın en solundan başlatıldı ve biraz koyulaştırıldı. Genel görsel/Figma kabulü açık; kontrol ve teslim kaydı STATUS/HANDOFF ile native-hero-overlay-67-qa.json içinde. Kalan dört başlığın kapsamı değişmedi.
 
 BKL-019/020 · D095 Home kaydırma geri bildirimi: kullanıcı19Ekim2026TVakıcılığını “bu tamam” diyerek onayladı; bu alt iş done. Splash ve genel görsel/kullanıcı kabul maddeleri açık kalır.

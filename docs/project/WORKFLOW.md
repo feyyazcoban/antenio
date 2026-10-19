@@ -47,6 +47,8 @@ TV'ye giden teslimler 0.14.29'dan beri `.\gradlew.bat assembleRelease` çıktıs
 
 `files/cold-restore-verification.json` ham FrameMetrics ve restore gözlemlerini, görsel modda gerçek yakalama zamanlarını içerir. İlk 2.800 ms vsync penceresi geciken animasyonun tamamını kapsamayabilir; Application/instrumentation hazırlığı ve fiziksel sunum ölçüm dışıdır. Screenshot koşusunu timing-only performans karşılaştırmasına katma. Atlanan test başarılı ölçüm sayılmaz; wrapper bunu reddeder.
 
+Küçültülmüş gerçek TV paketi için `--cold-catalog release`, ayrı görsel koşu için `release-visual` kullanılır. Bu modlar framework tabanlı Java instrumentation ile R8'in yeniden adlandırdığı Kotlin/AndroidX sınıflarına bağlanmadan gerçek MainActivity karelerini ölçer; app'in iç restore durumunu doğrulamaz. Aynı runner ile `actual-debug` / `actual-debug-visual` karşılaştırması yapılabilir. Normal ekran testleri AndroidJUnitRunner ile debug APK kullanmaya devam eder. Her mod aynı 5558/AVD korumasından geçer; final kod82+ çıktılarında rapor `getExternalFilesDir` altında `release-cold-verification.json`, görseller `release-cold-entrance/` içindedir. Bu dosyalar yalnız sentetik test verisidir. Yeni process ile yeniden açmak, cihazın veya GPU shader önbelleğinin tamamen soğuk olduğu anlamına gelmez; karşılaştırmanın yeniden açılış/snapshot koşulunu ayrıca kaydet.
+
 ## Dosya yerleşimi
 
 | İçerik | Yer |

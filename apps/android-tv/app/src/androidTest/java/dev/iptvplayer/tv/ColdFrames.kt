@@ -10,10 +10,9 @@ import android.os.HandlerThread
 import android.os.SystemClock
 import android.view.FrameMetrics
 import android.view.Window
-import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.Flow
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.CompletableFuture
@@ -21,10 +20,13 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.io.File
 
 /** Test-only observer attached before Activity.onCreate; never asks Compose to idle or advances its clock. */
 @androidx.annotation.RequiresApi(29)
-internal class ColdFrames(private val instrumentation: Instrumentation) : Application.ActivityLifecycleCallbacks, AutoCloseable {
+internal class ColdFrames(private val instrumentation: Instrumentation,
+    private val output: File = instrumentation.targetContext.filesDir,
+    private val restoreState: ((Activity) -> Flow<String>)? = null) : Application.ActivityLifecycleCallbacks, AutoCloseable {
     private data class Frame(val received: Long, val dropped: Int, val metrics: FrameMetrics)
     private val app = instrumentation.targetContext.applicationContext as Application
     private val thread = HandlerThread("ColdFrames").apply { start() }
@@ -42,7 +44,7 @@ internal class ColdFrames(private val instrumentation: Instrumentation) : Applic
     }
     fun register() = instrumentation.runOnMainSync { app.registerActivityLifecycleCallbacks(this) }
     override fun onActivityPreCreated(activity: Activity, state: Bundle?) {
-        if (activity !is MainActivity) return
+        if (activity.componentName.className != "dev.iptvplayer.tv.MainActivity") return
         activityCount++
         check(window == null)
         preCreateNs = System.nanoTime()
@@ -50,10 +52,10 @@ internal class ColdFrames(private val instrumentation: Instrumentation) : Applic
         activity.window.addOnFrameMetricsAvailableListener(listener, handler)
     }
     override fun onActivityPostResumed(activity: Activity) {
-        if (activity !is MainActivity) return
-        val model = ViewModelProvider(activity)[TvViewModel::class.java]
+        if (activity.componentName.className != "dev.iptvplayer.tv.MainActivity") return
+        val observed = restoreState?.invoke(activity) ?: return
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            model.state.map { it.sourceTask }.distinctUntilChanged().collect { states.add(System.nanoTime() to it.name) }
+            observed.distinctUntilChanged().collect { states.add(System.nanoTime() to it) }
         }
     }
     fun waitForObservation() {
@@ -97,6 +99,13 @@ internal class ColdFrames(private val instrumentation: Instrumentation) : Applic
                     .put("first", frame.metrics.getMetric(FrameMetrics.FIRST_DRAW_FRAME))
                     .put("totalNs", frame.metrics.getMetric(FrameMetrics.TOTAL_DURATION))
                     .put("unknownDelayNs", frame.metrics.getMetric(FrameMetrics.UNKNOWN_DELAY_DURATION))
+                    .put("animationNs", frame.metrics.getMetric(FrameMetrics.ANIMATION_DURATION))
+                    .put("layoutMeasureNs", frame.metrics.getMetric(FrameMetrics.LAYOUT_MEASURE_DURATION))
+                    .put("drawNs", frame.metrics.getMetric(FrameMetrics.DRAW_DURATION))
+                    .put("syncNs", frame.metrics.getMetric(FrameMetrics.SYNC_DURATION))
+                    .put("commandIssueNs", frame.metrics.getMetric(FrameMetrics.COMMAND_ISSUE_DURATION))
+                    .put("swapBuffersNs", frame.metrics.getMetric(FrameMetrics.SWAP_BUFFERS_DURATION))
+                    .put("gpuNs", if (android.os.Build.VERSION.SDK_INT >= 31) frame.metrics.getMetric(FrameMetrics.GPU_DURATION) else -1)
                     .put("droppedReports", frame.dropped)
             }))
             .put("scope", "New instrumented process, actual MainActivity creation and real clock. Application/instrumentation setup and physical display presentation are outside this measurement. No fixed FPS pass threshold.")
@@ -112,7 +121,7 @@ internal class ColdFrames(private val instrumentation: Instrumentation) : Applic
             try {
                 val origin = first.get(15, TimeUnit.SECONDS).metrics.getMetric(FrameMetrics.VSYNC_TIMESTAMP)
                 // A slow first draw can consume the early samples before the logo starts. Keep late samples too.
-                for (target in listOf(400L, 1200L, 2000L, 2800L, 3600L)) {
+                for (target in listOf(2000L, 2600L, 3000L, 3300L, 3600L, 4200L)) {
                     val wait = target - (System.nanoTime() - origin) / 1_000_000
                     if (wait > 0) SystemClock.sleep(wait)
                     val requested = System.nanoTime()
@@ -126,7 +135,7 @@ internal class ColdFrames(private val instrumentation: Instrumentation) : Applic
                     captured += JSONObject().put("targetMs", target).put("requestedMs", (requested-origin)/1_000_000.0)
                         .put("completedMs", (completed-origin)/1_000_000.0).put("logoPixels", logoPixels) to bitmap
                 }
-                val directory = instrumentation.targetContext.filesDir.resolve("cold-entrance").apply { mkdirs() }
+                val directory = output.resolve("cold-entrance").apply { mkdirs() }
                 captured.forEachIndexed { index, (_, bitmap) ->
                     directory.resolve("frame-$index.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
                 }

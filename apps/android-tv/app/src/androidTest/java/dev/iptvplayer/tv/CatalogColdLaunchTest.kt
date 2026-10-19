@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import org.json.JSONObject
 import org.junit.Assert.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.map
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import dev.iptvplayer.tv.data.*
@@ -52,7 +53,9 @@ class CatalogColdLaunchTest {
         assertNotEquals("Verifier must run in a different process", seedPid, android.os.Process.myPid())
         assertTrue("System animations must be enabled", android.animation.ValueAnimator.areAnimatorsEnabled())
         val start = SystemClock.elapsedRealtime()
-        val frames = ColdFrames(InstrumentationRegistry.getInstrumentation())
+        val frames = ColdFrames(InstrumentationRegistry.getInstrumentation(), restoreState = { activity ->
+            ViewModelProvider(activity as MainActivity)[TvViewModel::class.java].state.map { it.sourceTask.name }
+        })
         try {
         frames.register()
         val visual = InstrumentationRegistry.getArguments().getString("captureColdEntrance") == "true"

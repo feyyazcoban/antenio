@@ -1,0 +1,96 @@
+{
+  "date": "2026-10-19",
+  "version": "0.14.68-design-preview",
+  "versionCode": 82,
+  "decision": "D098",
+  "change": "Prime gradients and logo paths on a near-black first frame. Begin the entrance clock and cue after frame submission; preserve reduced motion and skip/content gates.",
+  "officialReference": "https://developer.android.com/reference/android/view/ViewTreeObserver#registerFrameCommitCallback(java.lang.Runnable)",
+  "review": "Separate source pass for frame callback cancellation, observer lifetime, API26 fallback, once-only cue, unchanged renderer geometry and unchanged PIN/data path. No separate agent used.",
+  "comparison": {
+    "scope": "Actual shrunk release, separate fresh clean-snapshot test-emulator starts, silent synthetic 63175-item catalog. Prototype carries version67 with only graphics change; final version68 includes cue coordination. First2800ms vsync window is not the full delayed entrance.",
+    "samples": {
+      "baseline": {
+        "firstFrameMs": 268.325914,
+        "launchToFirstCallbackMs": 1057.0311,
+        "maxGapAfterFirstFrameMs": 483.333314,
+        "nonFirstMaxCommandMs": 404.6111,
+        "introP95Ms": 462.296332,
+        "metricDrops": 0
+      },
+      "prototype": {
+        "firstFrameMs": 818.405042,
+        "launchToFirstCallbackMs": 1612.5339,
+        "maxGapAfterFirstFrameMs": 433.333316,
+        "nonFirstMaxCommandMs": 4.6565,
+        "introP95Ms": 48.889886,
+        "metricDrops": 0
+      },
+      "final": {
+        "firstFrameMs": 897.38901,
+        "launchToFirstCallbackMs": 1934.5323,
+        "maxGapAfterFirstFrameMs": 599.999976,
+        "nonFirstMaxCommandMs": 3.8773,
+        "introP95Ms": 70.569416,
+        "metricDrops": 0
+      }
+    },
+    "interpretation": "The expensive non-first-frame draw-command issue moved to the first frame. First frame became longer. The largest remaining gap is not eliminated; this is not a complete physical smoothness or faster-startup claim."
+  },
+  "tests": {
+    "jvm": {
+      "tests": 362,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "prototype": "Release timing1/1, separate visual1/1, controlled animation+restore gate3/3. Baseline prepare+release both1/1.",
+    "build": "Full unit/lint/release/debug/androidTest successful in 8m26s, one worker, heap1536MB, in-process Kotlin. Gradle stopped before measurements.",
+    "finalDevice": "Only emulator-5558/tools/run-device-tests.sh: final prepare1/1 and release1/1, separate release-visual1/1, LaunchAnimationTest plus startup content gate3/3. Normal scale only. No host disconnect or failed final run.",
+    "limitations": [
+      "No font-scale matrix at user request.",
+      "No physical sound/animation acceptance.",
+      "API26-28 and software fallback not device-tested.",
+      "Framework release runner reports frames but does not assert app-internal restored catalog state."
+    ],
+    "lint": {
+      "errors": 0,
+      "warnings": 40
+    },
+    "logs": [
+      "warm-final-build.log",
+      "warm-final-prepare.log",
+      "warm-final-release.log (tmp.dhJs9s9wmr)",
+      "warm-final-visual.log (tmp.ZRNt6SK8sx)",
+      "warm-final-controlled.log (tmp.GTCkvxjBUj)"
+    ],
+    "visual": "Inspected final release mark, partial letters and completed wordmark frames; separately controlled clock confirms visible intermediate motion and restore wait. Sparse screenshots alone do not prove continuous smoothness."
+  },
+  "rawEvidence": "work/remaining-player-qa/warm-*",
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "81",
+        "versionName": "0.14.67-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-19 22:45:30"
+      },
+      "after": {
+        "versionCode": "82",
+        "versionName": "0.14.68-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-19 23:43:40"
+      },
+      "sha256": "f0926965128692456de709a72ea9ddb703997c988d99b5372a1cd7508d01a6f2",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "designEmulator": "Not connected, not started or modified. Last known delivery .66.",
+    "testEmulator": "5558 stopped after final checks; Gradle stopped."
+  },
+  "sha256": "f0926965128692456de709a72ea9ddb703997c988d99b5372a1cd7508d01a6f2",
+  "signatureSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065",
+  "releaseDebuggable": false,
+  "physicalTvSdk": 31
+}

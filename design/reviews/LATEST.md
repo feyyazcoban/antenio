@@ -1,5 +1,15 @@
 # Güncel görsel inceleme
 
+## 0.14.68 · Splash çizim hazırlığı
+
+D098; gerçek küçültülmüş release, sentetik kayıtlı katalog, normal ölçek. Görünür girişten önce GPU hazırlığı; ilk kare daha uzun olabilir. Seyrek ekran görüntüleri kesintisiz akıcılık kanıtı değildir. [QA ve karşılaştırma](../../docs/project/native-launch-prime-68-qa.json).
+
+![Gerçek release: işaret](launch-prime-0.14.68/actual-mark.png)
+
+![Gerçek release: harfler](launch-prime-0.14.68/actual-letters.png)
+
+![Gerçek release: tamamlanan logo](launch-prime-0.14.68/actual-complete.png)
+
 ## 0.14.67 · Vitrin karartması
 
 D097; görselin tam genişliği ve oranı korunur. Karartma menü ikonlarının arkasındaki sol ekran kenarından başlar, sağa doğru yumuşar; sol kenar ve metin alanı daha koyudur. Normal ölçek, yerel test kaynağı; [QA](../../docs/project/native-hero-overlay-67-qa.json). [Önceki görünüm](navigation-feedback-0.14.63/home-fullscreen-backdrop.png).

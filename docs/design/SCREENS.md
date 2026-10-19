@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**19 Ekim · D098 / 0.14.68:** Splash gradient/logo çizimini siyaha yakın ilk karede hazırlar; ardından giriş saati ve ses başlar. İlk kare uzayabilir; toplam açılışın hızlandığı veya fiziksel akıcılığın kabul edildiği anlamına gelmez. Süre, kumandayla atlama, hareketi azalt ve içerik hazırlama davranışları korunur.
+
 **19 Ekim · TV-010 / D097:** Vitrin karartması ekranın en solundan, kapalı menü ikonlarının arkasından başlar ve sağa doğru kesintisiz azalır. Sol kenar ve metin bölgesi biraz daha koyudur; D093'te onaylanan tam genişlik/oran korunur.
 
 **19 Ekim · D095 / 0.14.65:** Home Hero ve raf kartlarında ilk odak kaydırması tam kart/başlık/pay alanını hedefler; geç görünürlük kontrolü aynı hedefe gider. İki farklı hedefin art arda hareket üretmesi giderilir. Kullanıcı19Ekim2026TVkaydırmasını onayladı; bu geri bildirim kapandı.

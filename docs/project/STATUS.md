@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.68 · Splash çizim hazırlığı ve kalan işlerin durumu · 19 Ekim 2026
+
+Kullanıcının “diğer işler ne oldu” sorusunda, vitrin tesliminden sonra kalan işe dönülmediği açıkça bildirildi; splash'e dönüldü. D098: gradient/path ilk karede hazırlanır, giriş saati ve ses frame commit sonrasında başlar. Kumanda atlama, hareketi azalt ve içerik kapısı korunur. Eski release ölçümünde animasyon ortası COMMAND_ISSUE405–416ms; yeni finalde3,9ms. Bunun karşılığında ilk frame268→897ms; ilk2,8sn pencerede sonraki en büyük vsync aralığı483→600ms. **Genel açılış beklemesi bitmedi; fiziksel splash/ses kabulü açık.** Ayrıntı ve kapsam sınırı [QA](native-launch-prime-68-qa.json).
+
+362 JVM sonucu (1 atlanan/0 hata), lint0/40; full build8m26s. Yalnız5558/betik: final prepare1/1, release1/1, ayrı release-visual1/1, kontrollü logo/reduced-motion/içerik kapısı3/3. Ara kareler incelendi; font matrisi yok. Kaynak ayrı geçişte incelendi, ayrı ajan kullanılmadı. Kod82/.68 aynı imza/debug kapalı/R8 ile TV'ye install-r kuruldu; firstInstallTime ve çekilen APK hash korundu. SHA-256 f0926965128692456de709a72ea9ddb703997c988d99b5372a1cd7508d01a6f2. TVapp/yayın açılmadı;5556 dokunulmadı,5558/Gradle kapalı.
+
+Diğer başlıklar: S15 önceki/son kanal altyapısı taslak stash'te, henüz tamamlanıp test edilmedi; S16 seçenekler ve S17–S29 geri sarma/EPG/arşiv/hatırlatıcı uygulamasına başlanmadı. Genel plan veya BKL kayıtları done değildir. Tam devralma ve WIP kimliği HANDOFF'ta.
+
 ## 0.14.67 · Vitrin karartması · 19 Ekim 2026
 
 D097: kullanıcının onayladığı görsel oranı/tam ekran yerleşim korunur. Karartma ekranın en solunda, menü ikonlarının arkasında koyu başlar; sağa doğru yumuşar. Sol kenar ve metin bölgesi biraz koyulaştı. Kaydırma, tek İzle ve diğer davranışlar değişmedi.

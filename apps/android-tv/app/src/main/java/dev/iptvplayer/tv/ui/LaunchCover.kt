@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.style.TextAlign
@@ -31,6 +32,9 @@ import androidx.tv.material3.Text
 import dev.iptvplayer.tv.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.coroutines.resume
 import kotlin.math.abs
 
 /**
@@ -42,7 +46,7 @@ import kotlin.math.abs
  * disabled system animations skip the entrance: the finished logo stays, still, only while sources are restored (D069).
  */
 @Composable internal fun LaunchCover(reducedMotion: Boolean, loading: Boolean,
-    prepareContent: () -> Unit = {}, finish: () -> Unit) {
+    prepareContent: () -> Unit = {}, entranceStarted: () -> Unit = {}, finish: () -> Unit) {
     val still = remember { reducedMotion || !android.animation.ValueAnimator.areAnimatorsEnabled() }
     // One linear master clock; every item eases its own window of it via segment() so the cascade stays in lockstep.
     val intro = remember { Animatable(if (still) 1f else 0f) }
@@ -50,13 +54,22 @@ import kotlin.math.abs
     val done by rememberUpdatedState(finish)
     val prepare by rememberUpdatedState(prepareContent)
     val busy by rememberUpdatedState(loading)
+    val started by rememberUpdatedState(entranceStarted)
+    val view = LocalView.current
+    var warming by remember { mutableStateOf(!still) }
     // Still: the spinner shows at once, beside the finished logo.
     var holding by remember { mutableStateOf(still) }
     // The spinner turns unless motion is reduced in Ayarlar or the system's animations are off; then it is a fixed arc
     // (as LoadingArc, U22), never a frozen frame of the turn. RestoringCover is still for its logo only.
     val spinnerStill = LocalReducedMotion.current || !android.animation.ValueAnimator.areAnimatorsEnabled()
     LaunchedEffect(Unit) {
-        withFrameNanos { }
+        if (!still) {
+            // Submit the same gradients and paths before starting the clock. At alpha 1/255 they are
+            // visually black, but nonzero so the renderer cannot skip their first GPU preparation.
+            awaitLaunchFrame(view)
+            warming = false
+        } else withFrameNanos { }
+        started()
         if (!still) {
             intro.animateTo(1f, tween(EntranceMs, easing = LinearEasing))
             delay((MinShowMs - EntranceMs).toLong())
@@ -101,12 +114,12 @@ import kotlin.math.abs
                 // Still covers do not breathe: nothing moves but the spinner.
                 val idle = if (still) .5f else breath.value
                 val glow = glowIn * lerp(.82f, 1f, idle) * (1f + .24f * bloom)
-                drawRect(bottomGlow, alpha = glow / maxGlow)
-                drawRect(topGlow, alpha = glow / maxGlow)
+                drawRect(bottomGlow, alpha = if (warming) WarmAlpha else glow / maxGlow)
+                drawRect(topGlow, alpha = if (warming) WarmAlpha else glow / maxGlow)
             }
         })
         Canvas(Modifier.fillMaxSize()) {
-            val t = intro.value
+            val t = if (warming) 1f else intro.value
             // Play mark + wordmark (design/brand/nextv-dikey.svg), a GroupW × GroupH box centred on the 1920×1080 stage.
             val unit = minOf(size.width / RefW, size.height / RefH)
             withTransform({
@@ -121,7 +134,7 @@ import kotlin.math.abs
                 withTransform({
                     translate(0f, lerp(-8f, 0f, rise))
                     scale(pop * pulse, pop * pulse, pivot = markCenter)
-                }) { mark.forEach { drawPath(it, NextvMint.copy(alpha = markAlpha)) } }
+                }) { mark.forEach { drawPath(it, NextvMint.copy(alpha = if (warming) WarmAlpha else markAlpha)) } }
 
                 // Glyphs rise left to right; alpha resolves in half the window so each reads while still settling.
                 glyphs.forEachIndexed { i, g ->
@@ -132,7 +145,7 @@ import kotlin.math.abs
                     withTransform({
                         translate(lerp(-12f, 0f, move), lerp(14f, 0f, move))
                         scale(glyphScale, glyphScale, pivot = g.center)
-                    }) { drawPath(g.path, (if (g.mint) NextvMint else Color.White).copy(alpha = glyphAlpha)) }
+                    }) { drawPath(g.path, (if (g.mint) NextvMint else Color.White).copy(alpha = if (warming) WarmAlpha else glyphAlpha)) }
                 }
             }
         }
@@ -152,6 +165,31 @@ import kotlin.math.abs
         }
     }
 }
+
+/** Wait for GPU submission, rather than a UI frame callback that can run before the first draw. */
+private suspend fun awaitLaunchFrame(view: android.view.View) {
+    val observer = view.viewTreeObserver
+    if (android.os.Build.VERSION.SDK_INT >= 29 && view.isHardwareAccelerated && observer.isAlive) {
+        var callback: Runnable? = null
+        try {
+            // A lost/inactive surface must never leave an unskippable cover. Cancellation also removes the callback.
+            withTimeoutOrNull(2_000) {
+                suspendCancellableCoroutine<Unit> { ready ->
+                    callback = Runnable { if (ready.isActive) ready.resume(Unit) }
+                    observer.registerFrameCommitCallback(callback!!)
+                    view.postInvalidateOnAnimation()
+                }
+            }
+        } finally {
+            if (observer.isAlive) callback?.let(observer::unregisterFrameCommitCallback)
+        }
+    } else {
+        // API26–28 and software rendering have no frame-commit callback.
+        withFrameNanos { }; withFrameNanos { }
+    }
+}
+
+private const val WarmAlpha = 1f / 255f
 
 /**
  * The NEXTV cover while saved sources are restored without the launch splash (D069): a later launch in the same

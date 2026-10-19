@@ -10,6 +10,9 @@
 #   tools/run-device-tests.sh --no-build --cold-catalog prepare   # seed only the dedicated test emulator
 #   tools/run-device-tests.sh --no-build --cold-catalog verify    # fresh process, timing without screenshots
 #   tools/run-device-tests.sh --no-build --cold-catalog visual    # separate frame captures; not timing comparison
+#   tools/run-device-tests.sh --no-build --cold-catalog release   # shrunk release, framework-only runner
+#   tools/run-device-tests.sh --no-build --cold-catalog release-visual # release captures, separate from timing
+#   tools/run-device-tests.sh --no-build --cold-catalog actual-debug # same framework runner, debug comparison
 #   tools/run-device-tests.sh --no-build --cold-catalog clean     # remove only the synthetic fixture
 #   tools/run-device-tests.sh --font-scale 2.0 SettingsFrameworkTest  # at that text size; the emulator's comes back after
 #
@@ -30,7 +33,7 @@ runner_args=()
 while [ $# -gt 0 ]; do
     case "$1" in
         --no-build) build=0; shift ;;
-        --cold-catalog) [ $# -ge 2 ] || { echo "--cold-catalog needs prepare, verify, visual or clean" >&2; exit 64; }; cold="$2"; shift 2 ;;
+        --cold-catalog) [ $# -ge 2 ] || { echo "--cold-catalog needs prepare, verify, visual, release[-visual], actual-debug[-visual] or clean" >&2; exit 64; }; cold="$2"; shift 2 ;;
         --font-scale) [ $# -ge 2 ] || { echo "--font-scale needs a value such as 1.5" >&2; exit 64; }; scale="$2"; shift 2 ;;
         *) break ;;
     esac
@@ -41,11 +44,15 @@ if [ -n "$cold" ]; then
         prepare) set -- 'CatalogColdLaunchTest#prepareEncryptedCatalogForColdLaunch'; runner_args=(-e prepareColdCatalog true) ;;
         verify|visual) set -- 'CatalogColdLaunchTest#verifyRestoredAfterProcessRestart'; runner_args=(-e verifyColdCatalog true)
             if [ "$cold" = visual ]; then runner_args+=(-e captureColdEntrance true); fi ;;
+        release|release-visual|actual-debug|actual-debug-visual) set -- 'ReleaseStartupInstrumentation'; runner_args=(-e verifyReleaseCatalog true)
+            RUNNER=dev.iptvplayer.tv.pilot.test/dev.iptvplayer.tv.ReleaseStartupInstrumentation
+            if [ "$cold" = actual-debug ] || [ "$cold" = actual-debug-visual ]; then runner_args+=(-e expectedDebug true); fi
+            if [ "$cold" = release-visual ] || [ "$cold" = actual-debug-visual ]; then runner_args+=(-e captureColdEntrance true); fi ;;
         clean) set -- 'CatalogColdLaunchTest#cleanColdCatalogFixture'; runner_args=(-e cleanColdCatalog true) ;;
         *) echo "Unknown cold mode: $cold" >&2; exit 64 ;;
     esac
 fi
-[ $# -ge 1 ] || { echo "usage: $0 [--no-build] [--font-scale 1.5] Class[,Class#method,...] | --cold-catalog prepare|verify|visual|clean" >&2; exit 64; }
+[ $# -ge 1 ] || { echo "usage: $0 [--no-build] [--font-scale 1.5] Class[,Class#method,...] | --cold-catalog prepare|verify|visual|release[-visual]|actual-debug[-visual]|clean" >&2; exit 64; }
 case "$scale" in ""|[0-9].[0-9]|[0-9].[0-9][0-9]|[0-9]) ;; *) echo "--font-scale takes a number such as 1.5" >&2; exit 64 ;; esac
 
 name="$(adb -s "$SERIAL" emu avd name 2>/dev/null | head -1 | tr -d '\r' || true)"
@@ -59,9 +66,13 @@ fi
 if [ $build = 1 ]; then
     # Android Studio's JDK on the Windows development machine when none is configured.
     if [ -z "${JAVA_HOME:-}" ] && [ -d "/c/Program Files/Android/Android Studio/jbr" ]; then export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"; fi
-    (cd "$APP" && ./gradlew --console=plain -q :app:assembleDebug :app:assembleDebugAndroidTest)
+    tasks=(:app:assembleDebug :app:assembleDebugAndroidTest)
+    if [ "$cold" = release ] || [ "$cold" = release-visual ]; then tasks+=(:app:assembleRelease); fi
+    (cd "$APP" && ./gradlew --console=plain -q "${tasks[@]}")
 fi
-adb -s "$SERIAL" install -r -t "$APP/app/build/outputs/apk/debug/app-debug.apk" >/dev/null
+target_apk="$APP/app/build/outputs/apk/debug/app-debug.apk"
+if [ "$cold" = release ] || [ "$cold" = release-visual ]; then target_apk="$APP/app/build/outputs/apk/release/app-release.apk"; fi
+adb -s "$SERIAL" install -r -t "$target_apk" >/dev/null
 adb -s "$SERIAL" install -r -t "$APP/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk" >/dev/null
 
 classes=""
@@ -83,7 +94,7 @@ if [ -n "$scale" ]; then
     echo "Font scale $scale (was ${before:-unset})"
 fi
 
-if [ "$cold" = verify ] || [ "$cold" = visual ]; then
+if [ "$cold" = verify ] || [ "$cold" = visual ] || [ "$cold" = release ] || [ "$cold" = release-visual ] || [ "$cold" = actual-debug ] || [ "$cold" = actual-debug-visual ]; then
     adb -s "$SERIAL" shell am force-stop dev.iptvplayer.tv.pilot
     running="$(adb -s "$SERIAL" shell pidof dev.iptvplayer.tv.pilot 2>/dev/null | tr -d '\r' || true)"
     [ -z "$running" ] || { echo "Cold verifier requires a stopped target process." >&2; exit 4; }

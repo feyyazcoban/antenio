@@ -17,12 +17,11 @@ internal class StartupSound(private val context: Context) {
     private var foreground = false
     private var prepared = false
     private var played = false
-    private var startedAt = 0L
+    private var entranceAt: Long? = null
 
     fun prepare() {
         if (!claimed.compareAndSet(false, true) || !DeviceStore(context).startupSound) return
         if ((context.getSystemService(Context.AUDIO_SERVICE) as AudioManager).isMusicActive) return
-        startedAt = SystemClock.elapsedRealtime()
         // Best effort: a TV without audio output or a decoder failure only skips the chime.
         runCatching {
             player = MediaPlayer().apply {
@@ -38,8 +37,15 @@ internal class StartupSound(private val context: Context) {
     }
 
     fun start() { foreground = true; maybePlay() }
+    // GPU preparation can delay the first visible entrance. Start the cue from that clock, not Activity.onStart.
+    fun entranceStarted() {
+        if (entranceAt != null) return
+        entranceAt = SystemClock.elapsedRealtime()
+        maybePlay()
+    }
     private fun maybePlay() {
-        if (!foreground || !prepared || played || SystemClock.elapsedRealtime() - startedAt > 1800) return
+        val since = entranceAt ?: return
+        if (!foreground || !prepared || played || SystemClock.elapsedRealtime() - since > 1800) return
         played = true
         runCatching { player?.start() }.onFailure { stop() }
     }

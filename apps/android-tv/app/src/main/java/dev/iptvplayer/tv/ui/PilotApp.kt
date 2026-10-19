@@ -78,7 +78,7 @@ import androidx.compose.ui.input.key.type
 
 /** [opening] shows the launch splash; the host clears it through [endOpening] or on any remote key (MainActivity). */
 @OptIn(ExperimentalFoundationApi::class)
-@Composable fun PilotApp(model: TvViewModel, opening: Boolean = false, endOpening: () -> Unit = {}) {
+@Composable fun PilotApp(model: TvViewModel, opening: Boolean = false, startEntrance: () -> Unit = {}, endOpening: () -> Unit = {}) {
     val state by model.state.collectAsStateWithLifecycle()
     // No first Home layout (or a second RestoringCover) competes with the entrance on the UI thread. A key skips
     // this gate immediately; otherwise LaunchCover opens it with the finished logo still covering the screen.
@@ -183,7 +183,7 @@ import androidx.compose.ui.input.key.type
             }
             if (opening) LaunchCover(state.reducedMotion,
                 loading = state.route == Route.LOADING && state.sourceTask == SourceTask.RESTORING,
-                prepareContent = { contentPrepared = true }, finish = endOpening)
+                prepareContent = { contentPrepared = true }, entranceStarted = startEntrance, finish = endOpening)
         }
     }
 }

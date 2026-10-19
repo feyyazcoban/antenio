@@ -21,11 +21,15 @@ class LaunchAnimationTest {
         var loading by mutableStateOf(true)
         var preparations = 0
         var finished = false
+        val starts = java.util.concurrent.atomic.AtomicInteger()
         ui.mainClock.autoAdvance = false
         try {
             ui.setContent { PilotTheme {
-                LaunchCover(false, loading, prepareContent = { preparations++ }, finish = { finished = true })
+                LaunchCover(false, loading, prepareContent = { preparations++ }, entranceStarted = { starts.incrementAndGet() }, finish = { finished = true })
             } }
+            // The controlled animation clock starts only after an actual black warm-up frame has been submitted.
+            ui.mainClock.advanceTimeByFrame(); ui.waitForIdle()
+            ui.waitUntil(5_000) { starts.get() == 1 }
             ui.mainClock.advanceTimeBy(400); ui.waitForIdle()
             val before = logoPixels("before")
             ui.mainClock.advanceTimeBy(800); ui.waitForIdle()
@@ -46,6 +50,7 @@ class LaunchAnimationTest {
             ui.runOnIdle { loading = false }
             ui.mainClock.advanceTimeBy(600); ui.waitForIdle()
             assertEquals(1, preparations)
+            assertEquals("Entrance starts once, independently of restore completion", 1, starts.get())
             assertTrue("Ready content must be revealed", finished)
             android.util.Log.i("LaunchMotionCheck", "logoPixels=$before,$mark,$letters,$complete; prepare=$preparations; finished=$finished")
         } finally { ui.mainClock.autoAdvance = true }
@@ -55,10 +60,11 @@ class LaunchAnimationTest {
         var loading by mutableStateOf(true)
         var prepared = false
         var finished = false
+        var starts = 0
         ui.mainClock.autoAdvance = false
         try {
             ui.setContent { PilotTheme { CompositionLocalProvider(LocalReducedMotion provides true) {
-                LaunchCover(true, loading, prepareContent = { prepared = true }, finish = { finished = true })
+                LaunchCover(true, loading, prepareContent = { prepared = true }, entranceStarted = { starts++ }, finish = { finished = true })
             } } }
             ui.mainClock.advanceTimeBy(100); ui.waitForIdle()
             ui.onNodeWithTag("launch-loading").assertExists()
@@ -68,6 +74,7 @@ class LaunchAnimationTest {
             ui.mainClock.advanceTimeBy(100); ui.waitForIdle()
             assertTrue(prepared)
             assertTrue("Reduced motion has no three-second minimum or fade", finished)
+            assertEquals("A still cover starts once without GPU warm-up or an entrance delay", 1, starts)
         } finally { ui.mainClock.autoAdvance = true }
     }
 
