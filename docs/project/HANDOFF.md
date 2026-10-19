@@ -1,5 +1,9 @@
 # Son devir notu
 
+## Codex · Home kaydırma kabulü ve devam kapsamı · 19 Ekim 2026
+
+Kullanıcı “Ana sayfa kaydırması ... TV'de akıcılığının doğrulanması kaldı” maddesine “bu tamam” diyerek fiziksel kullanıcı kabulünü verdi. D095/Home kaydırma geri bildirimi kapandı; yeni FPS ölçümü yapılmadı. STATUS/BACKLOG/SCREENS/HOME_SHELF_FRAMING ve .65QA kabul kaydı güncellendi; yalnız doküman, uygulama testi gerekmiyor. Splash ayrı açık. Kullanıcının “diğer4madde” devam talimatı önceki numaralı listenin1/3/4/5başlıklarını kapsar: splash → S15a–c kalanları → S16 → S17–S29. Önce .66devirdeki gerçek ilk Activity alt süreleri/görünür animasyon ölçümünden devam et. Genel BKL kayıtları topluca done yapılmaz; font matrisi mağaza hazırlığına ertelenmiş,5556 kullanıcı için açık, testler yalnız5558/betik.
+
 ## Codex · İlk açılış yükü / 0.14.66 · 19 Ekim 2026
 
 Üretim: SourceRepository/ArtworkCache/EpgRepository lazyHTTP ve IO/GuideWriter ilk erişim; TvViewModel immutable raw counts Default + ALL fastpath; FavoriteTargets mapping adayı yoksa erken dönüş; LaunchCover viewport bazlı cached glow, draw aşamasında alpha. Kod80/.66, D096. Salt okunur scrollbar_review üretim diff'inde somut bulgu yok. player_review test setup try/finally düzeltildi. Figma yok.

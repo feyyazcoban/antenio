@@ -1,5 +1,7 @@
 # Ana sayfa raf geçişi · 0.14.24
 
+**19 Ekim kullanıcı kabulü:** D095/Home iki aşamalı kaydırma düzeltmesi fiziksel TV'de kullanıcı tarafından tamam olarak onaylandı. FPS ölçümü yapılmadı; bu kabul splash veya bütün katalog/görsel kapsamı kapatmaz.
+
 **D095 / 0.14.65:** Home Hero ve raf kartlarında ilk otomatik odak isteği, görünür karta sonradan pay ekleyen ikinci hedef yerine kart/caption/başlık payını baştan kapsar. Aynı ortak rect hesabı resize için de kullanılır; ilk rafta pinleme yok, Hero0/0 korunur. Fiziksel kare süresi iddiası değildir.
 
 **0.14.58 · D088:** Kartın kaydırma sırasında kırpılmış durumdan görünür hâle gelmesi, sürmekte olan görünürlük isteğini iptal etmez. Ölçü/kırpılma değişimleri sırayla değerlendirilir; odak veya gerçek viewport/hedef değişimi eski işi hâlâ keser. D078 mesafesi ve 7/27 dp payları aynı. Test artık yalnız son konumu değil, hareket sürerken iptal sayısını ve karelik konumu da kaydeder. Fiziksel TV kare süresi kabulü ayrıca açık.

@@ -27,7 +27,7 @@
     ],
     "limitations": [
       "No font-scale matrix.",
-      "No physical TV frame-time measurement; physical smoothness acceptance remains open.",
+      "No physical TV frame-time measurement. User accepted Home scrolling on2026-10-19; other physical acceptance scopes remain separate.",
       "True cold splash remains separate work."
     ]
   },
@@ -76,5 +76,13 @@
   },
   "sha256": "8b60db603c3f882b1cd4f09b865f564a0ca0a4dd10b71d31df79cbeb89328837",
   "signatureSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065",
-  "releaseDebuggable": false
+  "releaseDebuggable": false,
+  "userAcceptance": {
+    "date": "2026-10-19",
+    "installedVersionAtAcceptance": "0.14.66-design-preview",
+    "scope": "Home two-stage scrolling and physical smoothness",
+    "status": "accepted",
+    "evidence": "User selected the Home scroll item and replied: bu tamam",
+    "physicalFrameTimesMeasured": false
+  }
 }

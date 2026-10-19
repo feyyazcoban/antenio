@@ -1,5 +1,9 @@
 # Proje durumu
 
+## Ana sayfa kaydırması kullanıcı kabulü · 19 Ekim 2026
+
+Kullanıcı TV'de ana sayfanın iki aşamalı kaydırma düzeltmesini tamam olarak onayladı. D095/Home kaydırma geri bildirimi kapatıldı; genel BKL-019/020 kapsamının diğer kabul maddeleri aynı. Splash donması açık. TV son teslim0.14.66. Kullanıcı kalan dört başlıkta çalışmaya devam edilmesini istedi: splash, S15 kanal paneli devamı, S16 oynatıcı seçenekleri ve S17–S29 geri sarma/EPG/geçmiş yayın/hatırlatıcı işleri.
+
 ## 0.14.66 · İlk açılış yükü ve ölçümü · 19 Ekim 2026
 
 D096: HTTP hazırlığı ilk IO isteğine ertelendi; katalog kaynak sayımları Default'a taşındı, gereksiz kategori/favori taramaları kaldırıldı. Splash glow shader'ları boyuta göre cache edilir. Zaman çizgisi/atlama/reduced motion ve veri sözleşmesi aynı.

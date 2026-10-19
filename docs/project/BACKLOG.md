@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-019/020 · D095 Home kaydırma geri bildirimi: kullanıcı19Ekim2026TVakıcılığını “bu tamam” diyerek onayladı; bu alt iş done. Splash ve genel görsel/kullanıcı kabul maddeleri açık kalır.
+
 BKL-013/020 · D096 / 0.14.66: gerçek ilk Activity ölçümü ve ana thread yükü optimizasyonu teslim edildi. İlk kare duraklaması belirgin düzelmedi; splash donması ve fiziksel akıcılık kabulü açık kalır. QA native-cold-launch-66-qa.json.
 
 BKL-013/019/020 · D095 / 0.14.65: Home ilk otomatik BringIntoView isteği tam kart/pay alanına normalize edilir; eski120dp→beklenen228dp regresyonu kanıtlandı. Final 10/10 cihaz kontrolü,362JVM/1skip/0hata ve veri koruyan TV/5556 teslimi tamam; fiziksel akıcılık kabulü ve cold splash açık.

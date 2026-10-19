@@ -1,6 +1,6 @@
 # Google TV ekran ve akış sözleşmesi
 
-**19 Ekim · D095 / 0.14.65:** Home Hero ve raf kartlarında ilk odak kaydırması tam kart/başlık/pay alanını hedefler; geç görünürlük kontrolü aynı hedefe gider. İki farklı hedefin art arda hareket üretmesi giderilir. Fiziksel akıcılık kabulü ayrıca açıktır.
+**19 Ekim · D095 / 0.14.65:** Home Hero ve raf kartlarında ilk odak kaydırması tam kart/başlık/pay alanını hedefler; geç görünürlük kontrolü aynı hedefe gider. İki farklı hedefin art arda hareket üretmesi giderilir. Kullanıcı19Ekim2026TVkaydırmasını onayladı; bu geri bildirim kapandı.
 
 **19 Ekim · D094 / 0.14.64:** Canlı oynatıcıda Kanallar düğmesi soldan hızlı seçim çekmecesi açar. Mevcut kanal ilk odak; OK seçimden sonra listede kalır, oynayan kanalda OK veya Geri kapatır ve Kanallar'a döner. Aynı player/PIN kapısı; hata/yeniden bağlanmada liste kapanmaz. Ayrıntı DECISIONS D094; genel TV-052/S15 kabulü tamamlanmış değildir.
 
