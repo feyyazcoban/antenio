@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-019/020 · D097 / 0.14.67: kullanıcının onayladığı vitrin görsel oranı korunarak karartma menü ikonlarının arkasından, ekranın en solundan başlatıldı ve biraz koyulaştırıldı. Genel görsel/Figma kabulü açık; kontrol ve teslim kaydı STATUS/HANDOFF ile native-hero-overlay-67-qa.json içinde. Kalan dört başlığın kapsamı değişmedi.
+
 BKL-019/020 · D095 Home kaydırma geri bildirimi: kullanıcı19Ekim2026TVakıcılığını “bu tamam” diyerek onayladı; bu alt iş done. Splash ve genel görsel/kullanıcı kabul maddeleri açık kalır.
 
 BKL-013/020 · D096 / 0.14.66: gerçek ilk Activity ölçümü ve ana thread yükü optimizasyonu teslim edildi. İlk kare duraklaması belirgin düzelmedi; splash donması ve fiziksel akıcılık kabulü açık kalır. QA native-cold-launch-66-qa.json.

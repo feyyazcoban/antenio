@@ -1,5 +1,9 @@
 # Ana sayfa üst alanı
 
+## 19 Ekim 2026 · Ekran kenarından başlayan karartma · D097
+
+Görselin onaylanan tam genişliği ve oranı korunur. Yatay karartma en sol ekran kenarında, saydam kapalı menünün ikonlarının altında en koyu başlar; metin alanından sağa doğru yumuşakça azalır. Sol kenarı daha açık bırakan eski profil kaldırılır ve metin bölgesi biraz daha koyulaştırılır. Alt dikey geçiş ve tek İzle aynı kalır. Home kaydırması kullanıcı tarafından onaylandı; splash ayrı açık iştir.
+
 ## 18 Ekim 2026 · Tam ekran vitrin · D093
 
 Vitrin içerik menüsünün sağıyla sınırlı değildir: ekranın sol kenarından sağ kenarına, en az viewport yüksekliğine uzanır (normal ekranda 960×540 dp). Backdrop oranı korunarak FillWidth/TopCenter ile tüm genişliği kaplar; geniş sinema oranında altta koyu zemin kalabilir, daha dar oranlarda taşan alt bölüm kırpılır. Kapalı menünün zemini saydamdır, ikonlar görselin üzerinde kalır; açıldıkça mevcut koyu zemin gelir. Metinler önceki sol güvenli hizalarını korur, metin arkasında karartma vardır. Poster-only keskin afiş 420 dp alan sınırını korur. D080'in 420 dp/ilk raf önizlemesi bölümü değişir; ilk raf vitrin altında başlar. Geri yukarı odağında vitrin üstü tam görünür olmalıdır. İki aşamalı Home kaydırma ve cold splash sorunu ayrı açık işlerdir.

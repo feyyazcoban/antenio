@@ -1,5 +1,11 @@
 # Güncel görsel inceleme
 
+## 0.14.67 · Vitrin karartması
+
+D097; görselin tam genişliği ve oranı korunur. Karartma menü ikonlarının arkasındaki sol ekran kenarından başlar, sağa doğru yumuşar; sol kenar ve metin alanı daha koyudur. Normal ölçek, yerel test kaynağı; [QA](../../docs/project/native-hero-overlay-67-qa.json). [Önceki görünüm](navigation-feedback-0.14.63/home-fullscreen-backdrop.png).
+
+![Ekran kenarından başlayan vitrin karartması](hero-overlay-0.14.67/home-fullscreen-backdrop.png)
+
 ## 0.14.66 · Açılış ölçümü
 
 D096; normal ölçek/sentetik kaynak. [QA](../../docs/project/native-cold-launch-66-qa.json). Kontrollü clock logo/harf aşamaları ile gerçek ilk Activity karesi ayrı kanıtlardır. İlk duraklama belirgin değişmedi; tamamen akıcı splash iddiası yok.

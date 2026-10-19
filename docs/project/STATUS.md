@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.67 · Vitrin karartması · 19 Ekim 2026
+
+D097: kullanıcının onayladığı görsel oranı/tam ekran yerleşim korunur. Karartma ekranın en solunda, menü ikonlarının arkasında koyu başlar; sağa doğru yumuşar. Sol kenar ve metin bölgesi biraz koyulaştı. Kaydırma, tek İzle ve diğer davranışlar değişmedi.
+
+362 JVM sonucu (1 atlanan, 0 hata), lint 0 hata/40 uyarı; release/debug/androidTest başarılı (8m12s). İlk birleşik ekran turunda emülatör kapandı; final ayrı normal ölçek koşuları 1/1 + 2/2 geçti ve vitrin görseli incelendi. Kaynak ayrı geçişte incelendi; ayrı ajan kullanılmadı. [QA](native-hero-overlay-67-qa.json), [görsel](../../design/reviews/LATEST.md). Font matrisi yok.
+
+Kod81/.67 TV'ye install-r ile kuruldu; ilk kurulum zamanı ve çekilen APK hash eşitliği doğrulandı. SHA-256 494157011ef27a70a1a84c910534cf3e7ba6da9bf6d47f1ecc343d9239202472. TV uygulaması/yayın açılmadı. 5556 bağlı değildi, açılmadı; son teslimi .66. 5558 ve Gradle kapalı. Splash ve kalan S15/S16/S17–S29 işleri açık; ön çalışma ve release ölçüm kanıtları HANDOFF'ta korunur.
+
 ## Ana sayfa kaydırması kullanıcı kabulü · 19 Ekim 2026
 
 Kullanıcı TV'de ana sayfanın iki aşamalı kaydırma düzeltmesini tamam olarak onayladı. D095/Home kaydırma geri bildirimi kapatıldı; genel BKL-019/020 kapsamının diğer kabul maddeleri aynı. Splash donması açık. TV son teslim0.14.66. Kullanıcı kalan dört başlıkta çalışmaya devam edilmesini istedi: splash, S15 kanal paneli devamı, S16 oynatıcı seçenekleri ve S17–S29 geri sarma/EPG/geçmiş yayın/hatırlatıcı işleri.

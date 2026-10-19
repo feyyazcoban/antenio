@@ -437,10 +437,11 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
     Box(Modifier.fillMaxWidth().heightIn(min = heroHeight)
         .then(visibility.container).then(visibility.focus).clipToBounds().background(Ink.Background).testTag("home-hero")) {
         Crossfade(entry, Modifier.matchParentSize(), animationSpec = fade, label = "hero-backdrop") { slide -> HeroPicture(slide, largeText) }
-        // Dark on the text side, clear on the picture side, and into the page at the bottom where the shelves begin.
+        // One continuous scrim starts at the screen edge, behind the rail as well as the text.
+        // Keep the picture's ratio and soften the shade toward its right edge.
         Box(Modifier.matchParentSize().background(Brush.horizontalGradient(
-            0f to Ink.Background.copy(alpha = .72f), .26f to Ink.Background.copy(alpha = .9f), .5f to Ink.Background.copy(alpha = .5f),
-            .72f to Ink.Background.copy(alpha = .12f), 1f to Color.Transparent)))
+            0f to Ink.Background.copy(alpha = .96f), .18f to Ink.Background.copy(alpha = .92f), .34f to Ink.Background.copy(alpha = .8f),
+            .5f to Ink.Background.copy(alpha = .58f), .72f to Ink.Background.copy(alpha = .2f), 1f to Color.Transparent)))
         Box(Modifier.matchParentSize().background(Brush.verticalGradient(
             0f to Ink.Background.copy(alpha = .35f), .18f to Color.Transparent, .58f to Color.Transparent,
             .86f to Ink.Background.copy(alpha = .8f), 1f to Ink.Background)))

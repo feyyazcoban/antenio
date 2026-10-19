@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-19",
+  "version": "0.14.67-design-preview",
+  "versionCode": 81,
+  "decision": "D097",
+  "change": "A continuous, slightly darker Home hero scrim starts at global x=0 behind the collapsed navigation rail and fades toward the right. FillWidth/TopCenter, image ratio, full viewport size, vertical fade and interaction are unchanged.",
+  "review": "Separate source review pass: scrim is a matchParentSize sibling of the backdrop, outside caption padding; navigation rail is transparent when collapsed. No new composable, animation state, network request or focus handler. No concrete finding. No separate agent was used.",
+  "tests": {
+    "jvm": {
+      "tests": 362,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "build": "Unit/lint/release/debug/androidTest successful in 8m12s; one worker, 1536MB heap, in-process Kotlin; Gradle stopped before emulator.",
+    "device": "Dedicated emulator-5558 through tools/run-device-tests.sh --no-build only. Final separate runs: VisualPreviewTest#homePostersAndContinueRemainVisibleWithRemote 1/1; HeroLayoutTest 2/2. Font scale read back as 1.0.",
+    "visual": "Inspected the actual fixture screenshot against the prior full-screen hero: shade reaches the left edge beneath rail icons, a gradual transition to the picture; ratio, image landmarks and text/action alignment preserved.",
+    "limitations": [
+      "Font-scale matrix remains deferred until store preparation at the user's request.",
+      "No physical screen or frame-time acceptance; no change to the separate splash investigation or remaining S15-S29 scope."
+    ],
+    "lint": {
+      "errors": 0,
+      "warnings": 40
+    },
+    "iterations": [
+      "Initial combined 3-case run lost its host emulator after one completed case and during the second. No completed-suite pass claimed. Reopened the dedicated clean snapshot and final separate runs both passed."
+    ],
+    "logs": [
+      "hero-overlay-build.log",
+      "hero-overlay-device.log (incomplete, full tmp.LdsChA35QD)",
+      "hero-overlay-visual-retry.log (full tmp.iezgdcYcah)",
+      "hero-overlay-layout-retry.log (full tmp.MMafrzb4la)"
+    ]
+  },
+  "rawEvidence": "work/remaining-player-qa",
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "80",
+        "versionName": "0.14.66-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-19 00:56:47"
+      },
+      "after": {
+        "versionCode": "81",
+        "versionName": "0.14.67-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-19 22:45:30"
+      },
+      "sha256": "494157011ef27a70a1a84c910534cf3e7ba6da9bf6d47f1ecc343d9239202472",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "designEmulator": "Not connected; not started or modified during this delivery. Last delivery remains .66.",
+    "testEmulator": "Dedicated 5558 stopped after final checks; Gradle stopped."
+  },
+  "sha256": "494157011ef27a70a1a84c910534cf3e7ba6da9bf6d47f1ecc343d9239202472",
+  "signatureSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065",
+  "releaseDebuggable": false
+}
