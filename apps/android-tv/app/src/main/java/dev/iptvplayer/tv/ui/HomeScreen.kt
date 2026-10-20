@@ -323,12 +323,13 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                     modifier = Modifier.padding(start = TvLayout.RailWidth).padding(horizontal = TvLayout.Gutter, vertical = 8.dp)) }
             }
             items(rows, key = { it.key }) { row ->
-                var headingHeight by remember { mutableStateOf(0.dp) }
+                val headingMinimum = actionHeight(compact = true)
+                var headingHeight by remember(headingMinimum) { mutableStateOf(headingMinimum) }
                 Column(Modifier.padding(start = TvLayout.RailWidth).onSizeChanged {
                     shelfHeights[row.key] = with(density) { it.height.toDp() }
                 }.padding(top = if (row == rows.first()) 0.dp else 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     // Every heading row keeps the compact action's height (it held "Tümünü gör"), so the shelf rhythm is unchanged.
-                    Row(Modifier.fillMaxWidth().heightIn(min = actionHeight(compact = true)).padding(horizontal = TvLayout.Gutter)
+                    Row(Modifier.fillMaxWidth().heightIn(min = headingMinimum).padding(horizontal = TvLayout.Gutter)
                         .testTag("shelf-heading:${row.key}").onSizeChanged { headingHeight = with(density) { it.height.toDp() } }, verticalAlignment = Alignment.CenterVertically) {
                         Text(stringResource(row.title), Modifier.weight(1f), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 17.sp, lineHeight = 22.sp)
                     }
@@ -345,7 +346,9 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                                 Modifier.then(if (key == target) Modifier.focusRequester(focus) else Modifier)
                                     .focusRequester(own)
                                     .onFocusChanged { if (it.isFocused) { model.homeFocus(key); lastFocus.requester = own } }, row.key, headingHeight + 10.dp, viewportHeight, reserveEpisode,
-                                frameShelf = slides.isEmpty() || row.key != rows.first().key,
+                                // Compact channel rows need only their heading/card revealed. Pinning them
+                                // to the top scrolls a whole viewport and builds the poster shelves below.
+                                frameShelf = row.key != "recent" && (slides.isEmpty() || row.key != rows.first().key),
                                 locked = s.locks.asksPin(entry.id), longClick = { overlay(AppOverlay.Quick(entry)) { lastFocus.requester } }) {
                                 model.homeFocus(key)
                                 if (model.open(entry, continuing?.record)) openPin { own }

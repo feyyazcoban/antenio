@@ -318,3 +318,7 @@ Kaynaklar: [Media3 1.11.1 DefaultAudioSink](https://github.com/androidx/media/bl
 ## D105 · Son kanal logolarında beyaz zeminin kaldırılması · 20 Ekim 2026
 
 Kullanıcı beyaz zeminde logoların görünmediğini bildirdi ve kaldırılmasını istedi. Ana sayfanın son izlenen kanal kartında D102 ile eklenen beyaz logo kutusu kaldırılır; logo kartın normal/odaklı koyu yüzeyinde şeffaf gösterilir. 80×56dp alan,8dp iç pay,13sp tek satır ad ve diğer ölçüler korunur. Eksik logo simgesi koyu zeminde okunması için Ink.Muted kullanır. Kaynağın kendi görselindeki beyaz piksel/zemin değiştirilmez. D102 yalnız bu zemin kararı bakımından güncellenir; diğer hükümleri sürer.
+
+## D106 · Devam rafından son kanallara kısa kaydırma · 20 Ekim 2026
+
+Kullanıcı İzlemeye devam et → Son izlediğin kanallar geçişinde takılma bildirdi. Kompakt recent rafı artık viewport yüksekliğinde hedefle ekranın tepesine sabitlenmez; yalnız başlık,kart ve odak payını görünür yapacak en kısa BringIntoView hedefini kullanır. Böylece devam rafı görünür kalabilir ve alt afiş rafları için gereksiz uzun hareket oluşmaz. Büyük afiş raflarının üst hizalama politikası ve ilk hero→raf kuralı korunur. Raf başlık yüksekliği ilk kompozisyonda0 yerine gerçek asgari actionHeight ile başlatılır; ölçüm normal yükseklikte hedefi sonradan değiştirmez, uzun/büyük metinde gerçek ölçüm yine kullanılır. Geometri ve kumanda kontrolleri fiziksel TV kare süresi kabulünün yerine geçmez.

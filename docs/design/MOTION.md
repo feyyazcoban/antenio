@@ -1,5 +1,7 @@
 # TV animasyon ve hareket rehberi
 
+**20 Ekim · D106:** Devam rafından kompakt son kanal rafına geçiş yalnız başlık/kart/odak payını görünür kılacak kadar kayar. Son kanallar ekranın tepesine zorlanmaz; afiş raflarının üst hizalaması sürer. Başlık ölçüsü0dan başlamaz; ilk normal odak hedefi son ölçümle aynı kalır.
+
 ## 20 Ekim 2026 · Kanal paneli · D100
 
 Mevcut soldan giriş 240 ms, çıkış 180 ms korunur. Kategori veya mini rehber sütunu açılırken panel genişliği 160 ms değişir; aynı anda en çok iki sütun vardır. Hareketi azalt açıkken bu süreler sıfırdır. Odak hareketi satırı büyütmez; odağın kimliği düz panel tutucusunda kalır. Kategori/mini rehber açıkken etkin olmayan kanal sütunu otomatik bring-into-view kaydırması yapmaz; listeye dönünce normal görünürlük kuralı sürer. Kapanma odağı çıkış animasyonu bitene kadar panelde hapsetmez; etkin olmayan içerik odak/erişilebilirlik ağacından çıkarılır.

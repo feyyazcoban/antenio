@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-019/020 · D106/.75: Continue → Recent için gereksiz viewport boyu tepeye kaydırma kaldırıldı; başlık ölçüsü ilk anda hazır. Başlangıç regresyonu görüldü, son 6/6 cihaz kontrolü ve birim/lint/release geçti; TV veri korunarak güncellendi. Fiziksel TV akıcılığı ayrıca açık. [QA](native-recent-scroll-75-qa.json).
+
 BKL-022/.74 ·20 Ekim: Hazırlanıyor göstergesi bildirimi açık. Normal/sabit gösterge için gerçek piksel regresyonları eklendi;5558’de4/4 açılış kontrolü geçti. TV Asleep olduğundan fiziksel neden veya çözüm doğrulanmadı. [QA](preparing-spinner-74-qa.json).
 
 D105/.74 ·20 Ekim: son izlenen kanal logolarındaki beyaz zemin kullanıcı isteğiyle kaldırıldı, mevcut ölçüler korundu. Build/birim/lint geçti;TV veri korunarak güncellendi. Ekran Asleep olduğundan fiziksel görsel kabul açık. Uzun basma bildirimi ekran/tuş/davranış yanıtını bekliyor. [QA](native-logo-background-74-qa.json).

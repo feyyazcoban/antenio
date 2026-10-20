@@ -1,5 +1,15 @@
 # Son devir notu
 
+## Codex · Continue → Recent kaydırması /.75 · 20 Ekim 2026
+
+Kullanıcı iki raf arası takılma bildirdi. HomeScreen recent için frameShelf=false: eski viewport yüksekliğinde hedef küçük rafı ekran tepesine çekiyordu. Diğer rafların ve ilk hero→raf politikasının kapsamı aynı. headingHeight artık0 yerine actionHeight(compact=true) ile başlar; gerçek ölçüm hâlâ günceller. Normal 30 dp başlık ilk hedefi sonradan değiştirmez. Versiyon89/.75; D106 ve tasarım sözleşmeleri güncel.
+
+Yeni VisualPreviewTest gerçek Home’da film ilerlemesi + kanal geçmişi kurup hero→continue→recent→continue yapar. .74 başlangıcında test, Recent sonrasında eski Continue kartı artık kompoze edilmediği için başarısız; bu jank süresi ölçümü değildir. Testte başlık sınırı assert’i eski kart sorgusundan önceye alındı. Son 6/6 test: yeni kısa geçiş, mevcut son kanallar yatay/quick/geri, dikey afiş rafları, iki CardVisibility hareket kontrolü, uzun hero. Son geometri: viewport540dp, Recent başlığı373dp, kart413–513dp; devam görünür,500ms sonra ikinci hareket yok. Normal font, yalnız5558/betik; font matrisi yok. Sentetik görüntü incelendi; sistem toast’ı üst köşeye girdiğinden Git galerisine eklenmedi, work/recent-scroll-75/continue-recent.png.
+
+Son birim/lint/release 4m 48s: 374 JVM/1skip/0 hata, lint0 hata/44 uyarı. Kaynak bağımsız tekrar okundu: compact-only hedef, dinamik başlık ölçümü, odak/PIN/OK ve ortak relocation korunur; engelleyici bulgu yok. TV install-r88→89, aynı firstInstallTime ve kurulu base.apk SHA arşivle eşit; TV Asleep olduğundan uyandırma/açılış/gezinme yapılmadı.5558 kapalı, Gradle no-daemon bitti;5556/5554 değişmedi. [QA](native-recent-scroll-75-qa.json).
+
+Tam sonraki adım: kullanıcı TV açıkken aynı iki raf geçişini denesin; takılma sürerse bu kısa geometriyle gerçek TV kare süreleri/görsel yükleme ölçülsün. Loader bildirimi TV beklemede olduğu için hâlâ fiziksel tanı bekler; uzun basma bildirimi ekran/tuş yanıtını bekler. Önceki kabulü yeni fiziksel kabul sayma.
+
 ## Codex · Hazırlanıyor göstergesi / TV beklemede · 20 Ekim 2026
 
 Yeni bildirim: Hazırlanıyor loader dönmüyor. Salt okunur TV kontrolünde Asleep ve global animator_duration_scale1,0. Kullanıcıya TV’yi açması ve logo+gösterge birlikte mi yoksa yalnız gösterge mi donduğunu söylemesi soruldu; yanıt yok. Önceki hareket ayarı tanısı bu olayın nedeni sayılmadı.

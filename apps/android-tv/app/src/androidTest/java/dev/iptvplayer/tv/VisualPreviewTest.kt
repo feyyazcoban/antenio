@@ -214,6 +214,41 @@ class VisualPreviewTest {
         shot("search-dense-last-row")
     }
 
+    @Test fun continueToRecentChannelsOnlyScrollsEnoughToRevealTheCompactRow() {
+        val movie = model.state.value.catalog.items.first { it.kind == MediaKind.MOVIE }
+        val live = model.state.value.catalog.items.first { it.kind == MediaKind.LIVE }
+        ui.runOnUiThread {
+            model.recordViewed(movie); model.saveProgress(movie, 45_000, 120_000)
+            model.recordViewed(live)
+        }
+        ui.waitForIdle()
+        ui.onNodeWithTag("hero-watch").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        ui.waitForIdle()
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.waitForIdle()
+        ui.onNodeWithTag("continue:${movie.id}").assertIsFocused()
+        val before = ui.onNodeWithTag("continue:${movie.id}").getUnclippedBoundsInRoot()
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.waitForIdle()
+        ui.onNodeWithTag("recent:${live.id}").assertIsFocused()
+        val viewport = ui.onNodeWithTag("home-content").getUnclippedBoundsInRoot()
+        val heading = ui.onNodeWithTag("shelf-heading:recent", true).getUnclippedBoundsInRoot()
+        val recent = ui.onNodeWithTag("recent:${live.id}").getUnclippedBoundsInRoot()
+        android.util.Log.i("RecentScrollCheck", "continueBefore=$before recentHeading=$heading recent=$recent viewport=$viewport")
+        Assert.assertTrue("A compact recent row must not be pinned to the screen top", heading.top >= viewport.top + 100.dp)
+        val after = ui.onNodeWithTag("continue:${movie.id}").getUnclippedBoundsInRoot()
+        Assert.assertTrue("The previous continue row remains visible after this short move", after.bottom > viewport.top + 32.dp)
+        Assert.assertTrue("Recent card and bottom focus margin are visible", recent.bottom <= viewport.bottom - 26.dp)
+        val settled = recent.top
+        ui.mainClock.advanceTimeBy(500); ui.waitForIdle()
+        Assert.assertEquals("No second scroll after becoming visible", settled.value,
+            ui.onNodeWithTag("recent:${live.id}").getUnclippedBoundsInRoot().top.value, 1f)
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_UP)
+        ui.waitForIdle()
+        ui.onNodeWithTag("continue:${movie.id}").assertIsFocused()
+        shot("continue-recent-short-scroll")
+    }
+
     @Test fun recentChannelsKeepLogoTitleAndSourceTogetherWithRemote() {
         val firstSource = model.state.value.sources.single().id
         // The second local source also exercises a long name and the missing-logo fallback.

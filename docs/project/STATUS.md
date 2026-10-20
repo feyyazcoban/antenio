@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.75 · Devam rafından son kanallara kısa geçiş · 20 Ekim 2026
+
+D106: kompakt son kanal rafı ekran tepesine zorlanmaz; yalnız başlık, kart ve odak payı görünür olana kadar kayar. Raf başlığı ilk anda gerçek minimum ölçüyle başlar. Eski akışta devam kartını tamamen ekran dışına atan geometri regresyonu görüldü; son 6/6 cihaz kontrolü geçti. 540 dp test ekranında kanal başlığı y373, kart y413–513, alt pay27 dp; devam rafı görünür, geç ek kaydırma yok. 374 JVM (1 skipped), lint 0 hata/44 uyarı, release başarılı. TV88→89/.75 veri korunarak kuruldu, kurulu APK SHA eşit. TV beklemede; fiziksel akıcılık kabulü açık. [QA](native-recent-scroll-75-qa.json).
+
 ## 0.14.74 · Hazırlanıyor göstergesi incelemesi · 20 Ekim 2026
 
 Kullanıcı göstergenin dönmediğini bildirdi. TV beklemede (Asleep),sistem animasyon ölçeği1,0; fiziksel olay yeniden gözlenemedi, neden/çözüm açık. Üretim kodu değişmedi. Yeni iki piksel kontrolü: normal hareketli RestoringCover göstergesi333ms sonra değişiyor, hareketi azaltılmış gösterge sabit.5558/betik üzerinden mevcut iki açılış testiyle4/4 geçti. TV uyandırılmadı/paket kurulmadı;5558 kapalı. [QA](preparing-spinner-74-qa.json).

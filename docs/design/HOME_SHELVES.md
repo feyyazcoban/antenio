@@ -1,5 +1,7 @@
 # Ana sayfa afiş ve devam rafları
 
+**20 Ekim · D106:** Devam rafından kompakt son kanal rafına geçiş yalnız başlık/kart/odak payını görünür kılacak kadar kayar. Son kanallar ekranın tepesine zorlanmaz; afiş raflarının üst hizalaması sürer. Başlık ölçüsü0dan başlamaz; ilk normal odak hedefi son ölçümle aynı kalır.
+
 **20 Ekim · Son izlenen kanal logoları / D105:** D102 beyaz logo zemini kaldırıldı. Logo kart yüzeyi üzerinde şeffaf;80×56dp alan/8dp iç pay korunur. Eksik logo simgesi Ink.Muted; ad13sp tek satır, kart/odak ölçüleri aynı.
 
 ## 18 Ekim 2026 · Listeleme başlıkları · D093

@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**20 Ekim · TV-010 / D106:** İzlemeye devam et → Son izlediğin kanallar geçişi küçük kanal rafını ekranın tepesine sabitlemez; yalnız başlık/kart ve odak payı görünür olana kadar kaydırır. İlk normal başlık ölçüsü hazırdır; afiş raflarının üst hizalaması sürer.
+
 **20 Ekim · Son izlenen kanal logoları / D105:** D102 beyaz logo zemini kaldırıldı. Logo kart yüzeyi üzerinde şeffaf;80×56dp alan/8dp iç pay korunur. Eksik logo simgesi Ink.Muted; ad13sp tek satır, kart/odak ölçüleri aynı.
 
 **20 Ekim ·D103/D104:** TV020 kategori sayıları görünen grid ile eşleşir, Sırala alt çizgisi kaldırılır. TV030/040 ayrıntı görseli ana sayfa vitrini gibi ekranın solundan başlar; film metni altta, boşluk20dp. Oynatıcılar ortak küçük kontrol/metin ölçülerinde; Canlı CH−/CH+ ekran düğmeleri kaldırılmıştır. Kumanda kanal değişimi korunur. VOD hız için oturumluk ses çözümü ve sınırları DECISIONS/D104'tedir.

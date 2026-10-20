@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-20",
+  "version": "0.14.75-design-preview",
+  "versionCode": 89,
+  "decision": "D106",
+  "change": [
+    "Recent-channel shelf uses minimal heading/card/focus-margin reveal instead of a viewport-sized top-pinning request.",
+    "Initialize shelf heading size at its real minimum to avoid an initial0-to30dp target change."
+  ],
+  "baseline": "New real-Home transition regression failed against .74: after Down from Continue to Recent, the previous Continue card was no longer composed. This is geometry evidence, not a physical jank/frame-time measurement. Test was then reordered to assert heading bounds before fetching the previous card.",
+  "tests": {
+    "device": "Final6/6, only5558/tools/run-device-tests.sh --no-build, normal font,hostGPU,Vulkan off. New Home regression, existing recent horizontal/quick/return flow, vertical poster shelves, two CardVisibility motion checks, long-title hero flow.",
+    "geometryDp": {
+      "viewportHeight": 540,
+      "recentHeadingTop": 373,
+      "recentCardTop": 413,
+      "recentCardBottom": 513,
+      "bottomMargin": 27
+    },
+    "lateScroll": "Same recent-card top after500ms; Up returns focus to Continue.",
+    "sharedMotion": "Existing CardVisibility test:0 cancelled padded requests and monotonic offsets; not a TV frame-pacing measurement.",
+    "jvm": {
+      "tests": 374,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lintErrors": 0,
+    "lintWarnings": 44,
+    "build": "4m 48s"
+  },
+  "visual": "Synthetic Home capture inspected; Continue and Recent visible together, transparent channel logo retained. System emulator notification overlays upper corner; capture kept only in work/recent-scroll-75/continue-recent.png.",
+  "review": "Separate local source pass: compact-only scope, other poster rows retain pinning, measured heading updates retained, stable requester/focus/skip/lock paths unchanged. No subagent used.",
+  "delivery": {
+    "device": "192.168.1.126:5555",
+    "before": {
+      "versionCode": "88",
+      "versionName": "0.14.74-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-20 19:30:34"
+    },
+    "after": {
+      "versionCode": "89",
+      "versionName": "0.14.75-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-20 19:54:46"
+    },
+    "sha256": "c489aefc649c658cab464f78f6c5614301a1b475c1837745426866595c0e460b",
+    "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+    "realPlaybackStarted": false,
+    "appLaunchedOnTv": false
+  },
+  "limits": [
+    "Physical TV still Asleep during read-only checks. No wake, launch or physical scroll measurement in this delivery.",
+    "Font matrix deferred;5556/5554 unchanged;5558 and Gradle stopped.",
+    "Loader and held-key reports remain open as recorded in earlier handoff."
+  ]
+}
