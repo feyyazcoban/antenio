@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Codex · 5556 host çökmesi tanısı · 20 Ekim 2026
+
+Kullanıcı "listeleri kaldırıp ekliyordum" dedi. Windows14:34:34Event1000 qemu-system-x86_64.exe/PID0x8008=32776/0xc0000005/unknown; ilk5556 emülatör logunun PID'siyle eşleşti.14:34:42WER StackHash_b4ee/PCH_D7_FROM_unknown. Aynı native erişim ihlali önce iki5558 headless koşusunda da vardı. WER yalnız Report.wer; kullanılabilir native dump yok, hatalı modül kesinleşmedi. Ham Windows/Android/yeniden açma kayıtları yalnız.private/emulator-crash-71. Sanitized [QA](emulator-host-crash-71-qa.json). Android son kalıcı app exit-info11:20:49PACKAGE UPDATED; bu kapanışa ait crash/ANR bulunmadı. Ani VM ölümünün guest kayıtlarını kesebileceğini unutma; uygulamanın her koşulda hatasız olduğunu iddia etme.
+
+Eski başlatma -gpu swiftshader_indirect (resmî belgede36.4.9'dan beri deprecated), SwiftShader GLES/Vulkan ve Qt opengl32sw fallback var. Grafik/runtime şüpheli, kanıtlanmış spesifik driver nedeni değildir. Tek seferlik tanı açılışı: nextv_design_api36/5556, -no-snapshot-load -no-snapshot-save -gpu swiftshader -feature -Vulkan, görünür pencere.14:38:40PID23776; boot ve Vulkan disabled logu, aynı85/.71/firstInstallTime, MainActivity COLD/önde doğrulandı;5556 açık kalsın. Veri/snapshot/kurulum/kaynak/gerçek yayın işlemi yapılmadı.5558/Gradlekapalı;TV/5554dokunulmadı. Kalıcı AVD/SDK/Windows ayarı değişmedi; uygulama kaynağı/paketi aynı, yeni derleme gerekmedi. Uzun oturum/liste döngüsü için çözüm doğrulanmadı. Tekrarında önce native dump yakala; gerçek kaynak sil/ekle ile otomatik yeniden üretme. Sentetik kaynak testi yalnız5558/betik. Ardından önceki S15c kaynak-filter kenarı ve kalan işler sürer.
+
 ## Codex · Vitrin ilk devam önizlemesi / 0.14.71 · 20 Ekim 2026
 
 Kullanıcının son isteği D101: görseli değiştirmeden ön planı yukarı ve devam rafının başlangıcını ilk ekrana taşı. HomeScreen.Hero ön planı minimum420dp, matchParentSize+üst hizalı taşan arka plan viewport boyunda kalır; kırpma arka planın kendi sınırında. Metin ölçüleri, görsel/kadraj/karartma, tek İzle ve D095 odak algoritması aynı. VisualPreviewTest mevcut devam kartı etiketiyle ilk başlık/en az32dp kart görünürlüğünü ve Down/Up sonrası görselin eski üst konumunu doğrular. Kod85/.71; HOME_HERO/SCREENS/NATIVE_UI/D101/BACKLOG ve sentetik görseller güncel, Figma değişmedi.

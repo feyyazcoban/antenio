@@ -1,5 +1,11 @@
 # Proje durumu
 
+## 0.14.71 · Kullanıcı emülatörünün kapanması · 20 Ekim 2026
+
+Kullanıcı liste kaldırıp eklerken emülatör kapandı. Windows14:34:34/Event1000: qemu-system-x86_64.exe/PID32776, native0xc0000005 erişim ihlali, modülunknown. PID ilk5556 açılışıyla eşleşir; bütün emülatörün kapanması doğrulandı. Android kalıcı exit-info son kaydı .71 paket güncellemesidir; aynı zamana ait uygulama crash/ANR kaydı bulunmadı. Ani VM kapanması Android kaydını engelleyebilir; belirli uygulama/driver hatası kesinleştirilmedi.
+
+Grafik altyapısı şüpheli; kullanılmayan eski swiftshader_indirect seçeneği yerine desteklenen swiftshader ve Vulkan kapalı olarak mevcut diskten5556 yeniden açıldı. Boot/MainActivity/önde ve aynı85/.71 doğrulandı; veri sıfırlama/kurulum/liste değişimi yok. Kaynak sil/ekle döngüsü gerçek veriyle tekrarlanmadı; kalıcı çözüm kabulü açık.5556 kullanıcıya açık,5558/Gradlekapalı;TV/5554dokunulmadı. Uygulama kodu değişmedi, yeni paket/test derlemesi yok. [Tanı ve sınırlar](emulator-host-crash-71-qa.json).
+
 ## 0.14.71 · Vitrin ön planı yukarı · 20 Ekim 2026
 
 D101: kullanıcının görsel ayarlarını koruma isteğiyle tam ekran arka plan ve ön plan alanı ayrıldı. Normal960×540dp ekranda metin/İzle120dp yukarı, devam başlığı ve kart başlangıcı ilk ekranda. Görselin FillWidth/TopCenter kadrajı, viewport yüksekliği ve D097 karartması aynı; D095 odak algoritması korunur. İlk devam görünürlüğü, Down/Up dönüşü, slayt/menü, uzun/eksik görsel ve dikey raf kontrolü dört farklı akışta geçti. Son test APK'larıyla bir Hero vakası tamamlandıktan sonra hostQEMU kapandığı için uzun vaka ayrı koşuda geçti; kesilen koşular QA'da açıkça ayrılır. Görseller incelendi. Font matrisi yok.

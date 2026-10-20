@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-20",
+  "applicationVersion": "0.14.71-design-preview",
+  "applicationCode": 85,
+  "userAction": "User reported the emulator closed while removing and adding lists.",
+  "status": "Host emulator crash confirmed; exact native module unresolved. Non-destructive graphics workaround opened successfully; long-session/list-cycle stability not established.",
+  "confirmed": {
+    "windowsEventTime": "2026-10-20 14:34:34 +03:00",
+    "eventId": 1000,
+    "application": "qemu-system-x86_64.exe",
+    "processId": 32776,
+    "exceptionCode": "0xc0000005",
+    "exceptionMeaning": "Native access violation",
+    "faultingModule": "unknown",
+    "werSignature": "StackHash_b4ee / PCH_D7_FROM_unknown",
+    "processMatch": "PID0x8008=32776 matches the original nextv_design_api36 /5556 startup log.",
+    "relatedEvidence": "Two earlier dedicated5558 host processes also terminated with0xc0000005 at14:05:37 and14:10:41; those were not completed test runs.",
+    "emulatorVersion": "37.2.12.0 build16428233",
+    "originalRendering": "-gpu swiftshader_indirect; gfxstream; SwiftShader GLES/Vulkan; Qt software OpenGL library load failed and fell back to system OpenGL.",
+    "androidEvidence": "After cold boot from existing disk, latest persisted NEXTV exit-info was PACKAGE UPDATED at emulator11:20:49, matching .71 install. No persisted NEXTV crash/ANR entry near the reported closure was found; current-boot crash buffer empty before and after launching NEXTV. A sudden VM termination may prevent guest exit records from being persisted.",
+    "dumpAvailability": "Latest Windows WER archive retained Report.wer only; emulator crash database had no usable minidump. No native stack identifies the failing component."
+  },
+  "hypothesis": "Emulator graphics/runtime instability is a suspect because both visible/headless QEMU processes failed and the original launch used a deprecated renderer switch plus SwiftShader/Vulkan. Neither the unknown faulting module nor absence of guest crash records proves a particular driver or rules out every guest-side event. No NEXTV code defect is established from these records.",
+  "workaround": {
+    "device": "emulator-5556 / nextv_design_api36",
+    "arguments": "-avd nextv_design_api36 -port 5556 -no-snapshot-load -no-snapshot-save -gpu swiftshader -feature -Vulkan",
+    "launchTime": "2026-10-20 14:38:40 +03:00",
+    "processId": 23776,
+    "verified": "AVD identity and boot_completed=1; runtime log explicitly disables Vulkan; same installed85/.71 and same firstInstallTime2026-10-14 08:57:19; MainActivity COLD start successful and foreground; emulator remained running during the diagnostic session.",
+    "dataPreservation": "Existing disk; no wipe, reset, uninstall, APK install, snapshot restore, list/source mutation or automated real playback.",
+    "limitations": "Source removal/addition was not replayed against real user data. No instrumentation tests ran on5556. Only this launch uses the workaround; no permanent AVD/SDK/Windows configuration changed."
+  },
+  "references": [
+    "https://developer.android.com/studio/run/emulator-acceleration",
+    "https://developer.android.com/studio/run/emulator-troubleshooting"
+  ],
+  "referenceUse": "Official documentation marks swiftshader_indirect deprecated since36.4.9, supports swiftshader, and documents -feature -Vulkan. These support the diagnostic configuration, not proof of the crash's exact cause.",
+  "rawEvidence": ".private/emulator-crash-71; original launch log work/manual-emulator-70/emulator-out.log",
+  "endState": "5556 reopened visibly for user;5558/Gradle stopped;TV/5554 untouched. No application source/version/package change or new build.",
+  "nextStep": "If the native closure recurs, preserve a native crash dump before blaming source transactions or declaring graphics workaround successful. Keep source add/remove reproduction synthetic and only on5558 through tools/run-device-tests.sh. Broader S15c/S16/S17-S29 work remains as before."
+}
