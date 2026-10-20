@@ -214,6 +214,51 @@ class VisualPreviewTest {
         shot("search-dense-last-row")
     }
 
+    @Test fun heldOkOnHomeCardDoesNotChooseFavoriteWhenReleased() {
+        val movie = model.state.value.catalog.items.first { it.kind == MediaKind.MOVIE }
+        ui.runOnUiThread { model.recordViewed(movie); model.saveProgress(movie, 45_000, 120_000) }
+        ui.waitForIdle()
+        val card = ui.onNodeWithTag("continue:${movie.id}")
+        card.performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        ui.waitForIdle()
+        heldOkNeedsANewPressForFavorite(card, movie)
+    }
+
+    @Test fun heldOkOnLibraryCardDoesNotChooseFavoriteWhenReleased() {
+        val movie = model.state.value.catalog.items.first { it.kind == MediaKind.MOVIE }
+        ui.runOnUiThread { model.showKind(MediaKind.MOVIE) }
+        ui.waitForIdle()
+        ui.onNodeWithTag("library-grid").performScrollToNode(hasTestTag("tile:library:${movie.id}"))
+        val card = ui.onNode(hasClickAction() and hasAnyAncestor(hasTestTag("tile:library:${movie.id}")))
+        card.performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        ui.waitForIdle()
+        heldOkNeedsANewPressForFavorite(card, movie)
+    }
+
+    private fun heldOkNeedsANewPressForFavorite(card: SemanticsNodeInteraction, entry: MediaEntry) {
+        Assert.assertFalse(entry.id in model.state.value.favoriteIds)
+        card.assertIsFocused()
+        val down = android.os.SystemClock.uptimeMillis()
+        fun event(action: Int, repeat: Int, flags: Int = 0) = KeyEvent(down, android.os.SystemClock.uptimeMillis(),
+            action, KeyEvent.KEYCODE_DPAD_CENTER, repeat, 0, android.view.KeyCharacterMap.VIRTUAL_KEYBOARD, 0, flags)
+        instrumentation.sendKeySync(event(KeyEvent.ACTION_DOWN, 0))
+        Thread.sleep(android.view.ViewConfiguration.getLongPressTimeout().toLong() + 50)
+        instrumentation.sendKeySync(event(KeyEvent.ACTION_DOWN, 1, KeyEvent.FLAG_LONG_PRESS))
+        ui.waitUntil(5_000) { ui.onAllNodesWithTag("quick-favorite").fetchSemanticsNodes().isNotEmpty() }
+        ui.waitForIdle()
+        instrumentation.sendKeySync(event(KeyEvent.ACTION_DOWN, 2))
+        instrumentation.sendKeySync(event(KeyEvent.ACTION_DOWN, 3))
+        instrumentation.sendKeySync(event(KeyEvent.ACTION_UP, 0))
+        ui.waitForIdle()
+        ui.onNodeWithTag("quick-favorite").assertIsFocused()
+        Assert.assertFalse("Releasing the opener must not favorite the card", entry.id in model.state.value.favoriteIds)
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitForIdle()
+        ui.onNodeWithTag("quick-actions").assertDoesNotExist()
+        Assert.assertTrue("A fresh OK press intentionally favorites the card", entry.id in model.state.value.favoriteIds)
+        card.assertIsFocused()
+    }
+
     @Test fun continueToRecentChannelsOnlyScrollsEnoughToRevealTheCompactRow() {
         val movie = model.state.value.catalog.items.first { it.kind == MediaKind.MOVIE }
         val live = model.state.value.catalog.items.first { it.kind == MediaKind.LIVE }

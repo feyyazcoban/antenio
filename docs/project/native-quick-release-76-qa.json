@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-20",
+  "version": "0.14.76-design-preview",
+  "versionCode": 90,
+  "decision": "D107",
+  "symptom": "Long OK opens quick menu; repeated DOWNs and UP can reach its first focused favorite action.",
+  "change": "QuickActions owns only fresh activation DOWN/UP pairs in its own window. Repeated OK/Enter/NumPadEnter DOWNs and orphan UPs consumed; focus loss clears pending ownership. No timed debounce. Navigation, Back, pointer/semantics actions unchanged.",
+  "tests": {
+    "device": "Final5/5, only emulator-5558/tools/run-device-tests.sh --no-build, normal font,hostGPU,Vulkan off.",
+    "nativeHold": "Home continue card and Library movie card: actual DOWN, held delay, repeated DOWN1/FLAG_LONG_PRESS, popup opens, repeated DOWN2/3 and UP. Menu stays focused/open and favorite remains false. A new OK changes favorite once, closes menu, restores card focus.",
+    "existingFlows": "Recent-channel quick menu/focus return; channel drawer quick menu; parental quick-menu lock/unlock/PIN.",
+    "jvm": {
+      "tests": 377,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "guardCases": "Three tests cover DPAD_CENTER/ENTER/NUMPAD_ENTER orphan/repeat filtering, first fresh activation and navigation, focus-loss reset.",
+    "lintErrors": 0,
+    "lintWarnings": 44,
+    "build": "4m 53s"
+  },
+  "review": "Separate local diff pass: handler is confined to shared QuickActions body; dialog LocalWindowInfo read inside its window; fresh presses unblocked; held repeats never generate a new row press; no broader SourceDialog/PIN changes. No subagent used.",
+  "delivery": {
+    "device": "192.168.1.126:5555",
+    "before": {
+      "versionCode": "89",
+      "versionName": "0.14.75-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-20 19:54:46"
+    },
+    "after": {
+      "versionCode": "90",
+      "versionName": "0.14.76-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-20 20:11:54"
+    },
+    "sha256": "00550a8ffcd8eeb7310c0dbe15a3d5104148667822a5e1dbb4ea5d895b516ed8",
+    "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+    "realPlaybackStarted": false,
+    "appLaunchedOnTv": false
+  },
+  "limits": [
+    "TV remains Asleep; no wake/launch or physical remote acceptance claimed.",
+    "Font matrix deferred;5556/5554 unchanged;5558/Gradle stopped.",
+    "Preparing-loader physical diagnosis and .75 scroll physical acceptance remain open."
+  ],
+  "logs": "work/quick-release-76/"
+}

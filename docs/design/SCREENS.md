@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**20 Ekim · Hızlı menü / D107:** Kartta uzun OK menüyü açar; aynı basışın tekrarları ve bırakması hiçbir menü eylemini çalıştırmaz. Menü ilk satırda odakla kalır; yeni OK basışı seçili eylemi uygular. Yön/Geri ve erişilebilirlik eylemleri korunur; ilk yeni basış için zaman kilidi yoktur.
+
 **20 Ekim · TV-010 / D106:** İzlemeye devam et → Son izlediğin kanallar geçişi küçük kanal rafını ekranın tepesine sabitlemez; yalnız başlık/kart ve odak payı görünür olana kadar kaydırır. İlk normal başlık ölçüsü hazırdır; afiş raflarının üst hizalaması sürer.
 
 **20 Ekim · Son izlenen kanal logoları / D105:** D102 beyaz logo zemini kaldırıldı. Logo kart yüzeyi üzerinde şeffaf;80×56dp alan/8dp iç pay korunur. Eksik logo simgesi Ink.Muted; ad13sp tek satır, kart/odak ölçüleri aynı.

@@ -492,12 +492,17 @@ internal fun quickActions(entry: MediaEntry, favorite: Boolean, toggleFavorite: 
  */
 @Composable internal fun QuickActions(entry: MediaEntry, actions: List<QuickAction>, dismiss: () -> Unit) {
     val first = remember { FocusRequester() }
+    val input = remember { QuickActionInput() }
     val gap = 16.dp
     val pitch = with(LocalDensity.current) { (actionHeight() + gap).roundToPx() }
     SourceDialog(rememberShownTitle(entry.title, entry.year).name, first, dismiss, width = 440.dp) {
+        val window = LocalWindowInfo.current
+        LaunchedEffect(window.isWindowFocused) { if (!window.isWindowFocused) input.clear() }
         // Half a gap above and below the rows, pulled out over the dialog's spacing: at rest each row sits where the
         // dialog's own column put it, and a scrolled window holds whole rows.
-        Column(Modifier.weight(1f, fill = false).testTag("quick-actions").layout { measurable, constraints ->
+        Column(Modifier.weight(1f, fill = false).testTag("quick-actions").onPreviewKeyEvent { event ->
+                input.consume(event.nativeKeyEvent.keyCode, event.nativeKeyEvent.action, event.nativeKeyEvent.repeatCount)
+            }.layout { measurable, constraints ->
                 val room = (gap / 2).roundToPx()
                 val max = if (!constraints.hasBoundedHeight) constraints.maxHeight
                     else ((constraints.maxHeight + 2 * room) / pitch).coerceAtLeast(1) * pitch

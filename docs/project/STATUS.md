@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.76 · Uzun OK bırakmasının hızlı menüde eylem seçmesi · 20 Ekim 2026
+
+Kullanıcı popup’ın tuşu bırakınca favoriye ekleyip kapandığını netleştirdi. D107: ortak QuickActions, açan basışın tekrar ve sahipsiz bırakmasını tüketir; yalnız menüde başlayan yeni OK/Enter basışı eylem yapar. Pencere odağı kaybolunca bekleyen basış unutulur. Gerçek DOWN/REPEAT/UP ile Home ve kütüphane kontrolleri; mevcut kanal/PIN akışlarıyla 5/5 cihaz kontrolü geçti. 377 JVM (1 skipped), lint 0 hata/44 uyarı, release başarılı. TV89→90/.76 veri korunarak kuruldu; kurulu APK SHA eşit. TV beklemede, fiziksel kumanda kabulü açık. [QA](native-quick-release-76-qa.json).
+
 ## 0.14.75 · Devam rafından son kanallara kısa geçiş · 20 Ekim 2026
 
 D106: kompakt son kanal rafı ekran tepesine zorlanmaz; yalnız başlık, kart ve odak payı görünür olana kadar kayar. Raf başlığı ilk anda gerçek minimum ölçüyle başlar. Eski akışta devam kartını tamamen ekran dışına atan geometri regresyonu görüldü; son 6/6 cihaz kontrolü geçti. 540 dp test ekranında kanal başlığı y373, kart y413–513, alt pay27 dp; devam rafı görünür, geç ek kaydırma yok. 374 JVM (1 skipped), lint 0 hata/44 uyarı, release başarılı. TV88→89/.75 veri korunarak kuruldu, kurulu APK SHA eşit. TV beklemede; fiziksel akıcılık kabulü açık. [QA](native-recent-scroll-75-qa.json).

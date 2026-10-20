@@ -1,5 +1,7 @@
 # TV animasyon ve hareket rehberi
 
+**20 Ekim · Hızlı menü / D107:** Kartta uzun OK menüyü açar; aynı basışın tekrarları ve bırakması hiçbir menü eylemini çalıştırmaz. Menü ilk satırda odakla kalır; yeni OK basışı seçili eylemi uygular. Yön/Geri ve erişilebilirlik eylemleri korunur; ilk yeni basış için zaman kilidi yoktur.
+
 **20 Ekim · D106:** Devam rafından kompakt son kanal rafına geçiş yalnız başlık/kart/odak payını görünür kılacak kadar kayar. Son kanallar ekranın tepesine zorlanmaz; afiş raflarının üst hizalaması sürer. Başlık ölçüsü0dan başlamaz; ilk normal odak hedefi son ölçümle aynı kalır.
 
 ## 20 Ekim 2026 · Kanal paneli · D100

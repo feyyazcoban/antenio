@@ -1,5 +1,15 @@
 # Son devir notu
 
+## Codex · Uzun OK popup bırakma koruması /.76 · 20 Ekim 2026
+
+Kullanıcı uzun basmayı netleştirdi: kartta OK basılı tutulunca popup açılıyor; bırakınca ilk Favori satırı çalışıp kapanıyordu. Önceki callback tabanlı testler bu tuş zincirini kapsamıyordu. QuickActionInput yeni küçük tutucu: menüde başlayan repeat0 DOWN’a ait aynı anahtar UP’u geçer, activation tekrarları ve sahipsiz UP tüketilir. OK/Enter/NumPadEnter destekli; yön/Geri değişmez. QuickActions gövdesinde onPreviewKeyEvent ile, dialog içindeki LocalWindowInfo odağı kaybolunca clear çağrısıyla bağlandı. Genel SourceDialog veya PIN klavyesi değiştirilmedi; zaman kilidi yok. Versiyon90/.76; D107 ve SCREENS/MOTION güncel.
+
+VisualPreviewTest iki yeni gerçek kumanda senaryosu: Home devam kartı ve kütüphane film kartı. DOWN→bekleme→repeat1/FLAG_LONG_PRESS popup açar; repeat2/3→UP menüyü kapatmaz ve favori false kalır. Sonraki yeni OK favoriyi true yapar, menüyü kapatır, kart odağını geri verir. Mevcut recent kanal hızlı menüsü, drawer quick dönüşü ve ebeveyn kilit/PIN menüsüyle 5/5 cihaz kontrolü. Üç JVM testinde anahtar varyantları/sahipsiz UP/tekrar/yeni basış/yön/Geri/fokus kaybı kontrolü. Son build 4m 53s: 377 JVM/1skip/0 hata, lint0 hata/44 uyarı, release başarılı. Kaynak bağımsız tekrar okundu; doğru dialog penceresi ve dar kapsam doğrulandı.
+
+Yalnız5558/betik/normal font/hostGPU/Vulkan kapalı.5558 kapatıldı, Gradle no-daemon bitti;5556/5554 değişmedi, font matrisi yok. TV install-r89→90 aynı firstInstallTime ve çekilen base.apk SHA ile doğrulandı; Asleep olduğu için uyandırma/açılış/kumanda denemesi yapılmadı. [QA](native-quick-release-76-qa.json); loglar work/quick-release-76.
+
+Tam sonraki adım: TV açıkken kartta uzun OK→bırak ile menünün kaldığını, yeni OK ile favorinin değiştiğini kullanıcı doğrulasın. Hazırlanıyor göstergesinin fiziksel tanısı ve .75 raf akıcılığı fiziksel kabulü ayrı açık; bu tuş düzeltmesi bunları kapatmaz.
+
 ## Codex · Continue → Recent kaydırması /.75 · 20 Ekim 2026
 
 Kullanıcı iki raf arası takılma bildirdi. HomeScreen recent için frameShelf=false: eski viewport yüksekliğinde hedef küçük rafı ekran tepesine çekiyordu. Diğer rafların ve ilk hero→raf politikasının kapsamı aynı. headingHeight artık0 yerine actionHeight(compact=true) ile başlar; gerçek ölçüm hâlâ günceller. Normal 30 dp başlık ilk hedefi sonradan değiştirmez. Versiyon89/.75; D106 ve tasarım sözleşmeleri güncel.
