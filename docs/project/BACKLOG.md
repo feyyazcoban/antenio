@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-019/020 · D108/.77: Home odak/sayfa sonu denetimi uygulandı. Sabit alt pay, baş/son ve sağ kenar sınırları, sabit son afiş konumu; son11/11 cihaz kontrolü ve birim/lint/release geçti. TV veri korunarak güncellendi; fiziksel görsel/akıcılık kabulü açık. [QA](native-home-focus-77-qa.json).
+
 Uzun basma / D107 /.76 · Kart hızlı menüsünde açan OK basışının tekrar/bırakma olaylarının favoriyi tetiklemesi için koruma eklendi. İki gerçek tuş akışı ve mevcut kanal/PIN menüleriyle 5/5 cihaz kontrolü, birim/lint/release geçti. TV veri korunarak güncellendi; fiziksel kumanda kabulü açık. [QA](native-quick-release-76-qa.json).
 
 BKL-019/020 · D106/.75: Continue → Recent için gereksiz viewport boyu tepeye kaydırma kaldırıldı; başlık ölçüsü ilk anda hazır. Başlangıç regresyonu görüldü, son 6/6 cihaz kontrolü ve birim/lint/release geçti; TV veri korunarak güncellendi. Fiziksel TV akıcılığı ayrıca açık. [QA](native-recent-scroll-75-qa.json).

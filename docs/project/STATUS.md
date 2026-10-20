@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.77 · Ana sayfa odak ve sayfa sonu denetimi · 20 Ekim 2026
+
+D108: son rafı üste taşımak için eklenen değişken ekran boyu dolgu kaldırıldı; sabit28dp alt pay. Afiş rafında kısa/uzun başlıklar aynı dikey hedefi kullanır, son raf gerçek sayfa sonunda durur. İlk raf Yukarı vitrine, son raf Aşağı ve sağ uç Sağ aynı kartta kalır. Menü/ayrıntı dönüşleri ve önceki kısa Recent geçişi korunur. İlk10 kontrol sonrası görsel incelemede yatay odakta başlık boyu kaynaklı dikey oynama bulundu ve ek düzeltildi; son11/11 kontrol geçti. 377 JVM/1skip/0 hata, lint0 hata/44 uyarı, release başarılı. TV90→91/.77 veri korunarak kuruldu; kurulu APK SHA eşit. TV beklemede, fiziksel görsel/akıcılık kabulü açık. [QA](native-home-focus-77-qa.json).
+
 ## 0.14.76 · Uzun OK bırakmasının hızlı menüde eylem seçmesi · 20 Ekim 2026
 
 Kullanıcı popup’ın tuşu bırakınca favoriye ekleyip kapandığını netleştirdi. D107: ortak QuickActions, açan basışın tekrar ve sahipsiz bırakmasını tüketir; yalnız menüde başlayan yeni OK/Enter basışı eylem yapar. Pencere odağı kaybolunca bekleyen basış unutulur. Gerçek DOWN/REPEAT/UP ile Home ve kütüphane kontrolleri; mevcut kanal/PIN akışlarıyla 5/5 cihaz kontrolü geçti. 377 JVM (1 skipped), lint 0 hata/44 uyarı, release başarılı. TV89→90/.76 veri korunarak kuruldu; kurulu APK SHA eşit. TV beklemede, fiziksel kumanda kabulü açık. [QA](native-quick-release-76-qa.json).

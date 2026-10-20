@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-20",
+  "version": "0.14.77-design-preview",
+  "versionCode": 91,
+  "decision": "D108",
+  "scope": "Home focus audit: hero,continue,recent,favorites,starter live,series,movies,empty/error Home and returns.",
+  "changes": [
+    "Fixed28dp page bottom padding replaces viewport-lastShelfHeight+7dp. Removed shelf height state that changed page extent after measurement.",
+    "Poster shelves share a vertical reveal target, including last shelf clamping at real content end; no title-height-driven vertical drift on horizontal focus.",
+    "First shelf Up targets hero if present, otherwise cancels. Last shelf Down and final card Right cancel. Left/Back menu entry and Right/content/detail return preserved."
+  ],
+  "tests": {
+    "device": "Final11/11, only5558/tools/run-device-tests.sh --no-build,normal font,hostGPU,Vulkan off.",
+    "boundary": "Continue/recent/mixed favorites/series/movies traversed down and up. Last Down/Right repeated3x retain same card/viewport. Menu and Detail back restore same final card.",
+    "horizontal": "Each movie receives real Right; one/two-line titles keep identical poster top within1dp.",
+    "bottom": "Last LazyRow bottom is28dp above viewport bottom. Captions fit; short-only recent page has zero scroll range and Up/Down/Right keep focus.",
+    "regressions": "Hero carousel/long missing-art layout, empty+failed Home, initial continue peek, compact recent flow, quick menu held release, refresh feedback and stable Home.",
+    "jvm": {
+      "tests": 377,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lintErrors": 0,
+    "lintWarnings": 44,
+    "build": "4m 24s",
+    "testedApkHashesUnchangedAfterFinalBuild": {
+      "apps/android-tv/app/build/outputs/apk/debug/app-debug.apk": "39b04a30bfb84096e78e4fbfd5e617c8097cc0b05030869b3db46f9147645c5c",
+      "apps/android-tv/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk": "3badd8e702f66106be76f93dad715ac5874788a1ab99da972bd8a95375169120"
+    }
+  },
+  "iterations": [
+    "First10 device cases passed. Screenshot review revealed last-row vertical drift between short and wrapped titles.",
+    "Initial release build intentionally stopped before delivery for this concrete source correction, not a final validation pass. Final11 tests assert stable horizontal geometry; final build completed after that."
+  ],
+  "visual": "Three final synthetic screenshots inspected and saved in design/reviews/home-focus-0.14.77; first/last movie focus share row height, full title/year fit. Not physical TV captures.",
+  "review": "Separate local source-diff pass: fixed padding no dependency on measured last row, edge guards confined to Home cards, carousel input unchanged, title/year spacing unchanged, no PIN/quick-menu logic changed. No subagent used.",
+  "delivery": {
+    "device": "192.168.1.126:5555",
+    "before": {
+      "versionCode": "90",
+      "versionName": "0.14.76-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-20 20:11:54"
+    },
+    "after": {
+      "versionCode": "91",
+      "versionName": "0.14.77-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-20 20:36:09"
+    },
+    "sha256": "a72c25947c11c542972059db7a14369e31f970711cd36493db27dfa8e6321b45",
+    "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+    "realPlaybackStarted": false,
+    "appLaunchedOnTv": false
+  },
+  "limits": [
+    "TV Asleep during checks; no wake/launch or physical smoothness acceptance.",
+    "Font matrix deferred;5556/5554 unchanged;5558/Gradle stopped.",
+    "Preparing-spinner physical report remains open."
+  ],
+  "logs": "work/home-focus-77/"
+}

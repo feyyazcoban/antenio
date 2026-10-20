@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**20 Ekim · TV-010 / D108:** Home alt payı sabit28dp; son rafı üste zorlamak için ekran yüksekliğinde boş alan ayrılmaz. Son afiş rafı sayfa sonunda sabitlenir; kısa/uzun başlıklar arasında yatay geçiş dikey kaydırma yapmaz. İlk rafta Yukarı vitrine (yoksa aynı kartta), son rafta Aşağı ve satırın sağ ucunda Sağ aynı kartta kalır. Sol/Geri menüyü, menüde Sağ hatırlanan kartı korur.
+
 **20 Ekim · Hızlı menü / D107:** Kartta uzun OK menüyü açar; aynı basışın tekrarları ve bırakması hiçbir menü eylemini çalıştırmaz. Menü ilk satırda odakla kalır; yeni OK basışı seçili eylemi uygular. Yön/Geri ve erişilebilirlik eylemleri korunur; ilk yeni basış için zaman kilidi yoktur.
 
 **20 Ekim · TV-010 / D106:** İzlemeye devam et → Son izlediğin kanallar geçişi küçük kanal rafını ekranın tepesine sabitlemez; yalnız başlık/kart ve odak payı görünür olana kadar kaydırır. İlk normal başlık ölçüsü hazırdır; afiş raflarının üst hizalaması sürer.

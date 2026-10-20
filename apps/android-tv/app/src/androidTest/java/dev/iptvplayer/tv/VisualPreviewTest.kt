@@ -379,7 +379,9 @@ class VisualPreviewTest {
                 Assert.assertTrue("Whole poster and caption fit: $tile / $viewport", tile.top >= viewport.top && tile.bottom <= viewport.bottom)
                 val heading = ui.onNodeWithTag("shelf-heading:$section", true).getUnclippedBoundsInRoot()
                 Assert.assertTrue("Shelf heading stays fully visible: $heading / $viewport", heading.top >= viewport.top && heading.bottom < tile.top)
-                Assert.assertTrue("Shelf starts beneath navigation without a previous-row text sliver: $heading / $viewport",
+                if (section == "movies") Assert.assertEquals("Last row ends at the fixed page margin", 28f,
+                    (viewport.bottom - ui.onNodeWithTag("shelf-row:movies").getUnclippedBoundsInRoot().bottom).value, 1f)
+                else Assert.assertTrue("Middle shelf starts beneath navigation: $heading / $viewport",
                     heading.top.value <= viewport.top.value + 9f)
                 if (it < 2) instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT)
             }
@@ -460,7 +462,9 @@ class VisualPreviewTest {
             val heading = ui.onNodeWithTag("shelf-heading:$section", true).getUnclippedBoundsInRoot()
             val tile = ui.onNodeWithTag("tile:$focused", true).getUnclippedBoundsInRoot()
             Assert.assertTrue("Heading fully visible", heading.top >= viewport.top && heading.bottom < tile.top)
-            Assert.assertTrue("Heading anchored below navigation", heading.top.value <= viewport.top.value + 9f)
+            if (section == "movies") Assert.assertEquals("Last shelf has no artificial blank space below it", 28f,
+                (viewport.bottom - ui.onNodeWithTag("shelf-row:movies").getUnclippedBoundsInRoot().bottom).value, 1f)
+            else Assert.assertTrue("Middle shelf heading anchored below navigation", heading.top.value <= viewport.top.value + 9f)
             Assert.assertTrue("Whole card and captions visible", tile.top >= viewport.top && tile.bottom.value <= viewport.bottom.value - 26f)
             Assert.assertEquals(Route.HOME, model.state.value.route)
         }
@@ -488,6 +492,67 @@ class VisualPreviewTest {
         click("Geri")
         ui.waitUntil(5_000) { model.state.value.route == Route.HOME }
         Assert.assertEquals("Back restores that exact item", "movies:$anchor", tag())
+    }
+
+    @Test fun allHomeShelvesKeepFocusInsideTheirEdgesAndLastRowHasNoBlankTail() {
+        val movie = model.state.value.catalog.items.first { it.kind == MediaKind.MOVIE }
+        val live = model.state.value.catalog.items.first { it.kind == MediaKind.LIVE }
+        ui.runOnUiThread {
+            model.toggleFavorite(movie); model.toggleFavorite(live)
+            model.recordViewed(movie); model.saveProgress(movie, 45_000, 120_000)
+            model.recordViewed(live)
+        }
+        ui.waitForIdle()
+        fun key(code: Int) { instrumentation.sendKeyDownUpSync(code); ui.waitForIdle() }
+        fun focusedTag() = ui.onNode(isFocused()).fetchSemanticsNode().config
+            .getOrNull(androidx.compose.ui.semantics.SemanticsProperties.TestTag).orEmpty()
+        ui.onNodeWithTag("hero-watch").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        ui.waitForIdle()
+        for (section in listOf("continue", "recent", "favorites", "series", "movies")) {
+            key(KeyEvent.KEYCODE_DPAD_DOWN)
+            Assert.assertTrue("Down reaches $section, actual=${focusedTag()}", focusedTag().startsWith("$section:"))
+        }
+        val state = model.state.value
+        val movies = homeLibrary(state.catalog, state.history, state.favoriteIds, state.locks).movies
+        ui.onNodeWithTag("shelf-row:movies").performScrollToIndex(0)
+        ui.onNodeWithTag("movies:${movies.first().id}").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        ui.waitForIdle()
+        val posterTop = ui.onNodeWithTag("movies:${movies.first().id}").getUnclippedBoundsInRoot().top
+        movies.forEachIndexed { index, entry ->
+            if (index > 0) key(KeyEvent.KEYCODE_DPAD_RIGHT)
+            ui.onNodeWithTag("movies:${entry.id}").assertIsFocused()
+            Assert.assertEquals("One-line and two-line titles must not shift the row on Right", posterTop.value,
+                ui.onNodeWithTag("movies:${entry.id}").getUnclippedBoundsInRoot().top.value, 1f)
+        }
+        val lastTag = "movies:${movies.last().id}"
+        ui.onNodeWithTag(lastTag).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        ui.waitForIdle()
+        val viewport = ui.onNodeWithTag("home-content").getUnclippedBoundsInRoot()
+        val tile = ui.onNodeWithTag("tile:$lastTag", true).getUnclippedBoundsInRoot()
+        Assert.assertTrue("Final poster and caption fit", tile.top >= viewport.top && tile.bottom <= viewport.bottom)
+        Assert.assertTrue("Final row has 28dp page margin plus row padding, not a viewport-sized tail",
+            (viewport.bottom - tile.bottom).value in 27f..34f)
+        repeat(3) { key(KeyEvent.KEYCODE_DPAD_DOWN); Assert.assertEquals(lastTag, focusedTag()) }
+        repeat(3) { key(KeyEvent.KEYCODE_DPAD_RIGHT); Assert.assertEquals(lastTag, focusedTag()) }
+        Assert.assertEquals("Blocked edge keys must not scroll into empty space", tile,
+            ui.onNodeWithTag("tile:$lastTag", true).getUnclippedBoundsInRoot())
+        shot("home-focus-last-row")
+        key(KeyEvent.KEYCODE_BACK)
+        ui.onNodeWithTag("nav:Ana Sayfa").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag(lastTag).assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10_000) { model.state.value.route == Route.DETAIL && !model.state.value.detailLoading }
+        click("Geri")
+        ui.waitUntil(5_000) { model.state.value.route == Route.HOME }
+        ui.waitForIdle()
+        ui.onNodeWithTag(lastTag).assertIsFocused()
+        for (section in listOf("series", "favorites", "recent", "continue")) {
+            key(KeyEvent.KEYCODE_DPAD_UP)
+            Assert.assertTrue("Up reaches $section, actual=${focusedTag()}", focusedTag().startsWith("$section:"))
+        }
+        key(KeyEvent.KEYCODE_DPAD_UP)
+        ui.onNodeWithTag("hero-watch").assertIsFocused()
     }
 
     @Test fun refreshKeepsContentInPlaceAndSettingsShowsItsResult() {

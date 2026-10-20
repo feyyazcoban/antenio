@@ -254,7 +254,6 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
     val list = rememberLazyListState(initialFirstVisibleItemIndex = if (startRow >= 2) startRow + 1 else 0)
     val density = LocalDensity.current
     var viewportHeight by remember { mutableStateOf(0.dp) }
-    val shelfHeights = remember { mutableStateMapOf<String, Dp>() }
     // Held OK on a card: the quick actions (U8) above the screen; focus returns to that card. A locked title's PIN pad
     // too (pin.md §3.6).
     val overlay = rememberOverlayOpener()
@@ -305,7 +304,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                         topLeft = Offset(0f, size.height - fade), size = androidx.compose.ui.geometry.Size(size.width, fade))
                 }
             }, state = list,
-            verticalArrangement = Arrangement.spacedBy(16.dp), contentPadding = PaddingValues(bottom = maxOf(28.dp, viewportHeight - (shelfHeights[rows.lastOrNull()?.key] ?: 0.dp) + 7.dp))) {
+            verticalArrangement = Arrangement.spacedBy(16.dp), contentPadding = PaddingValues(bottom = 28.dp)) {
             item(key = "hero") {
                 if (slides.isNotEmpty()) Hero(slides, newest = library.newest.isNotEmpty(), reducedMotion = s.reducedMotion,
                     Modifier.then(if (target == "hero") Modifier.focusRequester(focus) else Modifier)
@@ -325,9 +324,8 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
             items(rows, key = { it.key }) { row ->
                 val headingMinimum = actionHeight(compact = true)
                 var headingHeight by remember(headingMinimum) { mutableStateOf(headingMinimum) }
-                Column(Modifier.padding(start = TvLayout.RailWidth).onSizeChanged {
-                    shelfHeights[row.key] = with(density) { it.height.toDp() }
-                }.padding(top = if (row == rows.first()) 0.dp else 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(Modifier.padding(start = TvLayout.RailWidth)
+                    .padding(top = if (row == rows.first()) 0.dp else 16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     // Every heading row keeps the compact action's height (it held "Tümünü gör"), so the shelf rhythm is unchanged.
                     Row(Modifier.fillMaxWidth().heightIn(min = headingMinimum).padding(horizontal = TvLayout.Gutter)
                         .testTag("shelf-heading:${row.key}").onSizeChanged { headingHeight = with(density) { it.height.toDp() } }, verticalAlignment = Alignment.CenterVertically) {
@@ -337,7 +335,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                     val rowState = rememberLazyListState(initialFirstVisibleItemIndex = rowStart)
                     // A row that mixes movies and episodes reserves the episode line on every card.
                     val reserveEpisode = row.continuing.any { it.record.kind == MediaKind.EPISODE }
-                    LazyRow(state = rowState, horizontalArrangement = Arrangement.spacedBy(TvLayout.Gap), contentPadding = PaddingValues(horizontal = TvLayout.Gutter, vertical = 4.dp)) {
+                    LazyRow(Modifier.testTag("shelf-row:${row.key}"), state = rowState, horizontalArrangement = Arrangement.spacedBy(TvLayout.Gap), contentPadding = PaddingValues(horizontal = TvLayout.Gutter, vertical = 4.dp)) {
                         items(row.entries, key = { it.id }) { entry ->
                             val key = "${row.key}:${entry.id}"
                             val own = remember(key) { FocusRequester() }
@@ -345,10 +343,15 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                             HomeCard(entry, continuing?.record, if (s.sources.size > 1) s.sourceName(entry.sourceId) else null,
                                 Modifier.then(if (key == target) Modifier.focusRequester(focus) else Modifier)
                                     .focusRequester(own)
+                                    .focusProperties {
+                                        if (row == rows.first()) up = if (slides.isNotEmpty()) heroFocus else FocusRequester.Cancel
+                                        if (row == rows.last()) down = FocusRequester.Cancel
+                                        if (entry.id == row.entries.last().id) right = FocusRequester.Cancel
+                                    }
                                     .onFocusChanged { if (it.isFocused) { model.homeFocus(key); lastFocus.requester = own } }, row.key, headingHeight + 10.dp, viewportHeight, reserveEpisode,
-                                // Compact channel rows need only their heading/card revealed. Pinning them
-                                // to the top scrolls a whole viewport and builds the poster shelves below.
-                                frameShelf = row.key != "recent" && (slides.isEmpty() || row.key != rows.first().key),
+                                // Poster shelves share a vertical target even when their title heights differ.
+                                // At the last row this clamps to the real page end, without artificial padding.
+                                frameShelf = row.key != "recent" && (row == rows.last() || slides.isEmpty() || row.key != rows.first().key),
                                 locked = s.locks.asksPin(entry.id), longClick = { overlay(AppOverlay.Quick(entry)) { lastFocus.requester } }) {
                                 model.homeFocus(key)
                                 if (model.open(entry, continuing?.record)) openPin { own }

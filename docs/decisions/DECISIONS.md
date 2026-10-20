@@ -326,3 +326,9 @@ Kullanıcı İzlemeye devam et → Son izlediğin kanallar geçişinde takılma 
 ## D107 · Hızlı menü yalnız yeni OK basışına ait bırakmayı işler · 20 Ekim 2026
 
 Kullanıcı içerik kartında uzun OK ile açılan popup’ın tuş bırakılınca kapandığını ve favorinin değiştiğini bildirdi. QuickActions, menüyü açan basıştan gelen tekrarları ve menü içinde başlamamış OK/Enter/NumPadEnter bırakmalarını tüketir. Menünün ilk satırına odak gelmesi bir eylem değildir; favori/aç/kilit işlemi yalnız menü içinde yeni başlayan basışın bırakılmasıyla veya açık erişilebilirlik eylemiyle çalışır. Menü içinde OK tekrarları da yeni satırda basış üretmez. Pencere odağı kaybolunca bekleyen basış unutulur. Yönler, Geri, dokunma ve semantik eylemler aynı kalır. Koruma ortak QuickActions gövdesindedir; Home/kütüphane ve kanal paneli aynı kuralı kullanır. İlk yeni OK için süreli bekletme yoktur.
+
+## D108 · Ana sayfa son rafı ve odak sınırları · 20 Ekim 2026
+
+Kullanıcı ana sayfa odaklarının dengesizliğini ve sonda fazla boşluk kaldığını bildirdi. Son rafı ekranın tepesine taşıyabilmek için kullanılan viewport−sonRafYüksekliği+7dp alt dolgu kaldırılır; sayfa alt payı sabit28dp olur. Son afiş rafı gerçek sayfa sonunda durur; sağa-sola gezinirken kısa/uzun başlıklar aynı dikey hedefi paylaşır. Kompakt son kanallar için kısa görünürlük hedefi korunur. Ortadaki afiş raflarının başlık hizalaması sürer. Raf ölçümlerinin bütün sayfanın alt dolgusunu sonradan değiştirmesi sona erer.
+
+İlk rafta Yukarı varsa vitrinin tek İzle eylemine, vitrin yoksa aynı karta döner/odakta kalır. Son rafta Aşağı ve her rafın son kartında Sağ odağı sayfa dışındaki gezinmeye kaçırmaz. Sol/Geri ile menüye erişim ve Sağ ile hatırlanan karta dönüş korunur. Bu değişiklik son rafın altında odak/maske payını korurken yapay boş kaydırma alanı oluşturmaz; kısa içerik doğal olarak ekranın tamamını doldurmayabilir. Font matrisi kullanıcı yayına hazırlama talimatına ertelenir.

@@ -77,6 +77,29 @@ class HeroLayoutTest {
         title().assertTextEquals("Yeni film 3")
     }
 
+    @Test fun aSingleCompactShelfDoesNotCreateBlankScrollingAndKeepsItsFocus() {
+        val model = home(listOf(MediaEntry("live:1", "1", MediaKind.LIVE, "Tek kanal", "Kanallar",
+            uri = "http://127.0.0.1:1/live.ts")))
+        val entry = model.state.value.catalog.items.single()
+        ui.runOnUiThread { model.recordViewed(entry) }
+        ui.waitForIdle()
+        ui.activityRule.scenario.recreate()
+        ui.waitForIdle()
+        val tag = "recent:${entry.id}"
+        ui.onNodeWithTag(tag).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        ui.waitForIdle()
+        val range = ui.onNodeWithTag("home-content").fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.VerticalScrollAxisRange]
+        assertEquals("Short content must not acquire an artificial scroll tail", 0f, range.maxValue(), .01f)
+        for (key in listOf(KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT)) {
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(key); ui.waitForIdle()
+            ui.onNodeWithTag(tag).assertIsFocused()
+        }
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_LEFT); ui.waitForIdle()
+        ui.onNodeWithTag("nav:Ana Sayfa").assertIsFocused()
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
+        ui.onNodeWithTag(tag).assertIsFocused()
+    }
+
     @Test fun longTitleWithoutArtworkKeepsHeaderAndSingleActionVisible() {
         home((1..6).map { MediaEntry("movie:$it", "$it", MediaKind.MOVIE,
             "Uzun Bir Yolculuğun Ardından: Dünyanın Bilinmeyen Köşeleri $it", "Belgeseller", year = "2026",

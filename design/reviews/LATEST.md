@@ -1,5 +1,15 @@
 # Güncel görsel inceleme
 
+## 0.14.77 · Ana sayfa odakları ve son raf
+
+Sentetik test kataloğu, normal yazı.11/11 ilgili kontrol geçti; gerçek TV kabulü açık. Son rafda ilk ve son afiş aynı yükseklikte; başlık/yıl doğal satırlarını korur, sayfa alt payı28dp. [QA](../../docs/project/native-home-focus-77-qa.json).
+
+![İlk afiş odağı](home-focus-0.14.77/home-remote-shelf.png)
+
+![Son afiş odağı](home-focus-0.14.77/home-focus-last-row.png)
+
+![İlk ana sayfa](home-focus-0.14.77/home-initial-continue.png)
+
 ## 0.14.73 · Oynatıcı ölçüleri, kategoriler ve ayrıntı
 
 D103/D104; normal font, sentetik içerik.9/9 ilgili son APK kontrolü geçti; gerçek TV kullanıcı kabulü açık. [QA](../../docs/project/native-player-category-73-qa.json).

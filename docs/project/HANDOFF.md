@@ -1,5 +1,15 @@
 # Son devir notu
 
+## Codex · Home odak denetimi /.77 · 20 Ekim 2026
+
+Kullanıcı tüm Home odaklarını ve son boşluğu sordu. HomeScreen shelfHeights haritası ve viewport−sonRafYüksekliği+7dp dolgu kaldırıldı; contentPadding.bottom sabit28dp. İlk raf Yukarı heroFocus (yoksa Cancel), son raf Aşağı Cancel, satırın son kartı Sağ Cancel. Sol/Geri menü ve Right ile hatırlanan karta dönüş aynı. Son afiş rafı frameShelf hedefini diğer afişlerle paylaşır, gerçek sayfa sonuna clamp olur; son Recent kısa hedefte kalır. Böylece yatay odakta başlığın1/2 satır olmasına göre viewport oynamaz; metin/yıl arasına boş satır konmadı. Yeni shelf-row test tagleri yatay sınır ölçümünü destekler.91/.77; D108 ve SCREENS/MOTION/HOME_SHELVES güncel.
+
+İlk10 ekran kontrolü geçti; ekran incelemesinde kısa/uzun başlık arasında son rafın dikey oynadığı görüldü. İlk release build bu somut bulgu için kasıtlı durduruldu, teslim/final başarı sayılmadı. Son hedef düzeltmesi ve yatay eşit-Y assert’i sonrası11/11 geçti: tam Continue/Recent/Favoriler/Series/Movies aşağı-yukarı turu; son Down/Right3x engeli; menü/ayrıntıdan aynı son karta dönüş; tüm film kartlarında1dp içinde aynı poster top; son row28dp alt pay; tek kompakt rafda sıfır scroll aralığı ve kenar odağı; Hero3, boş/hatalı Home, devam ilk görünürlüğü, recent/quick menü ve refresh. Normal font, yalnız5558/betik/hostGPU/Vulkan kapalı.
+
+Üç son sentetik ekran design/reviews/home-focus-0.14.77 altında incelendi; LATEST etiketli. Gerçek TV ekranı değildir. Son birim/lint/release 4m 24s: 377 JVM/1skip/0 hata, lint0 hata/44 uyarı. Test edilen debug/test APK hashleri final build sonunda aynı. Kaynak ayrıca yeniden okundu: dar Home sınırları, sabit alt pay, carousel/başlık/PIN/quick mantığı korunur. Figma/bağımlılık değişmedi.
+
+TV install-r90→91 aynı firstInstallTime ve çekilen base.apk SHA eşitliğiyle doğrulandı. Asleep; uyandırma/açılış/gezinme yapılmadı.5558 kapalı/Gradle no-daemon bitti,5556/5554 değişmedi,font matrisi yok. [QA](native-home-focus-77-qa.json);ham loglar work/home-focus-77. Tam sonraki adım: kullanıcı TV’de tüm raf turunu ve son boşluğu görsel onaylasın; fiziksel kare süresi ölçümü yapılmadı. Hazırlanıyor göstergesi fiziksel tanı beklemeye devam eder; uzun OK düzeltmesi .76’dan korunur.
+
 ## Codex · Uzun OK popup bırakma koruması /.76 · 20 Ekim 2026
 
 Kullanıcı uzun basmayı netleştirdi: kartta OK basılı tutulunca popup açılıyor; bırakınca ilk Favori satırı çalışıp kapanıyordu. Önceki callback tabanlı testler bu tuş zincirini kapsamıyordu. QuickActionInput yeni küçük tutucu: menüde başlayan repeat0 DOWN’a ait aynı anahtar UP’u geçer, activation tekrarları ve sahipsiz UP tüketilir. OK/Enter/NumPadEnter destekli; yön/Geri değişmez. QuickActions gövdesinde onPreviewKeyEvent ile, dialog içindeki LocalWindowInfo odağı kaybolunca clear çağrısıyla bağlandı. Genel SourceDialog veya PIN klavyesi değiştirilmedi; zaman kilidi yok. Versiyon90/.76; D107 ve SCREENS/MOTION güncel.
