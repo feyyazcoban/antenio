@@ -3,7 +3,7 @@
   "version": "0.14.70-design-preview",
   "versionCode": 84,
   "decision": "D100",
-  "status": "Code and final checks passed; post-commit source review and TV delivery pending.",
+  "status": "Final checks and TV delivery verified; S15c and broader acceptance remain open.",
   "change": "S15b: extend the existing live drawer with category and mini-guide columns, short/held OK ownership, paging/numeric focus, 15-second idle policy, local quick actions and programme detail, visible-row EPG and access protections.",
   "tests": {
     "initialBuild": "Full unit/lint/release/debug/androidTest passed in 8m12s; 373 JVM,1 skipped,0 failures/errors; lint0errors/43warnings. PluralsCandidate then fixed.",
@@ -78,7 +78,7 @@
     "project": "check_project passed: local links,17 registered screens,401 variables,required docs; Figma pending1."
   },
   "review": {
-    "method": "Separate source passes by the same agent using the four STEPS perspectives; no additional agents.",
+    "method": "Separate committed-source pass after the implementation commit, using the four STEPS perspectives; same agent, no separate reviewer agent.",
     "fixed": [
       "Logo 56x32 now has zero inset.",
       "Programme detail note distinguishes future, ended and live-only; overlap indication added.",
@@ -90,14 +90,15 @@
       "Ignore transient row focus while another column is active or a restoration is pending; publish row memory only after the requested focus succeeds.",
       "Freeze automatic bring-into-view scrolling for the inactive channel column; mini-guide test now asserts its selected channel stays completely inside the viewport."
     ],
-    "pending": "Validate final input/focus paths and then review the implementation commit separately.",
     "checked": [
       "Correctness/regression: owned short/held OK DOWN/REPEAT/UP; unchanged VOD seek/speed; category selection and numeric focus do not play; Back closes one column; page direction and captured restoration target.",
       "Architecture: extend the existing PlayerLayer/PlayerKeyRouter and drawer; pure paging/idle and precomputed LiveLists; focus memory stays local; TvViewModel exposes thin canonical lookups; one ExoPlayer stop/clear/open sequence.",
       "TV/accessibility: selected state and white-ring focus are separate with no scale; reduced-motion duration0; paneTitle/row descriptions and video actions; adaptive widths/single-column design. Font matrix and physical TalkBack are not claimed.",
       "Access/privacy/session: projected hidden/adult rows never enter canonical live lookup; every pick re-resolves through ChannelPick/PIN; locked guide rows skip programme/logo/query; only local synthetic HTTP fixtures in tests; browsing opens no media request."
     ],
-    "followUp": "Multi-source/source-filter fallback and category counts require a dedicated device tour: liveIndex fills a null source from sourceFilterId, while liveChoices currently accepts null as global; a numeric All fallback may expose inconsistent counts. Inspect/align at the start of S15c. The current final fixture is single-source."
+    "followUp": "Multi-source/source-filter fallback and category counts require a dedicated device tour: liveIndex fills a null source from sourceFilterId, while liveChoices currently accepts null as global; a numeric All fallback may expose inconsistent counts. Inspect/align at the start of S15c. The current final fixture is single-source.",
+    "implementationCommit": "37d9c54aa6543401b411ae8d5b6ab4bb9a68dcc8",
+    "findings": "Final12/12 and viewport assertion cover the confirmed focus/scroll fixes. Source-filter/count consistency remains an explicit follow-up below; no other new actionable finding in the committed-source pass."
   },
   "rawEvidence": "work/channel-panel-qa",
   "delivery": {
@@ -109,7 +110,25 @@
     "minified": true,
     "debuggable": false,
     "minSdk": 26,
-    "tv": null,
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "83",
+        "versionName": "0.14.69-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-20 12:06:03"
+      },
+      "after": {
+        "versionCode": "84",
+        "versionName": "0.14.70-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-20 13:48:00"
+      },
+      "sha256": "fc99d6a48ebd89a4d0514f26fa6de7d55b467de10e524355b027cc2b2a4cb8db",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
     "designEmulator": "5556 and5554 were not started or modified.",
     "testEmulator": "5558 stopped without saving snapshot; Gradle stopped."
   }
