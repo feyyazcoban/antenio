@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.73 · TV splash ayarı doğrulandı · 20 Ekim 2026
+
+Kullanıcının animasyon görünmüyor bildirimi fiziksel TV kaydıyla incelendi. Sistem animasyon ölçekleri1,0; uygulamada Hareketi azalt açık (UI checked=true). Kullanıcının animasyonu görme isteği kapsamında kapatıldı, checked=false doğrulandı. Aynı87/.73 ile ikinci tam süreç açılış kaydında işaret, ara harfler, tamamlanan logo ve Home açılması görünür. Yeni APK/kod yok; kaynak/veri korunur. Ses eşzamanlaması ve kesintisiz kare akıcılığı bu görsel kayıtla kabul edilmedi; önceki performans işi ayrı açık. [QA](physical-splash-setting-73-qa.json).
+
 ## 0.14.73 · Küçük oynatıcı kontrolleri, sayaçlar ve ayrıntı vitrini · 20 Ekim 2026
 
 Canlı ve VOD ortak oynat/duraklat48dp, diğer transport44dp, daha küçük metin/simgeler; Kanallar ile Ses/Altyazı aynı pill ölçüsünde, canlı CH−/CH+ ekran düğmeleri yok. Kategori sütununda dinamik içerik sayıları; Sırala altında çizgi yok. Ayrıntı görseli menü arkasına kadar vitrin düzeninde, film içeriği alt hizalı ve20dp aralıklı. D103.

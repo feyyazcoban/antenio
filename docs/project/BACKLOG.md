@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-022 ·20 Ekim fiziksel .73: animasyon görünmeme bildirimi uygulamanın Hareketi azalt tercihi açıkken yeniden üretildi. Tercih kapatılıp gerçek TV’de işaret/harf giriş aşamaları ve Home geçişi kayıttan doğrulandı. Yapılandırma sorunu giderildi; genel splash/ses/kare akıcılığı kabulü açık. [QA](physical-splash-setting-73-qa.json).
+
 UI/hız ·0.14.73 /20 Ekim: D103 küçük canlı/VOD kontrolleri, Kanallar pill, CH−/CH+ kaldırma, kategori sayıları, Sırala çizgisi kaldırma ve alt hizalı ayrıntı vitrini uygulandı; son APK'larda9/9 ilgili kontrol geçti. D104 VOD oturumluk PCM ve gerçek zamanlı2× doğrulaması eklendi. TV veri korunarak güncellendi; aynı gerçek filmde hız/codec ve UI kabulü açık. Genel ürün maddeleri done yapılmadı. [QA](native-player-category-73-qa.json).
 
 UI düzeltmesi ·0.14.72 /20 Ekim: D102 vitrin etiket/eylem boşlukları, beyaz logolu tek satır son kanal kartları, Dizi kütüphanen altındaki kalıcı Film kütüphanen rafı ve daha ferah Canlı TV satırları uygulandı;6/6 ilgili ekran kontrolü geçti. TV veri korunarak güncellendi, vitrin gözlendi; diğer alanların fiziksel kabulü açık. Genel ürün maddeleri bu teslimle done sayılmaz. [QA](native-home-polish-72-qa.json).

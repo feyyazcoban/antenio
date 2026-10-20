@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-20",
+  "version": "0.14.73-design-preview",
+  "versionCode": 87,
+  "scope": "Physical TV splash report; configuration diagnosis, no application code or package change.",
+  "systemAnimations": {
+    "animatorDurationScale": "1.0",
+    "transitionAnimationScale": "1.0"
+  },
+  "cause": "Application reduced-motion toggle was enabled. Settings UI checked=true verified before mutation; it intentionally bypasses the entrance per D069.",
+  "action": "Disabled reduced motion through the existing Settings > General and language row, checked=false verified. Startup sound toggle remained enabled.",
+  "verification": "Two force-stop/cold Activity launches recorded on the physical TV. Before: completed logo and restoring spinner. After: blank stage, mark appearing, partial NEXTV glyphs, complete logo, Home reveal visibly present in the actual screen recording.",
+  "limits": [
+    "Screen recording confirms visible entrance stages, not uninterrupted frame pacing or acoustic synchronization.",
+    "Historical startup performance issue is not closed by this configuration diagnosis.",
+    "No font matrix, emulator tests or new build: production source is unchanged."
+  ],
+  "deviceInteraction": "Initial rapid remote navigation reached a player unexpectedly; exited before continuing with individually observed focus steps. Viewing history may have changed normally. No source modifications or data reset. Final screen Home.",
+  "privateEvidence": ".private/splash-74/ (TV screen videos and UI hierarchy, not committed)",
+  "records": {
+    "baseline.mp4": "f65107507521a9554d922dcf8e7227bcdaa1090dc3c9f1e91fbd9e5ae05d0055",
+    "after.mp4": "9dc07b3d71e2feef7088808504b2653002f00142851ddee55e27f0bc4298065f",
+    "settings.xml": "bb5ed46c21e6fbd6037a8972f62b6e7c2ad05118b51f97a50182c25c61977a0a",
+    "settings-after.xml": "5bd16fa34fe1a3265c94f46ce5b4330b3c393ed7cb917a63e2f7a446dbd10109"
+  }
+}

@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Codex · Fiziksel splash / hareket tercihi · 20 Ekim 2026
+
+TV’de mevcut87/.73, sistem animator/transition ölçekleri1,0. İlk force-stop/COLD kaydında bitmiş logo + spinner doğrudan geldi. Ayarlar → Genel ve dil → Hareketi azalt satırı checked=true olarak doğrulandı; kullanıcının animasyon isteğiyle kapatıldı, checked=false kaydedildi. İkinci force-stop/COLD kaydında logo işareti, kısmi NEXTV harfleri, tamamlanma ve Home geçişi görüldü. Bu ayar D069 gereği girişi atlıyordu; performans düzeltmesi veya yeni APK değildir. Açılış sesi ayarı açık kaldı, akustik eşzaman doğrulanmadı. Fiziksel kesintisiz frame pacing kabulü açık kalır.
+
+Özel kayıtlar .private/splash-74 altında (klasör tanı için isimlendirildi; sürüm .74 üretilmedi), paylaşılabilir kayıt [QA](physical-splash-setting-73-qa.json). İlk hızlı kumanda dizisi beklenmedik şekilde player açtı; çıkıldı, sonraki gezinme tek tek odak okunarak yapıldı, olağan geçmiş etkisi olabilir. Kaynak silme/ekleme, reset, paket/cihaz ayarı değişikliği yok. Son ekran Home; emülatör/Gradle açılmadı. Üretim kodu değişmediğinden yeniden uygulama testi yok; doküman kontrolü yeterli. Sonraki adım: kullanıcı normal açılışı izlesin; ayrıca bir takılma bildirirse Hareketi azalt kapalıyken aynı cihaz kaydı/kare süreleriyle incele, bu tanıyı eski performans kabulü sayma.
+
 ## Codex · Oynatıcı, kategori ve ayrıntı /0.14.73 · 20 Ekim 2026
 
 Kullanıcının beş UI isteği ve1×'e dönen hız bildirimi birlikte işlendi. PlayerControls ortak ölçüler48/44dp,13sp düğme/bilgi,24sp başlık,16sp saat/süre. Kanallar solda Ses/Altyazı ile aynı44dp/20dp ikon düzeninde; PlayerScreen canlı CH−/CH+ ekran düğmelerini kaldırdı, kumanda ve panel davranışı aynı. LibraryScreen kategori sayıları grid'in aynı havuzundan tek geçiş; favori/geçmiş/arama/yenileme güncellenir. Sayı contentDescription'a eklenir, selected semantiği korunur. Theme.Action yeni selectionIndicator varsayılantrue, yalnız SortAction false.
