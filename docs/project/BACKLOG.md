@@ -1,5 +1,7 @@
 # İş listesi
 
+Hazırlanıyor göstergesi · 20 Ekim 2026: kullanıcı sabit göstergenin kapalı animasyonlardan kaynaklandığını doğruladı; bu alt bildirim çözüldü. Kod/paket değişikliği gerekmedi. Diğer kabul maddeleri ayrı izlenir. [QA](preparing-spinner-74-qa.json).
+
 BKL-019/020 · D108/.77: Home odak/sayfa sonu denetimi uygulandı. Sabit alt pay, baş/son ve sağ kenar sınırları, sabit son afiş konumu; son11/11 cihaz kontrolü ve birim/lint/release geçti. TV veri korunarak güncellendi; fiziksel görsel/akıcılık kabulü açık. [QA](native-home-focus-77-qa.json).
 
 Uzun basma / D107 /.76 · Kart hızlı menüsünde açan OK basışının tekrar/bırakma olaylarının favoriyi tetiklemesi için koruma eklendi. İki gerçek tuş akışı ve mevcut kanal/PIN menüleriyle 5/5 cihaz kontrolü, birim/lint/release geçti. TV veri korunarak güncellendi; fiziksel kumanda kabulü açık. [QA](native-quick-release-76-qa.json).

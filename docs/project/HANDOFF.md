@@ -1,5 +1,9 @@
 # Son devir notu
 
+## Codex · Hazırlanıyor göstergesi doğrulaması · 20 Ekim 2026
+
+Kullanıcı: “bu da animasyonlar kapalı olduğu için donuyormuş”. Önceki açık loader bildirimi, kullanıcının animasyon ayarı doğrulamasıyla kapandı; hangi ayarın kapalı olduğu ayrıca varsayılmadı. QA kaydına kullanıcı doğrulaması eklendi; üretim kodu, sürüm ve kurulum değişmedi. Home fiziksel odak/akıcılık ve diğer kabul maddeleri ayrı açık kalır. [QA](preparing-spinner-74-qa.json).
+
 ## Codex · Home odak denetimi /.77 · 20 Ekim 2026
 
 Kullanıcı tüm Home odaklarını ve son boşluğu sordu. HomeScreen shelfHeights haritası ve viewport−sonRafYüksekliği+7dp dolgu kaldırıldı; contentPadding.bottom sabit28dp. İlk raf Yukarı heroFocus (yoksa Cancel), son raf Aşağı Cancel, satırın son kartı Sağ Cancel. Sol/Geri menü ve Right ile hatırlanan karta dönüş aynı. Son afiş rafı frameShelf hedefini diğer afişlerle paylaşır, gerçek sayfa sonuna clamp olur; son Recent kısa hedefte kalır. Böylece yatay odakta başlığın1/2 satır olmasına göre viewport oynamaz; metin/yıl arasına boş satır konmadı. Yeni shelf-row test tagleri yatay sınır ölçümünü destekler.91/.77; D108 ve SCREENS/MOTION/HOME_SHELVES güncel.

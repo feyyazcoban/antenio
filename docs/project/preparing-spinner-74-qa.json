@@ -11,7 +11,12 @@
   ],
   "physical": "TV reports Asleep; global animator_duration_scale1.0. No wake/relaunch/reset/installation in this task. Physical cause of reported frozen preparing indicator remains undiagnosed.",
   "review": "Separate local source pass: RestoringCover intentionally keeps its logo still but spinner reads LocalReducedMotion; new tests exercise actual pixels in loading area, not only semantics callback. No production fix claimed.",
-  "next": "User asked to turn TV on and say whether logo and spinner freeze together. Capture the actual loading interval; confirm application motion preference before distinguishing render/UI work from intentional static arc.",
+  "next": "No further action for this specific preparing-spinner report. Other physical Home, playback and startup performance acceptance remains separate.",
   "cleanup": "5558 shut down without snapshot save; Gradle no-daemon completed;5556/5554 unchanged.",
-  "logs": "work/spinner-check/build.log and device-full.log"
+  "logs": "work/spinner-check/build.log and device-full.log",
+  "userConfirmation": {
+    "date": "2026-10-20",
+    "quote": "bu da animasyonlar kapalı olduğu için donuyormuş",
+    "resolution": "User confirmed animations were disabled. The reported static preparing indicator is resolved as expected reduced-motion behavior. No production change, new build, installation or physical measurement in this follow-up."
+  }
 }
