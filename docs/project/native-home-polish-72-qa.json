@@ -53,5 +53,5 @@
     "No font matrix, Figma synchronization or store acceptance.",
     "5556/5554 untouched; test5558 and Gradle stopped."
   ],
-  "review": "Implementation diff reviewed locally in a separate pass; no subagent used. Final review recorded after implementation commit."
+  "review": "After implementation commit d0e0fc5, same agent reviewed the committed source/tests separately: label participates in hidden and visible text measurement, stable action/hero bounds covered; movie shelf uses existing filtered bounded data and stable keys; live row focus scale remains1 with larger spacing; recent full spoken names preserved. No blocking finding. No subagent used."
 }
