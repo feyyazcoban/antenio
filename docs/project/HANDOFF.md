@@ -1,5 +1,13 @@
 # Son devir notu
 
+## Codex · Hazırlanıyor göstergesi / TV beklemede · 20 Ekim 2026
+
+Yeni bildirim: Hazırlanıyor loader dönmüyor. Salt okunur TV kontrolünde Asleep ve global animator_duration_scale1,0. Kullanıcıya TV’yi açması ve logo+gösterge birlikte mi yoksa yalnız gösterge mi donduğunu söylemesi soruldu; yanıt yok. Önceki hareket ayarı tanısı bu olayın nedeni sayılmadı.
+
+Yalnız LaunchAnimationTest değişti: RestoringCover gerçek loading alanının bitmap piksellerini333ms arayla karşılaştırıyor. Normal hareket değişimi>50piksel; reduced-motion değişimi0. Mevcut giriş/gate testleriyle4/4 geçti. Debug/androidTest build1m40s; yalnız5558/tools/run-device-tests.sh --no-build,normal font,hostGPU/Vulkan kapalı. Kaynak ayrıca tekrar okundu: intro için still ile spinnerStill ayrı, RestoringCover logo sabitken yerel tercih kapalıysa gösterge dönüyor. Üretim düzeltmesi/yeni APK yok, fiziksel çözüm iddiası yok.5558 kapatıldı,5556/5554 ve gerçek hesaplara dokunulmadı. [QA](preparing-spinner-74-qa.json),loglar work/spinner-check.
+
+Tam sonraki adım: TV açıkken gerçek hazırlık aralığını kaydet; uygulama hareket tercihini doğrula. Logo ve gösterge birlikte donarsa main/render işini ve içerik hazırlama geçişini ölç. Yalnız gösterge sabitse spinner state/çizim karelerini ayır. TV’ye yalnız bu test değişikliği için yeni paket kurma; uzun basma bildirimi de ekran/tuş yanıtını bekliyor.
+
 ## Codex · Şeffaf son kanal logosu /.74 · 20 Ekim 2026
 
 HomeScreen recent kartında yalnız beyaz Box.background kaldırıldı; alan/padding/başlık/odak aynı. Eksik logo LineIcon rengi Ink.Background yüzde60→Ink.Muted. Artwork logo modu zaten şeffaf; sağlayıcının görseli yeniden işlenmedi. D105,D102 beyaz kutu kararının yerine geçer; NATIVE_UI/SCREENS/HOME_SHELVES güncel. Sürüm88/0.14.74.

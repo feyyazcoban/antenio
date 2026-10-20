@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-022/.74 ·20 Ekim: Hazırlanıyor göstergesi bildirimi açık. Normal/sabit gösterge için gerçek piksel regresyonları eklendi;5558’de4/4 açılış kontrolü geçti. TV Asleep olduğundan fiziksel neden veya çözüm doğrulanmadı. [QA](preparing-spinner-74-qa.json).
+
 D105/.74 ·20 Ekim: son izlenen kanal logolarındaki beyaz zemin kullanıcı isteğiyle kaldırıldı, mevcut ölçüler korundu. Build/birim/lint geçti;TV veri korunarak güncellendi. Ekran Asleep olduğundan fiziksel görsel kabul açık. Uzun basma bildirimi ekran/tuş/davranış yanıtını bekliyor. [QA](native-logo-background-74-qa.json).
 
 BKL-022 ·20 Ekim fiziksel .73: animasyon görünmeme bildirimi uygulamanın Hareketi azalt tercihi açıkken yeniden üretildi. Tercih kapatılıp gerçek TV’de işaret/harf giriş aşamaları ve Home geçişi kayıttan doğrulandı. Yapılandırma sorunu giderildi; genel splash/ses/kare akıcılığı kabulü açık. [QA](physical-splash-setting-73-qa.json).

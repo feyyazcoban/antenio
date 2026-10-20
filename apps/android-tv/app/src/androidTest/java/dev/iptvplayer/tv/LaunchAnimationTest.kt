@@ -9,6 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import dev.iptvplayer.tv.ui.LaunchCover
 import dev.iptvplayer.tv.ui.LocalReducedMotion
 import dev.iptvplayer.tv.ui.PilotTheme
+import dev.iptvplayer.tv.ui.RestoringCover
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
@@ -75,6 +76,30 @@ class LaunchAnimationTest {
             assertTrue(prepared)
             assertTrue("Reduced motion has no three-second minimum or fade", finished)
             assertEquals("A still cover starts once without GPU warm-up or an entrance delay", 1, starts)
+        } finally { ui.mainClock.autoAdvance = true }
+    }
+
+    @Test fun preparingSpinnerMovesWhenMotionIsEnabled() = checkPreparingSpinner(reduced = false)
+
+    @Test fun preparingSpinnerIsStillOnlyWhenMotionIsReduced() = checkPreparingSpinner(reduced = true)
+
+    private fun checkPreparingSpinner(reduced: Boolean) {
+        ui.mainClock.autoAdvance = false
+        try {
+            ui.setContent { PilotTheme { CompositionLocalProvider(LocalReducedMotion provides reduced) { RestoringCover() } } }
+            ui.mainClock.advanceTimeBy(600); ui.waitForIdle()
+            val before = ui.onNodeWithTag("launch-loading").captureToImage().asAndroidBitmap()
+            ui.mainClock.advanceTimeBy(333); ui.waitForIdle()
+            val after = ui.onNodeWithTag("launch-loading").captureToImage().asAndroidBitmap()
+            assertEquals(before.width, after.width)
+            assertEquals(before.height, after.height)
+            val a = IntArray(before.width * before.height)
+            val b = IntArray(after.width * after.height)
+            before.getPixels(a, 0, before.width, 0, 0, before.width, before.height)
+            after.getPixels(b, 0, after.width, 0, 0, after.width, after.height)
+            val changed = a.indices.count { a[it] != b[it] }
+            if (reduced) assertEquals("Reduced motion shows a fixed arc", 0, changed)
+            else assertTrue("Preparing must show actual changing spinner pixels: $changed", changed > 50)
         } finally { ui.mainClock.autoAdvance = true }
     }
 

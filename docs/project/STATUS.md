@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.74 · Hazırlanıyor göstergesi incelemesi · 20 Ekim 2026
+
+Kullanıcı göstergenin dönmediğini bildirdi. TV beklemede (Asleep),sistem animasyon ölçeği1,0; fiziksel olay yeniden gözlenemedi, neden/çözüm açık. Üretim kodu değişmedi. Yeni iki piksel kontrolü: normal hareketli RestoringCover göstergesi333ms sonra değişiyor, hareketi azaltılmış gösterge sabit.5558/betik üzerinden mevcut iki açılış testiyle4/4 geçti. TV uyandırılmadı/paket kurulmadı;5558 kapalı. [QA](preparing-spinner-74-qa.json).
+
 ## 0.14.74 · Kanal logosu beyaz zemini kaldırıldı · 20 Ekim 2026
 
 D105: son izlenen kanal logoları kart yüzeyi üzerinde şeffaf;80×56dp alan/8dp iç pay ve kart ölçüleri aynı, eksik logo simgesi Ink.Muted.374 JVM (1 skipped),0 başarısız; lint0 hata/44 uyarı,release başarılı. TV87→88/.74 veri korunarak kuruldu,kurulu APK SHA ve firstInstallTime eşitliği doğrulandı. Görsel açılış denemesinde TV Asleep/ekran siyah; uyandırılmadı, fiziksel görsel kabul açık. [QA](native-logo-background-74-qa.json).
