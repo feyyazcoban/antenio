@@ -1,5 +1,13 @@
 # Son devir notu
 
+## Codex · Vitrin ilk devam önizlemesi / 0.14.71 · 20 Ekim 2026
+
+Kullanıcının son isteği D101: görseli değiştirmeden ön planı yukarı ve devam rafının başlangıcını ilk ekrana taşı. HomeScreen.Hero ön planı minimum420dp, matchParentSize+üst hizalı taşan arka plan viewport boyunda kalır; kırpma arka planın kendi sınırında. Metin ölçüleri, görsel/kadraj/karartma, tek İzle ve D095 odak algoritması aynı. VisualPreviewTest mevcut devam kartı etiketiyle ilk başlık/en az32dp kart görünürlüğünü ve Down/Up sonrası görselin eski üst konumunu doğrular. Kod85/.71; HOME_HERO/SCREENS/NATIVE_UI/D101/BACKLOG ve sentetik görseller güncel, Figma değişmedi.
+
+Debug/test2m2s, test etiketi düzeltmesi1m3s; yalnız5558/betik/normal1,0. Son APK'larla dört farklı vaka başarılı: slayt/menü (kesilen Hero koşusunda tamamlandı), uzun/no-art ayrı1/1, devam/görsel1/1, dikey raf1/1. İki birleşik koşu hostQEMU sırasında kesildi; Windows native0xc0000005/unknownmodül, uygulama hata kanıtı sayılmadı. İlk görsel assertion yanlış tile:continue etiketi nedeniyle başarısızdı, mevcut continue etiketiyle düzeltildi. Ham kayıtlar work/hero-peek-qa, [QA](native-hero-peek-71-qa.json). Son tam unit/lint/release/debug/androidTest5m 23s: 373JVM/1skip/0hata,lint0/42; debug/test hashleri aynı. Font matrisi/fizikselFPS yok.
+
+Arşiv releases/NEXTV_TV_Design_Preview_0.14.71.apk, SHA-256 df9b0a9d0836c3bb7c9e3a169980a3e041f5ca601c1bb2490e0441fe8bc6371f. Ayrı kaynak incelemesi ve TV/5556 install-r teslimi yapılacak;5556 kullanıcı için açık kalır, gerçek yayını otomatik başlatma.5558 ve Gradle sonrasında kapalı. Sonraki geliştirme S15c öncesi çok kaynak/source-filter sayımı/Allfallback; S15c/S16/S17–S29 ve fiziksel splash/ses kabulü açık. Eski iki yedek stash korunur.
+
 ## Codex · 5556 kullanıcı testi için açık · 20 Ekim 2026
 
 Kullanıcı son sürümü emülatörde denemek istedi. nextv_design_api36/5556, -no-snapshot-load/-no-snapshot-save ile mevcut disk verisinden ve görünür pencerede açıldı; wipe/reset/snapshotrestore yok. Önce .66/kod80 vardı; arşiv .70/kod84 install-r ile kuruldu. firstInstallTime2026-10-14 08:57:19 değişmedi; cihaz lastUpdateTime2026-10-20 10:54:55 (emülatör saati); kuruluAPKhashfc99d6a48ebd89a4d0514f26fa6de7d55b467de10e524355b027cc2b2a4cb8db eşleşti. MainActivity önde/resumed, HomeUI görünüyor, appRunningtrue/crashfalse. Evim etiketi tam ekran Home'da görünmüyor; bu veri silme kanıtı değildir. Kaynaklara/oynatmaya otomatik müdahale edilmedi. Ham hassas UI dökümü saklanmadı; yalnız boolean/kurulum metadata work/manual-emulator-70/delivery.json.

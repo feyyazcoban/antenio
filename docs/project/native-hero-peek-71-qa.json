@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-20",
+  "version": "0.14.71-design-preview",
+  "versionCode": 85,
+  "decision": "D101",
+  "change": "Separate a minimum420dp foreground from the unchanged full-viewport backdrop/scrims. At normal960x540dp text and Watch rise120dp; the continue heading and card beginning are visible initially.",
+  "status": "Source and final checks complete; separate source review and device delivery pending.",
+  "tests": {
+    "debugBuild": "Successful in2m2s. Test-only selector correction rebuilt in1m3s; production code unchanged.",
+    "build": "Final unit/lint/release/debug/androidTest successful in 5m 23s; one worker,1536MB heap,in-process Kotlin. Test emulator stopped; user emulator5556 left open.",
+    "jvm": {
+      "tests": 373,
+      "skipped": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 42
+    },
+    "device": "Four distinct relevant cases completed successfully on the final APKs, only emulator-5558 through tools/run-device-tests.sh --no-build, font1.0: carousel/menu; long/no-art title with Down/Up; full-screen backdrop and initial continue peek with Down/Up; vertical shelf/heading/card framing.",
+    "apkHashesUnchangedAfterFinalBuild": true,
+    "visual": "Inspected synthetic initial continue and long/no-art captures, and compared the backdrop to .67. Image landmarks, full-screen bounds and scrims preserved; text/action moved upward; heading and upper card visible. The regression asserts a full continue heading and at least32dp of card before any scroll, plus unchanged backdrop bottom and origin after returning Up.",
+    "iterations": [
+      "First four-case run lost the host test emulator during the second case; one completed carousel pass, suite incomplete.",
+      "First isolated visual run failed because the new assertion queried a tile:continue tag that this card branch does not expose; changed assertion to the existing continue card tag. No production change.",
+      "Final two-case Hero run completed carousel, then lost the host test emulator during the long-title case. Windows Application Error1000 identified qemu-system-x86_64-headless.exe native access violation0xc0000005, unknown module. Full logs preserved; no complete-suite pass claimed.",
+      "Final visual, isolated long-title and vertical runs each completed1/1; carousel completed on final APKs in the interrupted Hero run."
+    ],
+    "limitations": [
+      "Font-scale matrix deferred by user until store preparation.",
+      "Physical visual/frame-time/Figma acceptance remains open."
+    ],
+    "logs": [
+      "debug-build.log",
+      "debug-test-fix.log",
+      "final-build.log",
+      "device-incomplete-full.log",
+      "device-visual-first-full.log",
+      "device-layout-incomplete-full.log",
+      "device-visual-final-full.log",
+      "device-long-final-full.log",
+      "device-vertical-final-full.log"
+    ]
+  },
+  "package": {
+    "archive": "releases/NEXTV_TV_Design_Preview_0.14.71.apk",
+    "bytes": 3586643,
+    "sha256": "df9b0a9d0836c3bb7c9e3a169980a3e041f5ca601c1bb2490e0441fe8bc6371f",
+    "debuggable": false,
+    "r8": true,
+    "certificateSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065"
+  },
+  "review": "Pending separate source review after implementation commit; no subagent.",
+  "delivery": {
+    "tv": "pending",
+    "designEmulator": "pending"
+  },
+  "rawEvidence": "work/hero-peek-qa",
+  "screenshots": [
+    "design/reviews/hero-peek-0.14.71/home-fullscreen-backdrop.png",
+    "design/reviews/hero-peek-0.14.71/home-initial-continue.png",
+    "design/reviews/hero-peek-0.14.71/home-continue.png",
+    "design/reviews/hero-peek-0.14.71/no-art.png"
+  ],
+  "remaining": "S15c/source-filter multi-source edge, S16/S17-S29 and physical splash/audio acceptance unchanged. BKL-019/020 are not closed as a whole."
+}

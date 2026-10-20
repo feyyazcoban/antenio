@@ -1,5 +1,9 @@
 # Ana sayfa üst alanı
 
+## 20 Ekim 2026 · İlk ekranda devam rafı · D101
+
+Kullanıcı metin ve İzle grubunu yukarı, İzlemeye devam et rafının başlangıcını ilk ekrana istedi. D093'ün tam ekran görseli ve D097'nin karartması korunur: FillWidth/TopCenter, ekranın en solundan başlayan yatay karartma ve viewport boyundaki alt geçiş aynı kalır. Yalnız ön planın minimum alanı 420 dp olur; normal 960×540 dp ekranda yazı/İzle grubu 120 dp yukarı çıkar, devam başlığı ve kartın üst bölümü görünür. Arka plan aynı viewport yüksekliğinde, ilk rafın arkasına kadar çizilir. Uzun metin alanı gerektiğinde büyüyebilir; metin boyutları değişmez. D093'ün rafı mutlaka ilk ekranın altında tutan bölümü bu kullanıcı kararıyla değişir. Tek İzle, sağ/sol slayt ve D095'in tek hedefli Yukarı/Aşağı odağı korunur.
+
 ## 19 Ekim 2026 · Ekran kenarından başlayan karartma · D097
 
 Görselin onaylanan tam genişliği ve oranı korunur. Yatay karartma en sol ekran kenarında, saydam kapalı menünün ikonlarının altında en koyu başlar; metin alanından sağa doğru yumuşakça azalır. Sol kenarı daha açık bırakan eski profil kaldırılır ve metin bölgesi biraz daha koyulaştırılır. Alt dikey geçiş ve tek İzle aynı kalır. Home kaydırması kullanıcı tarafından onaylandı; splash ayrı açık iştir.

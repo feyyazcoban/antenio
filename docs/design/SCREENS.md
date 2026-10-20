@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**20 Ekim · TV-010 / D101:** Vitrinin ön plan alanı normal ölçekte 420 dp; metin ve İzle yukarı taşınır, devam rafı başlığı ve kart başlangıcı ilk ekranda görünür. Tam ekran görselin oranı, üst hizası ve D097 karartması aynı kalır. İlk odak İzle; Aşağı ilk devam kartı, Yukarı vitrinin tam üstü. [Vitrin sözleşmesi](HOME_HERO.md).
+
 **20 Ekim · TV-052 / D100:** Canlı görüntüde kısa OK bırakıldığında kanal panelini, basılı OK kontrolleri açar; bırakma yeni düğmeye tıklamaz. Panelde Sol kategori, Sağ mini rehber; kategori yalnız OK ile uygulanır. CH±/Page tuşları sayfalar, rakamlar 1,2 sn sonra satıra odaklanır ve yayın açmaz. Alt sütunda Geri kanallara; panelde Geri sağlıklı görüntüye, hata/yeniden bağlanmada kontrollere döner. 15 sn boşta kapanma; Hiçbir zaman, TalkBack, PIN ve ayrıntı penceresi korumaları. Ayrıntılı sözleşme [overlay](gap/overlay.md); S15c bilgi bandı/basılı zap/son kanal açılış arayüzü ayrı kalır.
 
 **20 Ekim · TV-050 / D099:** Kanal numaraları yayınlanan görünür katalogdan hazırlanır; kategori/favori bağlamı zap boyunca korunur. Bekleyen rakam yokken 0 veya LAST_CHANNEL önceki kanalı kendi bağlamıyla ve güncel PIN kapısıyla seçer; 1 ardından 0 kanal10 olur. Guide oynayan kanalı açar. Son kanal yalnız gerçek oynama başlayınca kimlik/zaman olarak saklanır ve geçmiş temizliğinde unutulur. Panelin yeni kısa/basılı OK dili, kategori/mini rehber, bilgi bandı ve otomatik açılış arayüzü S15b–c kapsamındadır.

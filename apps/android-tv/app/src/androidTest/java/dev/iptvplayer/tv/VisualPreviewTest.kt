@@ -316,6 +316,28 @@ class VisualPreviewTest {
         ui.waitForIdle()
         ui.onNodeWithTag("nav:Ana Sayfa").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
         ui.onNodeWithTag("home-content").performScrollToIndex(0)
+        ui.onNodeWithTag("hero-watch").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        ui.waitForIdle()
+        ui.onNodeWithTag("hero-watch").assertIsFocused()
+        val initialViewport = ui.onNodeWithTag("home-content").getUnclippedBoundsInRoot()
+        val initialHeading = ui.onNodeWithTag("shelf-heading:continue", true).getUnclippedBoundsInRoot()
+        val initialCard = ui.onNodeWithTag("continue:${movie.id}").getUnclippedBoundsInRoot()
+        Assert.assertTrue("Continue heading is fully visible before scrolling: $initialHeading / $initialViewport",
+            initialHeading.top >= initialViewport.top && initialHeading.bottom < initialViewport.bottom)
+        Assert.assertTrue("At least 32 dp of the continue card peeks into the first screen: $initialCard / $initialViewport",
+            initialCard.top <= initialViewport.bottom - 32.dp)
+        val initialBackdrop = ui.onNodeWithTag("home-hero-backdrop").getUnclippedBoundsInRoot()
+        Assert.assertEquals("Picture still reaches the screen bottom", initialViewport.bottom.value, initialBackdrop.bottom.value, 1f)
+        shot("home-initial-continue")
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.waitForIdle()
+        ui.onNodeWithTag("continue:${movie.id}").assertIsFocused()
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_UP)
+        ui.waitForIdle()
+        ui.onNodeWithTag("hero-watch").assertIsFocused()
+        Assert.assertEquals("Returning restores the unchanged picture origin", initialViewport.top.value,
+            ui.onNodeWithTag("home-hero-backdrop").getUnclippedBoundsInRoot().top.value, 1f)
+        ui.onNodeWithTag("nav:Ana Sayfa").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
         ui.onNodeWithTag("home-content").performScrollToNode(hasText("İzlemeye devam et"))
         val resume = ui.onNodeWithTag("continue:${movie.id}")
         resume.performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }

@@ -1,5 +1,11 @@
 # Proje durumu
 
+## 0.14.71 · Vitrin ön planı yukarı · 20 Ekim 2026
+
+D101: kullanıcının görsel ayarlarını koruma isteğiyle tam ekran arka plan ve ön plan alanı ayrıldı. Normal960×540dp ekranda metin/İzle120dp yukarı, devam başlığı ve kart başlangıcı ilk ekranda. Görselin FillWidth/TopCenter kadrajı, viewport yüksekliği ve D097 karartması aynı; D095 odak algoritması korunur. İlk devam görünürlüğü, Down/Up dönüşü, slayt/menü, uzun/eksik görsel ve dikey raf kontrolü dört farklı akışta geçti. Son test APK'larıyla bir Hero vakası tamamlandıktan sonra hostQEMU kapandığı için uzun vaka ayrı koşuda geçti; kesilen koşular QA'da açıkça ayrılır. Görseller incelendi. Font matrisi yok.
+
+373JVM/1skip/0hata, lint0/42; son tam kontrol5m 23s, debug/test APK hashleri aynı. Kod85/.71 aynı imzalı/debugkapalı/R8 arşivi hazır; SHA-256 df9b0a9d0836c3bb7c9e3a169980a3e041f5ca601c1bb2490e0441fe8bc6371f. Ayrı kaynak incelemesi ve veri koruyan TV/5556 kurulumları sırada. Kullanıcı5556 açık;5558/Gradle kapanacak. [QA](native-hero-peek-71-qa.json). Genel BKL-019/020 ve fiziksel/Figma kabulü açık; bu istek sonrasında S15c öncesi çok kaynak/source-filter kenarına dönülür.
+
 ## 0.14.70 · Kullanıcı emülatörü açık · 20 Ekim 2026
 
 Kullanıcının deneme isteğiyle nextv_design_api36 /5556 görünür pencerede, diskteki verilerle soğuk açıldı; eski snapshot yüklenmedi ve veri silinmedi. Kod80/.66→kod84/.70 aynı release APK ile install-r güncellendi. İlk kurulum zamanı ve kurulu APK hash eşitliği doğrulandı. NEXTV önde, Home içeriği görünüyor; crash kaydı yok. Kullanıcı testi için AÇIK bırakıldı. Ekran testi/font matrisi/yayın otomatik başlatılmadı; TV/5554 dokunulmadı,5558/Gradlekapalı. Sonraki geliştirme S15c öncesi kaynak filtresi kenarıdır.

@@ -433,19 +433,24 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
     }
     val fade = if (motion) tween<Float>(450) else snap()
     val visibility = rememberCardVisibility(topPadding = 0.dp, bottomPadding = 0.dp, normalizeFocusRequest = true)
-    val heroHeight = maxOf(TvLayout.HeroHeight, viewportHeight)
-    Box(Modifier.fillMaxWidth().heightIn(min = heroHeight)
-        .then(visibility.container).then(visibility.focus).clipToBounds().background(Ink.Background).testTag("home-hero")) {
-        Crossfade(entry, Modifier.matchParentSize(), animationSpec = fade, label = "hero-backdrop") { slide -> HeroPicture(slide, largeText) }
-        // One continuous scrim starts at the screen edge, behind the rail as well as the text.
-        // Keep the picture's ratio and soften the shade toward its right edge.
-        Box(Modifier.matchParentSize().background(Brush.horizontalGradient(
-            0f to Ink.Background.copy(alpha = .96f), .18f to Ink.Background.copy(alpha = .92f), .34f to Ink.Background.copy(alpha = .8f),
-            .5f to Ink.Background.copy(alpha = .58f), .72f to Ink.Background.copy(alpha = .2f), 1f to Color.Transparent)))
-        Box(Modifier.matchParentSize().background(Brush.verticalGradient(
-            0f to Ink.Background.copy(alpha = .35f), .18f to Color.Transparent, .58f to Color.Transparent,
-            .86f to Ink.Background.copy(alpha = .8f), 1f to Ink.Background)))
-        Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().heightIn(min = heroHeight)
+    val backdropHeight = maxOf(TvLayout.HeroHeight, viewportHeight)
+    Box(Modifier.fillMaxWidth().heightIn(min = TvLayout.HeroHeight)
+        .then(visibility.container).then(visibility.focus).background(Ink.Background).testTag("home-hero")) {
+        // The picture keeps its full-screen geometry; only the foreground reserves shelf space (D101).
+        // matchParentSize excludes it from the hero's measurement, while the top-aligned overflow
+        // paints behind the first shelf. Clip the picture at its own bounds, not the shorter foreground.
+        Box(Modifier.matchParentSize().wrapContentHeight(Alignment.Top, unbounded = true).height(backdropHeight).clipToBounds()) {
+            Crossfade(entry, Modifier.matchParentSize(), animationSpec = fade, label = "hero-backdrop") { slide -> HeroPicture(slide, largeText) }
+            // One continuous scrim starts at the screen edge, behind the rail as well as the text.
+            // Keep the picture's ratio and soften the shade toward its right edge.
+            Box(Modifier.matchParentSize().background(Brush.horizontalGradient(
+                0f to Ink.Background.copy(alpha = .96f), .18f to Ink.Background.copy(alpha = .92f), .34f to Ink.Background.copy(alpha = .8f),
+                .5f to Ink.Background.copy(alpha = .58f), .72f to Ink.Background.copy(alpha = .2f), 1f to Color.Transparent)))
+            Box(Modifier.matchParentSize().background(Brush.verticalGradient(
+                0f to Ink.Background.copy(alpha = .35f), .18f to Color.Transparent, .58f to Color.Transparent,
+                .86f to Ink.Background.copy(alpha = .8f), 1f to Ink.Background)))
+        }
+        Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().heightIn(min = TvLayout.HeroHeight)
             .padding(start = TvLayout.RailWidth + TvLayout.Gutter, end = TvLayout.Gutter, top = 28.dp, bottom = 22.dp), verticalArrangement = Arrangement.Bottom) {
             Text(stringResource(if (newest) R.string.hero_newest else R.string.hero_library), Modifier.testTag("hero-label"), color = Ink.Mint, fontFamily = Roboto,
                 fontWeight = FontWeight.Medium, fontSize = 12.sp, letterSpacing = 1.6.sp, maxLines = 1)

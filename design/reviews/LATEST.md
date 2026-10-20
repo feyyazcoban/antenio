@@ -1,5 +1,13 @@
 # Güncel görsel inceleme
 
+## 0.14.71 · İlk ekranda devam rafı
+
+D101; sentetik yerel fixture, normal yazı. Metin/İzle grubu120dp yukarı, devam başlığı ve kart başlangıcı ilk ekranda. Görselin tam ekran kadrajı ve karartması .67 ile karşılaştırılarak korundu; kumanda dönüşü ve uzun başlık kontrolü geçti. Fiziksel/Figma kabulü ve font matrisi açık. [QA](../../docs/project/native-hero-peek-71-qa.json).
+
+![İlk ekranda devam başlığı ve kart başlangıcı](hero-peek-0.14.71/home-initial-continue.png)
+
+![Uzun başlık ve görselsiz vitrin](hero-peek-0.14.71/no-art.png)
+
 ## 0.14.70 · Kanal paneli
 
 D100 / S15b; normal yazı ve yalnız sentetik yerel yayın. Kategori seçimi, mini rehber ve seçili kanalın görünürlüğü; 12 ekran akışı geçti. Fiziksel/Figma kabulü ve font matrisi açık. [QA](../../docs/project/native-channel-panel-70-qa.json).
