@@ -1,5 +1,11 @@
 # Proje durumu
 
+## 0.14.71 · Tekrarlayan emülatör çökmesi ve ekran kartıyla açılış · 20 Ekim 2026
+
+Kullanıcı menüyü açarken emülatör tekrar kapandı. Windows 15:27:07 / PID23776 / 0xc0000005: Vulkan kapalı SwiftShader denemesi çözmedi. İlk incelemede atlanan Windows `LocalAppData/CrashDumps` klasöründeki dump'lar bulundu. İki görünür çöküşte aynı geçersiz 16 bayt okuma komutu ve SwiftShader GLES çağrı dönüş yerleri var; önceki iki test emülatörü çöküşü de aynı çizim işçisi yolunu paylaşıyor. Kanıt SwiftShader çizimine güçlü biçimde işaret eder; belirli shader/buffer kusuru simgeli stack ile kanıtlanmadı. [Ayrıntı ve sınırlar](emulator-host-crash-71-repeat-qa.json).
+
+5556 mevcut diskle `-gpu host -feature -Vulkan` açıldı; gerçek renderer NVIDIA RTX4050, SwiftShader modülleri yok. Aynı85/.71 ve kurulum tarihleri, Home/İzle ve boş yeni Android crash kaydı doğrulandı. Aynı renderer ile yalnız5558/betik/normal yazıda iki mevcut menü/vitrin kontrolü geçti; test emülatörü kapatıldı. Uygulama kodu/paketi/kaynakları değişmedi; TV/5554 dokunulmadı.5556 kullanıcıya açık; uzun oturum kararlılığı henüz doğrulanmadı. M3U'nun son-eklenen/tam-görsel veri desteği ayrı açık ürün eksiğidir.
+
 ## 0.14.71 · Vitrindeki afiş görünümünün nedeni doğrulandı · 20 Ekim 2026
 
 5556 üzerinde Ayarlar → Kaynaklar → Kaynakları yönet ekranı okunarak tek kayıtlı kaynağın M3U olduğu doğrulandı. Uygulamanın M3U ayrıştırıcısı afişi alır; backdrop, açıklama ve eklenme tarihi üretmez. Vitrin ayrıntı isteği yalnız Xtream için çalıştığından bu katalog tek Kütüphanenden slaytı ve bulanık zemin/sağ afiş düzenini kullanır. Bu davranış D067'den beri vardır; .71'in ön plan yerleşimi değişikliği değildir. Sağlayıcının ayrıca Xtream üzerinden bu film için geniş görsel verip vermediği denenmedi. Kaynak/veri/paket değişmedi; ana sayfaya ve İzle odağına dönüldü, 5556 açık. Özel görüntüler yalnız `.private/hero-source-diagnosis` içinde; uygulama testi/derlemesi yapılmadı.

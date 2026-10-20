@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-20",
+  "applicationVersion": "0.14.71-design-preview",
+  "applicationCode": 85,
+  "userAction": "The user reported freezing and closure while trying to open the menu.",
+  "confirmed": {
+    "windowsEventTime": "2026-10-20 15:27:07 +03:00",
+    "eventId": 1000,
+    "processId": 23776,
+    "application": "qemu-system-x86_64.exe",
+    "exceptionCode": "0xc0000005",
+    "faultingModule": "unknown",
+    "faultingInstruction": "0x00000256f4e81db7",
+    "werSignature": "StackHash_58d5 / PCH_3A_FROM_unknown",
+    "failedWorkaround": "This is the same PID started at14:38:40 with -gpu swiftshader -feature -Vulkan. Disabling Vulkan did not prevent recurrence.",
+    "dumpCorrection": "The first investigation checked WER and the emulator crash database but missed Windows LocalAppData/CrashDumps. Usable dumps for both visible and two earlier headless crashes exist there.",
+    "dumpHashes": {
+      "qemu-system-x86_64.exe.23776.dmp": "acf991cc121a07bc2d0762377ac2abe84449011c00330c66dda9185cb7a3a8ef",
+      "qemu-system-x86_64.exe.32776.dmp": "0b53bf7e25fe50052f1306c48be4b86dc9f026bdb7a5e53c48c1c804afc6db36"
+    },
+    "dumpAnalysis": {
+      "method": "Read-only parsing of MINIDUMP exception/context, thread, module and memory streams; raw stack module matches and call-site byte checks, not symbolic stack unwinding.",
+      "matchingInstruction": "Both visible crashes execute identical MOVDQU xmm0,[rbp+r9+0x184e0] bytes, f3 42 0f 6f 84 0d e0 84 01 00. The calculated 16-byte read address matches the exception data address in both.",
+      "sharedCallSites": "Both visible dumps have candidate return addresses in SwiftShader libGLESv2.dll at +0x207aba,+0x207eb9,+0x207fbf,+0x208340,+0x208381,+0x182647. PE bytes confirm calls immediately before those addresses. Earlier headless dumps share the worker path.",
+      "scope": "Evidence strongly implicates the SwiftShader GLES rendering path. The exact generated shader/buffer defect is not established without symbols/unwinding. Vulkan-off still used SwiftShader GLES."
+    },
+    "androidEvidence": "After reboot, latest persisted NEXTV exit-info remains the .71 PACKAGE UPDATED event. Current-boot crash buffer is empty. Abrupt VM death may prevent guest records from persisting."
+  },
+  "recovery": {
+    "device": "emulator-5556 / nextv_design_api36",
+    "arguments": "-avd nextv_design_api36 -port 5556 -no-snapshot-load -no-snapshot-save -gpu host -feature -Vulkan",
+    "launchTime": "2026-10-20 15:31:01 +03:00",
+    "qemuProcessId": 32788,
+    "actualRenderer": "Android Emulator OpenGL ES Translator (NVIDIA GeForce RTX4050 Laptop GPU/PCIe/SSE2), OpenGL ES3.0 / NVIDIA616.56",
+    "verification": "Boot completed in20.624s; Vulkan explicitly disabled; process graphics modules include nvoglv64.dll/gfxstream and no SwiftShader/libGLESv2. Same85/.71, firstInstallTime and lastUpdateTime. MainActivity cold launch409ms, foreground and Home screenshot verified.",
+    "launchCorrection": "The first am start used the applicationId-relative Activity name and failed. Leanback launcher resolution returned the actual namespace-qualified dev.iptvplayer.tv.MainActivity; launching it succeeded. No package change was needed.",
+    "dataPreservation": "Existing disk; no wipe, uninstall, install, snapshot restore, source edit or automatic real playback. No global GPU/driver/Windows/AVD configuration changes.",
+    "limitations": "Successful startup and a short check do not establish long-session stability; the preceding failure occurred about48minutes after launch."
+  },
+  "targetedCheck": {
+    "device": "emulator-5558 / nextv_test_api36",
+    "renderer": "host / Vulkan disabled / cold existing test disk; NVIDIA RTX4050 actual renderer confirmed in boot log",
+    "command": "tools/run-device-tests.sh --no-build 'HeroLayoutTest#newestTitlesTurnWithRightAndLeftAndLeftOnTheFirstReachesTheMenu,SearchNavigationTest#categoryAndMenuTransitionsKeepIntermediatePositionsAndReverseImmediately'",
+    "status": "Passed: OK (2 tests), wrapper exit0. Full instrumentation output preserved privately. Only5558 stopped afterward without snapshot save;5556 stays open.",
+    "scope": "Existing .71 debug/test APKs; synthetic data, normal font scale. No new application build."
+  },
+  "rawEvidence": ".private/emulator-crash-71-repeat (dumps, parsed evidence, logs and user Home screenshot; never commit raw captures)",
+  "reference": "https://developer.android.com/studio/run/emulator-acceleration",
+  "referenceUse": "Officially supported host mode selects computer GPU drivers. Actual NVIDIA renderer was verified locally rather than inferred from the command alone.",
+  "nextStep": "Leave5556 open for manual use. If host mode also closes, preserve its new Windows LocalAppData/CrashDumps dump and compare before changing app/data. The M3U hero limitation and S15c/remaining product work remain open."
+}

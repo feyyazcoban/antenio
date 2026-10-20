@@ -3,7 +3,7 @@
   "applicationVersion": "0.14.71-design-preview",
   "applicationCode": 85,
   "userAction": "User reported the emulator closed while removing and adding lists.",
-  "status": "Host emulator crash confirmed; exact native module unresolved. Non-destructive graphics workaround opened successfully; long-session/list-cycle stability not established.",
+  "status": "Historical first investigation. Vulkan-off SwiftShader workaround subsequently failed at15:27:07; see emulator-host-crash-71-repeat-qa.json for native dump evidence and host-GPU recovery.",
   "confirmed": {
     "windowsEventTime": "2026-10-20 14:34:34 +03:00",
     "eventId": 1000,
@@ -18,7 +18,7 @@
     "emulatorVersion": "37.2.12.0 build16428233",
     "originalRendering": "-gpu swiftshader_indirect; gfxstream; SwiftShader GLES/Vulkan; Qt software OpenGL library load failed and fell back to system OpenGL.",
     "androidEvidence": "After cold boot from existing disk, latest persisted NEXTV exit-info was PACKAGE UPDATED at emulator11:20:49, matching .71 install. No persisted NEXTV crash/ANR entry near the reported closure was found; current-boot crash buffer empty before and after launching NEXTV. A sudden VM termination may prevent guest exit records from being persisted.",
-    "dumpAvailability": "Latest Windows WER archive retained Report.wer only; emulator crash database had no usable minidump. No native stack identifies the failing component."
+    "dumpAvailability": "Initial inspection found only Report.wer in the WER archive and no minidump in the emulator crash database. Correction after recurrence: usable dumps were present in Windows LocalAppData/CrashDumps, which this first investigation missed. See emulator-host-crash-71-repeat-qa.json."
   },
   "hypothesis": "Emulator graphics/runtime instability is a suspect because both visible/headless QEMU processes failed and the original launch used a deprecated renderer switch plus SwiftShader/Vulkan. Neither the unknown faulting module nor absence of guest crash records proves a particular driver or rules out every guest-side event. No NEXTV code defect is established from these records.",
   "workaround": {

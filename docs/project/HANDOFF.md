@@ -1,5 +1,15 @@
 # Son devir notu
 
+## Codex · Tekrarlayan çökmede SwiftShader kanıtı / host GPU · 20 Ekim 2026
+
+15:27:07'de kullanıcı menü açarken bütün5556 kapandı. PID23776 önceki Vulkan-off SwiftShader açılışıyla aynı; bu deneme başarısızdır. Önceki “dump yok” sonucu eksikti: `%LOCALAPPDATA%/CrashDumps` içinde32776/23776 ve test emülatörü dump'ları var. İki GUI dump'ında aynı MOVDQU komutu/RBP+R9+0x184e0 hesaplaması tam hata adresini verir, raw stack'te aynı SwiftShader libGLESv2 çağrı dönüşleri vardır; PE byte kontrolleri çağrıları doğrular. Bağımsız ajan yalnız bu read-only native incelemeyi yaptı; özel JSON'u `.private/emulator-crash-71-repeat/dump-analysis.json`. Simgeli unwind yok, belirli shader/buffer kusurunu kesin ilan etme. Sanitized [QA](emulator-host-crash-71-repeat-qa.json); ilk QA'nın dump/workaround sonucu düzeltilmiştir.
+
+5556 `-no-snapshot-load -no-snapshot-save -gpu host -feature -Vulkan` ile mevcut diskten görünür açıldı. QEMU PID32788 /15:31:01; logdaki gerçek GLES renderer NVIDIA RTX4050/NVIDIA616.56, process'te SwiftShader/libGLESv2 yok. Boot20,624sn; aynı85/.71/firstInstallTime/lastUpdateTime. Gerçek component `dev.iptvplayer.tv.pilot/dev.iptvplayer.tv.MainActivity`; ilk applicationId-relative deneme yanlış component nedeniyle başarısız, doğru LEANBACK_LAUNCHER çözümlemesiyle COLD409ms/önde/Home geçti. Kaynak/kurulum/snapshot/veri/gerçek yayın değişikliği yok. Android kalıcı son çıkışı yine PACKAGE UPDATED; ani VM kapanması kayıtları engelleyebilir.
+
+Aynı donanım renderer'ıyla5558 soğuk/başsız açıldı, mevcut .71 debug/test APK'ları `tools/run-device-tests.sh --no-build` üzerinden iki sentetik kontrolü geçti: HeroLayoutTest#newestTitlesTurnWithRightAndLeftAndLeftOnTheFirstReachesTheMenu ve SearchNavigationTest#categoryAndMenuTransitionsKeepIntermediatePositionsAndReverseImmediately. Normal yazı, yeni build yok; tam çıktı özel klasörde.5558 snapshot kaydetmeden kapatıldı,5556 açık kalsın; TV/5554 dokunulmadı. Önceki kapanış yaklaşık48dk sonra: kısa iki test uzun kararlılık kanıtı değildir. Tekrarında yeni Windows dump'ını sakla; veri sıfırlama veya uygulama kodunu kanıtsız değiştirme. Yeni açılışta gerçek renderer'ı logdan kontrol et.
+
+Kullanıcının aradaki vitrin sorusu yanıtlandı: ürün hedefi son eklenen film/diziler; M3U yolu addedAt almadığından mevcut kod tek Kütüphanenden yedeğine düşer. Liste sırası tarihin kanıtı değildir; kaynak türü kullanıcıya sormadan dönüştürülmedi. Bu destek/görsel eksikliği ve S15c/diğer ürün işleri açık kalır.
+
 ## Codex · Vitrin kaynak türü doğrulaması · 20 Ekim 2026
 
 Kullanıcının “kesinleştir” isteğiyle 5556'nın mevcut Home görüntüsü ve Kaynakları yönet ekranı okundu: tek kaynak M3U. Kaynak düzenleme, yenileme, silme/ekleme veya yayın açma yapılmadı. Back ile aynı Home/İzle odağına dönüldü; 5556 açık bırakıldı. Ham ekranlar yalnız `.private/hero-source-diagnosis/{current,source-type,return}.png`, Git'e eklenmez. TV/5554/5558 dokunulmadı.
