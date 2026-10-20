@@ -1,5 +1,7 @@
 # İş listesi
 
+D105/.74 ·20 Ekim: son izlenen kanal logolarındaki beyaz zemin kullanıcı isteğiyle kaldırıldı, mevcut ölçüler korundu. Build/birim/lint geçti;TV veri korunarak güncellendi. Ekran Asleep olduğundan fiziksel görsel kabul açık. Uzun basma bildirimi ekran/tuş/davranış yanıtını bekliyor. [QA](native-logo-background-74-qa.json).
+
 BKL-022 ·20 Ekim fiziksel .73: animasyon görünmeme bildirimi uygulamanın Hareketi azalt tercihi açıkken yeniden üretildi. Tercih kapatılıp gerçek TV’de işaret/harf giriş aşamaları ve Home geçişi kayıttan doğrulandı. Yapılandırma sorunu giderildi; genel splash/ses/kare akıcılığı kabulü açık. [QA](physical-splash-setting-73-qa.json).
 
 UI/hız ·0.14.73 /20 Ekim: D103 küçük canlı/VOD kontrolleri, Kanallar pill, CH−/CH+ kaldırma, kategori sayıları, Sırala çizgisi kaldırma ve alt hizalı ayrıntı vitrini uygulandı; son APK'larda9/9 ilgili kontrol geçti. D104 VOD oturumluk PCM ve gerçek zamanlı2× doğrulaması eklendi. TV veri korunarak güncellendi; aynı gerçek filmde hız/codec ve UI kabulü açık. Genel ürün maddeleri done yapılmadı. [QA](native-player-category-73-qa.json).

@@ -1,5 +1,7 @@
 # Ana sayfa afiş ve devam rafları
 
+**20 Ekim · Son izlenen kanal logoları / D105:** D102 beyaz logo zemini kaldırıldı. Logo kart yüzeyi üzerinde şeffaf;80×56dp alan/8dp iç pay korunur. Eksik logo simgesi Ink.Muted; ad13sp tek satır, kart/odak ölçüleri aynı.
+
 ## 18 Ekim 2026 · Listeleme başlıkları · D093
 
 Ortak kütüphane/arama/favori afiş kartında poster–başlık aralığı 12 dp; başlık 16/22 sp Medium, bir/iki gerçek satır. Yıl/kaynak gerçek başlığın 4 dp altında 12/16 sp, muted rengin %78 opaklığıyla. Kısa ad için boş ikinci satır ayrılmaz. Canlı kart düzeni değişmez. Ana sayfa dizi rafındaki D086 yakınlık yaklaşımı listeleme kartlarına da uygulanır.

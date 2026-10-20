@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.74 · Kanal logosu beyaz zemini kaldırıldı · 20 Ekim 2026
+
+D105: son izlenen kanal logoları kart yüzeyi üzerinde şeffaf;80×56dp alan/8dp iç pay ve kart ölçüleri aynı, eksik logo simgesi Ink.Muted.374 JVM (1 skipped),0 başarısız; lint0 hata/44 uyarı,release başarılı. TV87→88/.74 veri korunarak kuruldu,kurulu APK SHA ve firstInstallTime eşitliği doğrulandı. Görsel açılış denemesinde TV Asleep/ekran siyah; uyandırılmadı, fiziksel görsel kabul açık. [QA](native-logo-background-74-qa.json).
+
 ## 0.14.73 · TV splash ayarı doğrulandı · 20 Ekim 2026
 
 Kullanıcının animasyon görünmüyor bildirimi fiziksel TV kaydıyla incelendi. Sistem animasyon ölçekleri1,0; uygulamada Hareketi azalt açık (UI checked=true). Kullanıcının animasyonu görme isteği kapsamında kapatıldı, checked=false doğrulandı. Aynı87/.73 ile ikinci tam süreç açılış kaydında işaret, ara harfler, tamamlanan logo ve Home açılması görünür. Yeni APK/kod yok; kaynak/veri korunur. Ses eşzamanlaması ve kesintisiz kare akıcılığı bu görsel kayıtla kabul edilmedi; önceki performans işi ayrı açık. [QA](physical-splash-setting-73-qa.json).

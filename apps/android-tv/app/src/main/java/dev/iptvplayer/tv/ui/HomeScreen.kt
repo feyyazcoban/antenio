@@ -631,9 +631,9 @@ internal fun runtimeText(seconds: Long): String {
                 border = CardDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
                 Row(Modifier.fillMaxWidth().heightIn(min = 100.dp).padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Box(Modifier.width(80.dp).height(56.dp).background(Color.White, RoundedCornerShape(8.dp)).padding(8.dp),
+                    Box(Modifier.width(80.dp).height(56.dp).padding(8.dp),
                         contentAlignment = Alignment.Center) {
-                        if (entry.artwork == null) LineIcon("tv", Ink.Background.copy(alpha = .6f), Modifier.size(26.dp))
+                        if (entry.artwork == null) LineIcon("tv", Ink.Muted, Modifier.size(26.dp))
                         else Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.fillMaxSize(), true, logoInset = 0.dp)
                     }
                     Column(Modifier.weight(1f),

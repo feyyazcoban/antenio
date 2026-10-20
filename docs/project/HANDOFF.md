@@ -1,5 +1,13 @@
 # Son devir notu
 
+## Codex · Şeffaf son kanal logosu /.74 · 20 Ekim 2026
+
+HomeScreen recent kartında yalnız beyaz Box.background kaldırıldı; alan/padding/başlık/odak aynı. Eksik logo LineIcon rengi Ink.Background yüzde60→Ink.Muted. Artwork logo modu zaten şeffaf; sağlayıcının görseli yeniden işlenmedi. D105,D102 beyaz kutu kararının yerine geçer; NATIVE_UI/SCREENS/HOME_SHELVES güncel. Sürüm88/0.14.74.
+
+Birim/lint/release tek son derleme5m37s:374 JVM/1skip/0 hata;lint0 hata/44 uyarı. Yeni test eklenmedi, basit renk değişiminde enstrümantasyon/font matrisi koşulmadı;5558/5556/5554 açılmadı. Kaynak farkı bağımsız tekrar okundu, engelleyici bulgu yok; proje/diff kontrolü geçti. TV install-r87→88, aynı firstInstallTime ve çekilen base.apk SHA arşivle eşit. Uygulamayı Home için açma ve iki Down denendi, screenshot siyah; power Asleep doğrulandı, TV uyandırılmadı. Gerçek yayın açılmadı. [QA](native-logo-background-74-qa.json);özel capture .private/logo-background-74.
+
+Sonraki adım: TV açıkken yeni logolar kullanıcı tarafından görülmeli. Ayrı uzun basma bildirimi için hangi ekran/tuş ve gerçekleşen davranış soruldu, yanıt henüz yok; kapsam belirlenmeden uzun basma kodu değiştirilmedi.
+
 ## Codex · Fiziksel splash / hareket tercihi · 20 Ekim 2026
 
 TV’de mevcut87/.73, sistem animator/transition ölçekleri1,0. İlk force-stop/COLD kaydında bitmiş logo + spinner doğrudan geldi. Ayarlar → Genel ve dil → Hareketi azalt satırı checked=true olarak doğrulandı; kullanıcının animasyon isteğiyle kapatıldı, checked=false kaydedildi. İkinci force-stop/COLD kaydında logo işareti, kısmi NEXTV harfleri, tamamlanma ve Home geçişi görüldü. Bu ayar D069 gereği girişi atlıyordu; performans düzeltmesi veya yeni APK değildir. Açılış sesi ayarı açık kaldı, akustik eşzaman doğrulanmadı. Fiziksel kesintisiz frame pacing kabulü açık kalır.

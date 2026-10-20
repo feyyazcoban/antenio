@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**20 Ekim · Son izlenen kanal logoları / D105:** D102 beyaz logo zemini kaldırıldı. Logo kart yüzeyi üzerinde şeffaf;80×56dp alan/8dp iç pay korunur. Eksik logo simgesi Ink.Muted; ad13sp tek satır, kart/odak ölçüleri aynı.
+
 **20 Ekim ·D103/D104:** TV020 kategori sayıları görünen grid ile eşleşir, Sırala alt çizgisi kaldırılır. TV030/040 ayrıntı görseli ana sayfa vitrini gibi ekranın solundan başlar; film metni altta, boşluk20dp. Oynatıcılar ortak küçük kontrol/metin ölçülerinde; Canlı CH−/CH+ ekran düğmeleri kaldırılmıştır. Kumanda kanal değişimi korunur. VOD hız için oturumluk ses çözümü ve sınırları DECISIONS/D104'tedir.
 
 **20 Ekim · TV-010/020 / D102:** Vitrin etiketi başlığa bağlıdır; açıklama–İzle aralığı 28 dp. Son izlenen kanal kartları beyaz yuvarlak logo zemini ve 13 sp/tek satır ad kullanır. Film kütüphanen, izleme geçmişinden bağımsız olarak Dizi kütüphanen'in altında görünür; boş tür rafı eklenmez. Canlı TV katalog satırları en az 60 dp ve 10 dp aralıklı, logo 44×26 dp. Odak/OK/Geri ve mevcut erişim filtreleri aynı. [Karar](../decisions/DECISIONS.md).

@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-20",
+  "version": "0.14.74-design-preview",
+  "versionCode": 88,
+  "decision": "D105",
+  "change": "Removed white background from Home recent-channel logo; preserved80x56dp area,8dp padding and card metrics. Missing-logo icon now Ink.Muted.",
+  "checks": {
+    "jvm": {
+      "tests": 374,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lintErrors": 0,
+    "lintWarnings": 44,
+    "releaseBuild": "Successful5m37s; no new dependencies.",
+    "projectCheck": "PASS",
+    "sourceReview": "Only background removal, missing-logo contrast and version changed; shared Artwork logo mode is already transparent. No blocking finding.",
+    "deviceTests": "No new instrumentation: reversible colour-only change; no font matrix."
+  },
+  "delivery": {
+    "device": "192.168.1.126:5555",
+    "before": {
+      "versionCode": "87",
+      "versionName": "0.14.73-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-20 19:04:45"
+    },
+    "after": {
+      "versionCode": "88",
+      "versionName": "0.14.74-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-20 19:30:34"
+    },
+    "sha256": "5b48b49a96de980b5782ac3fed48a9c1d5b77193c4776b6dca6e78b8bf67742f",
+    "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+    "realPlaybackStarted": false,
+    "appLaunchedOnTv": false,
+    "appLaunchRequested": true
+  },
+  "visualLimit": "Attempted Home launch and two Down inputs; capture black. Read-only power state confirmed Asleep. TV not awakened; physical visual acceptance remains open. Private capture .private/logo-background-74/tv.png.",
+  "next": "User may verify recent-channel logos when TV is on. Separate held-key report still needs screen/key/symptom clarification."
+}
