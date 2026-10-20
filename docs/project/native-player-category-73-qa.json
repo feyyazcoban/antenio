@@ -60,7 +60,7 @@
     "realPlaybackStarted": false,
     "appLaunchedOnTv": false
   },
-  "review": "Separate local review; no subagent. Category selected semantics and session-specific audio warning corrected before final validation.",
+  "review": "Committed diff c9c3422 independently re-read locally: focus order, selected semantics, count filters, detail fallback/episode flow and session audio policy checked. No new blocking finding. Physical AC3 speed remains unverified; no subagent used.",
   "limitations": [
     "No font matrix until store preparation.",
     "No physical AC3 speed verification or physical UI acceptance.",
