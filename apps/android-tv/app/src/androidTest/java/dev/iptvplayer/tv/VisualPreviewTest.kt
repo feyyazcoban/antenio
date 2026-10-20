@@ -780,6 +780,62 @@ class VisualPreviewTest {
         Assert.assertEquals(45_000L, model.progress(episodes.last())?.resumeMs)
     }
 
+    /** Shareable gallery of the local fixture's favorites and settings, at the device's current text size. */
+    @Test fun captureGalleryFavoritesAndSettings() {
+        val favorites = listOf(MediaKind.MOVIE, MediaKind.SERIES, MediaKind.LIVE).map { kind ->
+            model.state.value.catalog.items.first { it.kind == kind && !it.adult }
+        }
+        ui.runOnUiThread {
+            favorites.filterNot { it.id in model.state.value.favoriteIds }.forEach(model::toggleFavorite)
+            model.favorites()
+        }
+        ui.waitUntil(10_000) {
+            model.state.value.route == Route.LIBRARY &&
+                ui.onAllNodesWithTag("library-grid").fetchSemanticsNodes().isNotEmpty()
+        }
+        shot("gallery-favorites")
+
+        fun title(text: String) {
+            ui.waitUntil(5_000) {
+                ui.onAllNodes(hasTestTag("settings-title") and hasText(text)).fetchSemanticsNodes().isNotEmpty()
+            }
+        }
+        fun back() {
+            instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
+            ui.waitForIdle()
+        }
+        fun openSection(label: String) {
+            ui.onNode(hasText(label) and hasClickAction() and hasAnyAncestor(hasTestTag("settings-panel")))
+                .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
+        }
+
+        ui.onNodeWithTag("nav:Ayarlar")
+            .performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)
+        title("Ayarlar")
+        shot("gallery-settings")
+        listOf(
+            "Genel ve dil" to "general",
+            "Kaynaklar" to "sources",
+            "İçerik ve ebeveyn denetimi" to "parental",
+            "Oynatıcı" to "player",
+            "Kütüphane" to "library"
+        ).forEach { (label, name) ->
+            openSection(label)
+            title(label)
+            shot("gallery-settings-$name")
+            back()
+            title("Ayarlar")
+        }
+        openSection("Hakkında")
+        title("Uygulama hakkında")
+        shot("gallery-about")
+        back()
+        title("Ayarlar")
+        back()
+        ui.waitUntil(5_000) { ui.onAllNodesWithTag("settings-panel").fetchSemanticsNodes().isEmpty() }
+    }
+
     @Test fun captureNativeScreensWithRealArtwork() {
         val movie = model.state.value.catalog.items.first { it.localId == "movie:3" }
         ui.runOnUiThread { model.recordViewed(movie); model.saveProgress(movie, 1_200_000, 8_880_000) }

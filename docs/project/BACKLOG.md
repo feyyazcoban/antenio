@@ -1,5 +1,7 @@
 # İş listesi
 
+Paylaşım ·20 Ekim: kullanıcı için44özgün ekran/panel görüntüsü ve çevrimdışı galeri/ZIP hazır. 36kayıt .71,8tarihli eski kayıt sürümüyle etiketli; sentetik içerik,12/12dar yakalama kontrolü. Bu iş görsel kabul/store hazırlığı veya açık ürün maddelerinin tamamlanması değildir. Teslim ve kapsam HANDOFF'ta.
+
 Ortam takibi ·20 Ekim tekrar: Vulkan-off SwiftShader ile5556 yine çöktü. Windows LocalAppData/CrashDumps kanıtı ortak SwiftShader GLES çizim yolunu işaret etti; gerçek NVIDIA renderer ile5556 veri koruyarak açıldı,5558'de iki sentetik menü/vitrin kontrolü geçti. Uzun oturum kabulü açık, uygulama sürümü değişmedi. İlk “dump yok” bulgusu düzeltildi; [QA](emulator-host-crash-71-repeat-qa.json). M3U'da son-eklenen tarih/görsel desteği ayrı açık eksiği oluşturur.
 
 BKL-019/020 · 20 Ekim vitrin tanısı: 5556'daki tek kaynağın M3U olduğu Kaynakları yönet ekranından doğrulandı. Mevcut M3U yolu geniş görsel/açıklama/tarih almadığı için tek slayt ve eski sağ afiş yedeği görülüyor; .71 yerleşim regresyonu değil. Bu inceleme görsel düzeni iyileştirmedi ve genel kabulü kapatmaz. Kaynak dönüşümü/veri değişikliği yapılmadı; kanıt ve sınırlar HANDOFF'ta.

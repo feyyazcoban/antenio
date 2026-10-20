@@ -1,5 +1,11 @@
 # Proje durumu
 
+## 0.14.71 · Paylaşılabilir ekran galerisi · 20 Ekim 2026
+
+Kullanıcının ekran görüntüsü isteği için 6 bölümde 44 özgün 1920×1080 PNG, çevrimdışı HTML/Markdown galeri ve ZIP hazırlandı: `releases/NEXTV-ekranlar-0.14.71/` ve `releases/NEXTV-ekranlar-0.14.71.zip`. 36 görüntü .71; kalan 8 önceki sürümden ve kendi sürümüyle açıkça etiketli. Ana ekranlar ile başlıca paneller kapsanır; bütün hata/dil durumları ve uzun ayar sayfalarının her kaydırma konumu değildir. Kişisel kaynak yerine sentetik katalog kullanıldı.
+
+Eksik favoriler/ayarlar için yalnız VisualPreviewTest'e bir yakalama yöntemi eklendi. Debug/test derlemesi 47sn; yalnız5558/betik/normal yazı/host GPU ile 12/12 seçilmiş kontrol geçti. Kaynak PNG→galeri→HTML→ZIP bayt/hash eşitliği ve görsel örnekler bağımsız incelendi; tarayıcıda filtre, arama, büyütme, ok ve Esc çalıştı. Üretim kodu/sürüm/paket değişmedi; TV/5556 dokunulmadı.5558/Gradle kapalı. Galeri bu bilgisayarda `127.0.0.1:8767` üzerinden açık; HTML ayrıca tek başına çalışır. Önceki ürün eksikleri ve uzun emülatör kararlılığı kabulü açık kalır.
+
 ## 0.14.71 · Tekrarlayan emülatör çökmesi ve ekran kartıyla açılış · 20 Ekim 2026
 
 Kullanıcı menüyü açarken emülatör tekrar kapandı. Windows 15:27:07 / PID23776 / 0xc0000005: Vulkan kapalı SwiftShader denemesi çözmedi. İlk incelemede atlanan Windows `LocalAppData/CrashDumps` klasöründeki dump'lar bulundu. İki görünür çöküşte aynı geçersiz 16 bayt okuma komutu ve SwiftShader GLES çağrı dönüş yerleri var; önceki iki test emülatörü çöküşü de aynı çizim işçisi yolunu paylaşıyor. Kanıt SwiftShader çizimine güçlü biçimde işaret eder; belirli shader/buffer kusuru simgeli stack ile kanıtlanmadı. [Ayrıntı ve sınırlar](emulator-host-crash-71-repeat-qa.json).

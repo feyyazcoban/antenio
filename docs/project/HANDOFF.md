@@ -1,5 +1,13 @@
 # Son devir notu
 
+## Codex · Ekran görüntüsü galerisi · 20 Ekim 2026
+
+Kullanıcı bütün ekranların SS'lerini istedi. Teslim: `releases/NEXTV-ekranlar-0.14.71/{index.html,galeri.md,README.md,manifest.json,44 PNG}` ve aynı adlı ZIP (42.702.473 bayt; SHA-256 `4959eee5cf5066f5a9319d955fec61bfcd27912234c93dfbce79cf08d8f67313`). 36 kayıt .71 (32 yeni + 4 mevcut),8 kayıt .62/.63/.68/.70; galeri her birinin gerçek sürümünü belirtir. TV001 mevcut kaynak kurulumuyla ortak; ayrı welcome sayfası yok. Ana ekranlar/başlıca paneller kapsanır; tüm recovery/lock/next-up/uzun basma/alt ayar/hata varyantları değildir. Uzun sayfaların yalnız yakalanan kaydırma konumu görünür.
+
+Tek kaynak değişikliği `VisualPreviewTest#captureGalleryFavoritesAndSettings`: yerel fixture favorilerini doldurur, ayarlar kökü+5bölüm+Hakkında yakalar; mevcut cleanup kaynak favorilerini temizler. Üretim koduna dokunulmadı. Derleme debug/test47sn; Gradle durdurulup5558 hostGPU/Vulkanoff soğuk başlatıldı, NVIDIA renderer doğrulandı. Yalnız `tools/run-device-tests.sh --no-build` üzerinden12/12 yöntem geçti; yeni font matrisi/release/TVkurulumu yok. Yakalama/galeri görevi için unit/lint/release tekrar koşulmadı. Tam log `work/screen-gallery-71/device-tests.log`, kaynak PNG'ler `captures/files`, generator `build_gallery.py`, tarif `prepare_manifest.py`, giriş `manifest.json` aynı work klasöründe. Büyük teslimler releases içinde Git dışıdır.
+
+İki bağımsız ajan PNG/HTML/ZIP hashlerini,48dosya içeriğini, kaynak gizliliğini ve16görseli kontrol etti; kök ajan katalog/film/dizi/arama/player görüntülerini ve tarayıcı filtre/arama/lightbox/ok/Esc işlevini doğruladı.5558 snapshot kaydetmeden kapatıldı;5556/TV değişmedi. Yerel galeri sunucusu yalnız127.0.0.1:8767,PythonPID8488; kullanıcı önizlemesi için açık. Sonraki adım ekran geri bildirimini almak veya önceki açık M3U metadata/S15c işini sürdürmek; bu paylaşım ürün eksiklerini kapatmaz.
+
 ## Codex · Tekrarlayan çökmede SwiftShader kanıtı / host GPU · 20 Ekim 2026
 
 15:27:07'de kullanıcı menü açarken bütün5556 kapandı. PID23776 önceki Vulkan-off SwiftShader açılışıyla aynı; bu deneme başarısızdır. Önceki “dump yok” sonucu eksikti: `%LOCALAPPDATA%/CrashDumps` içinde32776/23776 ve test emülatörü dump'ları var. İki GUI dump'ında aynı MOVDQU komutu/RBP+R9+0x184e0 hesaplaması tam hata adresini verir, raw stack'te aynı SwiftShader libGLESv2 çağrı dönüşleri vardır; PE byte kontrolleri çağrıları doğrular. Bağımsız ajan yalnız bu read-only native incelemeyi yaptı; özel JSON'u `.private/emulator-crash-71-repeat/dump-analysis.json`. Simgeli unwind yok, belirli shader/buffer kusurunu kesin ilan etme. Sanitized [QA](emulator-host-crash-71-repeat-qa.json); ilk QA'nın dump/workaround sonucu düzeltilmiştir.
