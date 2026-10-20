@@ -1,5 +1,9 @@
 # Ana sayfa üst alanı
 
+## 20 Ekim 2026 · Etiket ve eylem aralıkları · D102
+
+“Yeni eklenen” / “Kütüphanenden” etiketi slaydın başlığıyla aynı metin grubundadır; başlıkla arasında 10 dp bulunur. En uzun slayt için ayrılan ortak yükseklik kısa slaytta etiket ile başlık arasına girmez. Açıklama/metin grubuyla İzle satırı arasındaki pay 18→28 dp olur. Ortak en uzun metin ölçümü, düğmenin ve rafların slayt değişiminde sabit kalmasını sürdürür. D101'in 420 dp ön planı, tam ekran görsel kadrajı ve D097 karartması korunur.
+
 ## 20 Ekim 2026 · İlk ekranda devam rafı · D101
 
 Kullanıcı metin ve İzle grubunu yukarı, İzlemeye devam et rafının başlangıcını ilk ekrana istedi. D093'ün tam ekran görseli ve D097'nin karartması korunur: FillWidth/TopCenter, ekranın en solundan başlayan yatay karartma ve viewport boyundaki alt geçiş aynı kalır. Yalnız ön planın minimum alanı 420 dp olur; normal 960×540 dp ekranda yazı/İzle grubu 120 dp yukarı çıkar, devam başlığı ve kartın üst bölümü görünür. Arka plan aynı viewport yüksekliğinde, ilk rafın arkasına kadar çizilir. Uzun metin alanı gerektiğinde büyüyebilir; metin boyutları değişmez. D093'ün rafı mutlaka ilk ekranın altında tutan bölümü bu kullanıcı kararıyla değişir. Tek İzle, sağ/sol slayt ve D095'in tek hedefli Yukarı/Aşağı odağı korunur.

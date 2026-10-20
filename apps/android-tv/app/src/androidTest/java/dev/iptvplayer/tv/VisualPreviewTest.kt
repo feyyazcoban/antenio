@@ -347,6 +347,17 @@ class VisualPreviewTest {
         Assert.assertTrue(card.top >= viewport.top && card.bottom <= viewport.bottom)
         ui.onNodeWithText("2 dk kaldı", substring = true).assertIsDisplayed()
         shot("home-continue")
+        // Discovery stays available with history, directly below the series shelf.
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.waitForIdle()
+        Assert.assertTrue(ui.onNode(isFocused()).fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.TestTag].startsWith("live:"))
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.waitForIdle()
+        Assert.assertTrue(ui.onNode(isFocused()).fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.TestTag].startsWith("series:"))
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.waitForIdle()
+        Assert.assertTrue(ui.onNode(isFocused()).fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.TestTag].startsWith("movies:"))
+        shot("home-movies-with-history")
     }
 
     @Test fun remoteVerticalShelvesKeepTheirHeadingAndFullCardTogether() {
@@ -374,9 +385,9 @@ class VisualPreviewTest {
             Assert.assertEquals(Route.HOME, model.state.value.route)
         }
         repeat(3) {
-            reach("movies", KeyEvent.KEYCODE_DPAD_DOWN)
             reach("series", KeyEvent.KEYCODE_DPAD_DOWN)
-            reach("movies", KeyEvent.KEYCODE_DPAD_UP)
+            reach("movies", KeyEvent.KEYCODE_DPAD_DOWN)
+            reach("series", KeyEvent.KEYCODE_DPAD_UP)
             reach("live", KeyEvent.KEYCODE_DPAD_UP)
         }
         reach("movies", KeyEvent.KEYCODE_DPAD_DOWN)

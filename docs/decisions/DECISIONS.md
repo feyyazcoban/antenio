@@ -289,3 +289,11 @@ Panel15sn girdisizlikte kapanır; TalkBack, OSD Hiçbir zaman veya üstteki PIN/
 ## D101 · Vitrin ön planı ve ilk devam rafı · 20 Ekim 2026
 
 Kullanıcı, görselin ayarlarını koruyarak yazı/İzle grubunu yukarı ve İzlemeye devam et rafının bir bölümünü ilk ekrana istedi. D093'te birlikte büyüyen görsel ve ön plan ayrılır: görsel viewport yüksekliğinde, FillWidth/TopCenter ve D097 karartmasıyla kalır; ön plan minimum420dp alan kaplar. Normal960×540dp ekranda ön plan120dp yukarı gelir, devam başlığı ve kart başlangıcı görünür. Gereken uzun metin alanı büyüyebilir; metin boyutları, tek İzle, slayt ve D095'in kabul edilen odak kaydırması aynı kalır. Arka plan ilk rafın arkasına kadar çizilir ve kendi tam ekran sınırında kırpılır. Bu karar D093'ün rafı ilk ekran altında tutan bölümünü değiştirir. Figma değişmedi; font matrisi kullanıcı isteğiyle mağaza öncesinde, fiziksel görsel kabul açık.
+
+## D102 · Gerçek TV görüntülerinden ana sayfa ve kanal düzeni · 20 Ekim 2026
+
+Kullanıcının dört ekran geri bildirimi birlikte uygulanır. Vitrinde üst etiket başlıkla aynı slayt grubuna alınır: en uzun gizli slaydın yüksekliği kısa slaydın etiketi altında boşluk bırakmaz; aralık10dp. Açıklama/metin ile İzle satırı arasındaki pay18→28dp. Görsel kadrajı,420dp ön plan, karartma ve slaytlar arası sabit düğme/raf konumu korunur.
+
+Son izlenen kanallarda logo beyaz80×56dp,8dp köşeli ve8dp iç paylı zeminde; kanal adı14→13sp, tek satır/üç nokta. Tam ad kumanda erişilebilirlik açıklamasında korunur; eksik logoda koyu TV simgesi kullanılır. Film kütüphanen artık izleme geçmişiyle kaybolmaz; Dizi kütüphanen'in hemen altında, onun160dp afiş/16sp başlık düzenini kullanır. Veri seçimi mevcut homeShelf'tir (ençok12, afişli içerik öncelikli); gizli/kilitli/yetişkin/sağlayıcı ayırıcı filtreleri değişmez.
+
+Canlı TV katalog listesinde logo56×32→44×26dp; satır minimum48→60dp, satırlar arası6→10dp, yatay/dikey iç pay12/5→16/10dp ve sütun aralığı12→16dp. Program satırları arası3→5dp. Aynı odak halkası/ölçeksiz satır ve OK/Geri davranışı korunur. Bu istek oynatıcının kanal çekmecesine veya rehberine uygulanmaz. Figma ve bağımlılıklar değişmez; font matrisi kullanıcının mağaza hazırlığı talimatına kadar ertelenir.

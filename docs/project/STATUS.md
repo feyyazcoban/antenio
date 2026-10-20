@@ -1,5 +1,11 @@
 # Proje durumu
 
+## 0.14.72 · Vitrin, kütüphane rafları ve kanal boşlukları · 20 Ekim 2026
+
+D102 uygulandı: vitrin etiketi başlıkla aynı metin grubunda, açıklama–İzle arası28dp; arka plan kadrajı korunur. Son izlenen kanal logosunda beyaz yuvarlatılmış zemin,13sp tek satır ad. Film kütüphanen, izleme geçmişi olsa da Dizi kütüphanen altında160dp afişlerle görünür. Canlı TV katalog satırları60dp, araları10dp; logo44×26dp ve daha geniş iç boşluklar.
+
+Son APK'larla5558'de6/6 ilgili ekran kontrolü;373 birim testi (1 atlandı),0 hata; lint0 hata/42 mevcut uyarı, release başarılı. TV85/.71 →86/.72 veri silmeden güncellendi; kurulu APK SHA ve ilk kurulum tarihi doğrulandı. TV'de vitrin görüntüsü incelendi; ardından başka uygulamaya geçildiği için gezinme durduruldu. Diğer yeni alanların fiziksel TV kabulü açık, sentetik ekranları incelendi.5558/Gradle kapalı;5556 değiştirilmedi, font matrisi koşulmadı. [QA](native-home-polish-72-qa.json).
+
 ## 0.14.71 · Gerçek televizyondan ekran galerisi · 20 Ekim 2026
 
 Kullanıcının isteğiyle fiziksel TV'de kurulu 85/0.14.71-design-preview üzerinden gerçek katalogla 41 adet 1920×1080 ekran/panel görüntüsü alındı. Ana sayfa, kompakt son izlenen kanal kartları, canlı katalog/rehber/oynatıcı/kanal çekmecesi, film/dizi ayrıntıları, arama, boş favoriler ve ayar panelleri kapsanır. Hepsi aynı TV sürümündendir; eski veya sentetik görüntü karıştırılmadı. Kişisel katalog/geçmiş içerdiğinden galeri ve ZIP yalnız `.private/tv-screen-gallery-71/` altında tutulur; Git'e girmez.

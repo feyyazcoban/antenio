@@ -1,5 +1,17 @@
 # Güncel görsel inceleme
 
+## 0.14.72 · Vitrin ve kanal boşlukları, film rafı
+
+D102; normal yazı, sentetik fixture. Son APK'larla6/6 ekran kontrolü geçti. Vitrin etiketi başlığa yakın, açıklama–İzle arası daha geniş; son kanallarda beyaz logo zemini/tek satır ad; dizi altında kalıcı film rafı; canlı katalogda küçük logo ve daha geniş satır boşlukları. Fiziksel TV'de vitrin gözlendi; diğer alanların kullanıcı kabulü açık. [QA](../../docs/project/native-home-polish-72-qa.json).
+
+![Vitrin ve devam rafı](home-polish-0.14.72/home-initial-continue.png)
+
+![Son izlenen kanallar](home-polish-0.14.72/home-recent-0.png)
+
+![Film kütüphanen](home-polish-0.14.72/home-movies-with-history.png)
+
+![Canlı TV](home-polish-0.14.72/presentation-live.png)
+
 ## 0.14.71 · İlk ekranda devam rafı
 
 D101; sentetik yerel fixture, normal yazı. Metin/İzle grubu120dp yukarı, devam başlığı ve kart başlangıcı ilk ekranda. Görselin tam ekran kadrajı ve karartması .67 ile karşılaştırılarak korundu; kumanda dönüşü ve uzun başlık kontrolü geçti. Fiziksel/Figma kabulü ve font matrisi açık. [QA](../../docs/project/native-hero-peek-71-qa.json).

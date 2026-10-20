@@ -57,7 +57,7 @@ object TvLayout {
     val HeroRadius = 20.dp
     val LandscapeWidth = 196.dp
     val PosterWidth = 136.dp
-    val SeriesShelfWidth = 160.dp
+    val LibraryShelfWidth = 160.dp
     val ContinueWidth = 284.dp
     val LiveWidth = 168.dp
     val RecentChannelWidth = 272.dp

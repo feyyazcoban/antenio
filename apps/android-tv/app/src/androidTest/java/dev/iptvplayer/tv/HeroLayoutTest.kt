@@ -36,6 +36,7 @@ class HeroLayoutTest {
         // Reduced motion stops the 8 s timer, so only the remote turns the slides here.
         DeviceStore(ui.activity).reducedMotion = true
         home((1..3).map { MediaEntry("movie:$it", "$it", MediaKind.MOVIE, "Yeni film $it", "Belgeseller",
+            description = if (it == 2) "Uzun açıklaması olan başka bir slayt. ".repeat(8) else "",
             artwork = "http://127.0.0.1:1/poster-$it.jpg", addedAt = 1_000L + it, uri = "http://127.0.0.1:1/movie.mp4") })
         // D079: İzle is the only action; Right/Left turn slides without moving focus.
         ui.onNodeWithTag("hero-watch").assertIsFocused()
@@ -44,9 +45,22 @@ class HeroLayoutTest {
         ui.onNodeWithTag("hero-dots", useUnmergedTree = true).assertExists()
         fun title() = ui.onNodeWithTag("hero-title", useUnmergedTree = true)
         title().assertTextEquals("Yeni film 3")
+        val label = ui.onNodeWithTag("hero-label", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val heading = title().getUnclippedBoundsInRoot()
+        assertEquals("A taller hidden slide must not separate the label from the visible title",
+            10f, (heading.top - label.bottom).value, 1f)
+        val hero = ui.onNodeWithTag("home-hero").getUnclippedBoundsInRoot()
+        val watch = ui.onNodeWithTag("hero-watch").getUnclippedBoundsInRoot()
         val keys = InstrumentationRegistry.getInstrumentation()
         keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
         title().assertTextEquals("Yeni film 2")
+        val description = ui.onNodeWithTag("hero-description", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        assertTrue("Description has breathing room before the watch action",
+            ui.onNodeWithTag("hero-watch").getUnclippedBoundsInRoot().top - description.bottom >= androidx.compose.ui.unit.Dp(28f))
+        assertEquals("Turning to a taller slide keeps the shelf boundary stable", hero,
+            ui.onNodeWithTag("home-hero").getUnclippedBoundsInRoot())
+        assertEquals("Turning slides keeps the watch action stable", watch,
+            ui.onNodeWithTag("hero-watch").getUnclippedBoundsInRoot())
         ui.onNodeWithTag("hero-watch").assertIsFocused()
         keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); keys.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
         title().assertTextEquals("Yeni film 3")  // the last slide wraps to the first

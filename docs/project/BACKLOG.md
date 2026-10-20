@@ -1,5 +1,7 @@
 # İş listesi
 
+UI düzeltmesi ·0.14.72 /20 Ekim: D102 vitrin etiket/eylem boşlukları, beyaz logolu tek satır son kanal kartları, Dizi kütüphanen altındaki kalıcı Film kütüphanen rafı ve daha ferah Canlı TV satırları uygulandı;6/6 ilgili ekran kontrolü geçti. TV veri korunarak güncellendi, vitrin gözlendi; diğer alanların fiziksel kabulü açık. Genel ürün maddeleri bu teslimle done sayılmaz. [QA](native-home-polish-72-qa.json).
+
 Paylaşım · 20 Ekim, gerçek TV: kurulu .71 üzerinden 41 ekran/panel görüntüsü ve ayrı özel galeri hazırlandı; gerçek katalog/izleme geçmişi, eski/sentetik kare yok. TV'nin Xtream Codes kaynağı ve kompakt son kanal kartları doğrulandı. Önceki sentetik galerinin “Son izlenen” diye yanlış adlandırılan başlangıç rafı “Canlı yayınlar” olarak düzeltildi. Bu teslim açık ürün maddelerini done yapmaz; kapsam ve özel dosya yolları HANDOFF'ta.
 
 Paylaşım ·20 Ekim: kullanıcı için44özgün ekran/panel görüntüsü ve çevrimdışı galeri/ZIP hazır. 36kayıt .71,8tarihli eski kayıt sürümüyle etiketli; sentetik içerik,12/12dar yakalama kontrolü. Bu iş görsel kabul/store hazırlığı veya açık ürün maddelerinin tamamlanması değildir. Teslim ve kapsam HANDOFF'ta.

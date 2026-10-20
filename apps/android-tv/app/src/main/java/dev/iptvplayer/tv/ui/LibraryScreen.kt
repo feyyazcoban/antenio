@@ -271,7 +271,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                         }
                         .onSizeChanged { viewportHeight = it.height }.testTag("library-grid"),
                     contentPadding = PaddingValues(start = 7.dp, end = 7.dp, top = 7.dp, bottom = 27.dp),
-                    verticalArrangement = Arrangement.spacedBy(if (live) 6.dp else 14.dp),
+                    verticalArrangement = Arrangement.spacedBy(if (live) 10.dp else 14.dp),
                     horizontalArrangement = Arrangement.spacedBy(if (live) 0.dp else 16.dp, Alignment.CenterHorizontally)) {
                     if (!fixedHeading) item(key = "heading", span = { GridItemSpan(maxLineSpan) }) {
                         // As on Ara, the heading steps aside while typing; a short result list could not scroll it away.
@@ -528,24 +528,24 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     val next = guide?.takeIf { !locked }?.next(now)
     val lockedState = stringResource(R.string.lock_state)
     Box(Modifier.fillMaxWidth().then(visibility.container).testTag("tile:library:${entry.id}")) {
-        Surface(onClick = click, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth().heightIn(min = 48.dp)
+        Surface(onClick = click, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth().heightIn(min = 60.dp)
             .semantics { contentDescription = spoken; if (locked) stateDescription = lockedState },
             shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
             colors = ClickableSurfaceDefaults.colors(containerColor = Ink.Container, contentColor = Ink.Text,
                 focusedContainerColor = Ink.High, focusedContentColor = Ink.Text),
             border = ClickableSurfaceDefaults.border(focusedBorder = focusRing(10.dp)),
             scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)) {
-            Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(horizontal = 12.dp, vertical = 5.dp),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.fillMaxWidth().heightIn(min = 60.dp).padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(if (number > 0) "$number" else "", Modifier.width(36.dp), color = Ink.Muted, fontFamily = Roboto,
                     fontSize = 14.sp, maxLines = 1)
-                Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(56.dp).height(32.dp), true, logoInset = 0.dp)
+                Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.width(44.dp).height(26.dp), true, logoInset = 0.dp)
                 Row(Modifier.weight(.42f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text((if (favorite) "★ " else "") + shown.name, Modifier.weight(1f, fill = false), color = Ink.Text, fontFamily = Roboto,
                         fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (locked) LockMark()
                 }
-                Column(Modifier.weight(.58f), verticalArrangement = Arrangement.spacedBy(3.dp, Alignment.CenterVertically)) {
+                Column(Modifier.weight(.58f), verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically)) {
                     // Without a guide the column names the channel's category instead of "Program bilgisi yok" on every row.
                     Text(current?.title ?: if (locked) stringResource(R.string.lock_channel)
                         else if (guideAvailable) stringResource(R.string.programme_none) else shownCategory(entry.category).first,

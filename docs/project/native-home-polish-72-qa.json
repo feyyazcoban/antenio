@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-20",
+  "version": "0.14.72-design-preview",
+  "versionCode": 86,
+  "decision": "D102",
+  "tests": {
+    "jvm": {
+      "tests": 373,
+      "skipped": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 42
+    },
+    "build": "Final successful in 2m42s. Initial unit run had two stale inline .71 version expectations; forced test compilation fixed these. First retry had a PowerShell quoting error and did not build.",
+    "device": "6/6 on emulator-5558 using tools/run-device-tests.sh --no-build. Repeated successfully with final APKs because test APK hash changed after nonincremental compilation; production debug APK hash unchanged.",
+    "font": "Normal only; matrix deferred by user.",
+    "visual": "Six synthetic captures inspected: hero, recent first/last, series, movies with history, live catalog. Actual TV hero inspected; later another app came forward, so further navigation stopped.",
+    "logs": "work/home-polish-72/",
+    "projectCheck": "PASS: local links,17 screens,401 variables,required documents; Figma pending1."
+  },
+  "package": {
+    "archive": "releases/NEXTV_TV_Design_Preview_0.14.72.apk",
+    "sha256": "51cd58ebc3e8d21dc38f65af792fc6a6277e1e0281bedfd8c3bde9cad8eefa68",
+    "bytes": 3586643,
+    "debuggable": false,
+    "r8": true,
+    "certificateSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065"
+  },
+  "delivery": {
+    "device": "192.168.1.126:5555",
+    "before": {
+      "versionCode": "85",
+      "versionName": "0.14.71-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-20 14:22:06"
+    },
+    "after": {
+      "versionCode": "86",
+      "versionName": "0.14.72-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-20 18:22:35"
+    },
+    "sha256": "51cd58ebc3e8d21dc38f65af792fc6a6277e1e0281bedfd8c3bde9cad8eefa68",
+    "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+    "realPlaybackStarted": false,
+    "appLaunchedOnTv": false
+  },
+  "limitations": [
+    "Physical TV acceptance for recent/movie/live rows remains open.",
+    "No font matrix, Figma synchronization or store acceptance.",
+    "5556/5554 untouched; test5558 and Gradle stopped."
+  ],
+  "review": "Implementation diff reviewed locally in a separate pass; no subagent used. Final review recorded after implementation commit."
+}

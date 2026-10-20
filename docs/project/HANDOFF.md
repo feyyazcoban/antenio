@@ -1,5 +1,17 @@
 # Son devir notu
 
+## Codex · Vitrin/kanal ferahlığı ve film rafı /0.14.72 · 20 Ekim 2026
+
+HomeScreen: hero-label, tüm slaytların ölçülen ve görünen HeroText grubunun içine alındı; kısa metinde etiket–başlık10dp korunur. İzle üst aralığı18→28dp. Görselin viewport/FillWidth/TopCenter/scrim ayarları değişmedi. Son kanal kartları80×56dp beyaz/8dp radius/8dp iç boşluk, koyu eksik-logo simgesi,13sp/18sp tek satır ad; tam erişilebilir ad korunur. Film rafı artık geçmişten bağımsız olarak dizi rafının hemen altında; ikisi ortak LibraryShelfWidth160dp ve16sp başlık kullanır.
+
+LibraryScreen yalnız canlı katalog:60dp minimum satır,16dp yatay/10dp dikey iç boşluk,16dp kolon arası,10dp satır arası,44×26dp logo,5dp EPG satır arası. Player çekmecesi değişmedi. HeroLayoutTest kısa/uzun slaytta etiket/düğme/raf sabitliğini; VisualPreviewTest geçmiş varken film rafını ve yeni dikey sırayı doğrular. Tasarım sözleşmeleri ve D102 güncel; Figma değişmedi.
+
+Son build2m42s başarılı;373 JVM (1 skipped,0 hata),lint0 hata/42 uyarı. İlk kontrol iki eski inline BuildConfig sürüm beklentisi yüzünden başarısızdı; unit compile zorlanıp Kotlin incremental kapatılarak düzeldi. İlk retry PowerShell argüman alıntılama hatasıyla başlamadı; doğru alıntıyla yeniden çalıştırıldı. Üretim debug APK hash'i aynı kaldı, test APK yeniden üretildiği için5558'de aynı6 ilgili test son APK'larla tekrar geçti. Yalnız tools/run-device-tests.sh --no-build, normal font,hostGPU/Vulkan kapalı. Ham loglar work/home-polish-72; sentetik6 görüntü design/reviews/home-polish-0.14.72.
+
+Release86/0.14.72-design-preview releases altında arşivli. Fiziksel TV install-r ile85→86; aynı firstInstallTime ve çekilen base.apk SHA doğrulandı. TV vitrin görüntüsü .private/home-polish-72/home.png; sonraki kontrol sırasında başka uygulama öne geldi, TV gezinmesi durduruldu. recent.png NEXTV değildir, kanıt olarak kullanma. Gerçek katalog görüntülerini Git'e alma. Yeni gerçek yayın açılmadı.5558 ve Gradle kapalı;5556/5554 değiştirilmedi.
+
+Sonraki adım kullanıcı incelemesi: yeni canlı satır aralıkları, beyaz logo kartları ve film rafının fiziksel TV görünümü. Eski .71 galerileri tarihli kalır, .72 diye sunulmaz. S15c/diğer ürün işleri, M3U tarih/görsel desteği ve uzun emülatör oturumu kararlılığı açık. Yazı matrisi yalnız kullanıcı “yayına hazırla” dediğinde. [QA](native-home-polish-72-qa.json).
+
 ## Codex · Gerçek TV ekranlarının teslimi · 20 Ekim 2026
 
 Kullanıcı gerçek veriyle, doğrudan televizyondan ekran görüntüleri istedi. Kurulu 85/0.14.71-design-preview ve mevcut 1920×1080 görüntü boyutu doğrulandı; fiziksel TV uyandırılarak yalnız seri hedefli manuel gezinme/yakalama yapıldı. 41 özgün PNG `.private/tv-screen-gallery-71/`; çevrimdışı HTML/Markdown ve kopyalar `output/`; ZIP `NEXTV-TV-ekranlar-0.14.71.zip`. Tarif ve özel manifest aynı klasörde, araçlar `work/tv-screen-gallery-71/` içinde. Kişisel katalog/geçmiş olan bu dosyaları releases, Git, Figma veya dış servise taşımayın. Galeri ana ekranları/panelleri ve bazı kaydırma konumlarını kapsar; tüm hata/kurulum/erişim varyantları değildir.

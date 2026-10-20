@@ -226,11 +226,10 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
             if (library.continueWatching.isNotEmpty()) add(HomeRow("continue", R.string.home_continue, library.continueWatching.map { it.entry }, continuing = library.continueWatching))
             if (library.recentChannels.isNotEmpty()) add(HomeRow("recent", R.string.home_recent_channels, library.recentChannels, MediaKind.LIVE))
             if (library.favorites.isNotEmpty()) add(HomeRow("favorites", R.string.home_favorites, library.favorites))
-            // Starter shelves until there is history: watched channels replace "Canlı yayınlar", and
-            // "İzlemeye devam et" replaces "Film kütüphanen", so a new or channel-only list never opens empty.
+            // Watched channels replace the starter live shelf; both discovery libraries remain below history.
             if (library.recentChannels.isEmpty() && library.channels.isNotEmpty()) add(HomeRow("live", R.string.home_live, library.channels, MediaKind.LIVE))
-            if (library.continueWatching.isEmpty() && library.movies.isNotEmpty()) add(HomeRow("movies", R.string.home_movies, library.movies, MediaKind.MOVIE))
             if (library.series.isNotEmpty()) add(HomeRow("series", R.string.home_series, library.series, MediaKind.SERIES))
+            if (library.movies.isNotEmpty()) add(HomeRow("movies", R.string.home_movies, library.movies, MediaKind.MOVIE))
         }
     }
     val focus = remember { FocusRequester() }
@@ -452,23 +451,21 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
         }
         Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().heightIn(min = TvLayout.HeroHeight)
             .padding(start = TvLayout.RailWidth + TvLayout.Gutter, end = TvLayout.Gutter, top = 28.dp, bottom = 22.dp), verticalArrangement = Arrangement.Bottom) {
-            Text(stringResource(if (newest) R.string.hero_newest else R.string.hero_library), Modifier.testTag("hero-label"), color = Ink.Mint, fontFamily = Roboto,
-                fontWeight = FontWeight.Medium, fontSize = 12.sp, letterSpacing = 1.6.sp, maxLines = 1)
-            Spacer(Modifier.height(10.dp))
             // Every slide's text is laid out, unseen, in the same slot: the hero keeps the tallest slide's height,
-            // so the shelves below never move as it turns.
+            // so the shelves below never move as it turns. Keep the label inside each text group:
+            // a shorter slide must not leave the reserved height between its label and title.
             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomStart) {
-                if (many) slides.forEach { HeroText(detail(it), largeText, Modifier.graphicsLayer { alpha = 0f }.clearAndSetSemantics { }) }
+                if (many) slides.forEach { HeroText(detail(it), largeText, newest, Modifier.graphicsLayer { alpha = 0f }.clearAndSetSemantics { }) }
                 // Text fades out, then in: two large titles cross-fading over each other read as a smear.
                 AnimatedContent(entry, contentAlignment = Alignment.BottomStart, label = "hero-text", transitionSpec = {
                     (if (motion) fadeIn(tween(240, delayMillis = 200)) togetherWith fadeOut(tween(200))
                     else EnterTransition.None togetherWith ExitTransition.None) using null
-                }) { slide -> HeroText(slide, largeText, tagged = true) }
+                }) { slide -> HeroText(slide, largeText, newest, tagged = true) }
             }
             // An OK within half a second of an automatic turn meant the slide that was on screen.
             fun shown() = turnedFrom?.takeIf { System.currentTimeMillis() - turnedAt < 600 } ?: slides[current]
             val place = stringResource(R.string.hero_slide, shownName(entry.title), (current + 1).toString(), slides.size.toString())
-            Row(Modifier.padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.padding(top = 28.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 // Left on İzle shows the previous slide; on the first it goes on to the menu. Both keys read the index
                 // itself, not this frame's copy, so two presses before the next frame turn two slides.
                 Action(stringResource(if (starting == slides[current].id) R.string.hero_opening else R.string.action_watch), actionModifier.onPreviewKeyEvent { event ->
@@ -513,11 +510,13 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
 }
 
 /** A slide's title, its rating, year, kind, runtime and language, and its plot, as wide as the picture leaves room for. */
-@Composable private fun HeroText(slide: MediaEntry, largeText: Boolean, modifier: Modifier = Modifier, tagged: Boolean = false) {
+@Composable private fun HeroText(slide: MediaEntry, largeText: Boolean, newest: Boolean, modifier: Modifier = Modifier, tagged: Boolean = false) {
     val width = if (largeText) .64f else if (slide.hasBackdrop) .5f else .52f
     val shown = rememberShownTitle(slide.title, slide.year)
     fun Modifier.tag(tag: String) = if (tagged) testTag(tag) else this
     Column(modifier.fillMaxWidth(width), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(stringResource(if (newest) R.string.hero_newest else R.string.hero_library), Modifier.tag("hero-label"), color = Ink.Mint, fontFamily = Roboto,
+            fontWeight = FontWeight.Medium, fontSize = 12.sp, letterSpacing = 1.6.sp, maxLines = 1)
         Text(shown.name, Modifier.tag("hero-title"), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
             fontSize = if (largeText) 32.sp else 50.sp, lineHeight = if (largeText) 38.sp else 56.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -632,16 +631,17 @@ internal fun runtimeText(seconds: Long): String {
                 border = CardDefaults.border(focusedBorder = focusRing(TvLayout.CardRadius))) {
                 Row(Modifier.fillMaxWidth().heightIn(min = 100.dp).padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Box(Modifier.width(80.dp).height(56.dp),
+                    Box(Modifier.width(80.dp).height(56.dp).background(Color.White, RoundedCornerShape(8.dp)).padding(8.dp),
                         contentAlignment = Alignment.Center) {
-                        Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.fillMaxSize(), true, logoInset = 0.dp)
+                        if (entry.artwork == null) LineIcon("tv", Ink.Background.copy(alpha = .6f), Modifier.size(26.dp))
+                        else Artwork(entry.sourceId, entry.artwork, entry.title, Modifier.fillMaxSize(), true, logoInset = 0.dp)
                     }
                     Column(Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             if (locked) LockMark()
                             Text(shown.name, Modifier.weight(1f), color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium,
-                                fontSize = 14.sp, lineHeight = 19.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                fontSize = 13.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                         sourceName?.let { Text(it, color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp,
                             lineHeight = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis) }
@@ -652,8 +652,8 @@ internal fun runtimeText(seconds: Long): String {
         return
     }
     val description = if (section == "continue") stringResource(R.string.continue_description, spoken) else spoken
-    val seriesShelf = section == "series" && entry.kind == MediaKind.SERIES
-    val width = if (live) TvLayout.LiveWidth else if (seriesShelf) TvLayout.SeriesShelfWidth else TvLayout.PosterWidth
+    val libraryShelf = section == "series" && entry.kind == MediaKind.SERIES || section == "movies" && entry.kind == MediaKind.MOVIE
+    val width = if (live) TvLayout.LiveWidth else if (libraryShelf) TvLayout.LibraryShelfWidth else TvLayout.PosterWidth
     Column(Modifier.width(width).then(visibility.container).testTag("tile:$section:${entry.id}"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Card(onClick = open, onLongClick = longClick, modifier = modifier.then(visibility.focus).fillMaxWidth().aspectRatio(if (live) 16f / 9 else 2f / 3)
             .semantics { contentDescription = description; if (locked) stateDescription = lockedState; testTag = "$section:${entry.id}" },
@@ -670,11 +670,11 @@ internal fun runtimeText(seconds: Long): String {
                 if (locked) LockBadge(Modifier.align(Alignment.TopEnd).padding(7.dp))
             }
         }
-        Column(verticalArrangement = Arrangement.spacedBy(if (seriesShelf) 4.dp else 8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(if (libraryShelf) 4.dp else 8.dp)) {
             Text(shown.name, color = Ink.Text, fontFamily = Roboto,
-                fontSize = if (seriesShelf) 16.sp else 14.sp, fontWeight = if (seriesShelf) FontWeight.Medium else null,
-                minLines = if (live || seriesShelf) 1 else 2, maxLines = 2, lineHeight = if (seriesShelf) 22.sp else 19.sp, overflow = TextOverflow.Ellipsis)
-            // The year follows the actual series title instead of an empty reserved second line.
+                fontSize = if (libraryShelf) 16.sp else 14.sp, fontWeight = if (libraryShelf) FontWeight.Medium else null,
+                minLines = if (live || libraryShelf) 1 else 2, maxLines = 2, lineHeight = if (libraryShelf) 22.sp else 19.sp, overflow = TextOverflow.Ellipsis)
+            // The year follows the actual library title instead of an empty reserved second line.
             if (!live) Text(listOf(shown.year, shown.tag, sourceName.orEmpty()).filter { it.isNotBlank() }.joinToString(" · "),
                 Modifier.testTag("home-year:$section:${entry.id}"), color = Ink.Muted,
                 fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, minLines = 1, maxLines = 1, overflow = TextOverflow.Ellipsis)
