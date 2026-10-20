@@ -157,9 +157,11 @@ class DeviceStore internal constructor(private val prefs: SharedPreferences) {
     fun history(source: String, records: List<WatchRecord>) {
         prefs.edit().putString(DeviceKeys.history.of(source), WatchHistory.encode(records)).apply()
     }
+    internal fun lastLive(source: String): LastLive? = LastLive.decode(prefs.getString(DeviceKeys.lastLive.of(source), null))
+    internal fun lastLive(source: String, value: LastLive) { prefs.edit().putString(DeviceKeys.lastLive.of(source), value.encode()).apply() }
     fun clearHistory(source: String) {
         val ownsLegacyProgress = runCatching { loadSource()?.id == source }.getOrDefault(false)
-        prefs.edit().remove(DeviceKeys.history.of(source)).apply {
+        prefs.edit().remove(DeviceKeys.history.of(source)).remove(DeviceKeys.lastLive.of(source)).apply {
             prefs.all.keys.filter { DeviceKeys.progress.owner(it) == source || (ownsLegacyProgress && DeviceKeys.legacyProgress.matches(it)) }
                 .forEach { remove(it) }
         }.apply()
@@ -205,6 +207,9 @@ class DeviceStore internal constructor(private val prefs: SharedPreferences) {
     var autoNextEpisode: Boolean
         get() = prefs.getBoolean(DeviceKeys.autoNextEpisode.name, true)
         set(value) { prefs.edit().putBoolean(DeviceKeys.autoNextEpisode.name, value).apply() }
+    var startLastChannel: Boolean
+        get() = prefs.getBoolean(DeviceKeys.startLastChannel.name, false)
+        set(value) { prefs.edit().putBoolean(DeviceKeys.startLastChannel.name, value).apply() }
     var audioLanguage: String?
         get() = prefs.getString(DeviceKeys.audioLanguage.name, null)
         set(value) { prefs.edit().putString(DeviceKeys.audioLanguage.name, value).apply() }

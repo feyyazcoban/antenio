@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.69 · Kanal bağlamı ve önceki kanal · 20 Ekim 2026
+
+S15a / D099: kanal listeleri ve numara haritaları görünür katalog yayınlanırken hazırlanır. Zap kaynak/kategori/favori bağlamını korur; 0/LAST önceki kanalı güncel erişim ve PIN kapısından seçer. Bekleyen rakamda0 hâlâ basamaktır. Guide oynayan kanalı hedefler; son kanal yalnız gerçekten oynama başlayınca kimlik/zaman olarak kaydedilir, geçmiş/kaynak temizliğinde unutulur. Otomatik açılış karar altyapısı vardır; kullanıcıya açılan ayar ve kapak altında tamponlama S15c'de kalır.
+
+368 JVM (1atlanan/0hata), lint0/42; full build9m12s. Yalnız5558/betik:6native akış geçti; Guide sistemde ayrılmış olduğundan uygulama Window.Callback→Compose→router sınırında ayrıca1/1 geçti. İlk Guide donanım enjeksiyonları başarısızdır ve QA'da korunur; fiziksel Guide tuşu kabulü açık. Normal yazı; font matrisi yok. [QA](native-channel-context-69-qa.json).
+
+Kod83/.69 aynı imzalı/debugkapalı/R8 release olarak TV'ye install-r kuruldu; ilk kurulum zamanı değişmedi, çekilen kurulu APK hash eşit. SHA-256 b800baaae4d04c9eb9c5fdd5e58bccdb59885f559739a3413c73303ce31c72ad. TVapp/yayın açılmadı;5556/5554 dokunulmadı.5558 ve Gradle kapalı. S15b–c, S16 ve S17–S29 açık; BKL-032 bütünü done değildir. Splash fiziksel animasyon/ses kabulü sürer; Home scroll kullanıcı kabulüyle kapalı.
+
 ## 0.14.68 · Splash çizim hazırlığı ve kalan işlerin durumu · 19 Ekim 2026
 
 Kullanıcının “diğer işler ne oldu” sorusunda, vitrin tesliminden sonra kalan işe dönülmediği açıkça bildirildi; splash'e dönüldü. D098: gradient/path ilk karede hazırlanır, giriş saati ve ses frame commit sonrasında başlar. Kumanda atlama, hareketi azalt ve içerik kapısı korunur. Eski release ölçümünde animasyon ortası COMMAND_ISSUE405–416ms; yeni finalde3,9ms. Bunun karşılığında ilk frame268→897ms; ilk2,8sn pencerede sonraki en büyük vsync aralığı483→600ms. **Genel açılış beklemesi bitmedi; fiziksel splash/ses kabulü açık.** Ayrıntı ve kapsam sınırı [QA](native-launch-prime-68-qa.json).

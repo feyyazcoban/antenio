@@ -198,6 +198,73 @@ class GuideFlowTest {
         assertEquals(Route.HOME, model.state.value.route)
         assertFalse(ui.activity.isFinishing)
     }
+    @Test fun guideKeyAfterZapOpensThePlayingChannel() {
+        click("nav:Canlı TV")
+        val first = model.state.value.catalog.items.first { it.id == id(0) }
+        ui.runOnUiThread { model.open(first) }
+        ui.waitUntil(10_000) { model.state.value.route == Route.PLAYER && streams.get() > 0 }
+        assertEquals(first.id, model.state.value.focusedId)
+        ui.runOnUiThread { model.changeChannel(1) }
+        ui.waitUntil(10_000) { model.state.value.playing?.entry?.id == id(1) }
+        // The model changes before the new player composition restores remote focus.
+        ui.waitForIdle()
+        // This Android TV image reserves GUIDE for its system GlobalKeyReceiver. Exercise the app's
+        // actual Window.Callback -> Compose -> PlayerKeyRouter path without that system interception.
+        ui.runOnUiThread {
+            for (action in intArrayOf(KeyEvent.ACTION_DOWN, KeyEvent.ACTION_UP))
+                ui.activity.window.callback.dispatchKeyEvent(KeyEvent(action, KeyEvent.KEYCODE_GUIDE))
+        }
+        ui.waitUntil(10_000) { model.state.value.route == Route.GUIDE }
+        ui.waitForIdle()
+        assertEquals("Guide follows the playing channel after zapping", id(1), model.state.value.guideChannelId)
+        ui.onNodeWithTag("guide-grid").assertIsFocused()
+    }
+
+    @Test fun previousChannelTogglesAndHistoryClearsItsPersistentRecord() {
+        val first = model.state.value.catalog.items.first { it.id == id(0) }
+        ui.runOnUiThread { model.open(first) }
+        ui.waitUntil(10_000) { model.store.lastLive(source.id)?.localId == "live:0" }
+        ui.runOnUiThread { model.changeChannel(1) }
+        ui.waitUntil(10_000) { model.store.lastLive(source.id)?.localId == "live:1" }
+        key(KeyEvent.KEYCODE_0)
+        ui.waitUntil(10_000) { model.state.value.playing?.entry?.id == first.id }
+        key(KeyEvent.KEYCODE_LAST_CHANNEL)
+        ui.waitUntil(10_000) { model.state.value.playing?.entry?.id == id(1) }
+        key(KeyEvent.KEYCODE_1); key(KeyEvent.KEYCODE_0)
+        ui.waitUntil(10_000) { model.store.lastLive(source.id)?.localId == "live:9" }
+        ui.runOnUiThread { model.clearHistory(source.id) }
+        ui.waitForIdle()
+        assertNull(model.state.value.previousLiveId)
+        assertNull(model.store.lastLive(source.id))
+        val playing = model.state.value.playing
+        ui.runOnUiThread { assertEquals(GateResult.Deny, model.previousChannel()) }
+        assertEquals(playing, model.state.value.playing)
+    }
+    @Test fun favoritesZapKeepsGlobalNumbersAndBackFocusesThePlayingRow() {
+        click("nav:Canlı TV")
+        val channels = listOf(0, 2).map { n -> model.state.value.catalog.items.first { it.id == id(n) } }
+        ui.runOnUiThread {
+            channels.forEach(model::toggleFavorite)
+            model.category(ChannelScope.FAVORITES)
+            model.open(channels[0])
+        }
+        ui.waitUntil(10_000) { model.store.lastLive(source.id)?.localId == "live:0" }
+        key(KeyEvent.KEYCODE_CHANNEL_UP)
+        ui.waitUntil(10_000) { model.state.value.playing?.entry?.id == id(2) }
+        assertEquals(3, model.channelNumber(channels[1]))
+        assertTrue(model.state.value.liveScope.favoritesOnly)
+        key(KeyEvent.KEYCODE_CHANNEL_UP)
+        ui.waitUntil(10_000) { model.state.value.playing?.entry?.id == id(0) }
+        key(KeyEvent.KEYCODE_CHANNEL_DOWN)
+        ui.waitUntil(10_000) { model.state.value.playing?.entry?.id == id(2) }
+        ui.runOnUiThread { model.back() }
+        ui.waitForIdle()
+        assertEquals(Route.LIBRARY, model.state.value.route)
+        assertEquals(ChannelScope.FAVORITES, model.state.value.category)
+        assertEquals(id(2), model.state.value.focusedId)
+        ui.onNode(isFocused() and hasAnyAncestor(hasTestTag("tile:library:${id(2)}"))).assertExists()
+    }
+
     @Test fun missingGuideAndEmptyFutureDayNeverBlockLivePlayback() {
         guide()
         key(KeyEvent.KEYCODE_DPAD_DOWN); key(KeyEvent.KEYCODE_DPAD_DOWN)

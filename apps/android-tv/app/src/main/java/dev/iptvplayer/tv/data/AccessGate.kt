@@ -18,9 +18,9 @@ sealed interface AccessTarget {
      * CH± or the player's channel buttons: the next channel in [direction] of the list the player was opened from that
      * plays without asking; a locked one is stepped over (pin.md §3.7).
      */
-    data class ChannelStep(val direction: Int) : AccessTarget
+    data class ChannelStep(val direction: Int, val origin: PickOrigin = PickOrigin.ZAP) : AccessTarget
     /** An explicit pick from the live player's current channel list; a locked channel asks for the PIN. */
-    data class ChannelPick(val id: String) : AccessTarget
+    data class ChannelPick(val id: String, val scope: ChannelScope? = null, val origin: PickOrigin = PickOrigin.LIST) : AccessTarget
     /** The episode after [currentId], by hand or when the countdown ends ([automatic]). */
     data class NextEpisode(val sourceId: String, val currentId: String, val nextId: String, val automatic: Boolean) : AccessTarget
 }
@@ -65,7 +65,8 @@ internal data class GateSnapshot(
     val unlocked: Set<AccessScope> = emptySet(),
     val appLocked: Boolean = false,
     /** Read by the targets of Plus features as they arrive; [AllFree] until sales open. */
-    val entitlements: Entitlements = AllFree
+    val entitlements: Entitlements = AllFree,
+    val liveById: Map<String, MediaEntry>? = null
 )
 
 /** What the gate found for a target: the [entry] to open, the lock rules' [verdict] and whether the session opened it. */

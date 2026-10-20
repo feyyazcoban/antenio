@@ -32,6 +32,7 @@ internal sealed interface PlayerKey {
     data object Right : PlayerKey
     data object Center : PlayerKey
     data object Guide : PlayerKey
+    data object LastChannel : PlayerKey
     data object FastForward : PlayerKey
     data object Rewind : PlayerKey
     data class Digit(val value: Int) : PlayerKey
@@ -50,6 +51,7 @@ internal sealed interface PlayerKey {
             KeyEvent.KEYCODE_DPAD_RIGHT -> Right
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> Center
             KeyEvent.KEYCODE_GUIDE -> Guide
+            KeyEvent.KEYCODE_LAST_CHANNEL -> LastChannel
             KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> FastForward
             KeyEvent.KEYCODE_MEDIA_REWIND -> Rewind
             in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9 -> Digit(keyCode - KeyEvent.KEYCODE_0)
@@ -64,7 +66,8 @@ internal sealed interface PlayerKey {
  * the player's own isPlaying, and [repeat] how often a key held down has repeated (KeyEvent.repeatCount).
  */
 internal data class KeyContext(val mode: PlaybackMode, val layer: PlayerLayer, val recovering: Boolean = false,
-    val failed: Boolean = false, val playing: Boolean = false, val repeat: Int = 0, val scrubbing: Boolean = false) {
+    val failed: Boolean = false, val playing: Boolean = false, val repeat: Int = 0, val scrubbing: Boolean = false,
+    val pendingDigits: Boolean = false) {
     val live get() = mode == PlaybackMode.LIVE
     /** Neither reconnecting nor stopped by an error. */
     val healthy get() = !recovering && !failed
@@ -85,6 +88,7 @@ internal sealed interface PlayerCommand {
     /** One more digit of a Canlı TV number. */
     data class AppendDigit(val digit: Int) : PlayerCommand
     data object OpenGuide : PlayerCommand
+    data object PreviousChannel : PlayerCommand
     data class Seek(val deltaMs: Long) : PlayerCommand
     data class ScrubNudge(val deltaMs: Long) : PlayerCommand
     data class CommitScrub(val thenToggle: Boolean) : PlayerCommand
@@ -130,7 +134,9 @@ internal object PlayerKeyRouter {
             key == PlayerKey.Pause -> if (recovering) PlayerCommand.StopRecovery else PlayerCommand.Pause
             (layer == PlayerLayer.Options || layer == PlayerLayer.Speed) -> null
             layer == PlayerLayer.Channels -> if (key == PlayerKey.ChannelUp || key == PlayerKey.ChannelDown ||
-                key is PlayerKey.Digit || key == PlayerKey.Guide) PlayerCommand.Consume else null
+                key is PlayerKey.Digit || key == PlayerKey.Guide || key == PlayerKey.LastChannel) PlayerCommand.Consume else null
+            live && (hidden || layer == PlayerLayer.Controls) && (key == PlayerKey.LastChannel || key == PlayerKey.Digit(0) && !pendingDigits) ->
+                if (repeat == 0) PlayerCommand.PreviousChannel else PlayerCommand.Consume
             live && (key == PlayerKey.ChannelUp || key == PlayerKey.ChannelDown) -> PlayerCommand.Zap(if (key == PlayerKey.ChannelUp) 1 else -1)
             live && hidden && healthy && (key == PlayerKey.Up || key == PlayerKey.Down) -> PlayerCommand.Zap(if (key == PlayerKey.Up) 1 else -1)
             live && layer != PlayerLayer.Tracks && key is PlayerKey.Digit -> PlayerCommand.AppendDigit(key.value)

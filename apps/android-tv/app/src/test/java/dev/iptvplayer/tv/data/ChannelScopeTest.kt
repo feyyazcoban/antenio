@@ -4,6 +4,18 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class ChannelScopeTest {
+    @Test fun publishedListsReuseNumbersAcrossCategoriesAndSources() {
+        val a = channel("1"); val b = channel("2", "Sport"); val c = channel("3", source = "b")
+        val lists = LiveLists(Catalog(listOf(a, b, c, channel("adult").copy(adult = true))))
+        val all = lists.select(ChannelScope(), emptySet())
+        val category = lists.select(ChannelScope(category = "Sport"), emptySet())
+        assertSame(all.numbers, category.numbers)
+        assertEquals(listOf(b), category.channels)
+        assertEquals(listOf(a, c), lists.select(ChannelScope(favoritesOnly = true), setOf(a.id, c.id)).channels)
+        assertEquals(listOf(c), lists.select(ChannelScope(sourceId = "b"), emptySet()).channels)
+        assertEquals(mapOf(c.id to 1), lists.select(ChannelScope(sourceId = "b"), emptySet(), "b").numbers)
+        assertNull(lists.byId[ContentRef("a", "adult").key])
+    }
     private fun channel(id: String, category: String = "News", source: String = "a") =
         MediaEntry(id, id, MediaKind.LIVE, id, category).inSource(source)
     @Test fun filteringKeepsGlobalNumbersAndProviderOrderWithDividersLast() {

@@ -186,7 +186,8 @@ import kotlinx.coroutines.flow.first
         if (layer == PlayerLayer.Video) { peek = true; peekDelta = deltaMs; peekAt = System.currentTimeMillis() }
     }
     // The player as PlayerKeyRouter reads it when a key or Back arrives; its commands are carried out here.
-    fun keys(repeat: Int = 0) = KeyContext(media.mode, top(), recoveryState.recovering, failure != null, player.isPlaying, repeat, scrub.target != null)
+    fun keys(repeat: Int = 0) = KeyContext(media.mode, top(), recoveryState.recovering, failure != null, player.isPlaying, repeat, scrub.target != null,
+        pendingDigits = digits.isNotEmpty())
     fun perform(command: PlayerCommand) {
         when (command) {
             PlayerCommand.Play -> { scrub.commit(); player.play() }
@@ -197,6 +198,14 @@ import kotlinx.coroutines.flow.first
             is PlayerCommand.Zap -> zap(command.direction)
             is PlayerCommand.AppendDigit -> { digits = PlayerKeyRouter.appendDigit(digits, command.digit); flash(digits) }
             PlayerCommand.OpenGuide -> model.guide()
+            PlayerCommand.PreviousChannel -> {
+                digits = ""; quiet = layer == PlayerLayer.Video
+                when (model.previousChannel()) {
+                    GateResult.Deny -> quiet = false
+                    is GateResult.NeedsPin -> openPin { if (layer == PlayerLayer.Video) canvas else first }
+                    else -> Unit
+                }
+            }
             is PlayerCommand.Seek -> seekBy(command.deltaMs)
             is PlayerCommand.ScrubNudge -> { updateClock(); scrub.nudge(command.deltaMs) }
             is PlayerCommand.CommitScrub -> {

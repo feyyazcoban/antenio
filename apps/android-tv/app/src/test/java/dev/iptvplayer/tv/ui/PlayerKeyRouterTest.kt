@@ -46,7 +46,7 @@ class PlayerKeyRouterTest {
         }
         // Back belongs to BackHandler; the other keys go on to focus as before.
         for (code in listOf(KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_INFO, KeyEvent.KEYCODE_NUMPAD_ENTER,
-            KeyEvent.KEYCODE_PAGE_UP, KeyEvent.KEYCODE_LAST_CHANNEL, KeyEvent.KEYCODE_MEDIA_STOP)) assertNull("$code", PlayerKey.of(code))
+            KeyEvent.KEYCODE_PAGE_UP, KeyEvent.KEYCODE_MEDIA_STOP)) assertNull("$code", PlayerKey.of(code))
     }
 
     @Test fun playPauseStopsAReconnectionRetriesAnErrorOrToggles() {
@@ -81,7 +81,7 @@ class PlayerKeyRouterTest {
     @Test fun digitsTypeALiveChannelNumberExceptOverTheTracksPanel() {
         for (d in 0..9) {
             for (layer in listOf(PlayerLayer.Video, PlayerLayer.Controls))
-                routes(PlayerCommand.AppendDigit(d), PlayerKey.Digit(d), live.copy(layer = layer, failed = true))
+                routes(if (d == 0) PlayerCommand.PreviousChannel else PlayerCommand.AppendDigit(d), PlayerKey.Digit(d), live.copy(layer = layer, failed = true))
             routes(null, PlayerKey.Digit(d), live.copy(layer = PlayerLayer.Tracks))
             for (layer in layers) routes(null, PlayerKey.Digit(d), vod.copy(layer = layer))
         }
@@ -90,6 +90,21 @@ class PlayerKeyRouterTest {
         assertEquals("1230", PlayerKeyRouter.appendDigit("123", 0))
         // A fifth digit is dropped; the number still commits after the pause.
         assertEquals("1234", PlayerKeyRouter.appendDigit("1234", 5))
+    }
+
+    @Test fun previousChannelIsImmediateButZeroStillCompletesANumber() {
+        assertEquals(PlayerKey.LastChannel, PlayerKey.of(KeyEvent.KEYCODE_LAST_CHANNEL))
+        for (layer in listOf(PlayerLayer.Video, PlayerLayer.Controls)) {
+            val context = live.copy(layer = layer)
+            routes(PlayerCommand.PreviousChannel, PlayerKey.Digit(0), context)
+            routes(PlayerCommand.AppendDigit(0), PlayerKey.Digit(0), context.copy(pendingDigits = true))
+            routes(PlayerCommand.PreviousChannel, PlayerKey.LastChannel, context.copy(pendingDigits = true))
+            routes(PlayerCommand.Consume, PlayerKey.LastChannel, context.copy(repeat = 1))
+            routes(PlayerCommand.Consume, PlayerKey.Digit(0), context.copy(repeat = 12))
+            routes(null, PlayerKey.LastChannel, vod.copy(layer = layer))
+        }
+        routes(null, PlayerKey.LastChannel, live.copy(layer = PlayerLayer.Tracks))
+        routes(PlayerCommand.Consume, PlayerKey.LastChannel, live.copy(layer = PlayerLayer.Channels))
     }
 
     @Test fun theGuideKeyOpensTheGuideFromLiveOnly() {

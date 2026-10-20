@@ -147,6 +147,8 @@
     <string name="action_back">Back</string>
     <string name="action_close">Close</string>
     <string name="player_channels">Channels</string>
+    <string name="player_no_previous">No previous channel yet.</string>
+    <string name="player_previous_gone">The previous channel is no longer available.</string>
     <string name="player_channels_empty">No channels in this list.</string>
     <string name="player_channel_playing">Now playing</string>
     <string name="action_cancel">Cancel</string>

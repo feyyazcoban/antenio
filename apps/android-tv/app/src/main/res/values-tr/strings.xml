@@ -143,6 +143,8 @@
     <string name="action_back">Geri</string>
     <string name="action_close">Kapat</string>
     <string name="player_channels">Kanallar</string>
+    <string name="player_no_previous">Henüz önceki kanal yok.</string>
+    <string name="player_previous_gone">Önceki kanal artık kullanılamıyor.</string>
     <string name="player_channels_empty">Bu listede kanal yok.</string>
     <string name="player_channel_playing">Şimdi oynatılıyor</string>
     <string name="action_cancel">Vazgeç</string>

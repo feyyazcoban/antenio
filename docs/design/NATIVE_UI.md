@@ -1,5 +1,7 @@
 # Native TV görünüm sözleşmesi
 
+**20 Ekim · TV-050 / D099:** Kanal numaraları yayınlanan görünür katalogdan hazırlanır; kategori/favori bağlamı zap boyunca korunur. Bekleyen rakam yokken 0 veya LAST_CHANNEL önceki kanalı kendi bağlamıyla ve güncel PIN kapısıyla seçer; 1 ardından 0 kanal10 olur. Guide oynayan kanalı açar. Son kanal yalnız gerçek oynama başlayınca kimlik/zaman olarak saklanır ve geçmiş temizliğinde unutulur. Panelin yeni kısa/basılı OK dili, kategori/mini rehber, bilgi bandı ve otomatik açılış arayüzü S15b–c kapsamındadır.
+
 **Oynatıcı güncellemesi · 18 Ekim 2026:** S14b / D072, önceki köşeli kontrol yüzeyini tek alt karartma, 28 sp başlık, 20 sp saat/süre, 64/52 dp taşıma düğmeleri ve sağa hizalı 44–56 dp çiplerle değiştirir. Odakta büyüme ve yatay kontrol kaydırması kaldırıldı; büyük yazıda etiketler ölçülerek simgelere iner. Yeni odaklanabilir çubuk ve Geri sırası [PLAYER_PRESENTATION](PLAYER_PRESENTATION.md) / [player-controls](gap/player-controls.md) içinde tanımlıdır. Aşağıdaki eski sürüm ölçüleri tarihçedir; D064 odak sözleşmesi ve güncel ekran tanımları önceliklidir.
 
 14 Ekim 2026 · 0.7 pilot. Bu belge mevcut COLOR/MOTION ve SCREENS belgelerini uygulama ölçülerine bağlar. Yeni bir tasarım sistemi değildir. Figma'ya aktarım kota nedeniyle yapılmadı; tam ekran referansı `prototypes/tv-flow` ve daha önce gösterilen prototip görüntüleridir.

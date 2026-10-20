@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**20 Ekim · TV-050 / D099:** Kanal numaraları yayınlanan görünür katalogdan hazırlanır; kategori/favori bağlamı zap boyunca korunur. Bekleyen rakam yokken 0 veya LAST_CHANNEL önceki kanalı kendi bağlamıyla ve güncel PIN kapısıyla seçer; 1 ardından 0 kanal10 olur. Guide oynayan kanalı açar. Son kanal yalnız gerçek oynama başlayınca kimlik/zaman olarak saklanır ve geçmiş temizliğinde unutulur. Panelin yeni kısa/basılı OK dili, kategori/mini rehber, bilgi bandı ve otomatik açılış arayüzü S15b–c kapsamındadır.
+
 **19 Ekim · D098 / 0.14.68:** Splash gradient/logo çizimini siyaha yakın ilk karede hazırlar; ardından giriş saati ve ses başlar. İlk kare uzayabilir; toplam açılışın hızlandığı veya fiziksel akıcılığın kabul edildiği anlamına gelmez. Süre, kumandayla atlama, hareketi azalt ve içerik hazırlama davranışları korunur.
 
 **19 Ekim · TV-010 / D097:** Vitrin karartması ekranın en solundan, kapalı menü ikonlarının arkasından başlar ve sağa doğru kesintisiz azalır. Sol kenar ve metin bölgesi biraz daha koyudur; D093'te onaylanan tam genişlik/oran korunur.

@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-20",
+  "version": "0.14.69-design-preview",
+  "versionCode": 83,
+  "decision": "D099",
+  "change": "S15a: published live lists and number maps, remembered live scope, previous-channel gate, source-local last-live record and cleanup, auto-start decision infrastructure (UI remains off/unexposed), guide follows the playing channel.",
+  "review": "Pending separate source pass after implementation commit; no separate agent.",
+  "tests": {
+    "jvm": {
+      "tests": 368,
+      "skipped": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 42,
+      "newWarnings": "Two UseKtx suggestions for SharedPreferences writes; existing project style retained."
+    },
+    "build": "Full unit/lint/release/debug/androidTest successful in 9m12s. Final late gate test is in XML. Test-only favorites addition: assembleAndroidTest/lint 2m01s. Guide diagnostic/boundary adjustments rebuilt test APK; final test/lint 2m34s. Production inputs unchanged after full build. One worker, heap1536MB, in-process Kotlin.",
+    "device": {
+      "surface": "emulator-5558 / nextv_test_api36 only, tools/run-device-tests.sh --no-build, normal font scale",
+      "nativePassed": [
+        "GuideFlowTest#previousChannelTogglesAndHistoryClearsItsPersistentRecord",
+        "GuideFlowTest#favoritesZapKeepsGlobalNumbersAndBackFocusesThePlayingRow",
+        "PlayerControlsLayoutTest#channelDrawerBrowsesWithoutPlayingThenSwitchesOnTheSamePlayerAndReturnsFocus",
+        "PlayerControlsLayoutTest#favoriteDrawerSurvivesRefreshAndMovesFocusWhenRowsDisappear",
+        "ParentalFlowTest#aLockedCategorysChannelsArePassedByChannelUpAndAskWhenTypedByNumber",
+        "ParentalFlowTest#channelDrawerPinCancelRestoresTheRowAndUnlockKeepsTheDrawerOpen"
+      ],
+      "appWindowBoundaryPassed": [
+        "GuideFlowTest#guideKeyAfterZapOpensThePlayingChannel"
+      ],
+      "initialFailures": "Native GUIDE injection timed out in the initial 7-test run and two focused diagnostics. Waiting for composition did not solve it. Window.Callback observer received no GUIDE event while route=PLAYER and windowFocus=true. Emulator dumpsys window policy maps KEYCODE_GUIDE to com.google.android.tv.receiver.GlobalKeyReceiver.",
+      "finalBoundary": "Final test sends GUIDE down/up through the real app Window.Callback, then Compose/PlayerKeyRouter; it does not invoke model.guide directly. Correct playing channel and guide-grid focus passed. This is not a physical GUIDE remote-key pass.",
+      "logs": [
+        "device-initial-full.log",
+        "guide-dispatch-evidence.log",
+        "window-policy.log",
+        "device-guide-boundary-full.log"
+      ]
+    },
+    "project": "check_project passed: local links,17 screens,401 variables,required docs; Figma pending1.",
+    "limits": [
+      "Physical GUIDE delivery and splash/audio acceptance remain open.",
+      "No font-scale matrix or physical playback/frame-time measurement.",
+      "S15b-c panel/mini guide/info band/held zap/last-channel launch UI, S16 and S17-S29 remain open."
+    ]
+  },
+  "rawEvidence": "work/channel-context-qa",
+  "delivery": {
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "82",
+        "versionName": "0.14.68-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-19 23:43:40"
+      },
+      "after": {
+        "versionCode": "83",
+        "versionName": "0.14.69-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-20 12:06:03"
+      },
+      "sha256": "b800baaae4d04c9eb9c5fdd5e58bccdb59885f559739a3413c73303ce31c72ad",
+      "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+      "realPlaybackStarted": false,
+      "appLaunchedOnTv": false
+    },
+    "signatureSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065",
+    "package": "dev.iptvplayer.tv.pilot",
+    "minified": true,
+    "debuggable": false,
+    "designEmulator": "5556 was not connected and was not started or modified.",
+    "testEmulator": "5558 stopped without saving snapshot; Gradle stopped."
+  }
+}

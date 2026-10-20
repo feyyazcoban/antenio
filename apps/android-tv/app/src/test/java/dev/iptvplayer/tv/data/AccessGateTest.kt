@@ -4,6 +4,17 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class AccessGateTest {
+    @Test fun cachedChannelLookupKeepsPinAndCanonicalPublicationChecks() {
+        val target = AccessTarget.ChannelPick(sport.id, ChannelScope(category = "Spor"), PickOrigin.PREVIOUS)
+        val current = snapshot.copy(playing = news, playerShown = true, channels = listOf(sport),
+            liveById = LiveLists(raw).byId, policy = locks)
+        assertEquals(GateResult.NeedsPin(target), decide(target, current))
+        allows(sport, target, current.copy(unlocked = setOf(content(sport))))
+        val removed = raw.copy(items = raw.items - sport)
+        denies(target, current.copy(allCatalog = removed, liveById = LiveLists(removed).byId))
+        denies(target, current.copy(appLocked = true))
+        denies(target, current.copy(channels = emptyList()))
+    }
     @Test fun explicitChannelPickRequiresCurrentScopeAndRevalidatesAfterPin() {
         val target = AccessTarget.ChannelPick(sport.id)
         val current = snapshot.copy(playing = news, playerShown = true, channels = listOf(news, sport), policy = locks)

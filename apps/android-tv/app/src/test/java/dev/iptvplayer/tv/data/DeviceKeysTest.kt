@@ -21,11 +21,13 @@ class DeviceKeysTest {
             store.favorites(id, setOf("movie:1"))
             store.history(id, listOf(WatchRecord("movie:1", MediaKind.MOVIE, positionMs = 1000, durationMs = 10_000)))
             store.saveProgress(id, "movie:1", 1000, 10_000)
+            store.lastLive(id, LastLive("live:1", 1000))
         }
         store.reducedMotion = true; store.startupSound = false; store.guideZoneId = "Europe/Istanbul"
         MediaKind.entries.forEach { store.librarySort(it, LibrarySort.TITLE) }
         store.hiddenCategories = setOf(CategoryVisibility.key(MediaKind.LIVE, "Haber")); store.hideAdultCategories = false
         store.autoNextEpisode = false; store.audioLanguage = "tr"; store.subtitleLanguage = "en"; store.subtitlesOff = false
+        store.startLastChannel = true
         store.appLanguage = "tr"; store.appLanguageHandedOver = true
         store.playback = player
         return memory to store
@@ -72,10 +74,10 @@ class DeviceKeysTest {
         val (memory, _) = filled()
         val keys = memory.values.keys.toList()
         val left = DeviceKeys.leftBehind(keys, setOf("source"))
-        assertEquals(setOf(DeviceKeys.favorites.of("source:a"), DeviceKeys.history.of("source:a")),
+        assertEquals(setOf(DeviceKeys.favorites.of("source:a"), DeviceKeys.history.of("source:a"), DeviceKeys.lastLive.of("source:a")),
             left.filterNot { it.startsWith(DeviceKeys.progress.of("source:a")) }.toSet())
         assertEquals(1, left.count { it.startsWith(DeviceKeys.progress.of("source:a")) })
-        assertEquals(3, left.size)
+        assertEquals(4, left.size)
         assertEquals(emptyList<String>(), DeviceKeys.leftBehind(keys, owners.toSet()))
         // Device settings belong to no source; the pre-registry progress keys are saveSources' own migration.
         assertEquals(emptyList<String>(), DeviceKeys.leftBehind(listOf("p:abc", "reduced", "sort:MOVIE", "unknown"), emptySet()))
@@ -106,6 +108,7 @@ class DeviceKeysTest {
         val (memory, store) = filled()
         store.clearHistory("source")
         assertTrue(store.history("source").isEmpty()); assertNull(store.progress("source", "movie:1"))
+        assertNull(store.lastLive("source")); assertEquals(LastLive("live:1", 1000), store.lastLive("source:a"))
         assertEquals(1, store.history("source:a").size); assertEquals(1000L, store.progress("source:a", "movie:1")!!.positionMs)
         assertEquals(setOf("movie:1"), store.favorites("source"))
         assertTrue(memory.values.keys.none { DeviceKeys.history.owner(it) == "source" || DeviceKeys.progress.owner(it) == "source" })

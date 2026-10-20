@@ -82,6 +82,8 @@ internal object DeviceKeys {
     val progress = DeviceKey("p2:", KeyScope.SOURCE, reset = true, BackupClass.PERSONAL, DeviceKey.Layout.SIZED)
     val favorites = DeviceKey("f:", KeyScope.SOURCE, reset = true, BackupClass.PERSONAL, DeviceKey.Layout.OWNER)
     val history = DeviceKey("history:", KeyScope.SOURCE, reset = true, BackupClass.PERSONAL, DeviceKey.Layout.OWNER)
+    val lastLive = DeviceKey("lastLive:", KeyScope.SOURCE, reset = true, BackupClass.PERSONAL, DeviceKey.Layout.OWNER)
+    val startLastChannel = DeviceKey("startLastChannel", KeyScope.DEVICE, reset = false, BackupClass.SETTINGS)
     val reducedMotion = DeviceKey("reduced", KeyScope.DEVICE, reset = false, BackupClass.SETTINGS)
     val startupSound = DeviceKey("startupSound", KeyScope.DEVICE, reset = false, BackupClass.SETTINGS)
     val guideZone = DeviceKey("guideZoneId", KeyScope.DEVICE, reset = false, BackupClass.SETTINGS)
@@ -101,7 +103,7 @@ internal object DeviceKeys {
     /** That this TV's Android 13 or later took over [appLanguage] once; another TV starts its own handover. */
     val appLanguageHandedOver = DeviceKey("appLanguageHandedOver", KeyScope.DEVICE, reset = false, BackupClass.NONE)
 
-    val all = listOf(sources, legacySource, legacyProgress, progress, favorites, history, reducedMotion, startupSound,
+    val all = listOf(sources, legacySource, legacyProgress, progress, favorites, history, lastLive, startLastChannel, reducedMotion, startupSound,
         guideZone, librarySort, hiddenCategories, hideAdultCategories, autoNextEpisode, audioLanguage, subtitleLanguage,
         subtitlesOff, playback, appLanguage, appLanguageHandedOver)
 

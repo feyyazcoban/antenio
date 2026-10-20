@@ -27,7 +27,7 @@ internal object AccessTargets {
                     channel(target.id)?.let(::ResolvedTarget) else null
                 is AccessTarget.ChannelStep -> if (channels.isEmpty()) null else {
                     // One lookup table for the steps: a locked category can make CH± pass many channels.
-                    val published = allCatalog.items.filter { it.kind == MediaKind.LIVE && !it.adult }.associateBy { it.id }
+                    val published = liveById ?: allCatalog.items.filter { it.kind == MediaKind.LIVE && !it.adult }.associateBy { it.id }
                     nextZap(channels, playing?.id, target.direction) { candidate ->
                         published[candidate.id]?.let { opens(ResolvedTarget(it)) } == true
                     }?.let { published[it.id] }?.let(::ResolvedTarget)
@@ -56,7 +56,7 @@ internal object AccessTargets {
     /** A channel, film or series of the published library. */
     private fun GateSnapshot.title(id: String): MediaEntry? = allCatalog.items.firstOrNull { it.id == id && !it.adult }
 
-    private fun GateSnapshot.channel(id: String): MediaEntry? = title(id)?.takeIf { it.kind == MediaKind.LIVE }
+    private fun GateSnapshot.channel(id: String): MediaEntry? = if (liveById != null) liveById[id] else title(id)?.takeIf { it.kind == MediaKind.LIVE }
 
     /**
      * What Play starts: the open detail when it is this title (a film's detail can name the stream's real container),
