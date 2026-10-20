@@ -4,7 +4,7 @@
 
 S15a / D099: kanal listeleri ve numara haritaları görünür katalog yayınlanırken hazırlanır. Zap kaynak/kategori/favori bağlamını korur; 0/LAST önceki kanalı güncel erişim ve PIN kapısından seçer. Bekleyen rakamda0 hâlâ basamaktır. Guide oynayan kanalı hedefler; son kanal yalnız gerçekten oynama başlayınca kimlik/zaman olarak kaydedilir, geçmiş/kaynak temizliğinde unutulur. Otomatik açılış karar altyapısı vardır; kullanıcıya açılan ayar ve kapak altında tamponlama S15c'de kalır.
 
-368 JVM (1atlanan/0hata), lint0/42; full build9m12s. Yalnız5558/betik:6native akış geçti; Guide sistemde ayrılmış olduğundan uygulama Window.Callback→Compose→router sınırında ayrıca1/1 geçti. İlk Guide donanım enjeksiyonları başarısızdır ve QA'da korunur; fiziksel Guide tuşu kabulü açık. Normal yazı; font matrisi yok. [QA](native-channel-context-69-qa.json).
+368 JVM (1atlanan/0hata), lint0/42; full build9m12s. Yalnız5558/betik:6native akış geçti; Guide sistemde ayrılmış olduğundan uygulama Window.Callback→Compose→router sınırında ayrıca1/1 geçti. İlk Guide donanım enjeksiyonları başarısızdır ve QA'da korunur; fiziksel Guide tuşu kabulü açık. Normal yazı; font matrisi yok. Uygulama commit6d85bf2 sonrası ayrı kaynak incelemesinde somut regresyon bulunmadı; ayrı ajan kullanılmadı. [QA](native-channel-context-69-qa.json).
 
 Kod83/.69 aynı imzalı/debugkapalı/R8 release olarak TV'ye install-r kuruldu; ilk kurulum zamanı değişmedi, çekilen kurulu APK hash eşit. SHA-256 b800baaae4d04c9eb9c5fdd5e58bccdb59885f559739a3413c73303ce31c72ad. TVapp/yayın açılmadı;5556/5554 dokunulmadı.5558 ve Gradle kapalı. S15b–c, S16 ve S17–S29 açık; BKL-032 bütünü done değildir. Splash fiziksel animasyon/ses kabulü sürer; Home scroll kullanıcı kabulüyle kapalı.
 

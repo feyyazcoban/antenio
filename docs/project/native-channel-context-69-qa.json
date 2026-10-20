@@ -4,7 +4,17 @@
   "versionCode": 83,
   "decision": "D099",
   "change": "S15a: published live lists and number maps, remembered live scope, previous-channel gate, source-local last-live record and cleanup, auto-start decision infrastructure (UI remains off/unexposed), guide follows the playing channel.",
-  "review": "Pending separate source pass after implementation commit; no separate agent.",
+  "review": {
+    "implementationCommit": "6d85bf2613b2cafc18b438fe04d1303958247a34",
+    "method": "Separate source pass after implementation commit, using the four STEPS perspectives. Same agent; no separate reviewer agent.",
+    "checked": [
+      "Correctness/regression: every LIVE start captures scope; same-id pick does not reopen stream; pending digits/repeats; favorite zap/global numbers and Back focus.",
+      "Architecture: pure LiveLists/LiveRecall/AutoStart; allCatalog and liveById are replaced together without suspension in publication; cached maps are never from an older canonical publication.",
+      "TV/accessibility: existing D094 focus/motion/controls retained; PIN cancel/unlock and drawer refresh/removal covered. New font matrix and physical TalkBack tour deferred.",
+      "Access/privacy/session: ChannelPick re-resolves on PIN; hidden/adult/source removal remain gated; lastLive stores local identity/time only and joins cleanup; existing single ExoPlayer stop/clear path retained."
+    ],
+    "findings": "No actionable current regression found. Native GUIDE diagnostic limitation is explicit and retained. S15b-c behavior remains scoped out."
+  },
   "tests": {
     "jvm": {
       "tests": 368,
