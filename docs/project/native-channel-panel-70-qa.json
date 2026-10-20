@@ -129,7 +129,38 @@
       "realPlaybackStarted": false,
       "appLaunchedOnTv": false
     },
-    "designEmulator": "5556 and5554 were not started or modified.",
+    "designEmulator": {
+      "initialDelivery": "5556 and5554 were not started or modified during initial TV delivery.",
+      "subsequentUserRequest": "Open latest on emulator for manual testing.",
+      "manualTest": {
+        "device": "emulator-5556",
+        "avd": "nextv_design_api36",
+        "before": {
+          "versionCode": "80",
+          "versionName": "0.14.66-design-preview",
+          "firstInstallTime": "2026-10-14 08:57:19",
+          "lastUpdateTime": "2026-10-18 17:49:50"
+        },
+        "after": {
+          "versionCode": "84",
+          "versionName": "0.14.70-design-preview",
+          "firstInstallTime": "2026-10-14 08:57:19",
+          "lastUpdateTime": "2026-10-20 10:54:55"
+        },
+        "sha256": "fc99d6a48ebd89a4d0514f26fa6de7d55b467de10e524355b027cc2b2a4cb8db",
+        "dataPreservation": "install -r; unchanged firstInstallTime; no clear/uninstall/wipe/snapshot restore",
+        "visibleWindow": true,
+        "appLaunched": true,
+        "automatedPlaybackStarted": false,
+        "instrumentationRun": false,
+        "appRunning": true,
+        "appForeground": true,
+        "evimLabelVisible": false,
+        "homeContentVisible": true,
+        "crashRecordForApp": false
+      },
+      "leftOpenForUser": true
+    },
     "testEmulator": "5558 stopped without saving snapshot; Gradle stopped."
   }
 }

@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Codex · 5556 kullanıcı testi için açık · 20 Ekim 2026
+
+Kullanıcı son sürümü emülatörde denemek istedi. nextv_design_api36/5556, -no-snapshot-load/-no-snapshot-save ile mevcut disk verisinden ve görünür pencerede açıldı; wipe/reset/snapshotrestore yok. Önce .66/kod80 vardı; arşiv .70/kod84 install-r ile kuruldu. firstInstallTime2026-10-14 08:57:19 değişmedi; cihaz lastUpdateTime2026-10-20 10:54:55 (emülatör saati); kuruluAPKhashfc99d6a48ebd89a4d0514f26fa6de7d55b467de10e524355b027cc2b2a4cb8db eşleşti. MainActivity önde/resumed, HomeUI görünüyor, appRunningtrue/crashfalse. Evim etiketi tam ekran Home'da görünmüyor; bu veri silme kanıtı değildir. Kaynaklara/oynatmaya otomatik müdahale edilmedi. Ham hassas UI dökümü saklanmadı; yalnız boolean/kurulum metadata work/manual-emulator-70/delivery.json.
+
+5556 kullanıcı için AÇIK kalsın; test/reset/kapatma yapma.5558 veGradlekapalı,TV/5554dokunulmadı. Kullanıcı talebi yalnız mevcut APK'yı açmaktı; yeni derleme/ekran testi/fontmatrisi yapılmadı. Sonraki geliştirme aşağıdaki S15c öncesi kaynakfilter/sayım kenarıdır; normal testler yine yalnız5558/tools/run-device-tests.sh. Bu işlem yalnız cihaz/QA kayıtlarını değiştirir.
+
 ## Codex · S15b / 0.14.70 teslim · 20 Ekim 2026
 
 Üretim kod84/0.14.70; uygulama commit37d9c54. Sonrasında aynı ajan, ayrı kaynak geçişinde dört STEPS bakışını inceledi; ayrı reviewer ajanı yok. Mevcut ChannelDrawer→ChannelPanel: kategori/mini rehber, kısa/basılı OK, paging/1200ms numara odağı,15sn idle/TalkBack/NEVER/PIN/dialog, görünür±3/playing EPG150ms/oturummerge, QuickActions/ProgrammeDetail. Düz focusTarget dönüş kimliğini geçici sistem odağından ayırır; inactivekolon callbackleri hafızayı ezmez. Inactivekanalsütunu bring-into-view yapmaz; minirehberde seçili kanal tamamen görünür. LiveLists cachedfavorites/ScopeChoice, VMfocusedGuide/liveChoices/liveEntry, sharedProgress, EN/TRplurals. D100/SCREENS/NATIVE_UI/MOTION/BACKLOG/STEPS/STATUS/QA/görseller güncel. S15c/S16/sonrası uygulanmadı.

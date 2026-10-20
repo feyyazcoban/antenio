@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.70 · Kullanıcı emülatörü açık · 20 Ekim 2026
+
+Kullanıcının deneme isteğiyle nextv_design_api36 /5556 görünür pencerede, diskteki verilerle soğuk açıldı; eski snapshot yüklenmedi ve veri silinmedi. Kod80/.66→kod84/.70 aynı release APK ile install-r güncellendi. İlk kurulum zamanı ve kurulu APK hash eşitliği doğrulandı. NEXTV önde, Home içeriği görünüyor; crash kaydı yok. Kullanıcı testi için AÇIK bırakıldı. Ekran testi/font matrisi/yayın otomatik başlatılmadı; TV/5554 dokunulmadı,5558/Gradlekapalı. Sonraki geliştirme S15c öncesi kaynak filtresi kenarıdır.
+
 ## 0.14.70 · Kanal paneli · 20 Ekim 2026
 
 S15b / D100: mevcut çekmece kategori ve mini rehberle genişletildi. Canlıda kısa OK bırakılınca liste, basılı OK kontroller; bırakma tıklaması yutulur. Kategori yalnız OK ile uygulanır. CH/Page sayfalar, rakamlar 1,2 sn sonra satıra odaklanır; gezinmek yayın açmaz. Alt sütundan Geri kanallara, panelden sağlıklı görüntüye döner. 15 sn boşta kapanma; Hiçbir zaman/TalkBack/PIN/dialog koruması. Aynı player ve erişim kapısı korunur.
