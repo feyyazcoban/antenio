@@ -116,6 +116,35 @@ class SearchNavigationTest {
         }
     }
 
+    @Test fun categoryCountsTrackFavoritesHistorySearchAndRefresh() {
+        ui.runOnUiThread { model.showKind(MediaKind.MOVIE) }
+        ui.waitForIdle()
+        fun count(key: String, expected: Int) {
+            ui.onNodeWithTag("category-count:$key", true).assertTextEquals(expected.toString())
+        }
+        count(CategoryFilter.ALL, 80)
+        count("@favorites", 0)
+        count("@history", 0)
+        val film = model.state.value.catalog.items.first { it.kind == MediaKind.MOVIE && !it.adult }
+        ui.runOnUiThread { model.toggleFavorite(film); model.recordViewed(film) }
+        ui.waitForIdle()
+        count("@favorites", 1)
+        count("@history", 1)
+        ui.runOnUiThread { model.query("does-not-match-any-title") }
+        searchFinished(); ui.waitForIdle()
+        count(CategoryFilter.ALL, 0)
+        count("@favorites", 0)
+        ui.runOnUiThread { model.query("") }
+        searchFinished(); ui.waitForIdle()
+        count(CategoryFilter.ALL, 80)
+        removedId = "movie:80"
+        ui.runOnUiThread { model.refresh() }
+        ui.waitUntil(10_000) { !model.state.value.refreshing && model.state.value.catalog.items.none { it.providerId == "80" && it.kind == MediaKind.MOVIE } }
+        ui.waitForIdle()
+        count(CategoryFilter.ALL, 79)
+        shot("category-counts")
+    }
+
     @Test fun genuinelyEmptyMovieLibraryOpensSourcesAndReturns() {
         emptyMovies = true
         ui.runOnUiThread { model.refresh() }

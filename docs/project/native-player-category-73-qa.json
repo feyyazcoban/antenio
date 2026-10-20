@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-20",
+  "version": "0.14.73-design-preview",
+  "versionCode": 87,
+  "decisions": [
+    "D103",
+    "D104"
+  ],
+  "tests": {
+    "jvm": {
+      "tests": 374,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 44
+    },
+    "device": "Final9/9,emulator-5558,tools/run-device-tests.sh --no-build,normal font,host GPU,Vulkan off.",
+    "speed": "All choices preserve pitch1;2x survives audio startup and media/wall time ratio stays1.6–2.4 over2s; live resets1x; tunnelling explains disabled speed. Synthetic AAC, not physical AC3.",
+    "iterations": [
+      "First debug compilation failed in new test: DpRect has no height property; fixed to bottom-top.",
+      "First9 cases passed. Review corrected effective session audio error reporting and count accessibility without replacing selected semantics.",
+      "Final unit/lint/release build successful1m47s; final9 device cases passed."
+    ],
+    "visual": "Six current synthetic screenshots inspected. No physical TV navigation in this task.",
+    "logs": "work/player-category-73/"
+  },
+  "speedDiagnosis": {
+    "tvEvidence": "Read-only media.metrics: package UID10106 matched dev.iptvplayer.tv.pilot; historical AC3/DIRECT audio track504 at15:34:56. Not a capture of the exact failed speed selection.",
+    "codePath": "Media3 1.11.1 DefaultAudioSink.shouldApplyAudioProcessorPlaybackParameters excludes encoded passthrough/offload; this path may restore DEFAULT.",
+    "change": "VOD sessions with tunnelling off use PCM decoding. Saved audio preference unchanged. Compressed bitstream passthrough replaced for VOD; missing device decoder retains existing unsupported-audio warning.",
+    "limitation": "Actual reported title/TV codec and speed require user confirmation."
+  },
+  "package": {
+    "archive": "releases/NEXTV_TV_Design_Preview_0.14.73.apk",
+    "sha256": "a174ff08650e9c275530c5dcfffd40d8e3ac7d8314b6523a6e0367133188f8b0",
+    "bytes": 3586447,
+    "debuggable": false,
+    "r8": true,
+    "certificateSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065"
+  },
+  "delivery": {
+    "device": "192.168.1.126:5555",
+    "before": {
+      "versionCode": "86",
+      "versionName": "0.14.72-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-20 18:22:35"
+    },
+    "after": {
+      "versionCode": "87",
+      "versionName": "0.14.73-design-preview",
+      "firstInstallTime": "2026-10-13 23:50:03",
+      "lastUpdateTime": "2026-10-20 19:04:45"
+    },
+    "sha256": "a174ff08650e9c275530c5dcfffd40d8e3ac7d8314b6523a6e0367133188f8b0",
+    "dataPreservation": "install -r, same firstInstallTime, no clear/uninstall",
+    "realPlaybackStarted": false,
+    "appLaunchedOnTv": false
+  },
+  "review": "Separate local review; no subagent. Category selected semantics and session-specific audio warning corrected before final validation.",
+  "limitations": [
+    "No font matrix until store preparation.",
+    "No physical AC3 speed verification or physical UI acceptance.",
+    "5556/5554 unchanged;5558/Gradle stopped."
+  ]
+}

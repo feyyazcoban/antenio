@@ -57,11 +57,11 @@ internal object PlayerFactory {
      * with audio focus, a pause when headphones go, and the remembered track languages. A decoder that cannot open a
      * stream gives way to another on the device.
      */
-    fun create(context: Context, store: DeviceStore, preferences: PlaybackPreferences): ExoPlayer {
+    fun create(context: Context, store: DeviceStore, preferences: PlaybackPreferences, mode: PlaybackMode = PlaybackMode.LIVE): ExoPlayer {
         val renderers = object : DefaultRenderersFactory(context) {
             override fun buildAudioSink(context: Context, enableFloatOutput: Boolean, enableAudioTrackPlaybackParams: Boolean): AudioSink? =
                 super.buildAudioSink(context, enableFloatOutput, enableAudioTrackPlaybackParams)
-                    ?.let { if (preferences.audioOutput == AudioOutput.PCM) PcmOnlyAudioSink(it) else it }
+                    ?.let { if (decodeAudio(preferences, mode)) PcmOnlyAudioSink(it) else it }
         }.setEnableDecoderFallback(true)
         if (preferences.decoder == DecoderMode.SOFTWARE_FIRST) renderers.setMediaCodecSelector(MediaCodecSelector.PREFER_SOFTWARE)
         // Tunnelling stays in the selector's own parameters: the track languages set below and in TracksDialog are
@@ -74,6 +74,12 @@ internal object PlayerFactory {
             trackSelectionParameters = rememberedTracks(trackSelectionParameters, store)
         }
     }
+
+    // Encoded passthrough bypasses Sonic and can silently restore 1x after accepting a speed.
+    // Decode VOD audio for the session; do not persist a different audio-output preference.
+    // Tunnelling already explicitly disables speed and retains its existing output policy.
+    internal fun decodeAudio(preferences: PlaybackPreferences, mode: PlaybackMode): Boolean =
+        preferences.audioOutput == AudioOutput.PCM || mode == PlaybackMode.VOD && !preferences.tunneling
 
     /** How far ahead a stream loads; Media3 checks that the durations agree. */
     fun loadControl(buffer: BufferPreset): DefaultLoadControl = DefaultLoadControl.Builder()

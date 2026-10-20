@@ -33,11 +33,11 @@ import kotlin.math.*
 
 internal enum class PlayerInfoKind { Full, Zap, Peek }
 
-private val PlayerControlHeight = 64.dp
+private val PlayerControlHeight = 48.dp
 private val FocusLabelPadding = 4.dp
 // Six dp clear of the outer focus ring, plus eight dp clear of the time row above.
 private val FocusLabelButtonGap = TvLayout.FocusInset + TvLayout.Focus + 6.dp
-private val FocusLabelStyle = TextStyle(fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, fontWeight = FontWeight.Normal)
+private val FocusLabelStyle = TextStyle(fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.Normal)
 
 @Composable private fun focusLabelSpace(): Dp {
     val height = rememberTextMeasurer().measure(AnnotatedString("Ag"), FocusLabelStyle, maxLines = 1).size.height
@@ -70,13 +70,13 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
                 horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (live) {
                     number?.let { Text(it.toString(), Modifier.widthIn(min = 28.dp), color = Ink.Muted,
-                        fontFamily = Roboto, fontSize = 24.sp, textAlign = TextAlign.End) }
+                        fontFamily = Roboto, fontSize = 18.sp, textAlign = TextAlign.End) }
                     if (entry.artwork == null) Box(Modifier.size(56.dp, 34.dp).background(Ink.Container, RoundedCornerShape(6.dp)).clearAndSetSemantics {}, contentAlignment = Alignment.Center) {
                         Text(info.title.take(2).uppercase(appLocale), color = Ink.Muted, fontFamily = Roboto, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     } else Artwork(entry.sourceId, entry.artwork, info.title, Modifier.size(56.dp, 34.dp), logo = true, logoInset = 2.dp)
                 }
                 Text(info.title, Modifier.weight(1f).testTag("player-title"), color = Ink.Text, fontFamily = Roboto,
-                    fontSize = 28.sp, lineHeight = 34.sp, fontWeight = FontWeight.Medium,
+                    fontSize = 24.sp, lineHeight = 30.sp, fontWeight = FontWeight.Medium,
                     maxLines = if (large) 2 else 1, overflow = TextOverflow.Ellipsis)
                 if (live) LiveBadge()
                 PlayerWallClock(clock)
@@ -99,7 +99,7 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
 @Composable private fun PlayerWallClock(clock: PlaybackClock) {
     val minute by remember(clock) { derivedStateOf { clock.now / 60_000 } }
     Text(guideTime(minute * 60_000, ZoneId.systemDefault()), Modifier.padding(start = 12.dp).testTag("player-clock"),
-        color = Ink.Muted, fontFamily = Roboto, fontSize = 20.sp, lineHeight = 26.sp,
+        color = Ink.Muted, fontFamily = Roboto, fontSize = 16.sp, lineHeight = 22.sp,
         style = TextStyle(fontFeatureSettings = "tnum"))
 }
 
@@ -137,14 +137,14 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
             if (opening) LoadingArc()
             Text(status ?: body, Modifier.weight(1f).then(if (live) Modifier.testTag("player-current-programme") else Modifier),
                 color = if (live || status != null) Ink.Text else Ink.Muted,
-                fontFamily = Roboto, fontSize = 15.sp, lineHeight = 20.sp, maxLines = if (density.fontScale >= 1.3f) 2 else 1,
+                fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, maxLines = if (density.fontScale >= 1.3f) 2 else 1,
                 overflow = TextOverflow.Ellipsis)
             if (live && status == null && nextLabel != null && density.fontScale < 1.3f) Text(nextLabel, Modifier.widthIn(max = 280.dp),
-                color = Ink.Muted, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 20.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                color = Ink.Muted, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         if (live && status == null && nextLabel != null && density.fontScale >= 1.3f && density.fontScale < 2f) Text(
             nextLabel,
-            Modifier.fillMaxWidth(), color = Ink.Muted, fontFamily = Roboto, fontSize = 14.sp, lineHeight = 20.sp,
+            Modifier.fillMaxWidth(), color = Ink.Muted, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp,
             maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End)
     }
 }
@@ -169,8 +169,8 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
 
 @Composable private fun TimeLabel(value: String, modifier: Modifier = Modifier, muted: Boolean = false,
     align: TextAlign = TextAlign.End) {
-    Text(value, modifier, color = if (muted) Ink.Muted else Ink.Text, fontFamily = Roboto, fontSize = 20.sp,
-        lineHeight = 26.sp, fontWeight = if (muted) FontWeight.Normal else FontWeight.Medium, maxLines = 1,
+    Text(value, modifier, color = if (muted) Ink.Muted else Ink.Text, fontFamily = Roboto, fontSize = 16.sp,
+        lineHeight = 22.sp, fontWeight = if (muted) FontWeight.Normal else FontWeight.Medium, maxLines = 1,
         textAlign = align, style = TextStyle(fontFeatureSettings = "tnum"))
 }
 
@@ -189,7 +189,7 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
     val seekable = enabled && clock.seekable
     val measurer = rememberTextMeasurer()
     val labelWidth = with(density) { measurer.measure(AnnotatedString(if (duration >= 3_600_000) "−0:00:00" else "−00:00"),
-        TextStyle(fontFamily = Roboto, fontSize = 20.sp, fontFeatureSettings = "tnum")).size.width.toDp() }
+        TextStyle(fontFamily = Roboto, fontSize = 16.sp, fontFeatureSettings = "tnum")).size.width.toDp() }
     val state = stringResource(R.string.player_position_total, spokenPlayerTime(position), spokenPlayerTime(duration))
     Box(Modifier.fillMaxWidth().height(height).testTag("player-time-row")) {
         Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -283,7 +283,7 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
     seekable: Boolean, rememberControl: (FocusRequester) -> Unit, hint: String) {
     val density = LocalDensity.current
     val measurer = rememberTextMeasurer()
-    val style = TextStyle(fontFamily = Roboto, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+    val style = TextStyle(fontFamily = Roboto, fontSize = 13.sp, fontWeight = FontWeight.Medium)
     BoxWithConstraints(Modifier.fillMaxWidth().height(PlayerControlHeight).testTag("player-controls")) {
         val textWidths = remember(chips.map { it.label }, cluster.map { it.label }, density.fontScale, density.density) {
             (cluster + chips).associate { it.tag to measurer.measure(AnnotatedString(it.label), style).size.width }
@@ -291,7 +291,7 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
         val iconSize = with(density) { maxOf(44.dp, 20.sp.toDp() + 16.dp) }
         val large = density.fontScale >= 2f
         val clusterSizes = cluster.map { if (it.primary) PlayerControlHeight else if (it.tag in listOf("player-next-episode", "player-channels") && !large)
-            with(density) { (textWidths.getValue(it.tag)).toDp() } + 62.dp else 52.dp }
+            with(density) { (textWidths.getValue(it.tag)).toDp() } + 60.dp else 44.dp }
         val clusterWidth = clusterSizes.fold(0.dp) { sum, value -> sum + value } + 12.dp * (cluster.size - 1).coerceAtLeast(0)
         val hintParts = hint.split(" · ")
         val hintWidths = remember(hint, density.fontScale, density.density) { hintParts.mapIndexed { i, part ->
@@ -303,14 +303,14 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
         }, 8.dp.roundToPx(), 48.dp.roundToPx(), if (density.fontScale >= 1.3f) emptyList() else hintWidths, large) }
         val chipWidths = chips.map { if (it.tag in plan.labels) with(density) { textWidths.getValue(it.tag).toDp() } + 60.dp else iconSize }
         Layout(content = {
-            cluster.forEachIndexed { index, control -> key(control.tag) { PlayerControlButton(control, clusterSizes[index], if (control.primary) PlayerControlHeight else 52.dp,
-                labelled = control.tag in listOf("player-next-episode", "player-channels") && !large, chip = false, scrub, seekable, rememberControl) } }
+            cluster.forEachIndexed { index, control -> key(control.tag) { PlayerControlButton(control, clusterSizes[index], if (control.primary) PlayerControlHeight else 44.dp,
+                labelled = control.tag in listOf("player-next-episode", "player-channels") && !large, chip = control.tag == "player-channels", scrub, seekable, rememberControl) } }
             chips.forEachIndexed { index, control -> key(control.tag) { PlayerControlButton(control, chipWidths[index], iconSize,
                 labelled = control.tag in plan.labels, chip = true, scrub, seekable, rememberControl) } }
             Text(hintParts.take(plan.hints).joinToString(" · "), Modifier.testTag("player-hint").clearAndSetSemantics {}, color = Ink.Muted,
                 fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, maxLines = 1, overflow = TextOverflow.Clip)
         }) { children, constraints ->
-            val clusterPlace = cluster.indices.map { i -> children[i].measure(Constraints.fixed(clusterSizes[i].roundToPx(), if (cluster[i].primary) PlayerControlHeight.roundToPx() else 52.dp.roundToPx())) }
+            val clusterPlace = cluster.indices.map { i -> children[i].measure(Constraints.fixed(clusterSizes[i].roundToPx(), if (cluster[i].primary) PlayerControlHeight.roundToPx() else 44.dp.roundToPx())) }
             val chipPlace = chips.indices.map { i -> children[cluster.size + i].measure(Constraints.fixed(chipWidths[i].roundToPx(), iconSize.roundToPx())) }
             val chipsTotal = chipPlace.sumOf { it.width } + 8.dp.roundToPx() * (chips.size - 1).coerceAtLeast(0)
             val leftEnd = clusterPlace.sumOf { it.width } + 12.dp.roundToPx() * (cluster.size - 1).coerceAtLeast(0)
@@ -347,9 +347,9 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
             Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
                 PlayerSymbol(control.symbol, LocalContentColor.current,
-                    Modifier.size(if (control.primary) 32.dp else if (chip) 20.dp else 28.dp).testTag("${control.tag}-symbol"))
+                    Modifier.size(if (control.primary) 24.dp else if (chip) 20.dp else 22.dp).testTag("${control.tag}-symbol"))
                 if (labelled) Text(control.label, color = LocalContentColor.current, fontFamily = Roboto,
-                    fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium, maxLines = 1)
+                    fontSize = 13.sp, lineHeight = 18.sp, fontWeight = FontWeight.Medium, maxLines = 1)
             }
         }
         if (focused && showLabel) Layout(content = {

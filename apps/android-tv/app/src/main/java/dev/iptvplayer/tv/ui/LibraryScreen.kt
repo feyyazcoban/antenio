@@ -106,6 +106,15 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                 providerCategories(itemsOfKind, s.catalog.categoryOrder[s.kind].orEmpty()).map(::provider)
         }
     }
+    // Count the same searchable pool as the grid once, not once per category.
+    val categoryCounts = remember(itemsOfKind, s.onlyFavorites, s.favoriteIds, historyIds, s.query, s.libraryMatches) {
+        val pool = itemsOfKind.filter { (!s.onlyFavorites || it.id in s.favoriteIds) && (s.query.isBlank() || it.id in s.libraryMatches) }
+        val history = historyIds.toSet()
+        pool.groupingBy { it.category }.eachCount() + mapOf(
+            CategoryFilter.ALL to pool.size,
+            FavoritesCategory to pool.count { it.id in s.favoriteIds },
+            HistoryCategory to pool.count { it.id in history })
+    }
     val categoryLabel = displayCategory(categories.firstOrNull { it.key == s.category }?.label ?: s.category).let { (name, tag) -> categoryDisplayName(name, tag) }
     // The section search filters the selected category; its label says so, and an empty result offers the whole section.
     val searchScoped = s.category != CategoryFilter.ALL
@@ -352,7 +361,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                     }
                 }
             }
-            if (keepCategories) CategoryColumn(categories, s.category, Modifier
+            if (keepCategories) CategoryColumn(categories, categoryCounts, s.category, Modifier
                 .graphicsLayer { translationX = (categoryInset.value - 196.dp).toPx() }
                 .background(Ink.Background).focusRequester(categoryFocus)
                 .onFocusChanged { categoryFocused.value = it.hasFocus; if (it.hasFocus) gridActive = false }
@@ -447,7 +456,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
  * "{ad}, kilitli", still saying whether it is the one shown ("Seçili"); choosing it asks for nothing, its titles ask on
  * opening (pin.md §4).
  */
-@Composable private fun CategoryColumn(categories: List<SectionCategory>, current: String, modifier: Modifier,
+@Composable private fun CategoryColumn(categories: List<SectionCategory>, counts: Map<String, Int>, current: String, modifier: Modifier,
     selectedFocus: FocusRequester, enabled: Boolean = true, select: (String) -> Unit) {
     val selectedIndex = categories.indexOfFirst { it.key == current }.coerceAtLeast(0)
     val list = rememberLazyListState(initialFirstVisibleItemIndex = (selectedIndex - 3).coerceAtLeast(0))
@@ -460,12 +469,14 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
             var focused by remember { mutableStateOf(false) }
             // "Kilitli" goes with the name: a state description would take the place of the spoken "Seçili".
             val spoken = if (category.locked) stringResource(R.string.lock_named, category.label) else category.label
+            val count = counts[category.key] ?: 0
+            val countLabel = pluralStringResource(R.plurals.count_items, count, count.toString())
             // Moving through the column does not change the list; OK on a category shows it.
             Surface(onClick = { if (enabled) select(category.key) },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp)
                     .then(if (isSelected) Modifier.focusRequester(selectedFocus) else Modifier)
                     .onFocusChanged { focused = it.isFocused }
-                    .semantics { selected = isSelected; contentDescription = spoken }
+                    .semantics { selected = isSelected; contentDescription = "$spoken, $countLabel" }
                     .focusProperties { canFocus = enabled }
                     .testTag("category:${category.key}"),
                 shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(10.dp)),
@@ -484,6 +495,9 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (tag.isNotEmpty()) Text(tag, Modifier.padding(start = 8.dp), color = if (focused) LocalContentColor.current else Ink.Muted,
                         fontFamily = Roboto, fontSize = 12.sp, lineHeight = 16.sp, maxLines = 1)
+                    Text(count.toString(), Modifier.padding(start = 8.dp).testTag("category-count:${category.key}"),
+                        color = if (focused) LocalContentColor.current else Ink.Muted,
+                        fontFamily = Roboto, fontSize = 11.sp, lineHeight = 16.sp, maxLines = 1)
                     if (category.locked) LockMark(Modifier.padding(start = 8.dp), color = if (focused) LocalContentColor.current else Ink.Muted)
                     if (isSelected && !focused) Box(Modifier.padding(start = if (category.locked) 6.dp else 0.dp).size(6.dp).background(Ink.Mint, RoundedCornerShape(50)))
                 }
@@ -502,7 +516,7 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     fun dismiss() { open = false; try { opener.requestFocus() } catch (_: IllegalStateException) { } }
     Action(if (short) stringResource(R.string.library_sort) else stringResource(R.string.library_sort_current, stringResource(current.label)),
         Modifier.widthIn(max = 220.dp).focusRequester(opener).testTag("library-sort"),
-        compact = true, outlined = true, selected = current != LibrarySort.DEFAULT) { open = true }
+        compact = true, outlined = true, selected = current != LibrarySort.DEFAULT, selectionIndicator = false) { open = true }
     if (open) {
         val initial = remember { FocusRequester() }
         SourceDialog(stringResource(R.string.library_sort), initial, ::dismiss, width = 420.dp) {

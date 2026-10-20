@@ -1,5 +1,19 @@
 # Güncel görsel inceleme
 
+## 0.14.73 · Oynatıcı ölçüleri, kategoriler ve ayrıntı
+
+D103/D104; normal font, sentetik içerik.9/9 ilgili son APK kontrolü geçti; gerçek TV kullanıcı kabulü açık. [QA](../../docs/project/native-player-category-73-qa.json).
+
+![Canlı oynatıcı](player-category-0.14.73/live.png)
+
+![Film oynatıcı](player-category-0.14.73/player-movie.png)
+
+![Kategori sayıları](player-category-0.14.73/categories.png)
+
+![Film ayrıntısı](player-category-0.14.73/detail-movie.png)
+
+![Dizi ayrıntısı ve bölümler](player-category-0.14.73/detail-series.png)
+
 ## 0.14.72 · Vitrin ve kanal boşlukları, film rafı
 
 D102; normal yazı, sentetik fixture. Son APK'larla6/6 ekran kontrolü geçti. Vitrin etiketi başlığa yakın, açıklama–İzle arası daha geniş; son kanallarda beyaz logo zemini/tek satır ad; dizi altında kalıcı film rafı; canlı katalogda küçük logo ve daha geniş satır boşlukları. Fiziksel TV'de vitrin gözlendi; diğer alanların kullanıcı kabulü açık. [QA](../../docs/project/native-home-polish-72-qa.json).

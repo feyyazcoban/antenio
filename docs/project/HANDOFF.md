@@ -1,5 +1,19 @@
 # Son devir notu
 
+## Codex · Oynatıcı, kategori ve ayrıntı /0.14.73 · 20 Ekim 2026
+
+Kullanıcının beş UI isteği ve1×'e dönen hız bildirimi birlikte işlendi. PlayerControls ortak ölçüler48/44dp,13sp düğme/bilgi,24sp başlık,16sp saat/süre. Kanallar solda Ses/Altyazı ile aynı44dp/20dp ikon düzeninde; PlayerScreen canlı CH−/CH+ ekran düğmelerini kaldırdı, kumanda ve panel davranışı aynı. LibraryScreen kategori sayıları grid'in aynı havuzundan tek geçiş; favori/geçmiş/arama/yenileme güncellenir. Sayı contentDescription'a eklenir, selected semantiği korunur. Theme.Action yeni selectionIndicator varsayılantrue, yalnız SortAction false.
+
+DetailScreen contentInset0, backdrop FillWidth/TopCenter, D097 karartmaları ekranın en solundan; foreground/Back rail payını kendi uygular. Film grubu viewport−36dp minimum alanın altında,20dp aralıklı; dizi minimum280dp ve sezon odak akışı korunur. Geniş görselsiz afiş yedeği aynı oranda. Yeni sentetik görüntüler design/reviews/player-category-0.14.73, LATEST güncel.
+
+Hız: PlayerFactory başlangıç moduVOD+tunnelling kapalıysa PcmOnlyAudioSink kullanır; tercihi diske yazmaz. Ses decode hatası bildirimi gerçek oturum çıkışını kullanır. TV media.metrics geçmişinde UID10106 için AC3/DIRECT görüldü; tek hata anı kesin yakalanmadı. Media3 1.11.1 encoded passthrough hız işlemcisini atlayıp1× döndürebilir; D104 kaynakları ve Dolby/DTS bitstream→PCM değişiminin sınırlarını oku. Cihazda codec yoksa mevcut ses çözülemiyor uyarısı gösterilir. Gerçek aynı filmde tekrar deneme hâlâ gerekir; sentetik AAC testi AC3 fiziksel çıkış testi değildir.
+
+Kontroller: ilk debug derlemesinde yeni test DpRect.height kullanımı yüzünden compile başarısız; bottom−top ile düzeltildi. İlk9 kontrol geçti; son kaynak incelemesinde oturum ses uyarısı ve sayının selected semantiğini gizlememesi düzeltildi. Son birim/lint/release/debug/test build1m47s,374 JVM/1 skipped/0 hata,lint0 hata/44 uyarı. Son APK'larla aynı9 kontrol tekrar geçti: movie/live control geometry, drawer dönüşü,3 hız senaryosu, kategori sayıları, uzun açıklama/sezonlar, poster yedeği. Yalnız5558/tools/run-device-tests.sh --no-build,hostGPU/Vulkan kapalı, normal font. Speed kontrolü ses çıkışı başladıktan sonra2×'in korunmasını ve2s duvar zamanında medya oranının1,6–2,4 olmasını ölçer.
+
+Release87/.73 arşivi releases; fizikselTV86→87 install-r, firstInstallTime aynı, çekilen base.apk SHA arşivle eşleşti. TV uygulaması açılmadı, gerçek yayın başlatılmadı.5558/Gradle kapalı; kullanıcı emülatörü5556 ve5554 değişmedi. Ham loglar work/player-category-73. Figma/bağımlılıklar değişmedi; kullanıcı font matrisi ertelemesi sürer.
+
+Sonraki adım: kullanıcının gerçek TV'de aynı filmde1,5×/2× denemesi ve yeni UI kabulü.1× dönüşü sürerse gerçek seçim anındaki codec/çıkış ve parametre olayını kimliksiz ölç; varsayımla decoder/hesap değiştirme. Önceki S15c, M3U görsel/tarih desteği ve emülatör uzun oturum kararlılığı işleri açık. [QA](native-player-category-73-qa.json).
+
 ## Codex · Vitrin/kanal ferahlığı ve film rafı /0.14.72 · 20 Ekim 2026
 
 HomeScreen: hero-label, tüm slaytların ölçülen ve görünen HeroText grubunun içine alındı; kısa metinde etiket–başlık10dp korunur. İzle üst aralığı18→28dp. Görselin viewport/FillWidth/TopCenter/scrim ayarları değişmedi. Son kanal kartları80×56dp beyaz/8dp radius/8dp iç boşluk, koyu eksik-logo simgesi,13sp/18sp tek satır ad; tam erişilebilir ad korunur. Film rafı artık geçmişten bağımsız olarak dizi rafının hemen altında; ikisi ortak LibraryShelfWidth160dp ve16sp başlık kullanır.

@@ -683,6 +683,7 @@ class VisualPreviewTest {
         ui.onNodeWithContentDescription("Inception").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
         ui.waitUntil(10_000) { !model.state.value.detailLoading }
         ui.onNodeWithTag("open-description").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.RequestFocus) { it() }
+        shot("movie-detail-spacing")
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.waitUntil(5_000) {
             ui.onAllNodesWithTag("detail-description-reader").fetchSemanticsNodes().any {

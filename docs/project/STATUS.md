@@ -1,5 +1,11 @@
 # Proje durumu
 
+## 0.14.73 · Küçük oynatıcı kontrolleri, sayaçlar ve ayrıntı vitrini · 20 Ekim 2026
+
+Canlı ve VOD ortak oynat/duraklat48dp, diğer transport44dp, daha küçük metin/simgeler; Kanallar ile Ses/Altyazı aynı pill ölçüsünde, canlı CH−/CH+ ekran düğmeleri yok. Kategori sütununda dinamik içerik sayıları; Sırala altında çizgi yok. Ayrıntı görseli menü arkasına kadar vitrin düzeninde, film içeriği alt hizalı ve20dp aralıklı. D103.
+
+Hızın1×'e dönmesine açık encoded passthrough yolu için tunnelling kapalı VOD oturumu PCM çözümüne alındı; kalıcı ayar değişmez. TV geçmiş ses metriğinde NEXTV UID'sine ait AC3/DIRECT izi var; bildirilen tek başarısız hız seçimiyle kesin eşleştirilmedi. Son APK'larla5558'de9/9 kontrol;2× sonrası gerçek medya zamanı ilerlemesi/pitch doğrulandı (sentetik AAC).374 JVM (1 skipped),lint0 hata/44 uyarı,release başarılı. TV86→87/0.14.73 veri korunarak kuruldu; kurulu APK SHA eşit. Uygulama TV'de zorla açılmadı. Aynı gerçek filmde hız/codec ve fiziksel UI kabulü açık; D104 ve [QA](native-player-category-73-qa.json).5558/Gradle kapalı;5556 değiştirilmedi, font matrisi koşulmadı.
+
 ## 0.14.72 · Vitrin, kütüphane rafları ve kanal boşlukları · 20 Ekim 2026
 
 D102 uygulandı: vitrin etiketi başlıkla aynı metin grubunda, açıklama–İzle arası28dp; arka plan kadrajı korunur. Son izlenen kanal logosunda beyaz yuvarlatılmış zemin,13sp tek satır ad. Film kütüphanen, izleme geçmişi olsa da Dizi kütüphanen altında160dp afişlerle görünür. Canlı TV katalog satırları60dp, araları10dp; logo44×26dp ve daha geniş iç boşluklar.

@@ -114,6 +114,19 @@ class PlayerSpeedFlowTest {
         key(KeyEvent.KEYCODE_MEDIA_PLAY)
         ui.waitUntil(5_000) { ui.onAllNodesWithContentDescription("Duraklat").fetchSemanticsNodes().isNotEmpty() }
         ui.runOnIdle { assertEquals(2f, engine().playbackParameters.speed, .001f) }
+        // A reported parameter alone is insufficient: verify it survives audio output startup
+        // and that media time really advances at the selected rate.
+        Thread.sleep(1200)
+        var before = 0L
+        ui.runOnIdle { before = engine().currentPosition; assertEquals(2f, engine().playbackParameters.speed, .001f) }
+        val started = android.os.SystemClock.elapsedRealtime()
+        Thread.sleep(2000)
+        ui.runOnIdle {
+            val elapsed = android.os.SystemClock.elapsedRealtime() - started
+            val ratio = (engine().currentPosition - before).toDouble() / elapsed
+            assertEquals(2f, engine().playbackParameters.speed, .001f)
+            assertTrue("2x must advance actual media time: $ratio", ratio in 1.6..2.4)
+        }
         key(KeyEvent.KEYCODE_BACK); ui.onNodeWithTag("player-panel").assertDoesNotExist()
         key(KeyEvent.KEYCODE_BACK)
         ui.waitUntil(5_000) { model.state.value.route != Route.PLAYER }

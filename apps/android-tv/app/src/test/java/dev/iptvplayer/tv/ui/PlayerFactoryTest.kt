@@ -72,6 +72,14 @@ class PlayerFactoryTest {
         assertEquals(2, asked)
     }
 
+    @Test fun vodDecodesAudioForSpeedWithoutChangingLiveOrTunnelingOutput() {
+        val automatic = dev.iptvplayer.tv.data.PlaybackPreferences()
+        assertTrue(PlayerFactory.decodeAudio(automatic, PlaybackMode.VOD))
+        assertFalse(PlayerFactory.decodeAudio(automatic, PlaybackMode.LIVE))
+        assertFalse(PlayerFactory.decodeAudio(automatic.copy(tunneling = true), PlaybackMode.VOD))
+        assertTrue(PlayerFactory.decodeAudio(automatic.copy(audioOutput = dev.iptvplayer.tv.data.AudioOutput.PCM), PlaybackMode.LIVE))
+    }
+
     @Test fun nextvSubtitlesTakeTheChosenColourAndBackground() {
         val semi = PlayerFactory.captionStyle(SubtitleStyle(SubtitleSource.APP, background = SubtitleBackground.SEMI))
         assertEquals(0xFFFFFFFF.toInt(), semi.foregroundColor)

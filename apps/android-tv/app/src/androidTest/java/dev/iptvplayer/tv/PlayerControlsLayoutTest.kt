@@ -228,8 +228,12 @@ class PlayerControlsLayoutTest {
         ui.onNodeWithTag("player-scrub").assertDoesNotExist()
         key(KeyEvent.KEYCODE_DPAD_UP); ui.onNodeWithTag("player-primary").assertIsFocused()
         centeredSymbol("player-primary")
-        assertTrue(bounds("player-channel-down").left - bounds("player-primary").right >= 32.dp)
-        listOf("player-channels", "player-channel-down", "player-channel-up", "player-tracks", "player-favorite").forEach {
+        ui.onNodeWithTag("player-channel-down").assertDoesNotExist()
+        ui.onNodeWithTag("player-channel-up").assertDoesNotExist()
+        assertEquals(48f, (bounds("player-primary").bottom - bounds("player-primary").top).value, 1f)
+        assertEquals((bounds("player-tracks").bottom - bounds("player-tracks").top).value,
+            (bounds("player-channels").bottom - bounds("player-channels").top).value, 1f)
+        listOf("player-channels", "player-tracks", "player-favorite").forEach {
             key(KeyEvent.KEYCODE_DPAD_RIGHT); ui.onNodeWithTag(it).assertIsFocused(); inScreen(it, ring = true)
             centeredSymbol(it, iconOnly = it != "player-tracks" && it != "player-channels")
         }

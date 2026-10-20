@@ -120,7 +120,7 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
 @Composable fun Action(label: String, modifier: Modifier = Modifier, selected: Boolean? = null,
     enabled: Boolean = true, primary: Boolean = false, icon: String? = null, compact: Boolean = false,
     labelOverflow: TextOverflow = TextOverflow.Ellipsis, outlined: Boolean = false, check: Boolean = false,
-    iconFilled: Boolean = false, labelText: AnnotatedString? = null, centerContent: Boolean = false, onClick: () -> Unit) {
+    iconFilled: Boolean = false, selectionIndicator: Boolean = true, labelText: AnnotatedString? = null, centerContent: Boolean = false, onClick: () -> Unit) {
     val height = actionHeight(compact)
     // The TV Button stays focusable while disabled. The D-pad must not enter a disabled action;
     // one that becomes disabled while focused keeps focus, so focus never jumps or disappears.
@@ -148,7 +148,7 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
                 fontFamily = Roboto, fontSize = 16.sp, lineHeight = 16.sp)
         } else Row((if (centerContent) Modifier.fillMaxSize() else Modifier).drawWithContent {
             drawContent()
-            if (selected == true) {
+            if (selected == true && selectionIndicator) {
                 // Same offset and mint as the navigation marker, clear of descenders; the clamp keeps it inside the pill.
                 val y = size.height + ((height.toPx() - size.height) / 2f - 2.dp.toPx()).coerceIn(2.dp.toPx(), 4.dp.toPx())
                 drawLine(if (contentColor == Ink.Text) Ink.Mint else contentColor,

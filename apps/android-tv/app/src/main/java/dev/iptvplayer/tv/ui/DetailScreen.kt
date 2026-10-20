@@ -104,23 +104,23 @@ private class SeasonShelf(start: Int) {
     var viewportHeight by remember { mutableStateOf(0.dp) }
 
     // The backdrop runs to the top edge; the Geri row and the text keep the menu's top margin themselves.
-    Navigation(s, model, Modifier.onFocusChanged { menuFocused = it.hasFocus }, contentEntry = { first }, contentTop = 0.dp, settings = settings) {
+    Navigation(s, model, Modifier.onFocusChanged { menuFocused = it.hasFocus }, contentEntry = { first }, contentTop = 0.dp, contentInset = 0.dp, settings = settings) {
         Box(Modifier.fillMaxSize()) {
-        if (entry.hasBackdrop) AsyncImage(SourceArtwork(entry.sourceId, entry.backdrop!!), null, Modifier.matchParentSize(), contentScale = ContentScale.Crop)
-        Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Ink.Background.copy(alpha = .98f),
-            .30f to Ink.Background.copy(alpha = .96f), .48f to Ink.Background.copy(alpha = .9f), .7f to Ink.Background.copy(alpha = .45f), 1f to Ink.Background.copy(alpha = .28f))))
-        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Transparent, .55f to Color.Transparent, 1f to Ink.Background)))
+        if (entry.hasBackdrop) AsyncImage(SourceArtwork(entry.sourceId, entry.backdrop!!), null, Modifier.matchParentSize(), contentScale = ContentScale.FillWidth, alignment = Alignment.TopCenter)
+        Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Ink.Background.copy(alpha = .96f), .18f to Ink.Background.copy(alpha = .92f), .34f to Ink.Background.copy(alpha = .8f),
+            .5f to Ink.Background.copy(alpha = .58f), .72f to Ink.Background.copy(alpha = .2f), 1f to Color.Transparent)))
+        Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Ink.Background.copy(alpha = .35f), .18f to Color.Transparent, .58f to Color.Transparent, .86f to Ink.Background.copy(alpha = .8f), 1f to Ink.Background)))
         if (!series && !entry.hasBackdrop && entry.artwork != null) Artwork(entry.sourceId, entry.artwork, shownName(entry.title),
             Modifier.align(Alignment.CenterEnd).padding(end = TvLayout.Gutter).width(180.dp).aspectRatio(2f / 3)
                 .clip(RoundedCornerShape(TvLayout.CardRadius)).testTag("detail-poster-fallback"))
         // While scrolled, the line cut under the fixed Geri row fades out instead of resting half visible.
-        LazyColumn(Modifier.fillMaxSize().padding(top = 52.dp + TvLayout.HeaderTop)
+        LazyColumn(Modifier.fillMaxSize().padding(start = TvLayout.RailWidth, top = 52.dp + TvLayout.HeaderTop)
             .onSizeChanged { viewportHeight = with(density) { it.height.toDp() } }
             .scrollEdgeMask(top = { list.canScrollBackward }).testTag("detail-content"),
             state = list, contentPadding = PaddingValues(bottom = 36.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)) {
             item(key = "details") {
-                Box(Modifier.fillMaxWidth().heightIn(min = if (series) 206.dp else 350.dp)
+                Box(Modifier.fillMaxWidth().heightIn(min = if (series) 280.dp else (viewportHeight - 36.dp).coerceAtLeast(280.dp))
                     .onSizeChanged { detailsHeight = it.height }
                     // Coming back up from the episodes shows the whole title group again when it fits. A
                     // bring-into-view request joins the focus relocation queue instead of racing it.
@@ -130,8 +130,8 @@ private class SeasonShelf(start: Int) {
                             scope.launch { detailsView.bringIntoView() }
                     }
                     .padding(horizontal = TvLayout.Gutter)) {
-                    Column(Modifier.width(if (series) 700.dp else 560.dp).padding(top = if (series) 8.dp else 34.dp),
-                        verticalArrangement = Arrangement.spacedBy(if (series) 12.dp else 14.dp)) {
+                    Column(Modifier.align(Alignment.BottomStart).width(if (series) 700.dp else 560.dp).padding(top = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(20.dp)) {
                         Text(stringResource(if (series) R.string.detail_series_kicker else R.string.detail_movie_kicker), color = Ink.Mint,
                             fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 12.sp, letterSpacing = 1.2.sp)
                         Text(shown.name, fontFamily = Roboto, color = Ink.Text, fontWeight = FontWeight.Medium,
@@ -184,7 +184,7 @@ private class SeasonShelf(start: Int) {
             }
         }
         Row(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(Ink.Background.copy(alpha = .82f), Color.Transparent)))
-            .padding(start = TvLayout.Gutter, end = TvLayout.Gutter, top = 5.dp + TvLayout.HeaderTop, bottom = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+            .padding(start = TvLayout.RailWidth + TvLayout.Gutter, end = TvLayout.Gutter, top = 5.dp + TvLayout.HeaderTop, bottom = 5.dp), verticalAlignment = Alignment.CenterVertically) {
             Action(stringResource(R.string.action_back), Modifier.focusRequester(back), icon = "back") { model.back() }
         }
     }

@@ -1,5 +1,7 @@
 # Native TV görünüm sözleşmesi
 
+**20 Ekim ·0.14.73 /D103:** oynatıcı transport48/44dp, Kanallar/Ses-Altyazı44dp ve13sp; başlık24sp, saat/süre16sp, bilgi13sp. Canlı CH−/CH+ görsel düğmeleri yok. Kategori sayıları11sp, Sırala'nın alt çizgisi yok. Ayrıntı arka planı tam ekran/menü arkası, film grubu altta36dp pay ve20dp aralık; Geri üstte sabit. D104 VOD ses çözümü hız için oturumluk PCM; kalıcı ayar değişmez.
+
 **20 Ekim · TV-010/020 / D102:** Vitrin etiketi görünür slaydın başlığının 10 dp üstünde; açıklama/İzle payı 28 dp. Son kanal logosu 80×56 dp beyaz, 8 dp köşeli zeminde 8 dp iç payla; ad 13/18 sp, tek satır/üç nokta. Tam kanal adı erişilebilirlikte korunur. Dizi ve film keşif rafları 160 dp afiş/16 sp başlık/4 dp yıl aralığını paylaşır; film rafı diziden sonra ve devam rafından bağımsızdır. Canlı TV katalog satırı minimum60dp, dış aralık10dp, iç pay16dp yatay/10dp dikey, sütun aralığı16dp, logo44×26dp ve EPG iç aralığı5dp. Bunlar katalog ölçüleridir; oynatıcının kanal çekmecesi ölçüleri değişmez.
 
 **20 Ekim · TV-010 / D101:** Vitrin görseli ve D097 karartması viewport boyutunda kalırken metin/İzle alanı minimum420dp ayrılır. Normal540dp yükseklikte ön plan120dp yukarı gelir; ilk devam başlığı ve kart başlangıcı görünür. Görsel rafın arkasına taşar; yalnız kendi tam ekran sınırında kırpılır. Metin boyutları ve D095 odak kaydırması korunur. Ayrıntı [HOME_HERO](HOME_HERO.md).

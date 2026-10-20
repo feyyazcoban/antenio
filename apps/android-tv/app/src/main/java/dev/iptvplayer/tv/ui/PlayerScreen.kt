@@ -97,7 +97,10 @@ import kotlinx.coroutines.flow.first
     // Settings → Oynatıcı as they were when the player opened: Settings opens from the other screens only, so a change
     // holds from the next stream.
     val opened = remember { screenState.playback }
-    val player = remember { PlayerFactory.create(context, model.store, opened) }
+    val sessionAudioOutput = remember {
+        if (PlayerFactory.decodeAudio(opened, media.mode)) dev.iptvplayer.tv.data.AudioOutput.PCM else opened.audioOutput
+    }
+    val player = remember { PlayerFactory.create(context, model.store, opened, media.mode) }
     val accessibility = remember(context) { context.getSystemService(AccessibilityManager::class.java) }
     // The notes, the top label and the Ses / Altyazı panel let as much of the picture through as Oynatıcı panelleri says.
     val panelAlpha = screenState.playback.panelOpacity.alpha
@@ -308,7 +311,7 @@ import kotlinx.coroutines.flow.first
             }
             override fun onTracksChanged(value: Tracks) {
                 tracks = value
-                if (!silent && unplayableAudio(value, opened.audioOutput)) {
+                if (!silent && unplayableAudio(value, sessionAudioOutput)) {
                     silent = true; flash(resources.getString(R.string.player_audio_unplayable), audio = true)
                 }
             }
@@ -532,10 +535,6 @@ import kotlinx.coroutines.flow.first
                     })
                     val favoriteState = stringResource(if (isFavorite) R.string.player_in_favorites else R.string.player_not_in_favorites)
                     val chips = buildList {
-                        if (live) {
-                            add(PlayerControl("player-channel-down", stringResource(R.string.player_channel_minus), "keyboard_arrow_down") { model.changeChannel(-1); interact() })
-                            add(PlayerControl("player-channel-up", stringResource(R.string.player_channel_plus), "keyboard_arrow_up") { model.changeChannel(1); interact() })
-                        }
                         add(PlayerControl("player-tracks", stringResource(R.string.player_tracks), "subtitles", state = selectedTrackSummary(tracks, trackParameters), enabled = healthy, requester = tracksFocus) {
                             scrub.commit(); interact(); layer = PlayerLayer.Tracks
                         })
