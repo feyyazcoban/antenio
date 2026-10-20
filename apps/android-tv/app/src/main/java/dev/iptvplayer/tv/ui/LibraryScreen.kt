@@ -560,11 +560,3 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
     }
 }
 
-@Composable private fun Progress(programme: EpgProgramme, now: Long, modifier: Modifier = Modifier) {
-    val end = programme.end ?: return
-    val fraction = ((now - programme.start).toFloat() / (end - programme.start).coerceAtLeast(1)).coerceIn(0f, 1f)
-    Box(modifier.fillMaxWidth().height(3.dp).clip(RoundedCornerShape(50)).background(Ink.Divider)) {
-        Box(Modifier.fillMaxWidth(fraction).fillMaxHeight().background(Ink.Mint))
-    }
-}
-

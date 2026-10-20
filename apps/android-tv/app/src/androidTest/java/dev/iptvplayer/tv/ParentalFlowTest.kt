@@ -489,6 +489,19 @@ class ParentalFlowTest {
         ui.onNodeWithTag("player-channel:$first").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_DOWN)
         ui.onNodeWithTag("player-channel:$sport").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_RIGHT)
+        ui.onNodeWithTag("channel-mini-guide").assertExists()
+        ui.onNodeWithText("Kilitli kanal. Programları görmek için kanalı PIN ile aç.").assertExists()
+        ui.onNodeWithTag("channel-programme:0").assertDoesNotExist()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(5_000) { padShown() }
+        Thread.sleep(16_000) // The channel panel's 15-second idle timer must pause under the PIN window.
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5_000) { !padShown() && ui.activity.hasWindowFocus() }
+        ui.onNodeWithTag("channel-mini-action").assertIsFocused()
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5_000) { ui.onAllNodes(hasTestTag("player-channel:$sport") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        ui.onNodeWithTag("player-channel:$sport").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.waitUntil(5_000) { padShown() }
         assertEquals(first, playingId)
@@ -502,9 +515,9 @@ class ParentalFlowTest {
         ui.waitUntil(5_000) { !padShown() && ui.activity.hasWindowFocus() }
         ui.onNodeWithTag("player-channel-drawer").assertExists()
         ui.onNodeWithTag("player-channel:$sport").assertIsFocused()
-        // This fixture has no playable video: failure must keep the drawer open, with an exit back to its button.
+        // This fixture has no playable video: failure keeps the drawer open; Back reveals retry controls.
         key(KeyEvent.KEYCODE_BACK)
-        ui.onNodeWithTag("player-channels").assertIsFocused()
+        ui.onNodeWithTag("player-primary").assertIsFocused()
         ui.runOnUiThread { model.back() }
     }
 

@@ -4,6 +4,20 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class ChannelScopeTest {
+    @Test fun scopeChoicesFollowProviderOrderAndPreparedFavoritesReuseTheirLists() {
+        val a = channel("1"); val b = channel("2", "Sport"); val c = channel("3", "Sport")
+        val lists = LiveLists(Catalog(listOf(a, b, c), categoryOrder = mapOf(MediaKind.LIVE to listOf("Sport", "News"))))
+        val favorites = setOf(a.id, c.id)
+        lists.prepareFavorites(favorites)
+        val choices = lists.choices(favorites)
+        assertEquals(listOf(2, 3, 2, 1), choices.map { it.count })
+        assertEquals(listOf(null, null, "Sport", "News"), choices.map { it.scope.category })
+        val scope = ChannelScope(favoritesOnly = true)
+        assertSame(lists.select(scope, favorites).channels, lists.select(scope, favorites).channels)
+        assertEquals(listOf(a, c), lists.select(scope, favorites).channels)
+        lists.prepareFavorites(setOf(b.id))
+        assertEquals(listOf(b), lists.select(scope, setOf(b.id)).channels)
+    }
     @Test fun publishedListsReuseNumbersAcrossCategoriesAndSources() {
         val a = channel("1"); val b = channel("2", "Sport"); val c = channel("3", source = "b")
         val lists = LiveLists(Catalog(listOf(a, b, c, channel("adult").copy(adult = true))))

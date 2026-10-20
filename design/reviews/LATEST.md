@@ -1,5 +1,15 @@
 # Güncel görsel inceleme
 
+## 0.14.70 · Kanal paneli
+
+D100 / S15b; normal yazı ve yalnız sentetik yerel yayın. Kategori seçimi, mini rehber ve seçili kanalın görünürlüğü; 12 ekran akışı geçti. Fiziksel/Figma kabulü ve font matrisi açık. [QA](../../docs/project/native-channel-panel-70-qa.json).
+
+![Kanal listesi](channel-panel-0.14.70/channels.png)
+
+![Kategori sütunu](channel-panel-0.14.70/categories.png)
+
+![Mini rehber ve yerinde kalan kanal](channel-panel-0.14.70/programmes.png)
+
 ## 0.14.68 · Splash çizim hazırlığı
 
 D098; gerçek küçültülmüş release, sentetik kayıtlı katalog, normal ölçek. Görünür girişten önce GPU hazırlığı; ilk kare daha uzun olabilir. Seyrek ekran görüntüleri kesintisiz akıcılık kanıtı değildir. [QA ve karşılaştırma](../../docs/project/native-launch-prime-68-qa.json).

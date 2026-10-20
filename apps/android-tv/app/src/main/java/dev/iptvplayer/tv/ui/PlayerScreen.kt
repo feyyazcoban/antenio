@@ -42,6 +42,9 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
@@ -87,8 +90,9 @@ import kotlinx.coroutines.flow.first
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val screenState by model.state.collectAsStateWithLifecycle()
     val guideNow = guideClock()
+    val guideAnchor = guideNow / 300_000 * 300_000
     val guideEntries = remember(media.entry) { if (media.entry.kind == MediaKind.LIVE) listOf(media.entry) else emptyList() }
-    val schedule = guideRows(guideEntries, dev.iptvplayer.tv.data.GuideWindow(guideNow, guideNow + 12 * 3_600_000L), screenState, model)[media.entry.id]
+    val schedule = guideRows(guideEntries, dev.iptvplayer.tv.data.GuideWindow(guideAnchor, guideAnchor + 12 * 3_600_000L), screenState, model)[media.entry.id]
     val currentProgramme = schedule?.now(guideNow)
     // Settings → Oynatıcı as they were when the player opened: Settings opens from the other screens only, so a change
     // holds from the next stream.
@@ -104,6 +108,10 @@ import kotlinx.coroutines.flow.first
     var active by remember { mutableStateOf<PlayingMedia?>(null) }
     // What the viewer has open over the picture: the controls, the tracks panel or nothing.
     var layer by remember { mutableStateOf<PlayerLayer>(PlayerLayer.Controls) }
+    val channelPanel = remember { ChannelPanelState() }
+    val keyInput = remember { PlayerKeyInput() }
+    val playerWindow = LocalWindowInfo.current
+    val overlays = LocalAppOverlays.current
     var tracks by remember { mutableStateOf(Tracks.EMPTY) }
     // Warn once per media if decoding on this device leaves every audio track unsupported.
     var silent by remember { mutableStateOf(false) }
@@ -186,8 +194,8 @@ import kotlinx.coroutines.flow.first
         if (layer == PlayerLayer.Video) { peek = true; peekDelta = deltaMs; peekAt = System.currentTimeMillis() }
     }
     // The player as PlayerKeyRouter reads it when a key or Back arrives; its commands are carried out here.
-    fun keys(repeat: Int = 0) = KeyContext(media.mode, top(), recoveryState.recovering, failure != null, player.isPlaying, repeat, scrub.target != null,
-        pendingDigits = digits.isNotEmpty())
+    fun keys(repeat: Int = 0, phase: KeyPhase = KeyPhase.DOWN, cancelled: Boolean = false) = KeyContext(media.mode, top(), recoveryState.recovering, failure != null, player.isPlaying, repeat, scrub.target != null,
+        pendingDigits = digits.isNotEmpty(), phase = phase, cancelled = cancelled, subColumn = channelPanel.column != ChannelColumn.CHANNELS)
     fun perform(command: PlayerCommand) {
         when (command) {
             PlayerCommand.Play -> { scrub.commit(); player.play() }
@@ -197,12 +205,15 @@ import kotlinx.coroutines.flow.first
             PlayerCommand.Consume -> Unit
             is PlayerCommand.Zap -> zap(command.direction)
             is PlayerCommand.AppendDigit -> { digits = PlayerKeyRouter.appendDigit(digits, command.digit); flash(digits) }
-            PlayerCommand.OpenGuide -> model.guide()
+            PlayerCommand.OpenGuide -> model.guide(if (layer == PlayerLayer.Channels) channelPanel.focusedId else null)
             PlayerCommand.PreviousChannel -> {
                 digits = ""; quiet = layer == PlayerLayer.Video
                 when (model.previousChannel()) {
                     GateResult.Deny -> quiet = false
-                    is GateResult.NeedsPin -> openPin { if (layer == PlayerLayer.Video) canvas else first }
+                    is GateResult.NeedsPin -> openPin { if (layer == PlayerLayer.Channels) channelPanel.returnFocus() else if (layer == PlayerLayer.Video) canvas else first }
+                    is GateResult.Allow -> if (layer == PlayerLayer.Channels) {
+                        channelPanel.scope = model.state.value.liveScope; channelPanel.focusedId = model.state.value.playing?.entry?.id; channelPanel.channels()
+                    }
                     else -> Unit
                 }
             }
@@ -220,19 +231,35 @@ import kotlinx.coroutines.flow.first
             PlayerCommand.CloseTracks -> { returnControl = tracksFocus; layer = PlayerLayer.Controls; interact() }
             PlayerCommand.CloseOptions -> { returnControl = optionsFocus; layer = PlayerLayer.Controls; interact() }
             PlayerCommand.CloseSpeed -> { layer = PlayerLayer.Options; interact() }
-            PlayerCommand.OpenChannels -> { digits = ""; quiet = false; note = null; peek = false; interact(); layer = PlayerLayer.Channels }
-            PlayerCommand.CloseChannels -> { returnControl = channelsFocus; layer = PlayerLayer.Controls; interact() }
+            PlayerCommand.OpenChannels -> {
+                if (!live) return
+                digits = ""; quiet = false; note = null; peek = false; interact()
+                channelPanel.open(model.state.value.liveScope, model.state.value.playing?.entry?.id ?: media.entry.id)
+                layer = PlayerLayer.Channels
+            }
+            PlayerCommand.CloseChannels -> {
+                digits = ""; note = null; returnControl = null; lastInteraction = System.currentTimeMillis()
+                layer = if (failure != null || recoveryState.recovering) PlayerLayer.Controls else PlayerLayer.Video
+            }
+            PlayerCommand.CloseChannelColumn -> { digits = ""; channelPanel.channels() }
+            is PlayerCommand.PanelPage -> { digits = ""; channelPanel.page(command.direction) }
+            is PlayerCommand.PanelDigit -> { digits = PlayerKeyRouter.appendDigit(digits, command.digit); flash(digits) }
             PlayerCommand.CloseEndCard -> { episodeEnd.dismiss(); interact() }
             is PlayerCommand.Exit -> { if (command.stopRecovery) recovery.cancel(); save(); model.back() }
         }
     }
     // PlayerKeyRouter decides; a key it leaves goes on to the focused control. The end card's window sends its keys here.
     fun onKey(event: KeyEvent): Boolean {
-        if (event.type != KeyEventType.KeyDown) return false
+        if (event.type != KeyEventType.KeyDown && event.type != KeyEventType.KeyUp) return false
         lastInteraction = System.currentTimeMillis()
         val key = PlayerKey.of(event.nativeKeyEvent.keyCode) ?: return false
-        val command = PlayerKeyRouter.route(key, keys(event.nativeKeyEvent.repeatCount)) ?: return false
+        val phase = if (event.type == KeyEventType.KeyUp) KeyPhase.UP else if (event.nativeKeyEvent.repeatCount > 0) KeyPhase.REPEAT else KeyPhase.DOWN
+        val command = keyInput.route(key, keys(event.nativeKeyEvent.repeatCount, phase, event.nativeKeyEvent.isCanceled)) ?: return false
         perform(command); return true
+    }
+    LaunchedEffect(layer, screenState.parental.prompt?.id) {
+        if (layer !in listOf(PlayerLayer.Video, PlayerLayer.Controls, PlayerLayer.Channels)) digits = ""
+        if (screenState.parental.prompt != null) { digits = ""; keyInput.reset() }
     }
     LaunchedEffect(peekAt) { if (peek) { delay(2_500); peek = false } }
     LaunchedEffect(failure, recoveryState.recovering) { if (failure != null || recoveryState.recovering) scrub.cancel() }
@@ -244,8 +271,15 @@ import kotlinx.coroutines.flow.first
     LaunchedEffect(digits) {
         val pending = digits
         if (pending.isEmpty()) return@LaunchedEffect
-        delay(PlayerKeyRouter.DIGIT_COMMIT_MS)
-        if (digits != pending || layer == PlayerLayer.Channels) return@LaunchedEffect
+        delay(if (layer == PlayerLayer.Channels) 1_200L else PlayerKeyRouter.DIGIT_COMMIT_MS)
+        if (digits != pending) return@LaunchedEffect
+        if (layer == PlayerLayer.Channels) {
+            digits = ""
+            val number = pending.toInt()
+            if (model.liveIndex().numbered.getOrNull(number - 1) != null) channelPanel.number(number)
+            else flash(resources.getString(R.string.player_no_channel, pending))
+            return@LaunchedEffect
+        }
         val number = pending.toInt(); digits = ""
         quiet = layer == PlayerLayer.Video
         when (model.playChannelNumber(number)) {
@@ -291,6 +325,7 @@ import kotlinx.coroutines.flow.first
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_STOP -> {
+                    keyInput.reset()
                     resumeOnStart = player.playWhenReady && player.playbackState == Player.STATE_READY
                     // Should the lock screen cover this player, the one that comes back after it stands as this one did.
                     model.playerStopped(paused = !player.playWhenReady)
@@ -312,6 +347,10 @@ import kotlinx.coroutines.flow.first
     }
 
     LaunchedEffect(media) {
+        keyInput.reset()
+        if (layer == PlayerLayer.Channels && media.liveOrigin == dev.iptvplayer.tv.data.PickOrigin.PREVIOUS) {
+            channelPanel.scope = model.state.value.liveScope; channelPanel.focusedId = media.entry.id; channelPanel.channels()
+        }
         val request = PlayerFactory.request(media)
         save()
         // Stop the old request before opening a new channel: one source session at a time.
@@ -341,7 +380,11 @@ import kotlinx.coroutines.flow.first
             if (++ticks % 10 == 0) save()
             // The PIN pad over the picture takes the remote's keys: the controls that opened it stay until it closes,
             // and for the usual while after, so focus can go back to them.
-            if (model.state.value.parental.prompt != null) lastInteraction = System.currentTimeMillis()
+            if (model.state.value.parental.prompt != null || !playerWindow.isWindowFocused || overlays.shown != null || overlays.returning != null)
+                lastInteraction = System.currentTimeMillis()
+            if (layer == PlayerLayer.Channels && PanelAutoClose.shouldClose(System.currentTimeMillis(), lastInteraction,
+                    if (model.state.value.playback.osdTimeout.ms == null) null else PanelAutoClose.TIMEOUT_MS,
+                    accessibility?.isTouchExplorationEnabled == true)) perform(PlayerCommand.CloseChannels)
             if (ControlsAutoHide.shouldHide(System.currentTimeMillis(), lastInteraction, model.state.value.playback.osdTimeout,
                     player.isPlaying, top() == PlayerLayer.Controls, recovery.state.value.failure != null, recovery.state.value.recovering,
                     talkBack = accessibility?.isTouchExplorationEnabled == true, scrubbing = scrub.target != null)) layer = PlayerLayer.Video
@@ -380,7 +423,16 @@ import kotlinx.coroutines.flow.first
         } }, modifier = Modifier.fillMaxSize(), update = { view ->
             view.subtitleView?.let { PlayerFactory.subtitles(it, screenState.playback.subtitle) }
         }, onRelease = { it.player = null })
-        Box(Modifier.fillMaxSize().focusRequester(canvas).focusable(layer == PlayerLayer.Video))
+        val canvasDescription = if (live) stringResource(R.string.panel_video_accessible,
+            model.channelNumber(media.entry)?.toString().orEmpty(), shownTitle(media.entry.title, "", resources).name) else ""
+        val channelsAction = stringResource(R.string.player_channels)
+        val controlsAction = stringResource(R.string.panel_controls_action)
+        Box(Modifier.fillMaxSize().focusRequester(canvas).focusable(layer == PlayerLayer.Video).testTag("player-canvas")
+            .semantics { if (live && layer == PlayerLayer.Video) {
+                contentDescription = canvasDescription
+                onClick(channelsAction) { perform(PlayerCommand.OpenChannels); true }
+                customActions = listOf(CustomAccessibilityAction(controlsAction) { perform(PlayerCommand.ShowControls); true })
+            } })
         val problemText = when {
             recoveryState.recovering -> recoveryState.message.resolve()
             failure != null -> failure.resolve()
@@ -511,12 +563,11 @@ import kotlinx.coroutines.flow.first
         AnimatedVisibility(live && layer == PlayerLayer.Channels, Modifier.align(Alignment.CenterStart).fillMaxHeight(),
             enter = slideInHorizontally(tween(if (reducedMotion) 0 else 240, easing = FastOutSlowInEasing)) { -it },
             exit = slideOutHorizontally(tween(if (reducedMotion) 0 else 180, easing = FastOutSlowInEasing)) { -it }) {
-            val channelIndex = remember(screenState.catalog, screenState.allCatalog, screenState.playerReturn,
-                screenState.searchSourceId, screenState.category, screenState.onlyFavorites, screenState.favoriteIds) { model.liveIndex() }
-            val sources = remember(screenState.sources) { screenState.sources.associate { it.id to it.name } }
-            ChannelDrawer(channelIndex, media.entry.id, screenState.locks, sources, layer == PlayerLayer.Channels,
-                problemText ?: statusText, failure != null, panelAlpha, pick = { id, returnFocus ->
-                    when (val result = model.pickChannel(id)) {
+            ChannelPanel(channelPanel, screenState, model, media.entry.id, layer == PlayerLayer.Channels,
+                problemText ?: statusText, failure != null, panelAlpha,
+                pick = { id, panelScope, returnFocus ->
+                    val result = model.pickChannel(id, panelScope)
+                    when (result) {
                         is GateResult.NeedsPin -> openPin(returnFocus)
                         is GateResult.Allow -> if (result.entry.id == media.entry.id) {
                             if (failure != null || status == Player.STATE_ENDED) recovery.retryManually()
@@ -524,8 +575,10 @@ import kotlinx.coroutines.flow.first
                         }
                         else -> Unit
                     }
-                }, close = { perform(PlayerCommand.CloseChannels) })
+                    result
+                }, close = { perform(PlayerCommand.CloseChannels) }, input = { lastInteraction = System.currentTimeMillis() })
         }
+
         if (layer == PlayerLayer.Options || layer == PlayerLayer.Speed) PlayerOptionsDialog(
             picking = layer == PlayerLayer.Speed, speed = speed, opacity = screenState.playback.panelOpacity,
             enabled = !opened.tunneling && player.isCommandAvailable(Player.COMMAND_SET_SPEED_AND_PITCH),

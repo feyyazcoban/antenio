@@ -11,7 +11,15 @@ class PlayerKeyRouterTest {
             KeyContext(PlaybackMode.LIVE, PlayerLayer.Channels, recovering = true),
             KeyContext(PlaybackMode.LIVE, PlayerLayer.Channels, failed = true))) {
             for (key in listOf(PlayerKey.Up, PlayerKey.Down, PlayerKey.Left, PlayerKey.Right, PlayerKey.Center)) routes(null, key, ctx)
-            for (key in listOf(PlayerKey.ChannelUp, PlayerKey.ChannelDown, PlayerKey.Guide, PlayerKey.Digit(2))) routes(PlayerCommand.Consume, key, ctx)
+            routes(PlayerCommand.PanelPage(1), PlayerKey.ChannelUp, ctx)
+            routes(PlayerCommand.PanelPage(-1), PlayerKey.ChannelDown, ctx)
+            routes(PlayerCommand.PanelPage(1), PlayerKey.PageDown, ctx)
+            routes(PlayerCommand.PanelPage(-1), PlayerKey.PageUp, ctx)
+            routes(PlayerCommand.OpenGuide, PlayerKey.Guide, ctx)
+            routes(PlayerCommand.PanelDigit(2), PlayerKey.Digit(2), ctx)
+            routes(PlayerCommand.PanelDigit(0), PlayerKey.Digit(0), ctx.copy(pendingDigits = true))
+            routes(PlayerCommand.PreviousChannel, PlayerKey.Digit(0), ctx)
+            assertEquals(PlayerCommand.CloseChannelColumn, PlayerKeyRouter.back(ctx.copy(subColumn = true)))
             assertEquals(PlayerCommand.CloseChannels, PlayerKeyRouter.back(ctx))
         }
     }
@@ -38,15 +46,16 @@ class PlayerKeyRouterTest {
             KeyEvent.KEYCODE_DPAD_DOWN to PlayerKey.Down, KeyEvent.KEYCODE_DPAD_LEFT to PlayerKey.Left,
             KeyEvent.KEYCODE_DPAD_RIGHT to PlayerKey.Right, KeyEvent.KEYCODE_DPAD_CENTER to PlayerKey.Center,
             KeyEvent.KEYCODE_ENTER to PlayerKey.Center, KeyEvent.KEYCODE_GUIDE to PlayerKey.Guide,
-            KeyEvent.KEYCODE_MEDIA_FAST_FORWARD to PlayerKey.FastForward, KeyEvent.KEYCODE_MEDIA_REWIND to PlayerKey.Rewind)
+            KeyEvent.KEYCODE_MEDIA_FAST_FORWARD to PlayerKey.FastForward, KeyEvent.KEYCODE_MEDIA_REWIND to PlayerKey.Rewind,
+            KeyEvent.KEYCODE_PAGE_UP to PlayerKey.PageUp, KeyEvent.KEYCODE_PAGE_DOWN to PlayerKey.PageDown,
+            KeyEvent.KEYCODE_MENU to PlayerKey.Menu, KeyEvent.KEYCODE_INFO to PlayerKey.Info)
         keys.forEach { (code, key) -> assertEquals("$code", key, PlayerKey.of(code)) }
         for (d in 0..9) {
             assertEquals(PlayerKey.Digit(d), PlayerKey.of(KeyEvent.KEYCODE_0 + d))
             assertEquals(PlayerKey.Digit(d), PlayerKey.of(KeyEvent.KEYCODE_NUMPAD_0 + d))
         }
         // Back belongs to BackHandler; the other keys go on to focus as before.
-        for (code in listOf(KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_INFO, KeyEvent.KEYCODE_NUMPAD_ENTER,
-            KeyEvent.KEYCODE_PAGE_UP, KeyEvent.KEYCODE_MEDIA_STOP)) assertNull("$code", PlayerKey.of(code))
+        for (code in listOf(KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_NUMPAD_ENTER, KeyEvent.KEYCODE_MEDIA_STOP)) assertNull("$code", PlayerKey.of(code))
     }
 
     @Test fun playPauseStopsAReconnectionRetriesAnErrorOrToggles() {
@@ -104,7 +113,7 @@ class PlayerKeyRouterTest {
             routes(null, PlayerKey.LastChannel, vod.copy(layer = layer))
         }
         routes(null, PlayerKey.LastChannel, live.copy(layer = PlayerLayer.Tracks))
-        routes(PlayerCommand.Consume, PlayerKey.LastChannel, live.copy(layer = PlayerLayer.Channels))
+        routes(PlayerCommand.PreviousChannel, PlayerKey.LastChannel, live.copy(layer = PlayerLayer.Channels))
     }
 
     @Test fun theGuideKeyOpensTheGuideFromLiveOnly() {
@@ -140,7 +149,7 @@ class PlayerKeyRouterTest {
     }
 
     @Test fun okBringsHiddenControlsUpAndOtherwiseClicksTheFocusedControl() {
-        for (ctx in everywhere()) routes(if (ctx.layer == PlayerLayer.Video) PlayerCommand.ShowControls else null, PlayerKey.Center, ctx)
+        for (ctx in everywhere()) routes(if (ctx.layer == PlayerLayer.Video) { if (ctx.live) PlayerCommand.Consume else PlayerCommand.ShowControls } else null, PlayerKey.Center, ctx)
     }
 
     @Test fun backClosesOneLayerAPress() {
@@ -180,6 +189,32 @@ class PlayerKeyRouterTest {
         assertEquals(PlayerCommand.Exit(true), PlayerKeyRouter.back(pending.copy(recovering = true)))
         assertEquals(PlayerCommand.CloseTracks, PlayerKeyRouter.back(pending.copy(layer = PlayerLayer.Tracks)))
         routes(PlayerCommand.StopRecovery, PlayerKey.PlayPause, pending.copy(recovering = true))
+    }
+
+    @Test fun shortLiveOkOpensOnReleaseAndHeldOkCannotClickTheNewLayer() {
+        val input = PlayerKeyInput()
+        assertEquals(PlayerCommand.Consume, input.route(PlayerKey.Center, live))
+        assertEquals(PlayerCommand.OpenChannels, input.route(PlayerKey.Center, live.copy(phase = KeyPhase.UP)))
+        assertNull(input.route(PlayerKey.Center, live.copy(phase = KeyPhase.UP)))
+        assertEquals(PlayerCommand.Consume, input.route(PlayerKey.Center, live))
+        assertEquals(PlayerCommand.ShowControls, input.route(PlayerKey.Center, live.copy(phase = KeyPhase.REPEAT, repeat = 1)))
+        val controls = live.copy(layer = PlayerLayer.Controls)
+        assertEquals(PlayerCommand.Consume, input.route(PlayerKey.Center, controls.copy(phase = KeyPhase.REPEAT, repeat = 2)))
+        assertEquals(PlayerCommand.Consume, input.route(PlayerKey.Center, controls.copy(phase = KeyPhase.UP)))
+        assertNull(input.route(PlayerKey.Center, controls))
+        assertEquals(PlayerCommand.ShowControls, input.route(PlayerKey.Center, vod))
+        assertNull(input.route(PlayerKey.Center, vod.copy(phase = KeyPhase.UP)))
+    }
+    @Test fun cancelledOrInterruptedOkDoesNotOpenAListAndMenuKeepsControlsReachable() {
+        val input = PlayerKeyInput()
+        input.route(PlayerKey.Center, live)
+        assertEquals(PlayerCommand.Consume, input.route(PlayerKey.Center, live.copy(phase = KeyPhase.UP, cancelled = true)))
+        input.route(PlayerKey.Center, live); input.reset()
+        assertNull(input.route(PlayerKey.Center, live.copy(phase = KeyPhase.UP)))
+        for (key in listOf(PlayerKey.Menu, PlayerKey.Info)) {
+            routes(PlayerCommand.ShowControls, key, live)
+            routes(null, key, vod)
+        }
     }
 
 }

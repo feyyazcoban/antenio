@@ -1,5 +1,7 @@
 # Google TV ekran ve akış sözleşmesi
 
+**20 Ekim · TV-052 / D100:** Canlı görüntüde kısa OK bırakıldığında kanal panelini, basılı OK kontrolleri açar; bırakma yeni düğmeye tıklamaz. Panelde Sol kategori, Sağ mini rehber; kategori yalnız OK ile uygulanır. CH±/Page tuşları sayfalar, rakamlar 1,2 sn sonra satıra odaklanır ve yayın açmaz. Alt sütunda Geri kanallara; panelde Geri sağlıklı görüntüye, hata/yeniden bağlanmada kontrollere döner. 15 sn boşta kapanma; Hiçbir zaman, TalkBack, PIN ve ayrıntı penceresi korumaları. Ayrıntılı sözleşme [overlay](gap/overlay.md); S15c bilgi bandı/basılı zap/son kanal açılış arayüzü ayrı kalır.
+
 **20 Ekim · TV-050 / D099:** Kanal numaraları yayınlanan görünür katalogdan hazırlanır; kategori/favori bağlamı zap boyunca korunur. Bekleyen rakam yokken 0 veya LAST_CHANNEL önceki kanalı kendi bağlamıyla ve güncel PIN kapısıyla seçer; 1 ardından 0 kanal10 olur. Guide oynayan kanalı açar. Son kanal yalnız gerçek oynama başlayınca kimlik/zaman olarak saklanır ve geçmiş temizliğinde unutulur. Panelin yeni kısa/basılı OK dili, kategori/mini rehber, bilgi bandı ve otomatik açılış arayüzü S15b–c kapsamındadır.
 
 **19 Ekim · D098 / 0.14.68:** Splash gradient/logo çizimini siyaha yakın ilk karede hazırlar; ardından giriş saati ve ses başlar. İlk kare uzayabilir; toplam açılışın hızlandığı veya fiziksel akıcılığın kabul edildiği anlamına gelmez. Süre, kumandayla atlama, hareketi azalt ve içerik hazırlama davranışları korunur.
@@ -65,6 +67,7 @@ ID'ler PRD, Figma ve geliştirme görevlerinde ortak kullanılır. İsimler değ
 | TV-041 | Dizi sezon ve bölümleri | Devam edilecek bölüm / ilk bölüm | TV-051 | Önce sezon paneli; sonra aynı dizi kartı |
 | TV-050 | Canlı oynatıcı | Kontroller açıldığında temel eylem | Kontrole göre; paneli aç/kapat | Önce panel, sonra kontroller, sonra geldiği ekran |
 | TV-051 | Film ve dizi oynatıcı | Kontroller açıldığında oynat/duraklat | Kontrole göre; çubukta hedefi uygula veya oynat/duraklat | Panel → bekleyen hedefi iptal → kontroller → kaynak detay; ilerleme kaydet |
+| TV-052 | Oynatıcı kanal paneli | Oynayan kanal / yoksa ilk satır; boşta Tüm kanallar | Başka kanala geç ve panelde kal; oynayan kanalda kapat; kilitliyse PIN | Mini rehber/kategori → kanallar → görüntü; hata varsa kontroller |
 | TV-060 | Arama | Arama alanı / dönüşte son sonuç | Kanal oynar; film/dizi detayı açılır | Klavye → sonuç → gezinme |
 | TV-061 | Favoriler | Son seçili tür ve öğe | İçerik türüne göre | Gezinme; tür filtresi korunur |
 | TV-070 | Kaynaklar ve ayarlar | Son ayar / ilk kaynak | İlgili ayarı aç | Alt ayar → ayar listesi → gezinme |

@@ -820,4 +820,17 @@
         <item quantity="one">%1$s second</item>
         <item quantity="other">%1$s seconds</item>
     </plurals>
+    <string name="panel_channels_title">Channel list</string>
+    <plurals name="panel_channel_count">
+        <item quantity="one">%1$d channel</item>
+        <item quantity="other">%1$d channels</item>
+    </plurals>
+    <string name="panel_hint">Left: categories · Right: programs · CH±: page</string>
+    <string name="panel_empty_favorites">No favorite channels yet. Hold OK on a channel to add one.</string>
+    <string name="panel_programmes">Program schedule</string>
+    <string name="panel_guide_locked">Locked channel. Unlock it with your PIN to see programs.</string>
+    <string name="panel_open_channel">Open channel</string>
+    <string name="panel_watch_channel">Switch to channel</string>
+    <string name="panel_video_accessible">Live TV, %1$s %2$s. OK opens the channel list.</string>
+    <string name="panel_controls_action">Player controls</string>
 </resources>

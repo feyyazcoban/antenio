@@ -3,6 +3,9 @@ package dev.iptvplayer.tv.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.ui.draw.clip
+import dev.iptvplayer.tv.data.EpgProgramme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -159,3 +162,11 @@ internal fun Modifier.scrollEdgeMask(top: () -> Boolean, topFade: Dp = 24.dp): M
         if (top()) drawRect(Brush.verticalGradient(0f to Color.Transparent, 1f to Color.Black, endY = topFade.toPx()),
             size = Size(size.width, topFade.toPx()), blendMode = BlendMode.DstIn)
     }
+
+@Composable internal fun Progress(programme: EpgProgramme, now: Long, modifier: Modifier = Modifier) {
+    val end = programme.end ?: return
+    val fraction = ((now - programme.start).toFloat() / (end - programme.start).coerceAtLeast(1)).coerceIn(0f, 1f)
+    Box(modifier.fillMaxWidth().height(3.dp).clip(RoundedCornerShape(50)).background(Ink.Divider)) {
+        Box(Modifier.fillMaxWidth(fraction).fillMaxHeight().background(Ink.Mint))
+    }
+}

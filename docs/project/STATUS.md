@@ -1,5 +1,13 @@
 # Proje durumu
 
+## 0.14.70 · Kanal paneli · 20 Ekim 2026
+
+S15b / D100: mevcut çekmece kategori ve mini rehberle genişletildi. Canlıda kısa OK bırakılınca liste, basılı OK kontroller; bırakma tıklaması yutulur. Kategori yalnız OK ile uygulanır. CH/Page sayfalar, rakamlar 1,2 sn sonra satıra odaklanır; gezinmek yayın açmaz. Alt sütundan Geri kanallara, panelden sağlıklı görüntüye döner. 15 sn boşta kapanma; Hiçbir zaman/TalkBack/PIN/dialog koruması. Aynı player ve erişim kapısı korunur.
+
+Son kaynakla yalnız5558/betik/normal1,0 ölçekte 12/12 ekran akışı geçti. İlk turlarda bulunan geçici odakla ezilen dönüş hafızası ve mini rehberin kanal listesini kaydırması düzeltildi; ilk başarısızlıklar [QA](native-channel-panel-70-qa.json)'da korunur. Görseller incelendi. 373 JVM sonucu (1 atlanan/0 hata), lint0/42; son tam kontrol4m44s geçti, test edilmiş debug/test APK hashleri aynı. TV teslimi bekleniyor. Font matrisi ve fiziksel/Figma kabulü açık.
+
+S15c bilgi bandı/basılı zap/son kanalı açma arayüzü, S16 ve S17–S29 açık; BKL-032 bütünü done değildir. Home kaydırması kullanıcı kabulüyle kapalı; splash fiziksel animasyon/ses kabulü sürer. Çalışma döngüsü WORKFLOW'da dar ekran kontrolü→son tam derleme olarak netleştirildi.
+
 ## 0.14.69 · Kanal bağlamı ve önceki kanal · 20 Ekim 2026
 
 S15a / D099: kanal listeleri ve numara haritaları görünür katalog yayınlanırken hazırlanır. Zap kaynak/kategori/favori bağlamını korur; 0/LAST önceki kanalı güncel erişim ve PIN kapısından seçer. Bekleyen rakamda0 hâlâ basamaktır. Guide oynayan kanalı hedefler; son kanal yalnız gerçekten oynama başlayınca kimlik/zaman olarak kaydedilir, geçmiş/kaynak temizliğinde unutulur. Otomatik açılış karar altyapısı vardır; kullanıcıya açılan ayar ve kapak altında tamponlama S15c'de kalır.

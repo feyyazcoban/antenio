@@ -258,7 +258,7 @@ class PlayerControlsLayoutTest {
         ui.mainClock.autoAdvance = false
         try {
             key(KeyEvent.KEYCODE_BACK); ui.mainClock.advanceTimeBy(32); ui.waitForIdle()
-            ui.onNodeWithTag("player-channels").assertIsFocused()
+            ui.onNodeWithTag("player-canvas").assertIsFocused()
             key(KeyEvent.KEYCODE_DPAD_CENTER); ui.mainClock.advanceTimeBy(64); ui.waitForIdle()
             ui.onNodeWithTag("player-channel:${channels[1].id}").assertIsFocused()
             shot("channels-reopening-middle")
@@ -266,11 +266,11 @@ class PlayerControlsLayoutTest {
         ui.waitForIdle()
         key(KeyEvent.KEYCODE_BACK)
         ui.onNodeWithTag("player-channel-drawer").assertDoesNotExist()
-        ui.onNodeWithTag("player-channels").assertIsFocused()
+        ui.onNodeWithTag("player-canvas").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         ui.onNodeWithTag("player-channel:${channels[1].id}").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_CENTER)
-        ui.onNodeWithTag("player-channels").assertIsFocused()
+        ui.onNodeWithTag("player-canvas").assertIsFocused()
     }
     @Test fun favoriteDrawerSurvivesRefreshAndMovesFocusWhenRowsDisappear() {
         val channels = model.state.value.catalog.items.filter { it.kind == MediaKind.LIVE }
@@ -291,9 +291,11 @@ class PlayerControlsLayoutTest {
         ui.onNodeWithTag("player-channel:${channels[1].id}").assertIsFocused()
         assertEquals(channels[0].id, model.state.value.playing?.entry?.id)
         ui.runOnUiThread { model.toggleFavorite(channels[1]) }; ui.waitForIdle()
-        ui.onNodeWithText("Bu listede kanal yok.").assertExists()
-        ui.onNodeWithTag("player-channels-close").assertIsFocused()
+        ui.onNodeWithText("Henüz favori kanalın yok. Eklemek için bir kanalda OK tuşunu basılı tut.").assertExists()
+        ui.onNodeWithTag("player-channels-all").assertIsFocused()
         key(KeyEvent.KEYCODE_DPAD_CENTER)
-        ui.onNodeWithTag("player-channels").assertIsFocused()
+        ui.onNodeWithTag("player-channel:${channels[0].id}").assertIsFocused()
+        key(KeyEvent.KEYCODE_BACK)
+        ui.onNodeWithTag("player-canvas").assertIsFocused()
     }
 }

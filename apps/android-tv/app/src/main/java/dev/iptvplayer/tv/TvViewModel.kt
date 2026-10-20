@@ -487,6 +487,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         parental.addLocks(view.missing)
         val all = view.catalog
         val favorites = SourceLibrary.favorites(saved.sources, store::favorites)
+        liveLists.prepareFavorites(favorites)
         val history = SourceLibrary.history(saved.sources, store::history)
         guides.synchronize(saved.sources, snapshots)
         mutable.update { old ->
@@ -691,9 +692,9 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     var homeFocusKey: String? = null
         private set
     fun homeFocus(key: String) { homeFocusKey = key }
-    fun guide() {
+    fun guide(channelId: String? = null) {
         mutable.update { it.copy(route = Route.GUIDE, guideAnchor = System.currentTimeMillis(), guideSaveError = null,
-            guideChannelId = (if (it.route == Route.PLAYER) it.playing?.entry?.id else it.focusedId)?.takeIf { id -> it.catalog.items.any { channel -> channel.id == id && channel.kind == MediaKind.LIVE && !channel.adult } }
+            guideChannelId = (channelId ?: if (it.route == Route.PLAYER) it.playing?.entry?.id else it.focusedId)?.takeIf { id -> it.catalog.items.any { channel -> channel.id == id && channel.kind == MediaKind.LIVE && !channel.adult } }
                 ?: it.history.firstOrNull { mark -> mark.kind == MediaKind.LIVE }?.id) }
     }
     fun guideCursor(id: String?, anchor: Long) { mutable.update { it.copy(guideChannelId = id, guideAnchor = anchor) } }
@@ -1023,7 +1024,9 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         val local = target.withoutSource().id
         val next = store.favorites(source.id).toMutableSet().apply { if (!add(local)) remove(local) }.toSet()
         store.favorites(source.id, next)
-        mutable.update { it.copy(favoriteIds = SourceLibrary.favorites(it.sources, store::favorites)) }
+        val favorites = SourceLibrary.favorites(state.value.sources, store::favorites)
+        liveLists.prepareFavorites(favorites)
+        mutable.update { it.copy(favoriteIds = favorites) }
     }
 
     /** What the app may use of NEXTV Plus: everything until sales open (gap plan S37). */
@@ -1354,6 +1357,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         }
         return cachedLiveIndex
     }
+    internal fun liveChoices(sourceId: String? = null): List<ScopeChoice> = liveLists.choices(state.value.favoriteIds, sourceId)
+    internal fun liveEntry(id: String?): MediaEntry? = liveLists.byId[id]
 
     fun progress(entry: MediaEntry): PlaybackMark? = state.value.sourceFor(entry)?.let { store.progress(it.id, entry.withoutSource().id) }
     fun recordViewed(entry: MediaEntry) {

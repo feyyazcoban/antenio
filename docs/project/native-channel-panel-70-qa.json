@@ -1,0 +1,116 @@
+{
+  "date": "2026-10-20",
+  "version": "0.14.70-design-preview",
+  "versionCode": 84,
+  "decision": "D100",
+  "status": "Code and final checks passed; post-commit source review and TV delivery pending.",
+  "change": "S15b: extend the existing live drawer with category and mini-guide columns, short/held OK ownership, paging/numeric focus, 15-second idle policy, local quick actions and programme detail, visible-row EPG and access protections.",
+  "tests": {
+    "initialBuild": "Full unit/lint/release/debug/androidTest passed in 8m12s; 373 JVM,1 skipped,0 failures/errors; lint0errors/43warnings. PluralsCandidate then fixed.",
+    "initialDevice": {
+      "passed": 8,
+      "failed": 4,
+      "firstRun": "ChannelListFlowTest 5/7 passed; mini-guide column return and quick-actions row focus assertions failed.",
+      "relatedRun": "3/5 passed; drawer test incorrectly expected canvas while still in controls; PIN mini-guide Back row focus assertion failed.",
+      "evidence": [
+        "work/channel-panel-qa/device-panel-full.log",
+        "work/channel-panel-qa/device-related-full.log"
+      ]
+    },
+    "reviewBuild": "Full unit/lint/release/debug/androidTest successful in 9m31s; 373 JVM/1 skipped/0 failures/errors, lint0/42. Final test-expectation rebuild successful in1m39s.",
+    "limits": [
+      "Normal font scale only; matrix explicitly deferred by user.",
+      "No physical playback/session/frame-time measurement.",
+      "GUIDE reaches the app Window.Callback boundary in the test, because the emulator reserves native GUIDE for its global receiver.",
+      "S15c/S16/S17-S29 and physical splash/audio acceptance remain open.",
+      "4500-channel opening/frame-time probe and physical TV p95 were not measured in this step."
+    ],
+    "secondDevice": {
+      "passed": 9,
+      "failed": 3,
+      "run": "12 relevant tests; mini-guide Left return, quick-actions return and PIN mini-guide Back still timed out even with5s focus wait.",
+      "evidence": [
+        "work/channel-panel-qa/device-second-full.log",
+        "work/channel-panel-qa/focus-failure.txt",
+        "work/channel-panel-qa/focus-failure.png"
+      ],
+      "finding": "Semantics tree showed channel7 focused, requested channel0 not focused. Implicit focus during column/window teardown overwrote the plain focusedId before restoration read it."
+    },
+    "focusGuardBuild": "Full unit/lint/release/debug/androidTest passed in8m06s;373JVM/1skip/0fail,lint0/42.",
+    "focusGuardDevice": {
+      "passed": 12,
+      "failed": 0,
+      "log": "work/channel-panel-qa/device-verified-full.log",
+      "note": "All input/focus/PIN/idle/regression cases passed. Visual inspection still found the inactive channel column scrolling its selected first row partly out while mini-guide was open."
+    },
+    "device": {
+      "surface": "emulator-5558 / nextv_test_api36 only; tools/run-device-tests.sh --no-build; normal font scale1.0",
+      "passed": [
+        "dev.iptvplayer.tv.ChannelListFlowTest#heldOkShowsControlsAndItsReleaseNeverPausesPlayback",
+        "dev.iptvplayer.tv.ChannelListFlowTest#categoryBrowsingDoesNotFilterUntilOkAndThePickedScopeDrivesZap",
+        "dev.iptvplayer.tv.ChannelListFlowTest#miniGuideDetailsReturnToTheirExactRowAndBackOnlyClosesOneColumn",
+        "dev.iptvplayer.tv.ChannelListFlowTest#shortOkOpensOnReleaseAndSecondSelectionReturnsToVideoOnTheSamePlayer",
+        "dev.iptvplayer.tv.ChannelListFlowTest#channelKeysPageAndDigitsFocusGlobalNumbersOutsideTheSelectedCategory",
+        "dev.iptvplayer.tv.ChannelListFlowTest#hiddenAndAdultChannelsAreNeverListedAndQuickActionsRestoreFocus",
+        "dev.iptvplayer.tv.ChannelListFlowTest#panelUsesFifteenSecondsRatherThanTheControlsTimeout",
+        "dev.iptvplayer.tv.PlayerControlsLayoutTest#channelDrawerBrowsesWithoutPlayingThenSwitchesOnTheSamePlayerAndReturnsFocus",
+        "dev.iptvplayer.tv.PlayerControlsLayoutTest#movieFocusGeometryAndPanelsReturnToTheirOpeningControl",
+        "dev.iptvplayer.tv.PlayerControlsLayoutTest#favoriteDrawerSurvivesRefreshAndMovesFocusWhenRowsDisappear",
+        "dev.iptvplayer.tv.ParentalFlowTest#channelDrawerPinCancelRestoresTheRowAndUnlockKeepsTheDrawerOpen",
+        "dev.iptvplayer.tv.ParentalFlowTest#aLockedCategorysChannelsArePassedByChannelUpAndAskWhenTypedByNumber"
+      ],
+      "failures": 0,
+      "log": "work/channel-panel-qa/device-visibility-full.log",
+      "guideBoundary": "ChannelListFlowTest numeric/guide case injects GUIDE via real app Window.Callback because the emulator reserves the hardware key; native paging/digits remain real key events. Physical GUIDE acceptance remains open."
+    },
+    "visual": "Final channels/categories/programmes captures inspected. Selected channel stays fully visible while mini-guide focus moves, checked by viewport assertion. Only synthetic fixture; no real source.",
+    "jvm": {
+      "tests": 373,
+      "skipped": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 42
+    },
+    "build": "Final full unit/lint/release/debug/androidTest passed in4m44s, after final debug/androidTest build2m31s and12/12 device tests. Tested debug and test APK hashes remained identical after the full build. One worker, heap1536MB, in-process Kotlin.",
+    "project": "check_project passed: local links,17 registered screens,401 variables,required docs; Figma pending1."
+  },
+  "review": {
+    "method": "Separate source passes by the same agent using the four STEPS perspectives; no additional agents.",
+    "fixed": [
+      "Logo 56x32 now has zero inset.",
+      "Programme detail note distinguishes future, ended and live-only; overlap indication added.",
+      "Locked categories expose a badge/state description; locked mini-guide has no programme titles.",
+      "Programme detail returns to its exact row.",
+      "Channel restore scrolls a partially visible target fully into view; quick dialog return re-enters the channel restore path.",
+      "Panel count uses plurals; old control-focus assertion corrected.",
+      "Freeze a restore target before re-enabling the channel column; capture quick-action row before dialog opens. A null target means the first row, never a transient implicit focus. Category test now also selects a category that excludes the playing channel.",
+      "Ignore transient row focus while another column is active or a restoration is pending; publish row memory only after the requested focus succeeds.",
+      "Freeze automatic bring-into-view scrolling for the inactive channel column; mini-guide test now asserts its selected channel stays completely inside the viewport."
+    ],
+    "pending": "Validate final input/focus paths and then review the implementation commit separately.",
+    "checked": [
+      "Correctness/regression: owned short/held OK DOWN/REPEAT/UP; unchanged VOD seek/speed; category selection and numeric focus do not play; Back closes one column; page direction and captured restoration target.",
+      "Architecture: extend the existing PlayerLayer/PlayerKeyRouter and drawer; pure paging/idle and precomputed LiveLists; focus memory stays local; TvViewModel exposes thin canonical lookups; one ExoPlayer stop/clear/open sequence.",
+      "TV/accessibility: selected state and white-ring focus are separate with no scale; reduced-motion duration0; paneTitle/row descriptions and video actions; adaptive widths/single-column design. Font matrix and physical TalkBack are not claimed.",
+      "Access/privacy/session: projected hidden/adult rows never enter canonical live lookup; every pick re-resolves through ChannelPick/PIN; locked guide rows skip programme/logo/query; only local synthetic HTTP fixtures in tests; browsing opens no media request."
+    ],
+    "followUp": "Multi-source/source-filter fallback and category counts require a dedicated device tour: liveIndex fills a null source from sourceFilterId, while liveChoices currently accepts null as global; a numeric All fallback may expose inconsistent counts. Inspect/align at the start of S15c. The current final fixture is single-source."
+  },
+  "rawEvidence": "work/channel-panel-qa",
+  "delivery": {
+    "package": "dev.iptvplayer.tv.pilot",
+    "versionCode": 84,
+    "versionName": "0.14.70-design-preview",
+    "sha256": "fc99d6a48ebd89a4d0514f26fa6de7d55b467de10e524355b027cc2b2a4cb8db",
+    "signatureSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065",
+    "minified": true,
+    "debuggable": false,
+    "minSdk": 26,
+    "tv": null,
+    "designEmulator": "5556 and5554 were not started or modified.",
+    "testEmulator": "5558 stopped without saving snapshot; Gradle stopped."
+  }
+}

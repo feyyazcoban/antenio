@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-032 · D100 / S15b: kanal/kategori/mini rehber, kısa/basılı OK, paging/numara odağı, PIN/idle ve sabit dönüş hedefi uygulandı; son kaynakla normal ölçekte12/12 ekran akışı geçti. 373JVM/1skip/0hata,lint0/42 ve finalrelease geçti; TV teslimi bekleniyor. S15c bilgi bandı, basılı zap ve son kanalı açma arayüzü açık; genel iş done değildir. [QA](native-channel-panel-70-qa.json).
+
 BKL-032 · D099 / 0.14.69: S15a kanal bağlamı/numara haritaları, önceki kanal, son kanal kaydı/temizliği ve Guide hedefi uygulandı;368JVM/1skip/0hata,6native+1uygulama-penceresi testi ve veri koruyan TVteslimi. Donanım Guide tuşu emülatörde sisteme ayrılmıştır; fiziksel doğrulama açık. S15b–c kategori/mini rehber/bant/yeni OK/heldzap/otomatik açılış arayüzü bekler; genel iş done değildir. [QA](native-channel-context-69-qa.json).
 
 BKL-013/022 · D098 / 0.14.68: splash'in ilk gradient/path hazırlığı görünür girişten önce yapılır, giriş saati/sesi frame commit sonrasına bağlanır. Emülatör release ölçümünde animasyon ortasındaki COMMAND_ISSUE yaklaşık405–416ms→4ms; ilk kare268ms→897ms ve en büyük sonraki vsync boşluğu483ms→600ms. Başlangıç beklemesi ortadan kalkmadı; fiziksel splash/ses kabulü açık, genel işler done değildir. QA native-launch-prime-68-qa.json; S15/S16/S17–S29 bekler.
@@ -55,7 +57,7 @@ BKL-019/020 · 0.14.48 / D078: kullanıcının vitrinden ilk devam kartına geç
 | BKL-029 | Metinler ve iki dil · S01–03, S13 | İki dil ve yerel biçimler uygulandı; İngilizce inceleme ve API 26–32 cihaz turu açık | review |
 | BKL-030 | Ortak temeller · S04–07 | Ayar/erişim/oynatıcı/veri temelleri uygulandı; sonraki adımlar aynı API'leri kullanır | review |
 | BKL-031 | Oynatıcı ayarları ve kontroller · S14, S14b, S16, S45–48 | S14 düzeltmeleri, D077 hız ve S14b native kontroller uygulandı; son doğrulama/teslim HANDOFF'ta. Figma/fiziksel kabul, S16 seçenekleri ve cihaz kapısı açık | in progress |
-| BKL-032 | Oynatıcıda kanal listesi · S15a–c | S15a veri/kapı alt adımı .69 ile teslim; S15b–c kategori/mini rehber, bilgi bandı ve son kanalı açma arayüzü açık | in progress |
+| BKL-032 | Oynatıcıda kanal listesi · S15a–c | S15a .69 teslim; S15b kategori/mini rehber/OK/odak12akış geçti, .70 teslimi sürüyor; S15c bilgi bandı/basılı zap/son kanal arayüzü açık | in progress |
 | BKL-033 | Timeshift · S17, S56–57, S64 | Sağlayıcı penceresi ve akış bütçesi önce; cihaz doğrulaması | planned |
 | BKL-034 | EPG · S19–21, S26–28 | Kaynak şeması, öncelik, kaydırma, elle eşleme ve arama | planned |
 | BKL-035 | Catch-up ve hatırlatıcı · S22–25, S29 | S21 sonrası arşiv; ortak erişim kapısı ve tek oturum | planned |

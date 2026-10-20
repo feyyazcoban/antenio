@@ -12,6 +12,8 @@ Bu klasör tek proje köküdür. Codex, Claude Code, Cursor veya başka bir ara�
 
 ## Derleme ve kontrol
 
+**Kontrol sırası · 20 Ekim 2026:** geliştirme döngüsünde önce değişen alanı derleyip ilgili kontrolü çalıştır. Görsel/odak denemesinde debug ve test APK'ları yeterlidir; her küçük düzeltmede R8 release paketi üretme. Ekran turu geçince emülatörü kapatıp commit öncesi tam birim/lint/release kontrolünü bir kez tamamla. Son kontrol üretim kaynağını değiştirmediyse, zaten geçen ekran turunu tekrar koşma; test edilen debug/test APK hashlerinin aynı kaldığını doğrula. Yeni kaynak değişikliği veya somut başarısızlık yeniden kontrol gerekçesidir. Yalnız kayıt/QA dokümanı commit'i için uygulamayı tekrar derleme.
+
 **Kullanıcı talimatı · 18 Ekim 2026:** geliştirme sırasında yazı boyutu matrisi (1,5 / 2,0) koşulmaz. Kullanıcı "yayına hazırla" dediğinde, mağazaya çıkış öncesi kabul turunda yapılır. Adım tasarımlarındaki büyük yazı gereksinimleri tasarım sözleşmesi olarak kalır; zorunlu geliştirme testi sayılmaz. Normal ölçekte değişiklikle ilgili davranış/odak kontrollerine devam edilir. Önceden tamamlanan font testleri tarihsel kanıttır, tekrar koşma gerekçesi değildir.
 
 Android Studio ile `apps/android-tv` açılır. Projedeki Gradle Wrapper kullanılır; sürümler bu düzenleme sırasında değiştirilmedi. Makinede uygun JDK ve Android SDK bulunmalıdır. SDK yolu Android Studio'nun oluşturduğu, Git dışında kalan `apps/android-tv/local.properties` içindedir. Başka bilgisayarda bu dosyayı yeniden oluştur.

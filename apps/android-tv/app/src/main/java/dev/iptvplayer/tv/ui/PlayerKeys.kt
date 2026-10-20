@@ -33,6 +33,10 @@ internal sealed interface PlayerKey {
     data object Center : PlayerKey
     data object Guide : PlayerKey
     data object LastChannel : PlayerKey
+    data object PageUp : PlayerKey
+    data object PageDown : PlayerKey
+    data object Menu : PlayerKey
+    data object Info : PlayerKey
     data object FastForward : PlayerKey
     data object Rewind : PlayerKey
     data class Digit(val value: Int) : PlayerKey
@@ -52,6 +56,10 @@ internal sealed interface PlayerKey {
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> Center
             KeyEvent.KEYCODE_GUIDE -> Guide
             KeyEvent.KEYCODE_LAST_CHANNEL -> LastChannel
+            KeyEvent.KEYCODE_PAGE_UP -> PageUp
+            KeyEvent.KEYCODE_PAGE_DOWN -> PageDown
+            KeyEvent.KEYCODE_MENU -> Menu
+            KeyEvent.KEYCODE_INFO -> Info
             KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> FastForward
             KeyEvent.KEYCODE_MEDIA_REWIND -> Rewind
             in KeyEvent.KEYCODE_0..KeyEvent.KEYCODE_9 -> Digit(keyCode - KeyEvent.KEYCODE_0)
@@ -65,9 +73,13 @@ internal sealed interface PlayerKey {
  * The player when a key arrives: [layer] is the one on top, [recovering] and [failed] the connection's state, [playing]
  * the player's own isPlaying, and [repeat] how often a key held down has repeated (KeyEvent.repeatCount).
  */
+internal enum class KeyPhase { DOWN, REPEAT, UP }
+
 internal data class KeyContext(val mode: PlaybackMode, val layer: PlayerLayer, val recovering: Boolean = false,
     val failed: Boolean = false, val playing: Boolean = false, val repeat: Int = 0, val scrubbing: Boolean = false,
-    val pendingDigits: Boolean = false) {
+    val pendingDigits: Boolean = false, val phase: KeyPhase = KeyPhase.DOWN,
+    val okPressed: Boolean = false, val okHeld: Boolean = false, val cancelled: Boolean = false,
+    val subColumn: Boolean = false) {
     val live get() = mode == PlaybackMode.LIVE
     /** Neither reconnecting nor stopped by an error. */
     val healthy get() = !recovering && !failed
@@ -100,6 +112,9 @@ internal sealed interface PlayerCommand {
     data object CloseSpeed : PlayerCommand
     data object OpenChannels : PlayerCommand
     data object CloseChannels : PlayerCommand
+    data object CloseChannelColumn : PlayerCommand
+    data class PanelPage(val direction: Int) : PlayerCommand
+    data class PanelDigit(val digit: Int) : PlayerCommand
     /** The end card closes and the controls come up over the episode, as its Bu bölümde kal does. */
     data object CloseEndCard : PlayerCommand
     /** Leaves the player; [stopRecovery] stops a reconnection first. */
@@ -122,6 +137,12 @@ internal object PlayerKeyRouter {
     fun route(key: PlayerKey, ctx: KeyContext): PlayerCommand? = with(ctx) {
         val hidden = layer == PlayerLayer.Video
         when {
+            key == PlayerKey.Center && okPressed -> when {
+                phase == KeyPhase.UP -> if (cancelled || okHeld || !hidden || !live) PlayerCommand.Consume else PlayerCommand.OpenChannels
+                phase == KeyPhase.REPEAT -> if (hidden && !okHeld) PlayerCommand.ShowControls else PlayerCommand.Consume
+                else -> PlayerCommand.Consume
+            }
+            phase == KeyPhase.UP -> null
             layer == PlayerLayer.EpisodeEnd -> if (key == PlayerKey.PlayPause || key == PlayerKey.Pause) PlayerCommand.CloseEndCard else null
             key == PlayerKey.PlayPause && healthy && scrubbing -> PlayerCommand.CommitScrub(true)
             key == PlayerKey.PlayPause -> when {
@@ -133,8 +154,18 @@ internal object PlayerKeyRouter {
             key == PlayerKey.Play -> when { failed -> PlayerCommand.Retry; recovering -> PlayerCommand.Consume; else -> PlayerCommand.Play }
             key == PlayerKey.Pause -> if (recovering) PlayerCommand.StopRecovery else PlayerCommand.Pause
             (layer == PlayerLayer.Options || layer == PlayerLayer.Speed) -> null
-            layer == PlayerLayer.Channels -> if (key == PlayerKey.ChannelUp || key == PlayerKey.ChannelDown ||
-                key is PlayerKey.Digit || key == PlayerKey.Guide || key == PlayerKey.LastChannel) PlayerCommand.Consume else null
+            layer == PlayerLayer.Channels -> when (key) {
+                PlayerKey.ChannelUp, PlayerKey.PageDown -> PlayerCommand.PanelPage(1)
+                PlayerKey.ChannelDown, PlayerKey.PageUp -> PlayerCommand.PanelPage(-1)
+                PlayerKey.Guide -> PlayerCommand.OpenGuide
+                PlayerKey.LastChannel -> if (repeat == 0) PlayerCommand.PreviousChannel else PlayerCommand.Consume
+                is PlayerKey.Digit -> if (key.value == 0 && !pendingDigits) {
+                    if (repeat == 0) PlayerCommand.PreviousChannel else PlayerCommand.Consume
+                } else PlayerCommand.PanelDigit(key.value)
+                else -> null
+            }
+            live && hidden && key == PlayerKey.Center -> PlayerCommand.Consume
+            live && (hidden || layer == PlayerLayer.Controls) && (key == PlayerKey.Menu || key == PlayerKey.Info) -> PlayerCommand.ShowControls
             live && (hidden || layer == PlayerLayer.Controls) && (key == PlayerKey.LastChannel || key == PlayerKey.Digit(0) && !pendingDigits) ->
                 if (repeat == 0) PlayerCommand.PreviousChannel else PlayerCommand.Consume
             live && (key == PlayerKey.ChannelUp || key == PlayerKey.ChannelDown) -> PlayerCommand.Zap(if (key == PlayerKey.ChannelUp) 1 else -1)
@@ -161,7 +192,7 @@ internal object PlayerKeyRouter {
         ctx.layer == PlayerLayer.Tracks -> PlayerCommand.CloseTracks
         ctx.layer == PlayerLayer.Options -> PlayerCommand.CloseOptions
         ctx.layer == PlayerLayer.Speed -> PlayerCommand.CloseSpeed
-        ctx.layer == PlayerLayer.Channels -> PlayerCommand.CloseChannels
+        ctx.layer == PlayerLayer.Channels -> if (ctx.subColumn) PlayerCommand.CloseChannelColumn else PlayerCommand.CloseChannels
         ctx.recovering -> PlayerCommand.Exit(stopRecovery = true)
         ctx.scrubbing -> PlayerCommand.CancelScrub
         ctx.layer == PlayerLayer.Controls && !ctx.failed -> PlayerCommand.HideControls
@@ -173,4 +204,20 @@ internal object PlayerKeyRouter {
 
     /** The channel number typed so far with [digit] added; it stops growing at [MAX_DIGITS]. */
     fun appendDigit(typed: String, digit: Int): String = if (typed.length < MAX_DIGITS) typed + digit else typed
+}
+
+/** Owns only an OK press started on live video. Its release cannot click the newly opened panel or controls. */
+internal class PlayerKeyInput {
+    private var okPressed = false
+    private var okHeld = false
+    fun route(key: PlayerKey, ctx: KeyContext): PlayerCommand? {
+        val command = PlayerKeyRouter.route(key, ctx.copy(okPressed = okPressed, okHeld = okHeld))
+        if (key == PlayerKey.Center) {
+            if (ctx.live && ctx.layer == PlayerLayer.Video && ctx.phase == KeyPhase.DOWN) okPressed = true
+            if (okPressed && ctx.phase == KeyPhase.REPEAT) okHeld = true
+            if (ctx.phase == KeyPhase.UP) reset()
+        }
+        return command
+    }
+    fun reset() { okPressed = false; okHeld = false }
 }

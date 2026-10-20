@@ -1,5 +1,9 @@
 # TV animasyon ve hareket rehberi
 
+## 20 Ekim 2026 · Kanal paneli · D100
+
+Mevcut soldan giriş 240 ms, çıkış 180 ms korunur. Kategori veya mini rehber sütunu açılırken panel genişliği 160 ms değişir; aynı anda en çok iki sütun vardır. Hareketi azalt açıkken bu süreler sıfırdır. Odak hareketi satırı büyütmez; odağın kimliği düz panel tutucusunda kalır. Kategori/mini rehber açıkken etkin olmayan kanal sütunu otomatik bring-into-view kaydırması yapmaz; listeye dönünce normal görünürlük kuralı sürer. Kapanma odağı çıkış animasyonu bitene kadar panelde hapsetmez; etkin olmayan içerik odak/erişilebilirlik ağacından çıkarılır.
+
 ## 19 Ekim 2026 · İlk açılış yükü · D096
 
 Splash zaman çizgisi ve atlama davranışı aynı; köşe ışıkları boyuta göre cache edilir, opaklık animasyonu çizim sırasında okunur. Kaynak hazırlığı ve katalog sayımları ana thread dışına taşınır. İlk Activity kareleri gerçek saatle, normal animasyon ve sentetik büyük katalogla ölçülür; Application/instrumentation hazırlığı ve fiziksel sunum hariç. Ölçüm sonuçları STATUS/HANDOFF/QA'da.

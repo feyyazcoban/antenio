@@ -805,4 +805,17 @@
         <item quantity="one">%1$s saniye</item>
         <item quantity="other">%1$s saniye</item>
     </plurals>
+    <string name="panel_channels_title">Kanal listesi</string>
+    <plurals name="panel_channel_count">
+        <item quantity="one">%1$d kanal</item>
+        <item quantity="other">%1$d kanal</item>
+    </plurals>
+    <string name="panel_hint">Sol: kategoriler · Sağ: program akışı · CH±: sayfa</string>
+    <string name="panel_empty_favorites">Henüz favori kanalın yok. Eklemek için bir kanalda OK tuşunu basılı tut.</string>
+    <string name="panel_programmes">Program akışı</string>
+    <string name="panel_guide_locked">Kilitli kanal. Programları görmek için kanalı PIN ile aç.</string>
+    <string name="panel_open_channel">Kanalı aç</string>
+    <string name="panel_watch_channel">Kanala geç</string>
+    <string name="panel_video_accessible">Canlı yayın, %1$s %2$s. OK kanal listesini açar.</string>
+    <string name="panel_controls_action">Oynatıcı kontrolleri</string>
 </resources>
