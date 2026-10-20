@@ -1,5 +1,7 @@
 # İş listesi
 
+Paylaşım · 20 Ekim, gerçek TV: kurulu .71 üzerinden 41 ekran/panel görüntüsü ve ayrı özel galeri hazırlandı; gerçek katalog/izleme geçmişi, eski/sentetik kare yok. TV'nin Xtream Codes kaynağı ve kompakt son kanal kartları doğrulandı. Önceki sentetik galerinin “Son izlenen” diye yanlış adlandırılan başlangıç rafı “Canlı yayınlar” olarak düzeltildi. Bu teslim açık ürün maddelerini done yapmaz; kapsam ve özel dosya yolları HANDOFF'ta.
+
 Paylaşım ·20 Ekim: kullanıcı için44özgün ekran/panel görüntüsü ve çevrimdışı galeri/ZIP hazır. 36kayıt .71,8tarihli eski kayıt sürümüyle etiketli; sentetik içerik,12/12dar yakalama kontrolü. Bu iş görsel kabul/store hazırlığı veya açık ürün maddelerinin tamamlanması değildir. Teslim ve kapsam HANDOFF'ta.
 
 Ortam takibi ·20 Ekim tekrar: Vulkan-off SwiftShader ile5556 yine çöktü. Windows LocalAppData/CrashDumps kanıtı ortak SwiftShader GLES çizim yolunu işaret etti; gerçek NVIDIA renderer ile5556 veri koruyarak açıldı,5558'de iki sentetik menü/vitrin kontrolü geçti. Uzun oturum kabulü açık, uygulama sürümü değişmedi. İlk “dump yok” bulgusu düzeltildi; [QA](emulator-host-crash-71-repeat-qa.json). M3U'da son-eklenen tarih/görsel desteği ayrı açık eksiği oluşturur.

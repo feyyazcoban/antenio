@@ -1,5 +1,11 @@
 # Proje durumu
 
+## 0.14.71 · Gerçek televizyondan ekran galerisi · 20 Ekim 2026
+
+Kullanıcının isteğiyle fiziksel TV'de kurulu 85/0.14.71-design-preview üzerinden gerçek katalogla 41 adet 1920×1080 ekran/panel görüntüsü alındı. Ana sayfa, kompakt son izlenen kanal kartları, canlı katalog/rehber/oynatıcı/kanal çekmecesi, film/dizi ayrıntıları, arama, boş favoriler ve ayar panelleri kapsanır. Hepsi aynı TV sürümündendir; eski veya sentetik görüntü karıştırılmadı. Kişisel katalog/geçmiş içerdiğinden galeri ve ZIP yalnız `.private/tv-screen-gallery-71/` altında tutulur; Git'e girmez.
+
+TV kaynak yöneticisi mevcut hesabın Xtream Codes olduğunu doğruladı. Önceki sentetik galerideki 11 numaralı “Son izlenen kanallar” etiketi hatalıydı: geçmişsiz katalogdan gelen “Canlı yayınlar” rafıdır; etiket ve paket düzeltildi. Gerçek TV'de D091 kompakt “Son izlediğin kanallar” kartları mevcut. Bu işlem UI düzeltmesi veya genel kabul testi değildir. Uygulama/paket, kaynak ve ayarlar değiştirilmedi; çekim için sırayla bir canlı yayın ve bir film açıldı, izleme kayıtları olağan biçimde güncellenebilir. Sonunda oynatıcıdan çıkılıp Home/İzle odağına dönüldü. 5556'ya dokunulmadı; 5558/Gradle kapalı, font matrisi çalıştırılmadı.
+
 ## 0.14.71 · Paylaşılabilir ekran galerisi · 20 Ekim 2026
 
 Kullanıcının ekran görüntüsü isteği için 6 bölümde 44 özgün 1920×1080 PNG, çevrimdışı HTML/Markdown galeri ve ZIP hazırlandı: `releases/NEXTV-ekranlar-0.14.71/` ve `releases/NEXTV-ekranlar-0.14.71.zip`. 36 görüntü .71; kalan 8 önceki sürümden ve kendi sürümüyle açıkça etiketli. Ana ekranlar ile başlıca paneller kapsanır; bütün hata/dil durumları ve uzun ayar sayfalarının her kaydırma konumu değildir. Kişisel kaynak yerine sentetik katalog kullanıldı.

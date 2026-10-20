@@ -1,5 +1,19 @@
 # Son devir notu
 
+## Codex · Gerçek TV ekranlarının teslimi · 20 Ekim 2026
+
+Kullanıcı gerçek veriyle, doğrudan televizyondan ekran görüntüleri istedi. Kurulu 85/0.14.71-design-preview ve mevcut 1920×1080 görüntü boyutu doğrulandı; fiziksel TV uyandırılarak yalnız seri hedefli manuel gezinme/yakalama yapıldı. 41 özgün PNG `.private/tv-screen-gallery-71/`; çevrimdışı HTML/Markdown ve kopyalar `output/`; ZIP `NEXTV-TV-ekranlar-0.14.71.zip`. Tarif ve özel manifest aynı klasörde, araçlar `work/tv-screen-gallery-71/` içinde. Kişisel katalog/geçmiş olan bu dosyaları releases, Git, Figma veya dış servise taşımayın. Galeri ana ekranları/panelleri ve bazı kaydırma konumlarını kapsar; tüm hata/kurulum/erişim varyantları değildir.
+
+03 gerçek kompakt son izlenen kanal kartlarıdır; 06–12 katalog/EPG/tek canlı oturum/kanal-kategori-program sütunlarıdır. 13–19 film ayrıntısı/açıklama/oynatıcı/ses/seçenek/hız; film oynatıcı karesinde video alanı siyahtır, sonraki panellerde görüntü vardır. 20–21 ve34 dizi/bölüm/sezon; 22 gerçek boş favoriler; 23–25 arama/klavye/sonuç; kalanlar ayar bölümleri, kaynak yöneticisi ve boş PIN formudur. PIN girilmedi; ayar seçimi, hesap düzenleme, yenileme, silme veya sıfırlama yapılmadı. Canlı ve film sırayla açıldı; son kanal/geçmiş/konum normal oynatma etkisiyle güncellenebilir. Oynatıcı kapatıldı, TV Home/İzle odağında bırakıldı.
+
+Kaynak yöneticisinde TV hesabının Xtream Codes olduğu doğrudan doğrulandı; 5556'nın önceki M3U doğrulamasıyla birlikte vitrin veri farkı artık somut. Bu yeni galeri tümüyle .71 gerçek TV'dir. Önceki sentetik galerinin 11 numaralı etiketi “Canlı yayınlar rafı” olarak düzeltildi: geçmiş yokken `live` büyük kartları gösterir; D091 `recent` kompakt kartları farklı raftır. Önceki ZIP yeniden üretildi: 42.703.449 bayt, SHA-256 `afdcbc1c7e9ee014b63050737a9cfd2bfed4f956b54821c5ffaddb58e6509305`; aşağıdaki eski teslim hash'i tarihçedir.
+
+41 görüntünün tamamı kök/bağımsız ajanlarca görsel olarak incelendi; yanlış/boş ekran veya hesap adresi/parola/token görünmedi. Özgün PNG→çıktı→HTML→ZIP eşleşmesi ve ZIP bütünlüğü doğrulandı. Son ZIP 55.856.025 bayt; SHA-256 `05dc82e634d07ac1d4ca14bc7801b3a03d230412929b35cc753ea79e761f85d2`. Yukarıdaki sayılar ham çekim numaralarıdır; çıktı galeri bölüm sırasıyla yeniden numaralanır, manifest `captureNumber` eşlemeyi korur. Galeri yalnız `127.0.0.1:8768` üzerinde (Python PID34956), uygulama tarayıcısında açık; büyütme görünümü doğrulandı. Çevrimdışı HTML tek başına kullanılabilir.
+
+Genel ayarlar karesinde TV'nin mevcut “Hareketi azalt” ayarı Açık görünüyor; değiştirilmedi. Bu durumda vitrin/açılış/menü animasyonları kapalı olacağından sonraki hareket geri bildiriminde hesaba katılmalı. Bazı gerçek kanal logoları/EPG bilgileri eksik; galeri bunları olduğu gibi gösterir.
+
+Üretim kodu/paket değişmedi; derleme veya cihaz instrumentation testi yapılmadı. Yalnız kullanıcı yetkili gerçek cihaz görüntüleri incelendi; font matrisi yok. 5556'ya dokunulmadı; 5558/Gradle kapalı. Sonraki adım numaralı gerçek TV karelerinden kullanıcının yerleşim geri bildirimini almak; açık ürün/kararlılık/Figma kabul maddeleri kapanmış sayılmaz.
+
 ## Codex · Ekran görüntüsü galerisi · 20 Ekim 2026
 
 Kullanıcı bütün ekranların SS'lerini istedi. Teslim: `releases/NEXTV-ekranlar-0.14.71/{index.html,galeri.md,README.md,manifest.json,44 PNG}` ve aynı adlı ZIP (42.702.473 bayt; SHA-256 `4959eee5cf5066f5a9319d955fec61bfcd27912234c93dfbce79cf08d8f67313`). 36 kayıt .71 (32 yeni + 4 mevcut),8 kayıt .62/.63/.68/.70; galeri her birinin gerçek sürümünü belirtir. TV001 mevcut kaynak kurulumuyla ortak; ayrı welcome sayfası yok. Ana ekranlar/başlıca paneller kapsanır; tüm recovery/lock/next-up/uzun basma/alt ayar/hata varyantları değildir. Uzun sayfaların yalnız yakalanan kaydırma konumu görünür.
