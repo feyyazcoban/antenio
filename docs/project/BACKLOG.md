@@ -1,6 +1,6 @@
 # İş listesi
 
-BKL-019/020 · D101 / 0.14.71: tam ekran görsel/kadraj/karartma korunurken metin ve İzle yukarı taşındı; devam başlığı ve kart başlangıcı ilk ekranda. Dört ilgili normal-font akış, birim/lint/release kontrolü geçti; arşiv hazır, ayrı inceleme/kurulum sırada. Genel görsel/Figma/fiziksel kabul açık. [QA](native-hero-peek-71-qa.json).
+BKL-019/020 · D101 / 0.14.71: tam ekran görsel/kadraj/karartma korunurken metin ve İzle yukarı taşındı; devam başlığı ve kart başlangıcı ilk ekranda. Dört ilgili normal-font akış, birim/lint/release kontrolü geçti; ayrı kaynak incelemesi ve veri koruyan TV/5556 kurulumları doğrulandı. Genel görsel/Figma/fiziksel kabul açık. [QA](native-hero-peek-71-qa.json).
 
 BKL-032 · D100 / S15b: kanal/kategori/mini rehber, kısa/basılı OK, paging/numara odağı, PIN/idle ve sabit dönüş hedefi uygulandı; son kaynakla normal ölçekte12/12 ekran akışı geçti. 373JVM/1skip/0hata,lint0/42 ve finalrelease geçti; .70 veri koruyan TVteslimi doğrulandı. Çok kaynak/source-filter sayım/Allfallback kenarı sonraki kontroldür. S15c bilgi bandı, basılı zap ve son kanalı açma arayüzü açık; genel iş done değildir. [QA](native-channel-panel-70-qa.json).
 

@@ -4,7 +4,7 @@
   "versionCode": 85,
   "decision": "D101",
   "change": "Separate a minimum420dp foreground from the unchanged full-viewport backdrop/scrims. At normal960x540dp text and Watch rise120dp; the continue heading and card beginning are visible initially.",
-  "status": "Source and final checks complete; separate source review and device delivery pending.",
+  "status": "Final checks, separate source pass and data-preserving TV/design-emulator delivery verified; user emulator left open.",
   "tests": {
     "debugBuild": "Successful in2m2s. Test-only selector correction rebuilt in1m3s; production code unchanged.",
     "build": "Final unit/lint/release/debug/androidTest successful in 5m 23s; one worker,1536MB heap,in-process Kotlin. Test emulator stopped; user emulator5556 left open.",
@@ -51,10 +51,56 @@
     "r8": true,
     "certificateSha256": "4fe97f80884624ca72df123c25f90f21c1a1792d189da7a18529ec4d41e96065"
   },
-  "review": "Pending separate source review after implementation commit; no subagent.",
+  "review": "After implementation commit, same agent reviewed the committed diff in a separate pass: finite fixed-height background overflow is excluded from foreground measurement and clipped at its own viewport bounds; image scaling/scrim stops unchanged; no new focus handler, decode/request or dependency; existing long/no-art layout and Down/Up/caption framing checks pass. No concrete finding. No separate reviewer/subagent was used; physical/Figma acceptance stays open.",
   "delivery": {
-    "tv": "pending",
-    "designEmulator": "pending"
+    "tv": {
+      "device": "192.168.1.126:5555",
+      "before": {
+        "versionCode": "84",
+        "versionName": "0.14.70-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-20 13:48:00"
+      },
+      "after": {
+        "versionCode": "85",
+        "versionName": "0.14.71-design-preview",
+        "firstInstallTime": "2026-10-13 23:50:03",
+        "lastUpdateTime": "2026-10-20 14:22:06"
+      },
+      "sha256": "df9b0a9d0836c3bb7c9e3a169980a3e041f5ca601c1bb2490e0441fe8bc6371f",
+      "dataPreservation": "install -r; unchanged firstInstallTime; no clear/uninstall/wipe/snapshot restore",
+      "automatedPlaybackStarted": false,
+      "instrumentationRun": false,
+      "appLaunched": false
+    },
+    "designEmulator": {
+      "device": "emulator-5556",
+      "before": {
+        "versionCode": "84",
+        "versionName": "0.14.70-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-20 10:54:55"
+      },
+      "after": {
+        "versionCode": "85",
+        "versionName": "0.14.71-design-preview",
+        "firstInstallTime": "2026-10-14 08:57:19",
+        "lastUpdateTime": "2026-10-20 11:20:49"
+      },
+      "sha256": "df9b0a9d0836c3bb7c9e3a169980a3e041f5ca601c1bb2490e0441fe8bc6371f",
+      "dataPreservation": "install -r; unchanged firstInstallTime; no clear/uninstall/wipe/snapshot restore",
+      "automatedPlaybackStarted": false,
+      "instrumentationRun": false,
+      "appLaunched": true,
+      "foreground": true,
+      "resumed": true,
+      "appRunning": true,
+      "homeContentVisible": true,
+      "homeVisibilityVerification": "Manual review of private emulator capture; Home, Watch, continue heading and card beginning visible. XML did not expose app nodes; no automated Home assertion claimed.",
+      "visibleWindow": true,
+      "leftOpenForUser": true,
+      "launchRecovery": "First launch left launcher foreground; brought existing task forward with a second am start. Verified without reinstall."
+    }
   },
   "rawEvidence": "work/hero-peek-qa",
   "screenshots": [
@@ -63,5 +109,7 @@
     "design/reviews/hero-peek-0.14.71/home-continue.png",
     "design/reviews/hero-peek-0.14.71/no-art.png"
   ],
-  "remaining": "S15c/source-filter multi-source edge, S16/S17-S29 and physical splash/audio acceptance unchanged. BKL-019/020 are not closed as a whole."
+  "remaining": "S15c/source-filter multi-source edge, S16/S17-S29 and physical splash/audio acceptance unchanged. BKL-019/020 are not closed as a whole.",
+  "implementationCommit": "da226763d06359002c1c2fb2b80f343dfb5f608d",
+  "deviceEndState": "5556 visible/Home/foreground/resumed and left open for user;5558 and Gradle stopped;5554 untouched. TV app/playback not launched."
 }
