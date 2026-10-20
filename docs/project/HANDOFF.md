@@ -1,5 +1,13 @@
 # Son devir notu
 
+## Codex · Vitrin kaynak türü doğrulaması · 20 Ekim 2026
+
+Kullanıcının “kesinleştir” isteğiyle 5556'nın mevcut Home görüntüsü ve Kaynakları yönet ekranı okundu: tek kaynak M3U. Kaynak düzenleme, yenileme, silme/ekleme veya yayın açma yapılmadı. Back ile aynı Home/İzle odağına dönüldü; 5556 açık bırakıldı. Ham ekranlar yalnız `.private/hero-source-diagnosis/{current,source-type,return}.png`, Git'e eklenmez. TV/5554/5558 dokunulmadı.
+
+Kaynak kodu zinciri: `SourcesScreen.sourceNumber` doğrudan kayıtlı `source.type` değerini gösterir; `CatalogParser` M3U yolunda yalnız afiş alanını doldurur, backdrop/açıklama/addedAt varsayılanda kalır; `ensureHeroDetail` yalnız Xtream isteği yapar; tarihsiz katalog `featured` tek slaytına, `HeroPicture` ise eski bulanık fon/sağ afiş düzenine geçer. Salt okunur bağımsız ajan incelemesi de bu zinciri doğruladı. .71 farkı bu seçimi değiştirmez. Sağlayıcının Xtream ayrıntılarındaki görsel varlığı bu incelemede doğrulanmadı; “M3U standardında hiçbir geniş görsel olamaz” genellemesi yapılmamalı.
+
+Uygulama kaynağı/sürümü değişmedi; derleme/font/cihaz test turu gerekmedi. Kullanıcı yalnız tanıyı istedi; kaynak türünü otomatik dönüştürme veya mevcut kaynağı kaldırma. Sonraki adım talebe göre M3U görsel bilgisi desteği/eksik görsel düzeni ya da sağlayıcının desteklediği Xtream bağlantısını değerlendirmek; önceki S15c ve diğer açık işler korunur.
+
 ## Codex · 5556 host çökmesi tanısı · 20 Ekim 2026
 
 Kullanıcı "listeleri kaldırıp ekliyordum" dedi. Windows14:34:34Event1000 qemu-system-x86_64.exe/PID0x8008=32776/0xc0000005/unknown; ilk5556 emülatör logunun PID'siyle eşleşti.14:34:42WER StackHash_b4ee/PCH_D7_FROM_unknown. Aynı native erişim ihlali önce iki5558 headless koşusunda da vardı. WER yalnız Report.wer; kullanılabilir native dump yok, hatalı modül kesinleşmedi. Ham Windows/Android/yeniden açma kayıtları yalnız.private/emulator-crash-71. Sanitized [QA](emulator-host-crash-71-qa.json). Android son kalıcı app exit-info11:20:49PACKAGE UPDATED; bu kapanışa ait crash/ANR bulunmadı. Ani VM ölümünün guest kayıtlarını kesebileceğini unutma; uygulamanın her koşulda hatasız olduğunu iddia etme.

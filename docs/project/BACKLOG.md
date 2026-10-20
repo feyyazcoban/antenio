@@ -1,5 +1,7 @@
 # İş listesi
 
+BKL-019/020 · 20 Ekim vitrin tanısı: 5556'daki tek kaynağın M3U olduğu Kaynakları yönet ekranından doğrulandı. Mevcut M3U yolu geniş görsel/açıklama/tarih almadığı için tek slayt ve eski sağ afiş yedeği görülüyor; .71 yerleşim regresyonu değil. Bu inceleme görsel düzeni iyileştirmedi ve genel kabulü kapatmaz. Kaynak dönüşümü/veri değişikliği yapılmadı; kanıt ve sınırlar HANDOFF'ta.
+
 Ortam takibi · 0.14.71 /20Ekim: kullanıcı liste sil/ekle sırasında5556'nın tamamının kapandığını bildirdi; WindowsQEMU/PID32776/0xc0000005 doğrulandı. Grafik/runtime şüpheli; modülunknown ve native dump yok. Mevcut disk desteklenen SwiftShader/Vulkan kapalı tek seferlik açıldı; kalıcı çözüm kabulü ve uzun liste döngüsü açık. Uygulama kaynağı/sürümü değişmedi, genel işleri done yapmaz. [QA](emulator-host-crash-71-qa.json).
 
 BKL-019/020 · D101 / 0.14.71: tam ekran görsel/kadraj/karartma korunurken metin ve İzle yukarı taşındı; devam başlığı ve kart başlangıcı ilk ekranda. Dört ilgili normal-font akış, birim/lint/release kontrolü geçti; ayrı kaynak incelemesi ve veri koruyan TV/5556 kurulumları doğrulandı. Genel görsel/Figma/fiziksel kabul açık. [QA](native-hero-peek-71-qa.json).

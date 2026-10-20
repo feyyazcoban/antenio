@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.71 · Vitrindeki afiş görünümünün nedeni doğrulandı · 20 Ekim 2026
+
+5556 üzerinde Ayarlar → Kaynaklar → Kaynakları yönet ekranı okunarak tek kayıtlı kaynağın M3U olduğu doğrulandı. Uygulamanın M3U ayrıştırıcısı afişi alır; backdrop, açıklama ve eklenme tarihi üretmez. Vitrin ayrıntı isteği yalnız Xtream için çalıştığından bu katalog tek Kütüphanenden slaytı ve bulanık zemin/sağ afiş düzenini kullanır. Bu davranış D067'den beri vardır; .71'in ön plan yerleşimi değişikliği değildir. Sağlayıcının ayrıca Xtream üzerinden bu film için geniş görsel verip vermediği denenmedi. Kaynak/veri/paket değişmedi; ana sayfaya ve İzle odağına dönüldü, 5556 açık. Özel görüntüler yalnız `.private/hero-source-diagnosis` içinde; uygulama testi/derlemesi yapılmadı.
+
 ## 0.14.71 · Kullanıcı emülatörünün kapanması · 20 Ekim 2026
 
 Kullanıcı liste kaldırıp eklerken emülatör kapandı. Windows14:34:34/Event1000: qemu-system-x86_64.exe/PID32776, native0xc0000005 erişim ihlali, modülunknown. PID ilk5556 açılışıyla eşleşir; bütün emülatörün kapanması doğrulandı. Android kalıcı exit-info son kaydı .71 paket güncellemesidir; aynı zamana ait uygulama crash/ANR kaydı bulunmadı. Ani VM kapanması Android kaydını engelleyebilir; belirli uygulama/driver hatası kesinleştirilmedi.
