@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Kurulum alanları açık metin /.84 · 22 Ekim 2026
+
+Kullanıcı: alanlardaki karakterler gizlenmesin; telefondaki Google TV uygulamasından bağlantı yapıştırılabilsin; "akışın tamamı modernitemize yakışmıyor". Yapılan: `ui/PilotApp.kt` içinde `reveal` varsayılanı `true` (D116); sürüm 98/0.14.84 (`app/build.gradle.kts`). Kontroller: `gradlew :app:testDebugUnitTest :app:assembleRelease` (JAVA_HOME = Android Studio jbr) 377/1 atlandı/0 hata, release başarılı; lint, androidTest ve emülatör koşulmadı. Teslim `releases/NEXTV_TV_Design_Preview_0.14.84.apk` (+ .sha256). TV `install -r` 97→98, firstInstallTime 22 Ekim 21:54 (bugünkü temiz kurulum) korundu, kurulu APK SHA eşit; uygulama açıldı, kurulum ekranında alan açık metin (ekran görüntüsü alındı, depoya konmadı). `adb input text` ile girilen örnek adres TV klavye düzeni nedeniyle bozuk yazıldı; bu adb'ye özgüdür, yazılan metin silindi ve klavye kapatıldı. Google TV uygulamasıyla yapıştırma doğrulanmadı; kullanıcı deneyecek.
+
+Tam sonraki adım: kullanıcı telefondan yapıştırmayı ve kaynak eklemeyi denesin. Kurulum akışı yenilemesi için önce tasarım taslağı (TV-001–004; telefonla QR yolu, adım adım akış, klavye açıkken alanın görünür kalması) kullanıcıya sunulur, onaydan sonra kodlanır. Ad işleri ve push bekleyenleri önceki kayıtta.
+
 ## Claude · TV'ye temiz kurulum /.83 · 22 Ekim 2026
 
 Kullanıcı: "televizyona temiz bir kurulum yap datalar silinsin eklemeyi test edeyim". Önce kurulu sürüm okundu: zaten 97/0.14.83 ve APK hash'i teslim dosyasıyla aynıydı. Ardından `adb uninstall` (veri dahil) ve `adb install` ile aynı APK temiz kuruldu; hash yeniden doğrulandı, firstInstallTime 2026-10-22 21:54:30. `am start` ile açıldı, MainActivity önde. Release paketi debuggable olmadığından veri dizini doğrudan okunamadı; kaldırma işlemi veriyi zaten siler. Kod, sürüm ve belgelerin kalanı değişmedi. 5556/5558 emülatörlerine dokunulmadı.

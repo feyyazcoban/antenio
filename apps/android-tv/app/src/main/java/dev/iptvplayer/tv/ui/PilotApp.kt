@@ -200,8 +200,9 @@ import androidx.compose.ui.input.key.type
     val passwordView = remember { BringIntoViewRequester() }
     val guideView = remember { BringIntoViewRequester() }
     val fieldHeights = remember { mutableStateMapOf<BringIntoViewRequester, Int>() }
-    // Hidden fields (the M3U link, the password, the guide address) can be shown while typing them with the remote (U13).
-    var reveal by rememberSaveable { mutableStateOf(false) }
+    // The M3U link, the password and the guide address are readable while typing them with the remote; the viewer can
+    // hide them when someone else is in the room (D116 reverses U13's hidden default).
+    var reveal by rememberSaveable { mutableStateOf(true) }
     val density = LocalDensity.current
     // An untouched name field shows, and saves, the default name in the app's language; an emptied one saves its own.
     val defaultName = stringResource(R.string.source_default_name)

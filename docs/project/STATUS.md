@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.84 · Kurulum alanları açık metin · 22 Ekim 2026
+
+D116: kaynak ekleme ekranında M3U bağlantısı, parola ve rehber adresi varsayılan olarak okunur; "Bilgileri gizle" ile maskelenir. Tek satırlık değişiklik (`ui/PilotApp.kt`, `reveal` varsayılanı). 377 JVM testi (1 atlandı, 0 hata), release derlemesi başarılı; lint ve cihaz testleri koşulmadı (odaklı kontrol). TV 97→98 veri korunarak güncellendi; kurulu APK SHA-256 teslim dosyasıyla eşit (59cedf06…c19c). TV'de alanın açık metin gösterdiği ekran görüntüsüyle doğrulandı. `adb input text` ile yazılan örnek adres TV klavye düzeni yüzünden bozuk geldi (ONBOARDING'de bilinen durum); telefondaki Google TV uygulamasından yapıştırma kullanıcı tarafından denenecek. Kullanıcı kurulum akışının tamamını yenilemek istiyor; tasarım taslağı koddan önce gösterilecek.
+
 ## TV'ye temiz kurulum · 22 Ekim 2026
 
 Kullanıcının isteğiyle ("datalar silinsin, eklemeyi test edeyim") fiziksel TV'deki (192.168.1.126) uygulama verisiyle birlikte kaldırıldı ve `releases/NEXTV_TV_Design_Preview_0.14.83.apk` temiz kuruldu. Kurulu APK SHA-256 teslim dosyasıyla eşit (1a7db5e2…fcfc7), sürüm 97/0.14.83, firstInstallTime 22 Ekim 21:54. 13 Ekim'den beri korunan kaynaklar, favoriler ve izleme geçmişi silindi; kullanıcı kaynak eklemeyi sıfırdan test edecek. Uygulama açıldı ve önde (MainActivity). Kod değişmedi.
