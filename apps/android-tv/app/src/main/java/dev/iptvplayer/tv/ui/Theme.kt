@@ -215,12 +215,12 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
 
 @Composable fun EntryField(label: String, value: String, onChange: (String) -> Unit,
     modifier: Modifier = Modifier, secret: Boolean = false, onDone: (() -> Unit)? = null,
-    containerColor: Color = Ink.Container, revealed: Boolean = false) {
+    containerColor: Color = Ink.Container, revealed: Boolean = false, doneAction: ImeAction = ImeAction.Search) {
     var focused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     val keyboard = rememberFieldKeyboard()
     val input = rememberFieldInput(value, onChange)
-    val options = fieldKeyboardOptions(if (secret) KeyboardType.Password else KeyboardType.Text, if (onDone != null) ImeAction.Search else ImeAction.Next)
+    val options = fieldKeyboardOptions(if (secret) KeyboardType.Password else KeyboardType.Text, if (onDone != null) doneAction else ImeAction.Next)
     val action = KeyboardActionHandler { if (onDone != null) { keyboard.close(); onDone() } else focusManager.moveFocus(FocusDirection.Down) }
     val style = TextStyle(color = Ink.Text, fontSize = 16.sp, fontFamily = Roboto)
     // A field removed while it has focus (a form closing) counts as left.

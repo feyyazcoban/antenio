@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.85 · Yeni kurulum akışı ve telefonla ekleme · 23 Ekim 2026
+
+D117: kullanıcı SETUP_FLOW taslağını onayladı ve telefon yolu dahil kodlandı. Yeni kaynak eklerken karşılama ekranı (Telefonla ekle önerilen, Kumandayla ekle), kumandayla adım adım tek soru, bağlantı hatası ekranı ve sonuçta "… hazır" penceresi gelir. Telefon yolu: TV ev ağında küçük bir sunucu açar, QR ve 6 haneli kod gösterir; telefondan gelen kaynak TV'de onaylanınca eklenir. Kayıtlı kaynağı düzenleme eski formda kalır. Yeni bağımlılık qrcodegen 1.8.0. 382 JVM testi (1 atlandı, 0 hata; 5'i yeni telefon eşleştirme testi), release derlemesi ve androidTest derlemesi başarılı. Lint ve cihaz testleri koşulmadı; `SetupLayoutTest` yeni akışa göre yeniden yazıldı ama cihazda çalıştırılmadı. TV 98→99 veri korunarak güncellendi, kurulu APK SHA-256 teslim dosyasıyla eşit (e485d73b…f517). TV'de karşılama, QR ekranı, sentetik bir gönderimle onay ekranı, hata ekranı ve adres adımı ekran görüntüsüyle doğrulandı; yanlış kod 403, doğru kod 200 döndü, ekrandan çıkınca sunucu kapandı. Gerçek bir telefonla QR okutma ve gerçek kaynakla "hazır" penceresi doğrulanmadı.
+
 ## Kurulum akışı yenileme taslağı · 22 Ekim 2026
 
 Kullanıcı kurulum akışının tamamını yenilemek istedi. [SETUP_FLOW](../design/SETUP_FLOW.md) yazıldı ve 9 ekranlık görsel taslak yayımlandı: karşılama (Telefonla ekle / Kumandayla ekle), QR ve eşleştirme kodu, telefon sayfası, TV'de onay, tek soruluk adımlar (tür, bağlantı; klavye açıkken alan görünür), bağlanıyor, hazır (kanal/film/dizi sayıları), hata. Telefon yolu sunucusuz, ev ağında yerel sunucuyla (öneri). Tahmin yaklaşık 8 iş günü (ölçülmedi). Öneridir; kullanıcı onayından sonra kodlanır. Kod değişmedi.

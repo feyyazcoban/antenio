@@ -33,47 +33,36 @@ class SetupLayoutTest {
         val root = ui.onRoot().getUnclippedBoundsInRoot()
         assertTrue("$tag must fit completely", rect.top >= root.top && rect.bottom <= root.bottom && rect.left >= root.left && rect.right <= root.right)
     }
-    @Test fun sourceTypesAndValidationKeepPrimaryActionVisible() {
+    private fun key(code: Int) { instrumentation.sendKeyDownUpSync(code); ui.waitForIdle() }
+
+    /** The new flow (SETUP_FLOW, D117): welcome, the remote way one question at a time, and the phone way's QR screen. */
+    @Test fun setupFlowStepsKeepFieldAndActionsVisible() {
         ui.waitUntil(10000) { model.state.value.route == Route.SETUP }
-        ui.onNodeWithTag("setup-xtream").assertIsFocused()
-        ui.onNodeWithTag("setup-xtream").assertIsSelected()
-        ui.onNodeWithTag("setup-m3u").assertIsNotSelected()
-        visible("setup-connect"); shot("xtream")
-        repeat(5) {
-            ui.runOnUiThread {
-                val ime = ui.activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-                ime.hideSoftInputFromWindow(ui.activity.window.decorView.windowToken, 0)
-            }
-            Thread.sleep(400)
-            instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle()
-            ui.onNode(isFocused()).assertIsDisplayed()
-            val bounds = ui.onNode(isFocused()).getUnclippedBoundsInRoot()
-            val root = ui.onNodeWithTag("setup-fields").getUnclippedBoundsInRoot()
-            assertTrue("Focused entry must remain fully visible", bounds.top >= root.top && bounds.bottom <= root.bottom)
-        }
-        ui.runOnUiThread {
-            val ime = ui.activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-            ime.hideSoftInputFromWindow(ui.activity.window.decorView.windowToken, 0)
-        }
-        Thread.sleep(400)
-        shot("last-field")
-        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); ui.waitForIdle()
-        ui.onNodeWithTag("setup-connect").assertIsFocused()
-        ui.onNodeWithTag("setup-xtream").performSemanticsAction(SemanticsActions.RequestFocus)
-        ui.waitForIdle()
-        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_RIGHT); ui.waitForIdle()
-        ui.onNodeWithTag("setup-m3u").assertIsFocused()
-        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER); ui.waitForIdle()
+        ui.waitUntil(5000) { runCatching { ui.onNodeWithTag("setup-phone").assertIsFocused() }.isSuccess }
+        visible("setup-remote"); shot("welcome")
+        key(KeyEvent.KEYCODE_DPAD_DOWN)
+        ui.onNodeWithTag("setup-remote").assertIsFocused()
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(5000) { runCatching { ui.onNodeWithTag("setup-m3u").assertIsFocused() }.isSuccess }
+        shot("type")
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
         assertEquals(SourceType.M3U, model.state.value.draft.type)
-        ui.onNodeWithTag("setup-m3u").assertIsSelected()
-        ui.onNodeWithTag("setup-xtream").assertIsNotSelected()
-        shot("m3u")
-        ui.onNodeWithTag("setup-connect").performSemanticsAction(SemanticsActions.RequestFocus)
-        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)
-        ui.waitUntil(5000) { model.state.value.error != null }
-        visible("setup-error"); visible("setup-connect")
-        ui.onNodeWithTag("setup-connect").assertIsFocused(); shot("validation")
-        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_UP); ui.waitForIdle()
-        ui.onNode(isFocused()).assertIsDisplayed()
+        ui.waitUntil(5000) { runCatching { ui.onNodeWithTag("setup-field").assertIsFocused() }.isSuccess }
+        visible("setup-field"); visible("setup-next"); shot("address")
+        // An empty link keeps the step and says so under the field.
+        ui.onNodeWithTag("setup-next").performSemanticsAction(SemanticsActions.RequestFocus)
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.onNodeWithTag("setup-error").assertIsDisplayed(); visible("setup-error"); shot("validation")
+        // Back returns to the type, then to the welcome.
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5000) { runCatching { ui.onNodeWithTag("setup-m3u").assertIsDisplayed() }.isSuccess }
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5000) { runCatching { ui.onNodeWithTag("setup-phone").assertIsFocused() }.isSuccess }
+        key(KeyEvent.KEYCODE_DPAD_CENTER)
+        ui.waitUntil(10000) { runCatching { ui.onNodeWithTag("setup-qr").assertIsDisplayed() }.isSuccess ||
+            runCatching { ui.onNodeWithTag("setup-phone-offline").assertIsDisplayed() }.isSuccess }
+        visible("setup-new-code"); shot("phone")
+        key(KeyEvent.KEYCODE_BACK)
+        ui.waitUntil(5000) { runCatching { ui.onNodeWithTag("setup-phone").assertIsFocused() }.isSuccess }
     }
 }

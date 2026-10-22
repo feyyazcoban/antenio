@@ -1,5 +1,13 @@
 # Son devir notu
 
+## Claude · Yeni kurulum akışı /.85 · 23 Ekim 2026
+
+Kullanıcı: "Taslak uygun. Telefon yolu dahil kodla; önerilen kararlarla ilerle." Yapılanlar (D117): `ui/SetupFlow.kt` (karşılama, telefon/QR, onay, tür, adres, kullanıcı adı, şifre, ad, hata adımları), `data/PhoneSetup.kt` (form ayrıştırma, 6 haneli kod, 5 dk, tek kullanım, 5 denemede kilit), `data/PhoneSetupServer.kt` (yerel HTTP, GET / ve POST /send), `assets/setup/index.html` (TR/EN telefon sayfası), `ui/QrCode.kt` (qrcodegen 1.8.0). `PilotApp` yeni kaynakta `SetupFlow`'u, düzenlemede eski `Setup` formunu açar; `ImportReady` penceresi `TvState.importSummary` ile gelir. `EntryField`'a `doneAction` eklendi; `LineIcon`'a phone ve remote. Metinler values ve values-tr'de. Sürüm 99/0.14.85.
+
+Kontroller: `gradlew :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin :app:assembleRelease` başarılı; 382 test, 1 atlandı, 0 hata. Lint ve cihaz testleri koşulmadı. `SetupLayoutTest` yeni akışa göre yazıldı, çalıştırılmadı; `ParentalFlowTest` yalnız `setup-notice` etiketine bakar, o korundu. TV `install -r` 98→99, veri korundu, SHA eşit. TV'de ekran görüntüleriyle doğrulandı: karşılama, QR ve kod, bilgisayardan sentetik `example.test` gönderimiyle onay ekranı, Ekle sonrası "Bağlanamadı", Bilgileri düzelt ile "Adım 2 / 3". Ardından uygulama yeniden başlatıldı; sentetik taslak kaydedilmedi.
+
+Tam sonraki adım: kullanıcı gerçek telefonla QR'ı okutup kaynağını eklesin ve "hazır" penceresini görsün. Yayın öncesi: androidTest (SetupLayoutTest dahil) ve lint. Telefon sayfası başlığı ve logo hâlâ NEXTV (BKL-045). Push için uzak depo adresi hâlâ bekleniyor.
+
 ## Claude · Kurulum akışı tasarım taslağı · 22 Ekim 2026
 
 Kullanıcı: "Yeni kurulum akışının tasarım taslağını hazırla (QR ile telefondan ekleme dahil); kodlamadan önce göster." Yeni `docs/design/SETUP_FLOW.md`: ekran tablosu (TV-001, 001a/b, 002/002a–b, 003a–c, 004/004a/b; ilk odak, OK, Back), durumlar, klavye kuralı, telefonla ekleme mekanizması (yerel HTTP sunucu, 6 haneli kod, 5 dk, TV onayı; PLAN S43 bileşeni), kodlama planı (~8 g) ve 4 kullanıcı sorusu. Görsel taslak tuvali: https://claude.ai/artifact/SqgnRvfmSRHhDCPZnDBXYV (özel; 9 artboard; Antenio adı ve `Ink` renkleri). Tek geçişte, paralel ajan olmadan hazırlandı. Kod, Figma ve SCREENS değişmedi.

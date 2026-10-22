@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>NEXTV</title>
+<style>
+:root { color-scheme: light dark; --bg: #f4f6f5; --card: #ffffff; --text: #15191e; --muted: #4a555c; --line: #b9c3c0; --accent: #2f7d63; --error: #b3261e; }
+@media (prefers-color-scheme: dark) { :root { --bg: #15191e; --card: #252c33; --text: #f0f3f1; --muted: #b7c1c7; --line: #5a666d; --accent: #a8dfcb; --error: #f2b8a0; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.45 system-ui, -apple-system, Roboto, sans-serif; }
+main { max-width: 440px; margin: 0 auto; padding: 28px 18px 40px; display: flex; flex-direction: column; gap: 16px; }
+h1 { margin: 0; font-size: 24px; font-weight: 600; }
+p { margin: 0; color: var(--muted); font-size: 15px; }
+.tabs { display: flex; padding: 4px; border-radius: 12px; background: var(--line); gap: 4px; }
+.tabs button { flex: 1; border: 0; border-radius: 9px; padding: 10px 0; font: inherit; font-size: 15px; background: transparent; color: var(--text); }
+.tabs button[aria-pressed="true"] { background: var(--card); font-weight: 600; }
+label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
+input, textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--text); font: inherit; }
+textarea { resize: vertical; min-height: 88px; }
+.code { letter-spacing: 6px; font-size: 22px; text-align: center; }
+.send { border: 0; border-radius: 14px; padding: 16px; font: inherit; font-size: 17px; font-weight: 600; background: var(--accent); color: var(--bg); }
+.send:disabled { opacity: .5; }
+.status { min-height: 24px; font-size: 15px; }
+.status.error { color: var(--error); }
+.status.done { color: var(--accent); font-weight: 600; }
+.hidden { display: none; }
+small { color: var(--muted); font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+<h1 id="title">TV'ne kaynak gönder</h1>
+<p id="intro">TV ekranındaki kodu kontrol et, bilgilerini gir ve gönder. TV sana onay soracak.</p>
+<label id="codeLabel">Eşleştirme kodu<input id="code" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7"></label>
+<div class="tabs" role="group">
+<button type="button" id="tabM3u" aria-pressed="true">Bağlantı</button>
+<button type="button" id="tabXtream" aria-pressed="false">Sunucu ve hesap</button>
+</div>
+<label id="addressLabel">M3U bağlantısı<textarea id="address" autocapitalize="off" autocomplete="off" spellcheck="false"></textarea></label>
+<div id="xtream" class="hidden">
+<label id="userLabel">Kullanıcı adı<input id="username" autocapitalize="off" autocomplete="off" spellcheck="false"></label>
+<label id="passLabel" style="margin-top: 16px">Şifre<input id="password" autocapitalize="off" autocomplete="off" spellcheck="false"></label>
+</div>
+<label id="nameLabel">Kaynak adı · isteğe bağlı<input id="name"></label>
+<label id="epgLabel">Rehber (XMLTV) adresi · isteğe bağlı<input id="epg" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="http://…"></label>
+<button type="button" id="send" class="send">TV'ye gönder</button>
+<div id="status" class="status" role="status" aria-live="polite"></div>
+<small id="privacy">Bilgiler yalnız ev ağında TV'ne gider; hiçbir sunucuya gönderilmez.</small>
+</main>
+<script>
+(function () {
+  var en = !/^tr/i.test(navigator.language || "");
+  var t = en ? {
+    title: "Send a source to your TV", intro: "Check the code on your TV screen, enter your details and send. The TV will ask you to confirm.",
+    codeLabel: "Pairing code", tabM3u: "Link", tabXtream: "Server and account", addressM3u: "M3U link", addressXtream: "Server address",
+    userLabel: "Username", passLabel: "Password", nameLabel: "Source name · optional", epgLabel: "Guide (XMLTV) address · optional",
+    send: "Send to TV", privacy: "Your details go only to your TV on your home network, never to a server.",
+    sending: "Sending…", done: "Sent. Confirm on your TV.", code: "The code doesn't match the TV. Check it and try again.",
+    expired: "The code expired. Press New code on the TV.", locked: "Too many wrong codes. Press New code on the TV.",
+    fields: "Enter the link or the server address.", network: "Couldn't reach the TV. Phone and TV must be on the same Wi-Fi."
+  } : {
+    title: "TV'ne kaynak gönder", intro: "TV ekranındaki kodu kontrol et, bilgilerini gir ve gönder. TV sana onay soracak.",
+    codeLabel: "Eşleştirme kodu", tabM3u: "Bağlantı", tabXtream: "Sunucu ve hesap", addressM3u: "M3U bağlantısı", addressXtream: "Sunucu adresi",
+    userLabel: "Kullanıcı adı", passLabel: "Şifre", nameLabel: "Kaynak adı · isteğe bağlı", epgLabel: "Rehber (XMLTV) adresi · isteğe bağlı",
+    send: "TV'ye gönder", privacy: "Bilgiler yalnız ev ağında TV'ne gider; hiçbir sunucuya gönderilmez.",
+    sending: "Gönderiliyor…", done: "Gönderildi. TV'de onayla.", code: "Kod TV'dekiyle aynı değil. Kontrol edip tekrar dene.",
+    expired: "Kodun süresi doldu. TV'de Yeni kod'a bas.", locked: "Çok sayıda yanlış kod. TV'de Yeni kod'a bas.",
+    fields: "Bağlantıyı ya da sunucu adresini gir.", network: "TV'ye ulaşılamadı. Telefon ve TV aynı Wi-Fi'da olmalı."
+  };
+  var $ = function (id) { return document.getElementById(id); };
+  document.documentElement.lang = en ? "en" : "tr";
+  ["title", "intro", "tabM3u", "tabXtream", "send", "privacy"].forEach(function (k) { $(k).textContent = t[k]; });
+  [["codeLabel", "codeLabel"], ["userLabel", "userLabel"], ["passLabel", "passLabel"], ["nameLabel", "nameLabel"], ["epgLabel", "epgLabel"]]
+    .forEach(function (p) { $(p[0]).firstChild.nodeValue = t[p[1]]; });
+  var type = "m3u";
+  function setType(next) {
+    type = next;
+    $("tabM3u").setAttribute("aria-pressed", String(type === "m3u"));
+    $("tabXtream").setAttribute("aria-pressed", String(type === "xtream"));
+    $("xtream").classList.toggle("hidden", type !== "xtream");
+    $("addressLabel").firstChild.nodeValue = type === "m3u" ? t.addressM3u : t.addressXtream;
+  }
+  $("tabM3u").onclick = function () { setType("m3u"); };
+  $("tabXtream").onclick = function () { setType("xtream"); };
+  setType("m3u");
+  var fromQr = (location.hash || "").replace(/[^0-9]/g, "");
+  if (fromQr.length === 6) { $("code").value = fromQr; }
+  function show(text, kind) { var s = $("status"); s.textContent = text; s.className = "status " + (kind || ""); }
+  $("send").onclick = function () {
+    if (!$("address").value.trim()) { show(t.fields, "error"); return; }
+    var body = new URLSearchParams({ code: $("code").value, type: type, address: $("address").value.trim(),
+      username: $("username").value.trim(), password: $("password").value, name: $("name").value.trim(), epg: $("epg").value.trim() });
+    $("send").disabled = true; show(t.sending);
+    fetch("/send", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body.toString() })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        if (res.ok) { show(t.done, "done"); $("password").value = ""; return; }
+        $("send").disabled = false;
+        show(t[res.j.error] || t.network, "error");
+      })
+      .catch(function () { $("send").disabled = false; show(t.network, "error"); });
+  };
+})();
+</script>
+</body>
+</html>

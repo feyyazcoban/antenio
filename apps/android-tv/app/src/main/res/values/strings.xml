@@ -208,6 +208,62 @@
     <string name="setup_connect">Open library</string>
     <string name="setup_show">Show details</string>
     <string name="setup_hide">Hide details</string>
+    <!-- The setup flow (SETUP_FLOW, D117) -->
+    <string name="setup_way_phone">Add with your phone</string>
+    <string name="setup_way_phone_hint">Scan the QR code and paste your link on your phone.</string>
+    <string name="setup_way_remote">Add with the remote</string>
+    <string name="setup_way_remote_hint">Type the link or your account details with the TV keyboard.</string>
+    <string name="setup_recommended">Recommended</string>
+    <string name="setup_phone_step1">Scan the QR code with your phone\'s camera.</string>
+    <string name="setup_phone_step2">Paste your link or enter your account on the page that opens.</string>
+    <string name="setup_phone_step3">Confirm on the TV.</string>
+    <string name="setup_phone_network">Your phone and TV must be on the same Wi-Fi. Your details go only to the TV.</string>
+    <string name="setup_phone_address">Or open this address on your phone:</string>
+    <string name="setup_phone_code">Code</string>
+    <string name="setup_phone_valid">Valid for %1$s</string>
+    <string name="setup_phone_expired">The code expired. Get a new code.</string>
+    <string name="setup_phone_new_code">New code</string>
+    <string name="setup_phone_starting">Getting ready…</string>
+    <string name="setup_phone_offline">The TV isn\'t on a home network. Connect it to Wi-Fi or add with the remote.</string>
+    <string name="setup_phone_qr">QR code for setting up with your phone</string>
+    <string name="setup_confirm_title">Add this source?</string>
+    <string name="setup_confirm_secret">Sent from your phone. The password isn\'t shown on the TV.</string>
+    <string name="setup_confirm_name">Name</string>
+    <string name="setup_confirm_type">Type</string>
+    <string name="setup_confirm_server">Server</string>
+    <string name="setup_confirm_guide">Guide</string>
+    <string name="setup_confirm_guide_yes">XMLTV address added</string>
+    <string name="setup_confirm_guide_no">None</string>
+    <string name="setup_confirm_add">Add</string>
+    <string name="setup_type_title">What are you adding?</string>
+    <string name="setup_type_m3u_hint">The list link from your provider</string>
+    <string name="setup_type_xtream">Xtream account</string>
+    <string name="setup_type_xtream_hint">Server address, username and password</string>
+    <string name="setup_address_hint">Press OK to type. You can also paste it from the Google TV app on your phone.</string>
+    <string name="setup_server_title">Server address</string>
+    <string name="setup_server_hint">It starts with http:// or https://, as your provider gave it.</string>
+    <string name="setup_account_hint">As your provider gave it. Press OK to type.</string>
+    <string name="setup_name_title">Name this source</string>
+    <string name="setup_name_hint">The name tells your sources apart. The guide address is optional.</string>
+    <string name="setup_next">Next</string>
+    <string name="setup_connect_now">Connect</string>
+    <string name="setup_required">Fill this in to continue.</string>
+    <string name="setup_step">Step %1$d of %2$d</string>
+    <string name="setup_password_show">Show password</string>
+    <string name="setup_password_hide">Hide password</string>
+    <string name="setup_failed_title">Couldn\'t connect</string>
+    <string name="setup_fix">Fix details</string>
+    <string name="ready_title">%1$s is ready</string>
+    <plurals name="ready_movies">
+        <item quantity="one">%1$s movie</item>
+        <item quantity="other">%1$s movies</item>
+    </plurals>
+    <plurals name="ready_series">
+        <item quantity="one">%1$s series</item>
+        <item quantity="other">%1$s series</item>
+    </plurals>
+    <string name="ready_another">Add another source</string>
+    <string name="ready_done">Done</string>
     <!-- The name field's first value; once saved it is the viewer's own name for the source. -->
     <string name="source_default_name">My TV</string>
     <!-- What a name field left empty saves. -->

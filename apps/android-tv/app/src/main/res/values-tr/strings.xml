@@ -201,6 +201,62 @@
     <string name="setup_connect">Kütüphaneyi aç</string>
     <string name="setup_show">Bilgileri göster</string>
     <string name="setup_hide">Bilgileri gizle</string>
+    <!-- Kurulum akışı (SETUP_FLOW, D117) -->
+    <string name="setup_way_phone">Telefonla ekle</string>
+    <string name="setup_way_phone_hint">QR kodu okut, bağlantını telefondan yapıştır.</string>
+    <string name="setup_way_remote">Kumandayla ekle</string>
+    <string name="setup_way_remote_hint">Bağlantıyı ya da hesap bilgilerini TV klavyesiyle yaz.</string>
+    <string name="setup_recommended">Önerilen</string>
+    <string name="setup_phone_step1">Telefonunun kamerasıyla QR kodu okut.</string>
+    <string name="setup_phone_step2">Açılan sayfaya bağlantını yapıştır ya da hesabını gir.</string>
+    <string name="setup_phone_step3">TV\'de onayla.</string>
+    <string name="setup_phone_network">Telefon ve TV aynı Wi-Fi ağında olmalı. Bilgilerin yalnız TV\'ye gider.</string>
+    <string name="setup_phone_address">Ya da telefonunda bu adresi aç:</string>
+    <string name="setup_phone_code">Kod</string>
+    <string name="setup_phone_valid">%1$s geçerli</string>
+    <string name="setup_phone_expired">Kodun süresi doldu. Yeni kod al.</string>
+    <string name="setup_phone_new_code">Yeni kod</string>
+    <string name="setup_phone_starting">Hazırlanıyor…</string>
+    <string name="setup_phone_offline">TV bir ev ağına bağlı değil. Wi-Fi\'a bağla ya da kumandayla ekle.</string>
+    <string name="setup_phone_qr">Telefonla kurulum için QR kodu</string>
+    <string name="setup_confirm_title">Bu kaynak eklensin mi?</string>
+    <string name="setup_confirm_secret">Telefonundan geldi. Şifre TV ekranında gösterilmez.</string>
+    <string name="setup_confirm_name">Ad</string>
+    <string name="setup_confirm_type">Tür</string>
+    <string name="setup_confirm_server">Sunucu</string>
+    <string name="setup_confirm_guide">Rehber</string>
+    <string name="setup_confirm_guide_yes">XMLTV adresi var</string>
+    <string name="setup_confirm_guide_no">Yok</string>
+    <string name="setup_confirm_add">Ekle</string>
+    <string name="setup_type_title">Ne ekleyeceksin?</string>
+    <string name="setup_type_m3u_hint">Sağlayıcının verdiği liste bağlantısı</string>
+    <string name="setup_type_xtream">Xtream hesabı</string>
+    <string name="setup_type_xtream_hint">Sunucu adresi, kullanıcı adı ve şifre</string>
+    <string name="setup_address_hint">Yazmak için OK\'e bas. Telefondaki Google TV uygulamasından da yapıştırabilirsin.</string>
+    <string name="setup_server_title">Sunucu adresi</string>
+    <string name="setup_server_hint">Sağlayıcının verdiği gibi, http:// ya da https:// ile başlar.</string>
+    <string name="setup_account_hint">Sağlayıcının verdiği gibi. Yazmak için OK\'e bas.</string>
+    <string name="setup_name_title">Kaynağa ad ver</string>
+    <string name="setup_name_hint">Kaynaklarını adıyla ayırt edersin. Rehber adresi isteğe bağlı.</string>
+    <string name="setup_next">İleri</string>
+    <string name="setup_connect_now">Bağlan</string>
+    <string name="setup_required">Devam etmek için bunu doldur.</string>
+    <string name="setup_step">Adım %1$d / %2$d</string>
+    <string name="setup_password_show">Şifreyi göster</string>
+    <string name="setup_password_hide">Şifreyi gizle</string>
+    <string name="setup_failed_title">Bağlanamadı</string>
+    <string name="setup_fix">Bilgileri düzelt</string>
+    <string name="ready_title">%1$s hazır</string>
+    <plurals name="ready_movies">
+        <item quantity="one">%1$s film</item>
+        <item quantity="other">%1$s film</item>
+    </plurals>
+    <plurals name="ready_series">
+        <item quantity="one">%1$s dizi</item>
+        <item quantity="other">%1$s dizi</item>
+    </plurals>
+    <string name="ready_another">Bir kaynak daha ekle</string>
+    <string name="ready_done">Tamam</string>
     <!-- The name field's first value; once saved it is the viewer's own name for the source. -->
     <string name="source_default_name">Evim</string>
     <!-- What a name field left empty saves. -->

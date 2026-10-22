@@ -1,6 +1,6 @@
 # Kurulum akışı yenilemesi (TV-001–004): tasarım taslağı
 
-22 Ekim 2026 · Kullanıcı mevcut kaynak ekleme ekranını "modernitemize yakışmıyor" buldu ve yenileme istedi. Bu belge **öneridir**; kullanıcı onayından sonra kodlanır. Mevcut davranış sözleşmesi [SCREENS](SCREENS.md) TV-001–004, telefonla kurulum düşüncesi [ONBOARDING](../product/ONBOARDING.md), D116 (alanlar açık metin) ve D058 (klavye yalnız OK ile açılır) geçerlidir.
+22 Ekim 2026 · Kullanıcı mevcut kaynak ekleme ekranını "modernitemize yakışmıyor" buldu ve yenileme istedi. Kullanıcı 23 Ekim 2026'da taslağı onayladı ve önerilen kararlarla kodlandı (D117, 0.14.85); aşağıdaki "Uygulamadaki farklar" bölümü taslaktan ayrılan noktaları sayar. Mevcut davranış sözleşmesi [SCREENS](SCREENS.md) TV-001–004, telefonla kurulum düşüncesi [ONBOARDING](../product/ONBOARDING.md), D116 (alanlar açık metin) ve D058 (klavye yalnız OK ile açılır) geçerlidir.
 
 Görsel taslak (9 ekran, özel tuval): https://claude.ai/artifact/SqgnRvfmSRHhDCPZnDBXYV. Taslak Antenio adını (D115) ve uygulamanın `Ink` renklerini kullanır; QR görseli temsilidir, sayılar örnektir. Figma'ya aktarılmadı.
 
@@ -75,3 +75,11 @@ Toplam yaklaşık 8 iş günü. Mevcut Ayarlar → Kaynaklar → "Kaynak ekle" a
 2. Telefon yolu ilk sürümde mi (8 g), yoksa önce kumanda akışı (1, 2, 5, 6: yaklaşık 5 g) sonra telefon mu?
 3. Şifre alanı açık metin (D116) mi kalsın, yoksa Xtream şifresi için varsayılan gizli + "Göster" mi?
 4. Sonuç ekranında "Bir kaynak daha ekle" olsun mu?
+
+## Uygulamadaki farklar (D117)
+
+- Karar 1–4 önerildiği gibi uygulandı: Telefonla ekle ilk seçenek, telefon yolu ilk sürümde, şifre açık metin ve "Şifreyi gizle", sonuçta "Bir kaynak daha ekle".
+- Sunucu `data/PhoneSetupServer.kt`, eşleştirme ve form `data/PhoneSetup.kt` içindedir; sayfa dili `Accept-Language` yerine tarayıcının dilinden seçilir.
+- Bağlanıyor ekranı (TV-004) mevcut yükleme kartıdır; "Hazır" (TV-004a) ana sayfanın ya da Kaynaklar'ın üstünde bir pencere olarak açılır.
+- Adım göstergesi yalnız kumanda yolundadır. Kayıtlı kaynağı düzenleme eski tek form ekranında kalır.
+- TV-001b'de sunucunun yalnız alan adı gösterilir; bağlantının kendisi ve şifre gösterilmez.

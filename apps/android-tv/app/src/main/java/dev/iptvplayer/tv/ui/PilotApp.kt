@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.WindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -152,7 +153,8 @@ import androidx.compose.ui.input.key.type
                     Route.LOCKED -> AppLockScreen(state, model)
                     Route.RECOVERY -> SourceRecoveryScreen(state, model)
                     Route.SOURCES -> SourcesScreen(state, model)
-                    Route.SETUP -> Setup(state, model)
+                    // Adding a source walks the new flow (SETUP_FLOW, D117); editing a saved one keeps the single form.
+                    Route.SETUP -> if (state.editingSourceId != null) Setup(state, model) else SetupFlow(state, model)
                     // Opening the app on saved sources shows the NEXTV cover, never the operation card (D069). Imports, saves,
                     // removals and a Yeniden dene or reset from the recovery screen keep the card, so no brand flash cuts in.
                     Route.LOADING -> if (state.sourceTask == SourceTask.RESTORING && state.restoringAtLaunch) RestoringCover()
@@ -178,6 +180,10 @@ import androidx.compose.ui.input.key.type
                     }
                     AppOverlayHost(overlays, state, model)
                     state.accessNotice?.let { notice -> AccessNote(notice.resolve()) { model.accessNoticeShown() } }
+                    state.importSummary?.let { summary ->
+                        if (screen == Route.HOME || screen == Route.SOURCES) ImportReady(summary, home = screen == Route.HOME,
+                            done = { model.importSummaryShown() }, another = { model.importSummaryShown(); model.addSource() })
+                    }
                 }
                 if (exitAsk && screen == Route.HOME) ExitDialog { exitAsk = false }
             }
@@ -593,6 +599,42 @@ internal suspend fun refocusAfterDialog(window: androidx.compose.ui.platform.Win
             withTimeoutOrNull(500) { snapshotFlow { window.isWindowFocused }.first { it } }
             withFrameNanos { }
             stay.requestFocus()
+        }
+    }
+}
+
+/**
+ * TV-004a: the new source is ready, with what it brought ("128 kanal · 2400 film · 310 dizi") and, after a partial import,
+ * the sections that did not arrive. [home]: it opened over Home, so the first action opens the library.
+ */
+@Composable private fun ImportReady(summary: ImportSummary, home: Boolean, done: () -> Unit, another: () -> Unit) {
+    val first = remember { FocusRequester() }
+    Dialog(onDismissRequest = done, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        Column(Modifier.width(560.dp).background(Ink.Container, RoundedCornerShape(18.dp)).padding(32.dp).testTag("setup-ready"),
+            verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Box(Modifier.size(48.dp).background(Ink.Mint, androidx.compose.foundation.shape.CircleShape), contentAlignment = Alignment.Center) {
+                Text("✓", Modifier.clearAndSetSemantics { }, color = Ink.OnMint, fontFamily = Roboto, fontSize = 24.sp)
+            }
+            Heading(stringResource(R.string.ready_title, summary.name))
+            val parts = buildList {
+                if (summary.live > 0) add(pluralStringResource(R.plurals.count_channels, summary.live, summary.live.toString()))
+                if (summary.movies > 0) add(pluralStringResource(R.plurals.ready_movies, summary.movies, summary.movies.toString()))
+                if (summary.series > 0) add(pluralStringResource(R.plurals.ready_series, summary.series, summary.series.toString()))
+            }
+            if (parts.isNotEmpty()) Text(parts.joinToString(" · "), Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                color = Ink.Text, fontFamily = Roboto, fontSize = 18.sp, lineHeight = 24.sp)
+            summary.notices.take(2).forEach { Note(it.resolve(), error = true) }
+            Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Action(stringResource(if (home) R.string.setup_connect else R.string.ready_done), Modifier.focusRequester(first)
+                    .testTag("ready-open"), primary = true, onClick = done)
+                Action(stringResource(R.string.ready_another), Modifier.testTag("ready-another"), outlined = true, onClick = another)
+            }
+        }
+        val window = LocalWindowInfo.current
+        LaunchedEffect(Unit) {
+            withTimeoutOrNull(500) { snapshotFlow { window.isWindowFocused }.first { it } }
+            withFrameNanos { }
+            first.requestFocus()
         }
     }
 }

@@ -58,6 +58,8 @@ data class SourceStatus(val count: Int = 0, val updatedAt: Long = 0, val refresh
  * unuttum → Her şeyi sıfırla", told on the setup screen it ends on.
  */
 enum class CatalogOperation { REFRESH, SOURCE_REMOVAL, SOURCE_FILTER, START_OVER }
+/** A new source's import ended (SETUP_FLOW TV-004a): what it brought, shown once over the screen it led to. */
+data class ImportSummary(val name: String, val live: Int, val movies: Int, val series: Int, val notices: List<UiText> = emptyList())
 data class CatalogNotice(val message: UiText, val operation: CatalogOperation, val needsAttention: Boolean = false)
 /** Its texts are [UiText]s: the state holds no ready sentences; the screens resolve them in the app's language. */
 @androidx.compose.runtime.Immutable
@@ -114,6 +116,7 @@ data class TvState(
     val refreshing: Boolean = false,
     val catalogUpdatedAt: Long = 0,
     val catalogNotice: CatalogNotice? = null,
+    val importSummary: ImportSummary? = null,
     val recoveryCanReset: Boolean = false,
     val error: UiText? = null,
     val detailError: UiText? = null,
@@ -585,6 +588,11 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 mutable.update { it.copy(route = SourceScreens.afterSave(it, parental.state.value.mayManageSources),
                     sourceTask = SourceTask.IDLE, editingSourceId = null, draft = SourceDraft(), playing = null,
                     selected = null, episodes = emptyList(), focusedId = null,
+                    importSummary = if (it.editingSourceId != null) null else ImportSummary(source.name,
+                        catalog.items.count { entry -> !entry.adult && entry.kind == MediaKind.LIVE },
+                        catalog.items.count { entry -> !entry.adult && entry.kind == MediaKind.MOVIE },
+                        catalog.items.count { entry -> !entry.adult && entry.kind == MediaKind.SERIES },
+                        catalog.warnings.map { warning -> warning.text }),
                     sourceStatus = it.sourceStatus + (source.id to SourceStatus(
                         catalog.items.count { entry -> !entry.adult && entry.kind != MediaKind.EPISODE }, snapshot.updatedAt,
                         notices = catalog.warnings.map { warning -> warning.text }, failed = catalog.warnings.isNotEmpty()))) }
@@ -599,6 +607,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    fun importSummaryShown() { mutable.update { it.copy(importSummary = null) } }
 
     fun cancelImport() {
         if (state.value.sourceTask != SourceTask.IMPORTING) return

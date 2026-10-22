@@ -105,6 +105,8 @@ private val iconPaths = mapOf(
     "guide" to "M3 4h18v16H3ZM3 9h18M3 14h18M8 4v16M15 9v5",
     "info" to "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18ZM12 11v5.5M12 7.6v.2",
     "lock" to "M6 11h12v10H6ZM8 11V8a4 4 0 0 1 8 0v3",
+    "phone" to "M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2ZM11 18h2",
+    "remote" to "M9 2h6a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2ZM12 6a2 2 0 1 0 0 4a2 2 0 1 0 0-4ZM10.5 14h.01M13.5 14h.01M10.5 17h.01M13.5 17h.01",
 )
 
 @Composable fun LineIcon(name: String, color: Color, modifier: Modifier = Modifier, filled: Boolean = false) {
