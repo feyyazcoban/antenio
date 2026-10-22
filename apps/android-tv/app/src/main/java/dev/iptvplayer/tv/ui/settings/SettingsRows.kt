@@ -178,7 +178,7 @@ internal class SettingsScope(
     }
 
     @Composable fun NoteRow(text: String, modifier: Modifier = Modifier, error: Boolean = false) {
-        Note(text, error, modifier)
+        Note(text, modifier, error)
     }
 }
 

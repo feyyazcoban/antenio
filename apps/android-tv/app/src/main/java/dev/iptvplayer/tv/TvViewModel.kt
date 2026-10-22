@@ -60,6 +60,7 @@ data class SourceStatus(val count: Int = 0, val updatedAt: Long = 0, val refresh
 enum class CatalogOperation { REFRESH, SOURCE_REMOVAL, SOURCE_FILTER, START_OVER }
 data class CatalogNotice(val message: UiText, val operation: CatalogOperation, val needsAttention: Boolean = false)
 /** Its texts are [UiText]s: the state holds no ready sentences; the screens resolve them in the app's language. */
+@androidx.compose.runtime.Immutable
 data class TvState(
     val route: Route = Route.LOADING,
     val draft: SourceDraft = SourceDraft(),
@@ -400,7 +401,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
 
     /** A TV without sources, on the setup screen; the TV's own settings and the PIN's status stay. */
     private fun startedOver(notice: CatalogNotice? = null) = TvState(route = Route.SETUP, sourceTask = SourceTask.IDLE,
-        reducedMotion = store.reducedMotion, startupSound = store.startupSound, autoNextEpisode = store.autoNextEpisode,
+        reducedMotion = store.reducedMotion, startupSound = store.startupSound, autoNextEpisode = store.autoNextEpisode, startLastChannel = store.startLastChannel,
         playback = store.playback, guideZoneId = store.guideZoneId, librarySorts = storedSorts(), hideAdultCategories = store.hideAdultCategories,
         parental = parental.state.value, catalogNotice = notice)
 
@@ -585,7 +586,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                     sourceTask = SourceTask.IDLE, editingSourceId = null, draft = SourceDraft(), playing = null,
                     selected = null, episodes = emptyList(), focusedId = null,
                     sourceStatus = it.sourceStatus + (source.id to SourceStatus(
-                        catalog.items.count { entry -> !entry.adult }, snapshot.updatedAt,
+                        catalog.items.count { entry -> !entry.adult && entry.kind != MediaKind.EPISODE }, snapshot.updatedAt,
                         notices = catalog.warnings.map { warning -> warning.text }, failed = catalog.warnings.isNotEmpty()))) }
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) {
@@ -668,7 +669,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         homeFocusKey = null
         mutable.update { it.copy(sourceFilterId = id, catalog = filtered(it.allCatalog, id), category = CategoryFilter.ALL,
             focusedId = null) }
-        updateLibrarySearch()
+        updateLibrarySearch(clearResults = false)
         filterJob = viewModelScope.launch {
             try {
                 transactions.write {
@@ -1089,7 +1090,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             is AccessTarget.Watch -> watchAllowed(entry)
             is AccessTarget.Play -> startPlayback(entry, target.restart)
             // The channel already playing stays as it is.
-            is AccessTarget.ChannelNumber -> startLive(entry, ChannelScope(), PickOrigin.NUMBER)
+            is AccessTarget.ChannelNumber -> startLive(entry, ChannelScope(sourceId = liveScope().sourceId?.takeIf { it == entry.sourceId }), PickOrigin.NUMBER)
             is AccessTarget.ChannelStep -> startLive(entry, state.value.liveScope, target.origin)
             is AccessTarget.ChannelPick -> startLive(entry, target.scope ?: state.value.liveScope, target.origin)
             is AccessTarget.NextEpisode -> startPlayback(entry, restart = true)
@@ -1255,7 +1256,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         val target = AccessTarget.Play(id)
         val result = AccessGate.decide(target, gateSnapshot(target))
         if (result is GateResult.Allow && result.entry.kind == MediaKind.LIVE)
-            startPlayback(result.entry, scope = ChannelScope(), origin = PickOrigin.AUTOSTART)
+            startPlayback(result.entry, scope = ChannelScope(sourceId = state.value.sourceFilterId?.takeIf { it == result.entry.sourceId }), origin = PickOrigin.AUTOSTART)
     }
 
     fun startLastChannel(enabled: Boolean) {
@@ -1348,16 +1349,17 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             category = s.category.takeIf { library && it != CategoryFilter.ALL && it != ChannelScope.FAVORITES },
             favoritesOnly = library && (s.onlyFavorites || s.category == ChannelScope.FAVORITES))
     }
+    internal fun liveScope(requested: ChannelScope? = null): ChannelScope = (requested ?: if (state.value.route == Route.PLAYER) state.value.liveScope else entryScope(state.value)).let { it.copy(sourceId = it.sourceId ?: state.value.sourceFilterId) }
     internal fun liveIndex(requested: ChannelScope? = null): LiveIndex {
         val s = state.value
-        val scope = requested ?: if (s.route == Route.PLAYER) s.liveScope else entryScope(s)
+        val scope = liveScope(requested)
         if (s.allCatalog !== liveCatalog || s.catalog !== liveNumberedCatalog || scope != cachedLiveScope || s.favoriteIds != liveFavorites) {
-            cachedLiveIndex = liveLists.select(scope.copy(sourceId = scope.sourceId ?: s.sourceFilterId), s.favoriteIds, numberedSource = s.sourceFilterId)
+            cachedLiveIndex = liveLists.select(scope, s.favoriteIds, numberedSource = s.sourceFilterId)
             liveCatalog = s.allCatalog; liveNumberedCatalog = s.catalog; cachedLiveScope = scope; liveFavorites = s.favoriteIds
         }
         return cachedLiveIndex
     }
-    internal fun liveChoices(sourceId: String? = null): List<ScopeChoice> = liveLists.choices(state.value.favoriteIds, sourceId)
+    internal fun liveChoices(sourceId: String? = null): List<ScopeChoice> = liveLists.choices(state.value.favoriteIds, sourceId ?: state.value.sourceFilterId)
     internal fun liveEntry(id: String?): MediaEntry? = liveLists.byId[id]
 
     fun progress(entry: MediaEntry): PlaybackMark? = state.value.sourceFor(entry)?.let { store.progress(it.id, entry.withoutSource().id) }
@@ -1366,7 +1368,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         val source = s.sourceFor(entry) ?: return
         val local = entry.withoutSource()
         val mark = store.progress(source.id, local.id)
-        val parent = if (entry.kind == MediaKind.EPISODE) s.selected?.takeIf {
+        val parent = if (entry.kind == MediaKind.EPISODE) local.parentLocalId ?: s.selected?.takeIf {
             it.kind == MediaKind.SERIES && it.sourceId == source.id && s.episodes.any { episode -> episode.id == entry.id }
         }?.withoutSource()?.id else null
         val record = WatchRecord(local.id, local.kind, parent, local.season, local.episode,
@@ -1388,6 +1390,9 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             store.saveProgress(source.id, local, position, duration)
             val records = store.history(source.id)
             val record = records.firstOrNull { it.id == local } ?: return
+            val cleanPos = position.coerceAtLeast(0)
+            val cleanDur = duration.coerceAtLeast(0)
+            if (kotlin.math.abs(record.positionMs - cleanPos) < 2_000L && record.durationMs == cleanDur) return
             store.history(source.id, WatchHistory.upsert(records, record.copy(positionMs = position.coerceAtLeast(0),
                 durationMs = duration.coerceAtLeast(0), updatedAt = System.currentTimeMillis())))
             mutable.update { it.copy(history = SourceLibrary.history(it.sources, store::history)) }

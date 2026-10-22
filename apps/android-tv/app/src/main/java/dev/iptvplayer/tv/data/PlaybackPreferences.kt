@@ -51,6 +51,7 @@ enum class PanelOpacity(val alpha: Float) {
  * whole TV. The defaults are what the player did before these settings, so a TV that never opens the page plays as it
  * did. The player reads them when it is made: a change holds from the next stream.
  */
+@androidx.compose.runtime.Immutable
 data class PlaybackPreferences(
     val frameRate: FrameRateMatching = FrameRateMatching.SEAMLESS,
     val buffer: BufferPreset = BufferPreset.NORMAL,

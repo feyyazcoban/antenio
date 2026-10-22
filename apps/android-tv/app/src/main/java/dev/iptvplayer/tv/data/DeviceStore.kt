@@ -31,7 +31,7 @@ class DeviceStore internal constructor(private val prefs: SharedPreferences) {
         }.generateKey()
     }
 
-    @Synchronized fun saveSource(source: SourceConfig) {
+    @Synchronized internal fun saveSource(source: SourceConfig) {
         val plain = JSONObject().put("id", source.id).put("name", source.name).put("type", source.type.name)
             .put("address", source.address).put("username", source.username).put("password", source.password).put("epgUrl", source.epgUrl)
             .toString().toByteArray()

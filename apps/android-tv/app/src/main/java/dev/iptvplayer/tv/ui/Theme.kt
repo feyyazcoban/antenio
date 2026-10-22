@@ -120,12 +120,13 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
 @Composable fun Action(label: String, modifier: Modifier = Modifier, selected: Boolean? = null,
     enabled: Boolean = true, primary: Boolean = false, icon: String? = null, compact: Boolean = false,
     labelOverflow: TextOverflow = TextOverflow.Ellipsis, outlined: Boolean = false, check: Boolean = false,
-    iconFilled: Boolean = false, selectionIndicator: Boolean = true, labelText: AnnotatedString? = null, centerContent: Boolean = false, onClick: () -> Unit) {
+    iconFilled: Boolean = false, selectionIndicator: Boolean = true, labelText: AnnotatedString? = null, centerContent: Boolean = false,
+    onLongClick: (() -> Unit)? = null, onClick: () -> Unit) {
     val height = actionHeight(compact)
     // The TV Button stays focusable while disabled. The D-pad must not enter a disabled action;
     // one that becomes disabled while focused keeps focus, so focus never jumps or disappears.
     var focused by remember { mutableStateOf(false) }
-    Button(onClick = onClick, modifier = modifier.onFocusChanged { focused = it.isFocused }
+    Button(onClick = onClick, onLongClick = onLongClick, modifier = modifier.onFocusChanged { focused = it.isFocused }
         .enterWhenEnabled(enabled, focused)
         .heightIn(min = height, max = height)
         .then(if (selected != null) Modifier.semantics { this.selected = selected } else Modifier), enabled = enabled,
@@ -263,6 +264,8 @@ internal fun fieldKey(event: KeyEvent, focusManager: FocusManager, keyboard: Fie
     return when {
         event.key == Key.DirectionDown -> focusManager.moveFocus(FocusDirection.Down)
         event.key == Key.DirectionUp -> focusManager.moveFocus(FocusDirection.Up)
+        event.key == Key.DirectionLeft && !keyboard.isOpen -> focusManager.moveFocus(FocusDirection.Left)
+        event.key == Key.DirectionRight && !keyboard.isOpen -> focusManager.moveFocus(FocusDirection.Right)
         event.key == Key.DirectionCenter || remoteEnter -> { keyboard.open(); true }
         else -> false
     }
@@ -343,7 +346,7 @@ private class FieldSync(private var known: String) {
     Text(text, modifier, color = Ink.Text, fontFamily = Roboto, fontWeight = FontWeight.Medium, fontSize = 31.sp, lineHeight = 38.sp)
 }
 
-@Composable fun Note(text: String, error: Boolean = false, modifier: Modifier = Modifier) {
+@Composable fun Note(text: String, modifier: Modifier = Modifier, error: Boolean = false) {
     Text(text, modifier, color = if (error) Ink.Error else Ink.Muted, fontFamily = Roboto,
         fontSize = 13.sp, lineHeight = 19.sp)
 }

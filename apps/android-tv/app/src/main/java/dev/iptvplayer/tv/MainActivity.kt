@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
             hide(WindowInsetsCompat.Type.systemBars())
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
-        setContent { PilotTheme { PilotApp(model, opening, startEntrance = startupSound::entranceStarted) { opening = false } } }
+        setContent { PilotTheme { PilotApp(model, opening, startEntrance = startupSound::entranceStarted) { opening = false; if (model.state.value.route == Route.PLAYER) startupSound.stop() } } }
     }
     override fun onStart() { super.onStart(); startupSound.start(); model.appStarted() }
     // A configuration change (a keyboard plugged in, another language) recreates the activity while the viewer stays:

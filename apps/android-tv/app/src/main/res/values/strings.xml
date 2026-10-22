@@ -156,6 +156,7 @@
     <string name="action_retry">Try again</string>
     <string name="action_clear">Clear</string>
     <string name="action_watch">Watch</string>
+    <string name="action_explore">Explore</string>
     <string name="action_details">Details</string>
     <string name="action_play">Play</string>
     <string name="action_resume">Resume</string>
@@ -698,7 +699,7 @@
     <string name="pin_reason_release">Enter the PIN to remove the lock on “%1$s”.</string>
     <!-- TalkBack for the masked digits: how many of the four are in, never which. -->
     <string name="pin_entered">%1$s of %2$s digits entered</string>
-    <string name="pin_delete">Delete</string>
+
     <string name="pin_delete_description">Delete the last digit</string>
     <string name="pin_checking">Checking…</string>
     <string name="pin_wrong">Wrong PIN. Try again.</string>
@@ -802,11 +803,11 @@
     <string name="player_position_applied">Moved to %1$s</string>
     <string name="player_seek_back_accessible">Rewind 10 seconds</string>
     <string name="player_seek_forward_accessible">Forward 10 seconds</string>
-    <string name="player_channel_minus">Channel minus</string>
-    <string name="player_channel_plus">Channel plus</string>
+
+
     <string name="player_hint_vod">When hidden: ◀ ▶ seek · hold to go faster</string>
     <string name="player_hint_scrub">OK apply · Back cancel</string>
-    <string name="player_hint_live">When hidden: ▲▼ channel · digits: channel number</string>
+
     <string name="player_subtitles_off">Subtitles off</string>
     <plurals name="player_hours">
         <item quantity="one">%1$s hour</item>
@@ -833,4 +834,17 @@
     <string name="panel_watch_channel">Switch to channel</string>
     <string name="panel_video_accessible">Live TV, %1$s %2$s. OK opens the channel list.</string>
     <string name="panel_controls_action">Player controls</string>
+    <string name="settings_about_privacy">Privacy and data safety</string>
+    <string name="settings_about_privacy_note">NEXTV collects no analytics, telemetry or advertising identifiers. Source credentials, catalogs, favorites, watch history and parental locks stay encrypted on this device (AES-256-GCM, excluded from cloud backup) and are never sent to any third party. Network requests go only to the IPTV and guide addresses you add.</string>
+    <string name="settings_about_licenses">Open source licenses</string>
+    <string name="settings_about_licenses_note">Roboto font is licensed under the SIL Open Font License 1.1. AndroidX, Jetpack Compose, Media3 ExoPlayer, OkHttp, Coil and Material Symbols icons are licensed under the Apache License 2.0.</string>
+    <string name="settings_start_last_channel">Start on last watched channel</string>
+    <string name="settings_start_last_channel_note">Opens the last live TV channel directly when NEXTV launches. Locked channels open the Home screen instead.</string>
+    <string name="player_aspect_title">Picture fit</string>
+    <string name="player_aspect_fit">Fit (Default)</string>
+    <string name="player_aspect_zoom">Zoom (Crop edges)</string>
+    <string name="player_aspect_fill">Stretch (Full screen)</string>
+    <string name="player_stream_info">Stream details</string>
+    <string name="player_stream_info_empty">Stream format details will appear once playback starts.</string>
+    <string name="player_previous_channel">Previous channel</string>
 </resources>

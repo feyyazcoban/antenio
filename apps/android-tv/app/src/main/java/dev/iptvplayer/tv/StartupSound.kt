@@ -45,7 +45,8 @@ internal class StartupSound(private val context: Context) {
     }
     private fun maybePlay() {
         val since = entranceAt ?: return
-        if (!foreground || !prepared || played || SystemClock.elapsedRealtime() - since > 1800) return
+        if (!foreground || !prepared || played) return
+        if (SystemClock.elapsedRealtime() - since > 1800) { stop(); return }
         played = true
         runCatching { player?.start() }.onFailure { stop() }
     }

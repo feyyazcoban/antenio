@@ -81,7 +81,7 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
                 if (live) LiveBadge()
                 PlayerWallClock(clock)
             }
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(if (live) 10.dp else 4.dp))
             PlayerMeta(entry, info, schedule, zone, clock, speed, playing, status, opening)
             Spacer(Modifier.height(12.dp))
         }
@@ -134,7 +134,7 @@ internal data class PlayerControl(val tag: String, val label: String, val symbol
     val nextLabel = next?.let { stringResource(R.string.player_next_programme, guideTime(it.start, zone), it.title) }
     Column(Modifier.testTag("player-metadata")) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (opening) LoadingArc()
+            if (opening && !live) LoadingArc()
             Text(status ?: body, Modifier.weight(1f).then(if (live) Modifier.testTag("player-current-programme") else Modifier),
                 color = if (live || status != null) Ink.Text else Ink.Muted,
                 fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp, maxLines = if (density.fontScale >= 1.3f) 2 else 1,

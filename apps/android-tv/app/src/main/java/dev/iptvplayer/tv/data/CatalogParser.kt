@@ -108,7 +108,8 @@ object CatalogParser {
         sequenceOf("added", "last_modified").map { row.optString(it).trim().toLongOrNull() ?: 0L }.firstOrNull { it > 0 } ?: 0L
 
     private fun releaseYear(row: JSONObject): String = sequenceOf("releaseDate", "release_date", "releasedate", "year")
-        .map { row.optString(it) }.firstOrNull { it.matches(Regex("\\d{4}.*")) }?.take(4).orEmpty()
+        .map { row.optString(it) }.firstOrNull { it.matches(yearPrefix) }?.take(4).orEmpty()
+    private val yearPrefix = Regex("\\d{4}.*")
 
     private fun firstBackdrop(row: JSONObject): String? {
         val candidates = row.optJSONArray("backdrop_path")
@@ -121,6 +122,7 @@ object CatalogParser {
 
 object M3uParser {
     private val attribute = Regex("([\\w-]+)\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s,]+))")
+    private val moviePath = Regex("(?i).*\\.(mp4|mkv|avi|mov|webm)$")
     // A tag stands on its own (not inside 1920x1080) and follows the show's name: "8x8 (2023)" is a title, not S8E8.
     private val episodeTag = Regex("(?i)(?<![\\p{L}\\p{N}])(?:S(\\d{1,3})\\s*E(\\d{1,4})|(\\d{1,3})x(\\d{1,4}))(?![\\p{L}\\p{N}])")
     internal fun findEpisodeTag(name: String): MatchResult? =
@@ -189,7 +191,7 @@ object M3uParser {
                         val paths = uri.pathSegments
                         val kind = when {
                             "series" in paths || tag != null -> MediaKind.EPISODE
-                            "movie" in paths || uri.encodedPath.matches(Regex("(?i).*\\.(mp4|mkv|avi|mov|webm)$")) -> MediaKind.MOVIE
+                            "movie" in paths || uri.encodedPath.matches(moviePath) -> MediaKind.MOVIE
                             else -> MediaKind.LIVE
                         }
                         val id = "m3u:${stableId(uri.toString())}"

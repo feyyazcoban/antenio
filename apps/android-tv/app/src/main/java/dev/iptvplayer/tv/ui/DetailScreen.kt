@@ -150,7 +150,7 @@ private class SeasonShelf(start: Int) {
                             maxLines = if (series) 2 else 3, overflow = TextOverflow.Ellipsis)
                         if (s.detailLoading) Note(stringResource(R.string.detail_loading))
                         s.detailError?.let { Note(it.resolve(), error = true) }
-                        FlowRow(Modifier.then(actionVisibility.container).then(actionVisibility.focus).focusGroup().padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        FlowRow(Modifier.then(actionVisibility.container).then(actionVisibility.focus).focusProperties { up = back }.focusGroup().padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             if (canPlay) Action(stringResource(if (resume) R.string.action_resume else R.string.action_play),
                                 Modifier.focusRequester(playFocus).then(if (target == null) Modifier.focusRequester(first) else Modifier), primary = true, icon = "play") {
                                 if (model.play(if (series) next!! else entry)) openPin { playFocus }
@@ -185,7 +185,7 @@ private class SeasonShelf(start: Int) {
         }
         Row(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(Ink.Background.copy(alpha = .82f), Color.Transparent)))
             .padding(start = TvLayout.RailWidth + TvLayout.Gutter, end = TvLayout.Gutter, top = 5.dp + TvLayout.HeaderTop, bottom = 5.dp), verticalAlignment = Alignment.CenterVertically) {
-            Action(stringResource(R.string.action_back), Modifier.focusRequester(back), icon = "back") { model.back() }
+            Action(stringResource(R.string.action_back), Modifier.focusRequester(back).focusProperties { up = FocusRequester.Cancel; right = FocusRequester.Cancel }, icon = "back") { model.back() }
         }
     }
     }

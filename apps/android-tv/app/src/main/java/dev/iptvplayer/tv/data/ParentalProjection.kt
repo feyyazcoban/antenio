@@ -10,6 +10,7 @@ package dev.iptvplayer.tv.data
  * identity, listed in the library or not. [open]: the locked titles whose every lock a PIN opened in this session; they
  * read as unlocked until the app leaves the screen.
  */
+@androidx.compose.runtime.Immutable
 data class ParentalLocks(val ids: Set<String> = emptySet(), val categories: Set<String> = emptySet(),
     val sources: Set<String> = emptySet(), val unresolved: Int = 0, val unknown: Boolean = false,
     val contents: Set<String> = emptySet(), val open: Set<String> = emptySet()) {

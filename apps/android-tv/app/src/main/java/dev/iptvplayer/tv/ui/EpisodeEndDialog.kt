@@ -11,7 +11,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
+import kotlinx.coroutines.flow.first
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +37,8 @@ import dev.iptvplayer.tv.R
     Dialog(onDismissRequest = back, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         // Opened from inside the card's window, so focus returns there.
         val openPin = rememberPinOpener()
+        val window = LocalWindowInfo.current
+        LaunchedEffect(window) { withFrameNanos { }; first.requestFocus(); snapshotFlow { window.isWindowFocused }.first { it }; first.requestFocus() }
         Box(Modifier.fillMaxSize().padding(horizontal = 38.dp, vertical = 26.dp), contentAlignment = Alignment.BottomEnd) {
             Column(Modifier.width(480.dp).background(Ink.Container, RoundedCornerShape(16.dp))
                 .border(1.dp, Ink.Divider, RoundedCornerShape(16.dp)).padding(24.dp).testTag("episode-end")
@@ -77,5 +81,5 @@ import dev.iptvplayer.tv.R
             }
         }
     }
-    LaunchedEffect(Unit) { withFrameNanos { }; first.requestFocus() }
+
 }

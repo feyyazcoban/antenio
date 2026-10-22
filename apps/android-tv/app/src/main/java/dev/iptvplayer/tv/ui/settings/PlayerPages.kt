@@ -65,6 +65,8 @@ internal val playerPageList: List<SettingsPageSpec> = listOf(
         AudioOutput.entries.texts { it.note() }, note = nextStream) { prefs, it -> prefs.copy(audioOutput = it) }
     ToggleRow("tunneling", stringResource(R.string.settings_tunneling), stringResource(R.string.settings_tunneling_note), p.tunneling,
         Modifier.testTag("player-setting:tunneling")) { model.playback { it.copy(tunneling = !it.tunneling) } }
+    ToggleRow("start-last-channel", stringResource(R.string.settings_start_last_channel), stringResource(R.string.settings_start_last_channel_note),
+        s.startLastChannel, Modifier.testTag("player-setting:start-last-channel")) { model.startLastChannel(!s.startLastChannel) }
 }
 
 /**

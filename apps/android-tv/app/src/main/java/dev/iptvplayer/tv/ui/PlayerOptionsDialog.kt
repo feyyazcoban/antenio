@@ -1,3 +1,4 @@
+@file:androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 package dev.iptvplayer.tv.ui
 
 import androidx.compose.foundation.background
@@ -28,16 +29,26 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.tv.material3.Text
 import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.data.PanelOpacity
+import dev.iptvplayer.tv.data.SubtitleSize
+import dev.iptvplayer.tv.data.SubtitleSource
+import dev.iptvplayer.tv.data.SubtitleStyle
 import kotlinx.coroutines.flow.first
 
 /** Same panel surface as Ses / Altyazı; Back and media keys remain PlayerKeyRouter's. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable internal fun PlayerOptionsDialog(picking: Boolean, speed: Float, opacity: PanelOpacity,
     enabled: Boolean, unavailable: String, openSpeeds: () -> Unit, choose: (Float) -> Unit,
-    dismiss: () -> Unit, key: (KeyEvent) -> Boolean) {
+    dismiss: () -> Unit, key: (KeyEvent) -> Boolean,
+    resizeMode: Int = AspectRatioFrameLayout.RESIZE_MODE_FIT,
+    chooseResize: (Int) -> Unit = {},
+    subtitleStyle: SubtitleStyle = SubtitleStyle(),
+    chooseSubtitleSource: (SubtitleSource) -> Unit = {},
+    chooseSubtitleSize: (SubtitleSize) -> Unit = {},
+    streamInfo: String? = null) {
     val edge = with(LocalDensity.current) { 8.dp.toPx() }
     val visibility = remember(edge) { object : BringIntoViewSpec {
         override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float = when {
@@ -85,6 +96,33 @@ import kotlinx.coroutines.flow.first
                                 enabled = enabled, onClick = openSpeeds)
                             if (!enabled) Note(unavailable)
                             else Note(stringResource(R.string.player_speed_note))
+                            Spacer(Modifier.height(4.dp))
+                            Text(stringResource(R.string.player_aspect_title), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp)
+                            listOf(
+                                AspectRatioFrameLayout.RESIZE_MODE_FIT to R.string.player_aspect_fit,
+                                AspectRatioFrameLayout.RESIZE_MODE_ZOOM to R.string.player_aspect_zoom,
+                                AspectRatioFrameLayout.RESIZE_MODE_FILL to R.string.player_aspect_fill,
+                            ).forEach { (mode, labelRes) ->
+                                RadioRow(stringResource(labelRes), selected = resizeMode == mode,
+                                    modifier = Modifier.testTag("player-aspect:$mode")) { chooseResize(mode) }
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            Text(stringResource(R.string.settings_subtitle_size), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp)
+                            RadioRow(stringResource(R.string.settings_subtitle_system), selected = subtitleStyle.source == SubtitleSource.SYSTEM,
+                                modifier = Modifier.testTag("player-subtitle:SYSTEM")) { chooseSubtitleSource(SubtitleSource.SYSTEM) }
+                            listOf(
+                                SubtitleSize.SMALL to R.string.settings_subtitle_small,
+                                SubtitleSize.NORMAL to R.string.settings_subtitle_normal,
+                                SubtitleSize.LARGE to R.string.settings_subtitle_large,
+                                SubtitleSize.XLARGE to R.string.settings_subtitle_xlarge,
+                            ).forEach { (size, labelRes) ->
+                                RadioRow(stringResource(labelRes), selected = subtitleStyle.source == SubtitleSource.APP && subtitleStyle.size == size,
+                                    modifier = Modifier.testTag("player-subtitle:${size.name}")) { chooseSubtitleSize(size) }
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            Text(stringResource(R.string.player_stream_info), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp)
+                            Note(streamInfo ?: stringResource(R.string.player_stream_info_empty),
+                                modifier = Modifier.testTag("player-stream-info"))
                         }
                     }
                     }
