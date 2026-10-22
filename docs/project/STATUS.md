@@ -1,5 +1,9 @@
 # Proje durumu
 
+## Kurulum akışı yenileme taslağı · 22 Ekim 2026
+
+Kullanıcı kurulum akışının tamamını yenilemek istedi. [SETUP_FLOW](../design/SETUP_FLOW.md) yazıldı ve 9 ekranlık görsel taslak yayımlandı: karşılama (Telefonla ekle / Kumandayla ekle), QR ve eşleştirme kodu, telefon sayfası, TV'de onay, tek soruluk adımlar (tür, bağlantı; klavye açıkken alan görünür), bağlanıyor, hazır (kanal/film/dizi sayıları), hata. Telefon yolu sunucusuz, ev ağında yerel sunucuyla (öneri). Tahmin yaklaşık 8 iş günü (ölçülmedi). Öneridir; kullanıcı onayından sonra kodlanır. Kod değişmedi.
+
 ## 0.14.84 · Kurulum alanları açık metin · 22 Ekim 2026
 
 D116: kaynak ekleme ekranında M3U bağlantısı, parola ve rehber adresi varsayılan olarak okunur; "Bilgileri gizle" ile maskelenir. Tek satırlık değişiklik (`ui/PilotApp.kt`, `reveal` varsayılanı). 377 JVM testi (1 atlandı, 0 hata), release derlemesi başarılı; lint ve cihaz testleri koşulmadı (odaklı kontrol). TV 97→98 veri korunarak güncellendi; kurulu APK SHA-256 teslim dosyasıyla eşit (59cedf06…c19c). TV'de alanın açık metin gösterdiği ekran görüntüsüyle doğrulandı. `adb input text` ile yazılan örnek adres TV klavye düzeni yüzünden bozuk geldi (ONBOARDING'de bilinen durum); telefondaki Google TV uygulamasından yapıştırma kullanıcı tarafından denenecek. Kullanıcı kurulum akışının tamamını yenilemek istiyor; tasarım taslağı koddan önce gösterilecek.

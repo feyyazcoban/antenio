@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Kurulum akışı tasarım taslağı · 22 Ekim 2026
+
+Kullanıcı: "Yeni kurulum akışının tasarım taslağını hazırla (QR ile telefondan ekleme dahil); kodlamadan önce göster." Yeni `docs/design/SETUP_FLOW.md`: ekran tablosu (TV-001, 001a/b, 002/002a–b, 003a–c, 004/004a/b; ilk odak, OK, Back), durumlar, klavye kuralı, telefonla ekleme mekanizması (yerel HTTP sunucu, 6 haneli kod, 5 dk, TV onayı; PLAN S43 bileşeni), kodlama planı (~8 g) ve 4 kullanıcı sorusu. Görsel taslak tuvali: https://claude.ai/artifact/SqgnRvfmSRHhDCPZnDBXYV (özel; 9 artboard; Antenio adı ve `Ink` renkleri). Tek geçişte, paralel ajan olmadan hazırlandı. Kod, Figma ve SCREENS değişmedi.
+
+Tam sonraki adım: kullanıcı taslağı onaylasın ve SETUP_FLOW "Kullanıcının kararları"nı yanıtlasın (telefon yolu ilk sürümde mi, şifre açık mı, "Bir kaynak daha ekle"). Onaydan sonra SCREENS güncellenir ve kodlama SETUP_FLOW planındaki sırayla `main` üzerinde başlar.
+
 ## Claude · Kurulum alanları açık metin /.84 · 22 Ekim 2026
 
 Kullanıcı: alanlardaki karakterler gizlenmesin; telefondaki Google TV uygulamasından bağlantı yapıştırılabilsin; "akışın tamamı modernitemize yakışmıyor". Yapılan: `ui/PilotApp.kt` içinde `reveal` varsayılanı `true` (D116); sürüm 98/0.14.84 (`app/build.gradle.kts`). Kontroller: `gradlew :app:testDebugUnitTest :app:assembleRelease` (JAVA_HOME = Android Studio jbr) 377/1 atlandı/0 hata, release başarılı; lint, androidTest ve emülatör koşulmadı. Teslim `releases/NEXTV_TV_Design_Preview_0.14.84.apk` (+ .sha256). TV `install -r` 97→98, firstInstallTime 22 Ekim 21:54 (bugünkü temiz kurulum) korundu, kurulu APK SHA eşit; uygulama açıldı, kurulum ekranında alan açık metin (ekran görüntüsü alındı, depoya konmadı). `adb input text` ile girilen örnek adres TV klavye düzeni nedeniyle bozuk yazıldı; bu adb'ye özgüdür, yazılan metin silindi ve klavye kapatıldı. Google TV uygulamasıyla yapıştırma doğrulanmadı; kullanıcı deneyecek.
