@@ -36,7 +36,7 @@ Yeni karar için ID, tarih, bağlam, karar, gerekçe, etkilenen belge/ekran ve d
 
 ## Açık kararlar
 
-Ürün adı, hedef pazar/diller, gelir modeli, uygulama paket adı, minimum cihaz desteği, pilot kullanıcılar ve yayın tarihi. Renk/hareket taslaklarının gerçek TV doğrulaması da bekliyor.
+Hedef pazar/diller, fiyat (gelir modeli D113 ile kararlaştı; ürün adı D066 ile), uygulama paket adı, minimum cihaz desteği, pilot kullanıcılar ve yayın tarihi. Renk/hareket taslaklarının gerçek TV doğrulaması da bekliyor.
 
 ## Ana sayfa ve kullanıcı pilotu
 
@@ -332,3 +332,45 @@ Kullanıcı içerik kartında uzun OK ile açılan popup’ın tuş bırakılın
 Kullanıcı ana sayfa odaklarının dengesizliğini ve sonda fazla boşluk kaldığını bildirdi. Son rafı ekranın tepesine taşıyabilmek için kullanılan viewport−sonRafYüksekliği+7dp alt dolgu kaldırılır; sayfa alt payı sabit28dp olur. Son afiş rafı gerçek sayfa sonunda durur; sağa-sola gezinirken kısa/uzun başlıklar aynı dikey hedefi paylaşır. Kompakt son kanallar için kısa görünürlük hedefi korunur. Ortadaki afiş raflarının başlık hizalaması sürer. Raf ölçümlerinin bütün sayfanın alt dolgusunu sonradan değiştirmesi sona erer.
 
 İlk rafta Yukarı varsa vitrinin tek İzle eylemine, vitrin yoksa aynı karta döner/odakta kalır. Son rafta Aşağı ve her rafın son kartında Sağ odağı sayfa dışındaki gezinmeye kaçırmaz. Sol/Geri ile menüye erişim ve Sağ ile hatırlanan karta dönüş korunur. Bu değişiklik son rafın altında odak/maske payını korurken yapay boş kaydırma alanı oluşturmaz; kısa içerik doğal olarak ekranın tamamını doldurmayabilir. Font matrisi kullanıcı yayına hazırlama talimatına ertelenir.
+
+## D111 · Platformlar arası Premium ve NEXTV hesabı gereksinimi · 22 Ekim 2026
+
+Kullanıcı satış kanalını sorarken şu gereksinimi koydu: "yarın Apple'dan da kullanmak isteyen kişiler kendi hesaplarıyla giriş yapıp tekrar satın almadan kullanabiliyor olmalılar yani multi platform gibi olacak". Bir platformda (Google Play; ileride Apple, olası web) alınan ücretli hak, kullanıcının NEXTV hesabıyla giriş yaptığı diğer platformlarda yeniden ödeme olmadan açılır. Google ve Apple hesapları birbirini tanımadığı için bu, bir NEXTV hesabı ve sunucu tarafında tutulan bir hak kaydı gerektirir. SALES_STRATEGY ile gap planındaki "hesap yok, sunucu yok, hak yalnız cihazda" önerileri bu gereksinim bakımından geçersizdir; hiçbiri karar değildi. Aynı mağaza içinde hesapsız geri yükleme gereksinimle çelişmez. Gereksinim kaynak verisinin (adres, kimlik bilgisi, liste, favori, geçmiş) sunucuya gitmesini gerektirmez; bu verinin cihazda kalması öneridir (SALES_CHANNELS §3.1).
+
+Karar olmayanlar: hesabın isteğe bağlı mı zorunlu mu olacağı, satış kanalı (mağaza / web / ikisi), hak altyapısı (RevenueCat / kendi servis), kimlik sağlayıcı ve TV giriş yöntemi, cihaz sınırı, ücretli paketin adı (Premium mi Plus mı; uygulama adı NEXTV, D066), fiyat ve zamanlama. Öneriler [SALES_CHANNELS](../product/SALES_CHANNELS.md) içinde. Etkilenen belgeler: SALES_STRATEGY (başına güncelleme notu), gap PLAN ve sales_draft (başına not), PLATFORMS, PRD §12, STORE_LISTING_EN, LAUNCH_AUDIT, BKL-038 ve BKL-047. Durum: gereksinim kullanıcı kararıdır; hayata geçirme işi BKL-047'de planned, kod değişmedi. Numara notu: ana checkout'taki commitlenmemiş iş D109–D110'u kullandığı için bu kayıt D111'dir.
+
+## D112 · Satış kanalı ve NEXTV hesabı modeli · 22 Ekim 2026
+
+Kullanıcı, SALES_CHANNELS önerisinin üç maddesini kabul etti: "Mağaza satışı + isteğe bağlı NEXTV hesabı + Premium ile aynı sürümde hesap önerisini kabul ediyorum." D111 gereksinimi şu modelle karşılanır:
+
+1. **Mağaza satışı.** Ücretli hak uygulama içinden yalnız mağazanın kendi ödeme sistemiyle satılır: Android'de Google Play faturalandırma, Apple platformlarında App Store IAP. Kendi web sitesi satış yapmaz; bilgi, destek ve hesap merkezi işlevi görür. Web satışı ancak yeni bir kararla açılır.
+2. **İsteğe bağlı NEXTV hesabı.** Ücretsiz kullanım ve aynı mağazada geri yükleme hesap gerektirmez. Satın almanın önüne hesap engeli konmaz. Hesap, Premium'u başka bir platforma taşımak için kullanılır.
+3. **Hesap Premium ile aynı sürümde.** Hesap ve platformlar arası hak kaydı, Play'de Premium satışını açan Android sürümüyle birlikte yayımlanır. Hesapsız Premium satışı yapılmaz.
+
+Karar olmayanlar (öneriler SALES_CHANNELS ve [BKL-047 planı](../design/gap/account.md) içinde): hak altyapısı (RevenueCat / kendi servis), kimlik sağlayıcı ve TV giriş yöntemi, giriş seçenekleri, cihaz sınırı ve çevrimdışı süre, ücretli paketin adı (Premium mi Plus mı) ve fiyatı, yasal yapı, veri bölgesi, Family Sharing, Apple ve LG/Samsung zamanlaması. D111'i tamamlar, onun yerine geçmez. Etkilenen belgeler: SALES_CHANNELS, LAUNCH_AUDIT, BACKLOG (BKL-038, BKL-047), gap PLAN (S35–S37). Durum: kullanıcı kararı; kod değişmedi.
+
+## D113 · Gelir modeli: 7 gün ücretsiz deneme, sonra Google Play aboneliği · 22 Ekim 2026
+
+Kullanıcı: "7 gün ücretsiz deneme, sonra ücretli üyelik (Google Play aboneliği) modelini seçiyorum." NEXTV'nin gelir modeli ücretli üyeliktir. Yeni kullanıcı uygulamayı 7 gün ücretsiz dener. Deneme, Google Play aboneliğinin kendi ücretsiz deneme süresiyle yürür. Deneme bitince devam etmek için ücretli üyelik gerekir. Satış D112-1 gereği yalnız mağazadan yapılır.
+
+SALES_STRATEGY'deki "ücretsiz + tek seferlik Premium" önerisi ve gap planı ile sales_draft'taki tek seferlik "Plus" önerisi bu kararla geçersizdir; hiçbiri karar değildi. "Açık kararlar" listesindeki gelir modeli kapanır.
+
+D112 ile ilişki: D112-1 (yalnız mağaza) ve D112-2 (NEXTV hesabı isteğe bağlı) sürer. D112-3, hesabın ilk ücretli sürümle gelmesini istiyor. D113 ile ilk ücretli sürüm ilk Play yayını olduğundan D112-3 hesap sistemini ilk yayına çeker. Kullanıcı bunu ayrıca seçmedi; açık sorudur (bkz. SUBSCRIPTION planı).
+
+Karar olmayanlar: fiyat ve dönem (aylık/yıllık), ödeme ekranının nerede çıkacağı, üyeliksiz neyin açık kalacağı, hesabın zamanı (D112-3), kapalı test kullanıcılarına yaklaşım. Etkilenen belgeler: SALES_STRATEGY, SALES_CHANNELS, gap PLAN ve sales_draft, BKL-047 planı (account.md), PRD §12, LAUNCH_AUDIT, STORE_LISTING_EN, BACKLOG. Durum: kullanıcı kararı; kod değişmedi.
+
+## D114 · NEXTV adının değişmesi · 22 Ekim 2026
+
+Kullanıcı: "nextv ismini de değiştirmeliyiz". D066'daki ürün adı NEXTV, Play'deki "NexTv IPTV player" ve iOS'taki "NexTv" ile karıştırılma riski nedeniyle bırakılır (LAUNCH_AUDIT E8, PLAY_STORE_READINESS §3.1). D066'nın ad hükmünün yerine geçer.
+
+Yeni ad seçilene kadar NEXTV çalışma adı olarak kalır. Uygulama, logo, belgeler ve kod bu süre içinde değişmez.
+
+Karar olmayanlar: yeni ad, logo, alan adı. Yeni ad seçilince kalıcı paket adı da onunla birlikte belirlenir (LAUNCH_AUDIT E3). Mağaza yayınından önce yeni ad için marka vekiline tam araştırma yaptırılması önerilir.
+
+Etkilenen belgeler: AGENTS (kalıcı ürün kararları), LAUNCH_AUDIT, BACKLOG (BKL-045). Aday adların ön taraması [NAMING](../product/NAMING.md) içinde; öneridir. Planlardaki "NEXTV Premium" ve "NEXTV hesabı" ifadeleri yeni adla değişecek. Durum: kullanıcı kararı; ad seçimi açık, kod değişmedi.
+
+## D115 · Yeni ad: Antenio · 22 Ekim 2026
+
+Kullanıcı: "Antenio adını seçiyorum." D114'teki ad değişikliği bu adla kapanır; D066'nın NEXTV hükmünün yerine geçer. Ad "Antenio" (anten + -io) yazılır; mağaza başlığı "Antenio IPTV Player" olabilir (öneri; "IPTV Player" eki başlıkta serbesttir, NAMING). Hafif tarama: web, App Store arama API'si ve Google Play web aramasında aynı adlı uygulama bulunmadı; antenio.app ve anteniotv.com kayıtlı değil görünüyor (22.10.2026); marka veri tabanları doğrudan sorgulanmadı, marka vekili araştırması yayından önce şarttır.
+
+Karar olmayanlar (öneri): kalıcı paket adı `app.antenio.tv` (antenio.app alınırsa), ürün adı "Antenio Premium", logo. Uygulama, logo, User-Agent, mağaza metni ve belgeler yeni adla değişecek; iş BKL-045. Kod değişmedi.

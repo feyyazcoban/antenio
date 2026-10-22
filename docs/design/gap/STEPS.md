@@ -120,4 +120,4 @@ Plan row S29 and catchup.md (reminders): foreground scheduler T6 (a minute ticke
 
 ## Sonrası
 
-Faz F (S30–S34), G (S35–S37; satış kapalı kurulur, model ve fiyat kararı kullanıcıda, bkz. [SALES_STRATEGY](../../product/SALES_STRATEGY.md)), H (S38–S44), I (S45–S48), J (S49–S65): PLAN.md §2 tabloları. Faz J'den önce S49 cihaz kapısı (Media3'ün büyüyen yerel listeyi oynatması).
+Faz F (S30–S34), G (S35–S37; satış kapalı kurulur, model ve fiyat kararı kullanıcıda, bkz. [SALES_STRATEGY](../../product/SALES_STRATEGY.md); 22 Ekim 2026'dan beri D112 ile S35–S37a, adımlar [account.md](account.md) §5), H (S38–S44), I (S45–S48), J (S49–S65): PLAN.md §2 tabloları. Faz J'den önce S49 cihaz kapısı (Media3'ün büyüyen yerel listeyi oynatması).

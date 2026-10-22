@@ -2,6 +2,8 @@
 
 18 Ekim 2026 · planlama ajanı; öneriler kullanıcı kararı değildir.
 
+**22 Ekim 2026 · D111:** S35–S37'deki "hak bilgisi cihazda, sunucu yok" varsayımı geçersiz. Kullanıcı, bir platformda alınan Premium'un NEXTV hesabıyla diğer platformlarda yeniden ödemeden açılmasını istedi. S35–S37 hesap ve sunucu tarafı hak kaydıyla genişler. Güncel öneri [SALES_CHANNELS](../../product/SALES_CHANNELS.md), iş BKL-047.
+
 # NEXTV entegrasyon planı: TiviMate eksikleri, satış, dil ve ülkeler arası satın alma
 
 Bu plan sekiz küme tasarımını (pin, satış/dil/satın alma, playback, epg, catchup, organize, backup, record) birleştiriyor. Dayanağı 0.14.43 sürümünün kod okuması; çalışma ağacı temiz. Kod değiştirilmedi, Gradle ve adb çalıştırılmadı.
@@ -248,6 +250,10 @@ object PlayerKeyRouter { fun route(key: PlayerKey, ctx: KeyContext): PlayerComma
 | S34 | Taşıma kipi (`Feature.CUSTOM_ORDER`), kategori aralığında numaralandırma, Sıralamayı ve adları sıfırla, dengeleme | LibraryScreen.kt, TvViewModel.kt, GuideScreen.kt | CustomOrderTest; cihaz: MoveModeTest (KeyDown/KeyUp tüketimi, Sol ile kategori sütunu çakışması) | 3 |
 
 ### Faz G · NEXTV Plus (5,5 g; sahibin ön koşullarına bağlı)
+
+**22 Ekim 2026 · D113:** Gelir modeli 7 gün ücretsiz deneme ve Google Play aboneliği. Satış artık özellik başına Plus değil, uygulamanın tamamı için üyelik. İlk ücretli sürüm ilk Play yayınıdır. Güncel iş [SUBSCRIPTION](../../product/SUBSCRIPTION.md) içindedir. Aşağıdaki Faz G notları ve tablo tarihçedir.
+
+**22 Ekim 2026 · D112:** Faz G, [BKL-047 uygulama planı](account.md) ile S35, S35a–c, S36, S36a–c, S37 ve S37a'ya genişledi. Yeni tahmin yaklaşık 31,5 g kod ve sahip işleri (ölçülmedi, öneri). Aşağıdaki tablo tarihçedir. S35'teki `DeviceStore.seal` önbelleği ve sunucusuz hak varsayımı geçersizdir; güncel adımlar account.md §5'tedir.
 
 | # | İş | Başlıca dosyalar | Testler | g |
 |---|---|---|---|---|

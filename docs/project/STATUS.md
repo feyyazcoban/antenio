@@ -1,5 +1,63 @@
 # Proje durumu
 
+## Ad değişikliği kararı ve aday tarama (D114) · 22 Ekim 2026
+
+Kullanıcı NEXTV adının değişmesine karar verdi (D114; D066'nın ad hükmünün yerine geçer). Yeni ad seçilene kadar NEXTV çalışma adı olarak kalır.
+
+[NAMING](../product/NAMING.md) ön taraması yapıldı:
+- 36 aday üretildi, 14'ü ayrıntılı tarandı.
+- Taramada Play/App Store, web, marka toplayıcılar, dört dilde anlam ve alan adı RDAP sorgusu kullanıldı.
+- Kısa liste: Lindro (çakışma düşük; .app kayıtlı değil görünüyor), Ovano, Tarvo, Delmo, Pelora.
+
+Kullanıcı bu adları beğenmedi. 2. turda gerçek kelime, zap/kumanda, isim ve bileşik yönleri denendi; 33 aday üretildi, 14'ü tarandı. Kısa liste: Clickhop (çakışma düşük; .app kayıtlı değil görünüyor), Zapnest, Angora, Ferry, Zapcat.
+
+Kullanıcı 2. turu da "geleneksel" buldu; daha yaratıcı ve anlaşılır adlar istedi ve mağaza başlığında "IPTV Player" yazılmasını sordu. Cevap: yazılabilir (rakipler yazıyor; yalnız "Xtream Codes" yasak). Bu NAMING ve STORE_LISTING_EN'e işlendi. 3. turda harman, son ek, yeniden yazım ve canlı imge yönleri denendi; 31 aday, 14 tarama. Kısa liste: SofaGlow (çakışma düşük; .app ve .tv kayıtlı değil görünüyor; "SofaGlow" diye büyük G ile yazılmalı), Divanio, Ayglow, Telemoon, Zofa.
+
+Kullanıcı daha çok televizyonu ve izlemeyi çağrıştıran adlar istedi (4. tur). Ayrıntılı tarama kullanım kotasına takıldı; kullanıcının isteğiyle durduruldu ve kalan iş hafif yöntemle yapıldı (5 ad: web araması, App Store API, alan adı). Kısa liste: Izleo (düşük), Antenio (düşük/orta), Tivello (orta); Tevio ve Episo elendi. Google Play ve marka veri tabanları bu turda taranmadı. Bundan sonra ad işleri hafif yöntemle sürer.
+
+Kullanıcı **Antenio** adını seçti (D115). Ek hafif kontrol: Google Play web aramasında aynı ad yok; marka veri tabanları sorgulanmadı. Sıralı adımlar NAMING "Seçim" bölümünde: alan adı, marka vekili, paket adı onayı (`app.antenio.tv` öneri), logo, kodda ad geçişi (BKL-045, `main` üzerinde, ilk Play yüklemesiyle birlikte paket adı), mağaza metni, belgeler. Kod değişmedi.
+
+Hukuki uygunluk görüşü değildir; seçilen ada marka vekili tam araştırma yapmalı. AGENTS'taki kalıcı ad satırı güncellendi. Kod değişmedi.
+
+## Gelir modeli: 7 gün deneme ve abonelik (D113) · 22 Ekim 2026
+
+Kullanıcı gelir modelini seçti: 7 gün ücretsiz deneme, sonra Google Play aboneliği. Sade dilde [üyelik planı](../product/SUBSCRIPTION.md) yazıldı:
+- müşterinin yaşayacakları,
+- sahibin 10 işi,
+- yaklaşık 14,5 iş günü kod (ölçülmedi),
+- kararlar, riskler,
+- avukata 9 soru,
+- geliştirici notları.
+
+Abonelik kuralları, tüketici hukuku ve kod etkisi ayrıca doğrulandı; taslak eleştirilip düzeltildi.
+
+İlk Play yayını artık ücretli. Bu yüzden mali müşavir, avukat ve Play Console aboneliği ilk yayından önce gerekiyor (LAUNCH_AUDIT E9, BKL-048).
+
+D112-3 hesap sistemini ilk yayına çekiyor. Kullanıcıya iki seçenek soruldu:
+- A: D112-3 kalır, hesap ilk yayında olur.
+- B: Önce yalnız abonelik, hesap Apple'dan önce (öneri).
+
+`main` `c25a66a` (0.14.83) ile ilerledi; LAUNCH_AUDIT E1/E4 bulguları orada değişmeden duruyor. Kod değişmedi.
+
+## Satış modeli kararı ve BKL-047 planı · 22 Ekim 2026
+
+Kullanıcı satış modelini kabul etti (D112): satış yalnız mağazalardan, NEXTV hesabı isteğe bağlı, hesap Premium satışını açan Android sürümüyle birlikte. [BKL-047 uygulama planı](../design/gap/account.md) yazıldı. Plan şunları içeriyor:
+- mimari ve 8 veri akışı,
+- yeni ekranlar TV-074–078 (öneri),
+- 10 kod adımı (S35–S37a) ve 15 sahip işi (O01–O15),
+- K1–K10 kabul senaryoları,
+- yayın sırası ve sağlayıcı reddederse geri dönüş yolu.
+
+Tahmin yaklaşık 31,5 iş günü (ölçülmedi). Hak altyapısı (öneri RevenueCat) ve kimlik sağlayıcı (öneri Auth0) kararı S35c'den önce verilmeli. RevenueCat'e ve Auth0'a IPTV oynatıcıyı kabul edip etmedikleri yazılı sorulmalı (O04).
+
+Kod değişmedi. Plan, kod haritası ve güncel sağlayıcı belgeleriyle hazırlandı, iki ayrı açıdan eleştirilip düzeltildi.
+
+## Yayına hazırlık denetimi ve satış kanalı önerisi · 22 Ekim 2026
+
+Kullanıcının isteğiyle 0.14.77 (`ae5afb4`) için yayın denetimi yapıldı: [LAUNCH_AUDIT](LAUNCH_AUDIT.md). Teknik temel hazır. Play'e yüklemeyi 8 iş engelliyor: debug imza, AAB, kalıcı paket adı, gizlilik URL'si ve uygulama içi bağlantı, Console beyanları, mağaza görselleri, kapalı test ve marka. Ana checkout'taki commitlenmemiş 0.14.83 (önceden .82) gizlilik notu verilerin "AES-256-GCM" ile şifreli olduğunu söylüyor. Kodda favori ve geçmiş şifresiz, anahtar boyu da hiç belirtilmemiş; commit öncesi düzeltilmeli. Aynı işte release imzası, anahtar yoksa sessizce debug anahtarına düşüyor.
+
+Kullanıcı platformlar arası Premium gereksinimini koydu (D111). Öneri: satışı mağazalar yapsın, kendi siteniz hesap merkezi olsun. Önerilen modelde isteğe bağlı bir NEXTV hesabı, QR ile TV girişi ve sunucu tarafında hak kaydı kullanılır. Apple'da açılabilmesi için aynı Premium'un Apple'da da IAP olarak sunulması gerekir (3.1.3(b)). Web satışı şimdilik önerilmiyor: Stripe ve PayPal Türkiye'ye kapalı; Paddle, Lemon Squeezy ve FastSpring IPTV'yi satılamayacak iş türleri arasında sayıyor. Karar verdiren 13 iddia bağımsız doğrulayıcılarla birincil kaynaktan kontrol edildi: [SALES_CHANNELS](../product/SALES_CHANNELS.md). Yalnız belgeler değişti. Uygulama derlenmedi, cihaz ve emülatör kullanılmadı, font matrisi koşulmadı.
+
 ## Hazırlanıyor göstergesi · Kullanıcı doğrulaması · 20 Ekim 2026
 
 Kullanıcı, göstergenin animasyonlar kapalı olduğu için sabit kaldığını doğruladı. Bu bildirim çözüldü; kod değişikliği veya yeni paket gerekmedi. Diğer fiziksel TV kabul maddeleri bu doğrulamayla kapanmaz. [QA](preparing-spinner-74-qa.json).

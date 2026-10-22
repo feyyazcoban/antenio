@@ -2,6 +2,10 @@
 
 18 Ekim 2026 · TiviMate gap tasarımı (`overlay`), salt okunur tasarım ajanı; öneriler kullanıcı kararı değildir.
 
+**22 Ekim 2026 · D113:** Tek seferlik "NEXTV Plus" modeli tarihçedir. Gelir modeli 7 gün ücretsiz deneme ve Google Play aboneliği oldu. Güncel plan [SUBSCRIPTION](../../product/SUBSCRIPTION.md) içindedir.
+
+**22 Ekim 2026 · D111:** Bu taslaktaki "satın alma bilgisi cihazdan çıkmaz, sunucu yok" varsayımı geçersiz. Platformlar arası Premium için hesap ve sunucu tarafında hak kaydı gerekir. Ayrıca dil bölümündeki "yalnız `styles.xml` var" bilgisi eskidi; uygulama İngilizce varsayılan ve Türkçe kaynaklarla geliyor. Güncel öneri [SALES_CHANNELS](../../product/SALES_CHANNELS.md).
+
 **Özet:** Bugün uygulamada hiçbir gelir altyapısı yok. Billing bağımlılığı yok, release paketi debug anahtarıyla imzalanıyor, gelir modeli ve hedef diller DECISIONS'ta "Açık kararlar" altında ve PRD §12'de açık duruyor. Dil tarafında `res/values` altında yalnız `styles.xml` var: yaklaşık 500 kullanıcıya görünen metin Kotlin'e Türkçe olarak gömülü. Tarih, sayı, sıralama ve parça dili adları da `Locale.forLanguageTag("tr")` ile sabit. Bu yüzden İngilizce ya da Almanca bir TV'de uygulama baştan sona Türkçe görünüyor. Önerim üç parçalı. (1) Çekirdek ücretsiz kalsın. Güç kullanıcısı özellikleri tek seferlik "NEXTV Plus" ile açılsın (öneri: 14,99 € / 14,99 $ / 299,99 TL). Reklam olmasın. Abonelik yalnız sunucu maliyeti doğuran özellikler (senkronizasyon) gelirse eklensin. (2) Metinler kaynak dosyalarına taşınsın. İlk dalgada Türkçe ve İngilizce olsun. Tanımsız dillerde İngilizce açılsın. Uygulama içinde dil seçimi, yerel tarih/sayı biçimi olsun ve RTL tasarlanana kadar düzen soldan sağa kilitlensin. (3) Uluslararası satın alma yalnız Google Play Billing ile yapılsın. Para birimi, vergi (AB, Birleşik Krallık ve Türkiye'de Google vergiden sorumlu satıcıdır) ve ödeme yöntemlerini Play üstlenir. Uygulama hak bilgisini cihazda şifreli tutar ve sunucu ya da analitik eklemez. Fiyat ve sınırlar öneridir, kullanıcı kararı değildir.
 
 **Tahmini iş:** 14.5 gün

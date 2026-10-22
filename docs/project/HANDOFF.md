@@ -1,5 +1,171 @@
 # Son devir notu
 
+## Claude · D114 ad değişikliği ve aday tarama /.77 · 22 Ekim 2026
+
+Kullanıcı: "nextv ismini de değiştirmeliyiz".
+
+**Değişen dosyalar:**
+- DECISIONS: D114, NAMING bağlantısıyla.
+- AGENTS: kalıcı ürün kararları, ad satırı.
+- Yeni `docs/product/NAMING.md`.
+- LAUNCH_AUDIT: E8.
+- BACKLOG: BKL-045 kabul ölçütü.
+- STATUS.
+
+Kod, logo ve uygulama adı değişmedi; NEXTV çalışma adı olarak kalıyor.
+
+**Yöntem:**
+- Üç yönden 36 aday üretildi; eleme sonrası 14 aday için ayrı tarayıcılar çalıştı.
+- Tarananlar: Play/App Store, web, marka toplayıcılar, TR/EN/DE/AR anlam ve `.com`/`.app`/`<ad>tv.com` RDAP sorguları.
+- Ham çıktılar depoya alınmadı.
+- Sıralama önerisi: Lindro (çakışma düşük), Ovano, Tarvo, Delmo, Pelora.
+- Lindro için not: "-dro" eki kapatılmış korsan uygulaması Mobdro'yu andırabilir.
+- Kullanıcı ilk turu beğenmedi: "Bu adları beğenmedim, başka yönden yeni adlar öner."
+- 2. turda gerçek kelime, zap/kumanda, isim ve bileşik yönleri denendi. Önceki 36 ad hariç tutuldu; 33 aday üretildi, 14'ü tarandı.
+- 2. tur kısa listesi: Clickhop (çakışma düşük; clickhop.app ve clickhoptv.com kayıtlı değil görünüyor), Zapnest, Angora, Ferry, Zapcat. İsim yönünde temiz aday çıkmadı. Ayrıntı NAMING "2. tur".
+- Kullanıcı 2. turu da beğenmedi: "bu tarz geleneksel şeylere gitmemize gerek yok daha yaratıcı ve anlaşılabilir olsun, iptv player olduğunu mağaza başlığında yazamaz mıyız". Cevap NAMING'e ve STORE_LISTING_EN açık sorularına işlendi: başlıkta "IPTV Player" serbest; marka adında "IPTV" olmaz (genel sözcük, korunamaz).
+- 4. tur ("televizyonu ve izlemeyi çağrıştırsın"): 32 aday üretildi, 14 ön elemeden geçti; ayrıntılı tarama kullanım kotasına takılınca kullanıcı "bu kadar yememeli" dedi. Çok ajanlı tarama durduruldu; kullanıcının talimatıyla hafif yöntem: 5 ad için web araması, iTunes Search API ve RDAP. Sonuç: Izleo ve Antenio temiz görünüyor, Tivello orta, Tevio ve Episo elendi. Play ve marka taraması yapılmadı. **Kullanıcı talimatı:** bundan sonra paralel ajan yöntemi yok, tek geçişte ve az aramayla çalışılır.
+- 3. tur (harman, son ek, yeniden yazım, canlı imge): 31 aday, 14 tarama. Kısa liste: SofaGlow (düşük; sofaglow.app, .tv ve sofaglowtv.com kayıtlı değil görünüyor; küçük harfle yazılınca İngilizcede "fag" bölünmesi riski, her yerde "SofaGlow"), Divanio, Ayglow, Telemoon, Zofa. Ayrıntı NAMING "3. tur".
+
+**Kontroller:**
+- `python tools/check_project.py` exit 1. 60 bulgunun hepsi Git dışındaki `releases/*.apk` bağlantıları.
+- `git diff --check` temiz.
+
+**Seçim (22 Ekim, sonra):** Kullanıcı Antenio'yu seçti; D115 yazıldı, AGENTS ad satırı ve BKL-045 güncellendi, NAMING "Seçim" bölümünde sıralı adımlar var. Hafif ek kontrol: Play web aramasında aynı ad yok; marka veri tabanları sorgulanmadı.
+
+**Tam sonraki adım (güncel):**
+1. Kullanıcı antenio.app ve anteniotv.com'u alsın; marka vekiline araştırma yaptırsın; paket adı `app.antenio.tv` önerisini onaylasın.
+2. Logo ve wordmark hazırlansın.
+3. Kodda ad geçişi `main` üzerinde yapılsın (BKL-045): etiket, logo dosyaları, User-Agent, iki dilde metinler, Hakkında; paket adı değişimi ilk Play yüklemesi ve imza değişikliğiyle aynı anda. Belgeler yeni ada geçirilsin; tarihçe kayıtları değişmez.
+4. Ardından SUBSCRIPTION §1'deki A/B kararı ve fiyat.
+
+Eski sonraki adım (tarihçe):
+1. Kullanıcı NAMING kısa listesinden adı seçsin ya da yeni yön istesin.
+2. Seçilince alan adı hemen alınsın. Marka vekili araştırması yapılsın.
+3. Kalıcı paket adı (ör. `app.<ad>.tv`) yeni bir DECISIONS kaydıyla belirlensin.
+4. Uygulamadaki ad, logo, User-Agent ve belgeler BKL-045 kapsamında `main` üzerinde değişsin. AGENTS'taki ad satırı da aynı kayıtla güncellenir.
+
+Bekleyen önceki sorular: SUBSCRIPTION §1'deki A/B kararı, fiyat ve dönem.
+
+## Claude · D113 abonelik modeli ve sade üyelik planı /.77 · 22 Ekim 2026
+
+Kullanıcı: "7 gün ücretsiz deneme, sonra ücretli üyelik (Google Play aboneliği) modelini seçiyorum. Bunun için neler gerekiyor, sade dille planı çıkar." Kullanıcı teknik planları anlamakta zorlandığını söyledi. Yeni belgeler bu yüzden sade dille yazıldı; teknik ayrıntı ayrı bölümde duruyor.
+
+**Değişen dosyalar:**
+- DECISIONS: D113 ve "Açık kararlar" satırı.
+- Yeni `docs/product/SUBSCRIPTION.md`.
+- D113 notu eklenenler: SALES_CHANNELS, account.md, SALES_STRATEGY, gap PLAN, sales_draft.
+- PRD §12: gelir modeli satırı.
+- STORE_LISTING_EN: abonelik paragrafı.
+- LAUNCH_AUDIT: başlık, E9, §5 notu, §7.
+- BACKLOG: BKL-048, BKL-038 ve üst not.
+- STATUS.
+
+Kod değişmedi.
+
+**Doğrulama:**
+- Play abonelik ve deneme kuralları: uygunluk, ödeme yöntemi, durumlar, ek süre ve askı, test süreleri, komisyon, zam kuralları.
+- Abonelik politikası ve Data safety.
+- Türk tüketici hukuku: TKHK m.48 ve m.52, Mesafeli Sözleşmeler ve Abonelik Sözleşmeleri yönetmelikleri, "ücretsiz" ifadesi. AB'de Sofatutor kararı.
+- Kod etkisi: kapı, ekran, önbellek, testler.
+- Taslak bir eleştiriden geçirildi ve düzeltildi. Eleştiri; çıkarımların kesin yazılmasını, D112-3 çelişkisini ve eksik sahip işlerini yakaladı.
+
+**Önemli bulgular:**
+- Türkiye'de Play'deki satıcı geliştiricinin kendisidir; destek ve şikâyetler de geliştiriciye düşer.
+- Kanun, iptalde kalan ücretin iadesini istiyor; Google'ın kuralı "iade yok". Bu, avukat sorusu.
+- TV'den iptal yapılamıyor; telefon ya da bilgisayar gerekiyor.
+- Kapalı aboneliği sorgu döndürmez; askıdaki abonelik için PBL 8.1+'da `includeSuspendedSubscriptions` var.
+
+**`main` uyarısı:** `main` `c25a66a` (0.14.83, Antigravity) ile ilerledi; ana checkout temiz. LAUNCH_AUDIT E1 (debug imzaya düşme) ve E4 (favori ve geçmişin şifreli olduğunu söyleyen gizlilik notu) orada commitli olarak duruyor. Bu dal `ae5afb4` tabanlı. Birleşmede DECISIONS sonu (`main` D109–D110, bu dal D111–D113), STATUS ve HANDOFF üst girişleri çakışır; hepsi korunur.
+
+**Kontroller:**
+- `python tools/check_project.py` exit 1. 60 bulgunun hepsi Git dışındaki `releases/*.apk` bağlantıları; yeni bağlantılar geçerli.
+- `git diff --check`, yeni dosyalar dahil temiz.
+- Uygulama derlenmedi.
+
+**Tam sonraki adım:**
+1. Kullanıcı SUBSCRIPTION §1'deki A/B kararını versin. B seçilirse D112-3, DECISIONS'ta yeni bir kayıtla değişir.
+2. Kullanıcı §5'teki ad, dönem ve fiyatı belirlesin. Mali müşavir ve avukat görüşmelerini başlatsın (§3, §7).
+3. Kod, `main`'den başlar. Önce E4 gizlilik metni ve E1 imza düzeltilir. Sonra SUBSCRIPTION §8'e göre ödeme kütüphanesi, kapı ve üyelik ekranı yazılır; Play ürünü hazır olana kadar sahte ödeme sistemiyle çalışılır.
+
+## Claude · D112 ve BKL-047 uygulama planı /.77 · 22 Ekim 2026
+
+Kullanıcı: "Mağaza satışı + isteğe bağlı NEXTV hesabı + Premium ile aynı sürümde hesap önerisini kabul ediyorum. DECISIONS'a karar olarak yaz ve BKL-047 için uygulama planını çıkar." Aynı dal: `claude/launch-prep-sales-channel-2948fb`.
+
+**Değişen dosyalar:**
+- DECISIONS: D112.
+- Yeni `docs/design/gap/account.md`: BKL-047 planı.
+- SALES_CHANNELS: karar durumu ve §3.10'daki ilk iki madde D112 olarak işaretlendi.
+- gap PLAN: Faz G notu.
+- STEPS: Faz G satırı.
+- BACKLOG: üst not, BKL-038 ve BKL-047.
+- LAUNCH_AUDIT: §7, 8. satır.
+- STATUS.
+
+Kod değişmedi.
+
+**Yöntem:**
+- Kod haritası (giriş kapısı, depolama ve sıfırlama yolları, ağ, Ayarlar ve pencere kalıpları, testler), mevcut S35–S37 ve sales_draft tasarımı, güncel RevenueCat, Auth0 ve Play Billing belgeleri paralel incelendi.
+- Taslak iki açıdan eleştirildi (kod/TV arayüzü; uyum/güvenlik) ve düzeltildi.
+- Ekran kimliklerinin (TV-074–078) boş olduğu, `AdminReason`, `AccessGate.answer` ve `DeviceStore` sıfırlama yolları kodda ayrıca doğrulandı.
+
+**Planı etkileyen bulgular:**
+- RevenueCat Android 10.29.0, Play Billing 8.3.0 ile geliyor; PBL 9 yok. PBL 8 31.08.2027'ye kadar kabul ediliyor.
+- RevenueCat'in "Keep with original App User ID" ayarı yalnız hesabı zorunlu tutan uygulamalara izinli. Bu yüzden planda bağın doğruluk kaynağı RevenueCat değil, `purchaseToken` anahtarlı NEXTV tablosu.
+- RevenueCat'in çevrimdışı hak özelliği tek seferlik alımda çalışmıyor; plan yerel bir mağaza kaydı tutuyor.
+- Hak ve hesap önbelleği ayrı Keystore alias'larında tutulmalı, çünkü `DeviceStore`'un `iptv_source_v1` anahtarı kaynak kurtarmada, ProtectionStore ise PIN sıfırlamada siliniyor.
+
+**Kontroller:**
+- `python tools/check_project.py` exit 1. 60 bulgunun hepsi Git dışındaki `releases/*.apk` bağlantıları; başka hata yok, yeni bağlantılar geçerli.
+- `git diff --check`, yeni dosyalar dahil temiz.
+- Uygulama derlenmedi (yalnız belge).
+
+**Tam sonraki adım:**
+1. Kullanıcı, account.md §2.2'deki 1, 2, 4 ve 10 numaralı kararları versin: hak altyapısı, kimlik sağlayıcı, giriş seçenekleri, veri bölgesi.
+2. O04: RevenueCat'e ve Auth0'a IPTV oynatıcı sorusu hemen gönderilsin.
+3. Kod tarafında ilk adım S35a (hesap çekirdeği; standart RFC 8628, sağlayıcıdan bağımsız) ya da yalnız sahtelerle S35. İkisi de bayraklar kapalıyken birleşir; kullanıcı hiçbir şey görmez.
+
+Önceki kayıttaki ana checkout uyarıları (gizlilik metni, debug imzaya düşme, D109–D110 numaraları) sürüyor.
+
+## Claude · Yayına hazırlık denetimi ve satış kanalı /.77 · 22 Ekim 2026
+
+Kullanıcı: "yayına hazırlık için bir audit yap ve şuraya hazırlık yapalım. Satış kanalı için hangisi daha mantıklı kendi sitem üzerinden mi store'un üzerinden mi her ikisini de nasıl yaparım, yarın Apple'dan da kullanmak isteyen kişiler kendi hesaplarıyla giriş yapıp tekrar satın almadan kullanabiliyor olmalılar". Çalışma `claude/launch-prep-sales-channel-2948fb` dalında yapıldı (worktree, temel `ae5afb4`).
+
+Yeni belgeler `docs/project/LAUNCH_AUDIT.md` ve `docs/product/SALES_CHANNELS.md`. Değişenler:
+- DECISIONS: D111.
+- BACKLOG: BKL-042–047, üst not ve BKL-038 bağımlılığı.
+- SALES_STRATEGY: başa güncelleme notu.
+- PLATFORMS: D111 paragrafı.
+- PRD §12: hesap satırı.
+- STORE_LISTING_EN: "No NEXTV account, no NEXTV server" yerine "No sign-up needed".
+- gap PLAN ve sales_draft: başa D111 notu.
+
+Kod, Figma ve manifest değişmedi.
+
+Yöntem: Kod ve belge denetimi yapıldı, mağaza ve ödeme kuralları araştırıldı. Karar verdiren 13 iddia ayrı doğrulayıcılarla birincil kaynaktan yeniden kontrol edildi. Üç farklı açıdan yazılan strateji taslakları puanlandı, ardından bir tamlık eleştirisi uygulandı. Belgeler commit öncesi iki ayrı gözle (olgu doğruluğu; tutarlılık ve öneri/karar ayrımı) gözden geçirildi ve bulgular düzeltildi. Önceki araştırmaya göre düzeltilen bulgular:
+- FastSpring de IPTV'yi satılamayacak iş türleri arasında sayıyor.
+- Android TV'de hesap silme için web bağlantısı yeterli.
+- TiviMate Premium'u artık kendi hesabına bağlı; "5 cihaz" bilgisi birincil kaynakta yok.
+- AEA programları Android TV'yi de kapsıyor, ama işletme kaydı istiyor.
+- Play'de sunucu doğrulaması için güncel uç nokta `productsv2`.
+
+Ham doğrulama çıktıları depoya alınmadı.
+
+Kontroller:
+- `python tools/check_project.py` exit 1. 60 bulgunun hepsi Git dışındaki `releases/*.apk` bağlantıları (bilinen worktree sınırı); başka hata yok.
+- `git diff --check`, yeni dosyalar dahil temiz.
+- Yalnız belge değiştiği için uygulama derlenmedi (WORKFLOW).
+
+**Ana checkout uyarısı.** Ana checkout'ta (TV kökü, `main`) başka bir oturumun commitlenmemiş işi var: denetim sırasında 0.14.82 iken 0.14.83'e ilerledi; 32+ dosya ve D109–D110. Bu işe dokunulmadı.
+- Oradaki `settings_about_privacy_note`, kaynak, katalog, favori, geçmiş ve kilitlerin AES-256-GCM ile şifreli olduğunu söylüyor. `DeviceStore.kt:156-187` favori, geçmiş ve ilerlemeyi düz SharedPreferences'ta tutuyor. Kodda hiçbir yerde `setKeySize` yok (`DeviceStore.kt:27-30`, `ProtectionStore.kt:98-99`); "256" iddiası kodla kanıtlanmıyor.
+- Release imzası `NEXTV_RELEASE_*` değişkenleri yoksa debug anahtarına düşüyor.
+- İzlenmeyen `assets/licenses/SPLASH-CHIME-LICENSE.txt`, projenin kendi beyanı; hak sahibinden alınmış bir lisans değil. R1 açık kalır.
+- Birleşmede STATUS ve HANDOFF üst girişleri ile DECISIONS sonu çakışabilir. İkisini de koruyun; numara sırası D109, D110, D111.
+
+Kalan risk: SALES_CHANNELS §4'teki doğrulanamayanlar. Bunların başında Google'ın karma model için yazılı onayı yok ve RevenueCat ile Auth0'ın IPTV oynatıcı kabulü bilinmiyor.
+
+Tam sonraki adım: Kullanıcı SALES_CHANNELS §3.10'daki kararları versin. Öncelik sırası: satış kanalı, hesabın Premium ile aynı sürümde gelmesi, ücretli paketin adı (Premium mi Plus mı), yasal yapı. Ücretsiz/Premium sınırı ilk ücretsiz yayından önce yazılmalı (SALES_CHANNELS F0). Bu arada .82 işi commitlenmeden önce gizlilik metni kodla eşitlenmeli ve release derlemesi anahtar yoksa reddetmeli (LAUNCH_AUDIT E1/E4). Marka araştırması (BKL-045) paket adı seçiminden önce yapılmalı.
+
 ## Codex · Hazırlanıyor göstergesi doğrulaması · 20 Ekim 2026
 
 Kullanıcı: “bu da animasyonlar kapalı olduğu için donuyormuş”. Önceki açık loader bildirimi, kullanıcının animasyon ayarı doğrulamasıyla kapandı; hangi ayarın kapalı olduğu ayrıca varsayılmadı. QA kaydına kullanıcı doğrulaması eklendi; üretim kodu, sürüm ve kurulum değişmedi. Home fiziksel odak/akıcılık ve diğer kabul maddeleri ayrı açık kalır. [QA](preparing-spinner-74-qa.json).

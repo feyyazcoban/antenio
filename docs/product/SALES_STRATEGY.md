@@ -2,6 +2,19 @@
 
 18 Ekim 2026 · Masa başı araştırma ve kod okuması (0.14.43, `95ddba7`). Buradaki her öneri **öneridir**, karar değildir. Vergi ve hukuk kısmı mali müşavir ya da avukat görüşünün yerini tutmaz. **[3. taraf]** işareti bilginin satış ortaklığı, forum, haber ya da fırsat sitesinden geldiğini gösterir; bu bilgiler resmî kaynakla doğrulanmadı. Köşeli parantezdeki sayılar §10'daki kaynaklardır.
 
+**22 Ekim 2026 · D113:** Kullanıcı gelir modelini seçti: 7 gün ücretsiz deneme, sonra Google Play aboneliği. Bu belgenin "ücretsiz + tek seferlik Premium" önerisi, ücretsiz/Premium sınırı ve tek seferlik fiyat tablosu tarihçedir. Güncel plan [SUBSCRIPTION](SUBSCRIPTION.md) içindedir. Dil, pazar, vergi ve Play mekaniği notları bilgi olarak sürer.
+
+**22 Ekim 2026 güncellemesi:** Kullanıcı, platformlar arası Premium gereksinimini bildirdi (D111). Bu belgedeki şu bölümler güncellenir:
+- "sunucusuz geri yükleme" yalnız aynı mağaza içinde geçerli kalır; başka platforma taşıma hesap ve sunucu ister,
+- "sunucusuz yapıda cihaz sınırı konamaz",
+- "NEXTV hesabı yok, sunucumuz yok" mesajı,
+- "Kendi web mağazası neden şimdi değil" altındaki "sunucu yok" gerekçesi,
+- "TV için uygun program görünmüyor" ifadesi. AEA programları Android TV'yi de kapsıyor, ama işletme kaydı istiyor.
+
+Güncel öneri [SALES_CHANNELS](SALES_CHANNELS.md) içindedir. Fiyat, dil, pazar ve vergi bölümleri öneri olarak sürer. İki olgu eskidi:
+- TiviMate Premium'u artık kendi hesabına bağlı; "5 cihaz" bilgisi birincil kaynakta bulunamadı.
+- §1'deki "`strings.xml` yok, uygulama her cihazda Türkçe açılıyor" bilgisi geçerli değil; uygulama İngilizce varsayılan ve Türkçe kaynaklarla, dil seçiciyle geliyor ([LAUNCH_AUDIT](../project/LAUNCH_AUDIT.md) §1).
+
 ## 1. Özet
 
 **Önerilen model (öneri):**

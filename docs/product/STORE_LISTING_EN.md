@@ -30,18 +30,22 @@ Made for the remote
 • The audio and subtitle tracks each stream offers
 
 Private by design
-• No NEXTV account, no NEXTV server, no tracking
+• No sign-up needed, no tracking
 • Your source details are stored encrypted on your TV
 • Parental controls: a PIN locks categories, channels, titles and sources; adult categories are hidden by default
 
 Languages: English and Turkish. Choose one in Settings → Dil / Language, or follow your TV's language.
 
-You need an Android TV or Google TV device with Android 8.0 or later and your own source. Guide information depends on what your provider supports.
+You need an Android TV or Google TV device with Android 8.0 or later and your own source.
+
+Watching requires a NEXTV Premium subscription. New subscribers get a 7-day free trial; after that the subscription costs [price per period] and renews automatically until you cancel it in Google Play. Guide information depends on what your provider supports.
 
 NEXTV is not affiliated with any content provider. Use it only with content you are allowed to watch.
 
 ## Açık sorular
 
-- Başlıkta ad: marka kararından sonra kesinleşir.
+- Başlıkta ad: marka kararından sonra kesinleşir (D114: NEXTV değişecek). Kullanıcının isteğiyle başlık "<Ad> IPTV Player" biçiminde olabilir; "IPTV Player" ifadesi başlıkta serbesttir, yalnız "Xtream Codes" yazılmaz ([NAMING](NAMING.md)).
 - "Xtream-compatible" ifadesi kalsın mı, yoksa yalnız "M3U" mı denir?
 - Destek e-postası ve gizlilik politikası adresi mağaza kaydına eklenecek (Play hazırlığı §2.2).
+- 22 Ekim 2026 · D113: Açıklamaya abonelik ve 7 günlük deneme paragrafı eklendi. Fiyat, dönem ve plan adı açık. "Free trial" ifadesinin şartlarla birlikte yeterli olup olmadığına avukat bakar ([SUBSCRIPTION](SUBSCRIPTION.md) §7).
+- 22 Ekim 2026: "No NEXTV account, no NEXTV server, no tracking" cümlesi "No sign-up needed, no tracking" olarak değiştirildi; ilk yayında doğru, geleceği bağlamıyor. D111 gereği platformlar arası Premium için hesap ve sunucu gerekecek; hesabın isteğe bağlı olması öneridir ([SALES_CHANNELS](SALES_CHANNELS.md)). Hesap geldiğinde metin ve Data safety aynı sürümde güncellenir.

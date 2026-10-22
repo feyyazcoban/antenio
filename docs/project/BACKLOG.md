@@ -1,5 +1,11 @@
 # İş listesi
 
+BKL-048 · D113 · 22 Ekim 2026: Kullanıcı gelir modelini seçti: 7 gün ücretsiz deneme, sonra Google Play aboneliği. Sade dilde [üyelik planı](../product/SUBSCRIPTION.md) yazıldı. Kod yaklaşık 14,5 iş günü (ölçülmedi). İlk yayından önce mali müşavir, avukat ve Play Console aboneliği gerekiyor. Hesabın ilk yayında mı (A, D112-3), Apple'dan önce mi (B, öneri) geleceği kullanıcıya soruldu. Kod değişmedi.
+
+BKL-047 · D112 · 22 Ekim 2026: Kullanıcı mağaza satışını, isteğe bağlı NEXTV hesabını ve hesabın Premium ile aynı sürümde gelmesini kabul etti. [Uygulama planı](../design/gap/account.md) yazıldı: 10 kod adımı (S35–S37a), 15 sahip işi, yaklaşık 31,5 g (ölçülmedi). Kod değişmedi; iş planned.
+
+Yayına hazırlık denetimi · D111 · 22 Ekim 2026: 0.14.77 için Play yükleme engelleri, riskler ve kalite kapıları [LAUNCH_AUDIT](LAUNCH_AUDIT.md) içinde. İmza/AAB, gizlilik ve beyanlar, mağaza varlıkları, marka ve kapalı test için BKL-042–046, platformlar arası hesap için BKL-047 eklendi (planned). Satış kanalı önerisi [SALES_CHANNELS](../product/SALES_CHANNELS.md) içinde. Kod değişmedi.
+
 Hazırlanıyor göstergesi · 20 Ekim 2026: kullanıcı sabit göstergenin kapalı animasyonlardan kaynaklandığını doğruladı; bu alt bildirim çözüldü. Kod/paket değişikliği gerekmedi. Diğer kabul maddeleri ayrı izlenir. [QA](preparing-spinner-74-qa.json).
 
 BKL-019/020 · D108/.77: Home odak/sayfa sonu denetimi uygulandı. Sabit alt pay, baş/son ve sağ kenar sınırları, sabit son afiş konumu; son11/11 cihaz kontrolü ve birim/lint/release geçti. TV veri korunarak güncellendi; fiziksel görsel/akıcılık kabulü açık. [QA](native-home-focus-77-qa.json).
@@ -93,7 +99,7 @@ BKL-019/020 · 0.14.48 / D078: kullanıcının vitrinden ilk devam kartına geç
 | BKL-035 | Catch-up ve hatırlatıcı · S22–25, S29 | S21 sonrası arşiv; ortak erişim kapısı ve tek oturum | planned |
 | BKL-036 | Bağlantı ve güncelleme · S18, S30 | Kaynağa bağlı şifreli başlıklar ve ön plan zamanlayıcısı | planned |
 | BKL-037 | Kütüphane düzeni · S31–34 | Favori grupları, ad/gizleme/sıra; kimlik ve kilit korunur | planned |
-| BKL-038 | NEXTV Plus · S35–37 | Satış modeli, fiyat, sınır ve açılış kararı kullanıcıda | planned |
+| BKL-038 | NEXTV Plus · S35–37 | D113 ile özellik başına tek seferlik Plus yerine uygulamanın tamamı için abonelik geldi; satış işi BKL-048'de. Plus özellikleri (catch-up, kayıt vb.) üyeliğe dahil özellikler olarak kendi BKL'lerinde sürer | planned |
 | BKL-039 | Watch Next · S38–40 | Cihaz desteği, erişim kapısı, silme/geri dönüş | planned |
 | BKL-040 | Yedekleme · S41–44 | Şifreli aktarım, kurtarma ve cihaz doğrulaması | planned |
 | BKL-041 | Kayıt ve çoklu ekran · S49–65 | S49 cihaz kapısı, kaynak bütçesi, depolama/yaşam döngüsü | planned |
@@ -132,6 +138,13 @@ Durumlar: done, review, ready, planned, blocked, in progress. Review çalışan 
 | BKL-027 | P0 | Çoklu kaynak ve kaynak filtresi | Native yönetim/filtre, scoped artwork temizliği ve açık registry recovery testli; 16 kaynak/uzun ad/üç font ve index budama testli; gerçek cihaz/kullanıcı turu açık | review |
 | BKL-028 | P0 | Native PIN ve gizleme | SAFE01: kaynak/kategori/kanal politikası; arama, favori, geçmiş ve doğrudan detay/oynatmada ortak erişim kontrolü; prototip kanıtından ayrı doğrulama | in progress |
 | BKL-018 | P0 | İlk native Android TV pilotu | Kurulabilir APK; Xtream/M3U, canlı/film/dizi, gerçek parça seçimi; JVM, lint ve emülatör akış testleri; özel kaynakta sıralı üç oynatma | done |
+| BKL-042 | P0 | Play yükleme paketi | Kalıcı paket adı kararı; upload anahtarı depo dışında; release anahtar yoksa derlenmez; Play App Signing seçimi; imzalı AAB üretilir ve TV'ye kurularak denenir | planned |
+| BKL-043 | P0 | Gizlilik, koşullar ve Console beyanları | Kodla birebir gizlilik politikası URL'si ve kullanım koşulları (TR/EN); uygulama içi bağlantılar ve tam metinli lisans sayfası; Data safety, IARC, hedef yaş ve yasal test kaynağıyla App access | planned |
+| BKL-044 | P0 | Mağaza varlıkları | 1280×720 banner, 512×512 ikon, 1024×500 tanıtım görseli; sentetik içerikli TV ekran görüntüleri; EN/TR metin incelemesi | planned |
+| BKL-045 | P0 | Yeni ad Antenio ve marka (D115) | Alan adı alındı (antenio.app); marka vekili araştırması temiz, sınıf 9/42 başvurusu; logo ve wordmark; uygulama etiketi, logo dosyaları, User-Agent, metinler ve Hakkında yeni adla; kalıcı paket adı (öneri `app.antenio.tv`) ilk Play yüklemesiyle; mağaza metni ve belgeler güncel ([NAMING](../product/NAMING.md) "Seçim") | planned |
+| BKL-046 | P0 | Geliştirici hesabı ve kapalı test | Hesap doğrulandı; 12 test kullanıcısı 14 gün (TV cihazı şartı Play'den doğrulanır); üretim başvurusu | planned |
+| BKL-048 | P0 | Üyelik: 7 gün ücretsiz deneme ve Google Play aboneliği (D113) | [SUBSCRIPTION](../product/SUBSCRIPTION.md). Kod: ödeme kütüphanesi, üyelik ekranı, tek oynatma kapısı, "Üyeliğim", testler. Sahip: hesap A/B kararı, ad/dönem/fiyat, mali müşavir, avukat, Play Console aboneliği, koşullar ve gizlilik, inceleme erişimi. Lisans test kullanıcılarıyla gerçek Play'de deneme → ücretli, iptal, reddedilen kart ve yeniden kurulum senaryoları geçer | planned |
+| BKL-047 | P1 | NEXTV hesabı ve platformlar arası Premium | D111/D112; [uygulama planı](../design/gap/account.md) (S35–S37a, O01–O15). Hak altyapısı ve kimlik sağlayıcı kararı S35c'den önce; TV girişi (öneri: QR/cihaz akışı), hak kaydı, Play alımını hesaba bağlama, web silme sayfası; K1–K10 kabul senaryoları, en az "TV A'da al → TV B'de hesapla aç"; Apple tarafı Apple işiyle ayrıca izlenir; D112 gereği BKL-038 ile aynı sürüm | planned |
 
 BKL-004/005/006/007 yerel taslak olarak review durumundadır; kullanıcı doğrulaması ve Figma aktarımı bekler. BKL-017 tarayıcı prototipi, BKL-018 native pilot içindir. BKL-010 fiziksel 65U95A/codec testi, BKL-012 beş kişilik tur yapılmadığı için planned kalır. Native pilotta gerçek medya, kalıcı kaynak/favori/ilerleme vardır; bir sağlayıcıda gerçek EPG metadata doğrulandı; diğer sağlayıcı/cihaz, radyo örneği ve üretim PIN güvenliği açık. BKL-013 için 63.175 kayıt JVM ayrıştırması geçti; 0.3 emülatörde 63.175 kayıtla şifreli cache ve süreç yeniden açılışı gözlendi; p95/cihaz performans bütçesi henüz ölçülmedi.
 

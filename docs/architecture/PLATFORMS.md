@@ -35,3 +35,5 @@ Ses ve altyazı seçimleri parça kimliğinden çok dil/rol tercihiyle hatırlan
 Kaynak sırları güvenli cihaz deposunda; katalog ve kullanıcı ilerlemesi ayrı mantıksal alanlarda tutulur. Tam kaynak URL'si analitik veya hata kaydına yazılmaz. VOD meta verisi ve büyük afişler ihtiyaç oldukça alınır; UI ana iş parçacığında tüm liste parse edilmez.
 
 İlk sürüm için uygulama hesabı zorunlu değil. Bulut senkronizasyonu, QR eşleştirme ve lisans servisi ayrı sonraki faz kararlarıdır.
+
+D111 (22 Ekim 2026, kullanıcı gereksinimi): Bir platformda alınan Premium, NEXTV hesabıyla giriş yapılan diğer platformlarda yeniden ödeme olmadan açılmalı. Bu, bir NEXTV hesabı ve sunucu tarafında bir hak kaydı gerektirir. Önerilen modelde (karar değil) hesap isteğe bağlıdır ve kaynak verisi (adres, kimlik bilgisi, liste, favori, geçmiş) sunucuya gitmez. Hesap ve senkronizasyon ayrı işlerdir. Ayrıntı: [SALES_CHANNELS](../product/SALES_CHANNELS.md).
