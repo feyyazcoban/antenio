@@ -18,6 +18,8 @@ Kullanıcının seçtiği kişisel fyzcbn hesabı kullanıldı. Dosya üç mevcu
 
 **Sınır:** Ürün sayfası yazımı başarılı oldu. Foundations ve Components sayfalarına rehber panosu ekleme/isim düzenleme çağrıları MCP kullanım kotası nedeniyle uygulanmadı. Tarayıcıdan yeni ürün panosu görüldü; ortak belgelerde bu iki sayfanın gerçek mevcut adları kullanılır. Ürün panosundaki hedef sayfa adları ve iki metindeki düz satır sonu kaçışları, erişim açıldığında tools/figma_cleanup.js ile düzeltilmeli. Figma içinde uygulama ekranları veya çalışan animasyon prototipi henüz yoktur; yerel tarayıcı prototipi aşağıda bağlıdır.
 
+**23 Ekim:** Uygulamanın TV görüntülerinden oluşan ekran tuvali Figma dışında tutulur: [APP_CANVAS](APP_CANVAS.md). Manifest değişmedi.
+
 ## Yeni bölümler
 
 | Bölüm | Bağlantı | Projedeki karşılığı |

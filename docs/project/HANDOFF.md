@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Uygulama ekran tuvali · 23 Ekim 2026
+
+Kullanıcı: "bütün uygulamanın tasarım tuvalini bölüm bölüm çıkar. Önce mevcut ekranların TV görüntüleriyle başla." Design türünden yeni tuval açıldı (https://claude.ai/artifact/LvtaBnB1HKd2xWh3cu9MQT): kapak, altı sayfa, kurulum bölümünde beş TV görüntüsü (0.14.85'te alınmış, kurulum ekranları 0.14.86'da aynı). Öteki sayfalarda "kaynak bekleniyor" notları var. Kullanıcı aynı anda TV'de kaynak eklemeyi denediği için TV kumandayla sürülmedi. Yeni [APP_CANVAS](../design/APP_CANVAS.md) bölüm tablosunu ve kuralları tutar.
+
+Tam sonraki adım: kullanıcının yeni hata cümlesiyle kaynak sorunu çözülsün; sonra TV boştayken kurulumun kalan adımları ve bölüm 2'den başlayarak görüntüler alınıp tuvale eklensin, APP_CANVAS tablosu güncellensin.
+
 ## Claude · Bağlantı hatası teşhisi /.86 · 23 Ekim 2026
 
 Kullanıcı kendi bağlantısıyla "Sunucuya ulaşılamadı" aldı. Kontrol: TV saati doğru, 1.1.1.1 ve www.google.com erişilebilir, Wi-Fi doğrulanmış. `SourceRepository.get` OkHttp'nin her `IOException`'ını `SERVER_UNREACHABLE` yapıyordu. Yeni `networkFailure()` UnknownHost → SERVER_NAME_NOT_FOUND, ConnectException → SERVER_REFUSED, zaman aşımı → SERVER_TIMEOUT, SSLException → SECURE_CONNECTION_FAILED eşler; metinler values ve values-tr'de, `NetworkFailureTest` eklendi. Sürüm 100/0.14.86, TV'ye kuruldu.

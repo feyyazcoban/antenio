@@ -1,5 +1,9 @@
 # Proje durumu
 
+## Uygulama ekran tuvali başladı · 23 Ekim 2026
+
+Kullanıcı bütün uygulamanın tasarım tuvalini bölüm bölüm, önce mevcut ekranların TV görüntüleriyle istedi. Altı bölümlük tuval açıldı: https://claude.ai/artifact/LvtaBnB1HKd2xWh3cu9MQT. Kurulum bölümüne fiziksel TV'den beş görüntü kondu (karşılama, telefonla ekle, TV'de onay, bağlantı hatası, M3U adımı). Öteki bölümler TV'de çalışan bir kaynak gerektiriyor; kullanıcının kaynağı "ulaşılamadı" hatası verdiği için bekliyor. Plan ve kurallar [APP_CANVAS](../design/APP_CANVAS.md). Kod değişmedi.
+
 ## 0.14.86 · Bağlantı hatalarının nedeni · 23 Ekim 2026
 
 Kullanıcı: "linki doğru girmeme rağmen sunucuya ulaşılamadı diyor". TV'nin interneti, DNS'i ve saati sağlam çıktı. Uygulama sağlayıcıya bağlanırken oluşan her ağ hatasını tek "Sunucuya ulaşılamadı" cümlesine çeviriyordu. Artık ad bulunamadı (DNS), bağlantı reddedildi (port), zaman aşımı ve güvenli bağlantı (https) ayrı cümlelerle söylenir; kalanlar eski cümlede kalır. 383 JVM testi (1 atlandı, 0 hata), release başarılı. TV 99→100 veri korunarak güncellendi, SHA eşit (343f9ab2…db5a). Asıl neden henüz bilinmiyor; kullanıcı aynı bağlantıyla yeniden deneyip yeni cümleyi bildirecek.
