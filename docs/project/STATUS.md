@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.86 · Bağlantı hatalarının nedeni · 23 Ekim 2026
+
+Kullanıcı: "linki doğru girmeme rağmen sunucuya ulaşılamadı diyor". TV'nin interneti, DNS'i ve saati sağlam çıktı. Uygulama sağlayıcıya bağlanırken oluşan her ağ hatasını tek "Sunucuya ulaşılamadı" cümlesine çeviriyordu. Artık ad bulunamadı (DNS), bağlantı reddedildi (port), zaman aşımı ve güvenli bağlantı (https) ayrı cümlelerle söylenir; kalanlar eski cümlede kalır. 383 JVM testi (1 atlandı, 0 hata), release başarılı. TV 99→100 veri korunarak güncellendi, SHA eşit (343f9ab2…db5a). Asıl neden henüz bilinmiyor; kullanıcı aynı bağlantıyla yeniden deneyip yeni cümleyi bildirecek.
+
 ## 0.14.85 · Yeni kurulum akışı ve telefonla ekleme · 23 Ekim 2026
 
 D117: kullanıcı SETUP_FLOW taslağını onayladı ve telefon yolu dahil kodlandı. Yeni kaynak eklerken karşılama ekranı (Telefonla ekle önerilen, Kumandayla ekle), kumandayla adım adım tek soru, bağlantı hatası ekranı ve sonuçta "… hazır" penceresi gelir. Telefon yolu: TV ev ağında küçük bir sunucu açar, QR ve 6 haneli kod gösterir; telefondan gelen kaynak TV'de onaylanınca eklenir. Kayıtlı kaynağı düzenleme eski formda kalır. Yeni bağımlılık qrcodegen 1.8.0. 382 JVM testi (1 atlandı, 0 hata; 5'i yeni telefon eşleştirme testi), release derlemesi ve androidTest derlemesi başarılı. Lint ve cihaz testleri koşulmadı; `SetupLayoutTest` yeni akışa göre yeniden yazıldı ama cihazda çalıştırılmadı. TV 98→99 veri korunarak güncellendi, kurulu APK SHA-256 teslim dosyasıyla eşit (e485d73b…f517). TV'de karşılama, QR ekranı, sentetik bir gönderimle onay ekranı, hata ekranı ve adres adımı ekran görüntüsüyle doğrulandı; yanlış kod 403, doğru kod 200 döndü, ekrandan çıkınca sunucu kapandı. Gerçek bir telefonla QR okutma ve gerçek kaynakla "hazır" penceresi doğrulanmadı.

@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Bağlantı hatası teşhisi /.86 · 23 Ekim 2026
+
+Kullanıcı kendi bağlantısıyla "Sunucuya ulaşılamadı" aldı. Kontrol: TV saati doğru, 1.1.1.1 ve www.google.com erişilebilir, Wi-Fi doğrulanmış. `SourceRepository.get` OkHttp'nin her `IOException`'ını `SERVER_UNREACHABLE` yapıyordu. Yeni `networkFailure()` UnknownHost → SERVER_NAME_NOT_FOUND, ConnectException → SERVER_REFUSED, zaman aşımı → SERVER_TIMEOUT, SSLException → SECURE_CONNECTION_FAILED eşler; metinler values ve values-tr'de, `NetworkFailureTest` eklendi. Sürüm 100/0.14.86, TV'ye kuruldu.
+
+Tam sonraki adım: kullanıcının yeni hata cümlesine göre neden bulunur. Ad bulunamadıysa sağlayıcı alan adı ağda çözülmüyor olabilir (Türkiye'de DNS engeli yaygın); port reddiyse adresteki port; https ise http denenir. Bundan sonra uygulama tasarım tuvaline dönülür (kullanıcı onayladı: bölüm bölüm, önce TV görüntüleri).
+
 ## Claude · Yeni kurulum akışı /.85 · 23 Ekim 2026
 
 Kullanıcı: "Taslak uygun. Telefon yolu dahil kodla; önerilen kararlarla ilerle." Yapılanlar (D117): `ui/SetupFlow.kt` (karşılama, telefon/QR, onay, tür, adres, kullanıcı adı, şifre, ad, hata adımları), `data/PhoneSetup.kt` (form ayrıştırma, 6 haneli kod, 5 dk, tek kullanım, 5 denemede kilit), `data/PhoneSetupServer.kt` (yerel HTTP, GET / ve POST /send), `assets/setup/index.html` (TR/EN telefon sayfası), `ui/QrCode.kt` (qrcodegen 1.8.0). `PilotApp` yeni kaynakta `SetupFlow`'u, düzenlemede eski `Setup` formunu açar; `ImportReady` penceresi `TvState.importSummary` ile gelir. `EntryField`'a `doneAction` eklendi; `LineIcon`'a phone ve remote. Metinler values ve values-tr'de. Sürüm 99/0.14.85.

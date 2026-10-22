@@ -95,6 +95,10 @@
     <string name="failure_episodes_unavailable">Bölümler alınamadı. Tekrar dene.</string>
     <string name="failure_response_malformed">Sunucu beklenen biçimde yanıt vermedi.</string>
     <string name="failure_server_unreachable">Sunucuya ulaşılamadı. Adresi ve internet bağlantısını kontrol et.</string>
+    <string name="failure_server_name_not_found">Sunucu adı bulunamadı. Adresi kontrol et; doğruysa ağın bu adresi çözemiyor olabilir.</string>
+    <string name="failure_server_refused">Sunucu bağlantıyı kabul etmedi. Adresteki port numarasını kontrol et.</string>
+    <string name="failure_server_timeout">Sunucu zamanında yanıt vermedi. Biraz sonra tekrar dene.</string>
+    <string name="failure_secure_connection">Güvenli bağlantı kurulamadı. Adres https ile başlıyorsa http ile dene.</string>
     <string name="failure_access_denied">Kaynağa erişim reddedildi. Hesap bilgilerini kontrol et.</string>
     <string name="failure_source_not_found">Kaynak adresi bulunamadı.</string>
     <string name="failure_too_many_requests">Sağlayıcı çok fazla istek aldı. Biraz sonra tekrar dene.</string>

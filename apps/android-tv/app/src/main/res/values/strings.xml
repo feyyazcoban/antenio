@@ -99,6 +99,10 @@
     <string name="failure_episodes_unavailable">Episodes could not be loaded. Try again.</string>
     <string name="failure_response_malformed">The server did not respond in the expected format.</string>
     <string name="failure_server_unreachable">The server could not be reached. Check the address and your internet connection.</string>
+    <string name="failure_server_name_not_found">The server name could not be found. Check the address; if it is right, your network may not be resolving it.</string>
+    <string name="failure_server_refused">The server refused the connection. Check the port number in the address.</string>
+    <string name="failure_server_timeout">The server did not answer in time. Try again in a moment.</string>
+    <string name="failure_secure_connection">A secure connection could not be made. If the address starts with https, try http.</string>
     <string name="failure_access_denied">Access to the source was denied. Check the account details.</string>
     <string name="failure_source_not_found">The source address was not found.</string>
     <string name="failure_too_many_requests">The provider received too many requests. Try again in a moment.</string>

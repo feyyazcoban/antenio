@@ -14,10 +14,28 @@ import okhttp3.Response
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.io.InterruptedIOException
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import javax.net.ssl.SSLException
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+
+/**
+ * Why a connection to the provider failed, in words the viewer can act on: the name was not found (a typo, or a network
+ * that does not resolve it), the server refused the port, it did not answer in time, or the secure handshake failed.
+ * Anything else stays "Sunucuya ulaşılamadı".
+ */
+internal fun networkFailure(e: IOException): FailureReason = when {
+    e is UnknownHostException -> FailureReason.SERVER_NAME_NOT_FOUND
+    e is SocketTimeoutException || (e is InterruptedIOException && e.message == "timeout") -> FailureReason.SERVER_TIMEOUT
+    e is SSLException -> FailureReason.SECURE_CONNECTION_FAILED
+    e is ConnectException -> FailureReason.SERVER_REFUSED
+    else -> FailureReason.SERVER_UNREACHABLE
+}
 
 class SourceRepository(client: OkHttpClient? = null) {
     // All requests enter through IO; do not initialize TLS while constructing the ViewModel.
@@ -92,7 +110,7 @@ class SourceRepository(client: OkHttpClient? = null) {
                 continuation.invokeOnCancellation { call.cancel() }
                 call.enqueue(object : Callback {
                     override fun onFailure(call: Call, e: IOException) {
-                        if (continuation.isActive) continuation.resumeWithException(SourceFailure(FailureReason.SERVER_UNREACHABLE))
+                        if (continuation.isActive) continuation.resumeWithException(SourceFailure(networkFailure(e)))
                     }
                     override fun onResponse(call: Call, response: Response) {
                         continuation.resume(response, onCancellation = { _, value, _ -> value.close() })

@@ -10,8 +10,8 @@ android {
         applicationId = "dev.iptvplayer.tv.pilot"
         minSdk = 26
         targetSdk = 36
-        versionCode = 99
-        versionName = "0.14.85-design-preview"
+        versionCode = 100
+        versionName = "0.14.86-design-preview"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }
