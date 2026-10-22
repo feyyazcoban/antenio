@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Tuval bölümleri dolduruldu · 23 Ekim 2026
+
+Kullanıcı: "Şimdi başla ama işin bitince tv yi kapat ve sesi de kapalı olarak çalış". Yapılan: `cmd media_session volume --stream 3 --set 0`, `KEYCODE_WAKEUP`, uygulamada D-pad ile gezinip `screencap`; bitince `KEYCODE_SLEEP` ve ses 15'e geri (sessiz durumu korundu). Görüntüler JPEG olarak tuvalin varlık deposuna yüklendi, depoya konmadı. Arama alanında 0.14.90 düzeltmesi doğrulandı: OK sonrası StartInput inputType 0x1 ve `input text` ile arama sonuçları geldi.
+
+Tam sonraki adım: kullanıcı yayına hazırlık işlerine dönmek istedi; LAUNCH_AUDIT'teki açık maddelerden devam. Tuvalde kalanlar APP_CANVAS'ta.
+
 ## Claude · get.php → Xtream ve yapıştırma /.89–.90 · 23 Ekim 2026
 
 `SourceConfig.asXtreamAccount()` (Models.kt) get.php bağlantısından sunucu, kullanıcı adı ve şifreyi çıkarır; `connectDraft` bunu önce dener, `connect(requested, fallback)` Xtream `SourceFailure` verirse bağlantıyı M3U olarak yükler. Test: `XtreamLinkTest`. Klavye: `rememberFieldTyping(focused, keyboard)` (Theme.kt) odaktaki alanda OK ya da açılan herhangi bir klavye (`FieldKeyboard.isOpen`, 150 ms yoklama) ile `showKeyboardOnFocus`'u açar; `fieldKey`'in OK'i artık bu durumu başlatır, klavye iki kare sonra istenir. `EntryField` ve `SearchField` kullanır. Telefon klavye düğmesiyle açılan klavyenin TV'de pencere kenar boşluğu bildirip bildirmediği doğrulanmadı; bildirmezse yoklama tetiklenmez.

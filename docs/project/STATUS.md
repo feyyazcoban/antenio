@@ -1,5 +1,9 @@
 # Proje durumu
 
+## Uygulama ekran tuvali: altı bölüm dolu · 23 Ekim 2026
+
+Kullanıcının izniyle TV gece sessizde (hoparlör 0) uyandırıldı, 24 ekran görüntüsü alındı, TV uykuya alındı ve ses düzeyi eski haline döndü. Tuvalde artık altı bölümde 29 TV görüntüsü var (https://claude.ai/artifact/LvtaBnB1HKd2xWh3cu9MQT). Xtream kaynağıyla ana sayfa vitrini doğru görsellerle doluyor; kullanıcının M3U ile gördüğü kategori ve vitrin sorunu bu yolda görülmedi. Alınmayanlar ve tür ekranındaki "Adım 1 / 5" hatası [APP_CANVAS](../design/APP_CANVAS.md) içinde. Kod değişmedi.
+
 ## 0.14.89–0.14.90 · get.php → Xtream ve her yoldan yapıştırma · 23 Ekim 2026
 
 D118: Xtream panelinin get.php bağlantısı Xtream hesabı olarak yüklenir (aynı sağlayıcıda dakikalar yerine saniyeler), olmazsa M3U olarak denenir. Kullanıcı kaynağı Xtream olarak eklediğinde hızlı yüklendiğini doğruladı. Telefondan yapıştırma: kullanıcı sunucu alanında telefon uygulamasının klavye düğmesini kullandı, TV'de OK'e basmadı; alan bağlantı başlatmadı (inputType 0x0). 0.14.90'da odaktaki alan, üstünde herhangi bir klavye açılınca da gerçek bağlantıyı başlatır; OK'ten sonra klavye bağlantı kurulduktan sonra istenir. 386 JVM testi (1 atlandı, 0 hata), release başarılı. TV uykudayken 103 atlanıp 104/0.14.90 kuruldu, SHA eşit (3facb443…a3cc); TV'de görsel doğrulama yapılmadı. Açık: kullanıcının M3U yüklemesinde kategoriler ve ana sayfa vitrini yanlış görselle doluyordu; Xtream yüklemesinde durum sorulacak. Liste çözme ve kaydetme 20 MB'lık listede yaklaşık 45 sn sürüyor ve belleği sınıra yaklaştırıyor (akışla çözme önerisi).
