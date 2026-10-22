@@ -2,7 +2,7 @@
 
 ## 0.14.91 · Yayına hazırlık: imza koruması, gizlilik notu, adım sayısı · 23 Ekim 2026
 
-LAUNCH_AUDIT E1/E2: debug anahtarına düşme yalnız `-design-preview` sürümlerine açık; `bundleRelease` ve önizleme olmayan `assembleRelease` yükleme anahtarı olmadan durur (anahtarsız `bundleRelease` denendi, beklenen mesajla durdu). E4: Hakkında'daki gizlilik notu kodla eşitlendi (AES-256 iddiası kalktı; favori, geçmiş ve kalınan yerlerin şifresiz olduğu, Telefonla ekle sayfası ve listelenen yayın/görsel adresleri yazıldı). Kurulumda tür ekranının adım sayısı odaktaki seçeneğe göre 3 ya da 5. 386 JVM testi (1 atlandı, 0 hata). TV uykudayken 105/0.14.91 kuruldu, SHA eşit; TV'de görsel doğrulama yapılmadı.
+LAUNCH_AUDIT E1/E2: debug anahtarına düşme yalnız `-design-preview` sürümlerine açık; `bundleRelease` ve önizleme olmayan `assembleRelease` yükleme anahtarı olmadan durur (anahtarsız `bundleRelease` denendi, beklenen mesajla durdu). E4: Hakkında'daki gizlilik notu kodla eşitlendi (AES-256 iddiası kalktı; favori, geçmiş ve kalınan yerlerin şifresiz olduğu, Telefonla ekle sayfası ve listelenen yayın/görsel adresleri yazıldı). Kurulumda tür ekranının adım sayısı odaktaki seçeneğe göre 3 ya da 5. 386 JVM testi (1 atlandı, 0 hata). TV'ye kurulmadı: TV derin uykuya geçince ağ üzerinden adb bağlantısı kapandı ve kullanıcı TV'nin kapalı kalmasını istedi. Teslim dosyası `releases/NEXTV_TV_Design_Preview_0.14.91.apk` (SHA-256 327211d0…73e1); TV açılınca `install -r` ile kurulacak. TV'de 0.14.90 duruyor.
 
 ## Uygulama ekran tuvali: altı bölüm dolu · 23 Ekim 2026
 
