@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.87–0.14.88 · Uzun liste beklemesi ve telefondan yapıştırma · 23 Ekim 2026
+
+Kullanıcının listesi "Sunucu zamanında yanıt vermedi" verdi; aynı liste başka bir uygulamada açılıyor. 0.14.87: tüm liste indirmeleri (M3U ve Xtream bölümleri) ilk bayt için 45 yerine 120 saniye, toplamda 2 yerine 10 dakika bekler; bağlantı kurulamadan dolan süre ("Sunucuya zamanında bağlanılamadı") ile yanıtın gecikmesi ayrı söylenir; indirme ortasında dolan süre de "kaynak okunamadı" yerine zaman aşımı olarak görünür. Görünür gizli alanlar şifre alanı değil düz metin alanıdır. 0.14.88: TV'de alanlar klavyeye hiç metin alanı olarak bağlanmıyordu (sistem kaydında inputType 0x0); Compose odakla klavye açılmadığında bağlantıyı yalnız dokunuşla başlatıyor. Artık OK'e basılınca bağlantı başlar (inputType 0x1); Google TV telefon uygulaması alanı görüp yapıştırmaya izin verir. Arama alanı da aynı düzeltmeyi aldı. 384 JVM testi (1 atlandı, 0 hata), release başarılı; cihaz testleri koşulmadı. TV 101→102, SHA eşit (4cfb22d8…db3d). Telefondan yapıştırma ve kullanıcının listesinin artık açılıp açılmadığı kullanıcı tarafından doğrulanacak.
+
 ## Uygulama ekran tuvali başladı · 23 Ekim 2026
 
 Kullanıcı bütün uygulamanın tasarım tuvalini bölüm bölüm, önce mevcut ekranların TV görüntüleriyle istedi. Altı bölümlük tuval açıldı: https://claude.ai/artifact/LvtaBnB1HKd2xWh3cu9MQT. Kurulum bölümüne fiziksel TV'den beş görüntü kondu (karşılama, telefonla ekle, TV'de onay, bağlantı hatası, M3U adımı). Öteki bölümler TV'de çalışan bir kaynak gerektiriyor; kullanıcının kaynağı "ulaşılamadı" hatası verdiği için bekliyor. Plan ve kurallar [APP_CANVAS](../design/APP_CANVAS.md). Kod değişmedi.

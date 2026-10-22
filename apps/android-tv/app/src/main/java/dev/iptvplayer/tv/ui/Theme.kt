@@ -220,7 +220,12 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
     val focusManager = LocalFocusManager.current
     val keyboard = rememberFieldKeyboard()
     val input = rememberFieldInput(value, onChange)
-    val options = fieldKeyboardOptions(if (secret) KeyboardType.Password else KeyboardType.Text, if (onDone != null) doneAction else ImeAction.Next)
+    // The viewer pressed OK here, or arrived with the keyboard open: the field holds a real input connection.
+    var typing by remember { mutableStateOf(false) }
+    // A secret shown on screen is an ordinary text field: the Google TV phone app mirrors such a field and pastes into
+    // it, while it gives a password field only key presses. Hidden, it is a password field again.
+    val masked = secret && !revealed
+    val options = fieldKeyboardOptions(if (masked) KeyboardType.Password else KeyboardType.Text, if (onDone != null) doneAction else ImeAction.Next, typing)
     val action = KeyboardActionHandler { if (onDone != null) { keyboard.close(); onDone() } else focusManager.moveFocus(FocusDirection.Down) }
     val style = TextStyle(color = Ink.Text, fontSize = 16.sp, fontFamily = Roboto)
     // A field removed while it has focus (a form closing) counts as left.
@@ -228,14 +233,13 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
     Column(modifier, verticalArrangement = Arrangement.spacedBy(5.dp)) {
         Text(label, color = Ink.Muted, fontSize = 13.sp, lineHeight = 18.sp, fontFamily = Roboto)
         // Up/down leave this single-line field; OK opens the keyboard. The TV IME consumes its own remote events.
-        val field = Modifier.fillMaxWidth().onPreviewKeyEvent { event -> fieldKey(event, focusManager, keyboard) }
-            .onFocusChanged { keyboard.focusChanged(it.isFocused, focused); focused = it.isFocused }
+        val field = Modifier.fillMaxWidth().onPreviewKeyEvent { event -> fieldKey(event, focusManager, keyboard) { typing = true } }
+            .onFocusChanged { keyboard.focusChanged(it.isFocused, focused); focused = it.isFocused; typing = it.isFocused && (typing || keyboard.isOpen) }
             .background(containerColor, RoundedCornerShape(TvLayout.CardRadius))
             .border(if (focused) 2.dp else 1.dp, if (focused) Ink.Text else Ink.Outline.copy(alpha = .7f), RoundedCornerShape(TvLayout.CardRadius))
             .padding(12.dp)
-        if (secret) BasicSecureTextField(input.state, field, inputTransformation = input.reporter, textStyle = style, keyboardOptions = options,
-            onKeyboardAction = action, cursorBrush = SolidColor(Ink.Mint),
-            textObfuscationMode = if (revealed) TextObfuscationMode.Visible else TextObfuscationMode.Hidden)
+        if (masked) BasicSecureTextField(input.state, field, inputTransformation = input.reporter, textStyle = style, keyboardOptions = options,
+            onKeyboardAction = action, cursorBrush = SolidColor(Ink.Mint), textObfuscationMode = TextObfuscationMode.Hidden)
         else BasicTextField(input.state, field, inputTransformation = input.reporter, textStyle = style, keyboardOptions = options,
             onKeyboardAction = action, lineLimits = TextFieldLineLimits.SingleLine, cursorBrush = SolidColor(Ink.Mint))
     }
@@ -244,16 +248,21 @@ internal fun Modifier.enterWhenEnabled(enabled: Boolean, focused: Boolean) = foc
 /**
  * The keyboard opens only when the viewer presses OK on a field (or taps it), never because focus arrived (D058).
  * Only the [TextFieldState] fields honour [KeyboardOptions.showKeyboardOnFocus]; the String ones always open it.
+ *
+ * Compose starts a field's input connection only on a tap or, with showKeyboardOnFocus, on focus. A TV has no tap, so
+ * without [typing] the keyboard reached the field as key presses only: the IME saw no text field (inputType 0), the
+ * Google TV phone app offered no paste and showed none of the text, and `adb input text` went through the key layout.
+ * [typing] is true once the viewer pressed OK on the focused field: the changed options start the connection at once.
  */
-internal fun fieldKeyboardOptions(type: KeyboardType, action: ImeAction) =
-    KeyboardOptions(keyboardType = type, autoCorrectEnabled = false, imeAction = action, showKeyboardOnFocus = false)
+internal fun fieldKeyboardOptions(type: KeyboardType, action: ImeAction, typing: Boolean = false) =
+    KeyboardOptions(keyboardType = type, autoCorrectEnabled = false, imeAction = action, showKeyboardOnFocus = typing)
 
 /**
  * Remote keys on a focused single-line field: Up/Down leave it, OK opens the keyboard, Back with the keyboard open
  * closes only the keyboard. A remote's OK may arrive as Enter; a computer keyboard's Enter keeps its usual meaning
  * (the field's Next or Search).
  */
-internal fun fieldKey(event: KeyEvent, focusManager: FocusManager, keyboard: FieldKeyboard): Boolean {
+internal fun fieldKey(event: KeyEvent, focusManager: FocusManager, keyboard: FieldKeyboard, typing: () -> Unit = {}): Boolean {
     if (event.key == Key.Back && keyboard.isOpen) {
         if (event.type == KeyEventType.KeyUp) keyboard.close()
         return true
@@ -266,7 +275,7 @@ internal fun fieldKey(event: KeyEvent, focusManager: FocusManager, keyboard: Fie
         event.key == Key.DirectionUp -> focusManager.moveFocus(FocusDirection.Up)
         event.key == Key.DirectionLeft && !keyboard.isOpen -> focusManager.moveFocus(FocusDirection.Left)
         event.key == Key.DirectionRight && !keyboard.isOpen -> focusManager.moveFocus(FocusDirection.Right)
-        event.key == Key.DirectionCenter || remoteEnter -> { keyboard.open(); true }
+        event.key == Key.DirectionCenter || remoteEnter -> { typing(); keyboard.open(); true }
         else -> false
     }
 }

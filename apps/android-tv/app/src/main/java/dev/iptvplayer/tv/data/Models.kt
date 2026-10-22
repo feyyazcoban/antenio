@@ -212,6 +212,7 @@ enum class FailureReason(@StringRes val message: Int) {
     SERVER_NAME_NOT_FOUND(R.string.failure_server_name_not_found),
     SERVER_REFUSED(R.string.failure_server_refused),
     SERVER_TIMEOUT(R.string.failure_server_timeout),
+    SERVER_CONNECT_TIMEOUT(R.string.failure_server_connect_timeout),
     SECURE_CONNECTION_FAILED(R.string.failure_secure_connection),
     ACCESS_DENIED(R.string.failure_access_denied),
     SOURCE_NOT_FOUND(R.string.failure_source_not_found),

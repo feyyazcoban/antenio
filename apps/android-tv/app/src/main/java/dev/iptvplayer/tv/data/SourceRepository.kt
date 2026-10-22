@@ -31,7 +31,9 @@ import kotlin.coroutines.resumeWithException
  */
 internal fun networkFailure(e: IOException): FailureReason = when {
     e is UnknownHostException -> FailureReason.SERVER_NAME_NOT_FOUND
-    e is SocketTimeoutException || (e is InterruptedIOException && e.message == "timeout") -> FailureReason.SERVER_TIMEOUT
+    // Android's connect timeout reads "failed to connect to … after 15000ms"; a read timeout reads "timeout".
+    e is SocketTimeoutException && e.message.orEmpty().contains("connect", ignoreCase = true) -> FailureReason.SERVER_CONNECT_TIMEOUT
+    e is InterruptedIOException -> FailureReason.SERVER_TIMEOUT
     e is SSLException -> FailureReason.SECURE_CONNECTION_FAILED
     e is ConnectException -> FailureReason.SERVER_REFUSED
     else -> FailureReason.SERVER_UNREACHABLE
@@ -40,10 +42,17 @@ internal fun networkFailure(e: IOException): FailureReason = when {
 class SourceRepository(client: OkHttpClient? = null) {
     // All requests enter through IO; do not initialize TLS while constructing the ViewModel.
     private val client by lazy { client ?: Companion.client() }
+    /**
+     * The whole lists (an M3U, an Xtream section): some providers build them for a minute or more before the first byte,
+     * and a large one downloads for minutes. Other players wait that long; the loading card keeps İptal meanwhile.
+     */
+    private val patientClient by lazy {
+        this.client.newBuilder().readTimeout(PATIENT_READ_SECONDS, TimeUnit.SECONDS).callTimeout(PATIENT_CALL_MINUTES, TimeUnit.MINUTES).build()
+    }
     suspend fun load(source: SourceConfig, onProgress: (UiText) -> Unit): Catalog = withContext(Dispatchers.IO) {
         if (source.type == SourceType.M3U) {
             onProgress(UiText.Res(R.string.progress_downloading_list))
-            val text = get(source.address, 64 * 1024 * 1024)
+            val text = get(source.address, 64 * 1024 * 1024, patient = true)
             coroutineContext.ensureActive()
             onProgress(UiText.Res(R.string.progress_arranging_list))
             return@withContext M3uParser.parse(text.reader(), source.address)
@@ -72,7 +81,7 @@ class SourceRepository(client: OkHttpClient? = null) {
             categoryOrder[kind] = cats.values.distinct()
             try {
                 val action = if (kind == MediaKind.SERIES) "get_series" else "get_${prefix}_streams"
-                entries += CatalogParser.xtream(get(source.apiUrl(action)), kind, cats)
+                entries += CatalogParser.xtream(get(source.apiUrl(action), patient = true), kind, cats)
                 loadedKinds++
             } catch (e: CancellationException) { throw e } catch (_: Exception) {
                 warnings += CatalogWarning(CatalogWarning.Reason.KIND_UNAVAILABLE, kind)
@@ -101,11 +110,11 @@ class SourceRepository(client: OkHttpClient? = null) {
     private fun jsonObject(text: String): JSONObject = try { JSONObject(text) }
         catch (_: Exception) { throw SourceFailure(FailureReason.RESPONSE_MALFORMED) }
 
-    private suspend fun get(url: HttpUrl): String = get(url.toString())
+    private suspend fun get(url: HttpUrl, patient: Boolean = false): String = get(url.toString(), patient = patient)
 
-    private suspend fun get(url: String, maxBytes: Int = 32 * 1024 * 1024): String {
+    private suspend fun get(url: String, maxBytes: Int = 32 * 1024 * 1024, patient: Boolean = false): String {
         try {
-            val call = client.newCall(SourceHttp.list(url))
+            val call = (if (patient) patientClient else client).newCall(SourceHttp.list(url))
             val response = suspendCancellableCoroutine<Response> { continuation ->
                 continuation.invokeOnCancellation { call.cancel() }
                 call.enqueue(object : Callback {
@@ -141,10 +150,15 @@ class SourceRepository(client: OkHttpClient? = null) {
             }
         } catch (e: CancellationException) { throw e }
         catch (e: SourceFailure) { throw e }
+        // The list stopped arriving partway (a read or the whole call ran out of time).
+        catch (_: InterruptedIOException) { throw SourceFailure(FailureReason.SERVER_TIMEOUT) }
         catch (_: Exception) { throw SourceFailure(FailureReason.SOURCE_UNREADABLE) }
     }
 
     companion object {
+        const val PATIENT_READ_SECONDS = 120L
+        const val PATIENT_CALL_MINUTES = 10L
+
         fun client(): OkHttpClient = OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS).readTimeout(45, TimeUnit.SECONDS)
             .callTimeout(120, TimeUnit.SECONDS).followSslRedirects(false).build()

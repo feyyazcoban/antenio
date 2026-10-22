@@ -1,5 +1,13 @@
 # Son devir notu
 
+## Claude · Liste beklemesi ve telefondan yapıştırma /.87–.88 · 23 Ekim 2026
+
+Zaman aşımı: `SourceRepository` liste indirmelerinde `patientClient` kullanır (okuma 120 sn, çağrı 10 dk; hesap ve ayrıntı çağrıları eski sürelerde). `networkFailure` Android'in "failed to connect … after" mesajını `SERVER_CONNECT_TIMEOUT`, kalan zaman aşımlarını `SERVER_TIMEOUT` yapar; gövde okunurken `InterruptedIOException` da `SERVER_TIMEOUT`. Testler: `NetworkFailureTest`, MockWebServer ile `PatientListTest`.
+
+Yapıştırma: `dumpsys input_method` geçmişinde uygulamanın her StartInput kaydı inputType 0x0 idi; başka bir IPTV uygulamasınınki 0x1. Compose 1.11.2 `TextFieldDecoratorModifierNode.startInputSession(fromTap)` dokunuş yoksa `showKeyboardOnFocus` false iken çıkar. `fieldKeyboardOptions(…, typing)` artık OK'e basılan (ya da klavye açıkken gelinen) odaklı alanda `showKeyboardOnFocus = true` verir; değişen seçenekler oturumu hemen başlatır. `EntryField` ve `SearchField` bunu kullanır; görünür gizli alanlar `BasicTextField`. 0.14.88'de StartInput inputType 0x1, imeOptions 0x2000005 görüldü; TV'de "Mobil cihazınızdaki klavyeyi kullanın" çıktı.
+
+Tam sonraki adım: kullanıcı telefondan yapıştırmayı ve listesini yeniden denesin. Liste hâlâ açılmazsa yeni hata cümlesine göre devam edilir. Ardından tuval bölümleri (APP_CANVAS).
+
 ## Claude · Uygulama ekran tuvali · 23 Ekim 2026
 
 Kullanıcı: "bütün uygulamanın tasarım tuvalini bölüm bölüm çıkar. Önce mevcut ekranların TV görüntüleriyle başla." Design türünden yeni tuval açıldı (https://claude.ai/artifact/LvtaBnB1HKd2xWh3cu9MQT): kapak, altı sayfa, kurulum bölümünde beş TV görüntüsü (0.14.85'te alınmış, kurulum ekranları 0.14.86'da aynı). Öteki sayfalarda "kaynak bekleniyor" notları var. Kullanıcı aynı anda TV'de kaynak eklemeyi denediği için TV kumandayla sürülmedi. Yeni [APP_CANVAS](../design/APP_CANVAS.md) bölüm tablosunu ve kuralları tutar.
