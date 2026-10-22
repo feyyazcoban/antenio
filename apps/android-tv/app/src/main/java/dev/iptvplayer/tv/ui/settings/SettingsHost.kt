@@ -233,8 +233,10 @@ private val navSaver = Saver<SettingsNav, ArrayList<String>>(
                 }
                 Row(Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(if (if (lazy) canScrollBack else scroll.value > scrollHintThreshold) stringResource(R.string.settings_scroll_up) else "", Modifier.testTag("settings-scroll-up"), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
-                    Text(if (if (lazy) canScrollNext else scroll.maxValue - scroll.value > scrollHintThreshold) stringResource(R.string.settings_scroll_more) else "", Modifier.testTag("settings-scroll-more"), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
+                    val hintUp by remember(lazy, canScrollBack, scrollHintThreshold) { derivedStateOf { if (lazy) canScrollBack else scroll.value > scrollHintThreshold } }
+                    val hintMore by remember(lazy, canScrollNext, scrollHintThreshold) { derivedStateOf { if (lazy) canScrollNext else scroll.maxValue - scroll.value > scrollHintThreshold } }
+                    Text(if (hintUp) stringResource(R.string.settings_scroll_up) else "", Modifier.testTag("settings-scroll-up"), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
+                    Text(if (hintMore) stringResource(R.string.settings_scroll_more) else "", Modifier.testTag("settings-scroll-more"), color = Ink.Muted, fontFamily = Roboto, fontSize = 12.sp)
                 }
             }
         }
@@ -245,7 +247,7 @@ private val navSaver = Saver<SettingsNav, ArrayList<String>>(
     move: (Float) -> Unit) {
     val range = (info.contentSize - info.viewportSize).coerceAtLeast(0)
     if (info.viewportSize <= 0 || info.contentSize == Int.MAX_VALUE || range == 0) return
-    val progress = when { !backward -> 0f; !forward -> 1f; else -> (info.scrollOffset.toFloat() / range).coerceIn(0f, 1f) }
+    val progress by remember(info, backward, forward, range) { derivedStateOf { when { !backward -> 0f; !forward -> 1f; else -> (info.scrollOffset.toFloat() / range).coerceIn(0f, 1f) } } }
     val seek by rememberUpdatedState(move)
     val ratio by rememberUpdatedState(info.viewportSize.toFloat() / info.contentSize)
     val minimum = with(LocalDensity.current) { 20.dp.toPx() }

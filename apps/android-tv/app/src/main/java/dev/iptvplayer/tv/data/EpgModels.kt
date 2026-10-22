@@ -49,12 +49,14 @@ object XmltvTime {
     }
 }
 
+private val whitespace = Regex("\\s+")
 internal fun epgNameKey(name: String): String = Normalizer.normalize(name.trim(), Normalizer.Form.NFC)
-    .replace(Regex("\\s+"), " ").lowercase(Locale.ROOT)
+    .replace(whitespace, " ").lowercase(Locale.ROOT)
 
 data class EpgChannelRef(val feed: Int, val id: String)
 enum class EpgMatchKind { ID, NAME, MISSING_ID, AMBIGUOUS, NONE }
 data class EpgMatch(val kind: EpgMatchKind, val channel: EpgChannelRef? = null)
+@androidx.compose.runtime.Immutable
 data class GuideSlice(val match: EpgMatch, val programmes: List<EpgProgramme>, val truncated: Boolean = false) {
     // Overlapping listings are uncertain. Do not label either programme as current.
     fun now(time: Long): EpgProgramme? = programmes.filter { it.isOnAt(time) }.singleOrNull()

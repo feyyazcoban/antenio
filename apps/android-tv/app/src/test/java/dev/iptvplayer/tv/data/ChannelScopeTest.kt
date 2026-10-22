@@ -55,5 +55,9 @@ class ChannelScopeTest {
         assertEquals(listOf(b, c), selectedLibrary.channels)
         assertEquals(listOf(a), selectedLibrary.numbered) // Searching another source does not change numeric remote shortcuts.
         assertNull(selectedLibrary.numbers[b.id])
+        val lists = LiveLists(catalog)
+        val choicesB = lists.choices(setOf(a.id, b.id), "b")
+        assertEquals(listOf(ChannelScope("b", favoritesOnly = true), ChannelScope("b"), ChannelScope("b", "News"), ChannelScope("b", "Sport")), choicesB.map { it.scope })
+        assertEquals(listOf(1, 2, 1, 1), choicesB.map { it.count })
     }
 }

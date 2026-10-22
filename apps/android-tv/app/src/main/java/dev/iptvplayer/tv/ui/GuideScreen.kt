@@ -277,6 +277,7 @@ internal fun programmeTime(programme: EpgProgramme, zone: ZoneId): String =
                         }
                     }.focusable().testTag("guide-grid").semantics {
                         contentDescription = channelName + ", " + guideTime(anchor, zone) + ", " + selectedText
+                        liveRegion = LiveRegionMode.Polite
                         onClick(openLabel) { if (channel != null && selectedSlot != null) open(channel, selectedSlot); true }
                     }) {
                     // Size the list to whole rows: every scroll position, including the end, lands on a row

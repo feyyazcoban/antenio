@@ -12,6 +12,7 @@ enum class MediaKind(@StringRes val label: Int) {
     LIVE(R.string.kind_live), MOVIE(R.string.kind_movies), SERIES(R.string.kind_series), EPISODE(R.string.kind_episodes)
 }
 
+@androidx.compose.runtime.Immutable
 data class SourceConfig(
     val id: String = UUID.randomUUID().toString(),
     val name: String,
@@ -84,6 +85,7 @@ data class SourceConfig(
     }
 }
 
+@androidx.compose.runtime.Immutable
 data class MediaEntry(
     val id: String,
     val providerId: String,
@@ -117,6 +119,7 @@ data class MediaEntry(
     override fun toString() = "MediaEntry(id=$id, kind=$kind)"
 }
 
+@androidx.compose.runtime.Immutable
 data class Catalog(
     val items: List<MediaEntry>,
     val m3uEpisodes: Map<String, List<MediaEntry>> = emptyMap(),

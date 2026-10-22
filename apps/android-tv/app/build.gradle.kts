@@ -10,8 +10,8 @@ android {
         applicationId = "dev.iptvplayer.tv.pilot"
         minSdk = 26
         targetSdk = 36
-        versionCode = 91
-        versionName = "0.14.77-design-preview"
+        versionCode = 97
+        versionName = "0.14.83-design-preview"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }
@@ -20,6 +20,17 @@ android {
     androidResources { generateLocaleConfig = true }
     // Settings picks a language the TV may not speak, so a Play bundle keeps every language in the base APK.
     bundle { language { enableSplit = false } }
+    signingConfigs {
+        val storePath = providers.gradleProperty("NEXTV_RELEASE_STORE_FILE").orElse(providers.environmentVariable("NEXTV_RELEASE_STORE_FILE")).orNull
+        if (!storePath.isNullOrBlank()) {
+            create("release") {
+                storeFile = file(storePath)
+                storePassword = providers.gradleProperty("NEXTV_RELEASE_STORE_PASSWORD").orElse(providers.environmentVariable("NEXTV_RELEASE_STORE_PASSWORD")).orNull
+                keyAlias = providers.gradleProperty("NEXTV_RELEASE_KEY_ALIAS").orElse(providers.environmentVariable("NEXTV_RELEASE_KEY_ALIAS")).orNull
+                keyPassword = providers.gradleProperty("NEXTV_RELEASE_KEY_PASSWORD").orElse(providers.environmentVariable("NEXTV_RELEASE_KEY_PASSWORD")).orNull
+            }
+        }
+    }
     buildTypes {
         // en-XA (longer, accented text) and ar-XB (right to left) for layout checks on the emulator; never in release.
         debug { isPseudoLocalesEnabled = true }
@@ -30,7 +41,7 @@ android {
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             // Design previews update earlier debug-signed installs in place; the same key keeps user data.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
     compileOptions {

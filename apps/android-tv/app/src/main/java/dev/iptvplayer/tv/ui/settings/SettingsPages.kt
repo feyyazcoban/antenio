@@ -41,7 +41,7 @@ import dev.iptvplayer.tv.ui.updatedTime
  * The sections the main page lists, each a page of its own (plan decision 4a-8). Rehber, Yedekleme ve ana ekran,
  * Kayıtlar and NEXTV Plus join once they have settings.
  */
-internal enum class SectionId(@StringRes val label: Int) {
+internal enum class SectionId(@param:StringRes val label: Int) {
     GENERAL(R.string.settings_section_general), SOURCES(R.string.settings_section_sources),
     CONTENT(R.string.settings_section_content), PLAYER(R.string.settings_section_player),
     LIBRARY(R.string.settings_section_library), ABOUT(R.string.settings_section_about)
@@ -250,6 +250,12 @@ private fun readIn(text: String, languages: List<String>): AnnotatedString = bui
     NoteRow(stringResource(R.string.settings_about_library_note,
         stringResource(R.string.source_type_m3u), stringResource(R.string.source_type_xtream)))
     NoteRow(stringResource(R.string.settings_about_storage_note))
+    Spacer(Modifier.height(6.dp))
+    SettingsLabel(stringResource(R.string.settings_about_privacy))
+    NoteRow(stringResource(R.string.settings_about_privacy_note))
+    Spacer(Modifier.height(6.dp))
+    SettingsLabel(stringResource(R.string.settings_about_licenses))
+    NoteRow(stringResource(R.string.settings_about_licenses_note))
     Spacer(Modifier.height(6.dp))
     SettingsLabel(stringResource(R.string.settings_about_release))
     NoteRow(stringResource(R.string.settings_about_release_note))

@@ -152,6 +152,7 @@
     <string name="action_retry">Tekrar dene</string>
     <string name="action_clear">Temizle</string>
     <string name="action_watch">İzle</string>
+    <string name="action_explore">İncele</string>
     <string name="action_details">Ayrıntılar</string>
     <string name="action_play">Oynat</string>
     <string name="action_resume">Devam et</string>
@@ -683,7 +684,7 @@
     <string name="pin_reason_release">“%1$s” kilidini kaldırmak için PIN gir.</string>
     <!-- TalkBack for the masked digits: how many of the four are in, never which. -->
     <string name="pin_entered">%1$s / %2$s rakam girildi</string>
-    <string name="pin_delete">Sil</string>
+
     <string name="pin_delete_description">Son rakamı sil</string>
     <string name="pin_checking">Kontrol ediliyor…</string>
     <string name="pin_wrong">PIN yanlış. Tekrar dene.</string>
@@ -787,11 +788,11 @@
     <string name="player_position_applied">%1$s konumuna gidildi</string>
     <string name="player_seek_back_accessible">10 saniye geri</string>
     <string name="player_seek_forward_accessible">10 saniye ileri</string>
-    <string name="player_channel_minus">Kanal eksi</string>
-    <string name="player_channel_plus">Kanal artı</string>
+
+
     <string name="player_hint_vod">Gizliyken ◀ ▶ sar · basılı tut: daha hızlı</string>
     <string name="player_hint_scrub">OK uygula · Geri vazgeç</string>
-    <string name="player_hint_live">Gizliyken ▲▼ kanal · Rakam: kanal no</string>
+
     <string name="player_subtitles_off">Altyazı kapalı</string>
     <plurals name="player_hours">
         <item quantity="one">%1$s saat</item>
@@ -818,4 +819,17 @@
     <string name="panel_watch_channel">Kanala geç</string>
     <string name="panel_video_accessible">Canlı yayın, %1$s %2$s. OK kanal listesini açar.</string>
     <string name="panel_controls_action">Oynatıcı kontrolleri</string>
+    <string name="settings_about_privacy">Gizlilik ve veri güvenliği</string>
+    <string name="settings_about_privacy_note">NEXTV analitik, telemetri veya reklam kimliği toplamaz. Kaynak hesapları, kataloglar, favoriler, izleme geçmişi ve ebeveyn kilitleri yalnız bu cihazda şifreli saklanır (AES-256-GCM, bulut yedeklemesine dahil edilmez) ve hiçbir üçüncü tarafa gönderilmez. Ağ istekleri yalnız eklediğin IPTV ve rehber adreslerine yapılır.</string>
+    <string name="settings_about_licenses">Açık kaynak lisansları</string>
+    <string name="settings_about_licenses_note">Roboto yazı tipi SIL Open Font License 1.1 kapsamındadır. AndroidX, Jetpack Compose, Media3 ExoPlayer, OkHttp, Coil ve Material Symbols simgeleri Apache License 2.0 kapsamındadır.</string>
+    <string name="settings_start_last_channel">Açılışta son kanalı aç</string>
+    <string name="settings_start_last_channel_note">NEXTV açıldığında doğrudan son izlenen canlı TV kanalını başlatır. Kilitli kanallarda Ana sayfa açılır.</string>
+    <string name="player_aspect_title">Görüntü sığdırma</string>
+    <string name="player_aspect_fit">Sığdır (Varsayılan)</string>
+    <string name="player_aspect_zoom">Yakınlaştır (Kenarları kırp)</string>
+    <string name="player_aspect_fill">Genişlet (Tam ekran)</string>
+    <string name="player_stream_info">Yayın bilgileri</string>
+    <string name="player_stream_info_empty">Yayın başladığında çözünürlük ve kodek bilgileri burada görünür.</string>
+    <string name="player_previous_channel">Önceki kanal</string>
 </resources>

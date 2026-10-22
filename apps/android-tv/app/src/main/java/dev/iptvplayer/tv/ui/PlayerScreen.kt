@@ -74,6 +74,7 @@ import dev.iptvplayer.tv.PlayingMedia
 import dev.iptvplayer.tv.Route
 import dev.iptvplayer.tv.R
 import dev.iptvplayer.tv.TvViewModel
+import dev.iptvplayer.tv.data.MediaEntry
 import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.EpisodeSequence
 import dev.iptvplayer.tv.data.GateResult
@@ -138,6 +139,7 @@ import kotlinx.coroutines.flow.first
     val scrubFocus = remember { FocusRequester() }
     var scrubFocused by remember { mutableStateOf(false) }
     var playerView by remember { mutableStateOf<PlayerView?>(null) }
+    var resizeMode by remember { mutableIntStateOf(androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT) }
     var peekAt by remember { mutableLongStateOf(0L) }
     var peek by remember { mutableStateOf(false) }
     var peekDelta by remember { mutableLongStateOf(0L) }
@@ -169,7 +171,7 @@ import kotlinx.coroutines.flow.first
         val current = active?.entry
         val s = model.state.value
         if (hasPlayed && current != null && s.playing?.entry?.id == current.id && s.sourceFor(current) != null)
-            episodeEnd.ended(current.sourceId, current, model.nextEpisodeChoice(), s.autoNextEpisode, needsPin)
+            episodeEnd.ended(current.sourceId, current, model.nextEpisodeChoice(), s.autoNextEpisode && accessibility?.isTouchExplorationEnabled != true, needsPin)
     }
     // The end card covers whatever was open; EpisodeEndController keeps it.
     fun top(): PlayerLayer = if (endState != null) PlayerLayer.EpisodeEnd else layer
@@ -188,7 +190,19 @@ import kotlinx.coroutines.flow.first
     fun flash(text: String, detail: String? = null, audio: Boolean = false) {
         note = text to detail; audioNote = audio; noteAt = System.currentTimeMillis()
     }
-    fun zap(direction: Int) { quiet = layer == PlayerLayer.Video; digits = ""; model.changeChannel(direction) }
+    var zapPreview by remember { mutableStateOf<MediaEntry?>(null) }
+    var zapBandVisible by remember { mutableStateOf(false) }
+    var zapBandAt by remember { mutableLongStateOf(0L) }
+    fun zap(direction: Int, repeat: Int = 0) {
+        digits = ""
+        if (repeat > 0) {
+            model.zapTarget(zapPreview?.id ?: media.entry.id, direction)?.let { target ->
+                zapPreview = target; zapBandVisible = true; zapBandAt = System.currentTimeMillis()
+            }
+            return
+        }
+        zapPreview = null; quiet = layer == PlayerLayer.Video; model.changeChannel(direction)
+    }
     fun seekBy(deltaMs: Long) {
         if (!player.isCurrentMediaItemSeekable) return
         val end = player.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
@@ -199,14 +213,14 @@ import kotlinx.coroutines.flow.first
     // The player as PlayerKeyRouter reads it when a key or Back arrives; its commands are carried out here.
     fun keys(repeat: Int = 0, phase: KeyPhase = KeyPhase.DOWN, cancelled: Boolean = false) = KeyContext(media.mode, top(), recoveryState.recovering, failure != null, player.isPlaying, repeat, scrub.target != null,
         pendingDigits = digits.isNotEmpty(), phase = phase, cancelled = cancelled, subColumn = channelPanel.column != ChannelColumn.CHANNELS)
-    fun perform(command: PlayerCommand) {
+    fun perform(command: PlayerCommand, repeat: Int = 0) {
         when (command) {
             PlayerCommand.Play -> { scrub.commit(); player.play() }
             PlayerCommand.Pause -> { scrub.commit(); player.pause() }
             PlayerCommand.Retry -> recovery.retryManually()
             PlayerCommand.StopRecovery -> recovery.cancel()
             PlayerCommand.Consume -> Unit
-            is PlayerCommand.Zap -> zap(command.direction)
+            is PlayerCommand.Zap -> zap(command.direction, repeat)
             is PlayerCommand.AppendDigit -> { digits = PlayerKeyRouter.appendDigit(digits, command.digit); flash(digits) }
             PlayerCommand.OpenGuide -> model.guide(if (layer == PlayerLayer.Channels) channelPanel.focusedId else null)
             PlayerCommand.PreviousChannel -> {
@@ -257,14 +271,27 @@ import kotlinx.coroutines.flow.first
         lastInteraction = System.currentTimeMillis()
         val key = PlayerKey.of(event.nativeKeyEvent.keyCode) ?: return false
         val phase = if (event.type == KeyEventType.KeyUp) KeyPhase.UP else if (event.nativeKeyEvent.repeatCount > 0) KeyPhase.REPEAT else KeyPhase.DOWN
+        if (phase == KeyPhase.UP && zapPreview != null && key in setOf(PlayerKey.ChannelUp, PlayerKey.ChannelDown, PlayerKey.Up, PlayerKey.Down)) {
+            val target = zapPreview; zapPreview = null; zapBandAt = System.currentTimeMillis()
+            if (!event.nativeKeyEvent.isCanceled && target != null && target.id != media.entry.id) {
+                quiet = layer == PlayerLayer.Video
+                when (model.pickChannel(target.id, model.state.value.liveScope, dev.iptvplayer.tv.data.PickOrigin.ZAP)) {
+                    is GateResult.NeedsPin -> openPin { if (layer == PlayerLayer.Video) canvas else first }
+                    else -> Unit
+                }
+            }
+            return true
+        }
         val command = keyInput.route(key, keys(event.nativeKeyEvent.repeatCount, phase, event.nativeKeyEvent.isCanceled)) ?: return false
-        perform(command); return true
+        perform(command, event.nativeKeyEvent.repeatCount); return true
     }
     LaunchedEffect(layer, screenState.parental.prompt?.id) {
         if (layer !in listOf(PlayerLayer.Video, PlayerLayer.Controls, PlayerLayer.Channels)) digits = ""
+        if (layer != PlayerLayer.Video) { zapBandVisible = false; zapPreview = null }
         if (screenState.parental.prompt != null) { digits = ""; keyInput.reset() }
     }
     LaunchedEffect(peekAt) { if (peek) { delay(2_500); peek = false } }
+    LaunchedEffect(zapBandAt, zapPreview != null) { if (zapBandVisible && zapPreview == null) { delay(4_000); zapBandVisible = false } }
     LaunchedEffect(failure, recoveryState.recovering) { if (failure != null || recoveryState.recovering) scrub.cancel() }
     LaunchedEffect(controlsShown) { if (!controlsShown) {
         scrubFocused = false
@@ -363,11 +390,14 @@ import kotlinx.coroutines.flow.first
         tracks = Tracks.EMPTY; silent = false; scrub.reset(); clock.reset(request.startMs); peek = false
         if (audioNote) { note = null; audioNote = false }
         speedRequest = null
+        resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+        zapPreview = null
         if (request.mode == PlaybackMode.LIVE) player.playbackParameters = PlaybackParameters.DEFAULT
         if (layer == PlayerLayer.Tracks || layer == PlayerLayer.Options || layer == PlayerLayer.Speed) layer = PlayerLayer.Controls
         active = media
         if (quiet) {
             quiet = false; lastInteraction = System.currentTimeMillis()
+            if (request.mode == PlaybackMode.LIVE) { zapBandVisible = true; zapBandAt = System.currentTimeMillis() }
             flash(listOfNotNull(model.channelNumber(media.entry)?.toString(), shownTitle(media.entry.title, "", resources).name).joinToString("  "))
         } else interact()
         player.trackSelectionParameters = PlayerFactory.rememberedTracks(player.trackSelectionParameters, model.store)
@@ -415,6 +445,9 @@ import kotlinx.coroutines.flow.first
     BackHandler {
         // A Back that arrives after the model left the player, before this screen is gone, is the new route's.
         if (model.state.value.route != Route.PLAYER) return@BackHandler back()
+        if (live && layer == PlayerLayer.Video && !controlsShown && failure == null && !recoveryState.recovering && (zapBandVisible || zapPreview != null)) {
+            zapBandVisible = false; zapPreview = null; return@BackHandler
+        }
         perform(PlayerKeyRouter.back(keys()))
     }
     Box(Modifier.fillMaxSize().background(Color.Black).onPreviewKeyEvent(::onKey)) {
@@ -424,6 +457,7 @@ import kotlinx.coroutines.flow.first
             isFocusable = false; descendantFocusability = android.view.ViewGroup.FOCUS_BLOCK_DESCENDANTS
             setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
         } }, modifier = Modifier.fillMaxSize(), update = { view ->
+            view.resizeMode = resizeMode
             view.subtitleView?.let { PlayerFactory.subtitles(it, screenState.playback.subtitle) }
         }, onRelease = { it.player = null })
         val canvasDescription = if (live) stringResource(R.string.panel_video_accessible,
@@ -497,7 +531,7 @@ import kotlinx.coroutines.flow.first
                         (if (largeText) .657f else .667f) to Color.Black.copy(alpha = .86f), 1f to Color.Black.copy(alpha = .94f))))
                 PlayerInfoBlock(PlayerInfoKind.Full, media.entry, info, model.channelNumber(media.entry),
                     schedule, model.guideZone(),
-                    clock, scrub, speed, playing, statusText, failure != null || recoveryState.recovering, opening, scrubFocus,
+                    clock, scrub, speed, playing, if (live) null else statusText, failure != null || recoveryState.recovering, opening, scrubFocus,
                     returnFocus = { if (!runCatching { lastControl[0].requestFocus() }.getOrDefault(false)) first.requestFocus() }, toggle = ::primaryAction,
                     modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(horizontal = TvLayout.Gutter, vertical = 24.dp)
                         .testTag("player-panel").onGloballyPositioned { coordinates ->
@@ -518,6 +552,9 @@ import kotlinx.coroutines.flow.first
                         add(primary)
                         if (live) add(PlayerControl("player-channels", stringResource(R.string.player_channels), "channels",
                             requester = channelsFocus) { perform(PlayerCommand.OpenChannels) })
+                        val previousChannel = if (live) model.liveEntry(screenState.previousLiveId) else null
+                        if (previousChannel != null) add(PlayerControl("player-previous-channel", stringResource(R.string.player_previous_channel), "replay",
+                            state = shownTitle(previousChannel.title, "", resources).name) { perform(PlayerCommand.PreviousChannel) })
                         if (!live && (clock.seekable || opening)) add(PlayerControl("player-seek-forward", stringResource(R.string.player_seek_forward_accessible),
                             "forward_10", enabled = canSeek) { interact(); seekBy(10_000) })
                         if (nextChoice != null) add(PlayerControl("player-next-episode", stringResource(R.string.player_next_episode), "skip_next",
@@ -556,6 +593,17 @@ import kotlinx.coroutines.flow.first
                 playing, null, false, false, scrubFocus, {}, {}, Modifier.align(Alignment.BottomCenter).fillMaxWidth()
                     .padding(horizontal = TvLayout.Gutter, vertical = 24.dp).testTag("player-peek"), peekDelta = peekDelta)
         }
+        if (live && layer == PlayerLayer.Video && !controlsShown && failure == null && !recoveryState.recovering && (zapBandVisible || zapPreview != null)) {
+            val bandEntry = zapPreview ?: media.entry
+            val bandSchedule = if (bandEntry.id == media.entry.id) schedule else guideRows(listOf(bandEntry), dev.iptvplayer.tv.data.GuideWindow(guideAnchor, guideAnchor + 12 * 3_600_000L), screenState, model)[bandEntry.id]
+            val bandInfo = remember(bandEntry, resources) { PlayerInfoModel.from(bandEntry, null).let { it.copy(title = shownTitle(it.title, it.year, resources).name) } }
+            Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(180.dp)
+                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = .82f)))))
+            PlayerInfoBlock(PlayerInfoKind.Zap, bandEntry, bandInfo, model.channelNumber(bandEntry), bandSchedule, model.guideZone(),
+                clock, scrub, speed, playing, null,
+                false, false, scrubFocus, {}, {},
+                Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(horizontal = TvLayout.Gutter, vertical = 24.dp).testTag("player-zap-band"))
+        }
         if (layer == PlayerLayer.Tracks) TracksDialog(tracks, trackParameters, player, model, screenState.playback.panelOpacity) {
             perform(PlayerCommand.CloseTracks)
         }
@@ -587,7 +635,12 @@ import kotlinx.coroutines.flow.first
                 speedRequest = value
                 if (PlaybackSpeed.apply(player, media.mode, value, opened.tunneling)) perform(PlayerCommand.CloseSpeed)
                 else speedRequest = null
-            }, dismiss = { perform(PlayerKeyRouter.back(keys())) }, key = ::onKey)
+            }, dismiss = { perform(PlayerKeyRouter.back(keys())) }, key = ::onKey,
+            resizeMode = resizeMode, chooseResize = { resizeMode = it },
+            subtitleStyle = screenState.playback.subtitle,
+            chooseSubtitleSource = { src -> model.playback { it.copy(subtitle = it.subtitle.copy(source = src)) } },
+            chooseSubtitleSize = { sz -> model.playback { it.copy(subtitle = it.subtitle.copy(source = dev.iptvplayer.tv.data.SubtitleSource.APP, size = sz)) } },
+            streamInfo = streamSummary(tracks))
         endState?.let { end -> EpisodeEndDialog(end,
             play = { episodeEnd.playNow() == NextResult.NEEDS_PIN },
             stay = { perform(PlayerCommand.CloseEndCard) },
@@ -724,4 +777,49 @@ private fun trackLabel(format: Format, number: Int, type: Int): String {
     val subtitleLabel = subtitle?.let { languageName(it.language) ?: stringResource(R.string.tracks_subtitles) }
         ?: stringResource(R.string.player_subtitles_off)
     return "$audioLabel · $subtitleLabel"
+}
+
+@Composable @ReadOnlyComposable
+private fun streamSummary(tracks: Tracks): String? {
+    fun selectedFormat(type: Int): Format? = tracks.groups.filter { it.type == type }.firstNotNullOfOrNull { group ->
+        (0 until group.length).firstOrNull { group.isTrackSelected(it) }?.let { group.getTrackFormat(it) }
+    }
+    val video = selectedFormat(C.TRACK_TYPE_VIDEO)
+    val audio = selectedFormat(C.TRACK_TYPE_AUDIO)
+    val mono = stringResource(R.string.tracks_mono)
+    val stereo = stringResource(R.string.tracks_stereo)
+    val channelFormat = audio?.channelCount?.takeIf { it > 0 }?.let { count ->
+        when (count) {
+            1 -> mono; 2 -> stereo; 6 -> "5.1"; 8 -> "7.1"
+            else -> pluralStringResource(R.plurals.tracks_channels, count, count.toString())
+        }
+    }
+    val parts = buildList {
+        if (video != null) {
+            if (video.width > 0 && video.height > 0) add("${video.width}×${video.height}")
+            if (video.frameRate > 0f) add("${kotlin.math.round(video.frameRate).toInt()} fps")
+            video.sampleMimeType?.substringAfter('/')?.lowercase()?.let { sub ->
+                add(when (sub) {
+                    "avc" -> "H.264"
+                    "hevc" -> "HEVC"
+                    "av01" -> "AV1"
+                    "x-vnd.on2.vp9" -> "VP9"
+                    else -> sub.uppercase()
+                })
+            }
+        }
+        if (audio != null) {
+            audio.sampleMimeType?.substringAfter('/')?.lowercase()?.let { sub ->
+                add(when (sub) {
+                    "mp4a-latm" -> "AAC"
+                    "ac3" -> "AC-3"
+                    "eac3", "eac3-joc" -> "E-AC-3"
+                    "opus" -> "OPUS"
+                    else -> sub.uppercase()
+                })
+            }
+            channelFormat?.let(::add)
+        }
+    }
+    return parts.takeIf { it.isNotEmpty() }?.joinToString(" · ")
 }

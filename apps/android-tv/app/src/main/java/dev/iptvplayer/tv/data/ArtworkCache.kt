@@ -174,36 +174,45 @@ internal class ArtworkCache(private val context: Context) : Interceptor {
     }
 
     /** Bounded, incremental pruning. References survive while bytes, memory or an in-flight job exist. */
-    internal suspend fun pruneIndex(): Int = withContext(Dispatchers.IO) { gate.withLock {
-        val db = database()
-        val rows = db.rawQuery("SELECT rowid, cache_key FROM owners WHERE rowid > ? ORDER BY rowid LIMIT 64",
-            arrayOf(sweepAfter.toString())).use { cursor -> buildList {
-                while (cursor.moveToNext()) add(cursor.getLong(0) to cursor.getString(1))
-            } }
-        sweepAfter = rows.lastOrNull()?.first ?: 0L
-        val protected = running.values.mapTo(HashSet()) { it.key }
-        memory.keys.forEach { protected.add(it.key.substringAfterLast(':')) }
-        val obsolete = rows.map { it.second }.distinct().filter { key ->
-            if (key in protected) false else {
+    internal suspend fun pruneIndex(): Int = withContext(Dispatchers.IO) {
+        val (rowCount, candidates) = gate.withLock {
+            val db = database()
+            val rows = db.rawQuery("SELECT rowid, cache_key FROM owners WHERE rowid > ? ORDER BY rowid LIMIT 64",
+                arrayOf(sweepAfter.toString())).use { cursor -> buildList {
+                    while (cursor.moveToNext()) add(cursor.getLong(0) to cursor.getString(1))
+                } }
+            sweepAfter = rows.lastOrNull()?.first ?: 0L
+            val protected = running.values.mapTo(HashSet()) { it.key }
+            memory.keys.forEach { protected.add(it.key.substringAfterLast(':')) }
+            val recorded = rows.map { it.second }.distinct().filter { it !in protected }.associateWith { key ->
                 rememberFiles(db, key)
-                val paths = db.rawQuery("SELECT metadata, data FROM artwork_files WHERE cache_key = ?", arrayOf(key))
+                db.rawQuery("SELECT metadata, data FROM artwork_files WHERE cache_key = ?", arrayOf(key))
                     .use { if (it.moveToFirst()) it.getString(0) to it.getString(1) else null }
-                // Checking recorded paths does not open snapshots and promote cold images in Coil's LRU.
-                paths == null || !disk.fileSystem.exists(disk.directory / paths.first) || !disk.fileSystem.exists(disk.directory / paths.second)
+            }
+            rows.size to recorded
+        }
+        // Checking recorded paths outside the lock avoids blocking active UI requests during disk stat() calls.
+        val missing = candidates.filterValues { paths ->
+            paths == null || !disk.fileSystem.exists(disk.directory / paths.first) || !disk.fileSystem.exists(disk.directory / paths.second)
+        }.keys
+        if (missing.isNotEmpty()) gate.withLock {
+            val db = database()
+            val protected = running.values.mapTo(HashSet()) { it.key }
+            memory.keys.forEach { protected.add(it.key.substringAfterLast(':')) }
+            val obsolete = missing.filter { it !in protected }
+            if (obsolete.isNotEmpty()) {
+                db.beginTransaction()
+                try {
+                    obsolete.forEach { key ->
+                        db.delete("owners", "cache_key = ?", arrayOf(key))
+                        db.delete("artwork_files", "cache_key = ?", arrayOf(key))
+                    }
+                    db.setTransactionSuccessful()
+                } finally { db.endTransaction() }
             }
         }
-        if (obsolete.isNotEmpty()) {
-            db.beginTransaction()
-            try {
-                obsolete.forEach { key ->
-                    db.delete("owners", "cache_key = ?", arrayOf(key))
-                    db.delete("artwork_files", "cache_key = ?", arrayOf(key))
-                }
-                db.setTransactionSuccessful()
-            } finally { db.endTransaction() }
-        }
-        rows.size
-    } }
+        rowCount
+    }
 
     /** Used when the owner of an isolated loader is destroyed; callers must not reuse it. */
     suspend fun close() = withContext(Dispatchers.IO) { lifecycle.withLock {

@@ -58,9 +58,10 @@ import kotlinx.coroutines.flow.first
         override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float =
             if (channelsActive) parentVisibility.calculateScrollDistance(offset, size, containerSize) else 0f
     } }
-    val index = remember(s.allCatalog, s.catalog, s.favoriteIds, state.scope) { model.liveIndex(state.scope) }
+    val activeScope = remember(state.scope, s.sourceFilterId) { model.liveScope(state.scope) }
+    val index = remember(s.allCatalog, s.catalog, s.favoriteIds, activeScope) { model.liveIndex(activeScope) }
     val channels = index.channels
-    val choices = remember(s.allCatalog, s.favoriteIds, state.scope.sourceId) { model.liveChoices(state.scope.sourceId) }
+    val choices = remember(s.allCatalog, s.favoriteIds, activeScope.sourceId) { model.liveChoices(activeScope.sourceId) }
     val sources = remember(s.sources) { s.sources.associate { it.id to it.name } }
     val attached = remember { mutableStateMapOf<String, FocusRequester>() }
     val closeFocus = remember { FocusRequester() }
@@ -80,7 +81,7 @@ import kotlinx.coroutines.flow.first
     val requested = remember(state.session, s.guideRevision, s.guideZoneId, s.locks) { HashSet<String>() }
     val title = stringResource(R.string.panel_channels_title)
     val programmesLabel = stringResource(R.string.panel_programmes)
-    val scopeTitle = scopeName(state.scope)
+    val scopeTitle = scopeName(activeScope)
     fun returnRow(): FocusRequester? = if (state.column != ChannelColumn.CHANNELS) panelFocus else attached[state.focusedId] ?: if (channels.isEmpty()) allFocus else closeFocus
     SideEffect { state.returnFocus = ::returnRow }
     DisposableEffect(state) { onDispose { state.returnFocus = { null } } }
@@ -125,7 +126,7 @@ import kotlinx.coroutines.flow.first
     LaunchedEffect(state.number) {
         val number = state.number?.second ?: return@LaunchedEffect
         val entry = index.numbered.getOrNull(number - 1) ?: return@LaunchedEffect
-        if (channels.none { it.id == entry.id }) state.scope = ChannelScope()
+        if (channels.none { it.id == entry.id }) state.scope = ChannelScope(sourceId = activeScope.sourceId?.takeIf { it == entry.sourceId } ?: s.sourceFilterId)
         state.focusedId = entry.id; state.focusedIndex = 0; state.channels()
     }
     // Only visible rows (+3) and the playing channel are read. A scroll cancels the previous debounce/query.
@@ -165,7 +166,7 @@ import kotlinx.coroutines.flow.first
         .then(if (active) Modifier else Modifier.clearAndSetSemantics { })
         .semantics { paneTitle = title; isTraversalGroup = true }.testTag("player-channel-drawer")
         .focusRequester(panelFocus).focusProperties { onExit = { if (active) cancelFocusChange() } }.focusGroup()) {
-        if (state.column == ChannelColumn.CATEGORIES) ScopeColumn(choices, state.scope,
+        if (state.column == ChannelColumn.CATEGORIES) ScopeColumn(choices, activeScope,
             if (single) channelWidth else categoryWidth, active, s.locks, ::category, state::channels)
         if (!single || state.column == ChannelColumn.CHANNELS) Column(Modifier.width(channelWidth).fillMaxHeight()
             .padding(horizontal = 24.dp, vertical = 22.dp)) {
@@ -181,11 +182,11 @@ import kotlinx.coroutines.flow.first
                     .focusProperties { canFocus = channelsActive }.testTag("player-channels-close"), compact = true) { if (active) close() }
             }
             if (channels.isEmpty()) {
-                Text(stringResource(if (state.scope.favoritesOnly) R.string.panel_empty_favorites else R.string.player_channels_empty),
+                Text(stringResource(if (activeScope.favoritesOnly) R.string.panel_empty_favorites else R.string.player_channels_empty),
                     color = Ink.Muted, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 21.sp)
                 Spacer(Modifier.height(16.dp))
                 Action(stringResource(R.string.library_all_channels), Modifier.focusRequester(allFocus)
-                    .focusProperties { canFocus = channelsActive }.testTag("player-channels-all")) { category(ChannelScope()) }
+                    .focusProperties { canFocus = channelsActive }.testTag("player-channels-all")) { category(ChannelScope(sourceId = activeScope.sourceId)) }
             } else CompositionLocalProvider(LocalBringIntoViewSpec provides channelVisibility) {
             LazyColumn(Modifier.fillMaxWidth().weight(1f).testTag("player-channel-list"), state = list,
                 contentPadding = PaddingValues(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -227,7 +228,7 @@ import kotlinx.coroutines.flow.first
                         .semantics { contentDescription = "$number, $name, $second"; stateDescription = description
                             customActions = listOf(CustomAccessibilityAction(label = programmesLabel) { state.focusedId = entry.id; programmes(); true }) }
                         .testTag("player-channel:${entry.id}"),
-                        click = { pick(entry.id, state.scope) { returnRow() } },
+                        click = { pick(entry.id, activeScope) { returnRow() } },
                         longClick = { input(); quickReturn = entry.id to i; quick = entry; afterQuick = {} }) {
                         Text(number, Modifier.widthIn(min = (if (density.fontScale >= 1.3f) 42 else 30).dp),
                             color = LocalContentColor.current.copy(alpha = .7f), fontFamily = Roboto, fontSize = 14.sp, maxLines = 1)
@@ -255,13 +256,13 @@ import kotlinx.coroutines.flow.first
         }
         if (state.column == ChannelColumn.PROGRAMMES) model.liveEntry(miniId)?.let { entry ->
             MiniGuide(entry, if (single) channelWidth else 320.dp, s, model, active, anchor, playingId,
-                pick = { returnFocus -> pick(entry.id, state.scope, returnFocus) }, back = state::channels, close = close)
+                pick = { returnFocus -> pick(entry.id, activeScope, returnFocus) }, back = state::channels, close = close)
         }
     }
     quick?.let { entry ->
         fun dismiss() { quick = null }
         QuickActions(entry, quickActions(entry, entry.id in s.favoriteIds,
-            toggleFavorite = { model.toggleFavorite(entry) }, open = { pick(entry.id, state.scope) { returnRow() } }, close = ::dismiss,
+            toggleFavorite = { model.toggleFavorite(entry) }, open = { pick(entry.id, activeScope) { returnRow() } }, close = ::dismiss,
             locked = entry.id.takeIf { s.parental.status == ParentalStatus.ON }?.let { it in s.locks.contents },
             toggleLock = { lock -> if (model.setTitleLock(entry, lock)) openPin { returnRow() } }) +
             QuickAction("programmes", R.string.panel_programmes, "guide") { afterQuick = { programmes() }; dismiss() }, ::dismiss)
@@ -300,6 +301,7 @@ import kotlinx.coroutines.flow.first
                 val lockLabel = stringResource(R.string.lock_state)
                 PanelItem(choice.scope == selected, active,
                     (if (i == selectedIndex) Modifier.focusRequester(initial) else Modifier)
+                        .focusProperties { up = if (i == 0) FocusRequester.Cancel else FocusRequester.Default; down = if (i == choices.lastIndex) FocusRequester.Cancel else FocusRequester.Default; left = FocusRequester.Cancel }
                         .onPreviewKeyEvent { if (it.type == KeyEventType.KeyDown && it.key == Key.DirectionRight) { back(); true } else false }
                         .semantics { contentDescription = "$label, $count"; if (locked) stateDescription = lockLabel }
                         .testTag("channel-scope:${if (choice.scope.favoritesOnly) "@favorites" else choice.scope.category ?: "@all"}"),
@@ -361,6 +363,7 @@ import kotlinx.coroutines.flow.first
                 val current = slice?.now(now) == programme
                 val times = programmeTime(programme, zone)
                 PanelItem(current, active, Modifier.focusRequester(requester)
+                    .focusProperties { up = if (i == 0) FocusRequester.Cancel else FocusRequester.Default; down = if (i == programmes.lastIndex) FocusRequester.Cancel else FocusRequester.Default; right = FocusRequester.Cancel }
                     .semantics { contentDescription = "$times, ${programme.title}" }
                     .testTag("channel-programme:$i"), click = {
                         if (current) {

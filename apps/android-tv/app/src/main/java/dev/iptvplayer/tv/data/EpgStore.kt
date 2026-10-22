@@ -69,7 +69,22 @@ class EpgStore(context: Context) {
     }
 
     fun queryMany(plan: EpgPlan, entries: List<MediaEntry>, window: GuideWindow): Map<String, GuideSlice> =
-        read(plan) { db -> entries.associate { it.id to query(db, plan, it, window, 512) } }.orEmpty()
+        read(plan) { db ->
+            val matchCache = HashMap<String, EpgMatch>()
+            val sliceCache = HashMap<Pair<EpgChannelRef, EpgMatchKind>, GuideSlice>()
+            entries.associate { entry ->
+                val slice = if (entry.sourceId.isNotEmpty() && stableId(entry.sourceId) != plan.owner) {
+                    GuideSlice(EpgMatch(EpgMatchKind.NONE), emptyList())
+                } else {
+                    val matchKey = "${entry.kind}:${entry.epgId.trim()}:${epgNameKey(entry.epgName)}:${epgNameKey(entry.title)}"
+                    val m = matchCache.getOrPut(matchKey) { match(db, entry) }
+                    val ref = m.channel
+                    if (ref == null) GuideSlice(m, emptyList())
+                    else sliceCache.getOrPut(ref to m.kind) { query(db, plan, entry, window, 512) }
+                }
+                entry.id to slice
+            }
+        }.orEmpty()
 
     private fun query(db: SQLiteDatabase, plan: EpgPlan, entry: MediaEntry, window: GuideWindow, limit: Int): GuideSlice {
         require(limit in 1..2_000)

@@ -310,8 +310,9 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                     Modifier.then(if (target == "hero") Modifier.focusRequester(focus) else Modifier)
                     .focusRequester(heroFocus)
                     .onFocusChanged { if (it.hasFocus) { model.homeFocus("hero"); lastFocus.requester = heroFocus } },
-                    detail = model::heroDetail, ensure = model::ensureHeroDetail, starting = s.heroStarting, viewportHeight = viewportHeight,
-                    watch = { if (model.watch(it)) openPin { heroFocus } })
+                    detail = model::heroDetail, ensure = model::ensureHeroDetail, starting = s.heroStarting, focusedId = s.focusedId, viewportHeight = viewportHeight,
+                    watch = { if (model.open(it)) openPin { heroFocus } },
+                    longClick = { overlay(AppOverlay.Quick(it)) { heroFocus } })
                 else Column(Modifier.padding(start = TvLayout.RailWidth).padding(horizontal = TvLayout.Gutter, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.home_kicker), color = Ink.Mint, fontFamily = Roboto, fontSize = 12.sp, letterSpacing = 2.sp)
                     Heading(stringResource(R.string.home_prompt))
@@ -400,8 +401,8 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
  * reaches the menu). The action is one composable across slides, so focus never leaves it;
  * [actionModifier] is İzle's, the hero's focus target.
  */
-@Composable private fun Hero(slides: List<MediaEntry>, newest: Boolean, reducedMotion: Boolean, actionModifier: Modifier,
-    detail: (MediaEntry) -> MediaEntry, ensure: (MediaEntry) -> Unit, starting: String?, viewportHeight: Dp, watch: (MediaEntry) -> Unit) {
+@Composable private fun Hero(slides: List<MediaEntry>, newest: Boolean, reducedMotion: Boolean, modifier: Modifier = Modifier,
+    detail: (MediaEntry) -> MediaEntry, ensure: (MediaEntry) -> Unit, starting: String?, focusedId: String?, viewportHeight: Dp, watch: (MediaEntry) -> Unit, longClick: (MediaEntry) -> Unit = {}) {
     val largeText = LocalDensity.current.fontScale >= 1.5f
     val motion = !reducedMotion && android.animation.ValueAnimator.areAnimatorsEnabled()
     val many = slides.size > 1
@@ -411,7 +412,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
     var actionFocused by remember { mutableStateOf(false) }
     var turnedAt by remember { mutableLongStateOf(0L) }
     var turnedFrom by remember { mutableStateOf<MediaEntry?>(null) }
-    var index by rememberSaveable(slides) { mutableIntStateOf(0) }
+    var index by rememberSaveable(slides) { mutableIntStateOf(slides.indexOfFirst { it.id == focusedId }.coerceAtLeast(0)) }
     // A restored index can outlive a shorter slide list; every use goes through the clamped one.
     val current = index.coerceIn(0, slides.lastIndex)
     val entry = detail(slides[current])
@@ -474,7 +475,13 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
             Row(Modifier.padding(top = 28.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 // Left on İzle shows the previous slide; on the first it goes on to the menu. Both keys read the index
                 // itself, not this frame's copy, so two presses before the next frame turn two slides.
-                Action(stringResource(if (starting == slides[current].id) R.string.hero_opening else R.string.action_watch), actionModifier.onPreviewKeyEvent { event ->
+                val currentSlide = slides[current]
+                val actionLabel = when {
+                    starting == currentSlide.id -> R.string.hero_opening
+                    currentSlide.kind == MediaKind.LIVE -> R.string.action_watch
+                    else -> R.string.action_explore
+                }
+                Action(stringResource(actionLabel), modifier.onPreviewKeyEvent { event ->
                     val now = index.coerceIn(0, slides.lastIndex)
                     if (event.type == KeyEventType.KeyDown) when {
                         event.key == Key.DirectionRight -> { if (many) index = (now + 1) % slides.size; true }
@@ -483,7 +490,7 @@ private data class HomeRow(val key: String, @StringRes val title: Int, val entri
                     } else false
                 }.focusProperties { right = FocusRequester.Cancel }.onFocusChanged { actionFocused = it.isFocused }
                     .semantics { if (many) stateDescription = place }
-                    .testTag("hero-watch"), primary = true, icon = "play") { watch(shown()) }
+                    .testTag("hero-watch"), primary = true, icon = if (currentSlide.kind == MediaKind.LIVE) "play" else null, onLongClick = { longClick(shown()) }) { watch(shown()) }
                 if (many) Spacer(Modifier.width(8.dp))
                 if (many) SlideDots(slides.size, current)
             }

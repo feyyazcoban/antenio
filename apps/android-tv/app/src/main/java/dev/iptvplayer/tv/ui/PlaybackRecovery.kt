@@ -146,6 +146,7 @@ internal class PlaybackRecovery(
     override fun onPlaybackStateChanged(playbackState: Int) {
         if (closed || !foreground) return
         when (playbackState) {
+            Player.STATE_IDLE -> Unit
             Player.STATE_BUFFERING -> {
                 if (deadlineJob?.isActive != true) {
                     val remaining = incidentAt?.let { RECOVERY_LIMIT_MS - (elapsedMs() - it) } ?: OPEN_LIMIT_MS
