@@ -231,17 +231,17 @@ private data class SearchRow(val key: String, @StringRes val title: Int, val ent
     val input = rememberFieldInput(value, onChange)
     val state = input.state
     val shape = RoundedCornerShape(50)
-    // OK pressed here, or arrived with the keyboard open: a real input connection (fieldKeyboardOptions).
-    var typing by remember { mutableStateOf(false) }
+    // A real input connection once OK is pressed or a keyboard opens over the field (rememberFieldTyping).
+    val typing = rememberFieldTyping(focused, keyboard)
     // A field removed while it has focus (leaving Ara) counts as left.
     DisposableEffect(keyboard) { onDispose { if (focused) keyboard.focusChanged(false, true) } }
     BasicTextField(state,
         // Up/down leave this single-line field; OK opens the keyboard, focus alone does not. The TV IME consumes its own remote events.
-        modifier.onPreviewKeyEvent { event -> fieldKey(event, focusManager, keyboard) { typing = true } }
-            .onFocusChanged { keyboard.focusChanged(it.isFocused, focused); focused = it.isFocused; typing = it.isFocused && (typing || keyboard.isOpen) }
+        modifier.onPreviewKeyEvent { event -> fieldKey(event, focusManager, keyboard) { typing.ok(keyboard) } }
+            .onFocusChanged { keyboard.focusChanged(it.isFocused, focused); focused = it.isFocused }
             .testTag("search-field"),
         textStyle = TextStyle(color = Ink.Text, fontSize = 16.sp, fontFamily = Roboto),
-        keyboardOptions = fieldKeyboardOptions(KeyboardType.Text, ImeAction.Search, typing),
+        keyboardOptions = fieldKeyboardOptions(KeyboardType.Text, ImeAction.Search, typing.value),
         inputTransformation = input.reporter,
         onKeyboardAction = KeyboardActionHandler { keyboard.close(); onDone() },
         lineLimits = TextFieldLineLimits.SingleLine,

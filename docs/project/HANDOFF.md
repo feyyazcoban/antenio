@@ -1,5 +1,13 @@
 # Son devir notu
 
+## Claude · get.php → Xtream ve yapıştırma /.89–.90 · 23 Ekim 2026
+
+`SourceConfig.asXtreamAccount()` (Models.kt) get.php bağlantısından sunucu, kullanıcı adı ve şifreyi çıkarır; `connectDraft` bunu önce dener, `connect(requested, fallback)` Xtream `SourceFailure` verirse bağlantıyı M3U olarak yükler. Test: `XtreamLinkTest`. Klavye: `rememberFieldTyping(focused, keyboard)` (Theme.kt) odaktaki alanda OK ya da açılan herhangi bir klavye (`FieldKeyboard.isOpen`, 150 ms yoklama) ile `showKeyboardOnFocus`'u açar; `fieldKey`'in OK'i artık bu durumu başlatır, klavye iki kare sonra istenir. `EntryField` ve `SearchField` kullanır. Telefon klavye düğmesiyle açılan klavyenin TV'de pencere kenar boşluğu bildirip bildirmediği doğrulanmadı; bildirmezse yoklama tetiklenmez.
+
+Ölçüm için sağlayıcı bilgileri kullanıcı tarafından sohbete yapıştırıldı; bilgisayarda geçici dosyada tutuldu ve ölçümden sonra silindi, depoya girmedi. Sağlayıcı aynı anda tek bağlantıya izin veriyor (max_connections 1).
+
+Tam sonraki adım: kullanıcı 0.14.90'da sunucu alanında telefon klavyesiyle yapıştırmayı denesin; Xtream yüklemesinde kategori ve vitrin görsellerinin durumunu bildirsin. Sonra tuval bölümleri (APP_CANVAS).
+
 ## Claude · Liste beklemesi ve telefondan yapıştırma /.87–.88 · 23 Ekim 2026
 
 Zaman aşımı: `SourceRepository` liste indirmelerinde `patientClient` kullanır (okuma 120 sn, çağrı 10 dk; hesap ve ayrıntı çağrıları eski sürelerde). `networkFailure` Android'in "failed to connect … after" mesajını `SERVER_CONNECT_TIMEOUT`, kalan zaman aşımlarını `SERVER_TIMEOUT` yapar; gövde okunurken `InterruptedIOException` da `SERVER_TIMEOUT`. Testler: `NetworkFailureTest`, MockWebServer ile `PatientListTest`.

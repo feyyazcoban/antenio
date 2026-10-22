@@ -43,6 +43,19 @@ data class SourceConfig(
             username = username.trim(), epgUrl = guide?.toString().orEmpty())
     }
 
+    /**
+     * This M3U link as the Xtream account it exports, when it is a panel's `get.php` link carrying the username and the
+     * password; null otherwise. The id, name and guide stay.
+     */
+    fun asXtreamAccount(): SourceConfig? {
+        if (type != SourceType.M3U) return null
+        val url = address.trim().toHttpUrlOrNull() ?: return null
+        if (!url.pathSegments.lastOrNull().equals("get.php", ignoreCase = true)) return null
+        val user = url.queryParameter("username")?.takeIf { it.isNotBlank() } ?: return null
+        val secret = url.queryParameter("password")?.takeIf { it.isNotEmpty() } ?: return null
+        return copy(type = SourceType.XTREAM, address = xtreamBase(url).toString(), username = user, password = secret)
+    }
+
     fun apiUrl(action: String? = null, extra: Pair<String, String>? = null): HttpUrl {
         val base = xtreamBase(address.toHttpUrlOrNull() ?: throw SourceFailure(FailureReason.SOURCE_ADDRESS_INVALID))
         return base.newBuilder().addPathSegment("player_api.php")

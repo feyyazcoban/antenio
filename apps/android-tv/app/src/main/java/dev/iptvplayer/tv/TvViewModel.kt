@@ -544,16 +544,20 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 username = draft.username, password = draft.password, epgUrl = draft.epgUrl).validated().let { value ->
                 state.value.editingSourceId?.let { value.copy(id = it) } ?: value
             }
-            if (state.value.sources.any { it.id != source.id && sameConnection(it, source) })
+            // An Xtream panel's M3U export (…/get.php?username=…&password=…) loads as its account: separate sections in
+            // seconds instead of one file the panel builds for minutes, and the panel's own categories. The link itself
+            // stays the fallback for a panel that answers only the export.
+            val account = source.asXtreamAccount()?.validated()
+            if (state.value.sources.any { it.id != source.id && (sameConnection(it, source) || account != null && sameConnection(it, account)) })
                 throw SourceFailure(FailureReason.CONNECTION_ALREADY_ADDED)
-            connect(source)
+            connect(account ?: source, fallback = source.takeIf { account != null })
         } catch (e: SourceFailure) { mutable.update { it.copy(error = e.text) } }
     }
 
     private fun sameConnection(a: SourceConfig, b: SourceConfig) =
         a.type == b.type && a.address == b.address && a.username == b.username
 
-    private fun connect(source: SourceConfig) {
+    private fun connect(requested: SourceConfig, fallback: SourceConfig? = null) {
         val token = ++generation
         loadJob?.cancel(); detailJob?.cancel()
         mutable.update { it.copy(route = Route.LOADING, sourceTask = SourceTask.IMPORTING,
@@ -561,9 +565,9 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             sourceStatus = it.sourceStatus.mapValues { (_, status) -> status.copy(refreshing = false) }) }
         loadJob = viewModelScope.launch {
             try {
-                val catalog = repository.load(source) { message ->
-                    if (generation == token) mutable.update { it.copy(progressLabel = message) }
-                }
+                val progress = { message: UiText -> if (generation == token) mutable.update { it.copy(progressLabel = message) } }
+                val (source, catalog) = try { requested to repository.load(requested, progress) }
+                    catch (e: SourceFailure) { val link = fallback ?: throw e; link to repository.load(link, progress) }
                 if (generation != token) return@launch
                 if (snapshots[source.id] != null && catalog.warnings.isNotEmpty())
                     throw SourceFailure(FailureReason.PARTIAL_IMPORT)
