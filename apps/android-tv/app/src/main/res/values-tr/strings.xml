@@ -881,7 +881,7 @@
     <string name="panel_video_accessible">Canlı yayın, %1$s %2$s. OK kanal listesini açar.</string>
     <string name="panel_controls_action">Oynatıcı kontrolleri</string>
     <string name="settings_about_privacy">Gizlilik ve veri güvenliği</string>
-    <string name="settings_about_privacy_note">NEXTV analitik, telemetri veya reklam kimliği toplamaz. Kaynak hesapları, kataloglar, favoriler, izleme geçmişi ve ebeveyn kilitleri yalnız bu cihazda şifreli saklanır (AES-256-GCM, bulut yedeklemesine dahil edilmez) ve hiçbir üçüncü tarafa gönderilmez. Ağ istekleri yalnız eklediğin IPTV ve rehber adreslerine yapılır.</string>
+    <string name="settings_about_privacy_note">NEXTV analitik, telemetri ya da reklam kimliği toplamaz. Kaynak hesapların, katalog önbelleğin, PIN\'in ve kilit ayarların bu cihazda Android Keystore anahtarıyla şifreli (AES-GCM) saklanır. Favoriler, izleme geçmişi ve kaldığın yerler uygulamanın yalnız kendisinin okuyabildiği alanda şifresiz durur. Hiçbiri bulut yedeğine ya da cihaz aktarımına girmez ve üçüncü taraflara gönderilmez. Uygulama yalnız eklediğin kaynak ve rehber adreslerine ve bunların listelediği yayın ve görsel adreslerine bağlanır; Telefonla ekle açıkken ev ağında bir kurulum sayfası sunar.</string>
     <string name="settings_about_licenses">Açık kaynak lisansları</string>
     <string name="settings_about_licenses_note">Roboto yazı tipi SIL Open Font License 1.1 kapsamındadır. AndroidX, Jetpack Compose, Media3 ExoPlayer, OkHttp, Coil ve Material Symbols simgeleri Apache License 2.0 kapsamındadır.</string>
     <string name="settings_start_last_channel">Açılışta son kanalı aç</string>

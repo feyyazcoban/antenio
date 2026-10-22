@@ -3,6 +3,10 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+// The upload key, from gradle properties or the environment; never in the repository.
+fun releaseSetting(name: String) = providers.gradleProperty(name).orElse(providers.environmentVariable(name)).orNull
+val uploadStore = releaseSetting("NEXTV_RELEASE_STORE_FILE")
+
 android {
     namespace = "dev.iptvplayer.tv"
     compileSdk = 36
@@ -10,8 +14,8 @@ android {
         applicationId = "dev.iptvplayer.tv.pilot"
         minSdk = 26
         targetSdk = 36
-        versionCode = 104
-        versionName = "0.14.90-design-preview"
+        versionCode = 105
+        versionName = "0.14.91-design-preview"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }
@@ -21,13 +25,12 @@ android {
     // Settings picks a language the TV may not speak, so a Play bundle keeps every language in the base APK.
     bundle { language { enableSplit = false } }
     signingConfigs {
-        val storePath = providers.gradleProperty("NEXTV_RELEASE_STORE_FILE").orElse(providers.environmentVariable("NEXTV_RELEASE_STORE_FILE")).orNull
-        if (!storePath.isNullOrBlank()) {
+        if (!uploadStore.isNullOrBlank()) {
             create("release") {
-                storeFile = file(storePath)
-                storePassword = providers.gradleProperty("NEXTV_RELEASE_STORE_PASSWORD").orElse(providers.environmentVariable("NEXTV_RELEASE_STORE_PASSWORD")).orNull
-                keyAlias = providers.gradleProperty("NEXTV_RELEASE_KEY_ALIAS").orElse(providers.environmentVariable("NEXTV_RELEASE_KEY_ALIAS")).orNull
-                keyPassword = providers.gradleProperty("NEXTV_RELEASE_KEY_PASSWORD").orElse(providers.environmentVariable("NEXTV_RELEASE_KEY_PASSWORD")).orNull
+                storeFile = file(uploadStore)
+                storePassword = releaseSetting("NEXTV_RELEASE_STORE_PASSWORD")
+                keyAlias = releaseSetting("NEXTV_RELEASE_KEY_ALIAS")
+                keyPassword = releaseSetting("NEXTV_RELEASE_KEY_PASSWORD")
             }
         }
     }
@@ -40,7 +43,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Design previews update earlier debug-signed installs in place; the same key keeps user data.
+            // Design previews update earlier debug-signed installs in place; the same key keeps user data. Only they may
+            // fall back to the debug key: a Play bundle or a store version stops without the upload key (below).
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
@@ -55,6 +59,18 @@ android {
 }
 
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
+
+// LAUNCH_AUDIT E1: never a debug-signed artifact for the store. bundleRelease (the Play upload, E2) always needs the
+// upload key; assembleRelease needs it too unless the version is a design preview for the test TV.
+val hasUploadKey = !uploadStore.isNullOrBlank()
+val designPreview = android.defaultConfig.versionName.orEmpty().endsWith("-design-preview")
+tasks.matching { it.name == "bundleRelease" || (it.name == "assembleRelease" && !designPreview) }.configureEach {
+    val signed = hasUploadKey
+    doFirst {
+        if (!signed) throw GradleException("$name needs the upload key: set NEXTV_RELEASE_STORE_FILE, " +
+            "NEXTV_RELEASE_STORE_PASSWORD, NEXTV_RELEASE_KEY_ALIAS and NEXTV_RELEASE_KEY_PASSWORD (WORKFLOW).")
+    }
+}
 
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2026.05.01"))

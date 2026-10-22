@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Yayına hazırlık: E1, E2, E4 /.91 · 23 Ekim 2026
+
+Kullanıcı: "Bu bitince yayına hazırlık için yapacaklarımızdan devam edelim". Karar gerektirmeyen kod maddeleri yapıldı: `app/build.gradle.kts` (yükleme anahtarı ayarları `releaseSetting`, `bundleRelease` ve önizleme olmayan `assembleRelease` için anahtar zorunluluğu), `settings_about_privacy_note` (TR/EN), `SetupFlow.TypeStep` adım sayısı. WORKFLOW'a `bundleRelease` ve anahtar değişkenleri yazıldı; LAUNCH_AUDIT E1/E2/E4 durumları güncellendi.
+
+Tam sonraki adım: kullanıcı kararı bekleyen yayın maddeleri: paket adı (E3) ve ad/marka (E8, BKL-045), abonelik ayrıntıları (E9, SUBSCRIPTION §5), gizlilik politikası URL'si ve koşullar (E4, BKL-043), yükleme anahtarı ve Play hesabı (E1, E7), mağaza görselleri (E6). Kodda sırada: açık kaynak lisans sayfası (R2), HTTP kaynak uyarısı (R3), sürüm adındaki `-design-preview` ekinin User-Agent'tan çıkması (R5).
+
 ## Claude · Tuval bölümleri dolduruldu · 23 Ekim 2026
 
 Kullanıcı: "Şimdi başla ama işin bitince tv yi kapat ve sesi de kapalı olarak çalış". Yapılan: `cmd media_session volume --stream 3 --set 0`, `KEYCODE_WAKEUP`, uygulamada D-pad ile gezinip `screencap`; bitince `KEYCODE_SLEEP` ve ses 15'e geri (sessiz durumu korundu). Görüntüler JPEG olarak tuvalin varlık deposuna yüklendi, depoya konmadı. Arama alanında 0.14.90 düzeltmesi doğrulandı: OK sonrası StartInput inputType 0x1 ve `input text` ile arama sonuçları geldi.

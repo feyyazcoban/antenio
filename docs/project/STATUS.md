@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.14.91 · Yayına hazırlık: imza koruması, gizlilik notu, adım sayısı · 23 Ekim 2026
+
+LAUNCH_AUDIT E1/E2: debug anahtarına düşme yalnız `-design-preview` sürümlerine açık; `bundleRelease` ve önizleme olmayan `assembleRelease` yükleme anahtarı olmadan durur (anahtarsız `bundleRelease` denendi, beklenen mesajla durdu). E4: Hakkında'daki gizlilik notu kodla eşitlendi (AES-256 iddiası kalktı; favori, geçmiş ve kalınan yerlerin şifresiz olduğu, Telefonla ekle sayfası ve listelenen yayın/görsel adresleri yazıldı). Kurulumda tür ekranının adım sayısı odaktaki seçeneğe göre 3 ya da 5. 386 JVM testi (1 atlandı, 0 hata). TV uykudayken 105/0.14.91 kuruldu, SHA eşit; TV'de görsel doğrulama yapılmadı.
+
 ## Uygulama ekran tuvali: altı bölüm dolu · 23 Ekim 2026
 
 Kullanıcının izniyle TV gece sessizde (hoparlör 0) uyandırıldı, 24 ekran görüntüsü alındı, TV uykuya alındı ve ses düzeyi eski haline döndü. Tuvalde artık altı bölümde 29 TV görüntüsü var (https://claude.ai/artifact/LvtaBnB1HKd2xWh3cu9MQT). Xtream kaynağıyla ana sayfa vitrini doğru görsellerle doluyor; kullanıcının M3U ile gördüğü kategori ve vitrin sorunu bu yolda görülmedi. Alınmayanlar ve tür ekranındaki "Adım 1 / 5" hatası [APP_CANVAS](../design/APP_CANVAS.md) içinde. Kod değişmedi.

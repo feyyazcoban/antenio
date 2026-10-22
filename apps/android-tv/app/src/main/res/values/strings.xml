@@ -896,7 +896,7 @@
     <string name="panel_video_accessible">Live TV, %1$s %2$s. OK opens the channel list.</string>
     <string name="panel_controls_action">Player controls</string>
     <string name="settings_about_privacy">Privacy and data safety</string>
-    <string name="settings_about_privacy_note">NEXTV collects no analytics, telemetry or advertising identifiers. Source credentials, catalogs, favorites, watch history and parental locks stay encrypted on this device (AES-256-GCM, excluded from cloud backup) and are never sent to any third party. Network requests go only to the IPTV and guide addresses you add.</string>
+    <string name="settings_about_privacy_note">NEXTV collects no analytics, telemetry or advertising identifiers. Your source accounts, catalog cache, PIN and lock settings are stored encrypted on this device with an Android Keystore key (AES-GCM). Favorites, watch history and resume points stay unencrypted in storage only the app can read. None of it goes into cloud backup or device transfer, and none is sent to third parties. The app connects only to the source and guide addresses you add and the stream and image addresses they list; while Add with your phone is open, it serves a setup page on your home network.</string>
     <string name="settings_about_licenses">Open source licenses</string>
     <string name="settings_about_licenses_note">Roboto font is licensed under the SIL Open Font License 1.1. AndroidX, Jetpack Compose, Media3 ExoPlayer, OkHttp, Coil and Material Symbols icons are licensed under the Apache License 2.0.</string>
     <string name="settings_start_last_channel">Start on last watched channel</string>

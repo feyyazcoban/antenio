@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -151,7 +152,7 @@ private data class PhoneLink(val host: String, val port: Int) { val address get(
                         go(SetupStep.ADDRESS)
                     }, cancel = { back() })
                 } ?: LaunchedEffect(Unit) { step = SetupStep.PHONE }
-                SetupStep.TYPE -> TypeStep(s.draft, total) { type ->
+                SetupStep.TYPE -> TypeStep(s.draft) { type ->
                     if (type != s.draft.type) model.draft(s.draft.copy(type = type))
                     go(SetupStep.ADDRESS)
                 }
@@ -251,16 +252,22 @@ private data class PhoneLink(val host: String, val port: Int) { val address get(
     }
 }
 
-/** TV-002: M3U link or Xtream account; the kind already in the draft takes focus once an address was typed. */
-@Composable private fun TypeStep(draft: SourceDraft, total: Int, choose: (SourceType) -> Unit) {
+/**
+ * TV-002: M3U link or Xtream account; the kind already in the draft takes focus once an address was typed. The step
+ * count follows the focused card: the link takes three steps, the account five.
+ */
+@Composable private fun TypeStep(draft: SourceDraft, choose: (SourceType) -> Unit) {
     val first = rememberFirstFocus()
     val xtreamFirst = draft.type == SourceType.XTREAM && draft.address.isNotBlank()
-    StepFrame(1, total, stringResource(R.string.setup_type_title), null) {
+    var xtreamFocused by remember { mutableStateOf(xtreamFirst) }
+    StepFrame(1, if (xtreamFocused) 5 else 3, stringResource(R.string.setup_type_title), null) {
         Row(Modifier.widthIn(max = 860.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             ChoiceCard("guide", stringResource(R.string.setup_m3u), stringResource(R.string.setup_type_m3u_hint),
-                Modifier.weight(1f).then(if (!xtreamFirst) Modifier.focusRequester(first) else Modifier).testTag("setup-m3u")) { choose(SourceType.M3U) }
+                Modifier.weight(1f).then(if (!xtreamFirst) Modifier.focusRequester(first) else Modifier)
+                    .onFocusChanged { if (it.isFocused) xtreamFocused = false }.testTag("setup-m3u")) { choose(SourceType.M3U) }
             ChoiceCard("tv", stringResource(R.string.setup_type_xtream), stringResource(R.string.setup_type_xtream_hint),
-                Modifier.weight(1f).then(if (xtreamFirst) Modifier.focusRequester(first) else Modifier).testTag("setup-xtream")) { choose(SourceType.XTREAM) }
+                Modifier.weight(1f).then(if (xtreamFirst) Modifier.focusRequester(first) else Modifier)
+                    .onFocusChanged { if (it.isFocused) xtreamFocused = true }.testTag("setup-xtream")) { choose(SourceType.XTREAM) }
         }
     }
 }
