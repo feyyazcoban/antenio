@@ -1,5 +1,13 @@
 # Son devir notu
 
+## Claude · TV'ye temiz kurulum /.83 · 22 Ekim 2026
+
+Kullanıcı: "televizyona temiz bir kurulum yap datalar silinsin eklemeyi test edeyim". Önce kurulu sürüm okundu: zaten 97/0.14.83 ve APK hash'i teslim dosyasıyla aynıydı. Ardından `adb uninstall` (veri dahil) ve `adb install` ile aynı APK temiz kuruldu; hash yeniden doğrulandı, firstInstallTime 2026-10-22 21:54:30. `am start` ile açıldı, MainActivity önde. Release paketi debuggable olmadığından veri dizini doğrudan okunamadı; kaldırma işlemi veriyi zaten siler. Kod, sürüm ve belgelerin kalanı değişmedi. 5556/5558 emülatörlerine dokunulmadı.
+
+Not: "Veri silmeden kur" zinciri bu kurulumla bilinçli olarak kesildi; bundan sonraki `install -r` güncellemeleri yeni kurulumun üstüne gelir. Kullanıcının kaynak ekleme testi fiziksel kabul maddesidir.
+
+Tam sonraki adım: kullanıcı TV'de kaynak eklemeyi denesin; sorun olursa içerik türü ve kısa hata metni kaydedilsin (kimlik bilgisi yazılmaz). Belge tarafında bekleyenler: uzak depo adresi (push), SUBSCRIPTION §1 A/B kararı, fiyat, Antenio alan adı ve marka vekili.
+
 ## Claude · D114 ad değişikliği ve aday tarama /.77 · 22 Ekim 2026
 
 Kullanıcı: "nextv ismini de değiştirmeliyiz".

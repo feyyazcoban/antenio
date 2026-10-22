@@ -1,5 +1,9 @@
 # Proje durumu
 
+## TV'ye temiz kurulum · 22 Ekim 2026
+
+Kullanıcının isteğiyle ("datalar silinsin, eklemeyi test edeyim") fiziksel TV'deki (192.168.1.126) uygulama verisiyle birlikte kaldırıldı ve `releases/NEXTV_TV_Design_Preview_0.14.83.apk` temiz kuruldu. Kurulu APK SHA-256 teslim dosyasıyla eşit (1a7db5e2…fcfc7), sürüm 97/0.14.83, firstInstallTime 22 Ekim 21:54. 13 Ekim'den beri korunan kaynaklar, favoriler ve izleme geçmişi silindi; kullanıcı kaynak eklemeyi sıfırdan test edecek. Uygulama açıldı ve önde (MainActivity). Kod değişmedi.
+
 ## Ad değişikliği kararı ve aday tarama (D114) · 22 Ekim 2026
 
 Kullanıcı NEXTV adının değişmesine karar verdi (D114; D066'nın ad hükmünün yerine geçer). Yeni ad seçilene kadar NEXTV çalışma adı olarak kalır.

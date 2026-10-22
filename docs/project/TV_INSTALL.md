@@ -1,5 +1,7 @@
 # 65U95A · İlk APK kurulumu
 
+**22 Ekim 2026 temiz kurulum:** Kullanıcı isteğiyle uygulama verisiyle kaldırılıp 0.14.83/kod97 sıfırdan kuruldu (192.168.1.126:5555, `adb uninstall` + `adb install`). SHA-256 teslim dosyasıyla eşit. Önceki kaynak ve geçmiş silindi; kaynak ekleme testi kullanıcıda.
+
 **15 Ekim açılış kontrolü:** Yeni sürümün süreci açıldı ve aynı PID çalışır kaldı; TV ekranı uyuduğu için görünür katalog doğrulanamadı. Bir şifreli katalog dosyası mevcut. Ekran uyandırılmadı, yayın başlatılmadı. [QA](physical-tv-22-opening-qa.json).
 
 **15 Ekim 2026:** Fiziksel TV, mevcut kurulum üzerine 0.14.22/code36 sürümüne güncellendi. Kurulum Success ve paket sürümü cihazdan doğrulandı. Veri temizleme yapılmadı; uygulama/katalog açılışı ve medya testi bu tur yapılmadı. Aşağıdaki kurulum notları tarihçedir.
