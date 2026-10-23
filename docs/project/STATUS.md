@@ -1,5 +1,9 @@
 # Proje durumu
 
+## Kod GitHub'a gönderildi · 23 Ekim 2026
+
+Kullanıcı GitHub'da açtığı depo adresini verdi; `origin` olarak eklendi, `main` ve `claude/launch-prep-sales-channel-2948fb` gönderildi ve izlemeye alındı (uzak ve yerel aynı commit). Göndermeden önce geçmişte sağlayıcı hesap bilgisi aranmadı-bulunmadı; `releases/`, `.private/`, anahtar dosyaları `.gitignore`'da; en büyük dosya 5 MB. Depo adresi kişi adı içerdiği için belgelere yazılmadı (AGENTS "Hassas veri").
+
 ## Play'de kişisel hesap (D120) · 23 Ekim 2026
 
 Kullanıcı Play'e kişisel geliştirici hesabıyla çıkmayı ve Google'ın yasal adı orada göstermesini kabul etti. Geliştirici adı "Antenio" olacak; bizim yazdığımız hiçbir yerde gerçek ad geçmez. Yeni kişisel hesap kuralı: üretimden önce 12 test kullanıcısı × 14 gün kapalı test. Hesap henüz açılmadı; kod değişmedi.

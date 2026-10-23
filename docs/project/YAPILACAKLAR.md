@@ -5,7 +5,7 @@
 ## 1. Bu hafta: hesap güvenliği, e-posta ve site
 
 1. **GoDaddy:** hesapta iki adımlı doğrulamayı aç; antenio.app için otomatik yenilemeyi aç; ikinci yıl yenileme fiyatına bak.
-2. **Kodu yedekle:** GitHub'da özel (private) bir depo aç ve adresini bana ver; şu an kod yalnız bu bilgisayarda. Ben eklerim ve gönderirim.
+2. ~~**Kodu yedekle**~~ **Yapıldı (23 Ekim):** GitHub'daki özel depo `origin` olarak eklendi; main ve çalışma dalı gönderildi. Deponun özel (private) kaldığından emin ol.
 3. **destek@antenio.app (ImprovMX):**
    1. improvmx.com → alan adı `antenio.app`, hedef kişisel e-postan → ücretsiz hesap.
    2. Takma ad: `destek` → kişisel e-postan.

@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · origin eklendi ve gönderildi · 23 Ekim 2026
+
+`git remote add origin <GitHub deposu>` ana checkout'ta (`C:\Users\fyzcb\Desktop\TV`); kimlik bilgisi Git Credential Manager'da hazırdı, şifre istenmedi. `git push -u origin main claude/launch-prep-sales-channel-2948fb` başarılı. Bundan sonra her commit ve ff-merge'den sonra `git -C <ana checkout> push origin main <dal>` yapılır. Adres belgelere yazılmaz.
+
+Tam sonraki adım: YAPILACAKLAR 1, 3, 4 (GoDaddy güvenliği, ImprovMX, Netlify) kullanıcıda.
+
 ## Claude · Kullanıcının yapacakları listesi · 23 Ekim 2026
 
 Kullanıcı: "her yapmam gerekeni madde madde yaz email dahil". [YAPILACAKLAR](YAPILACAKLAR.md): GoDaddy güvenliği, kod yedeği için GitHub deposu, ImprovMX, Netlify, TV'de kaynak, marka vekili, avukat, mali müşavir, logo, Play hesabı (D120), ödeme profili, 12 test kullanıcısı, yükleme anahtarı, karar maddeleri ve Play Console uygulama kurulumu; sonunda kod tarafındaki işlerim.
