@@ -2,15 +2,16 @@
 
 23 Ekim 2026 · Kullanıcı: "Mağaza kaydı, görseller ve inceleme için test kaynağını hazırlayalım; kapalı teste yükleyelim." Hesap kişisel, geliştirici adı Antenio (D120). Aşağıdakiler öneridir; beyan kullanıcınındır ve "İncelemeye gönder"den önce kullanıcı onaylar. Metinler [STORE_LISTING_EN](../product/STORE_LISTING_EN.md) ve [STORE_LISTING_TR](../product/STORE_LISTING_TR.md); görseller `design/store` (`tools/make_store_graphics.py`), ekran görüntüleri `design/store/screenshots` (emülatör 5558, 1920×1080, inceleme kaynağıyla).
 
-## Durum (23 Ekim 2026, 17:00)
+## Durum (23 Ekim 2026, 18:00)
 
-Kullanıcı (16:20): "Dört beyanı onaylıyorum: hedef kitle 18+, veri toplanmıyor, sınırsız internet içeriği evet, varsayılan dil İngilizce ve Türkçe çeviri."
+Kullanıcı (16:20): "Dört beyanı onaylıyorum: hedef kitle 18+, veri toplanmıyor, sınırsız internet içeriği evet, varsayılan dil İngilizce ve Türkçe çeviri." Kullanıcı (17:40): "1 evet, 2 evet, 3 etiketleme" (IARC şartları, Android TV dağıtımı ve inceleme politikası, yapay zekâ öğe beyanı: etiketleme).
 
-- Uygulama oluşturuldu: Antenio IPTV Player, `app.antenio.tv`, en-US, uygulama, ücretsiz. Kullanıcı: "İşaretle" (Geliştirici Program Politikaları, Play Uygulama İmzalama Hizmet Şartları, ABD ihracat yasaları beyanları kullanıcının onayıyla işaretlendi).
-- Form faktörü: Android TV eklendi (Android XR kendiliğinden etkin). Bekleyen: "Android TV'ye dağıtımı etkinleştir ve inceleme politikasını kabul et" (kullanıcı kabulü).
-- Mağaza kaydı taslakta: en-US ve tr-TR metinleri, ikon, tanıtım görseli, TV afişi ve 7 TV ekran görüntüsü (sıra yüklemenin bitişine göre oldu; ilki filmler ekranı). Bekleyen: kaydın son adımındaki "yapay zekayla üretilmiş öğe beyanı" (kullanıcı kararı; görseller kodla çizildi ve gerçek ekran görüntüleri).
-- Uygulama içeriği kaydedildi: gizlilik politikası, reklam yok, uygulama erişimi (incelemeci talimatı, "Review source (no login)"), hedef kitle 18+, veri güvenliği (veri toplanmıyor/paylaşılmıyor), reklam kimliği yok, resmi kurum değil, finans özelliği yok, sağlık özelliği yok. Bekleyen: içerik derecelendirmesi (IARC kullanım şartları kabulü kullanıcıda; e-posta support@antenio.app, kategori "Diğer tüm uygulama türleri").
-- Kapalı test - Alpha: taslak sürüm "109 (0.16.1)", AAB ve en-US/tr-TR sürüm notları. Bekleyen: ülkeler, test kullanıcıları (12 e-posta), önizleme ve incelemeye gönderme.
+- Uygulama: Antenio IPTV Player, `app.antenio.tv`, en-US + tr-TR, uygulama, ücretsiz; kategori Video Oynatıcılar ve Düzenleyiciler; iletişim support@antenio.app, https://antenio.app (telefon yok). Oluştururken üç beyan kullanıcının onayıyla işaretlendi.
+- Form faktörü: Android TV eklendi ve dağıtımı etkinleştirildi (TV kalite yönergeleriyle incelenir); Android XR kendiliğinden etkin.
+- Mağaza kaydı kaydedildi ("incelenmek üzere göndermeye hazır"): metinler, ikon, tanıtım görseli, TV afişi, 7 TV ekran görüntüsü; Play en az 2 telefon/tablet görüntüsü istediği için telefon bölümüne de 4 TV görüntüsü kondu (uygulamanın telefon hâli yok). Yapay zekâ beyanı: etiketleme.
+- Uygulama içeriği tamam: gizlilik politikası; reklam yok; uygulama erişimi (incelemeci talimatı, 500 karakter sınırı içinde); içerik derecelendirmesi; hedef kitle 18+; veri güvenliği (veri toplanmıyor/paylaşılmıyor); reklam kimliği yok; resmi kurum değil; finans yok; sağlık yok.
+- İçerik derecelendirmesi (IARC, e-posta support@antenio.app, "Diğer tüm uygulama türleri"): paket içinde derecelendirmeye konu içerik yok; kullanıcılar arası paylaşım yok; uygulama dışarıdaki içeriği öne çıkarmıyor/tanıtmıyor (yalnız kullanıcının eklediği kaynağı oynatır; Netflix gibi bir katalog yok); yaş kısıtlı ürün tanıtımı yok; konum paylaşımı, dijital satın alma, para ödülü yok; web tarayıcısı ya da arama motoru değil; haber/eğitim ürünü değil. Sonuç: bütün bölgelerde "tüm yaşlar". Ankette "sınırsız internet" adlı bir soru yoktu; en yakını tarayıcı sorusuydu. **Abonelik gelince "dijital ürün satın alma" cevabı "evet" olarak yeniden gönderilmeli.**
+- Kapalı test - Alpha: taslak "109 (0.16.1)", AAB, en-US/tr-TR notları. Kurulum tamam, kanalın kilidi açık. Bekleyen: ülkeler, test kullanıcıları (12 kişi), önizleme ve incelemeye gönderme (kullanıcı onayıyla).
 
 ## Uygulama oluşturma
 
