@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from make_review_source import font, wrap  # noqa: E402
 
 LIVE_STREAMS = [
-    "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
+    "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8",
     "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8",
     "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
     "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",

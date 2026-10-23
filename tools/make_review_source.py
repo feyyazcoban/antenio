@@ -18,8 +18,11 @@ FONT = ROOT / "apps" / "android-tv" / "app" / "src" / "main" / "res" / "font" / 
 BASE = "https://antenio.app/review"
 
 LIVE = [
-    ("live", "Live Test Stream", "Test Channels", "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
-     ["Live Test Stream", "Live Test Signal"], "Akamai public HLS test stream.", ((22, 64, 96), (18, 140, 150))),
+    # The Akamai live test stream's variant playlists answer 404 since 23 October 2026; Apple's always-on example
+    # replaces it (tested to the first segment).
+    ("pattern", "Test Pattern", "Test Channels",
+     "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8",
+     ["Test Pattern", "Colour Bars"], "Apple HLS example stream.", ((22, 64, 96), (18, 140, 150))),
     ("bipbop", "Bip Bop Test", "Test Channels",
      "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8",
      ["Bip Bop Test Pattern", "Bip Bop Audio Sync"], "Apple HLS example stream.", ((70, 40, 110), (160, 70, 140))),
@@ -104,7 +107,7 @@ def m3u():
              "# Antenio review source: open-licensed films and public test streams only.",
              "# Elephants Dream, Big Buck Bunny, Sintel and Tears of Steel are (c) Blender Foundation, "
              "licensed CC BY (https://www.blender.org/about/projects/).",
-             "# Test streams: Akamai, Apple, Mux and Unified Streaming public HLS examples."]
+             "# Test streams: Apple, Mux and Unified Streaming public HLS examples."]
     for key, name, group, url, *_ in LIVE:
         lines += [f'#EXTINF:-1 tvg-id="antenio.demo.{key}" tvg-logo="{BASE}/art/{key}.png" group-title="{group}",{name}', url]
     for key, title, url, *_ in MOVIES:

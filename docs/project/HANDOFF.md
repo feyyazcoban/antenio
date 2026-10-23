@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Mağaza görselleri ve inceleme listesi düzeltmesi · 23 Ekim 2026
+
+Görseller betiklerle yeniden üretilir: vitrin `python tools/make_showcase_source.py OUT http://10.0.2.2:8766` (OUT'tan `python -m http.server 8766` ile sun), çerçeveler `python tools/make_store_frames.py OUT/art`. Play'de görsel değiştirme: devralınan tr-TR görselleri silinemez, Türkçe görsel eklenince yerini alır; çok dosyalı yüklemede sıra bitiş sırasına göre olur, ilk görseli tek başına yükle.
+
+Tam sonraki adım: kullanıcı onaylarsa mağaza değişikliklerini Yayın özeti'nden incelemeye gönder. Ayrı iş: afişlerin ilk açılışta boş kalması (Coil/ArtworkCache tekrar denemiyor olabilir).
+
 ## Claude · Play'e gönderim · 23 Ekim 2026
 
 Ayrıntılar PLAY_CONSOLE'da. Play Console'u Claude in Chrome ile kullanıcının oturumunda doldurdum; Chrome sekmesi arka plana düşünce ekran görüntüsü ve bazı tıklamalar çalışmıyor, yeni sekme açmak çözüyor. Malzeme bileşenlerinde `form_input` ve DOM `click()` çoğunlukla işliyor; kaydı her adımda durum mesajıyla doğruladım.

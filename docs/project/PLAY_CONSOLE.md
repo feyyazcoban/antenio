@@ -24,7 +24,7 @@ Kullanıcı (16:20): "Dört beyanı onaylıyorum: hedef kitle 18+, veri toplanm�
 
 - Kategori: Video Players & Editors. E-posta support@antenio.app, web sitesi https://antenio.app, telefon yok.
 - Gizlilik politikası: https://antenio.app/privacy
-- Görseller: `icon-512.png`, `feature-1024x500.png`; Android TV: `tv-banner-1280x720.png` ve `screenshots/01…07`. Telefon ekran görüntüsü yok: uygulama yalnız TV'de çalışır, Console telefon görüntüsü isterse TV görüntüleri kullanılmaz, kullanıcıya sorulur.
+- Görseller (23 Ekim akşamı yenilendi; kullanıcı: "Sadelik ve genel görünüm çok basit göründü", "İkisi birden"): `icon-512.png`, yeni `feature-1024x500.png` (afiş yelpazesi); Android TV: `tv-banner-1280x720.png` ve `screenshots/01…08` (sentetik vitrinle, değiştirilmemiş); telefon: `frames/en/*` (başlıklı), tr-TR kaydında `frames/tr/*`. Kayıt kaydedildi, "incelemeye gönderilmek için hazır"; gönderme kullanıcı onayı bekliyor. Yapay zekâ beyanı yine "etiketleme" (görseller kodla çizildi). Telefon ekran görüntüsü yok: uygulama yalnız TV'de çalışır, Console telefon görüntüsü isterse TV görüntüleri kullanılmaz, kullanıcıya sorulur.
 - Çeviri: Türkçe (tr-TR), aynı görseller.
 
 ## Uygulama içeriği (App content)
@@ -50,7 +50,11 @@ Antenio is a player and needs a source; no account or login. Please use this ope
 1. On the first screen choose "Add with the remote", then "M3U link".
 2. Press OK, type https://antenio.app/review/demo.m3u and press Next.
 3. Keep the name and press Connect, then "Open library".
-The list has 4 live channels with a test TV guide, 3 movies and 1 series: open movies by the Blender Foundation (CC BY) served from download.blender.org, and public HLS test streams from Akamai, Apple, Mux and Unified Streaming.
+The list has 4 live channels with a test TV guide, 3 movies and 1 series: open movies by the Blender Foundation (CC BY) served from download.blender.org, and public HLS test streams from Apple, Mux and Unified Streaming.
+```
+
+Not: Akamai canlı test yayını 23 Ekim'de bozuldu (alt listeler 404); listede yerini Apple'ın bipbop 16:9 örneği aldı ve site yeniden yüklendi. Play Console'daki talimat metni hâlâ "Akamai" adını anıyor; bir sonraki gönderimde düzeltilebilir.
+```
 ```
 
 ## Kapalı test

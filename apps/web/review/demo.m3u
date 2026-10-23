@@ -1,9 +1,9 @@
 #EXTM3U url-tvg="https://antenio.app/review/epg.xml"
 # Antenio review source: open-licensed films and public test streams only.
 # Elephants Dream, Big Buck Bunny, Sintel and Tears of Steel are (c) Blender Foundation, licensed CC BY (https://www.blender.org/about/projects/).
-# Test streams: Akamai, Apple, Mux and Unified Streaming public HLS examples.
-#EXTINF:-1 tvg-id="antenio.demo.live" tvg-logo="https://antenio.app/review/art/live.png" group-title="Test Channels",Live Test Stream
-https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8
+# Test streams: Apple, Mux and Unified Streaming public HLS examples.
+#EXTINF:-1 tvg-id="antenio.demo.pattern" tvg-logo="https://antenio.app/review/art/pattern.png" group-title="Test Channels",Test Pattern
+https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8
 #EXTINF:-1 tvg-id="antenio.demo.bipbop" tvg-logo="https://antenio.app/review/art/bipbop.png" group-title="Test Channels",Bip Bop Test
 https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8
 #EXTINF:-1 tvg-id="antenio.demo.bbb" tvg-logo="https://antenio.app/review/art/bbb.png" group-title="Open Movies",Big Buck Bunny Channel

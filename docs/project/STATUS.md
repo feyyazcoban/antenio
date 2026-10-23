@@ -1,5 +1,9 @@
 # Proje durumu
 
+## Mağaza görselleri yenilendi; inceleme listesindeki bozuk yayın değiştirildi · 23 Ekim 2026
+
+`tools/make_showcase_source.py` yalnız ekran görüntüleri için sentetik bir vitrin (12 kanal, 12 film, 4 dizi, 3 günlük rehber, kodla çizilmiş afişler) üretir; yayımlanmaz. Sekiz yeni TV görüntüsü bununla çekildi; `tools/make_store_frames.py` EN/TR başlıklı çerçeveleri ve yeni tanıtım görselini üretir. Play'de mağaza kaydı güncellenip kaydedildi, incelemeye gönderilmedi. Bulunanlar: (1) uygulama aynı yayın adresli kayıtları teke indiriyor (`CatalogParser` kimliği adresten üretir; vitrinde adreslere `#` eki kondu); (2) **bazı afişler ilk açılışta boş kalıyor, uygulama yeniden açılınca geliyor** (sunucu 200 dönmesine rağmen; yerel ve uzak kaynakta görüldü; kök neden aranmadı); (3) Akamai canlı test yayını bozuk: inceleme listesinde Apple bipbop 16:9 ile değiştirildi, emülatörde oynadı, site yeniden yüklendi. Play kişisel hesabında "Geliştirici hakkında" bölümü yasal adı gösteriyor (D120 gereği beklenen).
+
 ## 0.16.1 kapalı test için Google incelemesine gönderildi · 23 Ekim 2026
 
 Play Console kurulumu bitti: mağaza kaydı (en-US, tr-TR, TV afişi, ekran görüntüleri), uygulama içeriği beyanlarının tamamı, içerik derecelendirmesi (tüm yaşlar), Android TV dağıtımı, kategori ve iletişim. Kapalı test - Alpha: bütün ülkeler, "Antenio testers" e-posta listesi, geri bildirim support@antenio.app. Kullanıcının onayıyla 17 değişiklik 18:50'de incelemeye gönderildi. Test kullanıcıları: aile ve arkadaşlar, eksik kalırsa test takası toplulukları; uygulama yalnız TV'de kurulduğu için telefonlu testçiler katılabilir ama kuramaz.
