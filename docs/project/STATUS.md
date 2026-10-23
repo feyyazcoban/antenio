@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.16.1 kapalı test için Google incelemesine gönderildi · 23 Ekim 2026
+
+Play Console kurulumu bitti: mağaza kaydı (en-US, tr-TR, TV afişi, ekran görüntüleri), uygulama içeriği beyanlarının tamamı, içerik derecelendirmesi (tüm yaşlar), Android TV dağıtımı, kategori ve iletişim. Kapalı test - Alpha: bütün ülkeler, "Antenio testers" e-posta listesi, geri bildirim support@antenio.app. Kullanıcının onayıyla 17 değişiklik 18:50'de incelemeye gönderildi. Test kullanıcıları: aile ve arkadaşlar, eksik kalırsa test takası toplulukları; uygulama yalnız TV'de kurulduğu için telefonlu testçiler katılabilir ama kuramaz.
+
 ## Play Console: uygulama oluşturuldu, 0.16.1 kapalı test taslağında · 23 Ekim 2026
 
 İnceleme kaynağı Netlify'da yayında (https://antenio.app/review/demo.m3u, rehber ve afişler 200, X-Robots-Tag noindex). Play Console'da Antenio IPTV Player oluşturuldu; mağaza kaydı taslakta (metin, ikon, tanıtım görseli); Kapalı test - Alpha'da "109 (0.16.1)" taslak sürümü AAB ve iki dilli sürüm notlarıyla kaydedildi. Arada kullanıcı kategori sütununda seçili noktanın sayıya bindiğini bildirdi ("indicator rakamın üzerine geliyor"): `LibraryScreen` artık her satırda noktaya 6+6 dp yer ayırıyor, emülatörde doğrulandı; bu yüzden ilk yüklenen paket 0.16.1 oldu. Kalan: Android TV form faktörü, TV afişi ve ekran görüntüleri, Türkçe kayıt, uygulama içeriği beyanları (kullanıcı onayı), ülkeler, test kullanıcıları, incelemeye gönderme. Ayrıntı [PLAY_CONSOLE](PLAY_CONSOLE.md).

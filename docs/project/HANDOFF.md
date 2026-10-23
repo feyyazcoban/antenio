@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Play'e gönderim · 23 Ekim 2026
+
+Ayrıntılar PLAY_CONSOLE'da. Play Console'u Claude in Chrome ile kullanıcının oturumunda doldurdum; Chrome sekmesi arka plana düşünce ekran görüntüsü ve bazı tıklamalar çalışmıyor, yeni sekme açmak çözüyor. Malzeme bileşenlerinde `form_input` ve DOM `click()` çoğunlukla işliyor; kaydı her adımda durum mesajıyla doğruladım.
+
+Tam sonraki adım: inceleme sonucunu bekle (Play Console bildirimleri ve e-posta). Onaylanırsa "Web'de katılın" bağlantısını al; kullanıcı aile ve arkadaşlarını ekler, gerekirse Google Grubu açılır. 12 kişi 14 gün kalınca üretime erişim başvurusu. Abonelik sürümünde içerik derecelendirmesindeki "dijital ürün satın alma" cevabı güncellenmeli.
+
 ## Claude · Mağaza kaydı hazırlığı · 23 Ekim 2026
 
 Görseller ve inceleme kaynağı betiklerle yeniden üretilebilir (`tools/make_store_graphics.py` Chrome'u başsız çalıştırır; `tools/make_review_source.py` PIL ve Roboto kullanır, rehberi bugünden 75 gün üretir). Dizi afişi ortalanmıştır: bölüm kartları dizi görselini 16:9 ortadan kırpar. `apps/web/_headers` /review/* için noindex. Site zip'i hazır ama yüklenmedi.

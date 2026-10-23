@@ -42,7 +42,7 @@
 
 ## 5. Play Console'da uygulama (hesap ve anahtar hazır olunca)
 
-17. Uygulama oluştur: ad "Antenio IPTV Player", kategori, ücretsiz indirme.
+17. ~~Uygulama oluştur~~ **Yapıldı (23 Ekim):** mağaza kaydı, beyanlar, Android TV ve kapalı test kuruldu; 0.16.1 incelemeye gönderildi (ayrıntı PLAY_CONSOLE). Kalan: inceleme sonucu, sonra test kullanıcıları ve 14 gün.
 18. Gizlilik politikası adresi https://antenio.app/privacy; veri güvenliği formu (veri toplanmıyor); içerik derecelendirmesi (IARC); hedef kitle (çocuklar değil); reklam yok; TV form faktörü.
 19. Uygulama erişimi: 16. maddedeki test kaynağı.
 20. Kapalı test kanalına ilk paketi (AAB) yükle, 12 kişiyi davet et, 14 gün bekle, sonra üretime erişim başvurusu.
