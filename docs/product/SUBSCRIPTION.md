@@ -4,6 +4,24 @@
 
 Kaynaklar 22.10.2026'da açıldı ve ayrıca bir kez daha kontrol edildi. "Çıkarım" diye işaretli yerler resmî bir cümleye değil, kuralların okunmasına dayanır.
 
+## 24 Ekim 2026 güncellemesi (D121): bu belgenin değişen yerleri
+
+**Karar (D121, senin):** Üretime abonelikle çıkılır. İlk yayında Antenio hesabı yok (B yolu). Tek yıllık plan. İlk hafta kartsız ve abonelik istenmeden ücretsiz izlenir; 8. günden itibaren izlemek için abonelik gerekir. Aşağıdaki eski metinde Google Play'in kart isteyen 7 günlük deneme teklifi geçen her yer (§2 adım 4–7 ve 10, §3 adım 6'daki teklif, §8 "Fiyat metni", teklif `trial-7d`) bu kararla geçersizdir.
+
+Yeni akış (D121 dışındaki ayrıntılar öneridir):
+
+1. Kullanıcı kurar, listesini ekler, gezer. Ödeme sorulmaz.
+2. **Ücretsiz hafta ilk oynatmada başlar** (öneri): kullanıcı listesini bir hafta sonra eklese de 7 gün izler. Süre dolana kadar Ayarlar → Üyeliğim'de ve oynatıcı açılırken kısa bir "N gün kaldı" notu görünür (öneri).
+3. **8. gün ve sonrasında "İzle":** üyelik ekranı çıkar. Ekranda yıllık fiyat (Google'dan okunur, vergiler dahil), her yıl kendiliğinden yenilendiği, iptal yolu, koşulların bağlantısı ve görünür bir "Kapat" bulunur. "Abone ol" Google Play'in ödeme penceresini açar; ücret o an alınır.
+4. **İzleme dışında her şey açık kalır** (öneri, eski §2 madde 11).
+5. **Haftanın sayılması:** Başlangıç zamanı yalnız bu cihazda, şifreli ve sıfırlamalardan (kaynak kurtarma, "Her şeyi sıfırla") etkilenmeyen bir anahtarda tutulur. Sunucu olmadığı için uygulamayı silip yeniden kurmak haftayı yeniden başlatabilir; kaynağın yeniden eklenmesi gerektiği için caydırıcıdır. Bu risk ilk yayında kabul edilir, hesap ve sunucu gelince kapanır (öneri). Cihaz saati geri alınırsa haftanın uzamaması için son görülen zaman da saklanır (öneri).
+6. **Google incelemesi:** İnceleme ekibi ilk hafta her şeyi ücretsiz gördüğü için eski Risk 6 (ödeme duvarının arkasına erişim) büyük ölçüde çözülür; talimata ücretsiz haftadan söz eden bir cümle eklenir.
+7. **Hukuk açısından:** Deneme sonunda kendiliğinden ücrete dönüşme olmadığı için eski Risk 3'teki "denemeden ücretliye dönüş" sorusu düşer; otomatik yıllık yenileme, iade ve iptal soruları (§7) sürer.
+
+Play Console (öneri adlar): abonelik `antenio_premium`, temel plan `yearly` (otomatik yenilenen), teklif yok. Önce ödeme kütüphanesi içeren bir sürümün kapalı teste yüklenmesi ve ödeme profilinin (banka hesabı) kurulması gerekir; ödeme profili mali müşavir görüşmesinden sonra.
+
+Kod tahmini yine yaklaşık 3 hafta (ölçülmedi): Play deneme teklifi metni yerine uygulamanın kendi haftası gelir; sayaç ve "N gün kaldı" notu yaklaşık 1 gün ekler, teklif ve uygunluk işleri düşer.
+
 ## Kısaca
 
 - Uygulama Play'den indirilir. Kullanıcı kendi IPTV listesini ekler ve kanallarını görür.

@@ -403,3 +403,14 @@ Kullanıcı: "Kalıcı paket adı app.antenio.tv olsun. antenio.app alan adını
 ## D120 · Google Play'de kişisel geliştirici hesabı · 23 Ekim 2026
 
 Kullanıcı: "Şimdilik kişisel hesapla ilerleyelim; Play'de adımın görünmesini kabul ediyorum." Play'e ilk yayın kişisel geliştirici hesabıyla yapılır. Google bu hesapta yasal adı, ülkeyi ve geliştirici e-postasını, satış başlayınca tam adresi de Play'de gösterir; kullanıcı bunu kabul etti. Play'de görünen geliştirici adı "Antenio" seçilir. Bu kabul yalnız Google'ın gösterdiği hesap bilgileri içindir: bizim belgelerimiz, kodumuz, antenio.app sayfaları, mağaza metni ve commit'lerde geliştiricinin gerçek adı yine yazılmaz (AGENTS "Hassas veri"). Yeni kişisel hesap olduğu için üretime çıkmadan önce en az 12 test kullanıcısıyla 14 gün kesintisiz kapalı test gerekir. Şirket kurulursa kuruluş hesabına geçiş ayrı karar olur.
+
+## D121 · Üretime abonelikle çıkış; kartsız ücretsiz hafta, sonra yıllık abonelik · 24 Ekim 2026
+
+Kullanıcı: "üretime abonelikle çıkalım". Ardından sorulan üç soruya cevapları: hesap için "Önce yalnız abonelik", plan için "Tek yıllık plan", üyelik ekranı için "ilk bir hafta abone olmadan da izleyebilsin 8. gün izlemek için ücret vermeli".
+
+1. Google Play'de üretime ilk çıkış abonelikli sürümle yapılır. Üretim erişimi başvurusu (14 günlük kapalı testten sonra) aboneliği beklemez; onay gelince abonelikli sürüm hazır olduğunda yayına çıkılır.
+2. İlk yayında Antenio hesabı ve sunucu yoktur; abonelik kullanıcının Google hesabına bağlıdır. D112-3'ün "hesapsız Premium satışı yapılmaz" şartı bu kararla kalkar; hesap sonraki bir sürümde, Apple sürümünden önce gelir. D112-1 (yalnız mağaza) ve D112-2 (hesap isteğe bağlı) sürer.
+3. Tek plan vardır: her yıl kendiliğinden yenilenen Google Play aboneliği.
+4. D113'ün deneme biçimi değişir: ilk hafta kart ve abonelik istenmeden ücretsiz izlenir; Google Play'in kart isteyen deneme teklifi kullanılmaz. 8. günden itibaren izlemek için abonelik gerekir; abonelik başlarken ilk yılın ücreti alınır.
+
+Karar olmayanlar (öneriler SUBSCRIPTION'da): ücretsiz haftanın başladığı an, haftanın nasıl sayılacağı, üyeliksiz açık kalanlar, planın adı ve fiyatı. Etkilenen belgeler: SUBSCRIPTION, BACKLOG (BKL-048), YAPILACAKLAR. Abonelik sürümüyle IARC "dijital satın alma" cevabı, Data safety, mağaza metni, gizlilik politikası ve kullanım koşulları güncellenir. Durum: kod başlamadı.
