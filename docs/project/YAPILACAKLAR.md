@@ -37,8 +37,8 @@
 ## 4. Benimle verilecek kararlar
 
 14. **Abonelik:** plan adı, dönem ve fiyat; hesabın ilk yayında olup olmayacağı (SUBSCRIPTION §1 ve §5).
-15. **Mağaza görselleri:** 512×512 ikon, 1280×720 TV afişi, 1024×500 tanıtım görseli ve ekran görüntüleri; içerik sentetik olmalı.
-16. **İnceleme için yasal test kaynağı:** Google incelemecisinin uygulamayı deneyebileceği, telif sorunu olmayan bir liste.
+15. ~~**Mağaza görselleri**~~ **Hazır (23 Ekim):** `design/store`: 512×512 ikon, 1280×720 TV afişi, 1024×500 tanıtım görseli ve 7 TV ekran görüntüsü (inceleme kaynağıyla, İngilizce arayüz). Metinler STORE_LISTING_EN ve STORE_LISTING_TR, form cevapları PLAY_CONSOLE.
+16. ~~**İnceleme için yasal test kaynağı**~~ **Hazır (23 Ekim):** https://antenio.app/review/demo.m3u (Blender açık filmleri CC BY, herkese açık test yayınları, test rehberi); `apps/web/review`. Netlify'a yüklenmesi kaldı.
 
 ## 5. Play Console'da uygulama (hesap ve anahtar hazır olunca)
 

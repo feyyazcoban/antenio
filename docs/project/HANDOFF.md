@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Mağaza kaydı hazırlığı · 23 Ekim 2026
+
+Görseller ve inceleme kaynağı betiklerle yeniden üretilebilir (`tools/make_store_graphics.py` Chrome'u başsız çalıştırır; `tools/make_review_source.py` PIL ve Roboto kullanır, rehberi bugünden 75 gün üretir). Dizi afişi ortalanmıştır: bölüm kartları dizi görselini 16:9 ortadan kırpar. `apps/web/_headers` /review/* için noindex. Site zip'i hazır ama yüklenmedi.
+
+Tam sonraki adım: Chrome eklentisi bağlanınca `apps/web`'i Netlify'a yükle ve https://antenio.app/review/demo.m3u'yu doğrula; Play Console'da uygulamayı oluştur, PLAY_CONSOLE'daki cevapları kullanıcı onayıyla gir, 0.16.0 AAB'yi kapalı teste yükle. Test kullanıcılarının e-postaları kullanıcıdan gelecek.
+
 ## Claude · Yükleme anahtarı ve ilk AAB · 23 Ekim 2026
 
 `build.gradle.kts`: sürüm adı `-design-preview` ile bitenler yükleme anahtarı tanımlı olsa da debug anahtarıyla imzalanır (TV'deki kurulumun üstüne kurulsun diye); `bundleRelease` önizleme sürüm adında durur. Sürüm 0.16.0 (108) Play içindir; bu sürümün `assembleRelease` çıktısı yükleme anahtarıyla imzalanır ve TV'deki debug imzalı kurulumun üstüne kurulamaz. TV'ye yeni önizleme gerekirse sürüm adına yeniden `-design-preview` eklenir (ör. 0.16.1-design-preview). TV'de şu an 0.15.1'in debug derlemesi var (TV uykudaydı, release APK kurulamadı).

@@ -1,5 +1,9 @@
 # Proje durumu
 
+## Mağaza görselleri, metinler ve inceleme kaynağı hazır · 23 Ekim 2026
+
+Kullanıcı: "Mağaza kaydı, görseller ve inceleme için test kaynağını hazırlayalım; kapalı teste yükleyelim." `tools/make_review_source.py` inceleme kaynağını (`apps/web/review`: 4 canlı kanal, 75 günlük test rehberi, 3 film, 1 dizi; Blender Foundation filmleri CC BY ve Akamai/Apple/Mux/Unified Streaming test yayınları; afiş ve logolar bizim çizimimiz), `tools/make_store_graphics.py` mağaza görsellerini (`design/store`) üretir. Ekran görüntüleri emülatör 5558'de (1920×1080, İngilizce) bu kaynağın yerel kopyasıyla çekildi: kurulum akışı, içe aktarma, canlı liste, rehber, filmler, oynatma (Tears of Steel, blender.org'dan) ve dizi doğrulandı. Görülen: Sintel afişi ilk açılışta boş kaldı, uygulama yeniden açılınca geldi (yerel sunucuda; kök neden aranmadı). Metinler STORE_LISTING_EN/TR (abonelik paragrafı abonelik sürümüne bırakıldı), form cevapları PLAY_CONSOLE. Kalan: siteyi Netlify'a yüklemek (Chrome eklentisi bağlantısı koptu) ve Play Console adımları.
+
 ## 0.16.0: ilk Play paketi (AAB) yükleme anahtarıyla imzalandı · 23 Ekim 2026
 
 Kullanıcı Play Console kişisel hesabını açtı; hesap onayı ve Android cihaz doğrulaması tamam ("console onayını aldım doğrulama da tamam"). Yükleme anahtarını kullanıcı kendi Terminal sekmesinde oluşturdu (`C:\Users\fyzcb\antenio-anahtar\antenio-upload.jks`, takma ad `antenio-upload`, RSA 4096, sertifika CN=Antenio, O=Antenio, C=TR; SHA-256 B2:C3:D4:6E:…:43:F2). Şifre `%USERPROFILE%\.gradle\gradle.properties`'te, depoda değil. Sürüm 0.16.0 (108); `bundleRelease` geçti, `jarsigner -verify` "jar verified", imzalayan CN=Antenio. Paket henüz Play'e yüklenmedi; cihazda R8 sürümü bu adımda denenmedi.
