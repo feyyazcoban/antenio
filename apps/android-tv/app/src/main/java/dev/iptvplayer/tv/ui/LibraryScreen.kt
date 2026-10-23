@@ -499,7 +499,10 @@ private class LibraryMemory(var lastId: String?, var lastIndex: Int) {
                         color = if (focused) LocalContentColor.current else Ink.Muted,
                         fontFamily = Roboto, fontSize = 11.sp, lineHeight = 16.sp, maxLines = 1)
                     if (category.locked) LockMark(Modifier.padding(start = 8.dp), color = if (focused) LocalContentColor.current else Ink.Muted)
-                    if (isSelected && !focused) Box(Modifier.padding(start = if (category.locked) 6.dp else 0.dp).size(6.dp).background(Ink.Mint, RoundedCornerShape(50)))
+                    // Every row keeps the dot's place, 6 dp after the count, so the counts line up and the dot never
+                    // touches the number; only the chosen row, while not focused, shows it.
+                    Box(Modifier.padding(start = 6.dp).size(6.dp)
+                        .background(if (isSelected && !focused) Ink.Mint else Color.Transparent, RoundedCornerShape(50)))
                 }
             }
         }
