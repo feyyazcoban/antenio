@@ -43,7 +43,7 @@ Bu dosya Codex ve Claude Code için aynı çalışma sözleşmesidir. CLAUDE.md 
 
 Gerçek IPTV URL'si, kullanıcı adı, parola, erişim tokenı ve kimlik içeren medya adreslerini commit etmeyin; Figma'ya, ekran görüntüsüne veya analitik kaydına koymayın. Ham inceleme verisi .private/ ya da proje dışı geçici alanda kalır. Paylaşılacak örnekleri sentetik kimliklerle üretin. Kaynak testi tek oynatma oturumu üzerinden yapılır; eşzamanlı bağlantı limiti bilinmiyorsa paralel yayın açılmaz.
 
-Geliştiricinin gerçek adı ve soyadı hiçbir belgeye, koda, sayfaya, mağaza metnine, tasarıma ya da commit mesajına yazılmaz (kullanıcı kararı, 23 Ekim 2026). Kamuya dönük yerlerde "Antenio" ve destek@antenio.app kullanılır. Google Play kişisel hesabı yasal adı gösterdiği için hesap türü kararı LAUNCH_AUDIT E7'dedir.
+Geliştiricinin gerçek adı ve soyadı hiçbir belgeye, koda, sayfaya, mağaza metnine, tasarıma ya da commit mesajına yazılmaz (kullanıcı kararı, 23 Ekim 2026). Kamuya dönük yerlerde "Antenio" ve destek@antenio.app kullanılır. Play'de kişisel hesap kullanılır ve Google yasal adı orada gösterir; kullanıcı bunu kabul etti (D120), ama bu kural bizim yazdığımız her yerde sürer.
 
 ## Birlikte çalışma ve devir
 

@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Play hesap türü kararı (D120) · 23 Ekim 2026
+
+D120 yazıldı; AGENTS kuralı ("gerçek ad yazılmaz") sürer, yalnız Google'ın kendi gösterdiği hesap bilgisi için istisna not edildi. LAUNCH_AUDIT E7 ve WEB_SETUP güncellendi.
+
+Tam sonraki adım: kullanıcı Play Console'da kişisel hesap açsın (tek seferlik kayıt ücreti, kimlik doğrulaması, geliştirici adı "Antenio", iletişim destek@antenio.app) ve 12 test kullanıcısı bulsun; bu arada site WEB_SETUP adımlarıyla yayına alınır.
+
 ## Claude · Kişi adı olmadan gizlilik sayfası · 23 Ekim 2026
 
 Kullanıcı: "ad soyad yazmak mecburi mi" ve adının hiçbir yerde geçmemesini istedi. Gizlilik sayfalarındaki sorumlu yer tutucusu "Kapsam ve iletişim" bölümüyle değişti (Antenio geliştirici adı, destek@antenio.app); tarih 23 Ekim 2026. AGENTS'a kural eklendi; depoda ve commit kayıtlarında ad geçmiyor (kontrol edildi). Google kaynakları: User Data politikası (answer 10144311), kişisel hesapta gösterilen bilgiler (13628312), test kuralı (14151465).

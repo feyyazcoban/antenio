@@ -8,7 +8,7 @@
 
 - GoDaddy hesabında iki adımlı doğrulamayı ve antenio.app için otomatik yenilemeyi aç.
 - Sayfalarda kişi adı yoktur (kullanıcı kararı): Google'ın kuralı, Play'deki geliştirici adının ("Antenio") ya da uygulama adının politikada geçmesini ister; iletişim destek@antenio.app'tir. Metin uygulamanın 0.15.0'daki davranışına göre yazıldı ve tarihi 23 Ekim 2026'dır; yayından önce avukat kontrolü önerilir (BKL-043). Abonelik ya da hesap geldiğinde sayfa önceden güncellenmeli ve o zaman bir veri sorumlusu (şirket) adı gerekebilir.
-- Play'de geliştirici adı "Antenio" seçilmeli. Kişisel hesap yine de yasal adı gösterir; bunu önlemek için kuruluş hesabı gerekir (LAUNCH_AUDIT E7).
+- Play'de geliştirici adı "Antenio" seçilmeli. Kişisel hesap yasal adı Play'de gösterir; kullanıcı bunu kabul etti (D120).
 
 ## 1. Sayfaları Netlify'da yayımla
 

@@ -1,5 +1,9 @@
 # Proje durumu
 
+## Play'de kişisel hesap (D120) · 23 Ekim 2026
+
+Kullanıcı Play'e kişisel geliştirici hesabıyla çıkmayı ve Google'ın yasal adı orada göstermesini kabul etti. Geliştirici adı "Antenio" olacak; bizim yazdığımız hiçbir yerde gerçek ad geçmez. Yeni kişisel hesap kuralı: üretimden önce 12 test kullanıcısı × 14 gün kapalı test. Hesap henüz açılmadı; kod değişmedi.
+
 ## Gizlilik sayfası kişi adı olmadan; Play hesap türü notu · 23 Ekim 2026
 
 Kullanıcı gerçek adının hiçbir yerde geçmesini istemedi. Google Play Kullanıcı Verileri politikası, politikada Play'deki geliştirici adının ya da uygulama adının geçmesini ister; `apps/web` sayfaları artık "Antenio" ve destek@antenio.app ile, yer tutucusuz ve 23 Ekim 2026 tarihli. Kural AGENTS "Hassas veri" bölümüne eklendi. Play kişisel hesabı yasal adı gösterdiği için hesap türü kararı LAUNCH_AUDIT E7'de (kuruluş hesabı: kişi adı içermeyen şirket ve D-U-N-S). Kod değişmedi.
