@@ -4,7 +4,7 @@
 
 Emülatörün saati açılışta bir hafta geride kalıyor (16 Ekim) ve root izni yok; antenio.app'in yeni sertifikası bu yüzden emülatörde "güvenli bağlantı kurulamadı" veriyor. Site sağlam (bilgisayardan 200). Emülatörde inceleme listesi için `apps/web/review` klasörünü `python -m http.server 8766` ile sunup `http://10.0.2.2:8766/demo.m3u` ekle.
 
-Tam sonraki adım: kullanıcı onaylarsa 0.16.3 AAB'yi kapalı teste yükle (0.16.2 o sırada incelemedeyse yeni sürüm onun yerine geçer). Gizlilik politikasına HTTP kaynaklarla ilgili bir cümle eklenmesi (LAUNCH_AUDIT R3) açık.
+Tam sonraki adım: 0.16.3 kapalı test incelemesinde (24 Ekim gece gönderildi); sonucu Play Console'dan izle. Gizlilik politikasına HTTP kaynaklarla ilgili bir cümle eklenmesi (LAUNCH_AUDIT R3) açık.
 
 ## Claude · Mağaza görselleri ve inceleme listesi düzeltmesi · 23 Ekim 2026
 
