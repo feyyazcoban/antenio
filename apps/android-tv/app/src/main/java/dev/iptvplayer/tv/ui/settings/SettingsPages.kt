@@ -32,6 +32,8 @@ import dev.iptvplayer.tv.data.CategoryAccess
 import dev.iptvplayer.tv.data.CategoryVisibility
 import dev.iptvplayer.tv.data.Feature
 import dev.iptvplayer.tv.data.MediaKind
+import dev.iptvplayer.tv.data.MemberStage
+import dev.iptvplayer.tv.data.memberStage
 import dev.iptvplayer.tv.data.ParentalStatus
 import dev.iptvplayer.tv.data.UiText
 import dev.iptvplayer.tv.ui.Action
@@ -52,7 +54,8 @@ import dev.iptvplayer.tv.ui.updatedTime
 internal enum class SectionId(@param:StringRes val label: Int) {
     GENERAL(R.string.settings_section_general), SOURCES(R.string.settings_section_sources),
     CONTENT(R.string.settings_section_content), PLAYER(R.string.settings_section_player),
-    LIBRARY(R.string.settings_section_library), ABOUT(R.string.settings_section_about)
+    LIBRARY(R.string.settings_section_library), MEMBERSHIP(R.string.settings_section_membership),
+    ABOUT(R.string.settings_section_about)
 }
 
 /** What a page asks before it opens; the panel's [PageGate] decides. */
@@ -101,6 +104,7 @@ private val contentPage = SettingsRoute.Page("content")
 private val libraryPage = SettingsRoute.Page("library")
 private val removeSourcePage = SettingsRoute.Page("remove-source")
 private val clearHistoryPage = SettingsRoute.Page("clear-history")
+private val membershipPage = SettingsRoute.Page("membership")
 private val aboutSectionPage = SettingsRoute.Page("about-section")
 private val aboutPage = SettingsRoute.Page("about")
 private val licensesPage = SettingsRoute.Page("licenses")
@@ -126,6 +130,7 @@ internal val settingsPageList: List<SettingsPageSpec> = listOf(
             model.clearHistory(); false
         }
     },
+    SettingsPageSpec(membershipPage.id, UiText.Res(SectionId.MEMBERSHIP.label), SectionId.MEMBERSHIP) { MembershipPage() },
     SettingsPageSpec(aboutSectionPage.id, UiText.Res(SectionId.ABOUT.label), SectionId.ABOUT) { AboutSection() },
     SettingsPageSpec(aboutPage.id, UiText.Res(R.string.settings_about), SectionId.ABOUT, body = PageBody.READING) { About() },
     SettingsPageSpec(licensesPage.id, UiText.Res(R.string.settings_about_licenses), SectionId.ABOUT, body = PageBody.READING) { Licenses() },
@@ -160,6 +165,7 @@ private fun readIn(text: String, languages: List<String>): AnnotatedString = bui
     PageRow(contentPage.id, stringResource(SectionId.CONTENT.label), stringResource(R.string.settings_section_content_note), contentPage)
     PageRow(playerPage.id, stringResource(SectionId.PLAYER.label), stringResource(R.string.settings_section_player_note), playerPage)
     PageRow(libraryPage.id, stringResource(SectionId.LIBRARY.label), stringResource(R.string.settings_section_library_note), libraryPage)
+    PageRow(membershipPage.id, stringResource(SectionId.MEMBERSHIP.label), memberRow(), membershipPage)
     PageRow(aboutSectionPage.id, stringResource(SectionId.ABOUT.label), stringResource(R.string.settings_about_note), aboutSectionPage)
 }
 
@@ -269,6 +275,59 @@ private fun readIn(text: String, languages: List<String>): AnnotatedString = bui
     Spacer(Modifier.height(6.dp))
     SettingsLabel(stringResource(R.string.settings_about_release))
     NoteRow(stringResource(R.string.settings_about_release_note))
+}
+
+/** Üyelik's row on the main page: where the membership stands, in a few words (D121). */
+@Composable private fun SettingsScope.memberRow(): String {
+    val clock = System.currentTimeMillis()
+    val days = s.membership.freeDaysLeft(clock) ?: 0
+    return when (memberStage(s.membership, s.billing.renews, clock)) {
+        MemberStage.NOT_STARTED -> stringResource(R.string.membership_row_not_started)
+        MemberStage.FREE -> pluralStringResource(R.plurals.membership_row_free, days, days.toString())
+        MemberStage.ENDED -> stringResource(R.string.membership_row_ended)
+        MemberStage.ACTIVE -> stringResource(R.string.membership_row_active)
+        MemberStage.CANCELLED -> stringResource(R.string.membership_row_cancelled)
+        MemberStage.PENDING -> stringResource(R.string.membership_row_pending)
+        MemberStage.ON_HOLD -> stringResource(R.string.membership_row_on_hold)
+    }
+}
+
+/**
+ * Üyelik (D121): where the membership stands, Abone ol until there is a subscription, Yeniden kontrol et, and a QR code
+ * to manage or cancel it in Google Play on the phone, as the TV cannot (SUBSCRIPTION §2 step 8).
+ */
+@Composable private fun SettingsScope.MembershipPage() {
+    val clock = System.currentTimeMillis()
+    val stage = memberStage(s.membership, s.billing.renews, clock)
+    val days = s.membership.freeDaysLeft(clock) ?: 0
+    NoteRow(when (stage) {
+        MemberStage.NOT_STARTED -> stringResource(R.string.membership_note_not_started)
+        MemberStage.FREE -> pluralStringResource(R.plurals.membership_note_free, days, days.toString())
+        MemberStage.ENDED -> stringResource(R.string.membership_note_ended)
+        MemberStage.ACTIVE -> stringResource(R.string.membership_note_active)
+        MemberStage.CANCELLED -> stringResource(R.string.membership_note_cancelled)
+        MemberStage.PENDING -> stringResource(R.string.membership_note_pending)
+        MemberStage.ON_HOLD -> stringResource(R.string.membership_note_on_hold)
+    })
+    val activity = LocalActivity.current
+    if (stage == MemberStage.NOT_STARTED || stage == MemberStage.FREE || stage == MemberStage.ENDED)
+        ActionRow("subscribe", stringResource(R.string.paywall_subscribe), s.billing.offer?.let {
+            stringResource(R.string.membership_subscribe_note, it.price)
+        } ?: stringResource(R.string.membership_no_offer), Modifier.testTag("membership-subscribe")) {
+            activity?.let { model.subscribe(it) }
+        }
+    ActionRow("recheck", stringResource(R.string.membership_recheck), stringResource(R.string.membership_recheck_note)) {
+        model.refreshMembership()
+    }
+    val manage = stringResource(R.string.membership_manage_url)
+    Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        QrCode(manage, 96.dp, stringResource(R.string.membership_manage_qr), Modifier.testTag("membership-manage-qr"))
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Note(stringResource(R.string.membership_manage))
+            Text(manage.removePrefix("https://"), color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 20.sp)
+        }
+    }
 }
 
 /** Hakkında: the app's own page and the open source licenses, each a page of text. */

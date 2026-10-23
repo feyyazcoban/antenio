@@ -185,6 +185,10 @@ class DeviceStore internal constructor(private val prefs: SharedPreferences) {
 
     fun favorites(source: String): Set<String> = prefs.getStringSet(DeviceKeys.favorites.of(source), emptySet()).orEmpty().toSet()
     fun favorites(source: String, ids: Set<String>) { prefs.edit().putStringSet(DeviceKeys.favorites.of(source), ids.toSet()).apply() }
+    /** D121: the free week and Play's last answer (DeviceKeys.membership). */
+    var membership: Membership
+        get() = Membership.decode(prefs.getString(DeviceKeys.membership.name, null))
+        set(value) { prefs.edit().putString(DeviceKeys.membership.name, value.encode()).apply() }
     var reducedMotion: Boolean
         get() = prefs.getBoolean(DeviceKeys.reducedMotion.name, false)
         set(value) { prefs.edit().putBoolean(DeviceKeys.reducedMotion.name, value).apply() }

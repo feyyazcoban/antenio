@@ -30,6 +30,7 @@ class DeviceKeysTest {
         store.startLastChannel = true
         store.appLanguage = "tr"; store.appLanguageHandedOver = true
         store.playback = player
+        store.membership = Membership(1_000, 2_000, PlayStatus.ACTIVE, 3_000)
         return memory to store
     }
 

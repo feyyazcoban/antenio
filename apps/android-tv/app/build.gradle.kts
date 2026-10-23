@@ -14,8 +14,8 @@ android {
         applicationId = "app.antenio.tv"
         minSdk = 26
         targetSdk = 36
-        versionCode = 111
-        versionName = "0.16.3"
+        versionCode = 112
+        versionName = "0.17.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }
@@ -95,6 +95,8 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")
+    // The yearly Google Play subscription (D121); Apache 2.0.
+    implementation("com.android.billingclient:billing:9.1.0")
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20250517")

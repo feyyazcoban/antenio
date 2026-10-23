@@ -900,4 +900,45 @@
     <string name="player_stream_info">Yayın bilgileri</string>
     <string name="player_stream_info_empty">Yayın başladığında çözünürlük ve kodek bilgileri burada görünür.</string>
     <string name="player_previous_channel">Önceki kanal</string>
+    <string name="settings_section_membership">Üyelik</string>
+    <string name="paywall_title">İzlemeye devam etmek için abone ol</string>
+    <string name="paywall_body">Antenio Premium ile kendi kaynağındaki kanal, film ve dizileri izlemeye devam edersin. Antenio kanal satmaz. Kütüphanen, rehber ve Ayarlar abonelik olmadan da açık kalır.</string>
+    <string name="paywall_price">Antenio Premium: yıllık %1$s. İptal edene kadar her yıl kendiliğinden yenilenir.</string>
+    <string name="paywall_no_offer">Google Play\'den plan bilgisi gelmedi. Bağlantıyı kontrol edip yeniden dene.</string>
+    <string name="paywall_cancel">İstediğin zaman telefonundan ya da bilgisayarından Google Play\'de iptal edebilirsin (g.co/play/subscriptions); ödediğin yıl sürer.</string>
+    <string name="paywall_subscribe">Abone ol</string>
+    <string name="paywall_terms">Kullanım koşulları</string>
+    <string name="paywall_terms_url">https://antenio.app/kosullar</string>
+    <string name="paywall_terms_qr">Kullanım koşullarının QR kodu</string>
+    <string name="membership_welcome">Antenio Premium açıldı. İyi seyirler.</string>
+    <string name="membership_row_not_started">İlk izlemenden itibaren 7 gün ücretsiz</string>
+    <string name="membership_row_ended">Ücretsiz hafta bitti</string>
+    <string name="membership_row_active">Antenio Premium açık</string>
+    <string name="membership_row_cancelled">İptal edildi; yıl sonuna kadar açık</string>
+    <string name="membership_row_pending">Ödeme bekleniyor</string>
+    <string name="membership_row_on_hold">Ödeme sorunu</string>
+    <string name="membership_note_not_started">Ücretsiz haftan ilk izlediğinde başlar. 7 gün sonra izlemek için Antenio Premium gerekir; geri kalan her şey açık kalır.</string>
+    <string name="membership_note_ended">Ücretsiz haftan bitti. İzlemek için Antenio Premium\'a abone ol.</string>
+    <string name="membership_note_active">Antenio Premium açık. Google Play\'den iptal edene kadar her yıl yenilenir.</string>
+    <string name="membership_note_cancelled">Antenio Premium ödediğin yılın sonuna kadar açık kalır. Yenilenmeyecek.</string>
+    <string name="membership_note_pending">Ödemen bekleniyor. Google Play onaylayınca Antenio Premium açılır.</string>
+    <string name="membership_note_on_hold">Google Play ödemeyi alamadı. İzlemeye devam etmek için Google Play\'de ödeme yöntemini güncelle.</string>
+    <string name="membership_subscribe_note">Google Play\'de yıllık %1$s</string>
+    <string name="membership_no_offer">Google Play\'den plan bilgisi gelmedi</string>
+    <string name="membership_recheck">Yeniden kontrol et</string>
+    <string name="membership_recheck_note">Google Play\'e aboneliğini yeniden sorar.</string>
+    <string name="membership_manage">Aboneliğini Google Play\'de yönetmek ya da iptal etmek için telefonunla okut.</string>
+    <string name="membership_manage_qr">Google Play aboneliklerinin QR kodu</string>
+    <plurals name="membership_free_days_left">
+        <item quantity="one">Ücretsiz haftanın %1$s günü kaldı</item>
+        <item quantity="other">Ücretsiz haftanın %1$s günü kaldı</item>
+    </plurals>
+    <plurals name="membership_row_free">
+        <item quantity="one">Ücretsiz: %1$s gün kaldı</item>
+        <item quantity="other">Ücretsiz: %1$s gün kaldı</item>
+    </plurals>
+    <plurals name="membership_note_free">
+        <item quantity="one">Ücretsiz haftanın %1$s günü kaldı. Sonra izlemek için Antenio Premium gerekir.</item>
+        <item quantity="other">Ücretsiz haftanın %1$s günü kaldı. Sonra izlemek için Antenio Premium gerekir.</item>
+    </plurals>
 </resources>

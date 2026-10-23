@@ -146,6 +146,12 @@ data class TvState(
      * a lock from the quick menu that was not saved.
      */
     val accessNotice: UiText? = null,
+    /** D121: the free week and Play's last answer, as this TV keeps them. */
+    val membership: Membership = Membership(),
+    /** What Play says now: the subscription and the yearly plan to buy. */
+    val billing: BillingState = BillingState(),
+    /** The membership screen is up: İzle after the free week, without the subscription. */
+    val paywall: Boolean = false,
     val revision: Int = 0
 ) {
     /**
@@ -176,8 +182,11 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     private val artwork = (application as TvApplication).artworkCache
     private var recoveryStamp: String? = null
     private val transactions = SourceTransactions.shared
-    private val mutable = MutableStateFlow(TvState(reducedMotion = store.reducedMotion, startupSound = store.startupSound, autoNextEpisode = store.autoNextEpisode, playback = store.playback, guideZoneId = store.guideZoneId, librarySorts = storedSorts(), startLastChannel = store.startLastChannel))
+    private val mutable = MutableStateFlow(TvState(reducedMotion = store.reducedMotion, startupSound = store.startupSound, autoNextEpisode = store.autoNextEpisode, playback = store.playback, guideZoneId = store.guideZoneId, librarySorts = storedSorts(), startLastChannel = store.startLastChannel, membership = store.membership))
     val state = mutable.asStateFlow()
+    private val billing = (application as TvApplication).billing
+    /** The free week's days-left note shows once each time the app starts. */
+    private var freeWeekNoted = false
     private var registry = SourceRegistry()
     private val liveRecall = LiveRecall()
     private var liveLists = LiveLists(Catalog(emptyList()))
@@ -235,6 +244,18 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         }
         // Outside the sources' screens what a PIN opened there ends (pin.md §3.8), whatever moved the route.
         viewModelScope.launch { state.map { it.route }.distinctUntilChanged().collect { if (it !in SourceScreens.routes) parental.leftSources() } }
+        // Play's answers about the membership (D121). A purchase that goes through closes the membership screen; İzle
+        // then plays.
+        viewModelScope.launch {
+            billing.state.collect { answer ->
+                val clock = System.currentTimeMillis()
+                keepMembership(state.value.membership.seen(clock).answered(if (answer.reachable) answer.status else PlayStatus.UNKNOWN, clock))
+                val opened = answer.status == PlayStatus.ACTIVE && state.value.paywall
+                mutable.update { it.copy(billing = answer, paywall = it.paywall && !opened) }
+                if (opened) notice(UiText.Res(R.string.membership_welcome))
+            }
+        }
+        billing.refresh()
         // The restore reads the PIN and its locks first.
         restore(atLaunch = true)
     }
@@ -252,6 +273,9 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     fun appStarted() {
         // Back without the lock screen, the player went on as it was: how it stood as the app left no longer counts.
         if (!parental.state.value.appLocked) stoppedPaused = false
+        // A subscription bought, cancelled or refunded elsewhere meanwhile (D121).
+        keepMembership(state.value.membership.seen(System.currentTimeMillis()))
+        billing.refresh()
     }
     fun appStopped() {
         parental.stopped()
@@ -1107,7 +1131,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
             is AccessTarget.ChannelNumber -> startLive(entry, ChannelScope(sourceId = liveScope().sourceId?.takeIf { it == entry.sourceId }), PickOrigin.NUMBER)
             is AccessTarget.ChannelStep -> startLive(entry, state.value.liveScope, target.origin)
             is AccessTarget.ChannelPick -> startLive(entry, target.scope ?: state.value.liveScope, target.origin)
-            is AccessTarget.NextEpisode -> startPlayback(entry, restart = true)
+            // The countdown's own start does not open the membership screen; the player ends as without a next episode.
+            is AccessTarget.NextEpisode -> startPlayback(entry, restart = true, prompt = !target.automatic)
         }
     }
 
@@ -1226,11 +1251,13 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
 
     /**
      * Starts [entry] in the player. Only an allowed target reaches here, with the entry the gate found; anything that
-     * plays later (a detail's resume, the hero's episode) calls [continueWith], which asks the gate again then.
+     * plays later (a detail's resume, the hero's episode) calls [continueWith], which asks the gate again then. Every
+     * playback starts here, so the membership is asked here (D121); [prompt] is false for what starts on its own.
      */
     private fun startPlayback(entry: MediaEntry, restart: Boolean = false, scope: ChannelScope? = null,
-        origin: PickOrigin? = null) {
+        origin: PickOrigin? = null, prompt: Boolean = true) {
         val source = state.value.sourceFor(entry) ?: return
+        if (!mayPlay(prompt)) return
         try {
             val uri = source.streamUrl(entry)
             val position = if (restart || entry.kind == MediaKind.LIVE) 0 else store.progress(source.id, entry.withoutSource().id)?.takeIf { it.resumable }?.resumeMs ?: 0
@@ -1245,6 +1272,43 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
                 error = null) }
         } catch (e: SourceFailure) { mutable.update { it.copy(detailError = e.text) } }
     }
+
+    /**
+     * D121: the free week or the subscription lets a playback start; the first playback starts the week, and while it
+     * runs the days left show once each time the app starts. Without either, [prompt] leaves the player and opens the
+     * membership screen; what starts on its own (the last channel at launch, the next episode's countdown) only stops.
+     */
+    private fun mayPlay(prompt: Boolean): Boolean {
+        val clock = System.currentTimeMillis()
+        val seen = state.value.membership.seen(clock)
+        if (seen.mayWatch(clock)) {
+            val started = seen.started(clock)
+            keepMembership(started)
+            if (!started.subscribed(clock) && !freeWeekNoted) started.freeDaysLeft(clock)?.let { days ->
+                freeWeekNoted = true
+                notice(UiText.Plural(R.plurals.membership_free_days_left, days))
+            }
+            return true
+        }
+        keepMembership(seen)
+        if (prompt) {
+            if (state.value.route == Route.PLAYER) back()
+            mutable.update { it.copy(paywall = true) }
+            billing.refresh()
+        }
+        return false
+    }
+
+    private fun keepMembership(value: Membership) {
+        if (value == state.value.membership) return
+        store.membership = value
+        mutable.update { it.copy(membership = value) }
+    }
+
+    fun closePaywall() { mutable.update { it.copy(paywall = false) } }
+    /** Opens Play's purchase window for the yearly plan; false when Play has offered no plan yet. */
+    fun subscribe(activity: android.app.Activity): Boolean = billing.buy(activity).also { if (!it) billing.refresh() }
+    fun refreshMembership() = billing.refresh()
 
     private fun startLive(entry: MediaEntry, scope: ChannelScope, origin: PickOrigin) {
         if (entry.id != state.value.playing?.entry?.id) startPlayback(entry, scope = scope, origin = origin)
@@ -1270,7 +1334,8 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         val target = AccessTarget.Play(id)
         val result = AccessGate.decide(target, gateSnapshot(target))
         if (result is GateResult.Allow && result.entry.kind == MediaKind.LIVE)
-            startPlayback(result.entry, scope = ChannelScope(sourceId = state.value.sourceFilterId?.takeIf { it == result.entry.sourceId }), origin = PickOrigin.AUTOSTART)
+            startPlayback(result.entry, scope = ChannelScope(sourceId = state.value.sourceFilterId?.takeIf { it == result.entry.sourceId }),
+                origin = PickOrigin.AUTOSTART, prompt = false)
     }
 
     fun startLastChannel(enabled: Boolean) {

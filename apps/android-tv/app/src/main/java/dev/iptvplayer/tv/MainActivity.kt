@@ -19,6 +19,8 @@ import androidx.media3.common.util.UnstableApi
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import dev.iptvplayer.tv.data.ArtworkCache
+import dev.iptvplayer.tv.data.Billing
+import dev.iptvplayer.tv.data.PlayBilling
 import dev.iptvplayer.tv.ui.PilotApp
 import dev.iptvplayer.tv.ui.PilotTheme
 
@@ -33,6 +35,12 @@ class TvApplication : Application(), SingletonImageLoader.Factory {
     }
     internal val artworkCache by lazy { ArtworkCache(this) }
     override fun newImageLoader(context: android.content.Context): ImageLoader = artworkCache.loader
+    /** Google Play's side of the membership (D121), one for the app; tests set [billingFactory] before it is made. */
+    internal val billing: Billing by lazy { billingFactory?.invoke(this) ?: PlayBilling(this) }
+
+    companion object {
+        @androidx.annotation.VisibleForTesting internal var billingFactory: ((Context) -> Billing)? = null
+    }
 }
 
 class MainActivity : ComponentActivity() {

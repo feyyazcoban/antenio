@@ -14,13 +14,15 @@ Yeni akış (D121 dışındaki ayrıntılar öneridir):
 2. **Ücretsiz hafta ilk oynatmada başlar** (öneri): kullanıcı listesini bir hafta sonra eklese de 7 gün izler. Süre dolana kadar Ayarlar → Üyeliğim'de ve oynatıcı açılırken kısa bir "N gün kaldı" notu görünür (öneri).
 3. **8. gün ve sonrasında "İzle":** üyelik ekranı çıkar. Ekranda yıllık fiyat (Google'dan okunur, vergiler dahil), her yıl kendiliğinden yenilendiği, iptal yolu, koşulların bağlantısı ve görünür bir "Kapat" bulunur. "Abone ol" Google Play'in ödeme penceresini açar; ücret o an alınır.
 4. **İzleme dışında her şey açık kalır** (öneri, eski §2 madde 11).
-5. **Haftanın sayılması:** Başlangıç zamanı yalnız bu cihazda, şifreli ve sıfırlamalardan (kaynak kurtarma, "Her şeyi sıfırla") etkilenmeyen bir anahtarda tutulur. Sunucu olmadığı için uygulamayı silip yeniden kurmak haftayı yeniden başlatabilir; kaynağın yeniden eklenmesi gerektiği için caydırıcıdır. Bu risk ilk yayında kabul edilir, hesap ve sunucu gelince kapanır (öneri). Cihaz saati geri alınırsa haftanın uzamaması için son görülen zaman da saklanır (öneri).
+5. **Haftanın sayılması:** Başlangıç zamanı yalnız bu cihazda, uygulamanın özel depolamasında ve sıfırlamalardan (kaynak kurtarma, "Her şeyi sıfırla") etkilenmeyen bir anahtarda (`DeviceKeys.membership`) tutulur. Sunucu olmadığı için uygulamayı silip yeniden kurmak haftayı yeniden başlatabilir; kaynağın yeniden eklenmesi gerektiği için caydırıcıdır. Bu risk ilk yayında kabul edilir, hesap ve sunucu gelince kapanır (öneri). Cihaz saati geri alınırsa haftanın uzamaması için son görülen zaman da saklanır (öneri).
 6. **Google incelemesi:** İnceleme ekibi ilk hafta her şeyi ücretsiz gördüğü için eski Risk 6 (ödeme duvarının arkasına erişim) büyük ölçüde çözülür; talimata ücretsiz haftadan söz eden bir cümle eklenir.
 7. **Hukuk açısından:** Deneme sonunda kendiliğinden ücrete dönüşme olmadığı için eski Risk 3'teki "denemeden ücretliye dönüş" sorusu düşer; otomatik yıllık yenileme, iade ve iptal soruları (§7) sürer.
 
 Play Console (öneri adlar): abonelik `antenio_premium`, temel plan `yearly` (otomatik yenilenen), teklif yok. Önce ödeme kütüphanesi içeren bir sürümün kapalı teste yüklenmesi ve ödeme profilinin (banka hesabı) kurulması gerekir; ödeme profili mali müşavir görüşmesinden sonra.
 
 Kod tahmini yine yaklaşık 3 hafta (ölçülmedi): Play deneme teklifi metni yerine uygulamanın kendi haftası gelir; sayaç ve "N gün kaldı" notu yaklaşık 1 gün ekler, teklif ve uygunluk işleri düşer.
+
+**Kod durumu (0.17.0, 24 Ekim):** Uygulama tarafı yazıldı: `data/Membership.kt` (hafta, saat geri alınması, Play durumu, 3 günlük güven süresi), `data/PlayBilling.kt` (Play Billing Library 9.1.0, onaylama cihazda), `TvViewModel.startPlayback` içindeki tek kapı, `ui/MembershipScreen.kt` (üyelik ekranı) ve Ayarlar → Üyelik. Gerçek satın alma denenmedi: Play Console'da `antenio_premium` / `yearly` yok. Kalanlar: ödeme profili, ürün, lisans test kullanıcılarıyla gerçek deneme, koşullar sayfası (ekrandaki QR `antenio.app/terms` ve `antenio.app/kosullar`'a gider; sayfalar yok), mağaza metni, IARC "dijital satın alma" = evet, Data safety (kütüphane Google'ın datatransport paketini ve Play services'ı getiriyor; konum izni eklenmiyor, beyan etkisi kontrol edilecek), gizlilik politikası.
 
 ## Kısaca
 

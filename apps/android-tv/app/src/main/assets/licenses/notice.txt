@@ -11,6 +11,12 @@ Apache License 2.0
 - Coil: Copyright Coil Contributors
 - JSpecify: Copyright The JSpecify Authors
 - Material Symbols icons: Copyright Google LLC
+- Google Data Transport and Firebase Encoders: Copyright Google LLC
+- javax.inject: Copyright The JSR-330 Expert Group
+
+Android Software Development Kit License (https://developer.android.com/studio/terms)
+- Google Play Billing Library: Copyright Google LLC
+- Google Play services Base, Basement, Location, Place Report and Tasks: Copyright Google LLC
 
 MIT License
 - QR Code generator library: Copyright (c) Project Nayuki

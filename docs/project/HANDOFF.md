@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · 0.17.0 abonelik altyapısı · 24 Ekim 2026
+
+Kodun haritası SUBSCRIPTION "24 Ekim güncellemesi"nin sonundaki "Kod durumu"nda. Emülatörde haftayı bitirmek için (debug paket): `adb shell am force-stop app.antenio.tv`, sonra `run-as app.antenio.tv` ile `shared_prefs/device_state.xml` içindeki `membership` değerini `<8 gün önce ms>;<aynı>;UNKNOWN;0` yap. Emülatörde Play Store var ama hesap yok; Play "plan yok" der.
+
+0.17.0'ı kapalı teste **yükleme**: ürün Play'de tanımlanmadan yüklenirse testçiler 7 gün sonra plan bilgisi olmayan bir üyelik ekranına takılır. Sıra: mali müşavir → ödeme profili → 0.17.0'ı yalnız dahili teste (internal testing) yükle (Play, abonelik ürünü oluşturmak için BILLING izinli bir sürüm ister; doğrulanacak) → `antenio_premium` aboneliği, `yearly` temel planı, teklif yok → lisans test kullanıcılarıyla gerçek deneme → kapalı test ve üretim. Fiyat açık (öneri: ABD 7,99 $ civarı; rakip verisi `claude/play-store-competitor-analysis-163803` dalındaki `docs/research/PLAY_COMPETITORS.md`, main'e birleşmedi).
+
 ## Claude · 0.16.3 lisans sayfası ve HTTP uyarısı · 23 Ekim 2026
 
 Emülatörün saati açılışta bir hafta geride kalıyor (16 Ekim) ve root izni yok; antenio.app'in yeni sertifikası bu yüzden emülatörde "güvenli bağlantı kurulamadı" veriyor. Site sağlam (bilgisayardan 200). Emülatörde inceleme listesi için `apps/web/review` klasörünü `python -m http.server 8766` ile sunup `http://10.0.2.2:8766/demo.m3u` ekle.

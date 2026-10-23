@@ -179,6 +179,11 @@ import androidx.compose.ui.input.key.type
                         settings = false; model.closeSettings()
                     }
                     AppOverlayHost(overlays, state, model)
+                    if (state.paywall) {
+                        val activity = LocalActivity.current
+                        MembershipDialog(state.billing, subscribe = { activity?.let { model.subscribe(it) } },
+                            retry = { model.refreshMembership() }, close = { model.closePaywall() })
+                    }
                     state.accessNotice?.let { notice -> AccessNote(notice.resolve()) { model.accessNoticeShown() } }
                     state.importSummary?.let { summary ->
                         if (screen == Route.HOME || screen == Route.SOURCES) ImportReady(summary, home = screen == Route.HOME,

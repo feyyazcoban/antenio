@@ -102,10 +102,15 @@ internal object DeviceKeys {
     val appLanguage = DeviceKey("appLanguage", KeyScope.DEVICE, reset = false, BackupClass.SETTINGS)
     /** That this TV's Android 13 or later took over [appLanguage] once; another TV starts its own handover. */
     val appLanguageHandedOver = DeviceKey("appLanguageHandedOver", KeyScope.DEVICE, reset = false, BackupClass.NONE)
+    /**
+     * D121: when the free week began and what Play last said (Membership.encode). Starting over keeps it, or "Her şeyi
+     * sıfırla" would give another week; no backup carries it to another TV.
+     */
+    val membership = DeviceKey("membership", KeyScope.DEVICE, reset = false, BackupClass.NONE)
 
     val all = listOf(sources, legacySource, legacyProgress, progress, favorites, history, lastLive, startLastChannel, reducedMotion, startupSound,
         guideZone, librarySort, hiddenCategories, hideAdultCategories, autoNextEpisode, audioLanguage, subtitleLanguage,
-        subtitlesOff, playback, appLanguage, appLanguageHandedOver)
+        subtitlesOff, playback, appLanguage, appLanguageHandedOver, membership)
 
     /** The entry a stored [key] falls under; null for a key no Antenio build wrote. */
     fun find(key: String): DeviceKey? = all.firstOrNull { it.matches(key) }

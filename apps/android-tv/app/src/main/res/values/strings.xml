@@ -918,4 +918,46 @@
     <string name="player_stream_info">Stream details</string>
     <string name="player_stream_info_empty">Stream format details will appear once playback starts.</string>
     <string name="player_previous_channel">Previous channel</string>
+    <string name="settings_section_membership">Membership</string>
+    <string name="paywall_title">Subscribe to keep watching</string>
+    <string name="paywall_body">With Antenio Premium you keep watching your own source\'s channels, films and series. Antenio sells no channels. Your library, the guide and Settings stay open without a subscription.</string>
+    <string name="paywall_price">Antenio Premium: %1$s a year. It renews every year until you cancel.</string>
+    <string name="paywall_no_offer">Google Play did not send the plan. Check the connection and try again.</string>
+    <string name="paywall_cancel">Cancel anytime in Google Play on your phone or computer (g.co/play/subscriptions); the year you paid for stays.</string>
+    <string name="paywall_subscribe">Subscribe</string>
+    <string name="paywall_terms">Terms of use</string>
+    <string name="paywall_terms_url">https://antenio.app/terms</string>
+    <string name="paywall_terms_qr">QR code of the terms of use</string>
+    <string name="membership_welcome">Antenio Premium is on. Enjoy watching.</string>
+    <string name="membership_row_not_started">7 days free from your first playback</string>
+    <string name="membership_row_ended">Free week over</string>
+    <string name="membership_row_active">Antenio Premium is on</string>
+    <string name="membership_row_cancelled">Cancelled; on until the year ends</string>
+    <string name="membership_row_pending">Payment pending</string>
+    <string name="membership_row_on_hold">Payment problem</string>
+    <string name="membership_note_not_started">Your free week starts the first time you watch. After 7 days, watching needs Antenio Premium; everything else stays open.</string>
+    <string name="membership_note_ended">Your free week is over. Subscribe to Antenio Premium to watch.</string>
+    <string name="membership_note_active">Antenio Premium is on. It renews every year until you cancel it in Google Play.</string>
+    <string name="membership_note_cancelled">Antenio Premium stays on until the end of the year you paid for. It will not renew.</string>
+    <string name="membership_note_pending">Your payment is pending. Antenio Premium turns on once Google Play confirms it.</string>
+    <string name="membership_note_on_hold">Google Play could not take the payment. Update your payment method in Google Play to keep watching.</string>
+    <string name="membership_subscribe_note">%1$s a year in Google Play</string>
+    <string name="membership_no_offer">Google Play did not send the plan</string>
+    <string name="membership_recheck">Check again</string>
+    <string name="membership_recheck_note">Asks Google Play about your subscription again.</string>
+    <string name="membership_manage">Scan with your phone to manage or cancel your subscription in Google Play.</string>
+    <string name="membership_manage_url" translatable="false">https://g.co/play/subscriptions</string>
+    <string name="membership_manage_qr">QR code of Google Play subscriptions</string>
+    <plurals name="membership_free_days_left">
+        <item quantity="one">%1$s day of your free week left</item>
+        <item quantity="other">%1$s days of your free week left</item>
+    </plurals>
+    <plurals name="membership_row_free">
+        <item quantity="one">Free: %1$s day left</item>
+        <item quantity="other">Free: %1$s days left</item>
+    </plurals>
+    <plurals name="membership_note_free">
+        <item quantity="one">%1$s day of your free week is left. After that, watching needs Antenio Premium.</item>
+        <item quantity="other">%1$s days of your free week are left. After that, watching needs Antenio Premium.</item>
+    </plurals>
 </resources>

@@ -53,4 +53,4 @@
 - ~~Yükleme anahtarıyla `bundleRelease`~~ yapıldı: 0.16.0 (108), `apps/android-tv/app/build/outputs/bundle/release/app-release.aab`, imza CN=Antenio.
 - ~~Mağaza görselleri için sentetik içerik~~ yapıldı (`tools/make_showcase_source.py`).
 - ~~Lisans sayfası ve HTTP kaynak uyarısı~~ yapıldı (0.16.3, kullanıcı: "başla"); 24 Ekim gece kapalı teste yüklendi ve incelemeye gönderildi. Kalan: gizlilik politikasına HTTP cümlesi.
-- Abonelik ve 7 günlük deneme (BKL-048): kullanıcının kararından sonra.
+- Abonelik (BKL-048, D121): uygulama tarafı 0.17.0'da yazıldı, Play'e yüklenmedi. Kalan kod dışı işler: koşullar sayfası (antenio.app/terms, /kosullar), mağaza metni, IARC ve Data safety güncellemesi, gizlilik politikası; Play'de ürün ve lisans testi.
