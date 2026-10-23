@@ -1,5 +1,9 @@
 # Proje durumu
 
+## Eski NEXTV uygulaması TV'den kaldırıldı · 23 Ekim 2026
+
+Kullanıcının açık onayıyla ("Evet, eski NEXTV uygulamasını ve verisini TV'den kaldır.") fiziksel TV'den `dev.iptvplayer.tv.pilot` (0.14.90) verisiyle birlikte kaldırıldı (`adb uninstall`, Success). TV'de yalnız `app.antenio.tv` 0.15.0 var; kaynak, favoriler ve geçmiş Antenio'da yeniden oluşacak. TV uykudaydı ve uyandırılmadı.
+
 ## 0.15.0 · Uygulama Antenio adına ve app.antenio.tv kimliğine geçti (BKL-045) · 23 Ekim 2026
 
 Kullanıcı: "BKL-045'e başla: uygulamayı Antenio adına ve app.antenio.tv kimliğine geçir." Uygulama kimliği `app.antenio.tv` (D119), görünen ad "Antenio", User-Agent "Antenio AndroidTV" ve "Antenio/<sürüm> AndroidTV", iki dildeki metinler, telefon kurulum sayfası, yatay logo, menü yazısı, TV afişi ve açılış animasyonu yeni adla. Logo geçicidir: NEXTV'nin piksel ızgarasında "ANTENIO" (ANTEN beyaz, IO nane), oynatma amblemi korundu; kaynak `design/brand/antenio-yatay.svg` ve `antenio-dikey.svg`. Yükleme anahtarı değişkenleri `ANTENIO_RELEASE_*` oldu. 386 JVM testi (1 atlandı, 0 hata), androidTest derlemesi ve release başarılı. TV'ye yeni uygulama olarak kuruldu (`Antenio_TV_Design_Preview_0.15.0.apk`, SHA-256 d152bfc1…0859); TV uykudaydı, görsel doğrulama yapılmadı. Eski NEXTV uygulaması (0.14.90) ve verisi TV'de ayrı duruyor; Antenio'da kaynak yeniden eklenmeli.

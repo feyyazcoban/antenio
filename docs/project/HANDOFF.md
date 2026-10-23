@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Eski NEXTV kurulumu kaldırıldı · 23 Ekim 2026
+
+Kullanıcı onayıyla TV'den `dev.iptvplayer.tv.pilot` kaldırıldı; paket listesinde yalnız `app.antenio.tv` (0.15.0) kaldı. Bundan sonraki TV kurulumları `install -r releases/Antenio_TV_Design_Preview_<sürüm>.apk` ile yapılır ve `app.antenio.tv` kimliği doğrulanır.
+
+Tam sonraki adım: kullanıcı Antenio'yu açıp kaynağını yeniden eklesin ve yeni logoyu, açılışı ve afişi görsün.
+
 ## Claude · BKL-045 Antenio geçişi /0.15.0 · 23 Ekim 2026
 
 Değişenler: `app/build.gradle.kts` (`applicationId = "app.antenio.tv"`, 106/0.15.0, `ANTENIO_RELEASE_*`), manifest etiketi, `strings.xml` ×2, `SourceHttp` User-Agent, `assets/setup/index.html`, `BrandLogo` (eski `NextvLogo`, `R.drawable.brand_logo`), `brand_wordmark`, `ic_splash_mark` (eski `ic_nextv_splash_mark`), `app_banner`, `LaunchCover` (`BrandGlyphs`, `GroupW = 429.025f`, `MarkShift`). Logo dosyaları `scratchpad`taki `antenio_logo.py` mantığıyla üretildi: N/T/E eski yollar, A/I/O aynı ızgarada hücrelerden; çerçeveler even-odd dolgu. androidTest manifesti ve `tools/run-device-tests.sh`, `tools/check_cold_catalog.py` yeni kimlikte. `namespace` `dev.iptvplayer.tv` (iç ad) değişmedi; `MainActivity` bileşeni `app.antenio.tv/dev.iptvplayer.tv.MainActivity`. Sabit metin testine "Antenio" marka adı izinli olarak eklendi.
