@@ -52,5 +52,5 @@
 - ~~Ayarlar → Uygulama hakkında'ya gizlilik bağlantısı~~ yapıldı (0.15.1: QR kodu ve adres).
 - ~~Yükleme anahtarıyla `bundleRelease`~~ yapıldı: 0.16.0 (108), `apps/android-tv/app/build/outputs/bundle/release/app-release.aab`, imza CN=Antenio.
 - ~~Mağaza görselleri için sentetik içerik~~ yapıldı (`tools/make_showcase_source.py`).
-- Lisans sayfası ve HTTP kaynak uyarısı: kullanıcı (23 Ekim): "başla".
+- ~~Lisans sayfası ve HTTP kaynak uyarısı~~ yapıldı (0.16.3, kullanıcı: "başla"); AAB hazır, Play'e yüklenmesi kullanıcı onayı bekliyor. Kalan: gizlilik politikasına HTTP cümlesi.
 - Abonelik ve 7 günlük deneme (BKL-048): kullanıcının kararından sonra.

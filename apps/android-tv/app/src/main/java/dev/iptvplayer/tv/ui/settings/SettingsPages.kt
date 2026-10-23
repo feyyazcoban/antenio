@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -100,7 +101,9 @@ private val contentPage = SettingsRoute.Page("content")
 private val libraryPage = SettingsRoute.Page("library")
 private val removeSourcePage = SettingsRoute.Page("remove-source")
 private val clearHistoryPage = SettingsRoute.Page("clear-history")
+private val aboutSectionPage = SettingsRoute.Page("about-section")
 private val aboutPage = SettingsRoute.Page("about")
+private val licensesPage = SettingsRoute.Page("licenses")
 private val categoriesPage = SettingsRoute.Page("categories")
 private val categoryKinds = listOf(MediaKind.LIVE, MediaKind.MOVIE, MediaKind.SERIES)
 private fun categoryListPage(kind: MediaKind) = SettingsRoute.Page("category-list:${kind.name}")
@@ -123,7 +126,9 @@ internal val settingsPageList: List<SettingsPageSpec> = listOf(
             model.clearHistory(); false
         }
     },
+    SettingsPageSpec(aboutSectionPage.id, UiText.Res(SectionId.ABOUT.label), SectionId.ABOUT) { AboutSection() },
     SettingsPageSpec(aboutPage.id, UiText.Res(R.string.settings_about), SectionId.ABOUT, body = PageBody.READING) { About() },
+    SettingsPageSpec(licensesPage.id, UiText.Res(R.string.settings_about_licenses), SectionId.ABOUT, body = PageBody.READING) { Licenses() },
     // Its lists name the adult categories and can show them again (pin.md §2).
     SettingsPageSpec(categoriesPage.id, UiText.Res(R.string.settings_categories), SectionId.CONTENT,
         PageGuard.Pin(AdminReason.CATEGORIES), PageBody.SHORT_LIST) { CategoryKinds() },
@@ -155,7 +160,7 @@ private fun readIn(text: String, languages: List<String>): AnnotatedString = bui
     PageRow(contentPage.id, stringResource(SectionId.CONTENT.label), stringResource(R.string.settings_section_content_note), contentPage)
     PageRow(playerPage.id, stringResource(SectionId.PLAYER.label), stringResource(R.string.settings_section_player_note), playerPage)
     PageRow(libraryPage.id, stringResource(SectionId.LIBRARY.label), stringResource(R.string.settings_section_library_note), libraryPage)
-    PageRow(aboutPage.id, stringResource(SectionId.ABOUT.label), stringResource(R.string.settings_about_note), aboutPage)
+    PageRow(aboutSectionPage.id, stringResource(SectionId.ABOUT.label), stringResource(R.string.settings_about_note), aboutSectionPage)
 }
 
 /** Genel ve dil: motion, the app's language and the startup sound. */
@@ -262,12 +267,56 @@ private fun readIn(text: String, languages: List<String>): AnnotatedString = bui
     NoteRow(stringResource(R.string.settings_about_privacy_note))
     PrivacyPolicy()
     Spacer(Modifier.height(6.dp))
-    SettingsLabel(stringResource(R.string.settings_about_licenses))
-    NoteRow(stringResource(R.string.settings_about_licenses_note))
-    Spacer(Modifier.height(6.dp))
     SettingsLabel(stringResource(R.string.settings_about_release))
     NoteRow(stringResource(R.string.settings_about_release_note))
 }
+
+/** Hakkında: the app's own page and the open source licenses, each a page of text. */
+@Composable private fun SettingsScope.AboutSection() {
+    PageRow(aboutPage.id, stringResource(R.string.settings_about), stringResource(R.string.settings_about_app_note), aboutPage)
+    PageRow(licensesPage.id, stringResource(R.string.settings_about_licenses), stringResource(R.string.settings_licenses_note), licensesPage)
+}
+
+/** A license file of assets/licenses, under its [heading] on Açık kaynak lisansları. */
+internal class LicenseText(@param:StringRes val heading: Int, val file: String)
+
+/** What Açık kaynak lisansları shows, in order: the software in the app and who holds its copyright, then each license. */
+internal val licenseTexts = listOf(
+    LicenseText(R.string.settings_licenses_software, "notice.txt"),
+    LicenseText(R.string.settings_licenses_apache, "apache-2.0.txt"),
+    LicenseText(R.string.settings_licenses_mit, "mit-qrcodegen.txt"),
+    LicenseText(R.string.settings_licenses_ofl, "roboto-ofl.txt"))
+
+/**
+ * Açık kaynak lisansları (LAUNCH_AUDIT R2): the licenses ask for their full text and the copyright notices to reach
+ * whoever gets the app. The texts stay in English, the language they are written in.
+ */
+@Composable private fun SettingsScope.Licenses() {
+    val assets = LocalContext.current.assets
+    NoteRow(stringResource(R.string.settings_licenses_intro))
+    licenseTexts.forEach { license ->
+        val text = remember(license) { reflowLicense(assets.open("licenses/${license.file}").bufferedReader().use { it.readText() }) }
+        Spacer(Modifier.height(6.dp))
+        SettingsLabel(stringResource(license.heading))
+        NoteRow(text)
+    }
+}
+
+private val listItem = Regex("^([-*•]|\\d+[.)]|\\([a-z0-9]+\\))\\s")
+
+/**
+ * [text] as paragraphs that wrap to the panel: a license file breaks its lines near 80 columns, which would leave a
+ * ragged half line after each in the 440 dp panel. A blank line parts paragraphs, a list item ("- ", "1. ", "(a) ")
+ * starts a line of its own, and rules of dashes go.
+ */
+internal fun reflowLicense(text: String): String =
+    text.replace("\r\n", "\n").split(Regex("\n[ \t]*\n")).mapNotNull { block ->
+        val lines = block.lines().map { it.trim() }.filter { line -> line.isNotEmpty() && !line.all { it == '-' || it == '=' } }
+        lines.firstOrNull()?.let { first ->
+            lines.drop(1).fold(StringBuilder(first)) { out, line -> out.append(if (listItem.containsMatchIn(line)) "\n" else " ").append(line) }
+                .toString()
+        }
+    }.joinToString("\n\n")
 
 /**
  * The published privacy policy (Play asks for it inside the app too, E4) as a QR code with its address beside it: most

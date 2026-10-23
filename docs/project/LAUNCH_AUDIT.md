@@ -49,8 +49,8 @@ Gerekçeler ve kaynaklar [Play hazırlığı](PLAY_STORE_READINESS.md) (0.14.42)
 | # | Konu | Kanıt | Öneri |
 |---|---|---|---|
 | R1 | Açılış sesinin lisans belgesi yok | D062, BKL-022. .82'deki izlenmeyen `assets/licenses/SPLASH-CHIME-LICENSE.txt` projenin kendi beyanı; hak sahibinden alınmış bir lisans değil | Belge ya da yeni ses |
-| R2 | Açık kaynak lisans ekranı yok | `assets/licenses/Roboto-OFL.txt` APK'da ama gösterilmiyor. .82 notu yalnız özet. | Tam metinli lisans sayfası (Apache 2.0, NOTICE, OFL) |
-| R3 | Bütün uygulamada şifresiz HTTP açık; HTTP kaynakta uyarı yok | `AndroidManifest.xml:19`, `data/Models.kt:26-34` | Kaynak eklerken kısa uyarı; politikada açıklama |
+| R2 | ~~Açık kaynak lisans ekranı yok~~ **0.16.3'te kapandı** | Ayarlar → Hakkında → Açık kaynak lisansları: telif listesi, Apache 2.0, MIT ve OFL tam metin (`assets/licenses`). | Bağımlılık eklenince `notice.txt` güncellenir |
+| R3 | Bütün uygulamada şifresiz HTTP açık; ~~HTTP kaynakta uyarı yok~~ uyarı 0.16.3'te eklendi | `AndroidManifest.xml:19`; `data/Models.kt` `isUnencrypted` | Kalan: politikada açıklama |
 | R4 | Arayüzde "Xtream Codes" geçiyor | `res/values/strings.xml:197`, `ui/PilotApp.kt:261`, `ui/SourcesScreen.kt:213` | "Xtream API uyumlu" (karar sizin) |
 | R5 | Sürüm adı akış User-Agent'ına gidiyor | `data/SourceHttp.kt:16` → `NEXTV/0.14.77-design-preview` | Üretimde `-design-preview` eki kalkmalı |
 | R6 | Çökme raporu yok | Yalnız Android vitals | Her sürümde R8 mapping dosyası Console'a yüklenmeli |

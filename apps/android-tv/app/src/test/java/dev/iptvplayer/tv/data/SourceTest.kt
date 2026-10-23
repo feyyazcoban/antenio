@@ -164,6 +164,14 @@ class SourceTest {
         }
     }
 
+    @Test fun onlyPlainHttpAddressesAreUnencrypted() {
+        assertTrue(isUnencrypted("http://example.com:8080"))
+        assertTrue(isUnencrypted("  HTTP://example.com/get.php?username=a&password=b "))
+        assertFalse(isUnencrypted("https://example.com"))
+        assertFalse(isUnencrypted(""))
+        assertFalse(isUnencrypted("example.com"))
+    }
+
     @Test fun largeCatalogKeepsEveryUniqueEntry() {
         val text = buildString { append("#EXTM3U\n"); repeat(63_175) { append("#EXTINF:-1 group-title=\"Test\",Channel $it\nhttps://example.com/live/$it.ts\n") } }
         assertEquals(63_175, M3uParser.parse(text.reader(), "https://example.com/list").items.size)

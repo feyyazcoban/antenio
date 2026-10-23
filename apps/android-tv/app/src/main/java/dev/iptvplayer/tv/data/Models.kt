@@ -98,6 +98,13 @@ data class SourceConfig(
     }
 }
 
+/**
+ * Whether [address] is a plain http:// one: the link, and an account's username and password with it, cross the network
+ * unencrypted. The setup screens say so before the source is added (LAUNCH_AUDIT R3); it is still allowed, as many
+ * providers offer nothing else.
+ */
+fun isUnencrypted(address: String): Boolean = address.trim().toHttpUrlOrNull()?.isHttps == false
+
 @androidx.compose.runtime.Immutable
 data class MediaEntry(
     val id: String,

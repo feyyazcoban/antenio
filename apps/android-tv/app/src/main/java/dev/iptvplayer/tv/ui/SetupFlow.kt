@@ -41,6 +41,7 @@ import dev.iptvplayer.tv.data.PhoneSetupServer
 import dev.iptvplayer.tv.data.PhoneSetupSession
 import dev.iptvplayer.tv.data.PhoneSubmission
 import dev.iptvplayer.tv.data.SourceType
+import dev.iptvplayer.tv.data.isUnencrypted
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
@@ -304,6 +305,7 @@ private data class PhoneLink(val host: String, val port: Int) { val address get(
             EntryField(stringResource(R.string.setup_name), s.draft.name ?: defaultName, rename, Modifier.weight(1f))
             EntryField(stringResource(R.string.setup_guide), s.draft.epgUrl, guide, Modifier.weight(1.4f))
         }
+        if (isUnencrypted(s.draft.address)) HttpNote()
         Box(Modifier.heightIn(min = 19.dp).semantics { liveRegion = LiveRegionMode.Polite }) {
             s.error?.let { Note(it.resolve(), error = true, modifier = Modifier.testTag("setup-error")) }
         }
@@ -411,6 +413,7 @@ private data class PhoneLink(val host: String, val port: Int) { val address get(
                 CodeText(code, Ink.Mint, 24.dp)
             }
         }
+        if (isUnencrypted(sent.address)) HttpNote()
         Box(Modifier.heightIn(min = 19.dp).semantics { liveRegion = LiveRegionMode.Polite }) {
             if (error != null) Note(error, error = true, modifier = Modifier.testTag("setup-error"))
         }
@@ -420,6 +423,11 @@ private data class PhoneLink(val host: String, val port: Int) { val address get(
             Action(stringResource(R.string.action_cancel), outlined = true, onClick = cancel)
         }
     }
+}
+
+/** What an http:// address means for the account in it (isUnencrypted), before the source is added; it does not stop it. */
+@Composable internal fun HttpNote(modifier: Modifier = Modifier) {
+    Note(stringResource(R.string.setup_http_warning), modifier.widthIn(max = 720.dp).testTag("setup-http"))
 }
 
 @Composable private fun ConfirmRow(label: String, value: String) {

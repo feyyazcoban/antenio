@@ -250,6 +250,7 @@
     <string name="setup_account_hint">As your provider gave it. Press OK to type.</string>
     <string name="setup_name_title">Name this source</string>
     <string name="setup_name_hint">The name tells your sources apart. The guide address is optional.</string>
+    <string name="setup_http_warning">This address is not encrypted (http): your account details cross the network in the clear. Use an https:// address if your provider offers one.</string>
     <string name="setup_next">Next</string>
     <string name="setup_connect_now">Connect</string>
     <string name="setup_required">Fill this in to continue.</string>
@@ -570,7 +571,8 @@
     <string name="settings_auto_next_note">Continues 10 seconds after an episode ends. You can cancel the countdown.</string>
     <string name="settings_watch_history">Clear watch history</string>
     <string name="settings_watch_history_note">Removes watch positions in all sources; keeps your favorites.</string>
-    <string name="settings_about_note">Version and device information.</string>
+    <string name="settings_about_note">Version, privacy and open source licenses.</string>
+    <string name="settings_about_app_note">Version, device, library and privacy.</string>
     <string name="settings_remove_confirm">The source %1$s, its favorites and its watch history will be removed from this device.</string>
     <string name="settings_clear_history_confirm">Recent channels and watch positions in all sources will be removed from this device. Your favorites will be kept.</string>
     <string name="settings_clear_history">Clear history</string>
@@ -901,7 +903,12 @@
     <string name="settings_about_privacy_url">https://antenio.app/privacy</string>
     <string name="settings_about_privacy_qr">QR code for the privacy policy</string>
     <string name="settings_about_licenses">Open source licenses</string>
-    <string name="settings_about_licenses_note">Roboto font is licensed under the SIL Open Font License 1.1. AndroidX, Jetpack Compose, Media3 ExoPlayer, OkHttp, Coil and Material Symbols icons are licensed under the Apache License 2.0.</string>
+    <string name="settings_licenses_note">The open source software in the app and its licenses in full.</string>
+    <string name="settings_licenses_intro">Antenio is built with the open source software below. Their licenses follow in full, in English.</string>
+    <string name="settings_licenses_software">Software and copyright holders</string>
+    <string name="settings_licenses_apache" translatable="false">Apache License 2.0</string>
+    <string name="settings_licenses_mit" translatable="false">MIT License · QR Code generator</string>
+    <string name="settings_licenses_ofl" translatable="false">SIL Open Font License 1.1 · Roboto</string>
     <string name="settings_start_last_channel">Start on last watched channel</string>
     <string name="settings_start_last_channel_note">Opens the last live TV channel directly when Antenio launches. Locked channels open the Home screen instead.</string>
     <string name="player_aspect_title">Picture fit</string>

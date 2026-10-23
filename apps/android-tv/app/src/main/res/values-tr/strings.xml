@@ -243,6 +243,7 @@
     <string name="setup_account_hint">Sağlayıcının verdiği gibi. Yazmak için OK\'e bas.</string>
     <string name="setup_name_title">Kaynağa ad ver</string>
     <string name="setup_name_hint">Kaynaklarını adıyla ayırt edersin. Rehber adresi isteğe bağlı.</string>
+    <string name="setup_http_warning">Bu adres şifrelemesiz (http): hesap bilgilerin ağda açık gider. Sağlayıcın https:// ile başlayan bir adres sunuyorsa onu kullan.</string>
     <string name="setup_next">İleri</string>
     <string name="setup_connect_now">Bağlan</string>
     <string name="setup_required">Devam etmek için bunu doldur.</string>
@@ -563,7 +564,8 @@
     <string name="settings_auto_next_note">Bölüm bitince 10 saniye sonra devam eder. Geri sayımı iptal edebilirsin.</string>
     <string name="settings_watch_history">İzleme geçmişini temizle</string>
     <string name="settings_watch_history_note">Tüm kaynaklardaki izleme konumlarını siler; favorilerini korur.</string>
-    <string name="settings_about_note">Sürüm ve cihaz bilgileri.</string>
+    <string name="settings_about_note">Sürüm, gizlilik ve açık kaynak lisansları.</string>
+    <string name="settings_about_app_note">Sürüm, cihaz, kütüphane ve gizlilik.</string>
     <string name="settings_remove_confirm">%1$s kaynağı, bu kaynağın favorileri ve izleme geçmişi bu cihazdan silinecek.</string>
     <string name="settings_clear_history_confirm">Tüm kaynaklardaki son kanallar ve izleme konumları bu cihazdan kaldırılacak. Favorilerin korunacak.</string>
     <string name="settings_clear_history">Geçmişi temizle</string>
@@ -886,7 +888,9 @@
     <string name="settings_about_privacy_url">https://antenio.app/gizlilik</string>
     <string name="settings_about_privacy_qr">Gizlilik politikası için QR kodu</string>
     <string name="settings_about_licenses">Açık kaynak lisansları</string>
-    <string name="settings_about_licenses_note">Roboto yazı tipi SIL Open Font License 1.1 kapsamındadır. AndroidX, Jetpack Compose, Media3 ExoPlayer, OkHttp, Coil ve Material Symbols simgeleri Apache License 2.0 kapsamındadır.</string>
+    <string name="settings_licenses_note">Uygulamadaki açık kaynak yazılımlar ve tam lisans metinleri.</string>
+    <string name="settings_licenses_intro">Antenio aşağıdaki açık kaynak yazılımlarla yapıldı. Lisansların tam metni aşağıda; metinler özgün dilleri olan İngilizcedir.</string>
+    <string name="settings_licenses_software">Yazılımlar ve telif sahipleri</string>
     <string name="settings_start_last_channel">Açılışta son kanalı aç</string>
     <string name="settings_start_last_channel_note">Antenio açıldığında doğrudan son izlenen canlı TV kanalını başlatır. Kilitli kanallarda Ana sayfa açılır.</string>
     <string name="player_aspect_title">Görüntü sığdırma</string>

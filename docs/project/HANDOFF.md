@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · 0.16.3 lisans sayfası ve HTTP uyarısı · 23 Ekim 2026
+
+Emülatörün saati açılışta bir hafta geride kalıyor (16 Ekim) ve root izni yok; antenio.app'in yeni sertifikası bu yüzden emülatörde "güvenli bağlantı kurulamadı" veriyor. Site sağlam (bilgisayardan 200). Emülatörde inceleme listesi için `apps/web/review` klasörünü `python -m http.server 8766` ile sunup `http://10.0.2.2:8766/demo.m3u` ekle.
+
+Tam sonraki adım: kullanıcı onaylarsa 0.16.3 AAB'yi kapalı teste yükle (0.16.2 o sırada incelemedeyse yeni sürüm onun yerine geçer). Gizlilik politikasına HTTP kaynaklarla ilgili bir cümle eklenmesi (LAUNCH_AUDIT R3) açık.
+
 ## Claude · Mağaza görselleri ve inceleme listesi düzeltmesi · 23 Ekim 2026
 
 Görseller betiklerle yeniden üretilir: vitrin `python tools/make_showcase_source.py OUT http://10.0.2.2:8766` (OUT'tan `python -m http.server 8766` ile sun), çerçeveler `python tools/make_store_frames.py OUT/art`. Play'de görsel değiştirme: devralınan tr-TR görselleri silinemez, Türkçe görsel eklenince yerini alır; çok dosyalı yüklemede sıra bitiş sırasına göre olur, ilk görseli tek başına yükle.

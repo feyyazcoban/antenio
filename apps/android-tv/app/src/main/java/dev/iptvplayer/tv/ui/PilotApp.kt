@@ -277,6 +277,7 @@ import androidx.compose.ui.input.key.type
                 SetupEntry(stringResource(if (s.draft.type == SourceType.M3U) R.string.setup_m3u else R.string.setup_server), s.draft.address,
                     { model.draft(s.draft.copy(address = it)) }, secret = s.draft.type == SourceType.M3U,
                     modifier = fieldView(addressView), revealed = reveal)
+                if (isUnencrypted(s.draft.address)) HttpNote()
                 if (s.draft.type == SourceType.XTREAM) {
                     SetupEntry(stringResource(R.string.setup_username), s.draft.username, { model.draft(s.draft.copy(username = it)) },
                         modifier = fieldView(userView))

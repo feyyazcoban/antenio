@@ -1,0 +1,22 @@
+Apache License 2.0
+- AndroidX libraries, among them Jetpack Compose, Compose for TV, Media3 ExoPlayer, Activity, Lifecycle and Core: Copyright The Android Open Source Project
+- Accompanist Drawable Painter: Copyright The Android Open Source Project
+- Compose Multiplatform runtime and JetBrains Lifecycle and SavedState: Copyright JetBrains s.r.o. and The Android Open Source Project
+- Kotlin standard library: Copyright JetBrains s.r.o. and Kotlin Programming Language contributors
+- kotlinx.coroutines: Copyright 2016-2024 JetBrains s.r.o and contributors
+- kotlinx.serialization: Copyright JetBrains s.r.o. and contributors
+- JetBrains Java Annotations: Copyright JetBrains s.r.o.
+- Guava: Copyright The Guava Authors
+- OkHttp and Okio: Copyright Square, Inc.
+- Coil: Copyright Coil Contributors
+- JSpecify: Copyright The JSpecify Authors
+- Material Symbols icons: Copyright Google LLC
+
+MIT License
+- QR Code generator library: Copyright (c) Project Nayuki
+
+SIL Open Font License 1.1
+- Roboto font: Copyright 2011 The Roboto Project Authors
+
+Mozilla Public License 2.0
+- OkHttp includes data compiled from the Public Suffix List (https://publicsuffix.org/list/public_suffix_list.dat). It is subject to the terms of the Mozilla Public License, v. 2.0: https://mozilla.org/MPL/2.0/

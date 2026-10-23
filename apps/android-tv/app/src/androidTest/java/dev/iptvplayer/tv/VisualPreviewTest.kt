@@ -1025,8 +1025,10 @@ class VisualPreviewTest {
         click("Geri"); click("Ayarlar")
         shot("settings")
         ui.onNode(hasText("Hakkında") and hasClickAction()).performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
+        ui.waitForIdle()
+        ui.onNode(hasText("Uygulama hakkında") and hasClickAction()).performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
         shot("about")
-        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK); ui.waitForIdle(); instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
         shot("settings-bottom")
         click("Kapat"); click("Ara")
         ui.onNode(hasSetTextAction()).performTextReplacement("in")
