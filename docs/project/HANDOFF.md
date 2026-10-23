@@ -4,7 +4,7 @@
 
 Görseller betiklerle yeniden üretilir: vitrin `python tools/make_showcase_source.py OUT http://10.0.2.2:8766` (OUT'tan `python -m http.server 8766` ile sun), çerçeveler `python tools/make_store_frames.py OUT/art`. Play'de görsel değiştirme: devralınan tr-TR görselleri silinemez, Türkçe görsel eklenince yerini alır; çok dosyalı yüklemede sıra bitiş sırasına göre olur, ilk görseli tek başına yükle.
 
-Tam sonraki adım: kullanıcı onaylarsa mağaza değişikliklerini Yayın özeti'nden incelemeye gönder. Ayrı iş: afişlerin ilk açılışta boş kalması (Coil/ArtworkCache tekrar denemiyor olabilir).
+Tam sonraki adım: mağaza görselleri ve 0.16.2 kapalı test güncellemesi incelemede; sonucu Play Console'dan izle. Afişlerin ilk açılışta boş kalması 0.16.2'de düzeltildi (kopan bağlantı iki kez yeniden denenir). Play'deki uygulama erişimi talimatı hâlâ "Akamai" diyor; bir sonraki gönderimde düzelt.
 
 ## Claude · Play'e gönderim · 23 Ekim 2026
 

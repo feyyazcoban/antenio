@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.16.2: ilk açılışta boş kalan afişler düzeltildi, kapalı teste gönderildi · 23 Ekim 2026
+
+Kullanıcı: "İlk açılışta boş kalan afiş hatasını düzelt; testte güncelleme olarak yayınlayalım." Kök neden: liste ilk açıldığında çok sayıda görsel aynı anda istenir ve sunucu bazılarını yarıda kesiyordu (`ProtocolException: unexpected end of stream`); `Artwork` hatayı kalıcı sayıyordu, ancak uygulama yeniden açılınca geliyordu. Artık kopan bağlantı 1 ve 3 saniye sonra iki kez yeniden denenir; 404 gibi HTTP hataları denenmez (`artworkRetryDelay`, `ArtworkRetryTest`). Emülatörde vitrin listesi sıfırdan eklendi, uygulama yeniden başlatılmadan bütün afişler geldi. "110 (0.16.2)" kapalı test güncellemesi olarak 23 Ekim gece Google incelemesine gönderildi.
+
 ## Mağaza görselleri yenilendi; inceleme listesindeki bozuk yayın değiştirildi · 23 Ekim 2026
 
 `tools/make_showcase_source.py` yalnız ekran görüntüleri için sentetik bir vitrin (12 kanal, 12 film, 4 dizi, 3 günlük rehber, kodla çizilmiş afişler) üretir; yayımlanmaz. Sekiz yeni TV görüntüsü bununla çekildi; `tools/make_store_frames.py` EN/TR başlıklı çerçeveleri ve yeni tanıtım görselini üretir. Play'de mağaza kaydı güncellenip kaydedildi, incelemeye gönderilmedi. Bulunanlar: (1) uygulama aynı yayın adresli kayıtları teke indiriyor (`CatalogParser` kimliği adresten üretir; vitrinde adreslere `#` eki kondu); (2) **bazı afişler ilk açılışta boş kalıyor, uygulama yeniden açılınca geliyor** (sunucu 200 dönmesine rağmen; yerel ve uzak kaynakta görüldü; kök neden aranmadı); (3) Akamai canlı test yayını bozuk: inceleme listesinde Apple bipbop 16:9 ile değiştirildi, emülatörde oynadı, site yeniden yüklendi. Play kişisel hesabında "Geliştirici hakkında" bölümü yasal adı gösteriyor (D120 gereği beklenen).

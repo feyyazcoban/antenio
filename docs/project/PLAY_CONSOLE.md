@@ -22,6 +22,7 @@ Kullanıcı (16:20): "Dört beyanı onaylıyorum: hedef kitle 18+, veri toplanm�
 
 - Uygulama adı: Antenio IPTV Player · varsayılan dil: English (United States) · uygulama · ücretsiz.
 - Paket: `apps/android-tv/app/build/outputs/bundle/release/app-release.aab` (0.16.1, 109; imza CN=Antenio). 0.16.0 yüklenmedi; kullanıcının bildirdiği kategori noktası hatası düzeltildi.
+- İlk güncelleme "110 (0.16.2)": Kullanıcı: "İlk açılışta boş kalan afiş hatasını düzelt; testte güncelleme olarak yayınlayalım." Kapalı test - Alpha'da 2. sürüm olarak oluşturuldu; sürüm notu en-US "Posters and channel logos that failed to load on the first screen now load again on their own.", tr-TR "İlk ekranda yüklenemeyen afişler ve kanal logoları artık kendiliğinden yeniden yükleniyor." Tek uyarı yine hata ayıklama sembolü (engel değil); desteklenen cihaz sayısı değişmedi (TV 3.047). **23 Ekim 2026 gece incelemeye gönderildi** (Yayın özeti "İncelenmekte olan değişiklikler").
 - Uygulama imzalama: Google'ın ürettiği anahtarla Play App Signing (varsayılan). Bizim anahtar yalnız yükleme anahtarıdır.
 
 ## Mağaza kaydı
