@@ -1,5 +1,11 @@
 # Proje durumu
 
+## 0.15.1: Uygulama hakkında'da gizlilik politikası; destek adresi support@antenio.app · 23 Ekim 2026
+
+Kullanıcı: "Ayarlar → Uygulama hakkında'ya https://antenio.app/privacy bağlantısını ekle." Gizlilik bölümünün altında politikanın QR kodu (96 dp) ve adresi duruyor; TV'lerde çoğu zaman tarayıcı olmadığı için bağlantı açılmaz, telefonla okutulur. Adres arayüz diline göre: Türkçede https://antenio.app/gizlilik, İngilizcede /privacy (`settings_about_privacy_url`). Odaklı testler (NoHardcodedUiText, SettingsNav, LocaleController) ve `assembleDebug` geçti; TV'de görülmedi.
+
+Kullanıcı: "support@antenio.app olarak ekledim". ImprovMX takma adı `support` oldu; sitedeki, AGENTS'taki ve kullanıcı listesindeki adres support@antenio.app'e çevrildi. Sitenin Netlify'daki yayını yeni adresle yeniden yüklenmeli (Deploys → zip).
+
 ## antenio.app yayında; DNS kayıtları girildi · 23 Ekim 2026
 
 Kullanıcının isteğiyle ("chrome da sen yapar mısın dns'i falan", "netlify'ı da açıp giriş yaptım oradaki işi de hallet") Claude in Chrome ile kullanıcının oturumunda: GoDaddy'de A `@` "Parked" → 75.2.60.5, yeni MX `@` mx1/mx2.improvmx.com (10/20) ve TXT `@` SPF; yönlendirme kapalı. Netlify Drop'a site zip'i yüklendi, proje adı `antenio`, herkese açık yapıldı, antenio.app birincil alan adı (www yönleniyor), Let's Encrypt sertifikası alındı (antenio.app ve www, 21.01.2027'ye kadar). Dışarıdan doğrulandı: https://antenio.app, /gizlilik, /privacy 200. Site tek klasöre indirildi (`gizlilik.html`, `privacy.html`, `_redirects`). MX ve SPF kayıtları da yayına girdi (GoDaddy sunucusunda ve 1.1.1.1'de doğrulandı); ImprovMX hesabı kullanıcıda.

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
@@ -17,6 +18,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.intl.LocaleList
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.tv.material3.Text
 import dev.iptvplayer.tv.AppLanguage
 import dev.iptvplayer.tv.BuildConfig
 import dev.iptvplayer.tv.CatalogOperation
@@ -32,6 +35,10 @@ import dev.iptvplayer.tv.data.ParentalStatus
 import dev.iptvplayer.tv.data.UiText
 import dev.iptvplayer.tv.ui.Action
 import dev.iptvplayer.tv.ui.BrandLogo
+import dev.iptvplayer.tv.ui.Ink
+import dev.iptvplayer.tv.ui.Note
+import dev.iptvplayer.tv.ui.QrCode
+import dev.iptvplayer.tv.ui.Roboto
 import dev.iptvplayer.tv.ui.rememberPinOpener
 import dev.iptvplayer.tv.ui.resolve
 import dev.iptvplayer.tv.ui.shownCategory
@@ -253,12 +260,29 @@ private fun readIn(text: String, languages: List<String>): AnnotatedString = bui
     Spacer(Modifier.height(6.dp))
     SettingsLabel(stringResource(R.string.settings_about_privacy))
     NoteRow(stringResource(R.string.settings_about_privacy_note))
+    PrivacyPolicy()
     Spacer(Modifier.height(6.dp))
     SettingsLabel(stringResource(R.string.settings_about_licenses))
     NoteRow(stringResource(R.string.settings_about_licenses_note))
     Spacer(Modifier.height(6.dp))
     SettingsLabel(stringResource(R.string.settings_about_release))
     NoteRow(stringResource(R.string.settings_about_release_note))
+}
+
+/**
+ * The published privacy policy (Play asks for it inside the app too, E4) as a QR code with its address beside it: most
+ * TVs have no browser to open a link in. The page is in the app's language.
+ */
+@Composable private fun PrivacyPolicy() {
+    val url = stringResource(R.string.settings_about_privacy_url)
+    Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        QrCode(url, 96.dp, stringResource(R.string.settings_about_privacy_qr), Modifier.testTag("privacy-qr"))
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Note(stringResource(R.string.settings_about_privacy_link))
+            Text(url.removePrefix("https://"), color = Ink.Text, fontFamily = Roboto, fontSize = 15.sp, lineHeight = 20.sp)
+        }
+    }
 }
 
 /** Canlı TV, Filmler and Diziler, each with its count of categories and of those hidden or locked. */

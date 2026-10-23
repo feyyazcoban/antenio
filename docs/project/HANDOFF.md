@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Gizlilik bağlantısı ve support@ adresi · 23 Ekim 2026
+
+`SettingsPages.PrivacyPolicy` mevcut `QrCode`'u kullanır; metinler `settings_about_privacy_link/_url/_qr` (TR/EN). Sürüm 0.15.1 (107). Destek adresi kullanıcının ImprovMX'te kurduğu `support` takma adına göre support@antenio.app oldu. Eski dated kayıtlarda geçen destek@ tarihçedir, değiştirilmedi.
+
+Tam sonraki adım: `apps/web`'i Netlify'a yeniden yükle (sayfalar hâlâ eski adresi gösteriyor); kullanıcı support@antenio.app'e deneme e-postası atsın; 0.15.1'i TV'de Uygulama hakkında sayfasında gör.
+
 ## Claude · GoDaddy DNS ve Netlify kurulumu · 23 Ekim 2026
 
 Chrome eklentisiyle kullanıcının açık oturumlarında çalışıldı; hesap açılmadı, şifre girilmedi. Netlify Drop klasör sürüklemeyi beklediği için site düz dosyalara çevrildi ve zip olarak yüklendi. İlk sertifika denemesi proje "Private" iken başarısız göründü; "Make public" sonrası sertifika alındı (Netlify ekranı bir süre eski hatayı gösterdi; `openssl s_client` ile doğrulandı). `www` CNAME'i `antenio.app`'e bakıyor ve çalışıyor; istenirse `antenio.netlify.app` yapılabilir.

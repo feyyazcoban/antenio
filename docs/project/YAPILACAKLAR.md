@@ -6,9 +6,9 @@
 
 1. **GoDaddy:** hesapta iki adımlı doğrulamayı aç; antenio.app için otomatik yenilemeyi aç; ikinci yıl yenileme fiyatına bak.
 2. ~~**Kodu yedekle**~~ **Yapıldı (23 Ekim):** GitHub'daki özel depo `origin` olarak eklendi; main ve çalışma dalı gönderildi. Deponun özel (private) kaldığından emin ol.
-3. **destek@antenio.app (ImprovMX):** GoDaddy'deki MX ve SPF kayıtları hazır (3.3 yapıldı); senin yapacağın yalnız ImprovMX hesabı (3.1, 3.2) ve deneme e-postası (3.4).
+3. **support@antenio.app (ImprovMX):** DNS kayıtları (3.3) ve `support` takma adı (3.1, 3.2) yapıldı (23 Ekim). Kalan yalnız deneme e-postası (3.4).
    1. improvmx.com → alan adı `antenio.app`, hedef kişisel e-postan → ücretsiz hesap.
-   2. Takma ad: `destek` → kişisel e-postan.
+   2. Takma ad: `support` → kişisel e-postan.
    3. GoDaddy → antenio.app → DNS: eski MX kayıtlarını sil; MX `@` öncelik 10 `mx1.improvmx.com`; MX `@` öncelik 20 `mx2.improvmx.com`; TXT `@` ImprovMX'in verdiği SPF değeri.
    4. Panel "active" olunca başka bir adresten deneme e-postası at; spam klasörüne de bak.
 4. ~~**antenio.app sitesi (Netlify)**~~ **Yapıldı (23 Ekim):** site https://antenio.app'te yayında, HTTPS açık; GoDaddy'de A, MX ve SPF kayıtları girildi. Aşağıdaki alt adımlar kayıt içindir.
@@ -29,7 +29,7 @@
 
 ## 3. Google Play hesabı (D120: kişisel hesap)
 
-10. **Play Console hesabı:** play.google.com/console → kişisel hesap; tek seferlik kayıt ücreti; kimlik doğrulaması. Geliştirici adı "Antenio", iletişim e-postası destek@antenio.app (önce 3. adım çalışmalı), web sitesi https://antenio.app (önce 4. adım).
+10. **Play Console hesabı:** play.google.com/console → kişisel hesap; tek seferlik kayıt ücreti; kimlik doğrulaması. Geliştirici adı "Antenio", iletişim e-postası support@antenio.app (önce 3. adım çalışmalı), web sitesi https://antenio.app (önce 4. adım).
 11. **Ödeme profili:** satış için Google ödeme (satıcı) profili ve banka hesabı; tam adres Play'de görünür (kabul edildi).
 12. **12 test kullanıcısı:** Google hesabı olan, mümkünse Android TV ya da Google TV cihazı olan en az 12 kişi bul; 14 gün kesintisiz testte kalacaklar.
 13. **Yükleme anahtarı (upload key):** birlikte oluşturacağız; anahtar dosyasını ve şifresini iki ayrı güvenli yerde sakla (kaybolursa Play'den sıfırlama istenir).
@@ -49,6 +49,6 @@
 
 ## Benim yapacaklarım (kod)
 
-- Site yayına girince Ayarlar → Uygulama hakkında'ya gizlilik bağlantısı.
+- ~~Ayarlar → Uygulama hakkında'ya gizlilik bağlantısı~~ yapıldı (0.15.1: QR kodu ve adres).
 - Yükleme anahtarıyla `bundleRelease` ve sürüm adından `-design-preview` ekinin kaldırılması.
 - Abonelik ve 7 günlük deneme (BKL-048), lisans sayfası, HTTP kaynak uyarısı, mağaza görselleri için sentetik içerik.
