@@ -178,6 +178,26 @@ TÜRKPATENT'te benzer bir kayıt ilk sonuçlarda görünmedi; TMview'un TÜRKPAT
 
 **Ne zaman:** Paket adı ilk Play yüklemesinde kesinleşir. Play App Signing ile imza zaten değişeceği için kurulu önizlemeler o anda bir kez yeniden kurulacak; paket adı değişimi aynı ana konursa veri kaybı tek sefer yaşanır. Kod değişimi BKL-045 (ad değişikliği) ile birlikte yapılabilir; TV'de kaynağı yeniden eklemek Xtream ile birkaç saniye sürer.
 
+## antenio.app nereden alınır: araştırma · 23 Ekim 2026
+
+Kullanıcı: "domaini almak için bir araştırma yap en mantıklı seçeneği bul". Satın almayı kullanıcı yapar. Fiyatlar üçüncü taraf takipçiden (CostGoat, 20 Ekim 2026) ve kayıt şirketinin sayfasından; ödeme anında sepetteki fiyat geçerlidir.
+
+| Kayıt şirketi | İlk yıl | Yenileme/yıl | Not |
+|---|---|---|---|
+| Cloudflare | 8,20 $ | 14,20 $ | Maliyetine satar; WHOIS gizleme, SSL ve DNS ücretsiz; alan adı Cloudflare DNS'inde kalır |
+| Dynadot | 8,00 $ | 14,50 $ | İlk yıl teklifi |
+| Porkbun | 8,75 $ | 14,93 $ | WHOIS gizleme ve e-posta yönlendirme ücretsiz |
+| Namecheap | 11,18 $ | 23,18 $ | Yenileme belirgin pahalı |
+| Amazon Route 53 | 20,00 $ | 20,00 $ | |
+
+Natro, İsimtescil ve Turhost için yayımlanmış bir .app fiyatı bulunamadı. Türk kayıt şirketlerinin artısı TL fatura ve KDV'dir; .com örneklerinde ilk yıl düşük, yenileme yüksek fiyat görülüyor.
+
+**Öneri: Cloudflare Registrar.** Gerekçe: en düşük yenileme ve kâr eklenmeyen fiyat (yıllar içinde artmaz, yalnız kayıt kuruluşunun fiyatı değişirse değişir); WHOIS gizleme ücretsiz; .app tarayıcıda HTTPS zorunlu kılar ve Cloudflare sertifikayı kendisi yönetir. Ayrıca yayın için gereken iki şeyi ücretsiz sağlar: gizlilik politikası ve kullanım koşulları sayfası (Cloudflare Pages; LAUNCH_AUDIT E4) ve destek@antenio.app adresinin kişisel e-postaya yönlendirilmesi (Email Routing; Play geliştirici iletişimi ve telif bildirimi). Sınırlar: alan adı Cloudflare ad sunucularını kullanmak zorundadır; ödeme dolarla karttan alınır (banka kur farkı ve yurt dışı işlem ücreti olabilir); ICANN kuralı gereği ilk 60 gün başka şirkete taşınamaz (her yerde geçerli). Cloudflare'e bağlanmak istenmezse ikinci seçenek Porkbun'dur.
+
+**Adımlar (kullanıcı):** Cloudflare hesabı ve iki adımlı doğrulama; ödeme yöntemi; Domain Registration → antenio.app → 1 yıl (ya da birkaç yıl) satın al; otomatik yenilemeyi aç; kayıt iletişim bilgilerini gerçek bilgilerle doldur (gizleme ücretsizdir, bilgi kamuya görünmez). Sonra Email Routing ile destek@antenio.app yönlendirmesi.
+
+**Ek alan adları (isteğe bağlı):** anteniotv.com (Cloudflare'de .com maliyeti yaklaşık 10,5 $/yıl) yazım hatası ve koruma için ucuzdur. antenio.com başkasında. antenio.com.tr TRABİS üzerinden Türk kayıt şirketlerinden alınır ve Türkiye'de markayı korur; ilk yayın için şart değil.
+
 ## Seçilince yapılacaklar (genel öneri)
 
 1. **Alan adını hemen al:** ör. `<ad>.app`. Kayıtlı değil görünen adres hemen alınmazsa başkası alabilir.
@@ -193,3 +213,4 @@ TÜRKPATENT'te benzer bir kayıt ilk sonuçlarda görünmedi; TMview'un TÜRKPAT
 - Onavo: https://en.wikipedia.org/wiki/Onavo
 - Onvo TV (Türkiye): https://www.log.com.tr/butce-dostu-onvo-32ov6000h-televizyon-icin-yeni-a101-firsati-26-aralik-2024/
 - Alan adı sorguları: https://rdap.verisign.com/com/v1/domain/ · https://pubapi.registry.google/rdap/domain/ (22.10.2026)
+- .app fiyat karşılaştırması: https://costgoat.com/compare/domains/app (20.10.2026) · Cloudflare .app: https://www.cloudflare.com/application-services/products/registrar/buy-app-domains (23.10.2026)
