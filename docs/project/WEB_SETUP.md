@@ -1,0 +1,44 @@
+# antenio.app: gizlilik sayfası ve destek e-postası (GoDaddy ile)
+
+23 Ekim 2026 · Kullanıcı: "godaddy üzerinden devam edelim". Alan adı ve DNS GoDaddy'de kalır. Sayfalar ücretsiz Netlify'da, destek@antenio.app ücretsiz ImprovMX ile kişisel e-postaya yönlenir. Hesap açmak, DNS kaydı değiştirmek ve yayımlamak kullanıcının işidir. LAUNCH_AUDIT E4, BKL-043.
+
+**Neden bu yol:** GoDaddy'nin ücretsiz site planı alan adı bağlamaya izin vermiyor; bağlanan planlar aylık ücretli. GoDaddy'nin e-posta yönlendirmesi hesaba göre ücretsiz kredi ya da ücretli e-posta paketi istiyor. `.app` tarayıcıda HTTPS zorunlu kılar; Netlify sertifikayı (Let's Encrypt) kendisi alır.
+
+## 0. Önce
+
+- GoDaddy hesabında iki adımlı doğrulamayı ve antenio.app için otomatik yenilemeyi aç.
+- `apps/web/gizlilik/index.html` ve `apps/web/privacy/index.html` içinde köşeli parantezli yerleri doldur: `[AD SOYAD / ŞİRKET UNVANI, ADRES]` ve `[YAYIN TARİHİ]` (İngilizcesinde `[NAME / COMPANY, ADDRESS]`, `[PUBLICATION DATE]`). Metin uygulamanın 0.15.0'daki gerçek davranışına göre yazıldı; yayından önce avukat kontrolü önerilir (BKL-043). Abonelik ya da hesap geldiğinde sayfa önceden güncellenmeli.
+
+## 1. Sayfaları Netlify'da yayımla
+
+1. app.netlify.com adresinde ücretsiz hesap aç.
+2. "Add new project" → "Deploy manually" ekranına `apps/web` klasörünü sürükle bırak. Site bir `*.netlify.app` adresiyle açılır.
+3. Site ayarlarından adı `antenio` gibi bir şeye çevir (adres `antenio.netlify.app` olur; doluysa başka bir ad).
+4. Domain management → Add a domain → `antenio.app`. Netlify alan adının başka bir yerde (GoDaddy) yönetildiğini söyler ve aşağıdaki kayıtları ister.
+5. GoDaddy → antenio.app → DNS:
+   - `@` için var olan A kayıtlarını (ör. "Parked") sil, yenisini ekle: **Tür A, Ad `@`, Değer `75.2.60.5`**.
+   - `www` kaydını düzenle: **Tür CNAME, Ad `www`, Değer `antenio.netlify.app`** (kendi Netlify adresin).
+   - GoDaddy'de "Forwarding" (yönlendirme) açıksa kapat.
+6. Netlify → Domain management → HTTPS: "Verify DNS configuration", ardından sertifika kendiliğinden alınır. DNS yayılımı çoğunlukla bir saatten kısa, en çok 48 saat sürer.
+7. Dene: `https://antenio.app/gizlilik/` ve `https://antenio.app/privacy/` kilit simgesiyle açılmalı.
+
+Sayfa değişirse aynı ekranda klasörü yeniden bırakmak yeni sürümü yayımlar.
+
+## 2. destek@antenio.app yönlendirmesi (ImprovMX)
+
+1. improvmx.com'da alan adına `antenio.app`, hedefe kişisel e-postanı yazıp ücretsiz hesap aç (ücretsiz plan: 1 alan adı, 25 takma ad).
+2. Takma ad ekle: `destek` → kişisel e-postan. İstersen `*` (her şey) da eklenebilir.
+3. GoDaddy → antenio.app → DNS:
+   - Var olan bütün MX kayıtlarını sil.
+   - **MX, Ad `@`, Öncelik 10, Değer `mx1.improvmx.com`**
+   - **MX, Ad `@`, Öncelik 20, Değer `mx2.improvmx.com`**
+   - **TXT, Ad `@`, Değer: ImprovMX panelinin gösterdiği SPF değeri** (genelde `v=spf1 include:spf.improvmx.com ~all`; paneldekini kopyala).
+4. ImprovMX paneli "active" gösterince başka bir adresten destek@antenio.app'e deneme e-postası at; spam klasörüne de bak.
+
+Ücretsiz plan yalnız gelen postayı yönlendirir. destek@antenio.app adına yanıt göndermek (SMTP) ücretli plan ya da başka bir e-posta hizmeti ister; Play için gelen posta yeterlidir.
+
+## 3. Sonra
+
+- Play Console: gizlilik politikası adresi `https://antenio.app/privacy/` (İngilizce, Türkçeye bağlantı içerir), web sitesi `https://antenio.app`, iletişim e-postası `destek@antenio.app`.
+- Uygulama: Ayarlar → Uygulama hakkında'ya gizlilik politikası bağlantısı (E4'ün kalan parçası; sayfa yayına girince kodlanır).
+- Kullanım koşulları ve telif bildirim sayfası aynı klasöre eklenebilir (BKL-043).

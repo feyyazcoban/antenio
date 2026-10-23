@@ -1,5 +1,9 @@
 # Proje durumu
 
+## antenio.app sitesi ve destek e-postası hazırlığı · 23 Ekim 2026
+
+Kullanıcı GoDaddy'de kalmak istedi. `apps/web/` altında yayımlanmaya hazır statik site: giriş sayfası, Türkçe (`/gizlilik/`) ve İngilizce (`/privacy/`) gizlilik politikası, uygulamanın 0.15.0 davranışına göre (hesap ve analitik yok; kaynak, katalog, PIN şifreli; favori/geçmiş şifresiz; yedekleme yok; Telefonla ekle yerel). Sorumlu kişi ve yayın tarihi yer tutucu. Kurulum adımları [WEB_SETUP](WEB_SETUP.md): Netlify (A `@` → 75.2.60.5, CNAME `www`), ImprovMX (MX ×2 + SPF TXT). Yayın ve hesaplar kullanıcıda; kod değişmedi.
+
 ## antenio.app alındı · 23 Ekim 2026
 
 Kullanıcı: "godaddy üzerinden domain'i satın aldım". RDAP: kayıt 23.10.2026, bitiş 23.10.2027, kayıt şirketi GoDaddy (IANA 146), durum "client transfer/update/delete prohibited" (kilit açık), ad sunucuları ns51/ns52.domaincontrol.com. D119'daki `app.antenio.tv` paket adı artık sahip olunan alan adına karşılık geliyor. Sırada: gizlilik politikası ve koşullar sayfası (E4) ile destek e-posta adresi.

@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Site ve destek e-postası adımları · 23 Ekim 2026
+
+Kullanıcı: "godaddy üzerinden devam edelim". Araştırma: GoDaddy ücretsiz site planı alan adı bağlamıyor, e-posta yönlendirme hesaba göre kredi/ücretli. Çözüm WEB_SETUP'ta: Netlify ücretsiz (elle yükleme), ImprovMX ücretsiz. `apps/web/` (index, gizlilik, privacy, style.css, logo) yerel sunucuda kontrol edildi.
+
+Tam sonraki adım: kullanıcı yer tutucuları doldursun (ad/unvan, adres, tarih) ya da bilgileri versin; Netlify ve ImprovMX kurulumunu yapsın. Sayfa yayına girince Ayarlar → Uygulama hakkında'ya gizlilik bağlantısı kodlanır (E4).
+
 ## Claude · antenio.app kaydı doğrulandı · 23 Ekim 2026
 
 Kullanıcı alan adını Cloudflare önerisi yerine GoDaddy'den aldı; RDAP ile doğrulandı (bitiş 23.10.2027, kilitli). NAMING, BACKLOG BKL-045 ve LAUNCH_AUDIT E8 güncellendi. Hesap ve fiyat bilgisi depoya yazılmadı.
