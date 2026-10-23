@@ -2,7 +2,7 @@
 
 ## antenio.app yayında; DNS kayıtları girildi · 23 Ekim 2026
 
-Kullanıcının isteğiyle ("chrome da sen yapar mısın dns'i falan", "netlify'ı da açıp giriş yaptım oradaki işi de hallet") Claude in Chrome ile kullanıcının oturumunda: GoDaddy'de A `@` "Parked" → 75.2.60.5, yeni MX `@` mx1/mx2.improvmx.com (10/20) ve TXT `@` SPF; yönlendirme kapalı. Netlify Drop'a site zip'i yüklendi, proje adı `antenio`, herkese açık yapıldı, antenio.app birincil alan adı (www yönleniyor), Let's Encrypt sertifikası alındı (antenio.app ve www, 21.01.2027'ye kadar). Dışarıdan doğrulandı: https://antenio.app, /gizlilik, /privacy 200. Site tek klasöre indirildi (`gizlilik.html`, `privacy.html`, `_redirects`). GoDaddy MX/TXT yayınını hâlâ işliyordu (panelde "değişiklikler gerçekleştiriliyor"); ImprovMX hesabı kullanıcıda.
+Kullanıcının isteğiyle ("chrome da sen yapar mısın dns'i falan", "netlify'ı da açıp giriş yaptım oradaki işi de hallet") Claude in Chrome ile kullanıcının oturumunda: GoDaddy'de A `@` "Parked" → 75.2.60.5, yeni MX `@` mx1/mx2.improvmx.com (10/20) ve TXT `@` SPF; yönlendirme kapalı. Netlify Drop'a site zip'i yüklendi, proje adı `antenio`, herkese açık yapıldı, antenio.app birincil alan adı (www yönleniyor), Let's Encrypt sertifikası alındı (antenio.app ve www, 21.01.2027'ye kadar). Dışarıdan doğrulandı: https://antenio.app, /gizlilik, /privacy 200. Site tek klasöre indirildi (`gizlilik.html`, `privacy.html`, `_redirects`). MX ve SPF kayıtları da yayına girdi (GoDaddy sunucusunda ve 1.1.1.1'de doğrulandı); ImprovMX hesabı kullanıcıda.
 
 ## Kod GitHub'a gönderildi · 23 Ekim 2026
 

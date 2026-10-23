@@ -1,6 +1,6 @@
 # antenio.app: gizlilik sayfası ve destek e-postası (GoDaddy ile)
 
-**Durum (23 Ekim 2026, 11:20):** Site yayında: https://antenio.app, https://antenio.app/gizlilik, https://antenio.app/privacy (Netlify projesi `antenio`, herkese açık, Let's Encrypt sertifikası 21.01.2027'ye kadar, Netlify kendisi yeniler). GoDaddy DNS: A `@` → 75.2.60.5, CNAME `www` → antenio.app (Netlify www'yi ana adrese yönlendiriyor), MX ×2 ve SPF TXT eklendi; GoDaddy MX/TXT yayınını işliyordu. Kalan: ImprovMX hesabı (kullanıcı). Site tek klasördür (`gizlilik.html`, `privacy.html`, `_redirects`); güncelleme için klasörün zip'i Netlify Drop'a ya da projenin Deploys sayfasına bırakılır.
+**Durum (23 Ekim 2026, 11:20):** Site yayında: https://antenio.app, https://antenio.app/gizlilik, https://antenio.app/privacy (Netlify projesi `antenio`, herkese açık, Let's Encrypt sertifikası 21.01.2027'ye kadar, Netlify kendisi yeniler). GoDaddy DNS: A `@` → 75.2.60.5, CNAME `www` → antenio.app (Netlify www'yi ana adrese yönlendiriyor), MX ×2 ve SPF TXT yayında (GoDaddy sunucusunda ve 1.1.1.1'de doğrulandı). Kalan: ImprovMX hesabı (kullanıcı). Site tek klasördür (`gizlilik.html`, `privacy.html`, `_redirects`); güncelleme için klasörün zip'i Netlify Drop'a ya da projenin Deploys sayfasına bırakılır.
 
 23 Ekim 2026 · Kullanıcı: "godaddy üzerinden devam edelim". Alan adı ve DNS GoDaddy'de kalır. Sayfalar ücretsiz Netlify'da, destek@antenio.app ücretsiz ImprovMX ile kişisel e-postaya yönlenir. Hesap açmak, DNS kaydı değiştirmek ve yayımlamak kullanıcının işidir. LAUNCH_AUDIT E4, BKL-043.
 
