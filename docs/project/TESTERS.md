@@ -8,6 +8,8 @@
 2. Aynı Google hesabıyla teste katıl: https://play.google.com/apps/testing/app.antenio.tv ("Test kullanıcısı ol").
 3. 14 gün testten çıkma. TV gerekmez; Android TV ya da Google TV cihazı olan uygulamayı Play'den kurabilir (telefonlar kuramaz: `android.software.leanback` zorunlu).
 
+Önceden elle kurulmuş (debug anahtarıyla imzalı) bir Antenio cihazda duruyorsa Play sürümü kurulamaz ve TV "başka bir kullanıcı bu cihazda uyumsuz bir sürümünü zaten yüklediğinden" hatası verir. Eski kurulum TV'nin bütün profillerinden kaldırılmalıdır (`adb uninstall app.antenio.tv`); 23 Ekim'de test TV'sinde kopya ikinci profilde (kullanıcı 10) kalmıştı, kaldırıldı.
+
 Kapalı test 23 Ekim'den beri e-posta listesi yerine bu grupla yönetiliyor; daha önce e-posta listesine eklenenlerin de gruba katılması gerekir. Hesap sahibi grubun sahibi olarak üyedir ama teste ayrıca katılmalıdır.
 
 ## Tanıdıklara mesaj (Türkçe)
