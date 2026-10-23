@@ -138,7 +138,7 @@ Kullanıcı Antenio'yu seçti. Ek hafif kontrol: Google Play web aramasında ayn
 | # | İş | Kim | Not |
 |---|---|---|---|
 | 1 | antenio.app ve anteniotv.com alan adlarını al | Sen | Bugün boş görünüyor; beklenirse başkası alabilir **Alındı (23 Ekim 2026):** antenio.app GoDaddy üzerinden, bitiş 23.10.2027 (RDAP doğrulandı). |
-| 2 | Marka vekiline tam araştırma yaptır (TÜRKPATENT, EUIPO, WIPO; sınıf 9 ve 42). Temizse başvur. | Sen, marka vekili | Yayından önce şart. "Antena"/"Antenne" köklü mevcut markalarla karıştırılma riskini vekil değerlendirir |
+| 2 | Marka vekiline tam araştırma yaptır (TÜRKPATENT, EUIPO, WIPO; sınıf 9 ve 42). Temizse başvur. | Sen, marka vekili | Önerilir, yayın için şart değil (23 Ekim düzeltmesi; YAPILACAKLAR 6). "Antena"/"Antenne" köklü mevcut markalarla karıştırılma riskini vekil değerlendirir |
 | 3 | Kalıcı paket adı: `app.antenio.tv` (D119, kullanıcı kararı 23 Ekim) | Sen | İlk Play yüklemesinden sonra değişmez |
 | 4 | Logo ve yazı markası (wordmark): "Antenio" | Sen (tasarımcı ya da üretim aracı) | Lisans ya da devir belgesi saklanır (READINESS §3.3) **23 Ekim:** geçici piksel yazı "ANTENIO" (NEXTV ızgarası, oynatma amblemi korundu) uygulamada; tasarımcı logosu açık. |
 | 5 | Uygulamayı yeni ada geçir: uygulama etiketi, logo ve amblem dosyaları, User-Agent ("Antenio/<sürüm> AndroidTV"), iki dilde metinler, Hakkında | Kod | `main` üzerinde; BKL-045 **Yapıldı (0.15.0):** etiket, kimlik `app.antenio.tv`, logo/afiş, User-Agent "Antenio", iki dilde metinler. |

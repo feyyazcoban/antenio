@@ -22,9 +22,9 @@
 
 ## 2. Marka ve hukuk
 
-6. **Marka vekili:** TÜRKPATENT, EUIPO ve WIPO'da "Antenio" için sınıf 9 ve 42 araştırması; benzer kayıtlar ANTENNO ve anterio değerlendirilsin; temizse başvuru.
-7. **Avukat:** gizlilik politikası (`apps/web`), kullanım koşulları ve abonelik metinleri kontrolü.
-8. **Mali müşavir:** abonelik geliri, vergi kaydı ve Google'dan gelecek ödemeler.
+6. **Marka (yayın için şart değil; karar senin):** Kullanıcı: "gerek var mı gerçekten". Ön taramada birebir "Antenio" kaydı yok; AB'de yazılım sınıfında benzer iki tescil var (ANTENNO, anterio). Tescil, adı başkasının almasına karşı korur; tescilsiz kullanımda benzer bir markanın sahibi itiraz ederse Play adı değiştirtebilir. Kişi olarak yapılan başvuruda ad ve adres marka sicilinde herkese açık görünür. Öneri: şimdilik ertele; gelir başlayıp şirket kurulursa şirket adına başvur.
+7. ~~**Avukat**~~ Kullanıcı (23 Ekim): "bunları sordum sıkıntı yok gibi duruyor". Kullanım koşulları sayfası henüz yok; abonelik kodlanırken yazılacak.
+8. **Mali müşavir (kısa bir görüşme):** Kullanıcı: "gelir üzerinden vergiyi google ödemiyor mu". Google Türkiye'deki alıcılardan KDV'yi tahsil edip öder; geliştiricinin kazancının gelir vergisi geliştiriciye aittir. GVK mükerrer 20/B (mobil uygulama geliştiriciliği istisnası): vergi dairesinden istisna belgesi, Türkiye'deki bir bankada yalnız bu iş için açılan hesap, banka gelen paradan %15 keser; yıllık sınırın altında beyanname ve defter yok; 2026 sınırı 5.300.000 TL (danışmanlık sitesi kaynağı, GİB'den doğrulanmalı). Müşavire sorulacak: Android TV uygulaması kapsamda mı, belge nasıl alınır, sınır aşılırsa ne olur.
 9. **Logo:** tasarımcıdan Antenio logosu ve ikon (şu an geçici piksel yazı var); lisans ya da devir belgesini sakla.
 
 ## 3. Google Play hesabı (D120: kişisel hesap)
