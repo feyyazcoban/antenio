@@ -6,12 +6,13 @@
 
 1. **GoDaddy:** hesapta iki adımlı doğrulamayı aç; antenio.app için otomatik yenilemeyi aç; ikinci yıl yenileme fiyatına bak.
 2. ~~**Kodu yedekle**~~ **Yapıldı (23 Ekim):** GitHub'daki özel depo `origin` olarak eklendi; main ve çalışma dalı gönderildi. Deponun özel (private) kaldığından emin ol.
-3. **destek@antenio.app (ImprovMX):**
+3. **destek@antenio.app (ImprovMX):** GoDaddy'deki MX ve SPF kayıtları hazır (3.3 yapıldı); senin yapacağın yalnız ImprovMX hesabı (3.1, 3.2) ve deneme e-postası (3.4).
    1. improvmx.com → alan adı `antenio.app`, hedef kişisel e-postan → ücretsiz hesap.
    2. Takma ad: `destek` → kişisel e-postan.
    3. GoDaddy → antenio.app → DNS: eski MX kayıtlarını sil; MX `@` öncelik 10 `mx1.improvmx.com`; MX `@` öncelik 20 `mx2.improvmx.com`; TXT `@` ImprovMX'in verdiği SPF değeri.
    4. Panel "active" olunca başka bir adresten deneme e-postası at; spam klasörüne de bak.
-4. **antenio.app sitesi (Netlify):**
+4. ~~**antenio.app sitesi (Netlify)**~~ **Yapıldı (23 Ekim):** site https://antenio.app'te yayında, HTTPS açık; GoDaddy'de A, MX ve SPF kayıtları girildi. Aşağıdaki alt adımlar kayıt içindir.
+   - **antenio.app sitesi (Netlify):**
    1. app.netlify.com → ücretsiz hesap → "Deploy manually" → `C:\Users\fyzcb\Desktop\TV\apps\web` klasörünü sürükle bırak.
    2. Site adını `antenio` gibi yap; Domain management → Add a domain → `antenio.app`.
    3. GoDaddy DNS: `@` için eski A kayıtlarını sil, A `@` → `75.2.60.5`; CNAME `www` → `<site-adın>.netlify.app`; yönlendirme (Forwarding) açıksa kapat.
@@ -42,7 +43,7 @@
 ## 5. Play Console'da uygulama (hesap ve anahtar hazır olunca)
 
 17. Uygulama oluştur: ad "Antenio IPTV Player", kategori, ücretsiz indirme.
-18. Gizlilik politikası adresi https://antenio.app/privacy/; veri güvenliği formu (veri toplanmıyor); içerik derecelendirmesi (IARC); hedef kitle (çocuklar değil); reklam yok; TV form faktörü.
+18. Gizlilik politikası adresi https://antenio.app/privacy; veri güvenliği formu (veri toplanmıyor); içerik derecelendirmesi (IARC); hedef kitle (çocuklar değil); reklam yok; TV form faktörü.
 19. Uygulama erişimi: 16. maddedeki test kaynağı.
 20. Kapalı test kanalına ilk paketi (AAB) yükle, 12 kişiyi davet et, 14 gün bekle, sonra üretime erişim başvurusu.
 

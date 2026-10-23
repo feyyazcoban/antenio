@@ -1,5 +1,7 @@
 # antenio.app: gizlilik sayfası ve destek e-postası (GoDaddy ile)
 
+**Durum (23 Ekim 2026, 11:20):** Site yayında: https://antenio.app, https://antenio.app/gizlilik, https://antenio.app/privacy (Netlify projesi `antenio`, herkese açık, Let's Encrypt sertifikası 21.01.2027'ye kadar, Netlify kendisi yeniler). GoDaddy DNS: A `@` → 75.2.60.5, CNAME `www` → antenio.app (Netlify www'yi ana adrese yönlendiriyor), MX ×2 ve SPF TXT eklendi; GoDaddy MX/TXT yayınını işliyordu. Kalan: ImprovMX hesabı (kullanıcı). Site tek klasördür (`gizlilik.html`, `privacy.html`, `_redirects`); güncelleme için klasörün zip'i Netlify Drop'a ya da projenin Deploys sayfasına bırakılır.
+
 23 Ekim 2026 · Kullanıcı: "godaddy üzerinden devam edelim". Alan adı ve DNS GoDaddy'de kalır. Sayfalar ücretsiz Netlify'da, destek@antenio.app ücretsiz ImprovMX ile kişisel e-postaya yönlenir. Hesap açmak, DNS kaydı değiştirmek ve yayımlamak kullanıcının işidir. LAUNCH_AUDIT E4, BKL-043.
 
 **Neden bu yol:** GoDaddy'nin ücretsiz site planı alan adı bağlamaya izin vermiyor; bağlanan planlar aylık ücretli. GoDaddy'nin e-posta yönlendirmesi hesaba göre ücretsiz kredi ya da ücretli e-posta paketi istiyor. `.app` tarayıcıda HTTPS zorunlu kılar; Netlify sertifikayı (Let's Encrypt) kendisi alır.
@@ -21,7 +23,7 @@
    - `www` kaydını düzenle: **Tür CNAME, Ad `www`, Değer `antenio.netlify.app`** (kendi Netlify adresin).
    - GoDaddy'de "Forwarding" (yönlendirme) açıksa kapat.
 6. Netlify → Domain management → HTTPS: "Verify DNS configuration", ardından sertifika kendiliğinden alınır. DNS yayılımı çoğunlukla bir saatten kısa, en çok 48 saat sürer.
-7. Dene: `https://antenio.app/gizlilik/` ve `https://antenio.app/privacy/` kilit simgesiyle açılmalı.
+7. Dene: `https://antenio.app/gizlilik` ve `https://antenio.app/privacy` kilit simgesiyle açılmalı (sonda `/` olursa aynı sayfaya yönlenir). Netlify Drop'a bırakılan site önce "yalnız ekip" görünür; "Make public" ile açılmadan Let's Encrypt sertifikası alınamaz.
 
 Sayfa değişirse aynı ekranda klasörü yeniden bırakmak yeni sürümü yayımlar.
 
@@ -40,6 +42,6 @@ Sayfa değişirse aynı ekranda klasörü yeniden bırakmak yeni sürümü yayı
 
 ## 3. Sonra
 
-- Play Console: gizlilik politikası adresi `https://antenio.app/privacy/` (İngilizce, Türkçeye bağlantı içerir), web sitesi `https://antenio.app`, iletişim e-postası `destek@antenio.app`.
+- Play Console: gizlilik politikası adresi `https://antenio.app/privacy` (İngilizce, Türkçeye bağlantı içerir), web sitesi `https://antenio.app`, iletişim e-postası `destek@antenio.app`.
 - Uygulama: Ayarlar → Uygulama hakkında'ya gizlilik politikası bağlantısı (E4'ün kalan parçası; sayfa yayına girince kodlanır).
 - Kullanım koşulları ve telif bildirim sayfası aynı klasöre eklenebilir (BKL-043).

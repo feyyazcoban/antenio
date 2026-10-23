@@ -1,0 +1,5 @@
+# Netlify: the privacy pages answer with and without a trailing slash.
+/gizlilik/   /gizlilik.html   200
+/gizlilik    /gizlilik.html   200
+/privacy/    /privacy.html    200
+/privacy     /privacy.html    200

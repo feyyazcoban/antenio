@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · GoDaddy DNS ve Netlify kurulumu · 23 Ekim 2026
+
+Chrome eklentisiyle kullanıcının açık oturumlarında çalışıldı; hesap açılmadı, şifre girilmedi. Netlify Drop klasör sürüklemeyi beklediği için site düz dosyalara çevrildi ve zip olarak yüklendi. İlk sertifika denemesi proje "Private" iken başarısız göründü; "Make public" sonrası sertifika alındı (Netlify ekranı bir süre eski hatayı gösterdi; `openssl s_client` ile doğrulandı). `www` CNAME'i `antenio.app`'e bakıyor ve çalışıyor; istenirse `antenio.netlify.app` yapılabilir.
+
+Tam sonraki adım: GoDaddy MX/TXT yayınını doğrula (`nslookup -type=MX antenio.app ns51.domaincontrol.com`); kullanıcı ImprovMX hesabını açıp `destek` takma adını kursun; sonra Ayarlar → Uygulama hakkında'ya https://antenio.app/privacy bağlantısı (E4).
+
 ## Claude · origin eklendi ve gönderildi · 23 Ekim 2026
 
 `git remote add origin <GitHub deposu>` ana checkout'ta (`C:\Users\fyzcb\Desktop\TV`); kimlik bilgisi Git Credential Manager'da hazırdı, şifre istenmedi. `git push -u origin main claude/launch-prep-sales-channel-2948fb` başarılı. Bundan sonra her commit ve ff-merge'den sonra `git -C <ana checkout> push origin main <dal>` yapılır. Adres belgelere yazılmaz.
