@@ -4,7 +4,7 @@
 
 Kullanıcı: "Ayarlar → Uygulama hakkında'ya https://antenio.app/privacy bağlantısını ekle." Gizlilik bölümünün altında politikanın QR kodu (96 dp) ve adresi duruyor; TV'lerde çoğu zaman tarayıcı olmadığı için bağlantı açılmaz, telefonla okutulur. Adres arayüz diline göre: Türkçede https://antenio.app/gizlilik, İngilizcede /privacy (`settings_about_privacy_url`). Odaklı testler (NoHardcodedUiText, SettingsNav, LocaleController) ve `assembleDebug` geçti; TV'de görülmedi.
 
-Kullanıcı: "support@antenio.app olarak ekledim". ImprovMX takma adı `support` oldu; sitedeki, AGENTS'taki ve kullanıcı listesindeki adres support@antenio.app'e çevrildi. Sitenin Netlify'daki yayını yeni adresle yeniden yüklenmeli (Deploys → zip).
+Kullanıcı: "support@antenio.app olarak ekledim". ImprovMX takma adı `support` oldu; sitedeki, AGENTS'taki ve kullanıcı listesindeki adres support@antenio.app'e çevrildi. Site Netlify'a yeniden yüklendi (Deploys → zip, 11:26); https://antenio.app, /gizlilik ve /privacy support@antenio.app gösteriyor.
 
 ## antenio.app yayında; DNS kayıtları girildi · 23 Ekim 2026
 

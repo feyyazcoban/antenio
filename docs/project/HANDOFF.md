@@ -4,7 +4,7 @@
 
 `SettingsPages.PrivacyPolicy` mevcut `QrCode`'u kullanır; metinler `settings_about_privacy_link/_url/_qr` (TR/EN). Sürüm 0.15.1 (107). Destek adresi kullanıcının ImprovMX'te kurduğu `support` takma adına göre support@antenio.app oldu. Eski dated kayıtlarda geçen destek@ tarihçedir, değiştirilmedi.
 
-Tam sonraki adım: `apps/web`'i Netlify'a yeniden yükle (sayfalar hâlâ eski adresi gösteriyor); kullanıcı support@antenio.app'e deneme e-postası atsın; 0.15.1'i TV'de Uygulama hakkında sayfasında gör.
+Site Netlify'a yeniden yüklendi ve canlıda support@ doğrulandı. Tam sonraki adım: kullanıcı support@antenio.app'e deneme e-postası atsın; 0.15.1'i TV'de Uygulama hakkında sayfasında gör.
 
 ## Claude · GoDaddy DNS ve Netlify kurulumu · 23 Ekim 2026
 
