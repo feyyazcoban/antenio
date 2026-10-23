@@ -4,7 +4,7 @@
 
 ## 1. Bu hafta: hesap güvenliği, e-posta ve site
 
-1. **GoDaddy:** hesapta iki adımlı doğrulamayı aç; antenio.app için otomatik yenilemeyi aç; ikinci yıl yenileme fiyatına bak.
+1. **GoDaddy (ertelendi):** Kullanıcı (23 Ekim): "şimdilik gerek yok". Bekleyen: hesapta iki adımlı doğrulama, antenio.app için otomatik yenileme, ikinci yıl yenileme fiyatı. Alan adı süresi dolmadan yenilenmeli; site, e-posta ve Play'deki adresler ona bağlı.
 2. ~~**Kodu yedekle**~~ **Yapıldı (23 Ekim):** GitHub'daki özel depo `origin` olarak eklendi; main ve çalışma dalı gönderildi. Deponun özel (private) kaldığından emin ol.
 3. ~~**support@antenio.app (ImprovMX)**~~ **Yapıldı (23 Ekim):** DNS kayıtları, `support` takma adı ve başka bir adresten deneme e-postası tamam; posta kişisel kutuna geliyor. Açık: ücretsiz plan yalnız gelen postayı yönlendirir; Gmail'den verilen yanıt kişisel adresten ve Gmail'deki görünen adla gider (gerçek ad görünebilir). support@antenio.app adına yanıt için ImprovMX ücretli planı (SMTP) ya da başka bir e-posta hizmeti gerekir; kullanıcılara yanıt vermeye başlamadan karar verilmeli.
    1. improvmx.com → alan adı `antenio.app`, hedef kişisel e-postan → ücretsiz hesap.
@@ -18,7 +18,7 @@
    3. GoDaddy DNS: `@` için eski A kayıtlarını sil, A `@` → `75.2.60.5`; CNAME `www` → `<site-adın>.netlify.app`; yönlendirme (Forwarding) açıksa kapat.
    4. Netlify → HTTPS → doğrula; sertifika kendiliğinden gelir (çoğunlukla bir saat, en çok 48 saat).
    5. Dene: https://antenio.app/privacy/ ve https://antenio.app/gizlilik/ kilit simgesiyle açılmalı. Açılınca bana söyle; uygulamaya bağlantıyı eklerim.
-5. **TV:** Antenio'yu aç, kaynağını Xtream hesabı olarak yeniden ekle; logo, açılış ve afişte gördüğün sorunu yaz.
+5. ~~**TV:** kendi kaynağınla deneme~~ **Tamam (23 Ekim):** Kullanıcı: "burası okey"; sorun bildirilmedi.
 
 ## 2. Marka ve hukuk
 
@@ -37,18 +37,20 @@
 ## 4. Benimle verilecek kararlar
 
 14. **Abonelik:** plan adı, dönem ve fiyat; hesabın ilk yayında olup olmayacağı (SUBSCRIPTION §1 ve §5).
-15. ~~**Mağaza görselleri**~~ **Hazır (23 Ekim):** `design/store`: 512×512 ikon, 1280×720 TV afişi, 1024×500 tanıtım görseli ve 7 TV ekran görüntüsü (inceleme kaynağıyla, İngilizce arayüz). Metinler STORE_LISTING_EN ve STORE_LISTING_TR, form cevapları PLAY_CONSOLE.
-16. ~~**İnceleme için yasal test kaynağı**~~ **Hazır (23 Ekim):** https://antenio.app/review/demo.m3u (Blender açık filmleri CC BY, herkese açık test yayınları, test rehberi); `apps/web/review`. Netlify'a yüklenmesi kaldı.
+15. ~~**Mağaza görselleri**~~ **Hazır (23 Ekim, akşam yenilendi):** `design/store`: 512×512 ikon, 1280×720 TV afişi, 1024×500 tanıtım görseli, 8 TV ekran görüntüsü (sentetik vitrinle) ve telefon bölümü için EN/TR başlıklı çerçeveler; incelemeye gönderildi. Metinler STORE_LISTING_EN ve STORE_LISTING_TR, form cevapları PLAY_CONSOLE.
+16. ~~**İnceleme için yasal test kaynağı**~~ **Yayında (23 Ekim):** https://antenio.app/review/demo.m3u (Blender açık filmleri CC BY, herkese açık test yayınları, test rehberi); `apps/web/review`. Bozulan Akamai yayınının yerini Apple bipbop aldı.
 
 ## 5. Play Console'da uygulama (hesap ve anahtar hazır olunca)
 
-17. ~~Uygulama oluştur~~ **Yapıldı (23 Ekim):** mağaza kaydı, beyanlar, Android TV ve kapalı test kuruldu; 0.16.1 incelemeye gönderildi (ayrıntı PLAY_CONSOLE). Kalan: inceleme sonucu, sonra test kullanıcıları ve 14 gün.
-18. Gizlilik politikası adresi https://antenio.app/privacy; veri güvenliği formu (veri toplanmıyor); içerik derecelendirmesi (IARC); hedef kitle (çocuklar değil); reklam yok; TV form faktörü.
-19. Uygulama erişimi: 16. maddedeki test kaynağı.
-20. Kapalı test kanalına ilk paketi (AAB) yükle, 12 kişiyi davet et, 14 gün bekle, sonra üretime erişim başvurusu.
+17. ~~Uygulama oluştur~~ **Yapıldı (23 Ekim):** mağaza kaydı, beyanlar, Android TV ve kapalı test kuruldu; kapalı test yayında (ayrıntı PLAY_CONSOLE). 0.16.2 güncellemesi incelemede.
+18. ~~Gizlilik, veri güvenliği, IARC, hedef kitle, reklam, TV form faktörü~~ **Yapıldı (23 Ekim).**
+19. ~~Uygulama erişimi~~ **Yapıldı:** 16. maddedeki test kaynağı. Play'deki talimat metni hâlâ "Akamai" diyor; bir sonraki gönderimde düzeltilecek.
+20. Kapalı test: ~~ilk paket~~, ~~12 kişi~~ tamam; 14 gün sürüyor. En erken üretim erişimi başvurusu 6 Kasım 2026 civarı.
 
 ## Benim yapacaklarım (kod)
 
 - ~~Ayarlar → Uygulama hakkında'ya gizlilik bağlantısı~~ yapıldı (0.15.1: QR kodu ve adres).
 - ~~Yükleme anahtarıyla `bundleRelease`~~ yapıldı: 0.16.0 (108), `apps/android-tv/app/build/outputs/bundle/release/app-release.aab`, imza CN=Antenio.
-- Abonelik ve 7 günlük deneme (BKL-048), lisans sayfası, HTTP kaynak uyarısı, mağaza görselleri için sentetik içerik.
+- ~~Mağaza görselleri için sentetik içerik~~ yapıldı (`tools/make_showcase_source.py`).
+- Lisans sayfası ve HTTP kaynak uyarısı: kullanıcı (23 Ekim): "başla".
+- Abonelik ve 7 günlük deneme (BKL-048): kullanıcının kararından sonra.

@@ -60,7 +60,7 @@ Gerekçeler ve kaynaklar [Play hazırlığı](PLAY_STORE_READINESS.md) (0.14.42)
 
 ## 4. Kalite kapıları: yayın kalitesi
 
-- **Fiziksel TV kabulü açık:** .72 vitrin, .74 logo, .75 Devam → Son kanallar, .76 uzun OK, .77 Home odak. Splash ses eşzamanı ve hız/codec de bekliyor ([STATUS](STATUS.md)).
+- **Fiziksel TV kabulü açık:** .72 vitrin, .74 logo, .75 Devam → Son kanallar, .76 uzun OK, .77 Home odak. Splash ses eşzamanı ve hız/codec de bekliyor ([STATUS](STATUS.md)). **23 Ekim:** kendi kaynağıyla TV denemesi için kullanıcı: "burası okey"; sorun bildirilmedi. Yukarıdaki maddeler tek tek işaretlenmedi.
 - **P0 işler review/planned:** BKL-010 medya/codec, BKL-012 beş kişilik kumanda turu, BKL-013 büyük katalog p95, BKL-014 renk/hareket, BKL-019/020/022–028.
 - **Ölçüm kapılarının hiçbiri sağlanmadı** ([QUALITY_AUDIT](QUALITY_AUDIT.md)): odak p95 ≤ 100 ms, açılış p95 ≤ 2 s, ilk kare ≤ 4 s, arama ≤ 300 ms, 2 saat bellek, %99,5 çökmesiz oturum, cihaz matrisi.
 - **Yazı boyutu matrisi** (1,5 / 2,0) "yayına hazırla" kabul turunda koşulur ([WORKFLOW](WORKFLOW.md)). Bu denetimde koşulmadı. Aday sürüm imzalı AAB olarak hazır olunca koşulur.
