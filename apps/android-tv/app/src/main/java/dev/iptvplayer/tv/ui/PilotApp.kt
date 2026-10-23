@@ -560,10 +560,22 @@ internal suspend fun refocusAfterDialog(window: androidx.compose.ui.platform.Win
     try { requester()?.requestFocus() } catch (_: IllegalStateException) { }
 }
 
+/**
+ * How long to wait before loading artwork again after [error] on try [attempt] (0 for the first), or null to give up.
+ * A dropped connection is retried twice, after 1 s and 3 s: a list's first screen asks for many images at once and
+ * some servers cut a few of them off. An HTTP error such as 404 is not retried.
+ */
+internal fun artworkRetryDelay(attempt: Int, error: Throwable?): Long? =
+    if (error is java.io.IOException && attempt < 2) 1_000L + attempt * 2_000L else null
+
 @Composable internal fun Artwork(owner: String, url: String?, title: String, modifier: Modifier = Modifier, logo: Boolean = false,
     logoInset: androidx.compose.ui.unit.Dp = 16.dp, showFallbackTitle: Boolean = true) {
     var loaded by remember(owner, url) { mutableStateOf(false) }
     var failed by remember(owner, url) { mutableStateOf(url == null) }
+    // A new attempt is a new image request: the last one's error does not stay on the card until the app restarts.
+    var attempt by remember(owner, url) { mutableIntStateOf(0) }
+    var retryIn by remember(owner, url) { mutableStateOf<Long?>(null) }
+    LaunchedEffect(retryIn) { retryIn?.let { delay(it); retryIn = null; attempt++ } }
     Box(modifier.background(if (logo) Color.Transparent else Ink.Container), contentAlignment = Alignment.Center) {
         if (!loaded) Column(Modifier.padding(if (logo) 0.dp else 12.dp).clearAndSetSemantics { },
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -571,10 +583,17 @@ internal suspend fun refocusAfterDialog(window: androidx.compose.ui.platform.Win
             if (!logo && failed && showFallbackTitle) Text(title, color = Ink.Muted, fontFamily = Roboto, fontSize = 13.sp, lineHeight = 18.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 3, overflow = TextOverflow.Ellipsis)
         }
-        if (url != null) AsyncImage(model = SourceArtwork(owner, url), contentDescription = null,
-            modifier = Modifier.fillMaxSize().then(if (logo) Modifier.padding(logoInset) else Modifier),
-            contentScale = if (logo) ContentScale.Fit else ContentScale.Crop,
-            onSuccess = { loaded = true; failed = false }, onError = { loaded = false; failed = true })
+        if (url != null) key(attempt) {
+            AsyncImage(model = SourceArtwork(owner, url), contentDescription = null,
+                modifier = Modifier.fillMaxSize().then(if (logo) Modifier.padding(logoInset) else Modifier),
+                contentScale = if (logo) ContentScale.Fit else ContentScale.Crop,
+                onSuccess = { loaded = true; failed = false },
+                onError = { error ->
+                    loaded = false
+                    retryIn = artworkRetryDelay(attempt, error.result.throwable)
+                    failed = retryIn == null
+                })
+        }
     }
 }
 
