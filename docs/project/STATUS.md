@@ -1,5 +1,9 @@
 # Proje durumu
 
+## antenio.app alındı · 23 Ekim 2026
+
+Kullanıcı: "godaddy üzerinden domain'i satın aldım". RDAP: kayıt 23.10.2026, bitiş 23.10.2027, kayıt şirketi GoDaddy (IANA 146), durum "client transfer/update/delete prohibited" (kilit açık), ad sunucuları ns51/ns52.domaincontrol.com. D119'daki `app.antenio.tv` paket adı artık sahip olunan alan adına karşılık geliyor. Sırada: gizlilik politikası ve koşullar sayfası (E4) ile destek e-posta adresi.
+
 ## Eski NEXTV uygulaması TV'den kaldırıldı · 23 Ekim 2026
 
 Kullanıcının açık onayıyla ("Evet, eski NEXTV uygulamasını ve verisini TV'den kaldır.") fiziksel TV'den `dev.iptvplayer.tv.pilot` (0.14.90) verisiyle birlikte kaldırıldı (`adb uninstall`, Success). TV'de yalnız `app.antenio.tv` 0.15.0 var; kaynak, favoriler ve geçmiş Antenio'da yeniden oluşacak. TV uykudaydı ve uyandırılmadı.

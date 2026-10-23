@@ -137,7 +137,7 @@ Kullanıcı Antenio'yu seçti. Ek hafif kontrol: Google Play web aramasında ayn
 
 | # | İş | Kim | Not |
 |---|---|---|---|
-| 1 | antenio.app ve anteniotv.com alan adlarını al | Sen | Bugün boş görünüyor; beklenirse başkası alabilir |
+| 1 | antenio.app ve anteniotv.com alan adlarını al | Sen | Bugün boş görünüyor; beklenirse başkası alabilir **Alındı (23 Ekim 2026):** antenio.app GoDaddy üzerinden, bitiş 23.10.2027 (RDAP doğrulandı). |
 | 2 | Marka vekiline tam araştırma yaptır (TÜRKPATENT, EUIPO, WIPO; sınıf 9 ve 42). Temizse başvur. | Sen, marka vekili | Yayından önce şart. "Antena"/"Antenne" köklü mevcut markalarla karıştırılma riskini vekil değerlendirir |
 | 3 | Kalıcı paket adı: `app.antenio.tv` (D119, kullanıcı kararı 23 Ekim) | Sen | İlk Play yüklemesinden sonra değişmez |
 | 4 | Logo ve yazı markası (wordmark): "Antenio" | Sen (tasarımcı ya da üretim aracı) | Lisans ya da devir belgesi saklanır (READINESS §3.3) **23 Ekim:** geçici piksel yazı "ANTENIO" (NEXTV ızgarası, oynatma amblemi korundu) uygulamada; tasarımcı logosu açık. |
@@ -192,7 +192,9 @@ Kullanıcı: "domaini almak için bir araştırma yap en mantıklı seçeneği b
 
 Natro, İsimtescil ve Turhost için yayımlanmış bir .app fiyatı bulunamadı. Türk kayıt şirketlerinin artısı TL fatura ve KDV'dir; .com örneklerinde ilk yıl düşük, yenileme yüksek fiyat görülüyor.
 
-**Öneri: Cloudflare Registrar.** Gerekçe: en düşük yenileme ve kâr eklenmeyen fiyat (yıllar içinde artmaz, yalnız kayıt kuruluşunun fiyatı değişirse değişir); WHOIS gizleme ücretsiz; .app tarayıcıda HTTPS zorunlu kılar ve Cloudflare sertifikayı kendisi yönetir. Ayrıca yayın için gereken iki şeyi ücretsiz sağlar: gizlilik politikası ve kullanım koşulları sayfası (Cloudflare Pages; LAUNCH_AUDIT E4) ve destek@antenio.app adresinin kişisel e-postaya yönlendirilmesi (Email Routing; Play geliştirici iletişimi ve telif bildirimi). Sınırlar: alan adı Cloudflare ad sunucularını kullanmak zorundadır; ödeme dolarla karttan alınır (banka kur farkı ve yurt dışı işlem ücreti olabilir); ICANN kuralı gereği ilk 60 gün başka şirkete taşınamaz (her yerde geçerli). Cloudflare'e bağlanmak istenmezse ikinci seçenek Porkbun'dur.
+**Sonuç:** kullanıcı antenio.app'i 23 Ekim 2026'da GoDaddy üzerinden aldı (aşağıdaki öneri yerine). 60 günlük süreden sonra (22 Aralık 2026) yenileme maliyeti için Cloudflare'e taşıma ya da ad sunucularını Cloudflare'e yönlendirme seçenektir.
+
+**Öneri (araştırma anında): Cloudflare Registrar.** Gerekçe: en düşük yenileme ve kâr eklenmeyen fiyat (yıllar içinde artmaz, yalnız kayıt kuruluşunun fiyatı değişirse değişir); WHOIS gizleme ücretsiz; .app tarayıcıda HTTPS zorunlu kılar ve Cloudflare sertifikayı kendisi yönetir. Ayrıca yayın için gereken iki şeyi ücretsiz sağlar: gizlilik politikası ve kullanım koşulları sayfası (Cloudflare Pages; LAUNCH_AUDIT E4) ve destek@antenio.app adresinin kişisel e-postaya yönlendirilmesi (Email Routing; Play geliştirici iletişimi ve telif bildirimi). Sınırlar: alan adı Cloudflare ad sunucularını kullanmak zorundadır; ödeme dolarla karttan alınır (banka kur farkı ve yurt dışı işlem ücreti olabilir); ICANN kuralı gereği ilk 60 gün başka şirkete taşınamaz (her yerde geçerli). Cloudflare'e bağlanmak istenmezse ikinci seçenek Porkbun'dur.
 
 **Adımlar (kullanıcı):** Cloudflare hesabı ve iki adımlı doğrulama; ödeme yöntemi; Domain Registration → antenio.app → 1 yıl (ya da birkaç yıl) satın al; otomatik yenilemeyi aç; kayıt iletişim bilgilerini gerçek bilgilerle doldur (gizleme ücretsizdir, bilgi kamuya görünmez). Sonra Email Routing ile destek@antenio.app yönlendirmesi.
 

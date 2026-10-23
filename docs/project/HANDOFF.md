@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · antenio.app kaydı doğrulandı · 23 Ekim 2026
+
+Kullanıcı alan adını Cloudflare önerisi yerine GoDaddy'den aldı; RDAP ile doğrulandı (bitiş 23.10.2027, kilitli). NAMING, BACKLOG BKL-045 ve LAUNCH_AUDIT E8 güncellendi. Hesap ve fiyat bilgisi depoya yazılmadı.
+
+Tam sonraki adım: kullanıcı GoDaddy hesabında iki adımlı doğrulamayı ve otomatik yenilemeyi açsın, yenileme fiyatına baksın. Gizlilik politikası/koşullar sayfası için barındırma ve destek@antenio.app yönlendirmesi seçilecek (GoDaddy'nin kendi araçları ya da ad sunucularını Cloudflare'in ücretsiz planına yönlendirmek); 22 Aralık 2026'dan sonra Cloudflare'e taşıma seçeneği var.
+
 ## Claude · Eski NEXTV kurulumu kaldırıldı · 23 Ekim 2026
 
 Kullanıcı onayıyla TV'den `dev.iptvplayer.tv.pilot` kaldırıldı; paket listesinde yalnız `app.antenio.tv` (0.15.0) kaldı. Bundan sonraki TV kurulumları `install -r releases/Antenio_TV_Design_Preview_<sürüm>.apk` ile yapılır ve `app.antenio.tv` kimliği doğrulanır.
