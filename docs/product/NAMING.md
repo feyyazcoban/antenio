@@ -147,6 +147,37 @@ Kullanıcı Antenio'yu seçti. Ek hafif kontrol: Google Play web aramasında ayn
 
 Kod işi (5) yaklaşık 1 iş günü (tahmin, ölçülmedi); paket adı değişimi ayrıca kurulu TV'deki uygulamayı yeni uygulama yapar, kaynaklar ve geçmiş taşınmaz (D066 notu). Bu yüzden paket adı değişimi Play'e ilk yükleme ile aynı anda, imza değişikliğiyle birlikte yapılır (LAUNCH_AUDIT E1/E3).
 
+## Paket adı ve marka: yeniden kontrol (E3, E8) · 23 Ekim 2026
+
+Kullanıcı: "Önce paket adı ve marka kararına (E3, E8) geçelim." Bu bölüm bir **ön taramadır**; hukuki görüş değildir.
+
+**Alan adları (RDAP, 23.10.2026):** antenio.app, antenio.tv, antenio.net, antenio.dev ve anteniotv.com kayıtlı değil görünüyor. antenio.com 21 Ağustos 2026'da başka biri tarafından kaydedilmiş (kayıt şirketi GMO/Onamae, Cloudflare ad sunucuları); site yanıt vermiyor. Sorgu uç noktaları bilinen alan adlarıyla (twitch.tv, google.app) doğrulandı.
+
+**Play:** `app.antenio.tv`, `com.antenio.tv` ve `tv.antenio.app` kimlikleriyle yayımlanmış uygulama yok (Play sayfası 404).
+
+**Marka (TMview, AB ofisleri, EUIPO, WIPO, USPTO ve TÜRKPATENT dahil):**
+
+| Kayıt | Sınıf | Durum | Önemi |
+|---|---|---|---|
+| "Antenio" ile birebir | yok | – | Aynı adla kayıtlı marka görünmedi |
+| antenion (Almanya, DPMA) | 9, 42 | Süresi dolmuş (2016) | Engel değil |
+| ANTENNO (EUIPO 017996491, Datacom Solutions) | 9, 42 | Tescilli | Tek harf farkı, yazılım sınıfı; vekil değerlendirmeli |
+| anterio (EUIPO 018613690, anterio consult & research) | 1, 5, 9, 42 | Tescilli | Tek harf farkı, yazılım sınıfı; vekil değerlendirmeli |
+| ANTELIO, Antonio ve benzerleri | başka sınıflar | – | Düşük |
+
+TÜRKPATENT'te benzer bir kayıt ilk sonuçlarda görünmedi; TMview'un TÜRKPATENT verisi eksik olabilir, vekil doğrudan sorgulamalı.
+
+**Paket adı seçenekleri (E3):**
+
+| Seçenek | Artı | Eksi |
+|---|---|---|
+| `app.antenio.tv` (öneri) | antenio.app'e karşılık gelir; .app alan adı ucuz ve HTTPS zorunlu; iOS paket kimliği de aynı olabilir | antenio.app alınmalı |
+| `tv.antenio.app` | antenio.tv'ye karşılık gelir | .tv alan adı daha pahalı; ters sıra alışılmadık |
+| `com.antenio.tv` | Alışılmış biçim | antenio.com başkasının; kaçınılmalı |
+| `dev.iptvplayer.tv.pilot` (bugünkü) | Kurulu TV verisi korunur | "pilot" ve sahip olunmayan bir alan adı Play adresinde kalıcı olur |
+
+**Ne zaman:** Paket adı ilk Play yüklemesinde kesinleşir. Play App Signing ile imza zaten değişeceği için kurulu önizlemeler o anda bir kez yeniden kurulacak; paket adı değişimi aynı ana konursa veri kaybı tek sefer yaşanır. Kod değişimi BKL-045 (ad değişikliği) ile birlikte yapılabilir; TV'de kaynağı yeniden eklemek Xtream ile birkaç saniye sürer.
+
 ## Seçilince yapılacaklar (genel öneri)
 
 1. **Alan adını hemen al:** ör. `<ad>.app`. Kayıtlı değil görünen adres hemen alınmazsa başkası alabilir.
