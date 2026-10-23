@@ -7,6 +7,8 @@
 *secrets*
 *.m3u
 *.m3u8
+# The Play review list: open-licensed films and public test streams only (tools/make_review_source.py).
+!apps/web/review/demo.m3u
 # MPEG-TS captures belong in .private/; do not ignore TypeScript source files.
 *.mp4
 !apps/android-tv/app/src/androidTest/assets/playback-fixture.mp4

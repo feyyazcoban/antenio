@@ -1,0 +1,22 @@
+#EXTM3U url-tvg="https://antenio.app/review/epg.xml"
+# Antenio review source: open-licensed films and public test streams only.
+# Elephants Dream, Big Buck Bunny, Sintel and Tears of Steel are (c) Blender Foundation, licensed CC BY (https://www.blender.org/about/projects/).
+# Test streams: Akamai, Apple, Mux and Unified Streaming public HLS examples.
+#EXTINF:-1 tvg-id="antenio.demo.live" tvg-logo="https://antenio.app/review/art/live.png" group-title="Test Channels",Live Test Stream
+https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8
+#EXTINF:-1 tvg-id="antenio.demo.bipbop" tvg-logo="https://antenio.app/review/art/bipbop.png" group-title="Test Channels",Bip Bop Test
+https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8
+#EXTINF:-1 tvg-id="antenio.demo.bbb" tvg-logo="https://antenio.app/review/art/bbb.png" group-title="Open Movies",Big Buck Bunny Channel
+https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8
+#EXTINF:-1 tvg-id="antenio.demo.tos" tvg-logo="https://antenio.app/review/art/tos.png" group-title="Open Movies",Tears of Steel Channel
+https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8
+#EXTINF:-1 tvg-logo="https://antenio.app/review/art/elephants-dream.png" group-title="Open Movies",Elephants Dream (2006)
+https://download.blender.org/ED/elephantsdream-720-h264-st-aac.mov
+#EXTINF:-1 tvg-logo="https://antenio.app/review/art/sintel.png" group-title="Open Movies",Sintel (2010)
+https://download.blender.org/durian/movies/Sintel.2010.1080p.mkv
+#EXTINF:-1 tvg-logo="https://antenio.app/review/art/tears-of-steel.png" group-title="Open Movies",Tears of Steel (2012)
+https://download.blender.org/demo/movies/ToS/tears_of_steel_720p.mov
+#EXTINF:-1 tvg-logo="https://antenio.app/review/art/open-movie-trailers.png" group-title="Open Movie Trailers",Blender Open Movie Trailers S01E01 Big Buck Bunny
+https://download.blender.org/peach/trailer/trailer_720p.mov
+#EXTINF:-1 tvg-logo="https://antenio.app/review/art/open-movie-trailers.png" group-title="Open Movie Trailers",Blender Open Movie Trailers S01E02 Sintel
+https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4
