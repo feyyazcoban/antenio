@@ -24,7 +24,7 @@ Kullanıcı (16:20): "Dört beyanı onaylıyorum: hedef kitle 18+, veri toplanm�
 
 - Kategori: Video Players & Editors. E-posta support@antenio.app, web sitesi https://antenio.app, telefon yok.
 - Gizlilik politikası: https://antenio.app/privacy
-- Görseller (23 Ekim akşamı yenilendi; kullanıcı: "Sadelik ve genel görünüm çok basit göründü", "İkisi birden"): `icon-512.png`, yeni `feature-1024x500.png` (afiş yelpazesi); Android TV: `tv-banner-1280x720.png` ve `screenshots/01…08` (sentetik vitrinle, değiştirilmemiş); telefon: `frames/en/*` (başlıklı), tr-TR kaydında `frames/tr/*`. Kayıt kaydedildi, "incelemeye gönderilmek için hazır"; gönderme kullanıcı onayı bekliyor. Yapay zekâ beyanı yine "etiketleme" (görseller kodla çizildi). Telefon ekran görüntüsü yok: uygulama yalnız TV'de çalışır, Console telefon görüntüsü isterse TV görüntüleri kullanılmaz, kullanıcıya sorulur.
+- Görseller (23 Ekim akşamı yenilendi; kullanıcı: "Sadelik ve genel görünüm çok basit göründü", "İkisi birden"): `icon-512.png`, yeni `feature-1024x500.png` (afiş yelpazesi); Android TV: `tv-banner-1280x720.png` ve `screenshots/01…08` (sentetik vitrinle, değiştirilmemiş); telefon: `frames/en/*` (başlıklı), tr-TR kaydında `frames/tr/*`. Kullanıcı: "gönder". 4 değişiklik (en-US telefon, en-US Android TV, en-US tanıtım görseli, tr-TR telefon) 23 Ekim gece incelemeye gönderildi. Yapay zekâ beyanı yine "etiketleme" (görseller kodla çizildi). Telefon ekran görüntüsü yok: uygulama yalnız TV'de çalışır, Console telefon görüntüsü isterse TV görüntüleri kullanılmaz, kullanıcıya sorulur.
 - Çeviri: Türkçe (tr-TR), aynı görseller.
 
 ## Uygulama içeriği (App content)
