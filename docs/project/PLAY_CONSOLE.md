@@ -2,13 +2,15 @@
 
 23 Ekim 2026 · Kullanıcı: "Mağaza kaydı, görseller ve inceleme için test kaynağını hazırlayalım; kapalı teste yükleyelim." Hesap kişisel, geliştirici adı Antenio (D120). Aşağıdakiler öneridir; beyan kullanıcınındır ve "İncelemeye gönder"den önce kullanıcı onaylar. Metinler [STORE_LISTING_EN](../product/STORE_LISTING_EN.md) ve [STORE_LISTING_TR](../product/STORE_LISTING_TR.md); görseller `design/store` (`tools/make_store_graphics.py`), ekran görüntüleri `design/store/screenshots` (emülatör 5558, 1920×1080, inceleme kaynağıyla).
 
-## Durum (23 Ekim 2026, 16:10)
+## Durum (23 Ekim 2026, 17:00)
 
-- Uygulama oluşturuldu: Antenio IPTV Player, `app.antenio.tv`, en-US, uygulama, ücretsiz. Kullanıcı: "İşaretle" (Geliştirici Program Politikaları, Play Uygulama İmzalama Hizmet Şartları, ABD ihracat yasaları beyanları Claude tarafından kullanıcının onayıyla işaretlendi).
-- Varsayılan mağaza kaydı taslakta: kısa ve tam açıklama (en-US), ikon, tanıtım görseli. Android TV afişi ve ekran görüntüleri, form faktörü eklenince girilecek; Türkçe çeviri henüz yok.
-- Kapalı test - Alpha: taslak sürüm "109 (0.16.1)", AAB yüklendi, sürüm notları en-US ve tr-TR. Ülke, test kullanıcıları ve incelemeye gönderme yapılmadı.
-- Gelişmiş ayarlar → Form faktörü: Android TV seçeneği tıklandı ama eklenmedi (Chrome penceresi arka plandaydı, sayfa çizilmiyordu).
-- Uygulama içeriği beyanlarının hiçbiri girilmedi; aşağıdaki önerilerin kullanıcı onayı bekleniyor.
+Kullanıcı (16:20): "Dört beyanı onaylıyorum: hedef kitle 18+, veri toplanmıyor, sınırsız internet içeriği evet, varsayılan dil İngilizce ve Türkçe çeviri."
+
+- Uygulama oluşturuldu: Antenio IPTV Player, `app.antenio.tv`, en-US, uygulama, ücretsiz. Kullanıcı: "İşaretle" (Geliştirici Program Politikaları, Play Uygulama İmzalama Hizmet Şartları, ABD ihracat yasaları beyanları kullanıcının onayıyla işaretlendi).
+- Form faktörü: Android TV eklendi (Android XR kendiliğinden etkin). Bekleyen: "Android TV'ye dağıtımı etkinleştir ve inceleme politikasını kabul et" (kullanıcı kabulü).
+- Mağaza kaydı taslakta: en-US ve tr-TR metinleri, ikon, tanıtım görseli, TV afişi ve 7 TV ekran görüntüsü (sıra yüklemenin bitişine göre oldu; ilki filmler ekranı). Bekleyen: kaydın son adımındaki "yapay zekayla üretilmiş öğe beyanı" (kullanıcı kararı; görseller kodla çizildi ve gerçek ekran görüntüleri).
+- Uygulama içeriği kaydedildi: gizlilik politikası, reklam yok, uygulama erişimi (incelemeci talimatı, "Review source (no login)"), hedef kitle 18+, veri güvenliği (veri toplanmıyor/paylaşılmıyor), reklam kimliği yok, resmi kurum değil, finans özelliği yok, sağlık özelliği yok. Bekleyen: içerik derecelendirmesi (IARC kullanım şartları kabulü kullanıcıda; e-posta support@antenio.app, kategori "Diğer tüm uygulama türleri").
+- Kapalı test - Alpha: taslak sürüm "109 (0.16.1)", AAB ve en-US/tr-TR sürüm notları. Bekleyen: ülkeler, test kullanıcıları (12 e-posta), önizleme ve incelemeye gönderme.
 
 ## Uygulama oluşturma
 
