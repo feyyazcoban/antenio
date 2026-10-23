@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Kullanıcının yapacakları listesi · 23 Ekim 2026
+
+Kullanıcı: "her yapmam gerekeni madde madde yaz email dahil". [YAPILACAKLAR](YAPILACAKLAR.md): GoDaddy güvenliği, kod yedeği için GitHub deposu, ImprovMX, Netlify, TV'de kaynak, marka vekili, avukat, mali müşavir, logo, Play hesabı (D120), ödeme profili, 12 test kullanıcısı, yükleme anahtarı, karar maddeleri ve Play Console uygulama kurulumu; sonunda kod tarafındaki işlerim.
+
+Tam sonraki adım: kullanıcı listeyi sırayla yürütsün; site açılınca uygulama içi gizlilik bağlantısı kodlanır.
+
 ## Claude · Play hesap türü kararı (D120) · 23 Ekim 2026
 
 D120 yazıldı; AGENTS kuralı ("gerçek ad yazılmaz") sürer, yalnız Google'ın kendi gösterdiği hesap bilgisi için istisna not edildi. LAUNCH_AUDIT E7 ve WEB_SETUP güncellendi.
