@@ -6,7 +6,7 @@
 
 1. **GoDaddy:** hesapta iki adımlı doğrulamayı aç; antenio.app için otomatik yenilemeyi aç; ikinci yıl yenileme fiyatına bak.
 2. ~~**Kodu yedekle**~~ **Yapıldı (23 Ekim):** GitHub'daki özel depo `origin` olarak eklendi; main ve çalışma dalı gönderildi. Deponun özel (private) kaldığından emin ol.
-3. **support@antenio.app (ImprovMX):** DNS kayıtları (3.3) ve `support` takma adı (3.1, 3.2) yapıldı (23 Ekim). Kalan yalnız deneme e-postası (3.4).
+3. ~~**support@antenio.app (ImprovMX)**~~ **Yapıldı (23 Ekim):** DNS kayıtları, `support` takma adı ve başka bir adresten deneme e-postası tamam; posta kişisel kutuna geliyor. Açık: ücretsiz plan yalnız gelen postayı yönlendirir; Gmail'den verilen yanıt kişisel adresten ve Gmail'deki görünen adla gider (gerçek ad görünebilir). support@antenio.app adına yanıt için ImprovMX ücretli planı (SMTP) ya da başka bir e-posta hizmeti gerekir; kullanıcılara yanıt vermeye başlamadan karar verilmeli.
    1. improvmx.com → alan adı `antenio.app`, hedef kişisel e-postan → ücretsiz hesap.
    2. Takma ad: `support` → kişisel e-postan.
    3. GoDaddy → antenio.app → DNS: eski MX kayıtlarını sil; MX `@` öncelik 10 `mx1.improvmx.com`; MX `@` öncelik 20 `mx2.improvmx.com`; TXT `@` ImprovMX'in verdiği SPF değeri.
