@@ -2,10 +2,18 @@
 
 23 Ekim 2026 · Kullanıcı: "Mağaza kaydı, görseller ve inceleme için test kaynağını hazırlayalım; kapalı teste yükleyelim." Hesap kişisel, geliştirici adı Antenio (D120). Aşağıdakiler öneridir; beyan kullanıcınındır ve "İncelemeye gönder"den önce kullanıcı onaylar. Metinler [STORE_LISTING_EN](../product/STORE_LISTING_EN.md) ve [STORE_LISTING_TR](../product/STORE_LISTING_TR.md); görseller `design/store` (`tools/make_store_graphics.py`), ekran görüntüleri `design/store/screenshots` (emülatör 5558, 1920×1080, inceleme kaynağıyla).
 
+## Durum (23 Ekim 2026, 16:10)
+
+- Uygulama oluşturuldu: Antenio IPTV Player, `app.antenio.tv`, en-US, uygulama, ücretsiz. Kullanıcı: "İşaretle" (Geliştirici Program Politikaları, Play Uygulama İmzalama Hizmet Şartları, ABD ihracat yasaları beyanları Claude tarafından kullanıcının onayıyla işaretlendi).
+- Varsayılan mağaza kaydı taslakta: kısa ve tam açıklama (en-US), ikon, tanıtım görseli. Android TV afişi ve ekran görüntüleri, form faktörü eklenince girilecek; Türkçe çeviri henüz yok.
+- Kapalı test - Alpha: taslak sürüm "109 (0.16.1)", AAB yüklendi, sürüm notları en-US ve tr-TR. Ülke, test kullanıcıları ve incelemeye gönderme yapılmadı.
+- Gelişmiş ayarlar → Form faktörü: Android TV seçeneği tıklandı ama eklenmedi (Chrome penceresi arka plandaydı, sayfa çizilmiyordu).
+- Uygulama içeriği beyanlarının hiçbiri girilmedi; aşağıdaki önerilerin kullanıcı onayı bekleniyor.
+
 ## Uygulama oluşturma
 
 - Uygulama adı: Antenio IPTV Player · varsayılan dil: English (United States) · uygulama · ücretsiz.
-- Paket: `apps/android-tv/app/build/outputs/bundle/release/app-release.aab` (0.16.0, 108; imza CN=Antenio).
+- Paket: `apps/android-tv/app/build/outputs/bundle/release/app-release.aab` (0.16.1, 109; imza CN=Antenio). 0.16.0 yüklenmedi; kullanıcının bildirdiği kategori noktası hatası düzeltildi.
 - Uygulama imzalama: Google'ın ürettiği anahtarla Play App Signing (varsayılan). Bizim anahtar yalnız yükleme anahtarıdır.
 
 ## Mağaza kaydı

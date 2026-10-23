@@ -1,5 +1,9 @@
 # Proje durumu
 
+## Play Console: uygulama oluşturuldu, 0.16.1 kapalı test taslağında · 23 Ekim 2026
+
+İnceleme kaynağı Netlify'da yayında (https://antenio.app/review/demo.m3u, rehber ve afişler 200, X-Robots-Tag noindex). Play Console'da Antenio IPTV Player oluşturuldu; mağaza kaydı taslakta (metin, ikon, tanıtım görseli); Kapalı test - Alpha'da "109 (0.16.1)" taslak sürümü AAB ve iki dilli sürüm notlarıyla kaydedildi. Arada kullanıcı kategori sütununda seçili noktanın sayıya bindiğini bildirdi ("indicator rakamın üzerine geliyor"): `LibraryScreen` artık her satırda noktaya 6+6 dp yer ayırıyor, emülatörde doğrulandı; bu yüzden ilk yüklenen paket 0.16.1 oldu. Kalan: Android TV form faktörü, TV afişi ve ekran görüntüleri, Türkçe kayıt, uygulama içeriği beyanları (kullanıcı onayı), ülkeler, test kullanıcıları, incelemeye gönderme. Ayrıntı [PLAY_CONSOLE](PLAY_CONSOLE.md).
+
 ## Mağaza görselleri, metinler ve inceleme kaynağı hazır · 23 Ekim 2026
 
 Kullanıcı: "Mağaza kaydı, görseller ve inceleme için test kaynağını hazırlayalım; kapalı teste yükleyelim." `tools/make_review_source.py` inceleme kaynağını (`apps/web/review`: 4 canlı kanal, 75 günlük test rehberi, 3 film, 1 dizi; Blender Foundation filmleri CC BY ve Akamai/Apple/Mux/Unified Streaming test yayınları; afiş ve logolar bizim çizimimiz), `tools/make_store_graphics.py` mağaza görsellerini (`design/store`) üretir. Ekran görüntüleri emülatör 5558'de (1920×1080, İngilizce) bu kaynağın yerel kopyasıyla çekildi: kurulum akışı, içe aktarma, canlı liste, rehber, filmler, oynatma (Tears of Steel, blender.org'dan) ve dizi doğrulandı. Görülen: Sintel afişi ilk açılışta boş kaldı, uygulama yeniden açılınca geldi (yerel sunucuda; kök neden aranmadı). Metinler STORE_LISTING_EN/TR (abonelik paragrafı abonelik sürümüne bırakıldı), form cevapları PLAY_CONSOLE. Kalan: siteyi Netlify'a yüklemek (Chrome eklentisi bağlantısı koptu) ve Play Console adımları.
