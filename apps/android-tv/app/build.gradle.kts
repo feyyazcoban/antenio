@@ -43,9 +43,11 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Design previews update earlier debug-signed installs in place; the same key keeps user data. Only they may
-            // fall back to the debug key: a Play bundle or a store version stops without the upload key (below).
-            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
+            // Design previews update earlier debug-signed installs on the test TV in place (the same key keeps user
+            // data), so they keep the debug key even where the upload key is set. Every other release build stops
+            // without the upload key (below).
+            signingConfig = if (defaultConfig.versionName.orEmpty().endsWith("-design-preview")) signingConfigs.getByName("debug")
+                else signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -60,13 +62,16 @@ android {
 
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
 
-// LAUNCH_AUDIT E1: never a debug-signed artifact for the store. bundleRelease (the Play upload, E2) always needs the
-// upload key; assembleRelease needs it too unless the version is a design preview for the test TV.
+// LAUNCH_AUDIT E1: never a debug-signed artifact for the store. bundleRelease (the Play upload, E2) needs a version
+// that is not a design preview and the upload key; assembleRelease needs the key too unless it is a design preview for
+// the test TV.
 val hasUploadKey = !uploadStore.isNullOrBlank()
 val designPreview = android.defaultConfig.versionName.orEmpty().endsWith("-design-preview")
 tasks.matching { it.name == "bundleRelease" || (it.name == "assembleRelease" && !designPreview) }.configureEach {
     val signed = hasUploadKey
+    val preview = designPreview
     doFirst {
+        if (preview) throw GradleException("$name is for Play: drop -design-preview from versionName first (WORKFLOW).")
         if (!signed) throw GradleException("$name needs the upload key: set ANTENIO_RELEASE_STORE_FILE, " +
             "ANTENIO_RELEASE_STORE_PASSWORD, ANTENIO_RELEASE_KEY_ALIAS and ANTENIO_RELEASE_KEY_PASSWORD (WORKFLOW).")
     }

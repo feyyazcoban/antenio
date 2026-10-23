@@ -29,10 +29,10 @@
 
 ## 3. Google Play hesabı (D120: kişisel hesap)
 
-10. **Play Console hesabı:** play.google.com/console → kişisel hesap; tek seferlik kayıt ücreti; kimlik doğrulaması. Geliştirici adı "Antenio", iletişim e-postası support@antenio.app (önce 3. adım çalışmalı), web sitesi https://antenio.app (önce 4. adım).
+10. **Play Console hesabı:** **Açıldı (23 Ekim):** kişisel hesap, geliştirici adı Antenio; e-posta support@antenio.app, web sitesi https://antenio.app. Kalan: Android telefon doğrulaması (bir yakınının telefonunda Play Console uygulamasına kendi hesabınla gir, sonra hesabı o telefondan kaldır; emülatör kabul edilmiyor). Kayıt için adımlar: play.google.com/console → kişisel hesap; tek seferlik kayıt ücreti; kimlik doğrulaması. Geliştirici adı "Antenio", iletişim e-postası support@antenio.app (önce 3. adım çalışmalı), web sitesi https://antenio.app (önce 4. adım).
 11. **Ödeme profili** (banka hesabı için 8. maddeye bak): satış için Google ödeme (satıcı) profili ve banka hesabı; tam adres Play'de görünür (kabul edildi).
 12. **12 test kullanıcısı:** Google hesabı olan, mümkünse Android TV ya da Google TV cihazı olan en az 12 kişi bul; 14 gün kesintisiz testte kalacaklar.
-13. **Yükleme anahtarı (upload key):** birlikte oluşturacağız; anahtar dosyasını ve şifresini iki ayrı güvenli yerde sakla (kaybolursa Play'den sıfırlama istenir).
+13. **Yükleme anahtarı (upload key):** 23 Ekim:  (takma ad , sertifikada yalnız "Antenio"); şifreyi kendi terminalinde sen girdin, Claude görmedi. Şifre  dosyasına yalnız senin elinle yazılır. birlikte oluşturacağız; anahtar dosyasını ve şifresini iki ayrı güvenli yerde sakla (kaybolursa Play'den sıfırlama istenir).
 
 ## 4. Benimle verilecek kararlar
 
