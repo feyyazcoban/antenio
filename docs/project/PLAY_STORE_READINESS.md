@@ -27,7 +27,7 @@ Uygulama teknik olarak Play'e yakın: hedef API 36, minSdk 26, leanback manifest
 - **Kurulu cihazlar:** Bugün TV'de debug imzalı sürüm var. Play sürümü farklı imza taşıyacağından onu güncelleyemez; bir kez kaldırıp kurmak gerekir ve yerel veriler (kaynaklar, favoriler, izleme geçmişi) gider. "Veri silmeden kur" alışkanlığı bu geçişte bir kez bozulur; geçişten önce kaynak bilgilerini kullanıcı kendisi not etmeli.
 - **Play App Signing** ilk yayında zorunlu; Google uygulama imzalama anahtarını üretirse Play dışında dağıtılan APK aynı imzayı taşıyamaz. Play dışı APK dağıtımı sürecekse bu seçim önceden yapılmalı (Console'da kendi anahtarını yükleme seçeneği doğrulanmadı).
 - **AAB:** TV uygulamaları için zorunlu (TV-G1). `bundleRelease` görevine geçilmeli.
-- **Paket adı:** `dev.iptvplayer.tv.pilot` ilk yüklemeden sonra değiştirilemez; değişirse Play yeni uygulama sayar. Adında "iptvplayer" ve "pilot" var. Kalıcı ad ilk yüklemeden önce seçilmeli (karar sizin). İmza zaten değişeceği için yeni bir paket adı ek veri kaybı getirmez.
+- **Paket adı:** `dev.iptvplayer.tv.pilot` ilk yüklemeden sonra değiştirilemez; değişirse Play yeni uygulama sayar. Adında "iptvplayer" ve "pilot" var. Kalıcı ad `app.antenio.tv` olarak seçildi (D119); ilk yüklemeden önce koda geçirilir. İmza zaten değişeceği için yeni bir paket adı ek veri kaybı getirmez.
 
 ### 2.2 Mağaza ve Console beyanları
 

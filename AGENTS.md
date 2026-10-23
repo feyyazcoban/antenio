@@ -16,7 +16,7 @@ Bu dosya Codex ve Claude Code için aynı çalışma sözleşmesidir. CLAUDE.md 
 - M3U bağlantısı ve Xtream Codes hesabı desteklenir.
 - TV UI kitini ve mevcut Figma bileşenlerini temel alın.
 - LG webOS, Samsung Tizen, Android mobil ve iOS sonraki fazlardır.
-- Ürün adı Antenio'dur (D115, kullanıcı kararı 22 Ekim 2026; D066 ve D114'ün yerine geçer). Uygulama, logo ve belgeler yeni ada geçene kadar kodda NEXTV görünür (BKL-045). Kalıcı paket adı yeni adla birlikte seçilir (öneri `app.antenio.tv`, LAUNCH_AUDIT E3); o zamana kadar `dev.iptvplayer.tv.pilot` kurulu verileri korumak için değişmez. Marka vekili araştırması yayından önce şarttır.
+- Ürün adı Antenio'dur (D115, kullanıcı kararı 22 Ekim 2026; D066 ve D114'ün yerine geçer). Uygulama, logo ve belgeler yeni ada geçene kadar kodda NEXTV görünür (BKL-045). Kalıcı paket adı `app.antenio.tv`'dir (D119, kullanıcı kararı 23 Ekim 2026); uygulama kimliği ilk Play yüklemesine kadar, BKL-045 ad değişikliğiyle birlikte geçilene dek `dev.iptvplayer.tv.pilot` kalır. Marka vekili araştırması yayından önce şarttır.
 - Takvim, ücretlendirme ve minimum cihaz desteği onaylanmış sayılmaz.
 
 ## Tek kaynak kuralı

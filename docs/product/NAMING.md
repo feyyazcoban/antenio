@@ -139,7 +139,7 @@ Kullanıcı Antenio'yu seçti. Ek hafif kontrol: Google Play web aramasında ayn
 |---|---|---|---|
 | 1 | antenio.app ve anteniotv.com alan adlarını al | Sen | Bugün boş görünüyor; beklenirse başkası alabilir |
 | 2 | Marka vekiline tam araştırma yaptır (TÜRKPATENT, EUIPO, WIPO; sınıf 9 ve 42). Temizse başvur. | Sen, marka vekili | Yayından önce şart. "Antena"/"Antenne" köklü mevcut markalarla karıştırılma riskini vekil değerlendirir |
-| 3 | Kalıcı paket adını onayla: `app.antenio.tv` (öneri) | Sen | İlk Play yüklemesinden sonra değişmez |
+| 3 | Kalıcı paket adı: `app.antenio.tv` (D119, kullanıcı kararı 23 Ekim) | Sen | İlk Play yüklemesinden sonra değişmez |
 | 4 | Logo ve yazı markası (wordmark): "Antenio" | Sen (tasarımcı ya da üretim aracı) | Lisans ya da devir belgesi saklanır (READINESS §3.3) |
 | 5 | Uygulamayı yeni ada geçir: uygulama etiketi, logo ve amblem dosyaları, User-Agent ("Antenio/<sürüm> AndroidTV"), iki dilde metinler, Hakkında | Kod | `main` üzerinde; BKL-045 |
 | 6 | Mağaza metni ve görseller: başlık "Antenio IPTV Player" (19 karakter), açıklama ve ekran görüntüleri | Sen, kod | STORE_LISTING_EN |
@@ -171,7 +171,7 @@ TÜRKPATENT'te benzer bir kayıt ilk sonuçlarda görünmedi; TMview'un TÜRKPAT
 
 | Seçenek | Artı | Eksi |
 |---|---|---|
-| `app.antenio.tv` (öneri) | antenio.app'e karşılık gelir; .app alan adı ucuz ve HTTPS zorunlu; iOS paket kimliği de aynı olabilir | antenio.app alınmalı |
+| `app.antenio.tv` (seçildi, D119) | antenio.app'e karşılık gelir; .app alan adı ucuz ve HTTPS zorunlu; iOS paket kimliği de aynı olabilir | antenio.app alınmalı |
 | `tv.antenio.app` | antenio.tv'ye karşılık gelir | .tv alan adı daha pahalı; ters sıra alışılmadık |
 | `com.antenio.tv` | Alışılmış biçim | antenio.com başkasının; kaçınılmalı |
 | `dev.iptvplayer.tv.pilot` (bugünkü) | Kurulu TV verisi korunur | "pilot" ve sahip olunmayan bir alan adı Play adresinde kalıcı olur |

@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Paket adı kararı (D119) · 23 Ekim 2026
+
+Kullanıcı: "Kalıcı paket adı app.antenio.tv olsun. antenio.app alan adını alacağım." D119 yazıldı; AGENTS, PLAY_STORE_READINESS, BACKLOG BKL-045, NAMING ve LAUNCH_AUDIT E3 güncellendi. Kod değişmedi: `applicationId` BKL-045 ad değişikliğiyle birlikte değişecek.
+
+Tam sonraki adım: kullanıcının yapacakları: antenio.app alan adını almak, marka vekiline tam araştırma yaptırmak (TÜRKPATENT, EUIPO, WIPO; sınıf 9 ve 42). Kodda sırada BKL-045 (uygulamayı Antenio adına ve `app.antenio.tv` kimliğine geçirmek) ya da karar gerektirmeyen R2/R3/R5.
+
 ## Claude · Yayına hazırlık: E1, E2, E4 /.91 · 23 Ekim 2026
 
 Kullanıcı: "Bu bitince yayına hazırlık için yapacaklarımızdan devam edelim". Karar gerektirmeyen kod maddeleri yapıldı: `app/build.gradle.kts` (yükleme anahtarı ayarları `releaseSetting`, `bundleRelease` ve önizleme olmayan `assembleRelease` için anahtar zorunluluğu), `settings_about_privacy_note` (TR/EN), `SetupFlow.TypeStep` adım sayısı. WORKFLOW'a `bundleRelease` ve anahtar değişkenleri yazıldı; LAUNCH_AUDIT E1/E2/E4 durumları güncellendi.
