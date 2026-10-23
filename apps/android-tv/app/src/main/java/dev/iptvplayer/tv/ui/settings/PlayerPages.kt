@@ -27,7 +27,7 @@ import dev.iptvplayer.tv.data.UiText
 internal val playerPage = SettingsRoute.Page("player")
 private val subtitlesPage = SettingsRoute.Page("player-subtitles")
 
-/** Oynatıcı and its Altyazı görünümü page (playback.md §3.3, §7). Nothing here asks for the PIN or for NEXTV Plus. */
+/** Oynatıcı and its Altyazı görünümü page (playback.md §3.3, §7). Nothing here asks for the PIN or for Antenio Plus. */
 internal val playerPageList: List<SettingsPageSpec> = listOf(
     SettingsPageSpec(playerPage.id, UiText.Res(SectionId.PLAYER.label), SectionId.PLAYER) { Player() },
     SettingsPageSpec(subtitlesPage.id, UiText.Res(R.string.settings_subtitles), SectionId.PLAYER) { Subtitles() },
@@ -70,7 +70,7 @@ internal val playerPageList: List<SettingsPageSpec> = listOf(
 }
 
 /**
- * Where the subtitles' look comes from, then NEXTV's size, background and colour. Choosing one of those moves to NEXTV's
+ * Where the subtitles' look comes from, then Antenio's size, background and colour. Choosing one of those moves to Antenio's
  * setting, as on Android's a size chosen here would change nothing; the note says so beforehand.
  */
 @Composable private fun SettingsScope.Subtitles() {
@@ -116,7 +116,7 @@ internal val playerPageList: List<SettingsPageSpec> = listOf(
         optionDescriptions = notes) { picked -> choose(entries[picked]) }
 }
 
-/** "Android ayarı", or NEXTV's size, background and colour: "Büyük · Yarı saydam · Beyaz". */
+/** "Android ayarı", or Antenio's size, background and colour: "Büyük · Yarı saydam · Beyaz". */
 @Composable private fun subtitleSummary(style: SubtitleStyle): String =
     if (style.source == SubtitleSource.SYSTEM) stringResource(R.string.settings_subtitle_system)
     else stringResource(R.string.text_pair, stringResource(R.string.text_pair, stringResource(style.size.label()),

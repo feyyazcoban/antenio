@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.15.0 · Uygulama Antenio adına ve app.antenio.tv kimliğine geçti (BKL-045) · 23 Ekim 2026
+
+Kullanıcı: "BKL-045'e başla: uygulamayı Antenio adına ve app.antenio.tv kimliğine geçir." Uygulama kimliği `app.antenio.tv` (D119), görünen ad "Antenio", User-Agent "Antenio AndroidTV" ve "Antenio/<sürüm> AndroidTV", iki dildeki metinler, telefon kurulum sayfası, yatay logo, menü yazısı, TV afişi ve açılış animasyonu yeni adla. Logo geçicidir: NEXTV'nin piksel ızgarasında "ANTENIO" (ANTEN beyaz, IO nane), oynatma amblemi korundu; kaynak `design/brand/antenio-yatay.svg` ve `antenio-dikey.svg`. Yükleme anahtarı değişkenleri `ANTENIO_RELEASE_*` oldu. 386 JVM testi (1 atlandı, 0 hata), androidTest derlemesi ve release başarılı. TV'ye yeni uygulama olarak kuruldu (`Antenio_TV_Design_Preview_0.15.0.apk`, SHA-256 d152bfc1…0859); TV uykudaydı, görsel doğrulama yapılmadı. Eski NEXTV uygulaması (0.14.90) ve verisi TV'de ayrı duruyor; Antenio'da kaynak yeniden eklenmeli.
+
 ## Kalıcı paket adı app.antenio.tv (D119) · 23 Ekim 2026
 
 Kullanıcı kalıcı paket adını `app.antenio.tv` seçti ve antenio.app alan adını alacak. Ön tarama (NAMING): antenio.app/.tv/.net/.dev ve anteniotv.com boş, antenio.com başkasında; birebir "Antenio" markası yok, yazılım sınıflarında ANTENNO ve anterio benzer kayıtları vekil değerlendirmeli. Uygulama kimliği koda BKL-045 ile, ilk Play yüklemesinden önce geçecek. Kod değişmedi.

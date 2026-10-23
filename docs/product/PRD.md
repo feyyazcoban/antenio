@@ -327,9 +327,9 @@ Her ekran için giriş noktası, ilk odak, OK sonucu, Back sonucu, yükleme, bo�
 | Karar | Önerilen başlangıç | Ne zaman netleşmeli |
 | --- | --- | --- |
 | Hedef pazar | Türkçe ve İngilizce aday diller | İçerik metinleri ve mağaza hazırlığından önce |
-| Ürün adı | NEXTV çalışma referansı | Logo ve marka sistemi kesinleşmeden |
+| Ürün adı | Antenio (D115); paket `app.antenio.tv` (D119) | Logo ve marka sistemi kesinleşmeden |
 | Gelir modeli | D113: 7 gün ücretsiz deneme, sonra Google Play aboneliği ([SUBSCRIPTION](SUBSCRIPTION.md)). Fiyat, dönem ve ödeme ekranının yeri açık | İlk Play yayınından önce |
-| Kullanıcı hesabı | P0 yerel kullanım; hesap isteğe bağlı sonraki faz. D111: platformlar arası Premium için NEXTV hesabı ve sunucu tarafında hak kaydı gerekir; hesabın isteğe bağlı olması öneridir, karar değildir ([SALES_CHANNELS](SALES_CHANNELS.md)) | Premium satışından önce |
+| Kullanıcı hesabı | P0 yerel kullanım; hesap isteğe bağlı sonraki faz. D111: platformlar arası Premium için Antenio hesabı ve sunucu tarafında hak kaydı gerekir; hesabın isteğe bağlı olması öneridir, karar değildir ([SALES_CHANNELS](SALES_CHANNELS.md)) | Premium satışından önce |
 | Telefonla kurulum | QR eşleştirme P1 | Kurulum testleri zorlanma gösterirse öne alınır |
 | Minimum cihaz desteği | Gerçek cihaz testleriyle belirleme | Teknik deneme sonunda |
 | HTTP kaynakları | Uyumluluk ihtiyacını test et; güvenlik etkisini görünür kıl | Kaynak erişim politikası belirlenirken |

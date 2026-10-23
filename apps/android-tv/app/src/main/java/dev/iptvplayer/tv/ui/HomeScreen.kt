@@ -162,15 +162,15 @@ import kotlinx.coroutines.delay
             // handler, a test) keeps the item it asked for.
             .focusProperties { onEnter = { if (requestedFocusDirection != FocusDirection.Enter) activeTarget.requestFocus() } }.focusGroup()
             .testTag("navigation-bar").padding(vertical = 20.dp)) {
-            // The NEXTV emblem on the rail; the open menu adds the letters beside it, as in the horizontal logo (D066).
+            // The Antenio emblem on the rail; the open menu adds the letters beside it, as in the horizontal logo (D066).
             Row(Modifier.fillMaxWidth().padding(start = 16.dp).heightIn(min = 40.dp).semantics(mergeDescendants = true) { },
                 verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.width(40.dp), contentAlignment = Alignment.Center) {
-                    androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(dev.iptvplayer.tv.R.drawable.ic_nextv_splash_mark), "NEXTV",
+                    androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(dev.iptvplayer.tv.R.drawable.ic_splash_mark), "Antenio",
                         Modifier.size(width = 22.dp * (119f / 148f), height = 22.dp))
                 }
-                if (expanded) androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(dev.iptvplayer.tv.R.drawable.nextv_wordmark), null,
-                    Modifier.padding(start = 6.dp).wrapContentWidth(Alignment.Start, unbounded = true).size(width = 11.3.dp * (300f / 67f), height = 11.3.dp))
+                if (expanded) androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(dev.iptvplayer.tv.R.drawable.brand_wordmark), null,
+                    Modifier.padding(start = 6.dp).wrapContentWidth(Alignment.Start, unbounded = true).size(width = 11.3.dp * (429.025f / 65.715f), height = 11.3.dp))
             }
             Spacer(Modifier.weight(1f))
             Column(Modifier.fillMaxWidth().testTag("navigation-items").verticalScroll(rememberScrollState())

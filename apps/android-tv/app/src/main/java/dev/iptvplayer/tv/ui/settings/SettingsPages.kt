@@ -31,7 +31,7 @@ import dev.iptvplayer.tv.data.MediaKind
 import dev.iptvplayer.tv.data.ParentalStatus
 import dev.iptvplayer.tv.data.UiText
 import dev.iptvplayer.tv.ui.Action
-import dev.iptvplayer.tv.ui.NextvLogo
+import dev.iptvplayer.tv.ui.BrandLogo
 import dev.iptvplayer.tv.ui.rememberPinOpener
 import dev.iptvplayer.tv.ui.resolve
 import dev.iptvplayer.tv.ui.shownCategory
@@ -39,7 +39,7 @@ import dev.iptvplayer.tv.ui.updatedTime
 
 /**
  * The sections the main page lists, each a page of its own (plan decision 4a-8). Rehber, Yedekleme ve ana ekran,
- * Kayıtlar and NEXTV Plus join once they have settings.
+ * Kayıtlar and Antenio Plus join once they have settings.
  */
 internal enum class SectionId(@param:StringRes val label: Int) {
     GENERAL(R.string.settings_section_general), SOURCES(R.string.settings_section_sources),
@@ -52,7 +52,7 @@ internal sealed interface PageGuard {
     data object None : PageGuard
     /** The parental PIN while one is set, asked with [reason]'s sentence; once per Settings visit. */
     data class Pin(val reason: AdminReason) : PageGuard
-    /** NEXTV Plus, for [feature]. */
+    /** Antenio Plus, for [feature]. */
     data class Plus(val feature: Feature) : PageGuard
 }
 
@@ -242,7 +242,7 @@ private fun readIn(text: String, languages: List<String>): AnnotatedString = bui
 }
 
 @Composable private fun SettingsScope.About() {
-    NextvLogo(height = 24.dp)
+    BrandLogo(height = 24.dp)
     NoteRow(stringResource(R.string.settings_version, BuildConfig.VERSION_NAME))
     NoteRow("Android ${android.os.Build.VERSION.RELEASE} · API ${android.os.Build.VERSION.SDK_INT}")
     Spacer(Modifier.height(6.dp))

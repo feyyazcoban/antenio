@@ -35,7 +35,7 @@ cd apps/android-tv
 
 TV'ye giden teslimler 0.14.29'dan beri `.\gradlew.bat assembleRelease` çıktısıdır (`app/build/outputs/apk/release/app-release.apk`): R8 ile küçültülmüş, hata ayıklama kapalı, aynı debug anahtarıyla imzalı, böylece önceki kurulumun üstüne veri silinmeden kurulur. Hata ayıklama derlemesi TV'de belirgin biçimde takılır (D056). Enstrümantasyon testleri `debug` ile çalışır.
 
-Debug anahtarına düşme yalnız sürüm adı `-design-preview` ile biten TV önizlemelerine açıktır (0.14.91, LAUNCH_AUDIT E1). Play'e yüklenecek paket `.\gradlew.bat bundleRelease` ile üretilir (`app/build/outputs/bundle/release/app-release.aab`) ve yükleme anahtarı olmadan durur; önizleme olmayan bir sürüm adında `assembleRelease` de durur. Anahtar depoya girmez: `NEXTV_RELEASE_STORE_FILE`, `NEXTV_RELEASE_STORE_PASSWORD`, `NEXTV_RELEASE_KEY_ALIAS` ve `NEXTV_RELEASE_KEY_PASSWORD` ortam değişkeni ya da kullanıcı `gradle.properties` dosyasından verilir.
+Debug anahtarına düşme yalnız sürüm adı `-design-preview` ile biten TV önizlemelerine açıktır (0.14.91, LAUNCH_AUDIT E1). Play'e yüklenecek paket `.\gradlew.bat bundleRelease` ile üretilir (`app/build/outputs/bundle/release/app-release.aab`) ve yükleme anahtarı olmadan durur; önizleme olmayan bir sürüm adında `assembleRelease` de durur. Anahtar depoya girmez: `ANTENIO_RELEASE_STORE_FILE`, `ANTENIO_RELEASE_STORE_PASSWORD`, `ANTENIO_RELEASE_KEY_ALIAS` ve `ANTENIO_RELEASE_KEY_PASSWORD` ortam değişkeni ya da kullanıcı `gradle.properties` dosyasından verilir.
 
 ## Cihaz ayrımı
 

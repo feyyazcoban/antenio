@@ -55,7 +55,7 @@ import kotlin.math.roundToInt
 /**
  * Decides whether a page with a [PageGuard] opens: [open] runs now, after a question, or not at all. A question asked
  * in a window over the panel gives focus back to [returnFocus] if the page does not open. The parental PIN answers
- * here (rememberPinGate); NEXTV Plus joins when sales open, until then a Plus page opens.
+ * here (rememberPinGate); Antenio Plus joins when sales open, until then a Plus page opens.
  */
 internal fun interface PageGate {
     fun request(guard: PageGuard, returnFocus: () -> FocusRequester?, open: () -> Unit)

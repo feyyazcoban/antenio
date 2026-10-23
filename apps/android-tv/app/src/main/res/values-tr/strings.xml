@@ -573,7 +573,7 @@
     <string name="settings_subtitle_source">Kullanılan ayar</string>
     <string name="settings_subtitle_system">Android ayarı</string>
     <string name="settings_subtitle_system_note">Android\'in altyazı tercihlerini kullanır.</string>
-    <string name="settings_subtitle_app">NEXTV ayarı</string>
+    <string name="settings_subtitle_app">Antenio ayarı</string>
     <string name="settings_subtitle_app_note">Aşağıdaki boyut, zemin ve rengi kullanır.</string>
     <string name="settings_subtitle_size">Boyut</string>
     <string name="settings_subtitle_small">Küçük</string>
@@ -587,8 +587,8 @@
     <string name="settings_subtitle_color">Renk</string>
     <string name="settings_subtitle_white">Beyaz</string>
     <string name="settings_subtitle_yellow">Sarı</string>
-    <string name="settings_subtitle_system_hint">Boyut, zemin veya renk seçersen NEXTV ayarına geçilir.</string>
-    <string name="settings_subtitle_app_hint">NEXTV ayarında yayının kendi altyazı biçimi kullanılmaz.</string>
+    <string name="settings_subtitle_system_hint">Boyut, zemin veya renk seçersen Antenio ayarına geçilir.</string>
+    <string name="settings_subtitle_app_hint">Antenio ayarında yayının kendi altyazı biçimi kullanılmaz.</string>
     <string name="settings_osd_timeout">Kontrollerin kapanma süresi</string>
     <string name="settings_osd_timeout_note">Kumandaya dokunulmazsa oynatıcı kontrolleri bu süre sonunda gizlenir. TalkBack açıkken kendiliğinden gizlenmez.</string>
     <plurals name="settings_osd_seconds">
@@ -674,7 +674,7 @@
     <string name="parental_sources_need_pin">Kaynak yönetimi PIN istesin</string>
     <string name="parental_sources_need_pin_note">Kaynakları açmak, eklemek, düzenlemek ve kaldırmak PIN ister; kaynak bilgileri ve şifreler de korunur.</string>
     <string name="parental_launch_needs_pin">Açılışta PIN iste</string>
-    <string name="parental_launch_needs_pin_note">NEXTV açılırken ve arka plandan dönerken PIN ister.</string>
+    <string name="parental_launch_needs_pin_note">Antenio açılırken ve arka plandan dönerken PIN ister.</string>
     <string name="parental_create">PIN oluştur</string>
     <string name="parental_create_note">4 haneli bir PIN seç. Kolay tahmin edilen PIN\'ler kabul edilmez.</string>
     <string name="parental_off_note">Yetişkin kategorileri PIN olmadan da gizli kalır.</string>
@@ -770,7 +770,7 @@
     <string name="access_unresolved">Bu içeriğin kilit bilgisi doğrulanamadı. Kataloğu yenileyip tekrar dene.</string>
 
     <!-- The lock screen (pin.md §3.9): "Açılışta PIN iste", or a protection record that cannot be read. -->
-    <string name="app_lock_title">NEXTV kilitli</string>
+    <string name="app_lock_title">Antenio kilitli</string>
     <string name="app_lock_unavailable_title">Ebeveyn denetimi kaydı açılamadı</string>
     <string name="app_lock_unavailable_note">Kilitli içerikleri korumak için uygulama kapalı tutuluyor. Kayıt onarılamazsa bu cihazdaki kaynakları ve kilitleri sıfırlayıp yeniden kurabilirsin.</string>
     <string name="app_lock_retry">Yeniden dene</string>
@@ -881,11 +881,11 @@
     <string name="panel_video_accessible">Canlı yayın, %1$s %2$s. OK kanal listesini açar.</string>
     <string name="panel_controls_action">Oynatıcı kontrolleri</string>
     <string name="settings_about_privacy">Gizlilik ve veri güvenliği</string>
-    <string name="settings_about_privacy_note">NEXTV analitik, telemetri ya da reklam kimliği toplamaz. Kaynak hesapların, katalog önbelleğin, PIN\'in ve kilit ayarların bu cihazda Android Keystore anahtarıyla şifreli (AES-GCM) saklanır. Favoriler, izleme geçmişi ve kaldığın yerler uygulamanın yalnız kendisinin okuyabildiği alanda şifresiz durur. Hiçbiri bulut yedeğine ya da cihaz aktarımına girmez ve üçüncü taraflara gönderilmez. Uygulama yalnız eklediğin kaynak ve rehber adreslerine ve bunların listelediği yayın ve görsel adreslerine bağlanır; Telefonla ekle açıkken ev ağında bir kurulum sayfası sunar.</string>
+    <string name="settings_about_privacy_note">Antenio analitik, telemetri ya da reklam kimliği toplamaz. Kaynak hesapların, katalog önbelleğin, PIN\'in ve kilit ayarların bu cihazda Android Keystore anahtarıyla şifreli (AES-GCM) saklanır. Favoriler, izleme geçmişi ve kaldığın yerler uygulamanın yalnız kendisinin okuyabildiği alanda şifresiz durur. Hiçbiri bulut yedeğine ya da cihaz aktarımına girmez ve üçüncü taraflara gönderilmez. Uygulama yalnız eklediğin kaynak ve rehber adreslerine ve bunların listelediği yayın ve görsel adreslerine bağlanır; Telefonla ekle açıkken ev ağında bir kurulum sayfası sunar.</string>
     <string name="settings_about_licenses">Açık kaynak lisansları</string>
     <string name="settings_about_licenses_note">Roboto yazı tipi SIL Open Font License 1.1 kapsamındadır. AndroidX, Jetpack Compose, Media3 ExoPlayer, OkHttp, Coil ve Material Symbols simgeleri Apache License 2.0 kapsamındadır.</string>
     <string name="settings_start_last_channel">Açılışta son kanalı aç</string>
-    <string name="settings_start_last_channel_note">NEXTV açıldığında doğrudan son izlenen canlı TV kanalını başlatır. Kilitli kanallarda Ana sayfa açılır.</string>
+    <string name="settings_start_last_channel_note">Antenio açıldığında doğrudan son izlenen canlı TV kanalını başlatır. Kilitli kanallarda Ana sayfa açılır.</string>
     <string name="player_aspect_title">Görüntü sığdırma</string>
     <string name="player_aspect_fit">Sığdır (Varsayılan)</string>
     <string name="player_aspect_zoom">Yakınlaştır (Kenarları kırp)</string>

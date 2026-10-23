@@ -12,13 +12,13 @@ Kaynaklar 22.10.2026'da açıldı ve ayrıca bir kez daha kontrol edildi. "Çık
 - Para ilk günden gelmeye başlar. Yeni özellik yazmayı beklemeye gerek yoktur.
 - **Bunun için ilk yayından önce üç iş şart:** mali müşavir görüşmesi, avukatın kısa metin kontrolü ve ödeme sistemini yazmak (yaklaşık 3 hafta, ölçülmedi).
 
-## 1. Önce bir soru: NEXTV hesabı ilk yayında olsun mu?
+## 1. Önce bir soru: Antenio hesabı ilk yayında olsun mu?
 
 Daha önce şunu kabul ettin: "Premium ile aynı sürümde hesap" (D112-3). O karar şunu da söylüyor: "Hesapsız Premium satışı yapılmaz." D113 ile ilk ücretli sürüm artık ilk Play yayını oldu. Bu yüzden D112-3 değişmezse hesap sistemi ilk yayına girer.
 
 | | A: D112-3 kalsın | B: Önce yalnız abonelik (öneri) |
 |---|---|---|
-| İlk yayında | Abonelik + NEXTV hesabı (QR ile giriş, küçük sunucu) | Yalnız abonelik |
+| İlk yayında | Abonelik + Antenio hesabı (QR ile giriş, küçük sunucu) | Yalnız abonelik |
 | Ödeme sistemi için kod | Yaklaşık 3 hafta, artı hesap planındaki iş ([account.md](../design/gap/account.md), yaklaşık 31,5 iş günü; bir kısmı örtüşüyor, net ek süre ölçülmedi) | Yaklaşık 3 hafta |
 | Yeni kararlar | Satın alma takip servisi, giriş servisi, cihaz sınırı, veri yeri | Yok |
 | Bedeli | Yayın daha geç | Hesap Apple sürümünden önce gelir. O zamana kadar abone olanlar, üyeliklerini Apple'a taşımak için bir kez Android TV'lerinden hesaba giriş yapar. Gizlilik beyanı da o zaman güncellenir. |
@@ -27,7 +27,7 @@ Android'de üyelik zaten Google hesabına bağlıdır. Uygulama silinip yeniden 
 
 ## 2. Müşteri ne yaşar? (B yolu, öneri)
 
-1. **Kurar.** NEXTV'yi Google Play'den kurar. Mağaza sayfası açıkça söyler: NEXTV kanal içermez, kendi listeni eklersin, izlemek için üyelik gerekir (7 gün ücretsiz, sonra fiyat, otomatik yenilenir).
+1. **Kurar.** Antenio'yu Google Play'den kurar. Mağaza sayfası açıkça söyler: Antenio kanal içermez, kendi listeni eklersin, izlemek için üyelik gerekir (7 gün ücretsiz, sonra fiyat, otomatik yenilenir).
 2. **Listesini ekler.** Bugünkü gibi kendi IPTV listesini ekler. Ödeme sorulmaz.
 3. **Gezer.** Kanallarını, filmlerini ve rehberi görür; listesinin çalıştığını anlar.
 4. **İlk kez "İzle"ye basar.** Üyelik ekranı çıkar. Kullanıcı ayrıca bir şeye basmadan, tek ekranda şunları görür:
@@ -65,7 +65,7 @@ Sırayla. Her biri için adımları ben yazarım; tıklamak ve imzalamak sana ka
    - Google'ın payı bugün Türkiye'deki abonelikte %15. ABD, Avrupa ve İngiltere'de de toplam %15.
    - Türkiye'nin de girdiği anlaşılan "diğer ülkeler" grubunda yeni ücret yapısı 30.09.2027'de başlıyor; ayrıntısı henüz açıklanmadı.
 6. **Play Console'da aboneliği kur.** Play Console, Google'ın geliştirici panelidir. Kurulum sırası:
-   - **Abonelik:** ör. "NEXTV Premium".
+   - **Abonelik:** ör. "Antenio Premium".
    - **Temel plan:** fiyat ve dönem, ör. yıllık.
    - **Teklif:** temel plana eklenen koşul; burada 7 gün ücretsiz deneme.
    - **Uygunluk:** kimin deneme alabileceği. Öneri: "yeni müşteri", yani daha önce abone olmamış kişi. Kimin deneme alacağına Google karar verir.
@@ -109,7 +109,7 @@ A yolu seçilirse buna hesap işi eklenir ([account.md](../design/gap/account.md
 ## 5. Senden beklenen kararlar
 
 1. **Hesap ilk yayında mı?** (§1) **Öneri: B,** önce yalnız abonelik.
-2. **Ad, dönem ve fiyat.** **Öneri:** Tek plan, yıllık, adı "NEXTV Premium".
+2. **Ad, dönem ve fiyat.** **Öneri:** Tek plan, yıllık, adı "Antenio Premium".
    - Fiyat için yalnız örnek: eski önerilerde yıllık 149,99 TL ve 7,99 $ vardı ([SALES_STRATEGY](SALES_STRATEGY.md) §3). O rakam tek seferlik modelin yanına düşünülmüştü; yalnız abonelikte aynı anlamı taşımaz.
    - Aylık plan da eklenirse, yıllık plan ekranda aylık fiyatıyla en öne çıkarılmamalı. Google bunu yanıltıcı sayıyor.
 3. **Üyelik ekranı ne zaman çıksın?** İlk açılışta, liste eklenince ya da ilk "İzle"de. **Öneri:** İlk "İzle"de; kullanıcı önce kendi listesinin çalıştığını görür.
@@ -120,7 +120,7 @@ A yolu seçilirse buna hesap işi eklenir ([account.md](../design/gap/account.md
 ## 6. Riskler
 
 1. **Kendi sunucumuz yok (B yolunda).** Sunucu, internette sürekli çalışan kendi hizmetimiz demek. B yolunda üyelik yalnız TV'de kontrol edilir. Google, satın almanın güvenli bir sunucuda doğrulanmasını kesinlikle öneriyor. Değiştirilmiş bir uygulamayla üyelik atlatılabilir (çıkarım). Öneri: ilk yayında bu riski kabul etmek; hesap gelince sunucu doğrulaması eklemek.
-2. **Yanlış beklenti.** Kullanıcı NEXTV'nin kanal sattığını sanabilir. Rakip oynatıcıların yorumlarında "bu sadece bir oynatıcı" uyarıları var; iade şikâyetleri çoğunlukla içerik satan IPTV servislerine yönelik [3. taraf]. Mağaza metni ve üyelik ekranı bunu açıkça söylemeli.
+2. **Yanlış beklenti.** Kullanıcı Antenio'nun kanal sattığını sanabilir. Rakip oynatıcıların yorumlarında "bu sadece bir oynatıcı" uyarıları var; iade şikâyetleri çoğunlukla içerik satan IPTV servislerine yönelik [3. taraf]. Mağaza metni ve üyelik ekranı bunu açıkça söylemeli.
 3. **Tüketici hukuku belirsiz.** İki kritik soru var: otomatik yenileme kanunda nasıl sayılır, iptalde kalan ücret iade edilmeli mi? Google'ın kuralı "iade yok", ama Play Console'dan kısmi iade yapılabilir. Kanunun ilgili maddelerine aykırılıkta her işlem için ayrı idari para cezası var (taban 2.200 TL, her yıl güncellenir). Avrupa'da deneme sonrası ücret açıkça söylenmezse kullanıcı ücretliye dönüşte yeniden cayma hakkı kazanır.
 4. **TV'den iptal edilemiyor.** Google iptal için telefon ya da bilgisayar istiyor. Kanun ise iptalin, aboneliği başlatmaktan zor olmamasını istiyor. QR kod ve kısa adres yardım eder; yeterli olup olmadığını avukata soruyoruz.
 5. **TL'de zam.** Fiyat artınca mevcut aboneler eski fiyatta kalır. Onları yeni fiyata geçirmenin kuralları var: aynı plan ve ülke için yılda en çok bir kez, en çok %50 (ya da günde 17 ABD senti, hangisi büyükse), en az 30 gün önce uygulama içinde haber. Bu kurallara uymayan zamda, kabul etmeyenin aboneliği biter.

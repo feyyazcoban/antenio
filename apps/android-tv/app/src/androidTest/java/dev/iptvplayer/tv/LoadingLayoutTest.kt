@@ -118,7 +118,7 @@ class LoadingLayoutTest {
             ui.waitUntil(5_000) { ui.onAllNodes(hasTestTag("pin-key:1") and isFocused()).fetchSemanticsNodes().isNotEmpty() }
             for (tag in listOf("app-lock-title", "pin-boxes", "pin-feedback", "pin-key:1", "pin-key:0", "pin-key:delete", "pin-forgot")) fits(tag, "pad $fontScale")
             ui.onNodeWithTag("pin-boxes").assertContentDescriptionEquals("0 / 4 rakam girildi")
-            ui.onNodeWithTag("app-lock").assert(SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "NEXTV kilitli"))
+            ui.onNodeWithTag("app-lock").assert(SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "Antenio kilitli"))
             shot("app-lock-$name")
             ui.runOnUiThread { state.value = unreadable }
             ui.waitUntil(5_000) { ui.onAllNodes(hasTestTag("app-lock-retry") and isFocused()).fetchSemanticsNodes().isNotEmpty() }

@@ -83,10 +83,10 @@ fun focusRing(radius: Dp, color: Color = Ink.Text) =
     }
 }
 
-/** The NEXTV logo (D066): the horizontal logo in headings, at [height]. */
-@Composable fun NextvLogo(modifier: Modifier = Modifier, height: Dp = 24.dp) {
-    androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(dev.iptvplayer.tv.R.drawable.nextv_logo), "NEXTV",
-        modifier.size(width = height * (460f / 130f), height = height))
+/** The Antenio logo (D066): the horizontal logo in headings, at [height]. */
+@Composable fun BrandLogo(modifier: Modifier = Modifier, height: Dp = 24.dp) {
+    androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(dev.iptvplayer.tv.R.drawable.brand_logo), "Antenio",
+        modifier.size(width = height * (591.025f / 130f), height = height))
 }
 
 // Reuses the stroke icon paths from prototypes/tv-flow/app.js.

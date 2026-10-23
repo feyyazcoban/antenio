@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ANTENIO letters of the horizontal logo, without the mark: beside the emblem in the open side menu. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="107.26dp"
+    android:height="16.429dp"
+    android:viewportWidth="429.025"
+    android:viewportHeight="65.715">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M0 6.572L6.5801 6.572L6.5801 0L39.4809 0L39.4809 6.572L46.061 6.572L46.061 65.715L32.9008 65.715L32.9008 46.001L13.1603 46.001L13.1603 65.715L0 65.715ZM13.1603 13.143L13.1603 32.858L32.9008 32.858L32.9008 13.143Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M91.2445 46H84.6644V32.857H78.0844V65.715H64.924V0H84.6644V13.143H91.2445V26.286H97.8247V39.429H104.405V0H117.565V65.715H97.8247V59.143H91.2445V46Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M149.588 13.143H136.428V0H175.909V13.143H162.749V65.715H149.588V13.143Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M207.932 52.572H234.253V65.715H194.772V0H234.253V13.143H207.932V26.286H227.673V39.429H207.932V52.572Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M279.436 46H272.856V32.857H266.276V65.715H253.116V0H272.856V13.143H279.436V26.286H286.016V39.429H292.596V0H305.757V65.715H286.016V59.143H279.436V46Z" />
+    <path
+        android:fillColor="#FF1CECAB"
+        android:fillType="evenOdd"
+        android:pathData="M324.62 0L364.101 0L364.101 13.143L350.94 13.143L350.94 52.572L364.101 52.572L364.101 65.715L324.62 65.715L324.62 52.572L337.78 52.572L337.78 13.143L324.62 13.143Z" />
+    <path
+        android:fillColor="#FF1CECAB"
+        android:fillType="evenOdd"
+        android:pathData="M382.964 6.572L389.544 6.572L389.544 0L422.445 0L422.445 6.572L429.025 6.572L429.025 59.144L422.445 59.144L422.445 65.715L389.544 65.715L389.544 59.144L382.964 59.144ZM396.124 13.143L396.124 52.572L415.865 52.572L415.865 13.143Z" />
+</vector>

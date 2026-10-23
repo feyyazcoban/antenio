@@ -109,7 +109,7 @@ data class TvState(
     val startLastChannel: Boolean = false,
     val progressLabel: UiText = UiText.Res(R.string.progress_preparing),
     val sourceTask: SourceTask = SourceTask.RESTORING,
-    /** The restore opening the app (D069): shown as the NEXTV cover. Retries and resets keep the operation card. */
+    /** The restore opening the app (D069): shown as the Antenio cover. Retries and resets keep the operation card. */
     val restoringAtLaunch: Boolean = true,
     /** The hero's İzle is fetching a series' episodes for this title (D071); its label says "Açılıyor…". */
     val heroStarting: String? = null,
@@ -240,7 +240,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * NEXTV came on screen (MainActivity.onStart) or left it (onStop: Home, another app, standby). What may live only
+     * Antenio came on screen (MainActivity.onStart) or left it (onStop: Home, another app, standby). What may live only
      * while the viewer sees the app hangs here as it arrives (gap plan T3, T6): what PINs opened locks again, a PIN
      * verified in Ayarlar ends and an open PIN pad closes, Settings with them, and a locked title in the player leaves it
      * as Back would (its progress is already saved), so it does not play on behind the TV's standby or come back without
@@ -1044,7 +1044,7 @@ class TvViewModel(application: Application) : AndroidViewModel(application) {
         mutable.update { it.copy(favoriteIds = favorites) }
     }
 
-    /** What the app may use of NEXTV Plus: everything until sales open (gap plan S37). */
+    /** What the app may use of Antenio Plus: everything until sales open (gap plan S37). */
     val entitlements: Entitlements = AllFree
 
     /**

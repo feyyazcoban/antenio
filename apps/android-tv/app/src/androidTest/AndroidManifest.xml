@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="dev.iptvplayer.tv.pilot" />
+        android:targetPackage="app.antenio.tv" />
     <!-- Framework-only runner can observe the real shrunk release, whose Kotlin classes are renamed by R8. -->
     <instrumentation android:name="dev.iptvplayer.tv.ReleaseStartupInstrumentation"
-        android:targetPackage="dev.iptvplayer.tv.pilot" />
+        android:targetPackage="app.antenio.tv" />
 </manifest>

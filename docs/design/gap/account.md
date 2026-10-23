@@ -1,4 +1,4 @@
-# BKL-047 · NEXTV hesabı ve platformlar arası Premium: uygulama planı
+# BKL-047 · Antenio hesabı ve platformlar arası Premium: uygulama planı
 
 22 Ekim 2026 · BKL-047 uygulama planı. Plan, kod haritası, mevcut S35–S37 tasarımı ve güncel sağlayıcı belgeleriyle hazırlandı; iki ayrı açıdan (kod/TV arayüzü; uyum/güvenlik) eleştirildi ve düzeltildi. Kullanıcı kararı yalnız D111 ve D112'dir. Bunların dışındaki her model, sağlayıcı, sayı, ad, ekran kimliği, sınıf adı ve sıra **öneridir**. Kod değişmedi. Yollar depo köküne göredir; `<tv>/` = `apps/android-tv/app/src/main/java/dev/iptvplayer/tv/`. Gerekçe ve kaynaklar [SALES_CHANNELS](../../product/SALES_CHANNELS.md), yayın engelleri [LAUNCH_AUDIT](../../project/LAUNCH_AUDIT.md) içinde.
 
@@ -13,7 +13,7 @@
 ## Kısaca: teknik olmayan özet
 
 **Müşteri ne yaşar?**
-1. NEXTV'yi Google Play'den ücretsiz indirir. Hesap ya da kayıt yok.
+1. Antenio'yu Google Play'den ücretsiz indirir. Hesap ya da kayıt yok.
 2. Premium isterse Ayarlar → Premium'dan Google Play ile öder. Hesap açması gerekmez.
 3. Ödemeden sonra bir kez sorulur: "Premium'u diğer cihazlarında da kullanmak için hesabına bağla: Şimdi / Sonra."
 4. "Şimdi" derse TV'de bir QR kod çıkar. Telefonla okutur ve Google ya da Apple hesabıyla giriş yapar. Kumandayla şifre yazmaz.
@@ -25,8 +25,8 @@
 - **Google Play** ödemeyi alır.
 - **Satın alma takip servisi** (öneri: RevenueCat) ödemenin gerçek olduğunu denetler. Aylık 2.500 $ gelire kadar ücretsiz.
 - **Giriş servisi** (öneri: Auth0) QR ile girişi sağlar. 25.000 aktif kullanıcıya kadar ücretsiz.
-- **Küçük NEXTV sunucusu** iki liste tutar: hangi satın almanın hangi hesaba ait olduğu ve hesabın cihazları. Kanal listeleri, IPTV şifreleri ve izleme geçmişi buraya hiç gitmez.
-- **Güvenlik ağı:** NEXTV sunucusu çökse bile, Play'den alınan Premium aynı Google hesabındaki TV'lerde çalışmaya devam eder. Sunucu yalnız Premium'u başka platforma taşımak için gerekir.
+- **Küçük Antenio sunucusu** iki liste tutar: hangi satın almanın hangi hesaba ait olduğu ve hesabın cihazları. Kanal listeleri, IPTV şifreleri ve izleme geçmişi buraya hiç gitmez.
+- **Güvenlik ağı:** Antenio sunucusu çökse bile, Play'den alınan Premium aynı Google hesabındaki TV'lerde çalışmaya devam eder. Sunucu yalnız Premium'u başka platforma taşımak için gerekir.
 
 **İş sırası:**
 1. **Hazırlık (sen):** marka ve alan adı, Play geliştirici hesabı, mali müşavir. Ayrıca RevenueCat ve Auth0'a "IPTV oynatıcıyı kabul ediyor musunuz" sorusu.
@@ -46,20 +46,20 @@ Tablodaki diğer maddelerin çoğu teknik ayrıntıdır ve öneriyle ilerler. Fi
 
 ## Teknik özet
 
-Play alımı hesapsız yapılır ve aynı mağazada hesapsız açılır. İsteğe bağlı NEXTV hesabı, alımı Play `purchaseToken`'ıyla sunucudaki bağlama tablosuna yazar. Hesapla giriş yapılan başka bir cihaz, imzalı ve süreli bir hak belgesiyle Premium'u açar. Hesap ve satış aynı sürümde yayımlanır. İki ayrı derleme bayrağı birlikte açılır (D112-3).
+Play alımı hesapsız yapılır ve aynı mağazada hesapsız açılır. İsteğe bağlı Antenio hesabı, alımı Play `purchaseToken`'ıyla sunucudaki bağlama tablosuna yazar. Hesapla giriş yapılan başka bir cihaz, imzalı ve süreli bir hak belgesiyle Premium'u açar. Hesap ve satış aynı sürümde yayımlanır. İki ayrı derleme bayrağı birlikte açılır (D112-3).
 
 **Tahmini iş:** yaklaşık 31,5 g kod (ölçülmedi) ve sahip işleri. PLAN Faz G'deki 5,5 günlük tahminin yerine geçer (öneri).
 
 ## 1. Amaç, kapsam ve sınırlar
 
-**Amaç:** D111. Play'de alınan Premium, NEXTV hesabıyla giriş yapılan başka bir cihazda yeniden ödeme olmadan açılır. Model D112'dir.
+**Amaç:** D111. Play'de alınan Premium, Antenio hesabıyla giriş yapılan başka bir cihazda yeniden ödeme olmadan açılır. Model D112'dir.
 
 **Kapsam:**
 - TV'de isteğe bağlı hesap girişi (QR ve kod), çıkış, cihaz listesi ve cihaz sınırı. Başka bir cihazı çıkarmak ve giriş yöntemi eklemek web hesap merkezinden yapılır.
 - Play alımını `purchaseToken` ile hesaba bağlama, hesap hakkını cihaza taşıma, iade ve geri alma, onaylanmamış alımı kurtarma.
 - Belirteç ve hak önbelleği için PIN ve kaynak sıfırlamalarından etkilenmeyen depolama.
 - `Entitlements` uygulaması: hak ya mağaza kaydından **ya da** hesaptan gelen imzalı belgeden gelir.
-- Sunucu: kimlik sağlayıcı kiracısı, hak servisi, ince NEXTV API, web hesap merkezi ve silme sayfası. Hazırlık ve üretim ortamları ayrıdır.
+- Sunucu: kimlik sağlayıcı kiracısı, hak servisi, ince Antenio API, web hesap merkezi ve silme sayfası. Hazırlık ve üretim ortamları ayrıdır.
 - Kabul testi: TV A'da Play'den al → TV B'de (başka bir Android TV) giriş yap → Premium açılır.
 
 **Kapsam dışı:**
@@ -83,7 +83,7 @@ Play alımı hesapsız yapılır ve aynı mağazada hesapsız açılır. İsteğ
 
 ### 2.1 Verilmiş
 
-- **D111:** Bir platformda alınan Premium, NEXTV hesabıyla diğer platformlarda yeniden ödemeden açılır.
+- **D111:** Bir platformda alınan Premium, Antenio hesabıyla diğer platformlarda yeniden ödemeden açılır.
 - **D112-1:** Satış yalnız mağazadan yapılır: Android'de Play faturalandırma, Apple'da IAP. Site satış yapmaz; bilgi, destek ve hesap merkezi olarak çalışır.
 - **D112-2:** Hesap isteğe bağlıdır. Ücretsiz kullanım ve aynı mağazada geri yükleme hesap istemez. Satın almanın önünde hesap engeli yoktur.
 - **D112-3:** Hesap, Play'de Premium satışını açan Android sürümüyle gelir. Hesapsız Premium satışı yapılmaz.
@@ -94,7 +94,7 @@ Koddaki karşılığı (öneri): `PLUS_SALE_OPEN`, `ACCOUNT_ENABLED` olmadan aç
 
 | # | Karar | Öneri | Alternatif | En geç |
 |---|---|---|---|---|
-| 1 | Hak altyapısı | RevenueCat (doğrulama, onay, RTDN) + ince NEXTV API (bağlama, cihaz sınırı, imzalı hak, silme) | Yalnız kendi servis (`productsv2` + RTDN) | S35c |
+| 1 | Hak altyapısı | RevenueCat (doğrulama, onay, RTDN) + ince Antenio API (bağlama, cihaz sınırı, imzalı hak, silme) | Yalnız kendi servis (`productsv2` + RTDN) | S35c |
 | 2 | Kimlik sağlayıcı | Auth0, AB kiracısı, özel alan adı | Keycloak; Firebase + özel eşleştirme | S35c |
 | 3 | TV girişi | RFC 8628: QR (`verification_uri_complete`) + kısa kod; onay sayfası kodu ve uyarıyı gösterir | — | S35a |
 | 4 | Giriş seçenekleri | Google + Sign in with Apple; e-posta kodu sonra. Apple için Android açılışında Apple Developer üyeliği gerekir. E-postaya göre otomatik birleştirme yok; "giriş yöntemi ekle" hesap merkezinde. | Google + e-posta kodu; Apple F3'te | S35c |
@@ -123,12 +123,12 @@ Her karar verildiğinde DECISIONS'a D113'ten başlayarak yazılır.
 
 ### 3.1 İlkeler (öneri)
 
-1. Mağaza alımı, mağazanın kendi kaydına dayanarak kendi mağazasında açılır. NEXTV API ya da RevenueCat (RC) kapalıyken de açılır.
+1. Mağaza alımı, mağazanın kendi kaydına dayanarak kendi mağazasında açılır. Antenio API ya da RevenueCat (RC) kapalıyken de açılır.
 2. Hesap yalnız platformlar arası taşımayı ekler.
 3. Uygulamada satış yönlendirmesi yoktur.
 4. Kaynak verisi (adres, kimlik bilgisi, liste, favori, geçmiş) hiçbir isteğe girmez.
-5. Bayraklar kapalıyken RC kurulmaz, Play okuyucusu bağlanmaz, Auth0'a ve NEXTV API'ye istek gitmez. Ücretsiz yayının "veri toplanmıyor" beyanı böylece doğru kalır.
-6. Bağlamada ve cihaz sınırında doğruluk kaynağı NEXTV tablosudur. Bağ Play `purchaseToken`'ıyla (Apple'da `originalTransactionId`) kurulur. RC'nin müşteri kimliği ve kimlik aktarımı hesap hakkını değiştirmez.
+5. Bayraklar kapalıyken RC kurulmaz, Play okuyucusu bağlanmaz, Auth0'a ve Antenio API'ye istek gitmez. Ücretsiz yayının "veri toplanmıyor" beyanı böylece doğru kalır.
+6. Bağlamada ve cihaz sınırında doğruluk kaynağı Antenio tablosudur. Bağ Play `purchaseToken`'ıyla (Apple'da `originalTransactionId`) kurulur. RC'nin müşteri kimliği ve kimlik aktarımı hesap hakkını değiştirmez.
 
 ### 3.2 İstemci
 
@@ -142,7 +142,7 @@ Her karar verildiğinde DECISIONS'a D113'ten başlayarak yazılır.
 | `StoreBilling` | `<tv>/billing/StoreBilling.kt` | `products()`, `launch()`, `owned()`, `updates` (sales_draft §4.2). |
 | `RevenueCatBilling` | `<tv>/billing/RevenueCatBilling.kt` | Alım ve onay (asıl onay yolu), `syncPurchases`, `logOut`. `configure` geç çağrılır, yalnız bayrak açıkken: Satın al'da ya da `appStarted()` onaysız bir PURCHASED alım bulduğunda. Kimlik, girişliyse `accountId`, değilse RC'nin önbellekteki anonim kimliğidir. Bağlama için `logIn` çağrılmaz. Release'te `Purchases.logLevel = LogLevel.ERROR`. |
 | `PlayPurchaseReader` | `<tv>/billing/PlayPurchaseReader.kt` | Ürün fiyatını, sahip olunan alımları ve `purchaseToken`'ı okur. `purchase.signature`'ı `BuildConfig.PLAY_PUBLIC_KEY` ile doğrular. Onaylamayı yalnız yedek kuralda yapar: PURCHASED alım 48 saat sonra hâlâ onaysızsa (karar 13). RC'nin getirdiği PBL sürümünü kullanır; ikinci bir PBL sürümü eklenmez. |
-| `AccountApi` | `<tv>/account/AccountApi.kt` | Auth0 `/oauth/device/code`, `/oauth/token`, `/oauth/revoke` ve NEXTV API uçları. Tek, geç kurulan `OkHttpClient` (10/15/30 sn); `org.json`; iptal edilebilir çağrı (`SourceRepository.kt:88-127` kalıbı). Adresler ve istemci kimliği ortamın `BuildConfig` alanlarından gelir. |
+| `AccountApi` | `<tv>/account/AccountApi.kt` | Auth0 `/oauth/device/code`, `/oauth/token`, `/oauth/revoke` ve Antenio API uçları. Tek, geç kurulan `OkHttpClient` (10/15/30 sn); `org.json`; iptal edilebilir çağrı (`SourceRepository.kt:88-127` kalıbı). Adresler ve istemci kimliği ortamın `BuildConfig` alanlarından gelir. |
 | `AccountStore` / `AccountStorage` | `<tv>/account/AccountStore.kt` | ProtectionStore kalıbı: alias `nextv_account_v1`, `filesDir/account/account.bin`, AAD "account-v1", generation. Yazma atomiktir (geçici dosya + yeniden adlandırma). |
 | `PlusStore` / `PlusStorage` | `<tv>/data/PlusStore.kt` | Alias `nextv_plus_v1`, `filesDir/plus/plus.bin`, AAD "plus-v1". Mağaza ve hesap bölümleri ayrıdır. |
 | `PremiumServices` | `<tv>/MainActivity.kt` (`TvApplication`) | Lazy RC, Play okuyucusu, `AccountApi`, `enabled` ve `saleOpen`. Bayraklar kapalıyken hiçbir istemci oluşturulmaz. androidTest kendi sahtesini koyar. |
@@ -170,7 +170,7 @@ Her karar verildiğinde DECISIONS'a D113'ten başlayarak yazılır.
   - Üretim derlemesinde yalnız üretim `kid`'leri bulunur.
   - Hazırlık derlemesi yalnız iç test kanalına yüklenir ve sürüm adı `-staging` eki taşır.
 - **Auth0 kiracısı (AB):**
-  - Native uygulama "NEXTV TV": Device Code grant, token kimlik doğrulaması "None", OIDC uyumlu.
+  - Native uygulama "Antenio TV": Device Code grant, token kimlik doğrulaması "None", OIDC uyumlu.
   - API `nextv-api`: Allow Offline Access ve refresh rotasyonu. Reuse interval > 0 (öneri 30 sn). Hareketsizlik ömrü ≥ 30 g (öneri 90 g), mutlak ömür öneri 365 g. Varsayılanlar doğrulanacak.
   - Google ve Apple bağlantıları kendi anahtarlarıyla kurulur. Hesap bağlama ("giriş yöntemi ekle") hesap merkezinden yapılır.
   - Özel alan adı `giris.<alan>`.
@@ -178,11 +178,11 @@ Her karar verildiğinde DECISIONS'a D113'ten başlayarak yazılır.
   - Hesap silme `max_age=300` ile yeniden giriş ister.
 - **RevenueCat:**
   - Play uygulaması ve Play hizmet hesabı kimliği.
-  - RTDN Pub/Sub → RC. Aynı konuya NEXTV API için ikinci bir abonelik açılır (iade, void ve ters ibraz uyarısı).
+  - RTDN Pub/Sub → RC. Aynı konuya Antenio API için ikinci bir abonelik açılır (iade, void ve ters ibraz uyarısı).
   - Ürün `nextv_lifetime` "non-consumable", yetki `lifetime`.
   - Geri yükleme davranışı: "Transfer to new App User ID" (varsayılan). Aktarım bağı değiştirmez (ilke 6). S36c'de denenir.
-  - Webhook → NEXTV API, Authorization başlığıyla. Başlık sabit zamanlı karşılaştırılır. Webhook yalnız tetikleyicidir: her olayda durum RC REST'ten ya da `productsv2`'den yeniden okunur.
-- **NEXTV API:** ince ve sunucusuz. Öneri: Cloud Functions + Firestore, AB bölgesi. İmza anahtarı Cloud KMS'te durur. Kod `services/account-api/` altında (yeni), sırlar depo dışında. Dil, test ve dağıtım komutları WORKFLOW'a yazılır (öneri: Node + Firebase Emulator).
+  - Webhook → Antenio API, Authorization başlığıyla. Başlık sabit zamanlı karşılaştırılır. Webhook yalnız tetikleyicidir: her olayda durum RC REST'ten ya da `productsv2`'den yeniden okunur.
+- **Antenio API:** ince ve sunucusuz. Öneri: Cloud Functions + Firestore, AB bölgesi. İmza anahtarı Cloud KMS'te durur. Kod `services/account-api/` altında (yeni), sırlar depo dışında. Dil, test ve dağıtım komutları WORKFLOW'a yazılır (öneri: Node + Firebase Emulator).
 
   | Uç | Görev |
   |---|---|
@@ -210,7 +210,7 @@ Her karar verildiğinde DECISIONS'a D113'ten başlayarak yazılır.
 
 **(b) Satın alma sonrası bağlama**
 1. TV-078 "Şimdi" → TV-077, (c)'nin 1–4. adımları.
-2. Token `PlayPurchaseReader`'dan alınır → `POST /v1/link`. Alım başka bir hesaba bağlıysa: "Bu satın alma başka bir NEXTV hesabına bağlı. Destekle iletişime geç."
+2. Token `PlayPurchaseReader`'dan alınır → `POST /v1/link`. Alım başka bir hesaba bağlıysa: "Bu satın alma başka bir Antenio hesabına bağlı. Destekle iletişime geç."
 3. `POST /v1/devices`. Bu TV'nin mağaza hakkı ACTIVE olduğu için belge istenmez ve TV sınıra sayılmaz.
 4. "Sonra" denirse TV-076'da "Satın alımı hesaba bağla" satırı kalır.
 
@@ -255,7 +255,7 @@ Her karar verildiğinde DECISIONS'a D113'ten başlayarak yazılır.
 
 **(g) Hesap silme (web)**
 1. Hesap merkezinde yeniden giriş (`max_age=300`) → "Hesabı sil" onayı.
-2. NEXTV API sırasıyla şunları yapar:
+2. Antenio API sırasıyla şunları yapar:
    - cihazları, `accounts` kaydını, `idpSubjects`'i ve e-postayı siler;
    - `purchases.accountId`'yi boşaltır. Alım satırı iadeleri işleyebilmek için süreli tutulur (süre O10'da);
    - RC'de `accountId` kimlikli bir müşteri varsa `DELETE /v1/subscribers/{accountId}` ile siler (200 ve 404 başarıdır). Anonim RC müşterileri hesaba bağlı değildir;
@@ -347,8 +347,8 @@ Ayarlar'a iki yeni bölüm gelir: `SectionId.PREMIUM` (TV-074) ve `SectionId.ACC
 - Back TV-076'ya döner, odak Cihazlar'da.
 
 **TV-074 durumları:** sales_draft §4.4 tablosu ve şu ekler:
-- Satın al'ın üstünde ön bilgilendirme: "Premium bu Google Play hesabında süresiz açılır. NEXTV hesabıyla en çok 5 cihazda. Koşullar: {adres}". Metin avukata sorulur (O11).
-- Etkin satırında kaynak görünür: "Google Play" ya da "NEXTV hesabı" (S36a).
+- Satın al'ın üstünde ön bilgilendirme: "Premium bu Google Play hesabında süresiz açılır. Antenio hesabıyla en çok 5 cihazda. Koşullar: {adres}". Metin avukata sorulur (O11).
+- Etkin satırında kaynak görünür: "Google Play" ya da "Antenio hesabı" (S36a).
 - "Hesap hakkını yenilemek için internete bağlan." (S36a)
 - Satın alma sonucu `PlusUi`'den gelir; kilit ekranından sonra da kaybolmaz.
 - Satın al PIN istemez; Play'in kendi satın alma doğrulaması geçerlidir.
@@ -360,8 +360,8 @@ Ayarlar'a iki yeni bölüm gelir: `SectionId.PREMIUM` (TV-074) ve `SectionId.ACC
 - Fiyat yalnız `formattedPrice` ile gösterilir. Karşılaştırma, indirim, "sitemizden" ifadesi ya da web satışı yoktur. Web adresi yalnız giriş, koşullar, gizlilik ve silme için kullanılır.
 - Açılışta ve oynatma sırasında satış penceresi çıkmaz. TV-075 yalnız kilitli bir öğeye basınca açılır.
 - Ham hata ve belirteç gösterilmez. Metinler `values` ve `values-tr` içindedir (`UiTextTest`, `NoHardcodedUiTextTest`). `NoHardcodedUiTextTest` taraması (`NoHardcodedUiTextTest.kt:114-115`) `account/`, `billing/`, `data/AccountController.kt` ve `data/PlusController.kt`'yi kapsayacak biçimde genişler. "Authorization" ve "Bearer" `Allowed` listesine girer.
-- Karar 14 kabul edilirse `pin_forgot_note` ve `recovery_reset_kept` iki dilde "NEXTV hesabı girişin ve Premium kalır." der. "Kaynak hesapları" ifadesi NEXTV hesabıyla karışmasın diye "kaynak" sözcüğü korunur.
-- "NEXTV içerik satmaz; Premium yalnız uygulama özelliklerini açar."
+- Karar 14 kabul edilirse `pin_forgot_note` ve `recovery_reset_kept` iki dilde "Antenio hesabı girişin ve Premium kalır." der. "Kaynak hesapları" ifadesi Antenio hesabıyla karışmasın diye "kaynak" sözcüğü korunur.
+- "Antenio içerik satmaz; Premium yalnız uygulama özelliklerini açar."
 - **TalkBack:**
   - QR "Giriş için QR kodu" diye okunur.
   - QR ve kod odak almadığı için şu yolla duyurulur: kod göründüğünde adres, harf harf kod ve yönerge polite live region ve pencere başlığıyla okunur.
@@ -377,7 +377,7 @@ Adım kimlikleri PLAN Faz G'yi alt harfle sürdürür (öneri). Commit biçimi `
 |---|---|---|---|---|---|---|
 | S35 | Billing çekirdeği, satış kapalı | `app/build.gradle.kts` (RC SDK, tek PBL sürümü, iki bayrak, ortam alanları), `config/env/*.json`, `<tv>/billing/*`, `data/PlusController.kt`, `data/PlusStore.kt`, `data/Features.kt`, `DeviceKeys.kt`, `TvViewModel.kt`, `MainActivity.kt` (`PremiumServices`, RC log düzeyi) | O04 yanıtı; yanıt yoksa yalnız arayüz ve sahte | JVM: PlusControllerTest (onaysız alım yeniden açılışta onaylanır; 48 saat yedeği; satın almadan önce başlayan boş sorgu hakkı kapatmaz; geçersiz imza), EntitlementsTest, ReleaseFlagsTest (`sale && !account` yok; üretimde yalnız üretim `kid`'i). Cihaz: PlusStoreTest (üç sıfırlamadan sonra kalır). Bağımlılık raporunda tek PBL sürümü. Bayrak kapalıyken `Purchases.isConfigured == false` ve okuyucu oluşmaz. | 3,5 g | kod |
 | S35a | Hesap çekirdeği | `data/DeviceFlow.kt`, `data/AccountController.kt`, `<tv>/account/*`, `DeviceKeys.kt` (`account_device_id`), `res/xml/network_security_config.xml`, `AndroidManifest.xml`, `NoHardcodedUiTextTest.kt` | — (RFC 8628 standarttır) | JVM: DeviceFlowTest (duraklat/sürdür), AccountControllerTest (iki eşzamanlı yenileme tek ağ çağrısı yapar; yeni token yazılmadan süreç ölürse; çıkışta yeni cihaz kimliği), AccountApiTest (MockWebServer). Cihaz: AccountStoreTest. | 3 g | kod |
-| S35b | Hak belgesi ve birleşik karar | `data/EntitlementDoc.kt`, `account/AccountApi.kt` (NEXTV uçları), `PlusController.kt`, `config/env/*.json` (anahtar listeleri) | S35, S35a | JVM: EntitlementVerifierTest (RFC 7515 A.3; `alg` none/HS256 reddi; yabancı `kid`; `sub`; `iat`), PlusControllerTest (mağaza ∨ hesap, iade, silinmiş hesap, `device_removed`, `minVersion`, 30 gün, ileri sıçrama sonra düzelme, 1970 saati). Cihaz: aynı A.3 vektörü (AccountStoreTest içinde). | 2,5 g | kod |
+| S35b | Hak belgesi ve birleşik karar | `data/EntitlementDoc.kt`, `account/AccountApi.kt` (Antenio uçları), `PlusController.kt`, `config/env/*.json` (anahtar listeleri) | S35, S35a | JVM: EntitlementVerifierTest (RFC 7515 A.3; `alg` none/HS256 reddi; yabancı `kid`; `sub`; `iat`), PlusControllerTest (mağaza ∨ hesap, iade, silinmiş hesap, `device_removed`, `minVersion`, 30 gün, ileri sıçrama sonra düzelme, 1970 saati). Cihaz: aynı A.3 vektörü (AccountStoreTest içinde). | 2,5 g | kod |
 | S35c | Sunucu: API, Auth0, RC, webhook, silme, giriş yöntemi ekleme, ortamlar | `services/account-api/**` (yeni), `docs/architecture/ACCOUNT_API.md` (yeni), `docs/project/WORKFLOW.md` (dil, test, dağıtım, hazırlık/üretim) | O01, O02, O04, O07–O09; kararlar 1, 2, 4, 5, 10, 11, 17, 18 | Servis testleri: 409'lar, 403 `device_removed`, sınır ve çıkarma kotası, token ile bağlama, aile paylaşımlı alım bağlanmaz, idempotent webhook, `ONE_TIME_PRODUCT_CANCELED` ACTIVE'i kapatmaz, sahte başlık reddedilir, silme sırası, `auth_time`, giriş yöntemi ekleme. Hazırlık kiracısında uçtan uca cihaz akışı. | 7,5 g | kod + siz |
 | S36 | Premium sayfası (TV-074, hesap satırları olmadan), geri yükleme | `ui/settings/PlusPages.kt`, `SettingsPages.kt` (`SectionId.PREMIUM`), `SettingsHost.kt` (`start`), `TvViewModel.kt`, `MainActivity.kt`, `strings.xml` (iki dil) | S35, karar 6 | Cihaz: PlusPageTest (FakeBilling; durumlar, ilk odak, satın alma sonrası odak, Back, kilit ekranından sonra sonuç). İç testte lisans kullanıcısıyla gerçek alım. Gerçek TV: PIN ve "Açılışta PIN iste" açıkken satın alma. | 2,5 g | kod |
 | S36a | Giriş (TV-077), Hesap (TV-076), cihazlar, çıkış, öneri (TV-078), QR, TV-074'ün hesap satırları | `ui/AccountSignIn.kt`, `ui/settings/AccountPages.kt`, `ui/settings/PlusPages.kt`, `SettingsPages.kt` (`SectionId.ACCOUNT`), `ui/QrCode.kt`, `ui/PilotApp.kt` (`AppOverlay`), `data/ParentalController.kt` (`AdminReason.ACCOUNT`), `build.gradle.kts` (qrcodegen), `strings.xml`, `docs/design/SCREENS.md` | S35a–S35c, S36 | Cihaz: AccountSignInFlowTest (durumlar, live region, ekran açık, arka plandan dönüşte sorgu), AccountPageTest (PIN koruması, Cihazlar durumları), VisualPreviewTest çekimleri. QR telefonla, koyu temada elle okunur. | 5 g | kod |
@@ -396,9 +396,9 @@ Adım kimlikleri PLAN Faz G'yi alt harfle sürdürür (öneri). Commit biçimi `
 | O04 | RevenueCat'e ve Auth0'a yazılı soru: IPTV oynatıcıyı kabul ediyorlar mı; onay sayfasında cihaz adı gösterilebilir mi (uzaktan kimlik avı önlemi, RFC 8628 §5.4) | Hemen; yanıt S35c'den önce |
 | O05 | Mali müşavir: 20/B ya da şahıs şirketi. Play ödeme profili, vergi bilgisi, %15 kademesine kayıt | O06 |
 | O06 | Billing'li ilk iç test yüklemesi (S35 derlemesi); `nextv_lifetime` (başlık ≤55, açıklama ≤200); RC'de non-consumable; lisans test kullanıcıları | S36c |
-| O07 | RTDN: Pub/Sub konusu, Publisher rolü, "tüm bildirimler", test mesajı, RC bağlantısı; NEXTV API için ikinci abonelik | S35c |
+| O07 | RTDN: Pub/Sub konusu, Publisher rolü, "tüm bildirimler", test mesajı, RC bağlantısı; Antenio API için ikinci abonelik | S35c |
 | O08 | Hazırlık ve üretim Auth0 kiracıları; Google OAuth istemcisi ve onay ekranı doğrulaması; karar 4'e göre Apple üyeliği ve Services ID; refresh ömürleri ve reuse interval | S35c |
-| O09 | Hazırlık ve üretim RevenueCat projeleri; Play hizmet hesabı kimlikleri (RC ve NEXTV API için ayrı); webhook gizli değeri; geri yükleme davranışı | S35c |
+| O09 | Hazırlık ve üretim RevenueCat projeleri; Play hizmet hesabı kimlikleri (RC ve Antenio API için ayrı); webhook gizli değeri; geri yükleme davranışı | S35c |
 | O10 | Gizlilik politikası v2 (TR/EN), KVKK aydınlatma metni, yurt dışına aktarım, standart sözleşme ve Kurum'a bildirim, GDPR m.27 temsilcisi, veri işleme sözleşmeleri, saklama süreleri (silinen hesabın alım satırı, istek günlükleri) (avukat) | S37 |
 | O11 | Kullanım koşulları: lisans kapsamı, cihaz sınırı ve çıkarma kotası, 30 gün, platformlar arası erişimin süresi, iade yolu; TV-074 ön bilgilendirme metni | S37 (ilk satıştan önce) |
 | O12 | Data safety: e-posta, kullanıcı kimliği, cihaz ya da diğer kimlikler (`account_device_id`, RC kimliği), satın alma geçmişi, cihaz modeli; RC ve Auth0 SDK'larının topladıkları; aktarımda şifreleme; uygulamasız hesap silme URL'si | S37 |

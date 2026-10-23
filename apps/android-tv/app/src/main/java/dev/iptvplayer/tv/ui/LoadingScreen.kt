@@ -26,7 +26,7 @@ import dev.iptvplayer.tv.TvState
         Column(Modifier.widthIn(max = 720.dp).fillMaxWidth()
             .background(Ink.Container, RoundedCornerShape(24.dp)).padding(28.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)) {
-            NextvLogo(height = 24.dp)
+            BrandLogo(height = 24.dp)
             Text(stringResource(when (state.sourceTask) {
                 SourceTask.RESETTING -> R.string.loading_resetting
                 SourceTask.REMOVING -> R.string.loading_removing

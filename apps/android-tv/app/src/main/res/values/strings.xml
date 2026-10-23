@@ -580,7 +580,7 @@
     <string name="settings_subtitle_source">Settings in use</string>
     <string name="settings_subtitle_system">Android setting</string>
     <string name="settings_subtitle_system_note">Uses Android\'s caption preferences.</string>
-    <string name="settings_subtitle_app">NEXTV setting</string>
+    <string name="settings_subtitle_app">Antenio setting</string>
     <string name="settings_subtitle_app_note">Uses the size, background and color below.</string>
     <string name="settings_subtitle_size">Size</string>
     <string name="settings_subtitle_small">Small</string>
@@ -594,8 +594,8 @@
     <string name="settings_subtitle_color">Color</string>
     <string name="settings_subtitle_white">White</string>
     <string name="settings_subtitle_yellow">Yellow</string>
-    <string name="settings_subtitle_system_hint">Choosing a size, background or color switches to the NEXTV setting.</string>
-    <string name="settings_subtitle_app_hint">With the NEXTV setting, the stream\'s own subtitle styling isn\'t used.</string>
+    <string name="settings_subtitle_system_hint">Choosing a size, background or color switches to the Antenio setting.</string>
+    <string name="settings_subtitle_app_hint">With the Antenio setting, the stream\'s own subtitle styling isn\'t used.</string>
     <string name="settings_osd_timeout">Hide controls after</string>
     <string name="settings_osd_timeout_note">If you don\'t press a key, the player controls hide after this time. They stay while TalkBack is on.</string>
     <plurals name="settings_osd_seconds">
@@ -689,7 +689,7 @@
     <string name="parental_sources_need_pin">Require PIN for sources</string>
     <string name="parental_sources_need_pin_note">Opening, adding, editing and removing sources needs the PIN; source details and passwords are protected too.</string>
     <string name="parental_launch_needs_pin">Require PIN at launch</string>
-    <string name="parental_launch_needs_pin_note">Asks for the PIN when NEXTV opens and when it returns from the background.</string>
+    <string name="parental_launch_needs_pin_note">Asks for the PIN when Antenio opens and when it returns from the background.</string>
     <string name="parental_create">Create PIN</string>
     <string name="parental_create_note">Choose a 4-digit PIN. PINs that are easy to guess are not accepted.</string>
     <string name="parental_off_note">Adult categories stay hidden even without a PIN.</string>
@@ -785,7 +785,7 @@
     <string name="access_unresolved">The lock status of this title could not be verified. Refresh the catalog and try again.</string>
 
     <!-- The lock screen (pin.md §3.9): "Require PIN at launch", or a protection record that cannot be read. -->
-    <string name="app_lock_title">NEXTV is locked</string>
+    <string name="app_lock_title">Antenio is locked</string>
     <string name="app_lock_unavailable_title">The parental controls record could not be opened</string>
     <string name="app_lock_unavailable_note">The app stays closed to protect locked titles. If the record can\'t be repaired, you can reset the sources and locks on this device and set it up again.</string>
     <string name="app_lock_retry">Try again</string>
@@ -896,11 +896,11 @@
     <string name="panel_video_accessible">Live TV, %1$s %2$s. OK opens the channel list.</string>
     <string name="panel_controls_action">Player controls</string>
     <string name="settings_about_privacy">Privacy and data safety</string>
-    <string name="settings_about_privacy_note">NEXTV collects no analytics, telemetry or advertising identifiers. Your source accounts, catalog cache, PIN and lock settings are stored encrypted on this device with an Android Keystore key (AES-GCM). Favorites, watch history and resume points stay unencrypted in storage only the app can read. None of it goes into cloud backup or device transfer, and none is sent to third parties. The app connects only to the source and guide addresses you add and the stream and image addresses they list; while Add with your phone is open, it serves a setup page on your home network.</string>
+    <string name="settings_about_privacy_note">Antenio collects no analytics, telemetry or advertising identifiers. Your source accounts, catalog cache, PIN and lock settings are stored encrypted on this device with an Android Keystore key (AES-GCM). Favorites, watch history and resume points stay unencrypted in storage only the app can read. None of it goes into cloud backup or device transfer, and none is sent to third parties. The app connects only to the source and guide addresses you add and the stream and image addresses they list; while Add with your phone is open, it serves a setup page on your home network.</string>
     <string name="settings_about_licenses">Open source licenses</string>
     <string name="settings_about_licenses_note">Roboto font is licensed under the SIL Open Font License 1.1. AndroidX, Jetpack Compose, Media3 ExoPlayer, OkHttp, Coil and Material Symbols icons are licensed under the Apache License 2.0.</string>
     <string name="settings_start_last_channel">Start on last watched channel</string>
-    <string name="settings_start_last_channel_note">Opens the last live TV channel directly when NEXTV launches. Locked channels open the Home screen instead.</string>
+    <string name="settings_start_last_channel_note">Opens the last live TV channel directly when Antenio launches. Locked channels open the Home screen instead.</string>
     <string name="player_aspect_title">Picture fit</string>
     <string name="player_aspect_fit">Fit (Default)</string>
     <string name="player_aspect_zoom">Zoom (Crop edges)</string>

@@ -108,7 +108,7 @@ private const val UNLOCK_TITLE_MAX = 32
 }
 
 /**
- * The lock screen (pin.md §3.9, §4), in every screen's place while the app is locked: the logo, "NEXTV kilitli" and the
+ * The lock screen (pin.md §3.9, §4), in every screen's place while the app is locked: the logo, "Antenio kilitli" and the
  * digits typed on the left, the keys and PIN'i unuttum on the right; the right PIN opens the app as it was. A protection
  * record that cannot be read says so instead, with Yeniden dene and Sıfırla…: nothing opens until it reads again or
  * the TV starts over (D049). Back closes the app. TalkBack names the screen as it appears (its pane title), before the
@@ -145,7 +145,7 @@ private const val UNLOCK_TITLE_MAX = 32
         horizontalArrangement = Arrangement.spacedBy(32.dp), verticalAlignment = Alignment.CenterVertically) {
         // A large font scrolls this column; the keys keep their size beside it.
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            NextvLogo(height = 28.dp)
+            BrandLogo(height = 28.dp)
             Heading(title, Modifier.semantics { heading() }.testTag("app-lock-title"))
             Note(prompt.message(), modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
             PinBoxes(if (checking) PinFormat.LENGTH else pad.count)
@@ -177,7 +177,7 @@ private const val UNLOCK_TITLE_MAX = 32
     Column(Modifier.fillMaxSize().background(Ink.Background).semantics { paneTitle = title }.testTag("app-lock")
         .verticalScroll(rememberScrollState()).padding(horizontal = TvLayout.Gutter, vertical = 28.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        NextvLogo(height = 28.dp)
+        BrandLogo(height = 28.dp)
         Heading(title, Modifier.semantics { heading() }.testTag("app-lock-title"))
         if (unavailable) {
             val reading = retry == ProtectionRetry.READING

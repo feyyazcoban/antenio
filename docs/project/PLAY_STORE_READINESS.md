@@ -14,7 +14,7 @@ Uygulama teknik olarak Play'e yakın: hedef API 36, minSdk 26, leanback manifest
 | Engel | Gizlilik politikası URL'si, Data safety, IARC, hedef yaş, TV görselleri, App access test kaynağı | Hiçbiri yok | Siz + kod (uygulama içi bağlantı) |
 | Engel | AAB ile yükleme, Play App Signing | AAB görevi kullanılmadı | Kod |
 | Engel | Bireysel hesapta 12 test kullanıcısı × 14 gün kapalı test (TV cihazlı) | Başlamadı | Siz |
-| Risk: yüksek | **Ad:** aynı kategoride, aynı mağazada "NexTv IPTV player" (DCS apps, `com.dcsapp.iptv`) ve iOS'ta "NexTv" var | D066 ile ad NEXTV | **Marka vekili** |
+| Risk: yüksek | **Ad:** aynı kategoride, aynı mağazada "NexTv IPTV player" (DCS apps, `com.dcsapp.iptv`) ve iOS'ta "NexTv" var | D066 ile ad NEXTV; D115 ile Antenio, 0.15.0'da uygulandı | **Marka vekili** |
 | Risk: orta | Mağaza dili ve görselleri: gerçek kanal logosu, film afişi, "ücretsiz kanal" ifadesi ya da örnek liste kaldırılma sebebi | Henüz mağaza kaydı yok | Siz |
 | Risk: orta | Açılış sesinin lisans belgesi depoda yok (D062: kullanıcı beyanı) | `res/raw/splash_chime.m4a` | Siz |
 | Risk: orta | Açık kaynak lisans ekranı yok (Apache 2.0, paketlenen `roboto.ttf` için OFL 1.1) | Hakkında'da yok | Kod |
@@ -90,7 +90,7 @@ Depodaki durum:
 - Play cinsel içerik tanıtan uygulamalara izin vermez; katalog uygulamaları için istisna, bu içeriğin küçük bir kısım olması, **tanıtılmaması** ve reşit olmayanların erişiminin kısıtlanması şartına bağlı.
 - Depodaki durum: sağlayıcının yetişkin işaretli (`is_adult`) içerikleri hiç gösterilmiyor; adı yetişkin içerik bildiren kategoriler varsayılan olarak gizli ve Ana Sayfa, kütüphane, arama, rehber ve kanal numaralarından çıkıyor (D068). Vitrin bu filtrelenmiş katalogdan seçiliyor.
 - Eksik: filtre bir anahtardır, PIN değil; kumandası olan herkes açabilir. PIN altyapısı (`PinCredential`, `PinAttempts`, `AccessPolicy`) var ama arayüze bağlı değil (BKL-028). Önerilen: yetişkin filtresini kapatmak ve gizli kategori açmak PIN istesin; PIN ilk kurulumda belirlensin.
-- TCK m.226 kast arar; varsayılan gizleme iyi bir savunmadır. 7578 sayılı Kanun (01.11.2026) sosyal ağ ve oyun platformları içindir, NEXTV kapsamda görünmüyor.
+- TCK m.226 kast arar; varsayılan gizleme iyi bir savunmadır. 7578 sayılı Kanun (01.11.2026) sosyal ağ ve oyun platformları içindir, Antenio kapsamda görünmüyor.
 
 ### 3.6 Şifresiz HTTP ve kimlik bilgileri
 
@@ -100,7 +100,7 @@ Depodaki durum:
 
 ### 3.7 RTÜK, KVKK/GDPR, tüketici, vergi
 
-- **RTÜK:** NEXTV içerik seçmiyor, iletmiyor, hizmet sunmuyor; büyük olasılıkla yayın lisansı ya da platform iletim yetkisi kapsamı dışında. Uygulama içi kanal paketi, abonelik satışı, sağlayıcı ortaklığı ya da kendi sunucunuzdan proxy/transcode eklenirse kapsam değişebilir.
+- **RTÜK:** Antenio içerik seçmiyor, iletmiyor, hizmet sunmuyor; büyük olasılıkla yayın lisansı ya da platform iletim yetkisi kapsamı dışında. Uygulama içi kanal paketi, abonelik satışı, sağlayıcı ortaklığı ya da kendi sunucunuzdan proxy/transcode eklenirse kapsam değişebilir.
 - **KVKK/GDPR:** Veri cihazdan çıkmadığı sürece geliştirici veri işlemiyor sayılabilir (yorum; Kurul kararı yok). Destek e-postası (kullanıcı ekran görüntüsünde adres ve parola gönderebilir), web sitesi kayıtları ve ileride eklenecek çökme raporu ya da senkronizasyon başladığı anda aydınlatma metni, hukuki sebep ve yurt dışı aktarım kuralları (Firebase, Gmail; standart sözleşme 5 iş günü içinde Kurum'a bildirilir) devreye girer. Çökme raporu eklenirse URL'deki kimlik bilgileri maskelenmeli. VERBİS: tek geliştirici büyük olasılıkla muaf.
 - **Ücretli özellik eklenirse:** mesafeli sözleşme ön bilgilendirmesi, cayma istisnası onayı, 6502 m.52/3 (onaysız otomatik yenileme) ile Play aboneliğinin ilişkisi avukata sorulmalı.
 - **Kullanım koşulları:** "yalnız oynatıcı", "kullanıcı eklediği kaynağın yasal olduğunu beyan eder", üçüncü taraf hizmetler, garanti reddi, sorumluluk sınırı (ağır kusur hariç, TBK m.115), telif bildirim adresi, Türk hukuku (tüketicinin emredici korumaları saklı).
@@ -112,7 +112,7 @@ Depodaki durum:
 |---|---|---|
 | TV-ML LEANBACK_LAUNCHER | Var | |
 | TV-MT dokunmatik zorunlu değil | Var | |
-| TV-LB / TV-BN banner, ad içerir | Var | `app_banner.xml` yatay NEXTV logosu; mağaza için ayrıca 1280×720 PNG gerekir |
+| TV-LB / TV-BN banner, ad içerir | Var | `app_banner.xml` yatay Antenio logosu (geçici piksel yazı, 0.15.0); mağaza için ayrıca 1280×720 PNG gerekir |
 | TV-PS minSdk ≤ 31 | Var (26) | |
 | TV-DP her işlev D-pad ile | Var | Uzun basma kısayoldur; aynı işlevler ayrıntı sayfasında da var |
 | TV-DM Menü tuşuna bağımlılık yok | Var | Menü tuşu kullanılmıyor |

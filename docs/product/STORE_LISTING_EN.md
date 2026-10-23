@@ -7,12 +7,12 @@
 - "Android TV" geçer (TV paketi koşulu).
 - Kanal, maç, sağlayıcı ya da rakip adı, "free", "unlimited", "best" kullanılmaz.
 - Başlıkta ve anahtar kelimelerde "Xtream Codes" yoktur. Açıklamadaki "Xtream-compatible" ifadesi avukatın "Xtream API uyumlu" önerisine dayanır; karar sahibin.
-- Henüz olmayan özellik (geçmiş yayın, kayıt, NEXTV Plus) yazılmaz.
+- Henüz olmayan özellik (geçmiş yayın, kayıt, Antenio Plus) yazılmaz.
 - Ekran görüntüleri sentetik veriyle çekilir.
 
 ## Title (en çok 30 karakter)
 
-NEXTV Player for Android TV
+Antenio IPTV Player
 
 ## Short description (en çok 80 karakter)
 
@@ -20,7 +20,7 @@ Play your own M3U or Xtream-compatible source on your TV. No content included.
 
 ## Full description
 
-NEXTV doesn't provide any content. It plays the channels, movies and series of a source you already have the right to use: an M3U playlist link or an Xtream-compatible account from your provider.
+Antenio doesn't provide any content. It plays the channels, movies and series of a source you already have the right to use: an M3U playlist link or an Xtream-compatible account from your provider.
 
 Made for the remote
 • Live TV with a TV guide (XMLTV), channel numbers and CH+/CH−
@@ -38,9 +38,9 @@ Languages: English and Turkish. Choose one in Settings → Dil / Language, or fo
 
 You need an Android TV or Google TV device with Android 8.0 or later and your own source.
 
-Watching requires a NEXTV Premium subscription. New subscribers get a 7-day free trial; after that the subscription costs [price per period] and renews automatically until you cancel it in Google Play. Guide information depends on what your provider supports.
+Watching requires an Antenio Premium subscription. New subscribers get a 7-day free trial; after that the subscription costs [price per period] and renews automatically until you cancel it in Google Play. Guide information depends on what your provider supports.
 
-NEXTV is not affiliated with any content provider. Use it only with content you are allowed to watch.
+Antenio is not affiliated with any content provider. Use it only with content you are allowed to watch.
 
 ## Açık sorular
 

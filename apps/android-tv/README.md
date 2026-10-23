@@ -6,7 +6,7 @@
 
 Google TV görsel revizyonu çalışma koduna uygulanmıştır. [Görseller ve kapsam](../../docs/design/NATIVE_VISUAL_REVISION.md). Bu sürüm mağaza/üretim onayı değildir. Testler ayrılmış `emulator-5556` üzerinde yürütülür. Kullanıcı emülatörü korunur; fiziksel TV'nin son bilinen sürümü 0.14.22'dir.
 
-Kotlin + Compose for TV + Media3 ile ilk kurulabilir uygulama. Paket kimliği `dev.iptvplayer.tv.pilot`, görünen ad **IPTV Player · Pilot**. Bu kimlik yayın markası değildir. [TV kurulum rehberi](../../docs/project/TV_INSTALL.md).
+Kotlin + Compose for TV + Media3 ile ilk kurulabilir uygulama. Paket kimliği `app.antenio.tv` (D119), görünen ad **Antenio** (D115). 0.15.0 öncesi kimlik `dev.iptvplayer.tv.pilot` idi; o kurulum ayrı bir uygulamadır. [TV kurulum rehberi](../../docs/project/TV_INSTALL.md).
 
 ## Kapsam
 

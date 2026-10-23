@@ -38,7 +38,7 @@ sealed interface GateResult {
      * again on the state as it is then. Only the identity waits, never an action.
      */
     data class NeedsPin(val target: AccessTarget) : GateResult
-    /** A NEXTV Plus [feature]. Not returned until sales open. */
+    /** A Antenio Plus [feature]. Not returned until sales open. */
     data class NeedsPlus(val feature: Feature) : GateResult
 }
 
@@ -79,7 +79,7 @@ internal data class GateFinding(val entry: MediaEntry, val verdict: AccessVerdic
  * The one decision every open and play passes (gap plan T3): AccessTargets finds the target by identity in
  * [GateSnapshot]; it is allowed when the title is still published, not adult, its source still saved and no lock asks
  * for the PIN, or the session opened every lock on it (pin.md §6), and the lock screen is not up (§3.9). Pure, so its
- * rules are tested on the JVM. The NEXTV Plus answer (S37) joins here.
+ * rules are tested on the JVM. The Antenio Plus answer (S37) joins here.
  */
 internal object AccessGate {
     fun decide(target: AccessTarget, snapshot: GateSnapshot): GateResult = answer(target, find(target, snapshot), snapshot)

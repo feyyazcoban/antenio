@@ -194,7 +194,7 @@ private data class PhoneLink(val host: String, val port: Int) { val address get(
     val first = rememberFirstFocus()
     Row(Modifier.fillMaxSize().padding(horizontal = 56.dp, vertical = 40.dp), horizontalArrangement = Arrangement.spacedBy(48.dp)) {
         Column(Modifier.weight(.9f).align(Alignment.CenterVertically), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-            NextvLogo(height = 28.dp)
+            BrandLogo(height = 28.dp)
             Text(stringResource(R.string.setup_title), color = Ink.Text, fontFamily = Roboto, fontSize = 36.sp, lineHeight = 42.sp)
             Note(stringResource(R.string.setup_tagline))
             val startOver = s.catalogNotice?.takeIf { it.operation == CatalogOperation.START_OVER }
@@ -241,7 +241,7 @@ private data class PhoneLink(val host: String, val port: Int) { val address get(
 @Composable private fun StepFrame(position: Int?, total: Int, title: String, hint: String?, content: @Composable ColumnScope.() -> Unit) {
     Column(Modifier.fillMaxSize().padding(horizontal = 56.dp, vertical = 32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth().padding(bottom = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-            NextvLogo(height = 22.dp)
+            BrandLogo(height = 22.dp)
             Spacer(Modifier.weight(1f))
             if (position != null) Note(stringResource(R.string.setup_step, position, total))
         }
@@ -341,7 +341,7 @@ private data class PhoneLink(val host: String, val port: Int) { val address get(
     val expired = remaining == 0L
     Row(Modifier.fillMaxSize().padding(horizontal = 56.dp, vertical = 32.dp), horizontalArrangement = Arrangement.spacedBy(48.dp)) {
         Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            NextvLogo(height = 22.dp)
+            BrandLogo(height = 22.dp)
             Spacer(Modifier.height(20.dp))
             Heading(stringResource(R.string.setup_way_phone))
             listOf(R.string.setup_phone_step1, R.string.setup_phone_step2, R.string.setup_phone_step3).forEachIndexed { index, text ->

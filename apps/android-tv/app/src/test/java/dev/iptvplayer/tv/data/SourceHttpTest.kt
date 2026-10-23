@@ -19,9 +19,9 @@ class SourceHttpTest {
             server.start()
             SourceRepository().load(SourceConfig(name = "Fixture", type = SourceType.M3U, address = server.url("/list").toString())) {}
             EpgRepository().download(server.url("/guide").toString(), GuideWindow(0, Long.MAX_VALUE), emptySink)
-            repeat(2) { assertEquals("NEXTV AndroidTV", server.takeRequest(3, TimeUnit.SECONDS)!!.getHeader("User-Agent")) }
+            repeat(2) { assertEquals("Antenio AndroidTV", server.takeRequest(3, TimeUnit.SECONDS)!!.getHeader("User-Agent")) }
         }
-        assertEquals("NEXTV/${BuildConfig.VERSION_NAME} AndroidTV", SourceHttp.streamAgent)
+        assertEquals("Antenio/${BuildConfig.VERSION_NAME} AndroidTV", SourceHttp.streamAgent)
         val channel = MediaEntry("m3u:1", "m3u:1", MediaKind.LIVE, "Kanal", headers = mapOf("Referer" to "http://127.0.0.1/"))
         assertEquals(channel.headers, SourceHttp.streamHeaders(channel))
     }

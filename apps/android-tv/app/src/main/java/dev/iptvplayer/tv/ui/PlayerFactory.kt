@@ -93,7 +93,7 @@ internal object PlayerFactory {
 
     /**
      * [style] on the player's subtitles: Android's caption settings and the stream's own styling, as PlayerView starts
-     * with, or NEXTV's size, background and colour in place of both.
+     * with, or Antenio's size, background and colour in place of both.
      */
     fun subtitles(view: SubtitleView, style: SubtitleStyle) {
         if (style.source == SubtitleSource.SYSTEM) {

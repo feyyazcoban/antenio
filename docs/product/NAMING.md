@@ -140,10 +140,10 @@ Kullanıcı Antenio'yu seçti. Ek hafif kontrol: Google Play web aramasında ayn
 | 1 | antenio.app ve anteniotv.com alan adlarını al | Sen | Bugün boş görünüyor; beklenirse başkası alabilir |
 | 2 | Marka vekiline tam araştırma yaptır (TÜRKPATENT, EUIPO, WIPO; sınıf 9 ve 42). Temizse başvur. | Sen, marka vekili | Yayından önce şart. "Antena"/"Antenne" köklü mevcut markalarla karıştırılma riskini vekil değerlendirir |
 | 3 | Kalıcı paket adı: `app.antenio.tv` (D119, kullanıcı kararı 23 Ekim) | Sen | İlk Play yüklemesinden sonra değişmez |
-| 4 | Logo ve yazı markası (wordmark): "Antenio" | Sen (tasarımcı ya da üretim aracı) | Lisans ya da devir belgesi saklanır (READINESS §3.3) |
-| 5 | Uygulamayı yeni ada geçir: uygulama etiketi, logo ve amblem dosyaları, User-Agent ("Antenio/<sürüm> AndroidTV"), iki dilde metinler, Hakkında | Kod | `main` üzerinde; BKL-045 |
+| 4 | Logo ve yazı markası (wordmark): "Antenio" | Sen (tasarımcı ya da üretim aracı) | Lisans ya da devir belgesi saklanır (READINESS §3.3) **23 Ekim:** geçici piksel yazı "ANTENIO" (NEXTV ızgarası, oynatma amblemi korundu) uygulamada; tasarımcı logosu açık. |
+| 5 | Uygulamayı yeni ada geçir: uygulama etiketi, logo ve amblem dosyaları, User-Agent ("Antenio/<sürüm> AndroidTV"), iki dilde metinler, Hakkında | Kod | `main` üzerinde; BKL-045 **Yapıldı (0.15.0):** etiket, kimlik `app.antenio.tv`, logo/afiş, User-Agent "Antenio", iki dilde metinler. |
 | 6 | Mağaza metni ve görseller: başlık "Antenio IPTV Player" (19 karakter), açıklama ve ekran görüntüleri | Sen, kod | STORE_LISTING_EN |
-| 7 | Belgeleri yeni ada geçir: README, AGENTS, PRD, SALES_CHANNELS, SUBSCRIPTION, account.md ("NEXTV hesabı" → "Antenio hesabı", "NEXTV Premium" → "Antenio Premium") | Kod | Tarihçe kayıtları (STATUS, HANDOFF, DECISIONS) olduğu gibi kalır |
+| 7 | Belgeleri yeni ada geçir: README, AGENTS, PRD, SALES_CHANNELS, SUBSCRIPTION, account.md ("NEXTV hesabı" → "Antenio hesabı", "NEXTV Premium" → "Antenio Premium") | Kod | Tarihçe kayıtları (STATUS, HANDOFF, DECISIONS) olduğu gibi kalır **Yapıldı (0.15.0):** README, AGENTS, PRD, SALES_CHANNELS, SUBSCRIPTION, account.md, STORE_LISTING_EN, READINESS, BACKLOG, WORKFLOW, TV_INSTALL; tasarım planı belgeleri (gap/*) NEXTV adını taşımaya devam ediyor. |
 
 Kod işi (5) yaklaşık 1 iş günü (tahmin, ölçülmedi); paket adı değişimi ayrıca kurulu TV'deki uygulamayı yeni uygulama yapar, kaynaklar ve geçmiş taşınmaz (D066 notu). Bu yüzden paket adı değişimi Play'e ilk yükleme ile aynı anda, imza değişikliğiyle birlikte yapılır (LAUNCH_AUDIT E1/E3).
 

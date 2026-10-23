@@ -107,7 +107,7 @@ internal object DeviceKeys {
         guideZone, librarySort, hiddenCategories, hideAdultCategories, autoNextEpisode, audioLanguage, subtitleLanguage,
         subtitlesOff, playback, appLanguage, appLanguageHandedOver)
 
-    /** The entry a stored [key] falls under; null for a key no NEXTV build wrote. */
+    /** The entry a stored [key] falls under; null for a key no Antenio build wrote. */
     fun find(key: String): DeviceKey? = all.firstOrNull { it.matches(key) }
 
     /**

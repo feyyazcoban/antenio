@@ -155,7 +155,7 @@ import androidx.compose.ui.input.key.type
                     Route.SOURCES -> SourcesScreen(state, model)
                     // Adding a source walks the new flow (SETUP_FLOW, D117); editing a saved one keeps the single form.
                     Route.SETUP -> if (state.editingSourceId != null) Setup(state, model) else SetupFlow(state, model)
-                    // Opening the app on saved sources shows the NEXTV cover, never the operation card (D069). Imports, saves,
+                    // Opening the app on saved sources shows the Antenio cover, never the operation card (D069). Imports, saves,
                     // removals and a Yeniden dene or reset from the recovery screen keep the card, so no brand flash cuts in.
                     Route.LOADING -> if (state.sourceTask == SourceTask.RESTORING && state.restoringAtLaunch) RestoringCover()
                         else LoadingScreen(state) { model.cancelImport() }
@@ -235,7 +235,7 @@ import androidx.compose.ui.input.key.type
     Row(Modifier.fillMaxSize().padding(horizontal = TvLayout.Gutter, vertical = 28.dp),
         horizontalArrangement = Arrangement.spacedBy(32.dp)) {
         Column(Modifier.weight(.8f).align(Alignment.CenterVertically), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            NextvLogo(height = 28.dp)
+            BrandLogo(height = 28.dp)
             Text(stringResource(R.string.setup_title), color = Ink.Text, fontFamily = Roboto,
                 fontSize = if (largeText) 24.sp else 34.sp, lineHeight = if (largeText) 30.sp else 40.sp)
             if (!largeText) Note(stringResource(R.string.setup_tagline))

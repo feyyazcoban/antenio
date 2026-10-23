@@ -17,14 +17,14 @@ if adb('emu','avd','name').decode().splitlines()[0].strip() != 'nextv_design_api
  raise SystemExit('Refusing a device other than the dedicated nextv_design_api36 AVD')
 adb('install','-r',str(r/'apps/android-tv/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk'))
 def test(method,flag):
- out=adb('shell','am','instrument','-w','-e',flag,'true','-e','class',f'dev.iptvplayer.tv.CatalogColdLaunchTest#{method}','dev.iptvplayer.tv.pilot.test/androidx.test.runner.AndroidJUnitRunner')
+ out=adb('shell','am','instrument','-w','-e',flag,'true','-e','class',f'dev.iptvplayer.tv.CatalogColdLaunchTest#{method}','app.antenio.tv.test/androidx.test.runner.AndroidJUnitRunner')
  (audit_dir/f'{flag}.log').write_bytes(out);print(out.decode(errors='replace')[-2500:],flush=True);assert b'OK (1 test)' in out
 try:
  test('prepareEncryptedCatalogForColdLaunch','prepareColdCatalog')
- adb('shell','am','force-stop','dev.iptvplayer.tv.pilot')
- launch=adb('shell','am','start','-W','-n','dev.iptvplayer.tv.pilot/dev.iptvplayer.tv.MainActivity')
+ adb('shell','am','force-stop','app.antenio.tv')
+ launch=adb('shell','am','start','-W','-n','app.antenio.tv/dev.iptvplayer.tv.MainActivity')
  (audit_dir/'cold-external-launch.log').write_bytes(launch);print(launch.decode(),flush=True)
- pid=adb('shell','pidof','dev.iptvplayer.tv.pilot').decode().strip();assert pid
+ pid=adb('shell','pidof','app.antenio.tv').decode().strip();assert pid
  time.sleep(8)
  adb('shell','uiautomator','dump','/sdcard/cold-check.xml')
  xml=adb('exec-out','cat','/sdcard/cold-check.xml')
@@ -32,8 +32,8 @@ try:
  assert 'İzlemeye devam et'.encode() in xml
  (audit_dir/'home.png').write_bytes(adb('exec-out','screencap','-p'))
  test('verifyRestoredAfterProcessRestart','verifyColdCatalog')
- (audit_dir/'cold-restore-verification.json').write_bytes(adb('exec-out','run-as','dev.iptvplayer.tv.pilot','cat','files/cold-restore-verification.json'))
+ (audit_dir/'cold-restore-verification.json').write_bytes(adb('exec-out','run-as','app.antenio.tv','cat','files/cold-restore-verification.json'))
  print((audit_dir/'cold-restore-verification.json').read_text(),flush=True)
 finally:
  test('cleanColdCatalogFixture','cleanColdCatalog')
- adb('shell','am','force-stop','dev.iptvplayer.tv.pilot')
+ adb('shell','am','force-stop','app.antenio.tv')

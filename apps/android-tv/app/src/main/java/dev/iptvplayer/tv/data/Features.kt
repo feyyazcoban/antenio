@@ -1,7 +1,7 @@
 package dev.iptvplayer.tv.data
 
 /**
- * The features NEXTV Plus would open (a proposal, not a decision). Each is checked once where it is entered: a Settings
+ * The features Antenio Plus would open (a proposal, not a decision). Each is checked once where it is entered: a Settings
  * page names its feature, and the access gate answers [GateResult.NeedsPlus] for a target that needs one.
  */
 enum class Feature { CATCHUP, REMINDERS, FAVORITE_GROUPS, CUSTOM_ORDER, RENAME, RECORDING, MULTI_VIEW, ALWAYS_BUFFER }

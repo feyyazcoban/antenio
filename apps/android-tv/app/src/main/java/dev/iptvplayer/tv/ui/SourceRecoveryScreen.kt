@@ -25,7 +25,7 @@ import dev.iptvplayer.tv.TvViewModel
     var confirm by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().padding(horizontal = TvLayout.Gutter, vertical = 28.dp)
         .testTag("source-recovery-screen"), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        NextvLogo(height = 28.dp)
+        BrandLogo(height = 28.dp)
         Heading(stringResource(R.string.recovery_title))
         Column(Modifier.weight(1f, fill = false).fillMaxWidth().background(Ink.Container, RoundedCornerShape(24.dp))
             .padding(24.dp).verticalScroll(rememberScrollState()).padding(5.dp),

@@ -4,7 +4,7 @@
 
 **Karar durumu (D112, 22 Ekim 2026):** Kullanıcı üç maddeyi kabul etti:
 1. satış yalnız mağazalardan yapılır, kendi site satış yapmaz;
-2. NEXTV hesabı isteğe bağlıdır;
+2. Antenio hesabı isteğe bağlıdır;
 3. hesap, Premium satışını açan Android sürümüyle aynı sürümde gelir.
 
 Bu belgedeki diğer model, sağlayıcı, sayı ve sıralar **öneridir, karar değildir**. Uygulama planı: [BKL-047 planı](../design/gap/account.md).
@@ -27,19 +27,19 @@ Bu belge [SALES_STRATEGY](SALES_STRATEGY.md)'nin hesapsız ve sunucusuz varsayı
   - **Ödeme yolu yok.** Türkiye'den web satışı için kullanılabilir bir ödeme yolu bulunamadı. Stripe ve PayPal Türkiye'deki satıcıya kapalı. Satışı kendi adına yapıp vergiyi üstlenen sağlayıcıların (Merchant of Record, MoR) üçü de, Paddle, Lemon Squeezy ve FastSpring, "IPTV"yi yazılı olarak satılamayacak iş türleri arasında sayıyor (§2.3).
   - **Uygulama web satışından söz edemez.** Play'de satış yapan uygulama, Türkiye'deki kullanıcıya web satışına bağlantı veremez, onu öneremez. Android TV için tek istisna, işletme kaydı isteyen AEA programları (§2.1). Web satışı ancak uygulama dışındaki tanıtımla bulunur.
   - **Yükü mağaza taşır.** Vergiyi ve ödeme güvenliğini mağaza üstlenir; Türkiye'de KDV'yi Google ve Apple öder. Play'de ilk 48 saatten sonraki iade talepleri size gelir ([SALES_STRATEGY](SALES_STRATEGY.md) [17]).
-- **İkisini birden yapmanın yolu tek NEXTV hesabıdır.**
+- **İkisini birden yapmanın yolu tek Antenio hesabıdır.**
   - Satın alma hangi kanaldan yapılırsa yapılsın hesaba yazılır. Hesapla giriş yapılan her platformda Premium açılır.
   - Web satışı sonra eklenirse o alım da aynı hesaba "web" kaynağıyla yazılır.
   - Uygulamalar web alımını yalnız girişle tanır, web satışından hiç söz etmez.
 - **Apple şartı karşılanabilir.**
   - Apple 3.1.3(b), başka platformda ya da sitede alınan özelliği açmaya izin veriyor. Şartı, aynı Premium'un Apple uygulamasında da uygulama içi satın alma (IAP) olarak satılması.
-  - Play'de alan kullanıcı Apple TV'de NEXTV hesabıyla giriş yapınca yeniden ödemez. Apple'da alan da Android TV'de yeniden ödemez.
+  - Play'de alan kullanıcı Apple TV'de Antenio hesabıyla giriş yapınca yeniden ödemez. Apple'da alan da Android TV'de yeniden ödemez.
 - **Bunun bedeli:**
-  - isteğe bağlı bir NEXTV hesabı,
+  - isteğe bağlı bir Antenio hesabı,
   - TV'de QR ve kodla giriş,
   - sunucu tarafında bir hak kaydı.
 
-  "NEXTV hesabı yok, sunucu yok" vaadi Premium için biter.
+  "Antenio hesabı yok, sunucu yok" vaadi Premium için biter.
 - **Zamanlama önerisi:** Hesap, Premium satışıyla aynı Android sürümünde gelsin. Böylece her alıcı satın aldığı anda hesabını bağlayabilir ve "Apple'a geçtim, satın alımımı taşıyamıyorum" vakası büyük ölçüde önlenir. "Sonra" deyip Android cihazı kalmayan alıcı yine destek gerektirir (§3.8).
 
 ## 2. Kurallar (doğrulanmış, 22.10.2026)
@@ -93,7 +93,7 @@ Bu belge [SALES_STRATEGY](SALES_STRATEGY.md)'nin hesapsız ve sunucusuz varsayı
 - **3.1.1:**
   - Kilit IAP ile açılır. Lisans anahtarı, QR kod gibi kendi mekanizmalarla kilit açmak yasak. Bu yüzden TV ekranında "aktivasyon kodu" değil "hesap girişi" denir.
   - Geri yüklenebilir IAP için bir geri yükleme (Restore) mekanizması olmalı [A1].
-- **3.1.3(a) Reader:** Dergi, gazete, kitap, ses, müzik ve video içeriği içindir. NEXTV içerik değil oynatıcı işlevi sattığı için büyük olasılıkla bu kapsama girmez. Bu Apple'ın sözü değil, bizim yorumumuz.
+- **3.1.3(a) Reader:** Dergi, gazete, kitap, ses, müzik ve video içeriği içindir. Antenio içerik değil oynatıcı işlevi sattığı için büyük olasılıkla bu kapsama girmez. Bu Apple'ın sözü değil, bizim yorumumuz.
 - **Dış bağlantı:**
   - ABD vitrininde ayrı izin gerekmeden serbest. Dava Yüksek Mahkeme'de sürüyor; bağlantılı alımlara makul bir komisyon ilk derece mahkemesinde belirlenebilir [A2][A3, 3. taraf].
   - AB ve bazı ülkelerde ayrı izin (entitlement) ile mümkün.
@@ -155,8 +155,8 @@ Bu belge [SALES_STRATEGY](SALES_STRATEGY.md)'nin hesapsız ve sunucusuz varsayı
 
 ### 3.1 İlkeler
 
-1. **Mağaza alımı kendi mağazasında her zaman açılır.** Kaynak mağazanın kendi kaydıdır: Play'de satın alma sorgusu, Apple'da StoreKit. NEXTV sunucusu ya da hak servisi kapansa bile bu değişmez.
-2. **NEXTV hesabı yalnız platformlar arası taşımayı ekler.** Ücretsiz kullanım ve aynı mağazada geri yükleme için hesap gerekmez.
+1. **Mağaza alımı kendi mağazasında her zaman açılır.** Kaynak mağazanın kendi kaydıdır: Play'de satın alma sorgusu, Apple'da StoreKit. Antenio sunucusu ya da hak servisi kapansa bile bu değişmez.
+2. **Antenio hesabı yalnız platformlar arası taşımayı ekler.** Ücretsiz kullanım ve aynı mağazada geri yükleme için hesap gerekmez.
 3. **Uygulamada satış yönlendirmesi yok.** Fiyat karşılaştırması, web satışı ya da "başka yerden al" çağrısı hiçbir zaman olmaz. Tek cümle yeter: "Premium başka bir cihazında varsa hesabınla giriş yap." Bu cümle ilk sürümden önce politika açısından gözden geçirilir.
 4. **Sunucuya kaynak verisi gitmez.** IPTV adresi, kullanıcı adı ve parola, liste, favori ve izleme geçmişi cihazda kalır.
 
@@ -176,7 +176,7 @@ Bu belge [SALES_STRATEGY](SALES_STRATEGY.md)'nin hesapsız ve sunucusuz varsayı
 **Kademeler:**
 - **Ücretsiz:** hesap yok.
 - **Mağazadan Premium:** hesap gerekmez; aynı mağazada geri yüklenir.
-- **NEXTV hesabı:** Premium'u başka bir ekosisteme taşımak, mağaza satışı olmayan platformlar (LG, Samsung) ve cihaz yönetimi için.
+- **Antenio hesabı:** Premium'u başka bir ekosisteme taşımak, mağaza satışı olmayan platformlar (LG, Samsung) ve cihaz yönetimi için.
 
 **Satın alma akışı:**
 - Satın almanın önünde hesap engeli olmaz.
@@ -184,7 +184,7 @@ Bu belge [SALES_STRATEGY](SALES_STRATEGY.md)'nin hesapsız ve sunucusuz varsayı
 
 **Giriş yöntemleri:**
 - Google ve Sign in with Apple. Apple platformlarında Google girişi sunulursa, 4.8 gereği gizliliği koruyan eşdeğer bir giriş de olmalı; Sign in with Apple bu şartı karşılar.
-- NEXTV parola saklamaz.
+- Antenio parola saklamaz.
 - E-postaya tek kullanımlık kod ikinci adımda eklenebilir (karar sizin).
 
 **TV'de giriş:**
@@ -242,7 +242,7 @@ Bu belge [SALES_STRATEGY](SALES_STRATEGY.md)'nin hesapsız ve sunucusuz varsayı
   - `resetUnreadableSources()` (`:151`) kaynak anahtarını siliyor.
   - Bu ikisi Premium'u silmemeli.
 
-**Ad:** Kod "Plus" (`GateResult.NeedsPlus`), belgeler "Premium" diyor. Ücretli paketin adı kararıyla tek ad seçilir (uygulama adı NEXTV, D066).
+**Ad:** Kod "Plus" (`GateResult.NeedsPlus`), belgeler "Premium" diyor. Ücretli paketin adı kararıyla tek ad seçilir (uygulama adı Antenio, D115).
 
 ### 3.5 Cihaz sınırı ve kötüye kullanım
 
@@ -334,7 +334,7 @@ Bu bölümdeki sayılar öneridir.
   - "sunucusuz geri yükleme": yalnız aynı mağaza içinde geçerli kalır (ilke 1); başka platforma taşıma hesap ve sunucu ister,
   - "sunucusuz yapıda cihaz sınırı konamaz",
   - "lisans anahtarı 'sunucu yok' ilkesini bozar",
-  - "NEXTV hesabı yok, sunucumuz yok",
+  - "Antenio hesabı yok, sunucumuz yok",
   - "TV için uygun program görünmüyor". AEA programları Android TV'yi kapsıyor, ama işletme kaydı istiyor.
 
   Fiyat, dil, pazar ve vergi bölümleri öneri olarak sürer.

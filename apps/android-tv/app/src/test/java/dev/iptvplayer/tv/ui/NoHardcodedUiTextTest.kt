@@ -37,6 +37,7 @@ class NoHardcodedUiTextTest {
         Allowed("Europe/Istanbul", setOf("listOf"), "time zone id, listed first in the guide's zones as it is named"),
         Allowed("Europe/Berlin", setOf("listOf"), "time zone id, listed first in the guide's zones as it is named"),
         Allowed("Android   · API  ", setOf("NoteRow"), "the platform and its version in Uygulama hakkında, the same in every language"),
+        Allowed("Antenio", setOf("Image"), "the brand name read for the logo and the emblem, the same in every language (D115)"),
     )
 
     /**
@@ -154,7 +155,7 @@ class NoHardcodedUiTextTest {
             Modifier.focusRequester(focus("edit-source:${'$'}{source.id}"))
             format(time, zone, if (turkish) "d MMM EEEE" else "EEEE d MMM", locale)
             pattern(locale, "EEEEdMMM", "h:mm a")
-            Image(painter, "NEXTV")
+            Image(painter, "Antenio")
         """.trimIndent()
         assertEquals(listOf("Loading", "no results yet", "Watch"), offenders(literals(source, "Sample.kt")).map { it.text })
     }

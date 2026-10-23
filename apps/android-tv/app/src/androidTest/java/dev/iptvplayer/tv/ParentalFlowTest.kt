@@ -1031,7 +1031,7 @@ class ParentalFlowTest {
         assertEquals(Route.LOCKED, model.state.value.screen); assertEquals(Route.PLAYER, model.state.value.route)
         ui.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
         ui.waitUntil(5_000) { lockShown() && focused("pin-key:1") }
-        ui.onNodeWithTag("app-lock-title").assertTextEquals("NEXTV kilitli")
+        ui.onNodeWithTag("app-lock-title").assertTextEquals("Antenio kilitli")
         ui.onNodeWithText("Devam etmek için PIN gir.").assertExists()
         assertTrue(ui.onAllNodesWithTag("player-panel").fetchSemanticsNodes().isEmpty())
         // Nothing opens behind it.
@@ -1197,7 +1197,7 @@ class ParentalFlowTest {
         assertTrue(parental.appLocked)
         ui.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
         ui.waitUntil(5_000) { lockShown() && focused("pin-key:1") }
-        ui.onNodeWithTag("app-lock").assert(SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "NEXTV kilitli"))
+        ui.onNodeWithTag("app-lock").assert(SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, "Antenio kilitli"))
         digits("2580")
         waitFor { !parental.appLocked }
         // Back where the player saved it as the app left, and paused.

@@ -30,7 +30,7 @@ class PlayerFactoryTest {
         val media = PlayingMedia(channel, channel.uri!!, 0, PlaybackMode.of(channel.kind))
         val request = PlayerFactory.request(media)
         assertEquals(PlaybackRequest(channel, media.url, mapOf("Referer" to "http://127.0.0.1/"),
-            "NEXTV/${BuildConfig.VERSION_NAME} AndroidTV", 0, PlaybackMode.LIVE), request)
+            "Antenio/${BuildConfig.VERSION_NAME} AndroidTV", 0, PlaybackMode.LIVE), request)
         val film = MediaEntry("movie:3", "3", MediaKind.MOVIE, "Film", "Aile", extension = "mp4").inSource("a")
         assertEquals(PlaybackMode.VOD, PlayerFactory.request(PlayingMedia(film, "http://127.0.0.1/movie/3.mp4", 42_000, PlaybackMode.of(film.kind))).mode)
         assertEquals(42_000L, PlayerFactory.request(PlayingMedia(film, "http://127.0.0.1/movie/3.mp4", 42_000, PlaybackMode.VOD)).startMs)

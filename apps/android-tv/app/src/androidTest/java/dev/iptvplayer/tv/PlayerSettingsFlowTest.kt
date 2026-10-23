@@ -206,7 +206,7 @@ class PlayerSettingsFlowTest {
         key(KeyEvent.KEYCODE_DPAD_CENTER)
         title("Altyazı görünümü")
         ui.onNodeWithTag("player-setting:subtitle-source").assertIsFocused().assert(hasText("Android ayarı"))
-        ui.onNodeWithText("Boyut, zemin veya renk seçersen NEXTV ayarına geçilir.").assertExists()
+        ui.onNodeWithText("Boyut, zemin veya renk seçersen Antenio ayarına geçilir.").assertExists()
         key(KeyEvent.KEYCODE_DPAD_DOWN)
         val size = ui.onNodeWithTag("player-setting:subtitle-size")
         size.assertIsFocused()
@@ -216,12 +216,12 @@ class PlayerSettingsFlowTest {
         key(KeyEvent.KEYCODE_DPAD_DOWN); key(KeyEvent.KEYCODE_DPAD_DOWN)
         ui.onNodeWithTag("settings-option:3").assertIsFocused().assert(hasText("Çok büyük"))
         key(KeyEvent.KEYCODE_DPAD_CENTER)
-        // The size moves the subtitles to NEXTV's setting, and the note says what that leaves out.
+        // The size moves the subtitles to Antenio's setting, and the note says what that leaves out.
         title("Altyazı görünümü")
         size.assertIsFocused().assert(hasText("Çok büyük"))
         assertEquals(SubtitleStyle(SubtitleSource.APP, SubtitleSize.XLARGE), prefs.subtitle)
-        ui.onNodeWithTag("player-setting:subtitle-source").assert(hasText("NEXTV ayarı"))
-        ui.onNodeWithText("NEXTV ayarında yayının kendi altyazı biçimi kullanılmaz.").assertExists()
+        ui.onNodeWithTag("player-setting:subtitle-source").assert(hasText("Antenio ayarı"))
+        ui.onNodeWithText("Antenio ayarında yayının kendi altyazı biçimi kullanılmaz.").assertExists()
         assertFocusedRowReadable()
         shot("subtitles")
         // Back: the subtitles page, then Oynatıcı on its row, which sums the look up.

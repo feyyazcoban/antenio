@@ -22,7 +22,7 @@ set -euo pipefail
 SERIAL=emulator-5558
 EXPECTED_AVD=nextv_test_api36
 PACKAGE=dev.iptvplayer.tv
-RUNNER=dev.iptvplayer.tv.pilot.test/androidx.test.runner.AndroidJUnitRunner
+RUNNER=app.antenio.tv.test/androidx.test.runner.AndroidJUnitRunner
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$ROOT/apps/android-tv"
 
@@ -45,7 +45,7 @@ if [ -n "$cold" ]; then
         verify|visual) set -- 'CatalogColdLaunchTest#verifyRestoredAfterProcessRestart'; runner_args=(-e verifyColdCatalog true)
             if [ "$cold" = visual ]; then runner_args+=(-e captureColdEntrance true); fi ;;
         release|release-visual|actual-debug|actual-debug-visual) set -- 'ReleaseStartupInstrumentation'; runner_args=(-e verifyReleaseCatalog true)
-            RUNNER=dev.iptvplayer.tv.pilot.test/dev.iptvplayer.tv.ReleaseStartupInstrumentation
+            RUNNER=app.antenio.tv.test/dev.iptvplayer.tv.ReleaseStartupInstrumentation
             if [ "$cold" = actual-debug ] || [ "$cold" = actual-debug-visual ]; then runner_args+=(-e expectedDebug true); fi
             if [ "$cold" = release-visual ] || [ "$cold" = actual-debug-visual ]; then runner_args+=(-e captureColdEntrance true); fi ;;
         clean) set -- 'CatalogColdLaunchTest#cleanColdCatalogFixture'; runner_args=(-e cleanColdCatalog true) ;;
@@ -95,8 +95,8 @@ if [ -n "$scale" ]; then
 fi
 
 if [ "$cold" = verify ] || [ "$cold" = visual ] || [ "$cold" = release ] || [ "$cold" = release-visual ] || [ "$cold" = actual-debug ] || [ "$cold" = actual-debug-visual ]; then
-    adb -s "$SERIAL" shell am force-stop dev.iptvplayer.tv.pilot
-    running="$(adb -s "$SERIAL" shell pidof dev.iptvplayer.tv.pilot 2>/dev/null | tr -d '\r' || true)"
+    adb -s "$SERIAL" shell am force-stop app.antenio.tv
+    running="$(adb -s "$SERIAL" shell pidof app.antenio.tv 2>/dev/null | tr -d '\r' || true)"
     [ -z "$running" ] || { echo "Cold verifier requires a stopped target process." >&2; exit 4; }
 fi
 log="$(mktemp)"

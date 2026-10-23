@@ -5,17 +5,17 @@ plugins {
 
 // The upload key, from gradle properties or the environment; never in the repository.
 fun releaseSetting(name: String) = providers.gradleProperty(name).orElse(providers.environmentVariable(name)).orNull
-val uploadStore = releaseSetting("NEXTV_RELEASE_STORE_FILE")
+val uploadStore = releaseSetting("ANTENIO_RELEASE_STORE_FILE")
 
 android {
     namespace = "dev.iptvplayer.tv"
     compileSdk = 36
     defaultConfig {
-        applicationId = "dev.iptvplayer.tv.pilot"
+        applicationId = "app.antenio.tv"
         minSdk = 26
         targetSdk = 36
-        versionCode = 105
-        versionName = "0.14.91-design-preview"
+        versionCode = 106
+        versionName = "0.15.0-design-preview"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }
@@ -28,9 +28,9 @@ android {
         if (!uploadStore.isNullOrBlank()) {
             create("release") {
                 storeFile = file(uploadStore)
-                storePassword = releaseSetting("NEXTV_RELEASE_STORE_PASSWORD")
-                keyAlias = releaseSetting("NEXTV_RELEASE_KEY_ALIAS")
-                keyPassword = releaseSetting("NEXTV_RELEASE_KEY_PASSWORD")
+                storePassword = releaseSetting("ANTENIO_RELEASE_STORE_PASSWORD")
+                keyAlias = releaseSetting("ANTENIO_RELEASE_KEY_ALIAS")
+                keyPassword = releaseSetting("ANTENIO_RELEASE_KEY_PASSWORD")
             }
         }
     }
@@ -67,8 +67,8 @@ val designPreview = android.defaultConfig.versionName.orEmpty().endsWith("-desig
 tasks.matching { it.name == "bundleRelease" || (it.name == "assembleRelease" && !designPreview) }.configureEach {
     val signed = hasUploadKey
     doFirst {
-        if (!signed) throw GradleException("$name needs the upload key: set NEXTV_RELEASE_STORE_FILE, " +
-            "NEXTV_RELEASE_STORE_PASSWORD, NEXTV_RELEASE_KEY_ALIAS and NEXTV_RELEASE_KEY_PASSWORD (WORKFLOW).")
+        if (!signed) throw GradleException("$name needs the upload key: set ANTENIO_RELEASE_STORE_FILE, " +
+            "ANTENIO_RELEASE_STORE_PASSWORD, ANTENIO_RELEASE_KEY_ALIAS and ANTENIO_RELEASE_KEY_PASSWORD (WORKFLOW).")
     }
 }
 

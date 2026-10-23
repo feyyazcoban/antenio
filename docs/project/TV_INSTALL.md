@@ -30,7 +30,7 @@ Bağlantı kurulduktan sonra geliştirici tarafında:
 ```text
 adb devices
 adb -s TV_BAGLANTI_KIMLIGI install -r IPTV_Player_TV_Pilot_0.12.0.apk
-adb -s TV_BAGLANTI_KIMLIGI shell am start -n dev.iptvplayer.tv.pilot/dev.iptvplayer.tv.MainActivity
+adb -s TV_BAGLANTI_KIMLIGI shell am start -n app.antenio.tv/dev.iptvplayer.tv.MainActivity
 ```
 
 Bağlantı kimliği `adb devices` çıktısından alınır; TV'deki bilgisayar erişim istemini kullanıcı onaylar. 14 Ekim 2026: Fiziksel 65U95A kablosuz bağlandı, 0.2.0 kuruldu ve kullanıcının hesabı eklendi. Kurulum için yeniden USB gerekmedi. Kullanıcı TV’sinde veri sıfırlayan testler çalıştırılmamalıdır.

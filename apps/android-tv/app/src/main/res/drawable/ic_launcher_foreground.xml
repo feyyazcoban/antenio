@@ -5,7 +5,7 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <!--
-      NEXTV amblem (design/brand/nextv-amblem.svg, 119x148), inverted app-icon scheme: BLACK mark on the
+      Antenio emblem (the NEXTV play mark, kept) (design/brand/nextv-amblem.svg, 119x148), inverted app-icon scheme: BLACK mark on the
       green background layer. Scaled to 48dp tall (~67% of the 72dp visible circle) so a padding ring
       stays inside the launcher mask. Optically centred: the mark's area centroid (local x=46.77 of 119,
       ~4.1dp left of the box centre) sits on the canvas centre, so the box is nudged right of the

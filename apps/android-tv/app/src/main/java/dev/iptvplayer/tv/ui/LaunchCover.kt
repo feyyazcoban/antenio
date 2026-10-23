@@ -39,8 +39,8 @@ import kotlin.math.abs
 
 /**
  * TV has no platform custom SplashScreen animation, so the launch window shows the static mark and this cover plays the
- * NEXTV splash over the content (D062): a black stage, two mint corner glows, the folded play mark popping on the
- * startup chime's hit and the pixel "NEXTV" wordmark cascading in. Laid out on the 1920×1080 handoff, scaled to the
+ * Antenio splash over the content (D062): a black stage, two mint corner glows, the folded play mark popping on the
+ * startup chime's hit and the pixel "Antenio" wordmark cascading in. Laid out on the 1920×1080 handoff, scaled to the
  * screen. It stays at least [MinShowMs]; while saved sources are still restored it holds with a spinner and
  * "Hazırlanıyor...", then fades into the content. A new remote press removes it at once (MainActivity). Reduced motion or
  * disabled system animations skip the entrance: the finished logo stays, still, only while sources are restored (D069).
@@ -93,18 +93,18 @@ import kotlin.math.abs
         Offset((b.minOf { it.left } + b.maxOf { it.right }) / 2f, (b.minOf { it.top } + b.maxOf { it.bottom }) / 2f)
     }
     val glyphs = remember {
-        NextvGlyphs.map { g -> PathParser().parsePathString(g.data).toPath().let { ParsedGlyph(it, it.getBounds().center, g.mint) } }
+        BrandGlyphs.map { g -> PathParser().parsePathString(g.data).toPath().let { ParsedGlyph(it, it.getBounds().center, g.mint) } }
     }
     BoxWithConstraints(Modifier.fillMaxSize().graphicsLayer { this.alpha = alpha.value }.background(Color.Black)) {
         Spacer(Modifier.fillMaxSize().drawWithCache {
             val span = maxOf(size.width, size.height) * .62f
             // Cache shaders by viewport size; only their draw alpha changes with the entrance clock.
             val maxGlow = 1.24f
-            val bottomGlow = Brush.radialGradient(listOf(NextvMint.copy(alpha = .34f * maxGlow),
-                NextvMint.copy(alpha = .11f * maxGlow), Color.Transparent),
+            val bottomGlow = Brush.radialGradient(listOf(BrandMint.copy(alpha = .34f * maxGlow),
+                BrandMint.copy(alpha = .11f * maxGlow), Color.Transparent),
                 Offset(size.width * (-319f / RefW), size.height * (1306f / RefH)), span)
-            val topGlow = Brush.radialGradient(listOf(NextvMint.copy(alpha = .30f * maxGlow),
-                NextvMint.copy(alpha = .10f * maxGlow), Color.Transparent),
+            val topGlow = Brush.radialGradient(listOf(BrandMint.copy(alpha = .30f * maxGlow),
+                BrandMint.copy(alpha = .10f * maxGlow), Color.Transparent),
                 Offset(size.width * (1774f / RefW), size.height * (-414f / RefH)), span)
             onDrawBehind {
                 val t = intro.value
@@ -120,7 +120,7 @@ import kotlin.math.abs
         })
         Canvas(Modifier.fillMaxSize()) {
             val t = if (warming) 1f else intro.value
-            // Play mark + wordmark (design/brand/nextv-dikey.svg), a GroupW × GroupH box centred on the 1920×1080 stage.
+            // Play mark + wordmark (design/brand/antenio-dikey.svg), a GroupW × GroupH box centred on the 1920×1080 stage.
             val unit = minOf(size.width / RefW, size.height / RefH)
             withTransform({
                 translate((size.width - GroupW * unit) / 2f, (size.height - GroupH * unit) / 2f)
@@ -132,9 +132,9 @@ import kotlin.math.abs
                 val pop = lerp(.6f, 1f, Ease.Back.transform(segment(t, Impact - .15f, Impact + .07f)))
                 val pulse = if (still) 1f else lerp(1f, lerp(.985f, 1.02f, breath.value), Ease.InOut.transform(segment(t, .86f, 1f)))
                 withTransform({
-                    translate(0f, lerp(-8f, 0f, rise))
+                    translate(MarkShift, lerp(-8f, 0f, rise))
                     scale(pop * pulse, pop * pulse, pivot = markCenter)
-                }) { mark.forEach { drawPath(it, NextvMint.copy(alpha = if (warming) WarmAlpha else markAlpha)) } }
+                }) { mark.forEach { drawPath(it, BrandMint.copy(alpha = if (warming) WarmAlpha else markAlpha)) } }
 
                 // Glyphs rise left to right; alpha resolves in half the window so each reads while still settling.
                 glyphs.forEachIndexed { i, g ->
@@ -145,7 +145,7 @@ import kotlin.math.abs
                     withTransform({
                         translate(lerp(-12f, 0f, move), lerp(14f, 0f, move))
                         scale(glyphScale, glyphScale, pivot = g.center)
-                    }) { drawPath(g.path, (if (g.mint) NextvMint else Color.White).copy(alpha = if (warming) WarmAlpha else glyphAlpha)) }
+                    }) { drawPath(g.path, (if (g.mint) BrandMint else Color.White).copy(alpha = if (warming) WarmAlpha else glyphAlpha)) }
                 }
             }
         }
@@ -192,7 +192,7 @@ private suspend fun awaitLaunchFrame(view: android.view.View) {
 private const val WarmAlpha = 1f / 255f
 
 /**
- * The NEXTV cover while saved sources are restored without the launch splash (D069): a later launch in the same
+ * The Antenio cover while saved sources are restored without the launch splash (D069): a later launch in the same
  * process (the splash plays once per process, D062), a remote key during the splash, or reduced motion. The same logo,
  * still and silent, with the spinner; it leaves with the restore. The source-operation card stays for imports and saves.
  */
@@ -206,7 +206,7 @@ private const val WarmAlpha = 1f / 255f
     if (still) {
         Canvas(Modifier.size(diameter)) {
             val w = stroke.toPx()
-            drawArc(NextvMint, startAngle = -90f, sweepAngle = 270f, useCenter = false,
+            drawArc(BrandMint, startAngle = -90f, sweepAngle = 270f, useCenter = false,
                 topLeft = Offset(w / 2f, w / 2f), size = Size(size.width - w, size.height - w), style = Stroke(w, cap = StrokeCap.Round))
         }
         return
@@ -220,17 +220,19 @@ private const val WarmAlpha = 1f / 255f
         val head = 300f * Ease.InOut.transform((p * 2f).coerceAtMost(1f))
         val tail = 300f * Ease.InOut.transform((p * 2f - 1f).coerceAtLeast(0f))
         val w = stroke.toPx()
-        drawArc(NextvMint, startAngle = -90f + 420f * p + tail, sweepAngle = 12f + head - tail, useCenter = false,
+        drawArc(BrandMint, startAngle = -90f + 420f * p + tail, sweepAngle = 12f + head - tail, useCenter = false,
             topLeft = Offset(w / 2f, w / 2f), size = Size(size.width - w, size.height - w), style = Stroke(w, cap = StrokeCap.Round))
     }
 }
 
-// Brand mint of the NEXTV logo, icon and banner (#1CECAB); the app's own accent stays Ink.Mint.
-private val NextvMint = Color(0xFF1CECAB)
+// Brand mint of the Antenio logo, icon and banner (#1CECAB); the app's own accent stays Ink.Mint.
+private val BrandMint = Color(0xFF1CECAB)
 
 private const val RefW = 1920f
 private const val RefH = 1080f
-private const val GroupW = 298f
+// The mark (UnionPaths, centred over the old 298-unit wordmark) moves right to centre over ANTENIO.
+private const val GroupW = 429.025f
+private const val MarkShift = 65.512f
 private const val GroupH = 260f
 
 // The entrance is tuned to res/raw/splash_chime: StartupSound skips its 0.4 s lead, so the impact lands ~1.34 s in,
@@ -242,7 +244,7 @@ private const val LettersStart = Impact + .02f
 private const val LetterStagger = .045f
 private const val LetterSpan = .20f
 
-/** Folded play mark ("Union"), in group-local coordinates of design/brand/nextv-dikey.svg. */
+/** Folded play mark ("Union"), in group-local coordinates of design/brand/antenio-dikey.svg. */
 private val UnionPaths = listOf(
     "M124.893 92.0069L97.2701 109.541V117.313L118.55 128.935L193.454 80.7673L175.365 71.9941C168.402 68.6088 160.175 69.1155 153.679 73.3298L124.893 92.0069Z",
     "M124.893 77.4108L124.893 4.07898L118.55 0L97.2701 11.6217V109.541L116.263 94.936C121.704 90.7518 124.893 84.2762 124.893 77.4108Z",
@@ -252,13 +254,15 @@ private val UnionPaths = listOf(
 private class GlyphSpec(val data: String, val mint: Boolean)
 private class ParsedGlyph(val path: Path, val center: Offset, val mint: Boolean)
 
-/** "NEXTV", left to right. N/E/X are white; T/V take the mint. */
-private val NextvGlyphs = listOf(
-    GlyphSpec("M26.3205 240.285H19.7404V227.142H13.1603V260H0V194.285H19.7404V207.428H26.3205V220.571H32.9007V233.714H39.4808V194.285H52.6411V260H32.9007V253.428H26.3205V240.285Z", mint = false),
-    GlyphSpec("M84.6987 246.857H111.019V260H71.5384V194.285H111.019V207.428H84.6987V220.571H104.439V233.714H84.6987V246.857Z", mint = false),
-    GlyphSpec("M129.882 233.714H136.462V227.143H143.042V220.571H136.462V214H129.882V194.285H143.042V207.428H149.623V214H156.203V207.428H162.783V194.285H175.943V214H169.363V220.571H162.783V227.143H169.363V233.714H175.943V260H162.783V240.286H156.203V233.714H149.623V240.286H143.042V260H129.882V233.714Z", mint = false),
-    GlyphSpec("M206.755 207.428H193.595V194.285H233.076V207.428H219.916V260H206.755V207.428Z", mint = true),
-    GlyphSpec("M278.259 233.714H284.84V194.285H298V240.286H291.42V246.857H284.84V253.429H278.259V260H271.679V253.429H265.099V246.857H258.519V240.286H251.939V194.285H265.099V233.714H271.679V240.286H278.259V233.714Z", mint = true),
+/** "ANTENIO", left to right (interim pixel wordmark on the NEXTV grid, BKL-045). ANTEN is white; IO takes the mint. */
+private val BrandGlyphs = listOf(
+    GlyphSpec("M0 200.857L6.5801 200.857L6.5801 194.285L39.4809 194.285L39.4809 200.857L46.061 200.857L46.061 260L32.9008 260L32.9008 240.286L13.1603 240.286L13.1603 260L0 260ZM13.1603 207.428L13.1603 227.143L32.9008 227.143L32.9008 207.428Z", mint = false),
+    GlyphSpec("M91.2445 240.285H84.6644V227.142H78.0844V260H64.924V194.285H84.6644V207.428H91.2445V220.571H97.8247V233.714H104.405V194.285H117.565V260H97.8247V253.428H91.2445V240.285Z", mint = false),
+    GlyphSpec("M149.588 207.428H136.428V194.285H175.909V207.428H162.749V260H149.588V207.428Z", mint = false),
+    GlyphSpec("M207.932 246.857H234.253V260H194.772V194.285H234.253V207.428H207.932V220.571H227.673V233.714H207.932V246.857Z", mint = false),
+    GlyphSpec("M279.436 240.285H272.856V227.142H266.276V260H253.116V194.285H272.856V207.428H279.436V220.571H286.016V233.714H292.596V194.285H305.757V260H286.016V253.428H279.436V240.285Z", mint = false),
+    GlyphSpec("M324.62 194.285L364.101 194.285L364.101 207.428L350.94 207.428L350.94 246.857L364.101 246.857L364.101 260L324.62 260L324.62 246.857L337.78 246.857L337.78 207.428L324.62 207.428Z", mint = true),
+    GlyphSpec("M382.964 200.857L389.544 200.857L389.544 194.285L422.445 194.285L422.445 200.857L429.025 200.857L429.025 253.429L422.445 253.429L422.445 260L389.544 260L389.544 253.429L382.964 253.429ZM396.124 207.428L396.124 246.857L415.865 246.857L415.865 207.428Z", mint = true),
 )
 
 /** Carve a normalised [start, end] window out of master progress [t]. */

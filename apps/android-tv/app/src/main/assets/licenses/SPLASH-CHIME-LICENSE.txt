@@ -5,7 +5,7 @@ First-Party Brand Assets and Startup Audio Declaration (D019, D062)
    - Provenance: Royalty-free startup chime provided and approved by the project owner on 2026-10-16 (Decision D062).
    - Rights: Cleared for commercial and non-commercial distribution within the application package; does not derive from any third-party television or streaming brand (Decision D019).
 
-2. Brand Vector Assets: res/drawable/nextv_*.xml, res/drawable/app_banner.xml, res/drawable/ic_launcher_*.xml
+2. Brand Vector Assets: res/drawable/brand_*.xml, res/drawable/ic_splash_mark.xml, res/drawable/app_banner.xml, res/drawable/ic_launcher_*.xml
    - Provenance: Original first-party vector artwork created for this project (`design/brand/`).
    - Rights: Proprietary first-party project assets, cleared for store distribution.
 

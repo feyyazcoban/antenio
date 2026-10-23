@@ -10,7 +10,7 @@ import org.junit.Test
 /** Explicit local audit only: never embeds private input, identifiers, titles or URLs in the report. */
 class PrivateCatalogPresentationAuditTest {
     @Test fun auditStoredCatalogWithProductionPresentationRules() {
-        val path = System.getenv("NEXTV_PRIVATE_CATALOG_DIR")
+        val path = System.getenv("Antenio_PRIVATE_CATALOG_DIR")
         assumeTrue("No private catalog selected", !path.isNullOrBlank())
         val directory = File(path!!)
         val report = JSONArray()
