@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Kişi adı olmadan gizlilik sayfası · 23 Ekim 2026
+
+Kullanıcı: "ad soyad yazmak mecburi mi" ve adının hiçbir yerde geçmemesini istedi. Gizlilik sayfalarındaki sorumlu yer tutucusu "Kapsam ve iletişim" bölümüyle değişti (Antenio geliştirici adı, destek@antenio.app); tarih 23 Ekim 2026. AGENTS'a kural eklendi; depoda ve commit kayıtlarında ad geçmiyor (kontrol edildi). Google kaynakları: User Data politikası (answer 10144311), kişisel hesapta gösterilen bilgiler (13628312), test kuralı (14151465).
+
+Tam sonraki adım: kullanıcı Play hesap türünü seçsin (kişisel hesap adını gösterir; kuruluş hesabı şirket ister). Site yayını WEB_SETUP adımlarıyla.
+
 ## Claude · Site ve destek e-postası adımları · 23 Ekim 2026
 
 Kullanıcı: "godaddy üzerinden devam edelim". Araştırma: GoDaddy ücretsiz site planı alan adı bağlamıyor, e-posta yönlendirme hesaba göre kredi/ücretli. Çözüm WEB_SETUP'ta: Netlify ücretsiz (elle yükleme), ImprovMX ücretsiz. `apps/web/` (index, gizlilik, privacy, style.css, logo) yerel sunucuda kontrol edildi.

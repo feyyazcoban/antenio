@@ -7,7 +7,8 @@
 ## 0. Önce
 
 - GoDaddy hesabında iki adımlı doğrulamayı ve antenio.app için otomatik yenilemeyi aç.
-- `apps/web/gizlilik/index.html` ve `apps/web/privacy/index.html` içinde köşeli parantezli yerleri doldur: `[AD SOYAD / ŞİRKET UNVANI, ADRES]` ve `[YAYIN TARİHİ]` (İngilizcesinde `[NAME / COMPANY, ADDRESS]`, `[PUBLICATION DATE]`). Metin uygulamanın 0.15.0'daki gerçek davranışına göre yazıldı; yayından önce avukat kontrolü önerilir (BKL-043). Abonelik ya da hesap geldiğinde sayfa önceden güncellenmeli.
+- Sayfalarda kişi adı yoktur (kullanıcı kararı): Google'ın kuralı, Play'deki geliştirici adının ("Antenio") ya da uygulama adının politikada geçmesini ister; iletişim destek@antenio.app'tir. Metin uygulamanın 0.15.0'daki davranışına göre yazıldı ve tarihi 23 Ekim 2026'dır; yayından önce avukat kontrolü önerilir (BKL-043). Abonelik ya da hesap geldiğinde sayfa önceden güncellenmeli ve o zaman bir veri sorumlusu (şirket) adı gerekebilir.
+- Play'de geliştirici adı "Antenio" seçilmeli. Kişisel hesap yine de yasal adı gösterir; bunu önlemek için kuruluş hesabı gerekir (LAUNCH_AUDIT E7).
 
 ## 1. Sayfaları Netlify'da yayımla
 

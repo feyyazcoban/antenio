@@ -1,5 +1,9 @@
 # Proje durumu
 
+## Gizlilik sayfası kişi adı olmadan; Play hesap türü notu · 23 Ekim 2026
+
+Kullanıcı gerçek adının hiçbir yerde geçmesini istemedi. Google Play Kullanıcı Verileri politikası, politikada Play'deki geliştirici adının ya da uygulama adının geçmesini ister; `apps/web` sayfaları artık "Antenio" ve destek@antenio.app ile, yer tutucusuz ve 23 Ekim 2026 tarihli. Kural AGENTS "Hassas veri" bölümüne eklendi. Play kişisel hesabı yasal adı gösterdiği için hesap türü kararı LAUNCH_AUDIT E7'de (kuruluş hesabı: kişi adı içermeyen şirket ve D-U-N-S). Kod değişmedi.
+
 ## antenio.app sitesi ve destek e-postası hazırlığı · 23 Ekim 2026
 
 Kullanıcı GoDaddy'de kalmak istedi. `apps/web/` altında yayımlanmaya hazır statik site: giriş sayfası, Türkçe (`/gizlilik/`) ve İngilizce (`/privacy/`) gizlilik politikası, uygulamanın 0.15.0 davranışına göre (hesap ve analitik yok; kaynak, katalog, PIN şifreli; favori/geçmiş şifresiz; yedekleme yok; Telefonla ekle yerel). Sorumlu kişi ve yayın tarihi yer tutucu. Kurulum adımları [WEB_SETUP](WEB_SETUP.md): Netlify (A `@` → 75.2.60.5, CNAME `www`), ImprovMX (MX ×2 + SPF TXT). Yayın ve hesaplar kullanıcıda; kod değişmedi.
