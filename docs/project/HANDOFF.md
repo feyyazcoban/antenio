@@ -1,5 +1,11 @@
 # Son devir notu
 
+## Claude · Yükleme anahtarı ve ilk AAB · 23 Ekim 2026
+
+`build.gradle.kts`: sürüm adı `-design-preview` ile bitenler yükleme anahtarı tanımlı olsa da debug anahtarıyla imzalanır (TV'deki kurulumun üstüne kurulsun diye); `bundleRelease` önizleme sürüm adında durur. Sürüm 0.16.0 (108) Play içindir; bu sürümün `assembleRelease` çıktısı yükleme anahtarıyla imzalanır ve TV'deki debug imzalı kurulumun üstüne kurulamaz. TV'ye yeni önizleme gerekirse sürüm adına yeniden `-design-preview` eklenir (ör. 0.16.1-design-preview). TV'de şu an 0.15.1'in debug derlemesi var (TV uykudaydı, release APK kurulamadı).
+
+Tam sonraki adım: Play Console'da uygulamayı oluştur (YAPILACAKLAR 17–20): mağaza kaydı, ikon 512, TV afişi 1280×720, tanıtım görseli 1024×500, TV ekran görüntüleri, veri güvenliği, IARC, hedef kitle, inceleme için test kaynağı (16), sonra kapalı teste AAB.
+
 ## Claude · Gizlilik bağlantısı ve support@ adresi · 23 Ekim 2026
 
 `SettingsPages.PrivacyPolicy` mevcut `QrCode`'u kullanır; metinler `settings_about_privacy_link/_url/_qr` (TR/EN). Sürüm 0.15.1 (107). Destek adresi kullanıcının ImprovMX'te kurduğu `support` takma adına göre support@antenio.app oldu. Eski dated kayıtlarda geçen destek@ tarihçedir, değiştirilmedi.

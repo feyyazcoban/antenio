@@ -14,8 +14,8 @@ android {
         applicationId = "app.antenio.tv"
         minSdk = 26
         targetSdk = 36
-        versionCode = 107
-        versionName = "0.15.1-design-preview"
+        versionCode = 108
+        versionName = "0.16.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }

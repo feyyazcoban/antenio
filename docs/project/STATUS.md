@@ -1,5 +1,9 @@
 # Proje durumu
 
+## 0.16.0: ilk Play paketi (AAB) yükleme anahtarıyla imzalandı · 23 Ekim 2026
+
+Kullanıcı Play Console kişisel hesabını açtı; hesap onayı ve Android cihaz doğrulaması tamam ("console onayını aldım doğrulama da tamam"). Yükleme anahtarını kullanıcı kendi Terminal sekmesinde oluşturdu (`C:\Users\fyzcb\antenio-anahtar\antenio-upload.jks`, takma ad `antenio-upload`, RSA 4096, sertifika CN=Antenio, O=Antenio, C=TR; SHA-256 B2:C3:D4:6E:…:43:F2). Şifre `%USERPROFILE%\.gradle\gradle.properties`'te, depoda değil. Sürüm 0.16.0 (108); `bundleRelease` geçti, `jarsigner -verify` "jar verified", imzalayan CN=Antenio. Paket henüz Play'e yüklenmedi; cihazda R8 sürümü bu adımda denenmedi.
+
 ## 0.15.1: Uygulama hakkında'da gizlilik politikası; destek adresi support@antenio.app · 23 Ekim 2026
 
 Kullanıcı: "Ayarlar → Uygulama hakkında'ya https://antenio.app/privacy bağlantısını ekle." Gizlilik bölümünün altında politikanın QR kodu (96 dp) ve adresi duruyor; TV'lerde çoğu zaman tarayıcı olmadığı için bağlantı açılmaz, telefonla okutulur. Adres arayüz diline göre: Türkçede https://antenio.app/gizlilik, İngilizcede /privacy (`settings_about_privacy_url`). Odaklı testler (NoHardcodedUiText, SettingsNav, LocaleController) ve `assembleDebug` geçti. 23 Ekim 11:35 TV'ye kuruldu (versionCode 107); Antenio'da kaynak olmadığı için uygulama kurulum ekranında açılıyor, Uygulama hakkında sayfası TV'de henüz görülmedi (kaynak eklenince bakılacak). TV ses kapalı açıldı, sonra uyku moduna alındı ve ses eski düzeyine döndü.

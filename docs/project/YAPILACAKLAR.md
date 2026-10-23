@@ -29,10 +29,10 @@
 
 ## 3. Google Play hesabı (D120: kişisel hesap)
 
-10. **Play Console hesabı:** **Açıldı (23 Ekim):** kişisel hesap, geliştirici adı Antenio; e-posta support@antenio.app, web sitesi https://antenio.app. Kalan: Android telefon doğrulaması (bir yakınının telefonunda Play Console uygulamasına kendi hesabınla gir, sonra hesabı o telefondan kaldır; emülatör kabul edilmiyor). Kayıt için adımlar: play.google.com/console → kişisel hesap; tek seferlik kayıt ücreti; kimlik doğrulaması. Geliştirici adı "Antenio", iletişim e-postası support@antenio.app (önce 3. adım çalışmalı), web sitesi https://antenio.app (önce 4. adım).
+10. ~~**Play Console hesabı**~~ **Yapıldı (23 Ekim):** kişisel hesap, geliştirici adı Antenio; e-posta support@antenio.app, web sitesi https://antenio.app. Kullanıcı: "console onayını aldım doğrulama da tamam" (hesap onayı ve Android cihaz doğrulaması). Kayıt için adımlar: play.google.com/console → kişisel hesap; tek seferlik kayıt ücreti; kimlik doğrulaması. Geliştirici adı "Antenio", iletişim e-postası support@antenio.app (önce 3. adım çalışmalı), web sitesi https://antenio.app (önce 4. adım).
 11. **Ödeme profili** (banka hesabı için 8. maddeye bak): satış için Google ödeme (satıcı) profili ve banka hesabı; tam adres Play'de görünür (kabul edildi).
 12. **12 test kullanıcısı:** Google hesabı olan, mümkünse Android TV ya da Google TV cihazı olan en az 12 kişi bul; 14 gün kesintisiz testte kalacaklar.
-13. **Yükleme anahtarı (upload key):** 23 Ekim: keytool komutu senin Terminal sekmende başlatıldı ve şifreni bekliyor; şifreyi yalnız sen yazarsın, Claude görmez. Dosya `C:\Users\fyzcb\antenio-anahtar\antenio-upload.jks` olacak (takma ad `antenio-upload`, sertifikada yalnız "Antenio"). Şifreyi `C:\Users\fyzcb\.gradle\gradle.properties` dosyasındaki iki boş satıra kendin yaz. Anahtar dosyasını ve şifresini iki ayrı güvenli yerde sakla (kaybolursa Play'den sıfırlama istenir).
+13. ~~**Yükleme anahtarı (upload key)**~~ **Yapıldı (23 Ekim):** anahtarı kendi Terminal sekmende oluşturdun ve şifreyi gradle.properties'e yazdın. Not: dosya değişince uygulama içeriğini Claude'a gösterdi, şifre o oturumda Claude'un önüne geldi; hiçbir belgeye, commit'e ya da belleğe yazılmadı. Dosya `C:\Users\fyzcb\antenio-anahtar\antenio-upload.jks` olacak (takma ad `antenio-upload`, sertifikada yalnız "Antenio"). Şifreyi `C:\Users\fyzcb\.gradle\gradle.properties` dosyasındaki iki boş satıra kendin yaz. Anahtar dosyasını ve şifresini iki ayrı güvenli yerde sakla (kaybolursa Play'den sıfırlama istenir).
 
 ## 4. Benimle verilecek kararlar
 
@@ -50,5 +50,5 @@
 ## Benim yapacaklarım (kod)
 
 - ~~Ayarlar → Uygulama hakkında'ya gizlilik bağlantısı~~ yapıldı (0.15.1: QR kodu ve adres).
-- Yükleme anahtarıyla `bundleRelease` ve sürüm adından `-design-preview` ekinin kaldırılması.
+- ~~Yükleme anahtarıyla `bundleRelease`~~ yapıldı: 0.16.0 (108), `apps/android-tv/app/build/outputs/bundle/release/app-release.aab`, imza CN=Antenio.
 - Abonelik ve 7 günlük deneme (BKL-048), lisans sayfası, HTTP kaynak uyarısı, mağaza görselleri için sentetik içerik.
