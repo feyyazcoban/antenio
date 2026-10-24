@@ -36,7 +36,7 @@
 
 ## 4. Benimle verilecek kararlar
 
-14. **Abonelik (D121, 24 Ekim):** üretime abonelikle çıkılır; hesap yok, tek yıllık plan, ilk hafta kartsız ücretsiz, 8. gün abonelik. Fiyat (D122): ABD'de yıllık 7,99 $; TL fiyatı ürün kurulurken birlikte konacak. Açık: plan adı (uygulamada "Antenio Premium" yazıyor, onay bekliyor). Sıra: mali müşavir (8) → ödeme profili ve banka hesabı (11) → abonelikli sürüm kapalı teste → Play Console'da abonelik ürünü. Ayrıntı SUBSCRIPTION "24 Ekim güncellemesi".
+14. **Abonelik (D121, 24 Ekim):** üretime abonelikle çıkılır; hesap yok, tek yıllık plan, ilk hafta kartsız ücretsiz, 8. gün abonelik. Ad ve fiyat (D122): "Antenio Premium", ABD'de yıllık 7,99 $; TL fiyatı ürün kurulurken birlikte konacak. Sıra: mali müşavir (8) → ödeme profili ve banka hesabı (11) → abonelikli sürüm kapalı teste → Play Console'da abonelik ürünü. Ayrıntı SUBSCRIPTION "24 Ekim güncellemesi".
 15. ~~**Mağaza görselleri**~~ **Hazır (23 Ekim, akşam yenilendi):** `design/store`: 512×512 ikon, 1280×720 TV afişi, 1024×500 tanıtım görseli, 8 TV ekran görüntüsü (sentetik vitrinle) ve telefon bölümü için EN/TR başlıklı çerçeveler; incelemeye gönderildi. Metinler STORE_LISTING_EN ve STORE_LISTING_TR, form cevapları PLAY_CONSOLE.
 16. ~~**İnceleme için yasal test kaynağı**~~ **Yayında (23 Ekim):** https://antenio.app/review/demo.m3u (Blender açık filmleri CC BY, herkese açık test yayınları, test rehberi); `apps/web/review`. Bozulan Akamai yayınının yerini Apple bipbop aldı.
 
