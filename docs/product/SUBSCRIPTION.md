@@ -18,6 +18,8 @@ Yeni akış (D121 dışındaki ayrıntılar öneridir):
 6. **Google incelemesi:** İnceleme ekibi ilk hafta her şeyi ücretsiz gördüğü için eski Risk 6 (ödeme duvarının arkasına erişim) büyük ölçüde çözülür; talimata ücretsiz haftadan söz eden bir cümle eklenir.
 7. **Hukuk açısından:** Deneme sonunda kendiliğinden ücrete dönüşme olmadığı için eski Risk 3'teki "denemeden ücretliye dönüş" sorusu düşer; otomatik yıllık yenileme, iade ve iptal soruları (§7) sürer.
 
+Fiyat (D122, senin): ABD'de yıllık 7,99 $; TL fiyatı ürün kurulurken Play'in çevirisine bakılıp birlikte konur.
+
 Play Console (öneri adlar): abonelik `antenio_premium`, temel plan `yearly` (otomatik yenilenen), teklif yok. Önce ödeme kütüphanesi içeren bir sürümün kapalı teste yüklenmesi ve ödeme profilinin (banka hesabı) kurulması gerekir; ödeme profili mali müşavir görüşmesinden sonra.
 
 Kod tahmini yine yaklaşık 3 hafta (ölçülmedi): Play deneme teklifi metni yerine uygulamanın kendi haftası gelir; sayaç ve "N gün kaldı" notu yaklaşık 1 gün ekler, teklif ve uygunluk işleri düşer.

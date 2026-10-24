@@ -414,3 +414,7 @@ Kullanıcı: "üretime abonelikle çıkalım". Ardından sorulan üç soruya cev
 4. D113'ün deneme biçimi değişir: ilk hafta kart ve abonelik istenmeden ücretsiz izlenir; Google Play'in kart isteyen deneme teklifi kullanılmaz. 8. günden itibaren izlemek için abonelik gerekir; abonelik başlarken ilk yılın ücreti alınır.
 
 Karar olmayanlar (öneriler SUBSCRIPTION'da): ücretsiz haftanın başladığı an, haftanın nasıl sayılacağı, üyeliksiz açık kalanlar, planın adı ve fiyatı. Etkilenen belgeler: SUBSCRIPTION, BACKLOG (BKL-048), YAPILACAKLAR. Abonelik sürümüyle IARC "dijital satın alma" cevabı, Data safety, mağaza metni, gizlilik politikası ve kullanım koşulları güncellenir. Durum: kod başlamadı.
+
+## D122 · Yıllık abonelik fiyatı: ABD'de 7,99 $ · 24 Ekim 2026
+
+Kullanıcı: "Yıllık fiyat ABD'de 7,99 $ olsun; TL fiyatını Play'in çevirisine bakıp birlikte koyalım." D121'in tek yıllık planının ABD fiyatı 7,99 $'dır. Türkiye fiyatı, Play Console'da ürün kurulurken Play'in önerdiği TL karşılığına bakılarak kullanıcıyla birlikte belirlenir; diğer ülkeler Play'in kendi çevirisiyle kalır (öneri, karar değil). Fiyat uygulamada yazılı değildir; uygulama Play'in gösterdiği tutarı okur. Planın adı ("Antenio Premium") uygulama metinlerinde geçer ama karar olarak verilmedi; kullanıcı onayı bekliyor. Dayanak: Play'deki TV rakiplerinin uygulama içi fiyatları (`claude/play-store-competitor-analysis-163803` dalı, `docs/research/PLAY_COMPETITORS.md`).
